@@ -16,6 +16,7 @@
    <extension point="org.knime.workbench.repository.nodes">
       <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.knimenodesstarter.KnimeNodesStarterNodeFactory" id="de.helmholtz_muenchen.ibis.knimenodesstarter.KnimeNodesStarterNodeFactory"/>
    <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>
+  <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory"/>
 </extension>
    
 </plugin>
