@@ -14,8 +14,19 @@
    -->
    
    <extension point="org.knime.workbench.repository.nodes">
-   <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>
-  <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory"/>
+   <node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>
+  <node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory"/>
 </extension>
+   
+      <extension point="org.knime.workbench.repository.categories">
+      <category icon="/libs/icons/ibis.png" level-id="ibis" name="IBIS" path="/">
+      </category>
+      <category icon="/libs/icons/icon_ngs.png" level-id="ngs" name="Next Generation Sequencing" path="/ibis/">
+      </category>
+      <category icon="" level-id="metabolomics" name="Metabolomics" path="/ibis/">
+      </category>
+      <category icon="" level-id="utils" name="Utils" path="/ibis/">
+      </category>
+   </extension>
    
 </plugin>
