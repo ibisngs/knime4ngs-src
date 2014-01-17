@@ -23,9 +23,9 @@
       </category>
       <category icon="/libs/icons/icon_ngs.png" level-id="ngs" name="Next Generation Sequencing" path="/ibis/">
       </category>
-      <category icon="" level-id="metabolomics" name="Metabolomics" path="/ibis/">
+      <category icon="/libs/icons/metabolomics.png" level-id="metabolomics" name="Metabolomics" path="/ibis/">
       </category>
-      <category icon="" level-id="utils" name="Utils" path="/ibis/">
+      <category icon="/libs/icons/ibis.png" level-id="utils" name="Utils" path="/ibis/">
       </category>
    </extension>
    
