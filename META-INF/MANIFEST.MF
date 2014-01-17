@@ -9,7 +9,8 @@ Bundle-Vendor: hastreiter
 Require-Bundle: org.eclipse.core.runtime,
  org.knime.workbench.core,
  org.knime.workbench.repository,
- org.knime.base
+ org.knime.base,
+ org.apache.commons.lang
 Bundle-ActivationPolicy: lazy
 Export-Package: de.helmholtz_muenchen.ibis.knimenodesstarter
 
