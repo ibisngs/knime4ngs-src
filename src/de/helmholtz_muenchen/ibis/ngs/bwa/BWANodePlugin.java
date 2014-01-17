@@ -2,7 +2,7 @@
  * $Revision$ $Date$ $Author$
  *
  */
-package de.helmholtz_muenchen.ibis.knimenodesstarter;
+package de.helmholtz_muenchen.ibis.ngs.bwa;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
@@ -16,14 +16,14 @@ import org.osgi.framework.BundleContext;
  *
  * @author hastreiter
  */
-public class KnimeNodesStarterNodePlugin extends Plugin {
+public class BWANodePlugin extends Plugin {
     // The shared instance.
-    private static KnimeNodesStarterNodePlugin plugin;
+    private static BWANodePlugin plugin;
 
     /**
      * The constructor.
      */
-    public KnimeNodesStarterNodePlugin() {
+    public BWANodePlugin() {
         super();
         plugin = this;
     }
@@ -57,7 +57,7 @@ public class KnimeNodesStarterNodePlugin extends Plugin {
      * 
      * @return Singleton instance of the Plugin
      */
-    public static KnimeNodesStarterNodePlugin getDefault() {
+    public static BWANodePlugin getDefault() {
         return plugin;
     }
 
