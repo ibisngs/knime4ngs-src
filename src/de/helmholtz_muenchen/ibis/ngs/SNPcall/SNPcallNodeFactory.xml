@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>SNPcall</name>
+    
+    <shortDescription>
+        SNPcall - calls SNPs using faidx, mpileup, bcftools and varFilter
+    </shortDescription>
+    	
+    <fullDescription>
+    
+        <intro>
+        	SNPcall receives the path to SamTools, the path to an alignment BAM file and the path to the remaining genome reference sequence 
+    		from Sam2Bam, BAMSAMConverter, or BAMLoader and calls SNPs and short insertions/ deletions using faidx, mpileup, bcftools and varFilter.
+        </intro>
+        
+        <option name="############### Options ###############"></option>
+        <option name="*************** Input Options ***************"></option>
+        <option name="Quality is in the Illumina 1.3+ encoding">Assume the quality is in the Illumina 1.3+ encoding.  
+        </option>
+       <option name="Do not skip anomalous read pairs in variant calling">Activate if anomalous read pairs should be kept in analysis.
+        </option>
+       <option name="Disable probabilistic realignment for the computation of base alignment quality (BAQ)"> 
+                	BAQ is the Phred-scaled probability of a read base being misaligned.
+                	 Applying this option greatly helps to reduce false SNPs caused by misalignments. 
+        </option>
+        <option name="Coefficient for downgrading mapping quality for reads containing excessive mismatches">
+        Given a read with a phred-scaled probability q of being generated from the mapped position, the new mapping 
+        quality is about sqrt((INT-q)/INT)*INT. A zero value disables this functionality; if enabled, the recommended value for BWA is 50.
+        </option>
+        <option name="Maximally reads per input BAM">Max per-BAM depth to avoid excessive memory usage.</option>
+        <option name="Extended BAQ computation">
+        This option helps sensitivity especially for MNPs, but may hurt specificity a little bit. 
+        </option>
+        <option name="Cap mapping quality">
+       	Max. mapping quality. 
+        </option>
+        <option name="Ignore RG tags">
+       	 RG tags will be ignored.
+        </option>
+        <option name="Minimum mapping quality for an alignment to be used">Skip alignments with too small mapping quality
+        </option>
+        <option name="Minimum base quality for a base to be considered">Minimum baseQ/BAQ threshold for skipping bases
+        </option>
+        <option name="Activate if you want to exclude read groups listed in:">Reads listed in this file will be excluded
+        </option>
+        <option name="Activate if you want to restrict to a list of positions (chr pos) or regions (BED):">Similar to "Activate if you want to exclude read groups listed in". 
+        BED or position list file containing a list of regions or sites where pileup or BCF should be generated.
+        </option>
+        <option name="Region in which pileup is generated">Enter a String which defines region where pileup is generated
+        </option> 
+        <option name="*************** Options for Genotype Likelihood Computation ***************"></option>
+        <option name="Minimum fraction of gapped reads for candidates">Specifies the minimum fraction of gapped reads for candidates. 
+        </option>
+        <option name="Coefficient for modeling homopolymer errors">Given an l-long homopolymer run, the sequencing error of an indel of size s is modeled as Input*s/l.
+        </option>
+         <option name="Do not perform INDEL calling">
+        </option>
+        <option name="Phred-scaled gap extension sequencing error probability">The gap extension sequencing error probability determines the length of called indel. Lower numbers lead to
+        longer, increased numbers to shorter indels. 
+        </option>
+        <option name="Phred-scaled gap open sequencing error probability">The gap open sequencing error probability determines the number of indel calls. The lower the gap open sequencing error probability, the more indels will be called.
+        </option>
+        <option name="Skip INDEL calling if the average per-sample depth is above"> Define threshold for skipping indel calling depending on average per-sample depth.
+        </option>
+        <option name="Minimum gapped reads for indel candidates">
+        </option>
+        <option name="Comma separated list of platforms for indels"> Comma dilimited list of platforms (determined by @RG-PL) from which indel candidates are obtained. It is recommended to collect indel candidates from sequencing technologies that have low indel error rate such as ILLUMINA
+        </option> 
+        <option name="############### Filter Options ###############"></option>
+        <option name="Minimum RMS mapping quality for SNPs"></option>
+        <option name="Minimum read depth"></option>
+        <option name="Maximum read depth"></option>
+        <option name="Minimum number of alternate bases"></option>
+        <option name="SNP within x bp around a gap to be filtered"></option>
+        <option name="Window size for filtering adjacent gaps"></option>
+        <option name="*************** Set p-value thresholds ***************"></option>
+        <option name="Min P-value for strand bias"></option>
+        <option name="Min P-value for baseQ bias [1.0E-&lt;int&gt;]"></option>
+        <option name="Min P-value for mapQ bias"></option>
+        <option name="Min P-value for end distance bias"></option>
+        <option name="Min P-value for HWE (plus F&lt;0)"></option>
+        <option name="*************** Output Options ***************"></option>
+        <option name="Print filtered variants"></option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port">Cell 0: Path2SamTools<br></br>Cell 1: Path2BAMFile<br></br>Cell 2 (Optional): Path2SEQFile</inPort>
+    </ports>    
+    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

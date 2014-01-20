@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_red.png" type="Source">
+    <name>FastQC</name>
+    
+    <shortDescription>
+        FastQC - Quality check for NGS read data.
+    </shortDescription>
+    
+    <fullDescription>
+    
+        <intro>
+        Modern high throughput sequencers can generate tens of millions of sequences in a single run. Before analysing this sequence to draw biological conclusions you should always perform some simple quality control checks to ensure that the raw data looks good and there are no problems or biases in your data which may affect how you can usefully use it. 
+        This modified FastQC version (by Jonathan Hoser) automatically creates a filter file for filtering NGS read data. This filter file can be used by the RawReadManipulator to create filtered read files. In addition,
+        the standard FastQC report is produced which provides a comprehensive overview about the read quality.<br></br>
+        Source: <a href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">http://www.bioinformatics.babraham.ac.uk/projects/fastqc/</a> 
+        
+        
+        </intro>
+        
+        
+        <option name=""></option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port name">Cell 0: Path2ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path2ReadFile2
+        (fastQ or fastA).</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path2ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path2ReadFile2
+        (fastQ or fastA).<br></br>Cell 2: Path2filterfile</outPort>
+    </ports>    
+    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

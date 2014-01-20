@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_yellow.png" type="Source">
+    <name>Bfast</name>
+    
+    <shortDescription>
+        BFAST (BLAT-like Fast Accurate Search Tool) for mapping of short reads to reference sequences
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+			Node for BFAST (BLAT-like Fast Accurate Search Tool, written by Nils Homer). Note that this BFAST node does not provide
+       		all functionalities of the original tool. The node can be used to create a indexes reference genome and align reads against it.
+       		The node will write a SAM (Sequence Alignment/Map) file. To provide a input fastq file containing the reads, connect the either the 
+       		"RunAligner" node or "FastQC" node or the "RawReadManipulator" node with this node. For a more detailed description of the parameters please
+       		refer to the original BFAST manual book by Nils Homer from which the short descriptions below are taken.
+		</intro>
+        
+        
+        <option name="Bfast">Path to the executable BFAST tool</option>
+        <option name="Input fasta file">description of second option</option>
+        <option name="Reference genome model type">Specifies if the reference genome has to be created in nucleotide space
+        or color space, depending on the type of reads (e.g. color space for ABI SOLiD)</option>
+        <option name="Number of threads">Number of threads to use</option>
+        <option name="############### Indexing ###############"></option>
+        <option name="Mask">The mask or space-seed to use for the index</option>
+        <option name="Hashwidth">The hash width for the index (high width increases index size)</option>
+        <option name="Split depth">Index will be split in 4^x parts</option> 
+        <option name="Temporary directory">Write temporary files in this directory instead of where the input file is located</option> 
+        <option name="Mask repeats">Ignore lower case bases when creating the indexes. This typically corresponds to Repeat-Masker sequence</option> 
+        <option name="Start contig">Specifies the first contig to include when building indexes.</option> 
+        <option name="End contig">Specifies the last contig to include when building indexes.</option> 
+        <option name="Start position">Specifies the first position in the first contig to include when building indexes.</option> 
+        <option name="End position">Specifies the last position in the last contig to include when building indexes.</option> 
+   	    <option name="Use exons file">This option cannot be used with the start/end contig/position options. The exon ranges must fall within bounds in the BFAST reference
+				genome file.</option>
+        <option name="############### CALs ###############"></option>
+        <option name="Load indexes in memory"> Specifies to load all main or secondary indexes into memory (useful for high memory machines)</option>
+        <option name="Reads compression type">Specifies how the reads are compressed</option>
+        <option name="Search which strand">Specifies to find matches on the designated strands</option>
+        <option name="Main indexes">Specifies the index numbers for the main bif files (comma separated).
+        By default, all indexes of the reference genome FASTA file will be automatically detected and used as the main indexes if no main
+indexes are given.
+        </option>
+        <option name="Secondary indexes">Specifies the index numbers for the secondary bif files (comma separated).
+        If no secondary indexes are specified, none will be used. </option>
+        <option name="Offsets">Specifies the offsets to use for all BFAST index files. If no offsets file is given, all possible
+offsets will be used. The offsets can be given as a range (i.e. 0-25), or as a comma
+separated list (i.e. 0,1,2,3,4,5).</option>
+		<option name="Keysize">Specifies to truncate all indexes to have the given key size. This will only be performed on
+		indexes for which the given value is greater than the hash width and less than the original
+		key size. This may be useful to search with greater sensitivity by reusing indexes large key sizes
+		</option> 
+		<option name="Maximal Keymatches">Specifies the maximum number of matches to allow before a key is ignored. A key may return
+one or more CALs and therefore it may be desirable to ignore non-unique or over-represented keys. For example, a value of 100 may be useful when aligning the to Human Genome given
+that each index used is expected to return one CAL.</option> 
+<option name="Keymiss fraction">Specifies the maximum fraction of seed positions within the read that exceed the maximum
+	key matches limtit (see above) for the hit to be retained. The lower the maximum to increase specificity at the cost of sensitivity.</option>
+	<option name="Maximum number of CALs per read">Specifies the maximum number of CALs to allow before we stop searching for CALS for a
+		given read. If the limit is reached, the read will be flagged and ignored in later alignment
+		processes. For example, a value of 500 may be useful when aligning the to Human Genome
+		given that each index used is expected to return one CAL.
+	</option>
+	<option name="Limit number of reads to load at a time">Specifies the number of reads to cache or load into memory at one time.</option>
+	<option name="############### Align ###############"></option>
+	<option name="local alignment">Specifies if the local alignment should be gapped or ungapped (no deletions and insertions).
+	</option>
+	<option name="Mask constraints">Specifies align without considering seed constraints. If set to "yes", bases that matched
+		the reference during candidate alignment location search will be constrained to match during this step.
+	</option>
+	<option name="offset">Specifies the number of bases before and after each CAL to include in the reference when
+		aligning. This is not used with ungapped constrained alignment. For example, a value of 10 can be used when aligning to the Human Genome,
+		since this would allow for small insertions and deletions to be placed more accurately in the
+		local alignment.
+	</option>
+	<option name="Max. candidates">
+	Specifies to ignore reads who have more than the specified number of CALs.
+	</option>
+	<option name="Mismatch quality">
+	Specifies the average mismatch quality.
+	</option>
+
+	<option name="############### Postprocessing ###############"></option>
+	<option name="Algorithm">This specifies the algorithm to choose the alignment for each each end of the read after filtering.
+	</option>
+    <option name="Pairing">Specifies the pairing orientation: paired end reads, mate pair reads or no pairing
+    </option>
+    <option name="Minimal map quality">Specifies to choose remove all alignments with worse mapping quality.</option>    
+    <option name="Minimal score">Specifies to choose remove all alignments with worse normalized alignment score. The nor-
+		malized alignment score is calculated by dividing the alignment score by the read length.</option>   
+	<option name="*************** Mean insert size and standard deviation ***************"></option>
+	    <option name="Mean insert size">Specifies the insert size mean (outer size) to use for pairing.</option> 
+	    <option name="standard deviation">Specifies the insert size standard deviation (outer size) to use for pairing.</option> 
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port">Cell 0: Path2ReadFile1<br></br>Cell 1 (Optional): Path2ReadFile2 (not used)</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br>Cell 1: Path2RefFile</outPort>
+    </ports>    
+        <views>
+    <view index="0" name=""></view>
+    </views>
+   
+</knimeNode>

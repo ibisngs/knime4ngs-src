@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>Mpileup</name>
+    
+    <shortDescription>
+    Mpileup - Generates BCF or pileup files that can be used for SNP/Indel calling.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+        Samtools-Mpileup belongs to the set of Samtools utilities and can generate BCF or pileup for a given BAM file.
+        This requires that a BAM file is loaded using the BAMLoader node. Alignment records are grouped by sample 
+        identifiers in @RG header lines. If sample identifiers are absent, the input file is regarded as one sample.<br></br>
+        Source: <a href="http://samtools.sourceforge.net/">http://samtools.sourceforge.net/</a> 
+         </intro>
+         
+        <option name="*************** Input Options ***************">
+        </option>
+         
+        <option name="Use indexed reference genome">Use an indexed reference genome file for creating the BCF/pileup.
+        The reference genome can be loaded using the BAMLoader node. If the genome is not already indexed, use the "Index reference genome first"
+        option. Alternatively, genomes can be indexed using the <b>Faidx node</b>. 
+        </option>
+        
+        <option name="Index reference genome first">By activating this option, an indexed reference file will be created.    
+        </option>
+       
+        <option name="Quality is in the Illumina 1.3+ encoding">Assume the quality is in the Illumina 1.3+ encoding.  
+        </option>
+      
+       <option name="Do not skip anomalous read pairs in variant calling">Activate if anomalous read pairs should be kept in analysis.
+        </option>
+       
+       <option name="Disable probabilistic realignment for the computation of base alignment quality (BAQ)"> 
+                	BAQ is the Phred-scaled probability of a read base being misaligned.
+                	 Applying this option greatly helps to reduce false SNPs caused by misalignments. 
+        </option>
+        
+        <option name="Coefficient for downgrading mapping quality for reads containing excessive mismatches">
+        Given a read with a phred-scaled probability q of being generated from the mapped position, the new mapping 
+        quality is about sqrt((INT-q)/INT)*INT. A zero value disables this functionality; if enabled, the recommended value for BWA is 50.
+        </option>
+        
+        <option name="Extended BAQ computation">
+        This option helps sensitivity especially for MNPs, but may hurt specificity a little bit. 
+        </option>
+        
+        <option name="Cap mapping quality">
+       	Max. mapping quality. 
+        </option>
+        
+        <option name="Ignore RG tags">
+       	 RG tags will be ignored.
+        </option>
+        
+        <option name="Minimum mapping quality for an alignment to be used">Skip alignments with too small mapping quality
+        </option>
+        
+        <option name="Minimum base quality for a base to be considered">Minimum baseQ/BAQ threshold for skipping bases
+        </option>
+
+        <option name="Activate if you want to exclude read groups listed in:">Reads listed in this file will be excluded
+        </option>
+        
+        <option name="Activate if you want to restrict to a list of positions (chr pos) or regions (BED):">Similar to "Activate if you want to exclude read groups listed in". 
+        BED or position list file containing a list of regions or sites where pileup or BCF should be generated.
+        </option>
+        
+        <option name="Region in which pileup is generated">Enter a String which defines region where pileup is generated (chrom:start-stop).
+        </option> 
+        
+        <option name="*************** Output Options ***************">
+        </option>
+        
+        <option name="Generate BCF output (genotype likelihoods)">Compute genotype likelihoods and output them in the binary call format (BCF).
+        </option>
+
+        <option name="Generate uncompress BCF output">Output in uncompressed BCF
+        </option>
+        
+        <option name="Output per-sample DP in BCF">Include per-sample read depth in output. <b>Requires BCF output format</b>.
+        </option>
+
+        <option name="Output per-sample strand bias P-value in BCF">Include per-sample strand bias P-value in output. <b>Requires BCF output format</b>.
+        </option>        
+
+        <option name="Output base positions on reads">Provides base positions in output file. <b>Disables BCF output</b>.
+        </option>
+
+        <option name="Output mapping quality">Provides mapping quality in output file. <b>Disables BCF output</b>.
+        </option>    
+        
+        <option name="############### Options for Genotype Likelihood Computation ###############">(BCF only)
+        </option>          
+        
+        <option name="Minimum fraction of gapped reads for candidates">Specifies the minimum fraction of gapped reads for candidates. 
+        </option>   
+  
+        <option name="Coefficient for modeling homopolymer errors">Given an l-long homopolymer run, the sequencing error of an indel of size s is modeled as Input*s/l.
+        </option>   
+ 
+         <option name="Do not perform INDEL calling">
+        </option> 
+ 
+        <option name="Phred-scaled gap extension sequencing error probability">The gap extension sequencing error probability determines the length of called indel. Lower numbers lead to
+        longer, increased numbers to shorter indels. 
+        </option>              
+
+        <option name="Phred-scaled gap open sequencing error probability">The gap open sequencing error probability determines the number of indel calls. The lower the gap open sequencing error probability, the more indels will be called.
+        </option>
+        
+        <option name="Skip INDEL calling if the average per-sample depth is above"> Define threshold for skipping indel calling depending on average per-sample depth.
+        </option> 
+        
+        <option name="Minimum gapped reads for indel candidates">
+        </option> 
+        
+        <option name="Comma separated list of platforms for indels"> Comma dilimited list of platforms (determined by @RG-PL) from which indel candidates are obtained. It is recommended to collect indel candidates from sequencing technologies that have low indel error rate such as ILLUMINA
+        </option> 
+    </fullDescription>
+    
+
+
+    <ports>
+        <inPort index="0" name="In-Port">Cell 0: Path to Samtools<br></br>Cell 1: Path to BAM file</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to Samtools<br></br>Cell 1: Path to BCF Output</outPort>
+    </ports>   
+    <views>
+        <view index="0" name=""></view>
+    </views>
+</knimeNode>

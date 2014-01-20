@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_red.png" type="Source">
+    <name>RunFastQC</name>
+    
+    <shortDescription>
+        RunFastQC - executes FastQC or RawReadManipulator
+    </shortDescription>
+    
+    <fullDescription>
+    
+        <intro>
+        	RunFastQC can be used to execute FastQC or the RawReadManipulator.
+        </intro>
+        
+        <option name="Read sequences">FastQ, FastA, or BAM file. The second file (FastQ or FastA) is optional (paired-end mapping).</option>
+        <option name="*************** Parameter ***************"></option>
+        <option name="Type of reads/ mapping">Please choose if single-end, or paired-end mapping should be used.</option>
+        
+        
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Out-Port">Cell 0: Path to read file (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to second read file
+        (fastQ or fastA).</outPort>
+    </ports>    
+    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

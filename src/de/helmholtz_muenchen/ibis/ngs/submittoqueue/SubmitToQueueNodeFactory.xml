@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_blue.png" type="Source">
+    <name>SubmitToQueue</name>
+    
+    <shortDescription>
+        SubmitToQueue - submits jobs to queue instead of calculating them local
+    </shortDescription>
+    
+    <fullDescription>
+    
+        <intro>
+        	SubmitToQueue submits jobs started by other nodes to a queue instead of calculating them on the local computer, where knime is installed. This 
+        	Node does not have in- or out ports. You simply have to connect the flow variables port of SubmitToQueue to the first node 
+        	of your pipeline, that you want to run on a queue. This node might be replaced by the powerful Knime server environment.
+        </intro>
+        
+        <option name="Reserve memory">Specify the amount of memory [GB], that should be reserved per job. If this number is specified to large, the Jobs might not start.</option>
+        <option name="Prefix of job name">For an easy identification of the jobs using 'qstat' you can specify a short name that is used as prefix.</option>
+        
+    </fullDescription>
+    
+    <ports>
+    </ports>
+        
+    <views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

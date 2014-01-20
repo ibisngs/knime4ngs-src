@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>Annovar</name>
+    
+    <shortDescription>
+        Access to the annotate_variation.pl script of the ANNOVAR annotation tool
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node provides access to the annotate_variation.pl script of the ANNOVAR annotation tool. Descriptions are
+        taken from the help page of the ANNOVAR tool. <a href="http://www.openbioinformatics.org/annovar/">http://www.openbioinformatics.org/annovar/</a> </intro>
+        
+        
+        <option name="Directory containing annovar scripts">The directory which contains the annotate_variation.pl script. Option is deactivated if an in-port is available</option>
+        <option name="Tool"> geneanno: annotate variants by functional consequences on genes<br></br>
+        					regionanno: annotate variants by targetting specific genomics regions<br></br>
+        					filter: filter variants based on a position list</option>
+        <option name="Query file"> Path to the ANNOVAR input file. Option is deactivated if an in-port is available</option>
+        <option name="Table name"> Specify a table name instead of providing an input file. Option is deactivated if an in-port is available</option>
+        <option name="Database location"> Directory where the ANNOVAR database files are stored </option>       
+        <option name="############### In/Out ###############"> </option>
+        <option name="Specify output directory"> Path where the output will be created</option>
+        <option name="Database type"> Specify the database type, e.g. knowngene </option>
+        <option name="Build version"> Specify the genome build version, e.g. hg19 </option>
+        <option name="*************** Other options ***************"></option>
+        <option name="Print variant functions seperately">separately print out all function of a variant (default: one line per variant)</option>
+        <option name="Print comment lines in output files">print out comment line (those starting with #) in output files</option>
+        <option name="Use HGVS format for exonic annotation"> e.g. c.122C>T rather than c.C122T</option>
+        <option name="create a new file with cDNA sequence padded by this much either side"> </option>
+        <option name="*************** Gene-based options ***************"> </option>
+        <option name="sort the exon number in output line"> </option>
+        <option name="use transcript name rather than gene name in output"> </option>
+        <option name="*************** Region-based options ***************"> </option>
+        <option name="Specify gff3 db file"> </option>
+        <option name="Specify bed file"> </option>
+        <option name="Specify which columns to output (comma sep.)">specify which columns to output by comma-delimited numbers</option>
+        <option name="specify column with scores in db file">the column with scores in database file</option>
+        <option name="*************** Filter-based options ***************"> </option>
+        <option name="Specify generic db file"> </option>
+        <option name="Specify vcf db file"> </option>
+		<option name="print out additional columns in"> </option>
+		<option name="use INFO field as score in output"> </option>
+        
+        
+        <option name="############### Fine-tuning ###############"></option>
+        <option name="Batch size"> </option>
+        <option name="Genome bin size"> </option>
+        <option name="Expand bin"> </option>
+		<option name="distance threshold"></option>
+		<option name="Reverse directionality to compare to score threshold"></option>
+		<option name="include raw score in output">output includes the raw score (not normalized score) in UCSC Browser Track</option>
+		<option name="use score threshold"> minimum score of DB regions to use in annotation </option>
+		<option name="*************** Gene-based options ***************"> </option>
+	    <option name="precedence"> comma-delimited to specify precedence of variant function (default: exonic>intronic...) </option>
+	    <option name="use splicing threshold"> distance between splicing variants and exon/intron boundary (default: 2) </option>
+	    <option name="use indel splicing threshold"> if set, use this value for allowed indel size for splicing variants </option>
+		<option name="*************** Region-based options ***************"> </option>
+		<option name="minimum normalized score of DB regions"> minimum normalized score of DB regions to use in annotation </option>
+		<option name="min. query frac."> minimum percentage of query overlap to define match to DB (default: 0) </option>
+		<option name="*************** Filter-based options ***************"> </option>
+		<option name="MAF threshold"> filter 1000G variants with MAF above this threshold (default: 0) </option>
+		<option name="SIFT threshold"> SIFT threshold for deleterious prediction (default: 0.05) </option>
+		<option name="Indexfilter threshold "> controls whether filter-based annotation use index if this fraction of bins need to be scanned (default: 0.9) </option>		
+
+        <option name="############### Memory ###############"></option>	
+        <option name="Minimal required memory">ensure minimum amount of free system memory (default: 100000, in the order of kb)</option>
+        <option name="Limit memory used by annovar">limit total amount of memory used by ANNOVAR (default: 0, unlimited, in the order of kb)</option>        
+        <option name="examine specific chromosomes">examine these specific chromosomes in database file</option>			
+        					
+        
+    </fullDescription>
+    
+    <ports>
+    	<inPort index="0" name="">**Optional Inport**<br></br>Cell 0: Path to ANNOVAR query file<br></br>Cell 1: Path to directory containing the ANNOVAR scripts</inPort>
+    </ports>
+    
+    <views>
+      <view index="0" name=""></view>
+    </views>
+</knimeNode>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>Genscan</name>
+    
+    <shortDescription>
+        Genscan - Identification of complete gene structures in genomic DNA
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+			Source: <a href="http://genes.mit.edu/GENSCANinfo.html">http://genes.mit.edu/GENSCANinfo.html</a>
+		</intro>
+		
+        <option name="############### Options ###############"></option>
+        <option name="Genscan">Set path to executable Genscan.</option>
+        <option name="Parameter matrix">Optionally set path to parameter file (for appropriate organism).</option>
+        <option name="*************** Options ***************"></option>
+        <option name="Add some extra explanatory information to the text output"></option>
+        <option name="Also print predicted CDS">Print predicted coding sequences (nucleic acid).</option>
+        <option name="Identify suboptimal exons">Display suboptimal exons with P &gt; &lt;int&gt;: suboptimal exon probability cutoff (minimum: 0.01)</option>
+        <option name="Create the PostScript (graphical) output"></option>
+        
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port">Cell 0: Genome/ chromosome consensus sequence (FastA)</inPort>
+    </ports>
+    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_yellow.png" type="Source">
+    <name>Segemehl</name>
+    
+    <shortDescription>
+        Segemehl - Heuristic mapping of short read sequences with gaps
+    </shortDescription>
+    
+    <fullDescription>
+    
+        <intro>
+			Segemehl is a software to map short sequencer reads to reference genomes. Unlike other methods, Segemehl is able to detect not only mismatches but also insertions
+			and deletions. Furthermore, Segemehl is not limited to a specific read length and is able to map primer- or polyadenylation contaminated reads correctly.
+			Segemehl implements a matching strategy based on enhanced suffix arrays (ESA). Segemehl now supports the SAM format, reads gzip’ed queries to save both disk and 
+			memory space and allows bisulfite sequencing mapping and split read mapping.<br></br>
+			Source: <a href="http://www.bioinf.uni-leipzig.de/Software/segemehl/">http://www.bioinf.uni-leipzig.de/Software/segemehl/</a>
+		</intro>
+		
+        <option name="############### Options ###############"></option>
+        <option name="Segemehl">Set path of executable Segemehl.</option>
+        <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome seqeunce, to map the reads on (file type: FastA).</option>
+        <option name="*************** General ***************"></option>
+        <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using Segemehl). In this case the reference sequence 
+        		will not be indexed again.</option>
+        <option name="Type of reads/ mapping">Choose between single-end and paired-end read mapping.</option>
+        <option name="Number of threads/ cores to use">Parallel threads &lt;n&gt; will make matching much faster on machines with  &lt;n&gt; multiple cores. Use them!</option>
+        <option name="############### Further Options ###############"></option>
+        <option name="*************** Alignment Parameters ***************"></option>
+        <option name="Use (multiple) split read mapping (e.g. for cDNA reads)">Segemehl supports (multiple) split read mapping. To activate the split read mapping,
+				it is only required to give this option.</option>
+        <option name="Use bisulfite mapping">Segemehl supports mapping of bisulfite-treated sequencing data where DNA fragments are treated with sodium bisulfite which 
+        		results in the conversion of unmethylated cytosines into uracils while methylated cytosines remain unchanged. With bisulfite sequencing, it is possible 
+        		to capture DNA methylation genomewide in an unbiased fashion with single-base resolution and is hence considered ‘gold standard’. Segemehl supports both 
+        		currently used protocols for the construction of the bisulfite-treated libraries, namely methylC-seq  and BS-seq.</option>
+      	<option name="*************** Adapter and polyA clipping ***************"></option>
+        <option name="Clip 5' adapters">Using this option, Segemehl clipps adapter sequences of the 5'-ends of the reads before aligning them. Therefore you have to define 
+        a adapter sequence.</option>
+        <option name="Clip 3' adapters">Using this option, Segemehl clipps adapter sequences of the 3'-ends of the reads before aligning them. Therefore you have to define 
+        a adapter sequence or in the case that you do not know the adapter sequence Segemehl can detect this sequence automatically.</option>
+        <option name="Automatically clip polyA tails">Additionally, for cDNA-reads it is possible to automatically clip polyAtails . All clipping options may be combined.</option>
+        <option name="Clipping accuracy [%]">You can control the clipping accuracy, selecting an integer value between 0 and 100 [%]. The default is set to 70%.</option>
+        <option name="Type of clipping">All adapters and polyA-Signals will be soft-clipped. If you want hard-clipping, use this option.</option>
+    
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port">Cell 0: Path2ReadFile1<br></br>Cell 1 (Optional): Path2ReadFile2 (if paired end mapping is used)</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br>Cell 1: Path2RefFile</outPort>
+    </ports>
+    
+	<views>
+        <view index="0" name=""></view>
+    </views>
+    
+</knimeNode>

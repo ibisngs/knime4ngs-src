@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.ngs.bwa;
 import java.io.File;
 import java.io.IOException;
 
-
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;

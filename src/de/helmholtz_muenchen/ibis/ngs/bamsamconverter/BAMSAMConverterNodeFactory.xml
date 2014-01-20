@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>BAMSAMConverter</name>
+    
+    <shortDescription>
+        BAMSAMConverter - Node for BAM->SAM and BAM->SAM conversion
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Samtools BAMSAMConverter is able to extract/print all or sub alignments in SAM or BAM format. If no region is specified, all the alignments will be printed; otherwise only alignments overlapping the specified regions will be output. An alignment may be given multiple times if it is overlapping several regions. A region can be presented, for example, in the following format: ‘chr2’ (the whole chr2), ‘chr2:1000000’ (region starting from 1,000,000bp) or ‘chr2:1,000,000-2,000,000’ (region between 1,000,000 and 2,000,000bp including the end points). The coordinate is 1-based.
+        <br></br>
+        Source: <a href="http://samtools.sourceforge.net/">http://samtools.sourceforge.net/</a> 
+         </intro>
+              
+         <option name="*************** In/Out Options ***************">
+        </option>       
+        <option name="Path to Samtools">Select samtools executable in the Samtools folder. This option is disabled if In-port table with 'Path2SamTools' column is available.</option>
+	
+		<option name="Select utility">Select SAM->BAM or BAM->SAM conversion. This option is disabled if In-port table is available.</option>
+		<option name="Select file to convert">Select SAM/BAM file to convert. This option is disabled if In-port table is available.</option> 
+		<option name="*************** Options ***************">
+        </option>   
+		<option name="Output in BAM format">Create Output in the BAM format. (SAM->BAM only)</option>
+		<option name="Uncompressed BAM output">Output uncompressed BAM. This option saves time spent on compression/decompression. (SAM->BAM only)</option>
+		<option name="Fast compression"> (SAM->BAM only)</option>
+		<option name="Print header for the SAM output">Prints SAM header into output file (BAM->SAM only).</option>
+		<option name="Print header only (no alignments)">Header only (BAM->SAM only).</option>
+		<option name="Print only the count of matching records"> Instead of printing the alignments, only count them and print the total number. All filter options are taken into account.</option>
+		<option name="Output FLAG in HEX"> Sets a flag in the output flag field </option>
+		<option name="Output FLAG in string"> Sets a flag in the output flag field </option>
+		<option name="Output alignments overlapping the input BED file"> Specify file in BED format.</option>
+		<option name="List of reference names and lengths">This file is TAB-delimited. Each line must contain the reference name and the length of the reference, one line for each distinct reference; additional fields are ignored. This file also defines the order of the reference sequences in sorting. If you run the faidx node, the resultant index file ref.fa.fai can be used as this list file.(SAM->BAM only)</option>
+		<option name="Reference sequence file. (SAM->BAM only)"></option>
+		<option name="List of read groups to be outputted">Output reads in read groups listed in given file.</option>
+		<option name="Required flag"> Only output alignments with all bits in "Required flag" present in the FLAG field. Input can be in hex in the format of /^0x[0-9A-F]+/.</option>
+		<option name="Filtering flag">Skip alignments with flag bits present in "Filtering flag".</option>
+		<option name="Minimum mapping quality">Skip alignments with MAPQ smaller than input value.</option>
+		<option name="Only output reads in library"></option>
+		<option name="Only output reads in read group"></option>
+
+    </fullDescription>
+    
+    
+    <ports>
+            <inPort index="0" name="Optional In-Port">**Optional Inport**<br></br>Cell 0: 'Path2SamTools' or 'Path2SAMFile'<br></br>Cell 1: 'Path2BAMFile' or 'Path2SAMFile'</inPort>
+        	<outPort index="0" name="Out-Port">Cell 0: Path2SamTools<br></br>Cell 1: 'Path2BAMFile' or 'Path2SAMFile' </outPort>
+    </ports>    
+    <views>
+        <view index="0" name=""></view>
+
+    </views>
+</knimeNode>
