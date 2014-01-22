@@ -20,6 +20,7 @@ parser$add_argument("-l","--list"    , type="character", action="store"     , de
 parser$add_argument("-b","--bool"    ,                   action="store_true", dest="bool"       ,                help="a boolean flag")
  
 ## parse
+print(commandArgs(trailingOnly=TRUE))
 args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 
 
@@ -35,6 +36,7 @@ require(plyr)
 ########################################################################################################################################
 data = read.csv3(args$file.in)
 
+#Sys.sleep(2000000000)
 
 ########################################################################################################################################
 ## DO INTELLIGENT STUFF

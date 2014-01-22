@@ -56,8 +56,6 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP, "");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN, false);
 	
-	private final Executor executor = new Executor();
-	
 	
 //TODO: implement alnignment algos....
     /**
@@ -207,10 +205,9 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
      * @param path2bwa
      * @param path2refFile
      * @param path2readFile
-     * @throws IOException
-     * @throws InterruptedException
+     * @throws Exception 
      */
-    private void bwa_index(ExecutionContext exec,StringBuffer logBuffer, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws IOException, InterruptedException{
+    private void bwa_index(ExecutionContext exec,StringBuffer logBuffer, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws Exception{
     	 // bwa index -a bwtsw sequence.fasta
     	
     	//Constant values
@@ -241,14 +238,14 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 			// end QueueSub ###################################################
 			} else {
 	    	//Execute
-	    		executor.executeCommand(com, "BWA Indexing", exec);
+//	    		Executor.executeCommand(com, "BWA Indexing", exec);
 			}
     	} else {
     		logBuffer.append("Indexing reference sequence SKIPPED.\n");
     	}
     }
     
-    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam) throws IOException, InterruptedException{
+    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam) throws Exception{
     	
     	String outName = basePath+outBaseName+"_aln_sa.sai";
     	String out11Name = basePath+outBaseName1+"_aln_sa_1.sai";
@@ -285,7 +282,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-			executor.executeCommand(com, "BWA Aln forward", exec);
+//			Executor.executeCommand(com, "BWA Aln forward", exec);
 			
 		}
 		//If paired end, repeat previous step
@@ -302,13 +299,13 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 			// end QueueSub ###################################################
 			} else {
 		    	//Execute
-	    		executor.executeCommand(com, "BWA Aln Reverse", exec);
+//	    		Executor.executeCommand(com, "BWA Aln Reverse", exec);
 			}
     	}
     }
     
     
-    private void bwa_backtrack(ExecutionContext exec,String readType, StringBuffer logBuffer, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String samse, String sampe) throws IOException, InterruptedException{
+    private void bwa_backtrack(ExecutionContext exec,String readType, StringBuffer logBuffer, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String samse, String sampe) throws Exception{
 		String na = "";
 		String com = "";
 
@@ -334,11 +331,11 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-    		executor.executeCommand(com, "BWA Backtrack", exec);
+//    		Executor.executeCommand(com, "BWA Backtrack", exec);
 		}
     }
     
-    private void bwa_bwasw(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwasw, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws IOException, InterruptedException{
+    private void bwa_bwasw(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwasw, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws Exception{
     	String com = "";
     	
 		logBuffer.append("Generate alignments in the SAM format.\n");
@@ -354,11 +351,11 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-    		executor.executeCommand(com, "BWA SW", exec);
+//    		Executor.executeCommand(com, "BWA SW", exec);
 		}
     }
     
-    private void bwa_mem(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwamem, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws IOException, InterruptedException{
+    private void bwa_mem(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwamem, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws Exception{
     	String com = "";
 		logBuffer.append("Generate alignments in the SAM format.\n");
 		com = path2bwa + bwamem + path2refFile + " " + path2refFile + " " + path2readFile + " " + path2readFile2;
@@ -373,7 +370,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {	
 	    	//Execute
-    		executor.executeCommand(com, "BWA MEM", exec,out2Name);
+//    		Executor.executeCommand(com, "BWA MEM", exec,out2Name);
 		}
     }
     

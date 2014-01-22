@@ -8,5 +8,6 @@
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1-tests.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="libs/commons-codec-1.8.jar"/>
+	<classpathentry kind="lib" path="scripts"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

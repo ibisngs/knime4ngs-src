@@ -12,6 +12,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.knime.base
 Bundle-ActivationPolicy: lazy
 Export-Package: de.helmholtz_muenchen.ibis.ngs.bwa
-Import-Package: org.apache.commons.codec;version="1.8.0",
+Import-Package: org.apache.commons.codec,
  org.apache.commons.lang
 

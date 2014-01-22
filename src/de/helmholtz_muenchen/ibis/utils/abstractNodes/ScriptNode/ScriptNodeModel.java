@@ -9,7 +9,8 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 
-import de.helmholtz_muenchen.ibis.utils.Utils;
+import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 public abstract class ScriptNodeModel extends NodeModel {
 	protected final StringBuffer STDOUT;
@@ -28,28 +29,25 @@ public abstract class ScriptNodeModel extends NodeModel {
 	}
 	
 	protected String getScriptPath(){
-		LOGGER.error("CALLING SCRIPT PATH METHOD OF SCRIPT NODE MODEL");
-		return("");
+		return(IO.getScriptPath());
 	}
 	
-	protected void executeScript(String args, final ExecutionContext exec) throws CanceledExecutionException {
+	protected void executeScript(final ExecutionContext exec) throws CanceledExecutionException {
 		this.STDERR.setLength(0);
 		this.STDOUT.setLength(0);
 		
-		// run command
-		String com= this.SCRIPT + args;
-
-		LOGGER.info("RUNNING SCRIPT: >" + com);
 		try {
-			Utils.executeCommand(com, this.STDOUT, this.STDERR, LOGGER);
+			Executor.executeCommand(this.getCommand(), exec, LOGGER, this.STDOUT, this.STDERR);
 		} catch (Exception e) {
-			//LOGGER.error("Couldn'r run command >" + com);
-			//LOGGER.error("STDERR: " + this.STDERR + "\n\nSTDOUT: " + this.STDOUT);
-			throw new CanceledExecutionException("Error occured while ececuting external command >" + com + "\n" + e.getMessage());
+			LOGGER.error("Execution failed!");
+			LOGGER.error(e.getMessage());
+			throw(new CanceledExecutionException(e.getMessage()));
+			
 		}
 		
 	}
 
+	protected abstract String[] getCommand();
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS

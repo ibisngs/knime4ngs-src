@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -12,12 +13,13 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.Utils;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
 
 public abstract class RNodeModel extends ScriptNodeModel {
-	public static String R_SCRIPTS_PATH =  File.separatorChar + "scripts" + File.separatorChar + "R" + File.separatorChar;
-	public static String GLOBALS_R = Utils.getScriptPath() + R_SCRIPTS_PATH + "utils" + File.separatorChar + "GLOBALS.R";;
+	
+	public static final String R_SCRIPTS_BIN = "Rscript"; 
+	public static final String R_SCRIPTS_PATH =  "R" + File.separatorChar;
+	public static final String GLOBALS_R = IO.getScriptPath() + R_SCRIPTS_PATH + "utils" + File.separatorChar + "GLOBALS.R";;
 	
 	private final HashMap<String,String> ARGUMENTS;
 	protected final String[] INPUT_FILE_ARGUMENTS;
@@ -44,8 +46,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	
 	@Override
 	protected String getScriptPath(){
-		LOGGER.error("CALLING SCRIPT PATH METHOD OF R NODE MODEL");
-		return("Rscript " + Utils.getScriptPath() + R_SCRIPTS_PATH );
+		return(IO.getScriptPath() + R_SCRIPTS_PATH );
 	}
 	
 
@@ -87,8 +88,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		// RUN COMMAND
 		//////////////////////////////////////////////////////////////////////////
 		LOGGER.info("\targuments: " + getArgumentsAsVector());
-		super.executeScript(this.getArguments(), exec);
-		
+		super.executeScript(exec);
 		return(IO.readCSV(exec, outFiles, RNodeModel.LOGGER, true, true));
 	}
 
@@ -158,6 +158,26 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		return(args.toString());
 	}
+	
+	@Override
+	protected String[] getCommand(){
+		ArrayList<String> command = new ArrayList<String>();
+		command.add(R_SCRIPTS_BIN);
+		command.add(this.SCRIPT);
+		command.add("--globals");
+		command.add(GLOBALS_R);
+		for (String key : this.ARGUMENTS.keySet()) {
+			command.add(key);
+			// value
+			if(this.ARGUMENTS.get(key) != null){
+				command.add(this.ARGUMENTS.get(key));
+			}
+		}
+		
+		return(command.toArray(new String[command.size()]));
+	}
+	
+	
 	public String getArgumentsAsVector(){
 		StringBuilder args = new StringBuilder("args.in <- c( \"--globals\", \"" + GLOBALS_R + "\"");
 		for (String key : this.ARGUMENTS.keySet()) {

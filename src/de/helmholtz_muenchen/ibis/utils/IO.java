@@ -5,9 +5,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.knime.base.node.io.filereader.FileAnalyzer;
 import org.knime.base.node.io.filereader.FileReaderNodeSettings;
@@ -22,19 +26,19 @@ public class IO {
 
 	private static FileWriterSettings getWriterSettings(){
 		FileWriterSettings writerSettings     = new FileWriterSettings();
-		
+
 		// writer settings
 		writerSettings.setWriteColumnHeader(true);
 		writerSettings.setWriteRowID(true);
 		writerSettings.setQuoteBegin("\"");
 		writerSettings.setQuoteEnd("\"");	
-		
+
 		return writerSettings;
 	}
-	
+
 	private static FileReaderNodeSettings getReaderSettings(boolean rowHeader, boolean colHeader){
 		FileReaderNodeSettings readerSettings = new FileReaderNodeSettings();
-		
+
 		// reader settings
 		readerSettings.addDelimiterPattern(";", false, false, false);
 		readerSettings.setDelimiterUserSet(true);
@@ -48,14 +52,14 @@ public class IO {
 		readerSettings.setFileHasRowHeaders(rowHeader);
 		readerSettings.setFileHasRowHeadersUserSet(true);
 		readerSettings.setWhiteSpaceUserSet(true);
-		
+
 		return readerSettings;
 	}
-	
-	
+
+
 	public static BufferedDataTable readCSV(final ExecutionContext exec,String filepath, boolean rowHeader, boolean colHeader) throws IOException, CanceledExecutionException{
 		URL url = new URL("file:"+filepath);
-		
+
 		// set reader
 		FileReaderNodeSettings readerSettings = getReaderSettings(rowHeader, colHeader);
 		readerSettings.setDataFileLocationAndUpdateTableName(url);
@@ -64,7 +68,7 @@ public class IO {
 		if (status.getNumOfErrors() > 0) {
 			throw new IllegalStateException(status.getErrorMessage(0));
 		}
-		
+
 		FileTable fTable = new FileTable(readerSettings.createDataTableSpec(),readerSettings, exec.createSubExecutionContext(0.5));
 		BufferedDataTable table = exec.createBufferedDataTable(fTable, exec.createSubProgress(0.5));
 		return table;
@@ -87,8 +91,8 @@ public class IO {
 		return result;
 	}
 
-	
-	
+
+
 	/**
 	 * Writes a BufferedDataTable to file
 	 * @param inData data to write
@@ -135,8 +139,8 @@ public class IO {
 		}
 	}
 
-	
-	
+
+
 	@Deprecated
 	public static String findFile(String folder, String fileExtension, String curr_infile){
 		//add, cv,lod,norm,plot,set
@@ -174,5 +178,96 @@ public class IO {
 		File f = new File(filepath);
 		boolean suc = f.delete();
 		return suc;
+	}
+
+
+	//////////////////////////////////////////////////////////////////////////
+	// GET SCRIPT PATH FOR EXECUTING E.G. R-SCRIPTS
+	//////////////////////////////////////////////////////////////////////////
+	private static String SCRIPT_PATH;
+	private static void initScriptPath() {
+		System.err.println("JONAS: INIT SCRIPT PATH");
+		if(SCRIPT_PATH != null) return;
+		System.err.println("JONAS: SCRIPT PATH IS NULL");
+		// LOCALLY OR FROM JAR?
+		String path = IO.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		System.err.println("JONAS: PATH:" + path);
+		if(path.endsWith("jar")){
+			SCRIPT_PATH = "";
+			try {
+				String tmpFolder = createTempDirectory("knime_libs_", "").getCanonicalPath();
+				IO.unzipJar(path, new File(tmpFolder));
+				SCRIPT_PATH = tmpFolder + File.separatorChar;
+			} catch (IOException e) {
+				System.err.println("Couldn't unpack jar to tmp directory");
+				e.printStackTrace();
+			}
+			System.err.println("JONAS: SCRIPTPATH: " + SCRIPT_PATH);
+		}else{
+			// EXECUTED LOCALLY
+			System.err.println("JONAS: LOCAL PATH");
+			SCRIPT_PATH = path + File.separatorChar;
+		}
+	}
+
+	public static String getScriptPath() {
+		if(SCRIPT_PATH == null){
+			initScriptPath();
+		}
+		return(SCRIPT_PATH);
+	}
+
+	/**
+	 * Unzip jar file to directory
+	 * @param jarFile path to jar file
+	 * @param destDir path to target directory
+	 * @throws IOException
+	 */
+	private static void unzipJar(String jarFile, File destDir) throws IOException{
+		if (!destDir.exists()) {
+			System.out.println("JONAS: creating directory: " + destDir.getCanonicalPath());
+			boolean result = destDir.mkdir();  
+
+			if(!result) {    
+				throw(new IOException("Couldn't create temporary directory to extract scripts"));
+			}
+		}
+
+		JarFile jar = new JarFile(jarFile);
+		Enumeration<JarEntry> files = jar.entries();
+		while (files.hasMoreElements()) {
+			JarEntry file = files.nextElement();
+			File f = new File(destDir.getCanonicalPath() + File.separator + file.getName());
+			if (file.isDirectory()) { // if its a directory, create it
+				f.mkdir();
+				continue;
+			}
+			InputStream is = jar.getInputStream(file); // get the input stream
+			FileOutputStream fos = new FileOutputStream(f);
+			while (is.available() > 0) {  // write contents of 'is' to 'fos'
+				fos.write(is.read());
+			}
+			fos.close();
+			is.close();
+		}
+	}
+	
+	/**
+	 * Create a temporary directory in system's standard tmp dir
+	 * @param prefix prefix for directory name
+	 * @param suffix suffix for directory name
+	 * @return File object of the created tmp dir
+	 * @throws IOException
+	 */
+	public static File createTempDirectory(String prefix, String suffix) throws IOException {
+		final File temp = File.createTempFile(prefix, suffix);
+
+		if(!(temp.delete())){
+			throw new IOException("Could not delete temp file: " + temp.getAbsolutePath());
+		}
+		if(!(temp.mkdirs())){
+			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
+		}
+		return (temp);
 	}
 }

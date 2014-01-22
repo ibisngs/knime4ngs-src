@@ -55,6 +55,7 @@ public class RNodeTemplateNodeModel extends RNodeModel {
         // script path (relative to scripts/R/ directory
         // commandline args for input files
         // commandline args for output files
+       
     }
 
     /**
@@ -67,6 +68,7 @@ public class RNodeTemplateNodeModel extends RNodeModel {
     	this.addArgument("--double", m_double.getDoubleValue());
     	this.addArgument("--list"  , m_list.getIncludeList());
     	this.setFlag("--bool", m_bool.getBooleanValue());
+    	
 		return(super.execute(inData, exec));
 	}
     
