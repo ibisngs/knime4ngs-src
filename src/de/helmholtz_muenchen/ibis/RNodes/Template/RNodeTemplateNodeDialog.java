@@ -37,22 +37,24 @@ public class RNodeTemplateNodeDialog extends DefaultNodeSettingsPane {
 	protected RNodeTemplateNodeDialog() {
         super();
         
+        this.createNewTab("Numbers input");
         // INT
         addDialogComponent(new DialogComponentNumber(
         		new SettingsModelIntegerBounded(RNodeTemplateNodeModel.CFGKEY_INT, 5, Integer.MIN_VALUE, Integer.MAX_VALUE),
         		"Counter:", /*step*/ 1, /*componentwidth*/ 5)
         );
         
+        // DOUBLE
+        addDialogComponent(new DialogComponentNumber(
+        		new SettingsModelDouble(RNodeTemplateNodeModel.CFGKEY_DOUBLE, 3.0), "Double Value", /* step size */0.1)
+        );
+        
+        this.createNewTab("Other Input");
         // STRING DROPDOWN
         addDialogComponent(new DialogComponentStringSelection(
         		new SettingsModelString(RNodeTemplateNodeModel.CFGKEY_STRING, RNodeTemplateNodeModel.POSSIBLE_STRING_VALUES[0]),
         		"String", /*possible values for dropdown */ RNodeTemplateNodeModel.POSSIBLE_STRING_VALUES)
         		);
-        
-        // DOUBLE
-        addDialogComponent(new DialogComponentNumber(
-        		new SettingsModelDouble(RNodeTemplateNodeModel.CFGKEY_DOUBLE, 3.0), "Double Value", /* step size */0.1)
-        );
         
         // BOOLEAN
         addDialogComponent(new DialogComponentBoolean(

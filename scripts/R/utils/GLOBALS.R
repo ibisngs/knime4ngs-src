@@ -6,6 +6,22 @@ FILE_SEP <- ";"
 
 
 ################################################
+### LIBRARIES
+################################################
+loadLib <- function(x, bioC=FALSE){
+	if(!require(x, character.only=T)){
+		warning("installing package ", x)
+		if(bioC){
+			source("http://bioconductor.org/biocLite.R")
+			biocLite(x)
+		}else{
+			install.packages(x, repos="http://cran.us.r-project.org")
+		}
+	}
+	library(x, character.only=T)
+}
+
+################################################
 ### FUNCTIONS
 ################################################
 ## write ; separated csv
@@ -47,4 +63,29 @@ merge.byrownames = function(x,y, ...){
   d = d[, !grepl("Row.names", colnames(d))]
   
   return(d)
+}
+
+## split string in named list "name1=value1,name2=value2"
+strsplit.named <- function(l, split.1="\\s*,\\s*", split.2="\\s*=\\s*", perl=T){
+	if(is.na(l) | is.null(l) | l==""){
+		return(list())
+	}
+	split=as.list(unlist(strsplit(l, split=split.1, perl=perl)))
+
+	strsplit.inner=function(x){
+		y=unlist(strsplit(x, split=split.2, perl=perl))
+		if(length(y)==2){
+			x=list(y[2])
+			names(x)=y[1]
+			return(x)
+		} else if(length(y)==1){
+			x=list("")
+			names(x) = y[1]
+			return(x)
+		}else{
+			warning("wrong format of string!")
+		} 
+	}
+	l = as.list(unlist(lapply(split, FUN=strsplit.inner)))
+	return(l)
 }

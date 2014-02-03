@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -16,15 +16,14 @@ import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
 
 public abstract class RNodeModel extends ScriptNodeModel {
-	
-	public static final String R_SCRIPTS_BIN = "Rscript"; 
-	public static final String R_SCRIPTS_PATH =  "R" + File.separatorChar;
+
+	public static final String R_SCRIPTS_PATH =  "scripts" + File.separatorChar + "R" + File.separatorChar;
 	public static final String GLOBALS_R = IO.getScriptPath() + R_SCRIPTS_PATH + "utils" + File.separatorChar + "GLOBALS.R";;
-	
+
 	private final HashMap<String,String> ARGUMENTS;
 	protected final String[] INPUT_FILE_ARGUMENTS;
 	protected final String[] OUTPUT_FILE_ARGUMENTS;
-	
+
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(RNodeModel.class);
 
 	protected RNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, String[] input_file_arguments, String[] output_file_arguments) {
@@ -42,20 +41,30 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		this.INPUT_FILE_ARGUMENTS = input_file_arguments;
 		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;
+
 	}
-	
+
 	@Override
 	protected String getScriptPath(){
 		return(IO.getScriptPath() + R_SCRIPTS_PATH );
 	}
 	
+	protected String getRscriptBinary(){
+		if(!this.getAvailableFlowVariables().containsKey("Rscript")){
+			this.pushFlowVariableString("Rscript", "Rscript");
+		}
+		return(this.getAvailableFlowVariables().get("Rscript").getStringValue());
+	}
+
 
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
-
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+		
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT FILES
 		//////////////////////////////////////////////////////////////////////////
+		exec.setProgress(0.00);
+		exec.setProgress("writing input data");
 		for(int i=0; i < this.getNrInPorts(); i++){
 			File tmpFile = null;
 			try {
@@ -71,6 +80,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE OUTPUT FILES
 		//////////////////////////////////////////////////////////////////////////
+		exec.setProgress(0.05);
+		exec.setProgress("preparing output data");
 		String[] outFiles = new String[this.getNrOutPorts()];
 		for(int i=0; i < this.getNrOutPorts(); i ++){
 			File tmpFile = null;
@@ -83,28 +94,39 @@ public abstract class RNodeModel extends ScriptNodeModel {
 				throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
 			}
 		}	
-		
+
 		//////////////////////////////////////////////////////////////////////////
 		// RUN COMMAND
 		//////////////////////////////////////////////////////////////////////////
-		LOGGER.info("\targuments: " + getArgumentsAsVector());
-		super.executeScript(exec);
-		return(IO.readCSV(exec, outFiles, RNodeModel.LOGGER, true, true));
+		exec.setProgress(0.10);
+		exec.setProgress("executing script");
+		LOGGER.info("Running Rscript with arguments: " + getArgumentsAsVector());
+		super.executeScript(exec, null);
+
+		//////////////////////////////////////////////////////////////////////////
+		// READ DATA
+		//////////////////////////////////////////////////////////////////////////
+		exec.setProgress(0.90);
+		exec.setProgress("reading output");
+		BufferedDataTable[] output = IO.readCSV(exec, outFiles, RNodeModel.LOGGER, true, true);
+		exec.setProgress(1.0);
+
+		return(output);
 	}
 
-	
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS
 	/////////////////////////////////////////////////////////////////////////////////////////////////
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    	super.reset();
-    	this.ARGUMENTS.clear();
-    }
-    
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void reset() {
+		super.reset();
+		this.ARGUMENTS.clear();
+	}
+
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// COMMANDLINE ARGUMENTS
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -127,7 +149,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	public void removeArgument(String arg){
 		this.ARGUMENTS.remove(arg);
 	}
-	
+
 	public void addFlag(String arg){
 		this.ARGUMENTS.put(arg, null);
 	}
@@ -150,7 +172,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		for (String key : this.ARGUMENTS.keySet()) {
 			// key
 			args.append(" " + key);
-			
+
 			// value
 			if(this.ARGUMENTS.get(key) != null){
 				args.append(" \"" + this.ARGUMENTS.get(key) + "\"");
@@ -158,11 +180,11 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		return(args.toString());
 	}
-	
+
 	@Override
 	protected String[] getCommand(){
 		ArrayList<String> command = new ArrayList<String>();
-		command.add(R_SCRIPTS_BIN);
+		command.add(this.getRscriptBinary());
 		command.add(this.SCRIPT);
 		command.add("--globals");
 		command.add(GLOBALS_R);
@@ -173,17 +195,17 @@ public abstract class RNodeModel extends ScriptNodeModel {
 				command.add(this.ARGUMENTS.get(key));
 			}
 		}
-		
+
 		return(command.toArray(new String[command.size()]));
 	}
-	
-	
+
+
 	public String getArgumentsAsVector(){
 		StringBuilder args = new StringBuilder("args.in <- c( \"--globals\", \"" + GLOBALS_R + "\"");
 		for (String key : this.ARGUMENTS.keySet()) {
 			// key
 			args.append(", \"" + key + "\"");
-			
+
 			// value
 			if(this.ARGUMENTS.get(key) != null){
 				args.append(", \"" + this.ARGUMENTS.get(key) + "\"");
@@ -193,6 +215,6 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		return(args.toString());
 	}
 
-	
+
 
 }

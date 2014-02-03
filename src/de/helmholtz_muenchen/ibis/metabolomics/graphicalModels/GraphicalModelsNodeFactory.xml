@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
-    <name>RNodeTemplate</name>
+    <name>Graphical Models</name>
     
     <shortDescription>
-        This is a template for a node, which executes a R-Script.
+        Generate Graphical Models from measurements.
     </shortDescription>
     
     <fullDescription>
-        <intro>still just a dummy node</intro>
+        <intro>Graphical Model estimatio</intro>
 
         <tab name="Numbers input">
             <option name="short name of first option (like in the dialog)">description of first option</option>
@@ -22,7 +22,7 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input Data">Any Stupid Input here</inPort>
+        <inPort index="0" name="Data">A data matrix which contains measured variables in the columns and samples in the rows.</inPort>
         <outPort index="0" name="Data">The filtered Data</outPort>
         <outPort index="1" name="Args">The Arguments you defined</outPort>
     </ports>    

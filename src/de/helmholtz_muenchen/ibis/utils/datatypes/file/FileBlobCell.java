@@ -11,7 +11,10 @@ import org.knime.core.data.StringValue;
 import org.knime.core.data.container.BlobDataCell;
 
 public class FileBlobCell extends BlobDataCell implements StringValue, FileValue {
-    /**
+
+	private static final long serialVersionUID = 7924994696504591685L;
+
+	/**
      * Returns the preferred value class of this cell implementation. This
      * method is called per reflection to determine which is the preferred
      * renderer, comparator, etc.

@@ -38,7 +38,8 @@ public class DataTypesNodePlugin extends AbstractUIPlugin{
         final IPreferenceStore pStore = getPreferenceStore();
         pStore.addPropertyChangeListener(new IPropertyChangeListener() {
            /** {@inheritDoc} */
-            @Override
+            @SuppressWarnings("deprecation")
+			@Override
             public void propertyChange(final PropertyChangeEvent event) {
                 for (DataTypeTuple t : getCustomizableTypeList()) {
                     if (t.getPreferenceKey().equals(event.getProperty())) {

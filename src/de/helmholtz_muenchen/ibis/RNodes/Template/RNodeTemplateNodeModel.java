@@ -55,14 +55,14 @@ public class RNodeTemplateNodeModel extends RNodeModel {
         // script path (relative to scripts/R/ directory
         // commandline args for input files
         // commandline args for output files
-       
     }
 
     /**
      * {@inheritDoc}
+     * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
     	this.addArgument("--int"   , m_count.getIntValue());
     	this.addArgument("--string", m_string.getStringValue());
     	this.addArgument("--double", m_double.getDoubleValue());
@@ -77,7 +77,6 @@ public class RNodeTemplateNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	// TODO
         return new DataTableSpec[]{null};
     }
 

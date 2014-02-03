@@ -32,19 +32,16 @@ public abstract class ScriptNodeModel extends NodeModel {
 		return(IO.getScriptPath());
 	}
 	
-	protected void executeScript(final ExecutionContext exec) throws CanceledExecutionException {
+	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException {
 		this.STDERR.setLength(0);
 		this.STDOUT.setLength(0);
 		
 		try {
-			Executor.executeCommand(this.getCommand(), exec, LOGGER, this.STDOUT, this.STDERR);
+			Executor.executeCommand(this.getCommand(), exec, environment, LOGGER, this.STDOUT, this.STDERR);
 		} catch (Exception e) {
-			LOGGER.error("Execution failed!");
 			LOGGER.error(e.getMessage());
 			throw(new CanceledExecutionException(e.getMessage()));
-			
 		}
-		
 	}
 
 	protected abstract String[] getCommand();

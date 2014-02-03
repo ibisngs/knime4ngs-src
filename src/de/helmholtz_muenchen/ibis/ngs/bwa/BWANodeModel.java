@@ -26,7 +26,6 @@ import org.knime.core.node.workflow.NodeProgressListener;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 

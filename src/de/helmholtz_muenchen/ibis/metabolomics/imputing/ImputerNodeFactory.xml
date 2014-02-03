@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./default.png" type="Manipulator">
+    <name>Imputer</name>
+    
+    <shortDescription>
+        
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Insert long description here...</intro>
+        
+        
+        <option name="Imputing SD">
+                Missing values are imputed as mean intensitiy minus x time its standard deviation
+        </option>
+        <option name="Max portion of NAs">
+                if more than x percent are missing for the variable it is considered as sparse
+        </option>
+        <option name="Use NA info">
+                If false, sparse metabolites are discarded, otherwise variables of sparse metabolites are generalized to 0 (missing) and 1 (measured)
+        </option>
+
+    </fullDescription>
+    
+ 	<ports>
+		<inPort index="0" name="Experiment Data">
+			Data table with measurements. Each column represents one measured variable and each row represents one sample.
+		</inPort>
+		<outPort index="0" name="Imputed Experiment Data">
+			Like experiment data but with imputed missing values
+		</outPort>
+	</ports>
+	<views>
+		<view index="0" name="Logs">
+				View STDERR and STDOUT of the executed R command
+		</view>
+	</views>
+</knimeNode>

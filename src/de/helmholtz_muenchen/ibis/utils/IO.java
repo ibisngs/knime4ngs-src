@@ -1,9 +1,11 @@
 package de.helmholtz_muenchen.ibis.utils;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,7 +40,6 @@ public class IO {
 
 	private static FileReaderNodeSettings getReaderSettings(boolean rowHeader, boolean colHeader){
 		FileReaderNodeSettings readerSettings = new FileReaderNodeSettings();
-
 		// reader settings
 		readerSettings.addDelimiterPattern(";", false, false, false);
 		readerSettings.setDelimiterUserSet(true);
@@ -52,11 +53,19 @@ public class IO {
 		readerSettings.setFileHasRowHeaders(rowHeader);
 		readerSettings.setFileHasRowHeadersUserSet(true);
 		readerSettings.setWhiteSpaceUserSet(true);
-
 		return readerSettings;
 	}
 
-
+	/**
+	 * Read a single csv file as Buffered Table
+	 * @param exec
+	 * @param filepath
+	 * @param rowHeader
+	 * @param colHeader
+	 * @return
+	 * @throws IOException
+	 * @throws CanceledExecutionException
+	 */
 	public static BufferedDataTable readCSV(final ExecutionContext exec,String filepath, boolean rowHeader, boolean colHeader) throws IOException, CanceledExecutionException{
 		URL url = new URL("file:"+filepath);
 
@@ -74,6 +83,15 @@ public class IO {
 		return table;
 	}
 
+	/**
+	 * Reads csv files as Buffered Tables
+	 * @param exec
+	 * @param files
+	 * @param logger
+	 * @param rowHeader
+	 * @param colHeader
+	 * @return
+	 */
 	public static BufferedDataTable[] readCSV(ExecutionContext exec, String[] files, NodeLogger logger, boolean rowHeader, boolean colHeader) {
 		BufferedDataTable[] result = new BufferedDataTable[files.length];
 
@@ -139,59 +157,14 @@ public class IO {
 		}
 	}
 
-
-
-	@Deprecated
-	public static String findFile(String folder, String fileExtension, String curr_infile){
-		//add, cv,lod,norm,plot,set
-		//Alternative fuer alles ausser FileConverter und Info.file
-		if(fileExtension.equals("add")&fileExtension.equals("cv")&fileExtension.equals("lod")&fileExtension.equals("norm")&fileExtension.equals("plot")&fileExtension.equals("set")){
-			String base[] = curr_infile.split("csv");
-			String newName = base[0]+fileExtension+".csv";
-			System.out.println("#########################");
-			System.out.println(folder+"/"+newName);
-			System.out.println("#########################");
-			return folder+"/"+newName;
-		}
-		//
-
-		File[] files = new File(folder+"/").listFiles();
-		fileExtension = fileExtension.replaceAll("\\+","\\\\+");
-		fileExtension = fileExtension.replaceAll("\\*","\\\\*");
-		for (File file : files) {
-			if (!file.isDirectory()) {
-				String name = file.getName();
-				String [] namesplit = name.split(fileExtension);
-
-				//System.out.println(fileExtension);
-				if(namesplit[namesplit.length-1].equals(".csv")){
-					System.out.println("File: " + folder+"/"+file.getName());
-					return folder+"/"+name;
-				}
-			}
-		}
-		return "";
-	}
-
-	@Deprecated
-	public static boolean deleteFile(String filepath){
-		File f = new File(filepath);
-		boolean suc = f.delete();
-		return suc;
-	}
-
-
 	//////////////////////////////////////////////////////////////////////////
 	// GET SCRIPT PATH FOR EXECUTING E.G. R-SCRIPTS
 	//////////////////////////////////////////////////////////////////////////
 	private static String SCRIPT_PATH;
 	private static void initScriptPath() {
-		System.err.println("JONAS: INIT SCRIPT PATH");
 		if(SCRIPT_PATH != null) return;
-		System.err.println("JONAS: SCRIPT PATH IS NULL");
 		// LOCALLY OR FROM JAR?
 		String path = IO.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		System.err.println("JONAS: PATH:" + path);
 		if(path.endsWith("jar")){
 			SCRIPT_PATH = "";
 			try {
@@ -202,10 +175,8 @@ public class IO {
 				System.err.println("Couldn't unpack jar to tmp directory");
 				e.printStackTrace();
 			}
-			System.err.println("JONAS: SCRIPTPATH: " + SCRIPT_PATH);
 		}else{
 			// EXECUTED LOCALLY
-			System.err.println("JONAS: LOCAL PATH");
 			SCRIPT_PATH = path + File.separatorChar;
 		}
 	}
@@ -251,7 +222,7 @@ public class IO {
 			is.close();
 		}
 	}
-	
+
 	/**
 	 * Create a temporary directory in system's standard tmp dir
 	 * @param prefix prefix for directory name
@@ -269,5 +240,35 @@ public class IO {
 			throw new IOException("Could not create temp directory: " + temp.getAbsolutePath());
 		}
 		return (temp);
+	}
+
+	/**
+	 * returns the last x lines of the given file as String
+	 * @param src source file
+	 * @param maxLines number of lines to return
+	 * @return last maxLines Lines of the src file
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static String tail(File src, int maxLines) throws FileNotFoundException, IOException {
+		BufferedReader reader = new BufferedReader(new FileReader(src));
+		String[] lines = new String[maxLines];
+		int lastNdx = 0;
+		String out = "";
+		for (String line=reader.readLine(); line != null; line=reader.readLine()) {
+			if (lastNdx == lines.length) {
+				lastNdx = 0;
+			}
+			lines[lastNdx++] = line;
+		}
+
+		for (int ndx=lastNdx; ndx != lastNdx-1; ndx++) {
+			if (ndx == lines.length) {
+				ndx = 0;
+			}
+			out+=lines[ndx]+"\n";
+		}
+
+		return out;
 	}
 }

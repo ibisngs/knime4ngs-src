@@ -245,7 +245,8 @@ public class MyUtilityFactory extends ExtensibleUtilityFactory{
 	    /**
 	     * {@inheritDoc}
 	     */
-	    @Override
+	    @SuppressWarnings("deprecation")
+		@Override
 	    protected void readPreferredRendererFromPreferences() {
 	        if (m_preferencesRead) {
 	            return;
