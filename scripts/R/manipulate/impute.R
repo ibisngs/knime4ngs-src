@@ -48,6 +48,9 @@ if(is.null(args$columns)){
 	args$columns = unlist(strsplit(args$columns, ","))
 }
 # data = data.frame(matrix(rnorm(15), ncol=3, nrow=5))
+# data[,1] = as.factor(data[,3])
+# data[,2] = as.factor(data[,3])
+# data[,3] = as.factor(data[,3])
 # rownames(data) = paste("row.", c(1:5), sep="")
 # colnames(data) = paste("col.", c(1:3), sep="")
 # data[2,3] <- NA
@@ -67,9 +70,7 @@ impute.simple <- function(x, method="min"){
 	return(x)
 }
 impute.random <- function(x, cat.cutoff=10){
-	n = colnames(x)
-	x<- x[,1]
-	if(length(unique(x))>cat.cutoff){
+	if(length(unique(x))>cat.cutoff & is.numeric(x)){
 		x.mean = mean(x, rm=T)
 		x.sd   = sd(x, na.rm=T)
 		#cat("mean: ", x.mean, "  sd:", x.sd)
@@ -114,9 +115,9 @@ if(method == "knn"){
 	imputed = imputed$data
 	
 }else if(method == "random"){ ## TODO variable cutoff for categorical
-	loadLib("plyr")
-	imputed = t(aaply(.data=data[,args$columns], .margins=2, .fun=impute.random, cat.cutoff=10))
-	rownames(imputed) = rownames(data)		
+	imputed = apply(data[,args$columns], MARGIN=2, FUN=impute.random, cat.cutoff=10)
+	rownames(imputed) = rownames(data)
+	colnames(imputed) = colnames(data)
 }else{
 	warning("Method unknown")
   q()

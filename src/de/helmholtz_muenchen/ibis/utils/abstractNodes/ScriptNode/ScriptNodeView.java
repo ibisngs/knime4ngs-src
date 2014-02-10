@@ -44,7 +44,6 @@ public abstract class ScriptNodeView<T extends ScriptNodeModel> extends NodeView
         m_panel_log.setPreferredSize(new Dimension(800, 600));
         setComponent(m_panel_log);    
         this.setViewTitleSuffix("log");
-        
     }
 
     /** {@inheritDoc} */

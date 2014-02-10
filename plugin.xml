@@ -29,26 +29,28 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.snpsift.SnpSiftNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.snpsift.SnpSiftNodeFactory"/>
 		
 		<!-- METABOLOMICS -->
-		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"                id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
-		<node category-path="/ibis/metabolomics"     factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.GraphicalModelsNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.GraphicalModelsNodeFactory"/>
+		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
+		<node category-path="/ibis/metabolomics" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory"/>
+		<node category-path="/ibis/metabolomics" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.modelExtraction.GraphicalModelExtractionNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.modelExtraction.GraphicalModelExtractionNodeFactory"/>
 		
 		<!-- UTILS -->
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory" id="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory"/>
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>
-	</extension>
+	<node category-path="/" factory-class="tzui.KhjkNodeFactory" id="tzui.KhjkNodeFactory"/>
+</extension>
    
 	<extension point="org.knime.workbench.repository.categories">
-		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"></category>
+		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
 		<!-- NGS -->
-		<category icon="/libs/icons/icon_ngs.png" level-id="ngs" name="Next Generation Sequencing" path="/ibis/"></category>
-		<category icon="/libs/icons/icon_r_red2.png" level-id="ngs_pre" name="Preprocessing" path="/ibis/ngs/"></category>
-		<category icon="/libs/icons/icon_r_yellow2.png" level-id="ngs_asm" name="Mapping" path="/ibis/ngs/"></category>
-		<category icon="/libs/icons/icon_r_green2.png" level-id="ngs_post" name="Postprocessing" path="/ibis/ngs/"></category>
+		<category icon="/libs/icons/icon_ngs.png" level-id="ngs" name="Next Generation Sequencing" path="/ibis/"/>
+		<category icon="/libs/icons/icon_r_red2.png" level-id="ngs_pre" name="Preprocessing" path="/ibis/ngs/"/>
+		<category icon="/libs/icons/icon_r_yellow2.png" level-id="ngs_asm" name="Mapping" path="/ibis/ngs/"/>
+		<category icon="/libs/icons/icon_r_green2.png" level-id="ngs_post" name="Postprocessing" path="/ibis/ngs/"/>
 		<!-- METABOLOMICS -->
-		<category icon="/libs/icons/metabolomics.png" level-id="metabolomics" name="Metabolomics" path="/ibis/"></category>
-		<category icon="/libs/icons/metabolomics.png" level-id="pre" name="Pre-" path="/ibis/metabolomics/"></category>
+		<category icon="/libs/icons/metabolomics.png" level-id="metabolomics" name="Metabolomics" path="/ibis/"/>
+		<category icon="/libs/icons/metabolomics.png" level-id="pre" name="Pre-" path="/ibis/metabolomics/"/>
 		<!-- UTILS -->
-		<category icon="/libs/icons/ibis.png" level-id="utils" name="Utils" path="/ibis/"></category>
+		<category icon="/libs/icons/ibis.png" level-id="utils" name="Utils" path="/ibis/"/>
 	</extension>
    
 </plugin>

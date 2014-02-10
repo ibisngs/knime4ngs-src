@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels;
+package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
 

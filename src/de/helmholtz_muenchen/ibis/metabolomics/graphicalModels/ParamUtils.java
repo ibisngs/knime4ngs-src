@@ -108,7 +108,7 @@ public class ParamUtils {
 //	}
 
 
-	static String paramsToString(ArrayList<Pair<String,String>> params, String paramsSep, String keyValueSep){
+	public static String paramsToString(ArrayList<Pair<String,String>> params, String paramsSep, String keyValueSep){
 		String result = "";
 		if(params == null || params.size() == 0){
 			return(result);
@@ -121,7 +121,7 @@ public class ParamUtils {
 	
 	
 	
-	static ArrayList<Pair<String,String>> stringToParams( String params, String paramsSep, String keyValueSep) throws Exception{
+	public static ArrayList<Pair<String,String>> stringToParams( String params, String paramsSep, String keyValueSep) throws Exception{
 		ArrayList<Pair<String,String>> result = new ArrayList<Pair<String,String>>();
 		if(params==null || params.matches("^\\s*$")){
 			return(result);

@@ -9,16 +9,7 @@
 ##	vector named and ordered as the columns of D 
 ##	containing the node ranks (low=dep.var depends on this variable, high=no relationship with dep.var)
 
-# isValidRanker <- function(r){
-# 	if(is.missing(r) | is.null(r) | is.na(r) | ! is.character(r)){
-# 		return(FALSE)
-# 	}
-# 
-# 	if(r=="lasso" || r=="randomForest"){
-# 		return(TRUE)
-# 	}
-# 	return(FALSE)
-# }
+
 
 ############################################################################################################
 ## RANDOM FOREST RANKER
@@ -30,13 +21,9 @@
 ##
 ##
 ranker.randomForest <- function(dep.var, D, type=1, ...){
-	#warning("Using Random Forests")
 	dep.var.idx = which(dep.var == names(D))
-	#ranking = rep(NA, ncol(D))
-	#names(ranking) = colnames(D)
-
 	## preprocess outcome and cancel if variable has too little variation
-	y = D[, dep.var.idx]
+	y = D[, dep.var]
 	if(is.numeric(y)){
 		if(length(unique(y)) < 6){
 			return(rep(NA, ncol(D)))
@@ -50,42 +37,37 @@ ranker.randomForest <- function(dep.var, D, type=1, ...){
 
 	var.imp = importance(randomForest(x=D[,-dep.var.idx], y=y, importance=TRUE, proximity=FALSE, keep.forest=FALSE, ...), type=type)[,1]
 	var.imp[dep.var] = NA
-	#ranking[names(var.imp)] = rank(-var.imp)
 	return(var.imp[colnames(D)])
 }
-
-
 ############################################################################################################
 ## RANDOM FOREST RANKER
 ############################################################################################################
 ## calculate variable importance for all variables for the dep.var
 ## ADDITIONAL PARAMS
 ##	type  = how to asses variable importance? (1=mean decrease in accuracy, 2=mean decrease in node impurity)
-##	...   = passed to randomForest function
+##	...   = passed to cforest_unbiased (control) function
 ##
 ##
-ranker.randomForest.party <- function(dep.var, D, type="AUC", ...){
-	#warning("Using Random Forests")
-	#dep.var.idx = which(dep.var == names(D))
-	#ranking = rep(NA, ncol(D))
-	#names(ranking) = colnames(D)
-
+ranker.randomForest.party <- function(dep.var, D, type="AUC", mtry=NA, ...){
+	y= D[, dep.var]
 	## preprocess outcome and cancel if variable has too little variation
-	y = D[, dep.var]
 	if(is.factor(y)){
 		y = droplevels(y)
 		if(length(levels(y))==1){
-			return(rep(NA, ncol(D)))
+			return(rep(NA, times=ncol(D)))
 		}
 	}
+	if(is.na(mtry)){
+		mtry = if (!is.null(y) && !is.factor(y)) max(floor(ncol(D)/3), 1) else floor(sqrt(ncol(D)))
+	}
 	
-	forest = cforest(as.formula(paste(dep.var, "~ .")), data = D, control = cforest_unbiased(mtry = 2, ntree = 50))
+	forest = cforest(as.formula(paste(dep.var, "~ .")), data = D, control = cforest_unbiased(mtry=mtry, ...))
 	if(type=="AUC"){
 		var.imp = varimpAUC(forest)
 	}else{
 		var.imp = varimp(forest)
 	}
-	
+
 	var.imp[dep.var] = NA
 	#ranking[names(var.imp)] = rank(-var.imp)
 	return(var.imp[colnames(D)])
@@ -101,28 +83,26 @@ ranker.randomForest.party <- function(dep.var, D, type="AUC", ...){
 ##	...  = passed to glmnet function (particularly 'family' has to be given if not gaussian)
 ## 
 ##
-ranker.lasso <- function(dep.var, D, ...){
-	#warning("Using Lasso")
+## suppress pmax warnings and not reached maxit warnings
+suprWarning.glmnet <- function(w){
+	if( any( grepl( "exceeds pmax=", w) || grepl("not reached after maxit=", w ) )){
+		#warning("SUPRESS!")#
+		invokeRestart( "muffleWarning" )
+	}
+}
+ranker.lasso <- function(dep.var, D, nlambda=100, ...){
 	dep.var.idx = which(dep.var == names(D))
-	ranking = rep(NA, ncol(D))
-	names(ranking) = colnames(D)
 	
 	## preprocess outcome and cancel if variable has too little variation
-	y = D[, dep.var.idx]
-	if(is.numeric(y)){
-		if(length(unique(y)) < 6){
-			return(ranking)
-		}
-	}else if(is.factor(y)){
-		y = droplevels(y)
-		if(length(levels(y))==1){
-			return(ranking)
+	if(is.factor(D[, dep.var])){
+		D[, dep.var] = droplevels(D[, dep.var])
+		if(length(levels(D[, dep.var]))==1){
+			return(rep(NA, times=ncol(D)))
 		}
 	}
-	#cat("USING ", (2*round((9)/2)-1) , " as pmax\n")
-	# as only interest in rank of lamda for each variable stop if all variables except one have beta>0
- 	withCallingHandlers(
-		lasso.cv  <- glmnet(data.matrix(D[, -dep.var.idx]), y, standardize=T, ...), #pmax=2*round((9)/2)-1#, # family="gaussian", 
+	
+	withCallingHandlers(
+		lasso.cv  <- glmnet(data.matrix(D[, -dep.var.idx]), D[, dep.var], standardize=T, nlambda=nlambda, ...), #pmax=2*round((9)/2)-1#, # family="gaussian", 
  		warning = suprWarning.glmnet
  	)
 	## get beta coefficients for all lamda parameters
@@ -133,27 +113,43 @@ ranker.lasso <- function(dep.var, D, ...){
 	}
 	#betas <- betas[rowSums(betas)!=0,]                # ignore variables which are never used
 	bestLambda = aaply(.data=betas, .margins=1, .fun=function(x){a = which(x!=0); if(length(a)==0)return(-Inf); return(min(a))})
-	ranking[names(bestLambda)] = rank(bestLambda)
-
-# 	## alternative ranking by beta coefficient for best lambda
-# 	lasso.cv  <- cv.glmnet(data.matrix(D[, -dep.var.idx]), D[, dep.var.idx], family="gaussian", standardize=T, keep=F)
-# 	betas <- as.matrix(coef(lasso.cv$glmnet.fit, exact=T))
-# 	betas <- betas[rownames(betas) != "(Intercept)", ] # remove intercept
-# 	betas <- betas[rowSums(betas)!=0, ]                # ignore variables which are never used
-# 	betas <- as.matrix(coef(lasso.cv$glmnet.fit, exact=T))
-# 	betas <- betas[rownames(betas) != "(Intercept)", ] # remove intercept
-# 	lambda.min.idx = which(lasso.cv$lambda==lasso.cv$lambda.min)
-# 	ranking = betas[, lambda.min.idx]
-	return(ranking)
+	bestLambda[dep.var] = NA
+	
+	return(nlambda-bestLambda[colnames(D)])
 }
 
-## suppress pmax warnings and not reached maxit warnings
-suprWarning.glmnet <- function(w){
-	if( any( grepl( "exceeds pmax=", w) || grepl("not reached after maxit=", w ) )){
-		#warning("SUPRESS!")#
-		invokeRestart( "muffleWarning" )
+
+############################################################################################################
+## REGRESSION RANKER
+############################################################################################################
+## run regression using glm on depend variable
+## run an anova analysis and use the explained Deviance as ranking criterion
+## ADDITIONAL PARAMS
+##	...  = passed to glmnet function (particularly 'family' has to be given if not gaussian)
+## 
+##
+ranker.regression <- function(dep.var, D, ...){
+	## preprocess outcome and cancel if variable has too little variation
+	if(is.factor(D[, dep.var])){
+		D[, dep.var] = droplevels(D[, dep.var])
+		if(length(levels(D[, dep.var]))==1){
+			return(rep(NA, times=ncol(D)))
+		}
 	}
+	
+	model <- glm(as.formula(paste(dep.var, "~ .")), data=D, ...)
+	ano = anova(model)
+	ranking = ano[, "Deviance"]
+	names(ranking) = rownames(ano)
+	ranking[dep.var] = NA
+# 	betas = model$coefficients[names(model$coefficients) != "(Intercept)"]
+# 	names(betas) = colnames(D)[colnames(D)!=dep.var]
+# 	betas[dep.var] = NA
+# 	betas = betas[names(betas) != "(Intercept)"]
+# 	return(betas[colnames(D)])
+	return(ranking[colnames(D)])
 }
+
 
 
 
@@ -176,7 +172,7 @@ suprWarning.glmnet <- function(w){
 rankEdges <- function(D, var.classes, 
                       ranker        = list(numeric="randomForest", double="randomForest" , factor="randomForest"),
                       ranker.params = list(numeric=list() , double=list()  , factor=list()),
-                      rankType = "local",
+                      rank.type = "local",
                       edges.indices, 
                       parallel.ranking=FALSE){
 
@@ -189,13 +185,13 @@ rankEdges <- function(D, var.classes,
 
 	rownames(ranks) = colnames(ranks)
 	ranks[is.na(ranks)] = -10e10
-	if(rankType == "local"){
+	if(rank.type == "local"){
 		# ranks row-wise
 		ranks = aaply(ranks, .margins=1, .fun=function(x)rank(x))
-	}else if(rankType == "global"){
+	}else if(rank.type == "global"){
 		ranks = matrix(rank(ranks), nrow=ncol(D), ncol=ncol(D), dimnames=list(colnames(D), colnames(D)))
 	}else{
-		stop(paste("Unknown rank type", rankType))
+		stop(paste("Unknown rank type", rank.type))
 	}
 	
 	## combine local rankings

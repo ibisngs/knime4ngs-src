@@ -3,7 +3,7 @@
 ########################################################################################################################################
 require(kimisc)
 CWD = normalizePath(if(is.null(thisfile())){getwd()}else{dirname(thisfile())})
-source(paste(CWD, "/../utils/GLOBALS.R", sep=""))
+source(paste(CWD, "/../../utils/GLOBALS.R", sep=""))
 
 ## CRAN
 loadLib("plyr")
@@ -13,8 +13,8 @@ loadLib("plyr")
 ## rankers
 loadLib("randomForest")
 loadLib("glmnet")
-source(paste(CWD, "/graphicalModels_Ranker.R", sep=""))
-
+loadLib("party")
+source(paste(CWD, "/Ranker.R", sep=""))
 ########################################################################################################################################
 ## FUNCTIONS
 ########################################################################################################################################
@@ -30,12 +30,14 @@ mixedGraficalModels <- function(X, #
                                 stabSel.sampleNum = 100, 
                                 stabSel.sampleSize, #
                                 parallel.stabSel = TRUE,#
+                                rank.type = "local",
                                 ...){
 
 	if(parallel.stabSel){
 		loadLib("foreach")
 		loadLib("doMC")
 		registerDoMC(cores=detectCores())
+		warning("USING ", detectCores(), " cores for comuputations!")
 	}
 	
 	## measure time of the entire procedure
@@ -65,9 +67,10 @@ mixedGraficalModels <- function(X, #
 
 	## rank edges in each subsample
 	ranks   = laply(.data=samples, 
-			.fun = function(subset){rankEdges(X[subset,], var.classes=var.classes, ranker=ranker, ranker.params=ranker.params, edges.indices=edges.indices)},
-			.parallel = parallel.stabSel, .inform=F
+			.fun = function(subset){rankEdges(X[subset,], var.classes=var.classes, ranker=ranker, ranker.params=ranker.params, edges.indices=edges.indices, rank.type=rank.type)},
+			.parallel = parallel.stabSel
 			)
+	ranks = as.data.frame(matrix(ranks, nrow=stabSel.sampleNum))
 	rownames(ranks) = paste("ranks.subset", c(1:stabSel.sampleNum), sep=".")
 	colnames(ranks) = make.edgesNames(colnames(X))
 
@@ -83,44 +86,44 @@ mixedGraficalModels <- function(X, #
 # stabSel.inclusionPerc percentage of subsamples in which a edge must be present to be included in final graph
 # stabSel.edges 	number of edges to choose in each subsample (leave blank if desired E.v is given)
 # E.v			desired maximal number of False positive edges; only guaranteed if stabSel.edges is not given manually
-getGraph <- function(model, 
+getGraph <- function(edge.ranks, 
                      stabSel.sampleNumedges, #
                      stabSel.inclusionPerc=0.8, #
-                     E.v=20,
-                     mode="adjacency"){
-	## if not given by the user, calculate stabSel.sampleNumedges to meet certain FWER (for details Fellinghauer et al. 2013)
-	if(missing(stabSel.sampleNumedges)){
-		stabSel.sampleNumedges = floor(sqrt((2*stabSel.inclusionPerc-1) * E.v * model$p * (model$p-1) / 2))
-	}
+                     E.v=20){
+	loadLib("igraph")
 	
-	edge.ranks = model$ranks
+	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
+	p         = length(variables)
 	n.edges    = ncol(edge.ranks)
 	n.subsets  = nrow(edge.ranks)
 	
-	if(mode == "adjacency"){
-		## per stability selection sample choose x best edges
-		edges.included            = aaply(.data=edge.ranks, .margins=1, .fun=function(x){a<-rep(0, times=n.edges); a[which(rank(x, ties.method='min') < stabSel.sampleNumedges)]<-1;return(a)})
-		
-		## count number (and percentage) of samples in which a certain edge is included
-		edges.included.percentage = aaply(.data=edges.included, .margins=2, .fun=sum)
-		names(edges.included.percentage) = colnames(edge.ranks)
-		edges.included.percentage = edges.included.percentage/n.subsets
-		
-		## select edges which meet frequency cutoff
-		edges.selected            = edges.included.percentage[edges.included.percentage >= stabSel.inclusionPerc]
-		
-		## generate adjacency matrix from selected edges
-		adjacency.matrix          = matrix(0, ncol=model$p, nrow=model$p)
-		rownames(adjacency.matrix)= colnames(adjacency.matrix) = model$variables
-		adjacency.matrix[as.numeric(names(edges.selected))] = edges.selected
-		adjacency.matrix = adjacency.matrix+t(adjacency.matrix)
-
-		return(adjacency.matrix)
-	} else if( mode == "edge.ranks") {
-		edges.ranks.mean          = aaply(.data=edge.ranks, .margins=1, .fun=function(x){return(rank(x, ties.method='min'))})
-		edges.ranks.mean          = aaply(.data=edges.ranks.mean, .margins=2, .fun=mean)
-		#edges.ranks.mean          = rank(edges.ranks.mean)
-		return(edges.ranks.mean)
+	## if not given by the user, calculate stabSel.sampleNumedges to meet certain FWER (for details Fellinghauer et al. 2013)	
+	if(missing(stabSel.sampleNumedges)){
+		stabSel.sampleNumedges = floor(sqrt((2*stabSel.inclusionPerc-1) * E.v * p * (p-1) / 2))
+		cat("Including top ", stabSel.sampleNumedges, "edges from each sample")
 	}
+
+	
+	## per stability selection sample choose x best edges ## TODO HIGHER VALUE MEANS HIGHER PROBABILITY OF INCLUSION
+	edges.included            = aaply(.data=edge.ranks, .margins=1, .fun=function(x){a<-rep(0, times=n.edges); a[which(rank(-x) < stabSel.sampleNumedges)]<-1;return(a)}, .expand=FALSE)
+
+	#colnames(edges.included) = colnames(edge.ranks)
+	#srownames(edges.included) = rownames(edge.ranks)
+	
+	## count number (and percentage) of samples in which a certain edge is included
+	edges           = data.frame(do.call(rbind, strsplit(colnames(edge.ranks), split = "~")))
+	colnames(edges) = c("v1", "v2")
+	rownames(edges) = colnames(edge.ranks)
+	edges$incl.n    = aaply(.data=edges.included, .margins=2, .fun=sum)
+	edges$mean.rank = aaply(.data=edge.ranks, .margins=2, .fun = function(x){mean(x[,1])})
+	edges$incl.perc = edges$incl.n/n.subsets
+	edges$selected  = edges$incl.perc >= stabSel.inclusionPerc
+	
+	## generate adjacency matrix from selected edges
+	g = graph.data.frame(edges[, c("v1", "v2", "selected")], directed=F)
+	adjacency = get.adjacency(g,sparse=FALSE)
+	adjacency = adjacency[variables,variables]
+
+	return(list(edges=edges, adjacency=adjacency, graph=g))
 }
 

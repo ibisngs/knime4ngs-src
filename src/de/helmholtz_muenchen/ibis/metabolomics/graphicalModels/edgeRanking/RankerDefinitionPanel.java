@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels;
+package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import java.awt.GridLayout;
 
@@ -8,6 +8,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
 
 public final class RankerDefinitionPanel extends JPanel {
 

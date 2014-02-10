@@ -26,23 +26,18 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 
 print(args)
 # q()
+
 ########################################################################################################################################
 ## LOAD LIBRARIES
 ########################################################################################################################################
 source(args$file.glob)
-
 ## CRAN
 loadLib("plyr")
 #loadLib("igraph")
 #loadLib("reshape2")
-
-## rankers
-loadLib("randomForest")
-loadLib("party")
-loadLib("glmnet")
 loadLib("kimisc")
 CWD = normalizePath(if(is.null(thisfile())){getwd()}else{dirname(thisfile())})
-source(paste(CWD, "/graphicalModels.R", sep=""))
+source(paste(CWD, "/mixedGraphicalModels.R", sep=""))
 
 
 ##########################################################################################################################################

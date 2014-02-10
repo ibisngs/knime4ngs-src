@@ -17,7 +17,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel
 
 public abstract class RNodeModel extends ScriptNodeModel {
 
-	public static final String R_SCRIPTS_PATH =  "scripts" + File.separatorChar + "R" + File.separatorChar;
+	public static final String R_SCRIPTS_PATH =  "R" + File.separatorChar;
 	public static final String GLOBALS_R = IO.getScriptPath() + R_SCRIPTS_PATH + "utils" + File.separatorChar + "GLOBALS.R";;
 
 	private final HashMap<String,String> ARGUMENTS;

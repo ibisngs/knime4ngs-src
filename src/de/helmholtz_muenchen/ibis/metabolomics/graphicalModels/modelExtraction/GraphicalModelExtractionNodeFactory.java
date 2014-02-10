@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels;
+package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.modelExtraction;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author Jonas Zierer
  */
-public class GraphicalModelsNodeFactory 
-        extends NodeFactory<GraphicalModelsNodeModel> {
+public class GraphicalModelExtractionNodeFactory 
+        extends NodeFactory<GraphicalModelExtractionNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public GraphicalModelsNodeModel createNodeModel() {
-        return new GraphicalModelsNodeModel();
+    public GraphicalModelExtractionNodeModel createNodeModel() {
+        return new GraphicalModelExtractionNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class GraphicalModelsNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<GraphicalModelsNodeModel> createNodeView(final int viewIndex,
-            final GraphicalModelsNodeModel nodeModel) {
-        return new GraphicalModelsNodeView(nodeModel);
+    public NodeView<GraphicalModelExtractionNodeModel> createNodeView(final int viewIndex,
+            final GraphicalModelExtractionNodeModel nodeModel) {
+        return new GraphicalModelExtractionNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class GraphicalModelsNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new GraphicalModelsNodeDialog();
+        return new GraphicalModelExtractionNodeDialog();
     }
 
 }

@@ -9,7 +9,6 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.ExtensibleUtilityFactory;
 import org.osgi.framework.BundleContext;
 
 public class DataTypesNodePlugin extends AbstractUIPlugin{

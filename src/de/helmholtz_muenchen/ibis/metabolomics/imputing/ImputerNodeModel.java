@@ -36,7 +36,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
  */
 public class ImputerNodeModel extends RNodeModel {
 
-	static public final String[] IMPUTATION_METHODS = {"random", "min", "max", "mean", "mice", "knn", "SVD", "lm"};
+	static public final String[] IMPUTATION_METHODS = {"random", "min", "max", "mean", "mice", "knn" /*, "SVD", "lm"*/};
 	static public final String[] KNN_DIST_MEAS      = {"corr","euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski"};
 	//public String[] VARIABLE_TYPES  = new String[]{""};
 
@@ -145,9 +145,41 @@ public class ImputerNodeModel extends RNodeModel {
 	 */
 	@Override
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-		//this.VARIABLE_TYPES = getVariableTypes(inSpecs[0]);
-		//LOGGER.info("VAR_TYPES: " + StringUtils.join(VARIABLE_TYPES, ","));
-		return new DataTableSpec[]{null};
+		ArrayList<String> newCols       = new ArrayList<String>(Arrays.asList(inSpecs[0].getColumnNames()));
+		ArrayList<String> includedCols  = new ArrayList<String>(m_columns.getIncludeList());
+		ArrayList<String> excludedCols  = new ArrayList<String>(m_columns.getExcludeList());
+
+		// remove non-existing columns from inlcude-list
+		Iterator<String> cit = includedCols.iterator();
+		String col;
+		while(cit.hasNext()){
+			col = cit.next();
+			if(! newCols.contains(col)){
+				includedCols.remove(col);
+			}else{
+				newCols.remove(col);
+			}
+		}
+		
+		// remove non-existing columns from exclude-list
+		cit = excludedCols.iterator();
+		while(cit.hasNext()){
+			col = cit.next();
+			if(! newCols.contains(col)){
+				excludedCols.remove(col);
+			}else{
+				newCols.remove(col);
+			}
+		}
+		
+		// add columns which were not there before to exclude list
+		cit = newCols.iterator();
+		while(cit.hasNext()){
+			excludedCols.add(cit.next());
+		}
+		
+		this.m_columns.setNewValues(includedCols, excludedCols, false);
+		return(inSpecs);
 	}
 
 	/**

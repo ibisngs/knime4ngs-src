@@ -23,6 +23,8 @@ import java.awt.Dimension;
 
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.LogPanel;
+
 /**
  * <code>NodeView</code> for the "RNodeModel" Node.
  * 

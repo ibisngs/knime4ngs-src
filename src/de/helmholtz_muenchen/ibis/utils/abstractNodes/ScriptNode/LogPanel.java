@@ -12,8 +12,8 @@ import javax.swing.JTextArea;
 public class LogPanel extends JTabbedPane {
 	private static final long serialVersionUID = 8322929670792162817L;
 
-	StringBuffer STDOUT;
-	StringBuffer STDERR;
+	String STDOUT;
+	String STDERR;
 
 	JPanel panel_stdout;
 	JPanel panel_stderr;
@@ -24,7 +24,7 @@ public class LogPanel extends JTabbedPane {
 	JScrollPane scollpane_stdout;
 	JScrollPane scollpane_stderr;
 	
-	public LogPanel(StringBuffer stdout, StringBuffer stderr){
+	public LogPanel(String stdout, String stderr){
 		super();
 
 		STDOUT = stdout;
@@ -40,12 +40,12 @@ public class LogPanel extends JTabbedPane {
 		textarea_stdout = new JTextArea();
 		textarea_stdout.setLineWrap(false);
 		textarea_stdout.setEditable(false);
-		textarea_stdout.setText(STDOUT.toString());
+		textarea_stdout.setText(STDOUT);
 		
 		textarea_stderr = new JTextArea();
 		textarea_stderr.setLineWrap(false);
 		textarea_stderr.setEditable(false);
-		textarea_stderr.setText(STDERR.toString());
+		textarea_stderr.setText(STDERR);
 		
 		// scrollpanes
 		scollpane_stdout = new JScrollPane(textarea_stdout, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -67,20 +67,8 @@ public class LogPanel extends JTabbedPane {
 	}
 	
 	private void setText(){
-		textarea_stdout.setText(STDOUT.toString());
-		textarea_stderr.setText(STDERR.toString());
-//		
-//		textarea_stdout.append("PUTPUTPUT");
-//		
-//		textarea_stderr.repaint();
-//		textarea_stderr.validate();
-//		scollpane_stderr.repaint();
-//		scollpane_stderr.validate();
-//		
-//		textarea_stdout.repaint();
-//		textarea_stdout.validate();
-//		scollpane_stdout.repaint();
-//		scollpane_stdout.validate();
+		textarea_stdout.setText(STDOUT);
+		textarea_stderr.setText(STDERR);
 	}
 	/**
 	 * @see javax.swing.JComponent#paint(java.awt.Graphics)

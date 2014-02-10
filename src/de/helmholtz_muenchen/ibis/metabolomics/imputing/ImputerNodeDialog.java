@@ -1,6 +1,8 @@
 package de.helmholtz_muenchen.ibis.metabolomics.imputing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -39,7 +41,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 
 //	private String[] varTypes = {"1", "2", "3"};// TODO!!!!!
-
+	private DataTableSpec IN_DATA_SPEC;
+	
 	@Override
 	public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs) throws NotConfigurableException {
 		System.err.println("LOADING SETTINGS");
@@ -49,6 +52,8 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 		System.err.println("VAR TYPES IN DIALOG: " + StringUtils.join(ImputerNodeModel.getVariableTypes(specs[0]), ","));
 		String[] selected = null;
 		dialog_types.replaceListItems(ImputerNodeModel.getVariableTypes(specs[0]), selected);
+		
+		IN_DATA_SPEC = specs[0];
 	}
 
 	private DialogComponentStringListSelection dialog_types;
@@ -82,8 +87,10 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 				m_columns,
 				0, true, IntValue.class, DoubleValue.class, StringValue.class, DataValue.class)
 				);
-
+		this.closeCurrentGroup();
+		
 		// CHOOSE BY TYPE?
+		this.createNewGroup("Choose Columns by Type");
 		addDialogComponent(new DialogComponentBoolean(
 				m_chooseByType, 
 				"Choose columns to impute by Type")
@@ -94,10 +101,10 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 				"Variable type to impute", new ArrayList<String>(), false, 5);
 
 		addDialogComponent(dialog_types);
+		this.closeCurrentGroup();
 
 
-
-		this.createNewTab("Imputing Parameters");
+		this.createNewTab("Imputation Parameters");
 		this.createNewGroup("KNN-Imputation");
 		addDialogComponent(new DialogComponentNumber(
 				m_knn_k, 
@@ -121,10 +128,6 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 				);
 		this.closeCurrentGroup();
 
-
-
-
-		
 
 		// change listener
 		m_method.addChangeListener(new ChangeListener() {
@@ -151,6 +154,13 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 					m_varType.setEnabled(false);
 					m_columns.setEnabled(true);
 				}
+			}
+		});
+		
+		m_varType.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				List<String> columns = ImputerNodeModel.getColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue()));
+				m_columns.setIncludeList(columns);
 			}
 		});
 

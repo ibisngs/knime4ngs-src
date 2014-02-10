@@ -34,6 +34,7 @@ public class IO {
 		writerSettings.setWriteRowID(true);
 		writerSettings.setQuoteBegin("\"");
 		writerSettings.setQuoteEnd("\"");	
+		writerSettings.setMissValuePattern("NA");
 
 		return writerSettings;
 	}
@@ -45,6 +46,7 @@ public class IO {
 		readerSettings.setDelimiterUserSet(true);
 		readerSettings.addRowDelimiter("\n", true);
 		readerSettings.addQuotePattern("\"", "\"");
+		readerSettings.setMissValuePatternStrCols("NA");
 		readerSettings.setQuoteUserSet(true);
 		readerSettings.addSingleLineCommentPattern("#", false, false);
 		readerSettings.setCommentUserSet(true);
@@ -160,6 +162,7 @@ public class IO {
 	//////////////////////////////////////////////////////////////////////////
 	// GET SCRIPT PATH FOR EXECUTING E.G. R-SCRIPTS
 	//////////////////////////////////////////////////////////////////////////
+	public static final String SCRIPTS_SUBDIR = "scripts";
 	private static String SCRIPT_PATH;
 	private static void initScriptPath() {
 		if(SCRIPT_PATH != null) return;
@@ -177,7 +180,7 @@ public class IO {
 			}
 		}else{
 			// EXECUTED LOCALLY
-			SCRIPT_PATH = path + File.separatorChar;
+			SCRIPT_PATH = path + File.separatorChar + SCRIPTS_SUBDIR + File.separatorChar;
 		}
 	}
 

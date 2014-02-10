@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels;
+package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,12 +9,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.ParamUtils;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 
@@ -25,14 +28,15 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
  * @author Jonas Zierer
  */
 public class GraphicalModelsNodeModel extends RNodeModel {
-	static final String[] GRAFO_RANKERS  = {"randomForest", "lasso", "randomForest.party"};
+	static final String[] GRAFO_RANKERS  = {"randomForest", "lasso", "randomForest.party", "regression"};
 	static final String[] GRAFO_RANKTYPE = {"local", "global"};
-
+	static final String NODE_ID_SEP = "~";
+	
 	static final String PARAMS_SEP     = ",";
 	static final String PARAMS_SEP_2    = ";";
 	static final String KEY_VALUE_SEP   = "=";
 	static final String KEY_VALUE_SEP_2 = ":";
-	
+
 
 	/** CFG KEYS */
 	static final String CFGKEY_RANKER             = "rankers";
@@ -40,18 +44,18 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	static final String CFGKEY_VAR_TYPES          = "vartypes";
 	static final String CFGKEY_SS_SSAMPLE_N       = "stabselSamplenum";
 	static final String CFGKEY_SS_RANKTYPE        = "stabselRankType";
-	
+
 	/** SETTING MODELS */
 	private final Map<String, String> m_ranker        = new HashMap<String, String>();
 	private final HashMap<String, ArrayList<Pair<String,String>>> m_ranker_params = new HashMap<String, ArrayList<Pair<String,String>>>();
-	private int m_stabSel_sampleNum = 100;
+	private int m_stabSel_sampleNum = 1;
 	private String m_rankerType = GRAFO_RANKTYPE[0];
-	
+
 	/**
 	 * Constructor for the node model.
 	 */
 	protected GraphicalModelsNodeModel() {
-		super(1, 2, "statistics" + File.separatorChar + "graphicalModels_Runner.R", new String[]{"--data"}, new String[]{"--output", "--output2"});
+		super(1, 2, "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "runner.edgeranking.R", new String[]{"--data"}, new String[]{"--output", "--output2"});
 	}
 
 	/**
@@ -64,7 +68,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 
 		// types
 		Iterator<String> typesIt = getUniqueVariableTypes(inData[0].getSpec()).iterator();
-		
+
 		// Rankers + Params
 		String ranker = "";
 		String params = "";
@@ -75,12 +79,16 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		}
 		this.addArgument("--ranker", ranker.substring(0, ranker.length()-  PARAMS_SEP.length()));
 		this.addArgument("--param", params.substring( 0, params.length()-PARAMS_SEP_2.length()));
-		
+
 		// Other parameters
 
 		this.addArgument("--sampleNum" , m_stabSel_sampleNum );
 		this.addArgument("--rankType", m_rankerType);
-		return(super.execute(inData, exec));
+		
+		BufferedDataTable[] out = super.execute(inData, exec);
+		out[0] = exec.createSpecReplacerTable(out[0], this.edgeRanksSpec(inData[0].getDataTableSpec())); // pasre all to double cells
+		
+		return(out);
 	}
 
 
@@ -113,7 +121,6 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 		HashSet<String> types = getUniqueVariableTypes(inSpecs[0]);
 		Iterator<String> typesIt = types.iterator();
-		
 		// add newly discovered types
 		while(typesIt.hasNext()){
 			String type = typesIt.next();
@@ -122,8 +129,31 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 				this.m_ranker_params.put(type, new ArrayList<Pair<String,String>>());
 			}
 		}
+
+
+		return new DataTableSpec[]{edgeRanksSpec(inSpecs[0]),null};
+	}
+
+	private DataTableSpec edgeRanksSpec(DataTableSpec inSpecs){
+		// create DataTableSpec for edge Ranks
+		int nNodes = inSpecs.getNumColumns();
+		String[] nodeNames = inSpecs.getColumnNames();
+		int nEdges = nNodes*(nNodes-1)/2;
+		// types
+		DataType[] colTypes = new DataType[nEdges];
+		String[] colNames   = new String[nEdges];
+		for(int e = 0; e < nEdges; e++){
+			colTypes[e] = DataType.getType(DoubleCell.class);
+		}
+		// edge names
+		int eCounter=0;
+		for(int j = 1; j < nNodes; j++) {
+			for(int i = 0; i < j; i++) {
+				colNames[eCounter++] = nodeNames[i] + NODE_ID_SEP + nodeNames[j];
+			}
+		}
 		
-		return new DataTableSpec[]{null};
+		return(new DataTableSpec(colNames, colTypes));
 	}
 	
 	/**
@@ -135,7 +165,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		this.m_ranker.clear();
 		this.m_ranker_params.clear();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -144,12 +174,12 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		/* NORMAL SETTINGS */
 		m_stabSel_sampleNum = settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, 100);
 		m_rankerType = settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]);
-		
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		String[] types       = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_VAR_TYPES   , new String[0]);
 		String[] ranker      = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_RANKER      , new String[0]);
 		String[] params      = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_PARAMS      , new String[0]);
-		
+
 		if(ranker.length != types.length){
 			throw(new InvalidSettingsException("There has to be one ranker/ranker params entry per variable type!"));
 		}
@@ -169,7 +199,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		/* NORMAL SETTINGS */
 		settings.addInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, m_stabSel_sampleNum);
 		settings.addString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE, this.m_rankerType);
-		
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_ranker.keySet().size();
 
@@ -198,7 +228,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		if(settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, 100) < 1){
 			throw(new InvalidSettingsException("Invalid number for samples for stability selection!")); 
 		}
-		
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		// TODO: validation of settings
 	}

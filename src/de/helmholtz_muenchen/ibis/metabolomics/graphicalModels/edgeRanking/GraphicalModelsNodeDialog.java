@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels;
+package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -24,8 +24,8 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.port.PortObjectSpec;
+
 
 /**
  * <code>NodeDialog</code> for the "GraphicalModelsNode" Node.
