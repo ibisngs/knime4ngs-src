@@ -36,7 +36,6 @@
 		<!-- UTILS -->
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory" id="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory"/>
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>
-	<node category-path="/" factory-class="tzui.KhjkNodeFactory" id="tzui.KhjkNodeFactory"/>
 </extension>
    
 	<extension point="org.knime.workbench.repository.categories">
