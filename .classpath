@@ -9,5 +9,7 @@
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1-sources.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1-tests.jar"/>
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1.jar"/>
+	<classpathentry kind="lib" path="libs/FastQC.jar"/>
+	<classpathentry kind="lib" path="libs/FastQReadFiltering.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
