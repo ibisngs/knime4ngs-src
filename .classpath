@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="libs/FastQC.jar"/>
 	<classpathentry kind="lib" path="libs/FastQReadFiltering.jar"/>
+	<classpathentry kind="lib" path="libs/jbzip2-0.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
