@@ -5,7 +5,10 @@ Bundle-SymbolicName: de.helmholtz_muenchen.ibis.knimenodes;singleton:=true
 Bundle-Version: 1.0.1
 Bundle-ClassPath: ibis.knimenodes.jar,
  libs/commons-lang3-3.1/commons-lang3-3.1.jar,
- libs/commons-codec-1.8.jar
+ libs/commons-codec-1.8.jar,
+ libs/FastQC.jar,
+ libs/FastQReadFiltering.jar,
+ libs/jbzip2-0.9.jar
 Bundle-Activator: de.helmholtz_muenchen.ibis.ngs.bwa.BWANodePlugin
 Bundle-Vendor: IBIS KNIME Team
 Require-Bundle: org.eclipse.core.runtime,

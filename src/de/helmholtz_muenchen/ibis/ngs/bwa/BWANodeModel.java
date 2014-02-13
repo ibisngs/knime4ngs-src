@@ -15,6 +15,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -26,6 +27,7 @@ import org.knime.core.node.workflow.NodeProgressListener;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 
@@ -54,6 +56,8 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 	private final SettingsModelString m_readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE, "auto-detect");
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP, "");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN, false);
+	
+	private final NodeLogger LOGGER = getLogger();
 	
 	
 //TODO: implement alnignment algos....
@@ -111,10 +115,10 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	String colorSpaced = "-c ";
 
 
-    	String samse = " samse ";
-    	String sampe = " sampe ";
-    	String bwasw = " bwasw ";
-    	String bwamem = " bwamem ";
+    	String samse = " samse";
+    	String sampe = " sampe";
+    	String bwasw = " bwasw";
+    	String bwamem = " bwamem";
     	Boolean isBam = false;
     	
     	//Add Read Group if necessary:
@@ -237,7 +241,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 			// end QueueSub ###################################################
 			} else {
 	    	//Execute
-//	    		Executor.executeCommand(com, "BWA Indexing", exec);
+	    		Executor.executeCommand(com.split(" "),exec,LOGGER);
 			}
     	} else {
     		logBuffer.append("Indexing reference sequence SKIPPED.\n");
@@ -251,9 +255,6 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	String out12Name = basePath+outBaseName2+"_aln_sa_2.sai";
     	String com = ""; 
     	String outfile = outName;
-    	
-    	//System.out.println(path2readFile);
-    	//System.out.println(path2readFile2);
     	
     	//If Inputfile is in bam format
     	String bam = "-b0 ";
@@ -269,7 +270,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     		}
     	}
     	//Perform aln for forward reads OR single end reads
-    	com = path2bwa + " aln "+bam+" "+ path2refFile +" "+ path2readFile +" -f "+ outfile;
+    	com = path2bwa + " aln"+bam+" "+ path2refFile +" "+ path2readFile +" -f "+ outfile;
     	// begin QueueSub #################################################
 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWAaln";
@@ -281,12 +282,12 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-//			Executor.executeCommand(com, "BWA Aln forward", exec);
+			Executor.executeCommand(com.split(" "),exec,LOGGER);
 			
 		}
 		//If paired end, repeat previous step
     	if(readType.equals("paired-end")) {
-    		com = path2bwa + " aln "+bam2+" "+ path2refFile +" "+ path2readFile2 +" -f "+ out12Name;
+    		com = path2bwa + " aln"+bam2+" "+ path2refFile +" "+ path2readFile2 +" -f "+ out12Name;
     		// begin QueueSub #################################################
 			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
 				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWAaln";
@@ -298,7 +299,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 			// end QueueSub ###################################################
 			} else {
 		    	//Execute
-//	    		Executor.executeCommand(com, "BWA Aln Reverse", exec);
+	    		Executor.executeCommand(com.split(" "),exec,LOGGER);
 			}
     	}
     }
@@ -330,7 +331,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-//    		Executor.executeCommand(com, "BWA Backtrack", exec);
+    		Executor.executeCommand(com.split(" "),exec,LOGGER);
 		}
     }
     
@@ -350,7 +351,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {
 	    	//Execute
-//    		Executor.executeCommand(com, "BWA SW", exec);
+    		Executor.executeCommand(com.split(" "),exec,LOGGER);
 		}
     }
     
@@ -369,7 +370,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 		// end QueueSub ###################################################
 		} else {	
 	    	//Execute
-//    		Executor.executeCommand(com, "BWA MEM", exec,out2Name);
+    		Executor.executeCommand(com.split(" "),exec,LOGGER,out2Name);
 		}
     }
     

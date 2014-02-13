@@ -24,7 +24,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 
@@ -140,9 +139,10 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	    	
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = inData[0].iterator().next().getCell(1).toString();
-    	//String filterFile = inData[0].iterator().next().getCell(2).toString();
+//    	String filterFile = inData[0].iterator().next().getCell(2).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	String path = RawReadManipulatorNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	String sub =path.substring(path.lastIndexOf("/")+1, path.length());
     	
     	/**Initialize logfile**/
     	String logfile = inFile1.substring(0,inFile1.lastIndexOf("/")+1)+"logfile.txt";
@@ -163,6 +163,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	if(m_filterfileexists.getBooleanValue()){
     		call.append(" --filtersettings="+inData[0].iterator().next().getCell(2).toString());
     	}
+    	
 		if(m_useotherfilterfile.getBooleanValue()) {
 			call.append(" --filtersettings="+m_otherfiltersettingsfile.getStringValue());
     	}
@@ -211,22 +212,28 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	System.setOut(stdOut);
     	System.setErr(stdErr);
     	
-    	String com = "java -jar "+path+"/libs/FastQReadFiltering.jar "+call;
-    	System.out.println(com);
+    	String com ="";
+    	if(sub.equals("")){
+    		com = "java -jar "+path+"/libs/FastQReadFiltering.jar "+call;
+    	
+    	}else{//From Jar
+    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
+    		com = "java -jar "+tmpfolder+"/libs/FastQReadFiltering.jar "+call;
+    	}	
+    	
+
     	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
     	Process p1 = b.start();
     	p1.waitFor();
         logBuffer.append(ShowOutput.getLogEntry(p1, com));
         
-    	//RawReadManipulator.main(callReady);
-
-    	/*if(readType.equals("paired-end") && !inFile2.equals("")) {
-    		callReady[0] = "--in="+inFile2;
-   		if(callReady[1].lastIndexOf("filtersettings") != -1) {
-    			callReady[1] = "--filtersettings="+inData[0].iterator().next().getCell(3).toString();
-    		}
-    		RawReadManipulator.main(callReady);
-    	}*/
+//    	if(readType.equals("paired-end") && !inFile2.equals("")) {
+//    		callReady[0] = "--in="+inFile2;
+//   		if(callReady[1].lastIndexOf("filtersettings") != -1) {
+//    			callReady[1] = "--filtersettings="+inData[0].iterator().next().getCell(3).toString();
+//    		}
+//    		RawReadManipulator.main(callReady);
+//    	}
     	
         //Create Output
     	String outReadsFile1 = inFile1 + ".filtered.fastq";
