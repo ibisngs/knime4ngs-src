@@ -19,6 +19,8 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import uk.ac.babraham.FastQC.FastQCApplication;
+
 import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
@@ -63,24 +65,17 @@ public class FastQCNodeModel extends NodeModel {
 
     	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	
-    	/**
-    	 * AB HIER NEU !
-    	 */
+    	
     	String sub =path.substring(path.lastIndexOf("/")+1, path.length());
     	String com="";
     	if(sub.equals("")){
-    		com="cd "+path+"libs/FastQC_rebuild/ ; sh run_fastq2.sh "+readsFile2;
+    		com="cd "+path+"libs/ ; java -jar FastQC.jar "+readsFile2;
+    	
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		//com = "cd "+tmpfolder+" ; unzip -n "+sub+" ; sh FastQC_rebuild/run_fastq2.sh "+readsFile2;  #Jan#
-    		com = "cd "+tmpfolder+"libs/FastQC_rebuild/ ; sh run_fastq2.sh "+readsFile2;
+    		com = "cd "+tmpfolder+"libs/ ; java -jar FastQC.jar "+readsFile2;
     	}	
-    	
-     //ALT !---->   String com = "cd " + path + "libs/FastQC_rebuild/ ; sh run_fastq2.sh " + readsFile2;
-	/**
-	 * Bis HIER !
-	 */
-    	
+
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
 			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
 				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_FastQC-2";
@@ -97,22 +92,15 @@ public class FastQCNodeModel extends NodeModel {
 		        logBuffer.append(ShowOutput.getLogEntry(p1,com));
 			}
 		}
-		/**
-		 * UND AB HIER
-		 */
+
     	if(sub.equals("")){
-    		com="cd "+path+"libs/FastQC_rebuild/ ; sh run_fastq2.sh "+readsFile1;
+    		com="cd "+path+"libs/ ; java -jar FastQC.jar "+readsFile1;
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		//com = "cd "+tmpfolder+" ; unzip -n "+sub+" ; sh FastQC_rebuild/run_fastq2.sh "+readsFile1;	#Jan#
-    		com = "cd "+tmpfolder+"libs/FastQC_rebuild/ ; sh run_fastq2.sh "+readsFile1;
+    		com = "cd "+tmpfolder+"libs/ ; java -jar FastQC.jar "+readsFile1;
     	}	
     	
-		//OLD-->   com = "cd " + path + "libs/FastQC_rebuild/ ; sh run_fastq2.sh " + readsFile1;
-    	
-    	/**
-    	 * BIS HIER !
-    	 */
+
     	// begin QueueSub #################################################
 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_FastQC-1";
