@@ -1,8 +1,10 @@
-package de.helmholtz_muenchen.ibis.RNodes.Template;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.Template;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
 
 /**
  * <code>NodeFactory</code> for the "RNodeTemplate" Node.
@@ -10,8 +12,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Jonas Zierer
  */
-public class RNodeTemplateNodeFactory 
-        extends NodeFactory<RNodeTemplateNodeModel> {
+public class RNodeTemplateNodeFactory extends NodeFactory<RNodeTemplateNodeModel> {
 
     /**
      * {@inheritDoc}
@@ -33,9 +34,8 @@ public class RNodeTemplateNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<RNodeTemplateNodeModel> createNodeView(final int viewIndex,
-            final RNodeTemplateNodeModel nodeModel) {
-        return new RNodeTemplateNodeView(nodeModel);
+    public NodeView<RNodeTemplateNodeModel> createNodeView(final int viewIndex, final RNodeTemplateNodeModel nodeModel) {
+        return new RNodeView<RNodeTemplateNodeModel>(nodeModel);
     }
 
     /**

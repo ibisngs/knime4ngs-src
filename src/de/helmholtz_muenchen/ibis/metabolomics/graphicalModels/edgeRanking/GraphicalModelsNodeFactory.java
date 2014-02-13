@@ -4,14 +4,15 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+
 /**
  * <code>NodeFactory</code> for the "RNodeTemplate" Node.
  * This is a template for a node, which executes a R-Script.
  *
  * @author Jonas Zierer
  */
-public class GraphicalModelsNodeFactory 
-        extends NodeFactory<GraphicalModelsNodeModel> {
+public class GraphicalModelsNodeFactory extends NodeFactory<GraphicalModelsNodeModel> {
 
     /**
      * {@inheritDoc}
@@ -33,9 +34,8 @@ public class GraphicalModelsNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<GraphicalModelsNodeModel> createNodeView(final int viewIndex,
-            final GraphicalModelsNodeModel nodeModel) {
-        return new GraphicalModelsNodeView(nodeModel);
+    public NodeView<GraphicalModelsNodeModel> createNodeView(final int viewIndex, final GraphicalModelsNodeModel nodeModel) {
+        return new RNodeView<GraphicalModelsNodeModel>(nodeModel);
     }
 
     /**

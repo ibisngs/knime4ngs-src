@@ -30,7 +30,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.LogPanel;
  * 
  * @author Jonas Zierer
  */
-public abstract class RNodeView<T extends RNodeModel> extends NodeView<T> {
+public class RNodeView<T extends RNodeModel> extends NodeView<T> {
     
 
     // panel which actually paints the bins
@@ -41,7 +41,7 @@ public abstract class RNodeView<T extends RNodeModel> extends NodeView<T> {
      * 
      * @param nodeModel the model class: {@link RNodeModel}
      */
-	protected RNodeView(final T nodeModel) {
+	public RNodeView(final T nodeModel) {
         super(nodeModel);
         m_panel_log = new LogPanel(nodeModel.getSTDOUT(), nodeModel.getSTDERR());
         m_panel_log.setPreferredSize(new Dimension(800, 600));
@@ -65,7 +65,7 @@ public abstract class RNodeView<T extends RNodeModel> extends NodeView<T> {
     /** {@inheritDoc} */
     @Override
     protected void onOpen() {
- 
+    	m_panel_log.updateView();
     }
 
 

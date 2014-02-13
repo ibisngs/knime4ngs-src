@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.RNodes.Template;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.Template;
 
 import org.knime.core.data.DoubleValue;
 import org.knime.core.data.IntValue;
