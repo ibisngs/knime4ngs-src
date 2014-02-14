@@ -19,51 +19,23 @@
  */
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
-import java.awt.Dimension;
-import org.knime.core.node.NodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeView;
+
 
 /**
  * <code>NodeView</code> for the "RNodeModel" Node.
  * 
  * @author Jonas Zierer
  */
-public abstract class ScriptNodeView<T extends ScriptNodeModel> extends NodeView<T> {
+public abstract class ScriptNodeView<T extends ScriptNodeModel> extends WrapperNodeView<T> {
     
-
-    // panel which actually paints the bins
-	private final LogPanel m_panel_log;
-    
-    /**
+	/**
      * Creates a new view.
      * 
-     * @param nodeModel the model class: {@link ScriptNodeModel}
+     * @param nodeModel the model class: {@link RNodeModel}
      */
 	protected ScriptNodeView(final T nodeModel) {
         super(nodeModel);
-        m_panel_log = new LogPanel(nodeModel.getSTDOUT(), nodeModel.getSTDERR());
-        m_panel_log.setPreferredSize(new Dimension(800, 600));
-        setComponent(m_panel_log);    
-        this.setViewTitleSuffix("log");
     }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void modelChanged() {
-    	m_panel_log.updateView();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onClose() {
-
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void onOpen() {
- 
-    }
-
-
-
 }

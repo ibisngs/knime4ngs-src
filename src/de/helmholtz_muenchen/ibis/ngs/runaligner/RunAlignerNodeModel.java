@@ -29,6 +29,10 @@ import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
  */
 public class RunAlignerNodeModel extends NodeModel {
     
+	// name of the output variables
+	public static final String OUTPUT_NAME_READ_FILE1 = "Path2ReadFile1";
+	public static final String OUTPUT_NAME_READ_FILE2 = "Path2ReadFile2";
+	
 	public static final String CFGKEY_READSEQFILE = "readseqfile";
 	public static final String CFGKEY_READSEQFILE2 = "readseqfile2";
 	public static final String CFGKEY_READTYPE = "readType";
@@ -79,9 +83,8 @@ public class RunAlignerNodeModel extends NodeModel {
 		}
 		logBuffer.append("Read Type: " + readType + "\n");
 		
-		
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2ReadFile1", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2ReadFile2", StringCell.TYPE);
+    	DataColumnSpecCreator col1 = new DataColumnSpecCreator(OUTPUT_NAME_READ_FILE1, StringCell.TYPE);
+        DataColumnSpecCreator col2 = new DataColumnSpecCreator(OUTPUT_NAME_READ_FILE2, StringCell.TYPE);
         DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
     	DataTableSpec table = new DataTableSpec(cols);
     	BufferedDataContainer cont = exec.createDataContainer(table);

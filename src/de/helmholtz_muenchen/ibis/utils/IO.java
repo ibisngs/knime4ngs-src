@@ -6,11 +6,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -273,5 +275,44 @@ public class IO {
 		}
 
 		return out;
+	}
+	
+	
+	/**
+	 * returns all the files in a folder filtered by filename
+	 * @param dirname path to folder
+	 * @param filter Filename filter
+	 * @return
+	 */
+	public static ArrayList<String> getFilesOfFolder(String dirname, FilenameFilter filter)
+	{
+		ArrayList<String> files = new ArrayList<String>();
+		
+		// check, if dirname is a folder
+		File dir = new File(dirname);
+		if(!dir.exists() || !dir.isDirectory())
+			return files;
+		
+		// get all files
+		for(File f : dir.listFiles(filter))
+			files.add(f.getAbsolutePath());
+		
+		return files;
+	}
+	
+	/**
+	 * returns all the files in a folder
+	 * @param dirname path to folder
+	 * @return
+	 */
+	public static ArrayList<String> getFilesOfFolder(String dirname)
+	{
+		return IO.getFilesOfFolder(dirname, new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return true;
+			}
+		});
 	}
 }
