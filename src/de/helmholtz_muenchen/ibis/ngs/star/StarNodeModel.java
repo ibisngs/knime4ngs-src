@@ -26,8 +26,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeMod
 
 
 /**
- * This is the model implementation of Star.
- * STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays. * n * nFor details, please see paper: * nA. Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635
+ * This is the model implementation for the wrapper of STAR.
+ * STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays. 
+ * For details, please see paper: 
+ * Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635
  *
  * @author Michael Kluge
  */
@@ -120,6 +122,7 @@ public class StarNodeModel extends WrapperNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
     	
+    	exec.setProgress(0.01); // start with the work
     	// some simple arguments
     	String binaryPath = SET_BINARY_PATH.getStringValue();
     	File binaryFile = new File(binaryPath);
@@ -192,6 +195,7 @@ public class StarNodeModel extends WrapperNodeModel {
 		String[] command = allCommands.toArray(new String[allCommands.size()]);
 		
 		// execute the command
+		exec.setProgress(0.05);
 		executeCommand(exec, command, null);
 		exec.setProgress(1.00); // we are done
 		/*********************************************************/
