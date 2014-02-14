@@ -80,8 +80,9 @@ public abstract class WrapperNodeModel extends SettingsStorageNodeModel {
      */
     protected boolean validateBinary(String binaryPath) throws InvalidSettingsException
     {
-    	if(binaryPath.length() == 0)
-    		return false;
+    	if(binaryPath == null || binaryPath.length() == 0)
+    		throw new InvalidSettingsException("Path to binary is not set.");
+    	
     	// check, if file can be executed
     	File binFile = new File(binaryPath);
     	if(!(binFile.isFile() && binFile.canExecute()))

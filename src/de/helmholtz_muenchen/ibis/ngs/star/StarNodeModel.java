@@ -60,7 +60,9 @@ public class StarNodeModel extends WrapperNodeModel {
     private final static String NAME_OF_OUTPUT_PREFIX_PARAM 	= "--outFileNamePrefix";	// parameter in STAR which allows the user to set the output folder (relative or absolute)
     private final static String NAME_OF_OUTPUT_GENOMEDIR_PARAM 	= "--genomeDir";			// output parameter in case of generateGenome run or input in other case
     private final static String NAME_OF_RUN_MODE_PARAM 			= "--runMode";				// parameter in STAR which sets the runMode
-    private final static String NAME_OF_FASTAQ_PARAM 			= "--readFilesIn";			// string(s): paths to files that contain input read1 (and, if needed,  read2) 
+    private final static String NAME_OF_FASTAQ_PARAM 			= "--readFilesIn";			// string(s): paths to files that contain input read1 (and, if needed,  read2)
+    
+    private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_BINARY_PATH;
@@ -68,6 +70,9 @@ public class StarNodeModel extends WrapperNodeModel {
     private final SettingsModelString SET_RUN_MODE;
     private final SettingsModelString SET_OUTPUT_FOLDER;
     private final SettingsModelString SET_GENOME_FOLDER;
+    
+    private boolean isBinaryValid 			= false; // true, if last call of validateBinary was ok
+    private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -99,18 +104,24 @@ public class StarNodeModel extends WrapperNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	// validate binary
+    	if(hasConfigureOpendOnce)
+    		validateBinary(SET_BINARY_PATH.getStringValue());
+    	
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
     	if(isAlignRunMode()) {
     		if(!(cn[0].equals(RunAlignerNodeModel.OUTPUT_NAME_READ_FILE1) && cn[1].equals(RunAlignerNodeModel.OUTPUT_NAME_READ_FILE2)))
     			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' node.");
+    		
+            // validate genome dir
+            if(hasConfigureOpendOnce)
+            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue(), SET_BINARY_PATH.getStringValue());
     	}
     	else {
     		if(!cn[0].equals(FastaSelectorNodeModel.OUTPUT_NAME_FASTA_FILES))
     			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects the output of a 'FastaSelector' node.");
     	}
-    	
-    	validateBinary(SET_BINARY_PATH.getStringValue());
     	
 		return new DataTableSpec[]{null};
     }
@@ -257,8 +268,16 @@ public class StarNodeModel extends WrapperNodeModel {
         SET_OUTPUT_FOLDER.validateSettings(settings);
         SET_GENOME_FOLDER.validateSettings(settings);
         
+        // configure must have been opened or we won't be here
+        hasConfigureOpendOnce = true;
+        
         // get the value even if it is not saved and validate it.
-        validateBinary(((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue());
+        String binaryPath = ((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue();
+        validateBinary(binaryPath);
+        
+        // validate genome dir, if runMode is alignReads
+        if(isAlignRunMode())
+        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue(), binaryPath);
     }
     
     /**
@@ -273,12 +292,37 @@ public class StarNodeModel extends WrapperNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected boolean validateBinary(String binaryPath) throws InvalidSettingsException
-    {
+    protected boolean validateBinary(String binaryPath) throws InvalidSettingsException {
     	boolean ret = super.validateBinary(binaryPath);
     	
     	// TODO: check, if this is really a STAR binary, but HOW ?!
+    	isBinaryValid = ret;
     	return ret;
+    }
+    
+    /**
+     * Checks, if the path contains a genome index for STAR
+     * @param genomePath
+     * @return
+     * @throws InvalidSettingsException
+     */
+    protected boolean validateGenomeIndex(String genomePath, String binaryPath) throws InvalidSettingsException {
+    	// check for relative path if binary file is valid
+    	File bFile = new File(binaryPath);
+    	if(isBinaryValid && bFile.canRead())
+    		genomePath = getAbsoluteFilename(genomePath, bFile, true);
+    	
+    	// check if genomePath exists
+    	File f = new File(genomePath);
+    	if(!(f.isDirectory() && f.exists()))
+    		throw new InvalidSettingsException("Genome path '" + genomePath + "' does not exist.");
+    	
+    	// check if parameter file is there
+    	f = new File(genomePath + File.separator + NAME_OF_GENOME_PARAMETER_FILE);
+    	if(!(f.isFile() && f.canRead()))
+    		throw new InvalidSettingsException("Folder was found but it seems that it does not contain a valid genome index.");    	
+    	// all checks where ok
+    	return true;
     }
 }
 
