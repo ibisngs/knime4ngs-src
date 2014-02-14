@@ -117,7 +117,7 @@ public class Executor {
 				pool.shutdownNow();
 				while (!pool.isTerminated()) {
 				}
-				throw(new CanceledExecutionException("Canceled Execution of command " + command[0]));
+				throw(new CanceledExecutionException("Canceled Execution of command " + ExecuteThread.getCommand(command)));
 			}
 			try {
 				Thread.sleep(1000);
@@ -130,9 +130,9 @@ public class Executor {
 		Boolean finishedSuccessfully = executorResult.get();
 		if(!finishedSuccessfully){
 			logger.error(executorThread.printLogs());
-			throw(new CanceledExecutionException("Could not successfully finish command " + command[0]));
+			
+			throw(new CanceledExecutionException("Could not successfully finish command " + ExecuteThread.getCommand(command)));
 		}
 		//logger.info("ThreadPool closed successfully.");
 	}
-
 }

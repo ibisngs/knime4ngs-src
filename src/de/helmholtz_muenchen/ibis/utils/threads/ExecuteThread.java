@@ -48,7 +48,10 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdErrStr=stdErrStr;
 
 		this.LOGGER = logger;
-		this.ENVIRONMENT = Environment;
+		if(Environment != null)
+			this.ENVIRONMENT = Environment;
+		else
+			this.ENVIRONMENT = new String[0];
 	}
 
 
@@ -190,20 +193,18 @@ public class ExecuteThread implements Callable<Boolean> {
 	}
 	
 	private String getCommand(){
-		String com  = this.command[0];
-		boolean par = false;
-		for(int i=1; i<this.command.length; i++){
-			if(par){
-				com += " \"" + this.command[i] + "\"";
+		return getCommand(this.command);
+	}
+	
+	public static String getCommand(String[] command){
+		StringBuffer com  = new StringBuffer(command[0]);
+		for(int i=1; i<command.length; i++){
+			if(!command[i].startsWith("-")){
+				com.append(" \"" + command[i] + "\"");
 			}else{
-				com += " " + this.command[i];
-			}
-			par = false;
-			if(this.command[i].startsWith("-")){
-				par=true;
+				com.append(" " + command[i]);
 			}
 		}
-		
-		return(com);
+		return com.toString();
 	}
 }
