@@ -55,12 +55,8 @@ mixedGraficalModels <- function(X, #
 	}
 	
 	## sample subsets for stability selection
-	# TODO: set seed /random initialization...
-	if( stabSel.sampleNum == 1){
-		samples = list(c(1:n))
-	}else{
-		samples = llply(.data=c(1:stabSel.sampleNum),.fun=function(i){return(sample(rownames(X),stabSel.sampleSize,replace=F))})
-	}
+	samples = llply(.data=c(1:stabSel.sampleNum),.fun=function(i){return(sample(rownames(X),stabSel.sampleSize,replace=F))})
+
 	## order of edges (from an adjacency matrix) as vector
 	edges.matrix  <- matrix(1:(p*p),ncol=p, nrow=p, dimnames=list(colnames(X), colnames(X))) #, 
 	edges.indices <- as.vector(edges.matrix[upper.tri(edges.matrix)])
@@ -124,6 +120,10 @@ getGraph <- function(edge.ranks,
 	adjacency = get.adjacency(g,sparse=FALSE)
 	adjacency = adjacency[variables,variables]
 
+	## filter edgeslist
+	edges = edges[edges$selected, ]
+	edges = edges[, colnames(edges) != "selected"]
+		
 	return(list(edges=edges, adjacency=adjacency, graph=g))
 }
 

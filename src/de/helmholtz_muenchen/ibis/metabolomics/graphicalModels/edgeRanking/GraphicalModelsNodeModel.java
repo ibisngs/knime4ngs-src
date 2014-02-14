@@ -1,19 +1,24 @@
 package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
@@ -37,18 +42,28 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	static final String KEY_VALUE_SEP   = "=";
 	static final String KEY_VALUE_SEP_2 = ":";
 
+	static final int    DEFAULT_SS_SAMPLE_N = 100;
+	static final double DEFAULT_SS_SAMPLE_S = 0.5;
+	
+	@SuppressWarnings("unused")
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(GraphicalModelsNodeModel.class);
 
 	/** CFG KEYS */
 	static final String CFGKEY_RANKER             = "rankers";
 	static final String CFGKEY_PARAMS             = "rankerparams";
 	static final String CFGKEY_VAR_TYPES          = "vartypes";
-	static final String CFGKEY_SS_SSAMPLE_N       = "stabselSamplenum";
+	static final String CFGKEY_SS_SAMPLE_N        = "stabselSamplenum";
 	static final String CFGKEY_SS_RANKTYPE        = "stabselRankType";
+	static final String CFGKEY_SS_SAMPLE_S        = "stabselSamplesize";
+	static final String CFGKEY_RANDOM_SEED        = "seed";
 
 	/** SETTING MODELS */
 	private final Map<String, String> m_ranker        = new HashMap<String, String>();
 	private final HashMap<String, ArrayList<Pair<String,String>>> m_ranker_params = new HashMap<String, ArrayList<Pair<String,String>>>();
 	private int m_stabSel_sampleNum = 1;
+	private double m_stabSel_sampleSize = DEFAULT_SS_SAMPLE_S;
+	private int m_rseed;
+	
 	private String m_rankerType = GRAFO_RANKTYPE[0];
 
 	/**
@@ -56,6 +71,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	 */
 	protected GraphicalModelsNodeModel() {
 		super(1, 2, "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "runner.edgeranking.R", new String[]{"--data"}, new String[]{"--output", "--output2"});
+		m_rseed = new Random().nextInt();
 	}
 
 	/**
@@ -79,11 +95,13 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		}
 		this.addArgument("--ranker", ranker.substring(0, ranker.length()-  PARAMS_SEP.length()));
 		this.addArgument("--param", params.substring( 0, params.length()-PARAMS_SEP_2.length()));
-
+		
 		// Other parameters
 
 		this.addArgument("--sampleNum" , m_stabSel_sampleNum );
-		this.addArgument("--rankType", m_rankerType);
+		this.addArgument("--sampleSize", m_stabSel_sampleSize);
+		this.addArgument("--rankType"  , m_rankerType);
+		this.addArgument("--rseed"     , m_rseed);
 		
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.edgeRanksSpec(inData[0].getDataTableSpec())); // pasre all to double cells
@@ -129,8 +147,6 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 				this.m_ranker_params.put(type, new ArrayList<Pair<String,String>>());
 			}
 		}
-
-
 		return new DataTableSpec[]{edgeRanksSpec(inSpecs[0]),null};
 	}
 
@@ -172,9 +188,12 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	@Override
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
 		/* NORMAL SETTINGS */
-		m_stabSel_sampleNum = settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, 100);
+		m_stabSel_sampleNum = settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, DEFAULT_SS_SAMPLE_N);
+		m_stabSel_sampleSize = settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, DEFAULT_SS_SAMPLE_S);
 		m_rankerType = settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]);
+		m_rseed = settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED);
 
+		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		String[] types       = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_VAR_TYPES   , new String[0]);
 		String[] ranker      = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_RANKER      , new String[0]);
@@ -195,11 +214,14 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	}
 
 	@Override
-	protected void saveSettingsTo(NodeSettingsWO settings) {
+	protected void saveSettingsTo(final NodeSettingsWO settings){
 		/* NORMAL SETTINGS */
-		settings.addInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, m_stabSel_sampleNum);
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, m_stabSel_sampleNum);
+		settings.addDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize);
 		settings.addString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE, this.m_rankerType);
-
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, m_rseed);
+		
+		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_ranker.keySet().size();
 
@@ -225,13 +247,32 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	@Override
 	protected void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {		
 		/* NORMAL SETTINGS */
-		if(settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, 100) < 1){
+		if(settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_N) < 1){
 			throw(new InvalidSettingsException("Invalid number for samples for stability selection!")); 
+		}
+		
+		if(settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S)>1 | settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S)<0){
+			throw(new InvalidSettingsException("Size of subsamples must be in [0.0;1.0]")); 
 		}
 
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		// TODO: validation of settings
 	}
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	super.loadInternals(internDir, exec);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	super.saveInternals(internDir, exec);
+    }
 }
 

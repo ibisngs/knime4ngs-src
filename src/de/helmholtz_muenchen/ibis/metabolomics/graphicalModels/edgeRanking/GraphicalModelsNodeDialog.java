@@ -2,6 +2,8 @@ package de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking;
 
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import javax.swing.BorderFactory;
@@ -18,13 +20,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
-import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 
 
 /**
@@ -42,13 +45,15 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
     /** The node logger for this class. */
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(GraphicalModelsNodeDialog.class);
-
+    
 	/** SETTING MODELS */
     private final JList<String> m_typesList;
     private final DefaultListModel<String> m_typesListModel;
     private final JPanel m_typesListPanel;
     private final LinkedHashMap<String, RankerDefinitionPanel> m_typesRankerPanels;
-	private final SpinnerNumberModel m_stabSel_sampleNum = new SpinnerNumberModel(10, 1, 10000, 1);
+    private final SpinnerNumberModel m_stabSel_sampleNum = new SpinnerNumberModel(GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_N, 1, 10000, 1);
+    private final SpinnerNumberModel m_stabSel_sampleSize = new SpinnerNumberModel(GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S, 0.0, 1.0, 0.01);
+    private final SpinnerNumberModel m_rseed = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
 	private final JComboBox<String> m_rankerType;
 	
 
@@ -66,6 +71,19 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
         stabSelPanel.add(stabSel_sampleNum_label);
         final JSpinner stabSel_sampleNum_spinner= new JSpinner(m_stabSel_sampleNum);
         stabSelPanel.add(stabSel_sampleNum_spinner);
+        
+        // sample Size
+        final JLabel stabSel_sampleS_label     = new JLabel("(Relative) Size of Samples");
+        stabSelPanel.add(stabSel_sampleS_label);
+        final JSpinner stabSel_sampleS_spinner= new JSpinner(m_stabSel_sampleSize);
+        stabSelPanel.add(stabSel_sampleS_spinner);
+        
+        // random Seed
+        final JLabel stabSel_rseed_label = new JLabel("Seed for random generator");
+        stabSelPanel.add(stabSel_rseed_label);
+        final JSpinner stabSel_rseed= new JSpinner(m_rseed);
+        stabSelPanel.add(stabSel_rseed);
+        
         
         // ranking type
         JLabel label_rankerType = new JLabel("Ranking Type");
@@ -139,10 +157,14 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void loadSettingsFrom(final NodeSettingsRO settings, final PortObjectSpec[] specs) throws NotConfigurableException {
+	protected void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs) throws NotConfigurableException {
+		HashSet<String> typesCurrent = GraphicalModelsNodeModel.getUniqueVariableTypes(specs[0]);
+		
 		/* NORMAL SETTINGS */
-		m_stabSel_sampleNum.setValue(settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, 100));
+		m_stabSel_sampleNum.setValue(settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_N));
+		m_stabSel_sampleSize.setValue(settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S));
 		m_rankerType.setSelectedItem(settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]));
+		m_rseed.setValue(settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, 0));
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		// delete all old content
@@ -159,12 +181,17 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
         	throw(new NotConfigurableException("There has to be one ranker ("+ranker.length+")/ranker params (" + params.length + ") entry per variable type (" + types.length + ")!"));
         }
         
-        for(int t=0; t<types.length; t++) {
-        	String type = types[t];
-        	
+        for(String type: typesCurrent) {
+        	int t = Arrays.asList(types).indexOf(type);
         	m_typesListModel.addElement(type);
-        	RankerDefinitionPanel p = new RankerDefinitionPanel(type, ranker[t], params[t].replace(GraphicalModelsNodeModel.PARAMS_SEP, "\n"));
-			m_typesRankerPanels.put(type, p);
+        	RankerDefinitionPanel p;
+        	// ass new
+        	if(t<0){
+        		p = new RankerDefinitionPanel(type, "", "");
+        	}else{	
+	        	p = new RankerDefinitionPanel(type, ranker[t], params[t].replace(GraphicalModelsNodeModel.PARAMS_SEP, "\n"));
+        	}
+        	m_typesRankerPanels.put(type, p);
         }
         m_typesList.setSelectedIndex(0);
         getPanel().validate();
@@ -175,15 +202,17 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
 
 	
 	/**
-	 * @param settings write intervals to
-	 * @throws InvalidSettingsException if a bin name is empty
+	 * @param settings
+	 * @throws InvalidSettingsException
 	 * @see NodeDialogPane#saveSettingsTo(NodeSettingsWO)
 	 */
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) throws InvalidSettingsException {
 		/* NORMAL SETTINGS */
-		settings.addInt(GraphicalModelsNodeModel.CFGKEY_SS_SSAMPLE_N, m_stabSel_sampleNum.getNumber().intValue());
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, m_stabSel_sampleNum.getNumber().intValue());
+		settings.addDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize.getNumber().doubleValue());
 		settings.addString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE, (String)this.m_rankerType.getSelectedItem());
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, m_rseed.getNumber().intValue());
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_typesRankerPanels.keySet().size();

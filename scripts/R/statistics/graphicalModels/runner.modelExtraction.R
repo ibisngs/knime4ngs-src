@@ -56,4 +56,4 @@ if(! is.null(args$file.el)){
 if(! is.null(args$file.adj)){
 	write.csv3(model$adjacency, args$file.adj)
 }
-write.graph(model$g, "~/g.graphml",format="graphml")
+#write.graph(model$g, "~/g.graphml",format="graphml")

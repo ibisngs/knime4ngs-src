@@ -37,7 +37,8 @@
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory" id="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory"/>
 		<!--<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>-->
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory" id="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory"/>
-	</extension>
+		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory" id="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory"/>
+</extension>
    
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
