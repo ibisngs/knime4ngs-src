@@ -143,12 +143,18 @@ public class FastaSelectorNodeModel extends SettingsStorageNodeModel {
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
     	
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 
 	}
-
+	
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 

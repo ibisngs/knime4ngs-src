@@ -7,7 +7,7 @@ import org.knime.core.node.NodeView;
  * This Node can be used to select multiple fasta files.
  *
  * @author Michael Kluge
- * TODO: implement the view
+ * TODO: implement the view that it displays the selected fasta files which where written to the output
  */
 public class FastaSelectorNodeView extends NodeView<FastaSelectorNodeModel> {
 

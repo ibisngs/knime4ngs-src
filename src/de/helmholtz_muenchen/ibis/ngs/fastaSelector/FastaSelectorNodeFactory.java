@@ -10,8 +10,7 @@ import org.knime.core.node.NodeView;
  *
  * @author Michael Kluge
  */
-public class FastaSelectorNodeFactory 
-        extends NodeFactory<FastaSelectorNodeModel> {
+public class FastaSelectorNodeFactory extends NodeFactory<FastaSelectorNodeModel> {
 
     /**
      * {@inheritDoc}

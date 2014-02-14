@@ -29,11 +29,6 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 /**
  * <code>NodeDialog</code> for the "FastaSelector" Node.
  * This Node can be used to select multiple fasta files.
- *
- * This node dialog derives from {@link DefaultNodeSettingsPane} which allows
- * creation of a simple dialog with standard components. If you need a more 
- * complex dialog please derive directly from 
- * {@link org.knime.core.node.NodeDialogPane}.
  * 
  * @author Michael Kluge
  */
@@ -152,6 +147,7 @@ public class FastaSelectorNodeDialog extends DefaultNodeSettingsPane {
     
     @Override
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
+    	// save the hash to the key FastaSelectorNodeModel.CFGKEY_FASTA_LIST
     	settings.addStringArray(FastaSelectorNodeModel.CFGKEY_FASTA_LIST, FASTA_FILES.toArray(new String[FASTA_FILES.size()]));
     }
 
@@ -224,6 +220,7 @@ public class FastaSelectorNodeDialog extends DefaultNodeSettingsPane {
 		else
 			DC_FASTA_DISPLAY.replaceListItems(FASTA_FILES, (String[]) null);
 		
+		// reset the number of rows which are displayed
 		DC_FASTA_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
 	}
 }
