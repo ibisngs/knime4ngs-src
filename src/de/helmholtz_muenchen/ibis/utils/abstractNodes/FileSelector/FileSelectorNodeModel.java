@@ -35,10 +35,12 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     protected static final String CFGKEY_FILE_DIR 			= "FileDir";
     protected static final String CFGKEY_FILE_FILE 			= "FileFile";
     protected static final String CFGKEY_FILE_LIST_DISPLAY 	= "FileListDisplay";
-
+    protected static final String CFGKEY_REGEX			 	= "FilenameRegex";
+    
     // initial default values for SettingsModels
     protected static final String DEFAULT_FILE_DIR = "-";
     protected static final String DEFAULT_FILE_FILE = "-";
+    protected static final String DEFAULT_REGEX = ".*";
        
     // storage 
     private final HashSet<String> FILES		= new HashSet<String>();
@@ -54,6 +56,7 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
         // add values for SettingsModelString
         addSettingsModelString(CFGKEY_FILE_DIR, DEFAULT_FILE_DIR);
         addSettingsModelString(CFGKEY_FILE_FILE, DEFAULT_FILE_FILE);	
+        addSettingsModelString(CFGKEY_REGEX, DEFAULT_REGEX);
 	}
 	
     /**
@@ -120,7 +123,7 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
     	// clean the old data
-    	this.FILES.clear();
+    	FILES.clear();
     	// check, if data is set
         if (settings.containsKey(FileSelectorNodeModel.CFGKEY_FILE_LIST)) {
         	try {
@@ -132,14 +135,6 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
 			}
         }
     }
-    
-	@Override
-	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {	
-	}
-
-	@Override
-	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-	}
 
 	@Override
 	protected void saveSettingsTo(NodeSettingsWO settings) {
@@ -149,6 +144,14 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
 	protected void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {
         // configure must have been opened or we won't be here
         hasConfigureOpendOnce = true;
+	}
+	
+	@Override
+	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {	
+	}
+
+	@Override
+	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 	}
 	
 	/************************************** ABSTRACT METHODS **********************************************/

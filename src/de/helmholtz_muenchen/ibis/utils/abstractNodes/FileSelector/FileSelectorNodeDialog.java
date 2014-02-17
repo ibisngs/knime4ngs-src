@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -19,6 +21,7 @@ import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentButton;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
@@ -39,13 +42,15 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_FILE_DIR 					= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_DIR);
     private final SettingsModelString SET_FILE_FILE 				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_FILE);
+    private final SettingsModelString SET_NAME_REGEX				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_REGEX);
     private final SettingsModelStringArray SET_FILE_LIST_DISPLAY	= new SettingsModelStringArray(FileSelectorNodeModel.CFGKEY_FILE_LIST_DISPLAY, new String[0]);
-
-	// components which must be accessible inside a event handler
+    
+	// components which must be accessible inside a event handler or somewhere else
 	private final DialogComponentButton DC_FILE_DIR_BUTTON				= new DialogComponentButton("add all " + getFiletypeName() + " files of this folder");
 	private final DialogComponentButton DC_FILE_FILE_BUTTON				= new DialogComponentButton("add selected " + getFiletypeName() + " file");
 	private final DialogComponentButton DC_FILE_REMOVE_BUTTON			= new DialogComponentButton("remove selected " + getFiletypeName() + " files");
 	private final DialogComponentStringListSelection DC_FILE_DISPLAY 	= new DialogComponentStringListSelection(SET_FILE_LIST_DISPLAY, "files: ", NO_SELECTION_MADE);
+    private final DialogComponentString DC_REGEX 						= new DialogComponentString(SET_NAME_REGEX, "filename regex filter");
     
 	// storage 
 	private final HashSet<String> FILE_FILES = new HashSet<String>();
@@ -80,14 +85,18 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("add " + getFiletypeName() + " files");
         addDialogComponent(dcFastaFile);
         addDialogComponent(DC_FILE_FILE_BUTTON);
+        
         addDialogComponent(dcFastaDir);
+        setHorizontalPlacement(true);
+        addDialogComponent(DC_REGEX);
         addDialogComponent(DC_FILE_DIR_BUTTON);
+        setHorizontalPlacement(false);
         
         createNewGroup("currently selected " + getFiletypeName() + " files");
         addDialogComponent(DC_FILE_DISPLAY);  
         addDialogComponent(DC_FILE_REMOVE_BUTTON);
        
-        // add action listener
+        // add action listener        
         DC_FILE_DIR_BUTTON.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -161,10 +170,30 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
     	// get fasta files from folder
     	ArrayList<String> files = new ArrayList<String>();
     	files = IO.getFilesOfFolder(dirname, getFilenameFilter());
-
+    	
+    	// try to compile the REGEX
+    	String regex = SET_NAME_REGEX.getStringValue();
+    	Pattern p = null;
+    	Matcher m = null;
+    	try {
+    		p = Pattern.compile(regex);
+    	}
+    	catch(Exception e) {
+    		LOGGER.error("Pattern does not compile: " + e.getMessage());
+    	}
+    	
     	// add the files
-    	for(String f : files)
-    		addFile(f);
+    	for(String f : files) {
+    		// pattern was not valid --> add all
+    		if(p == null) 
+    			addFile(f);
+    		else {
+    			m = p.matcher(new File(f).getName().replaceFirst(getFilenameEndRegex(), "")); //compile the pattern
+    			// check, if pattern matches
+    			if(m.matches())
+    				addFile(f);
+    		}
+    	}
     }
     
     /**
@@ -172,7 +201,6 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
      * @param file
      */
 	private void addFile(String filename) {
-
     	// check, if file is there
     	File f = new File(filename);
     	if(!f.isFile() || !f.exists())
@@ -219,6 +247,21 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
 		// reset the number of rows which are displayed
 		DC_FILE_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
 	}
+	
+    /**
+     * must return a filename filter which is used when the folder option is used
+     * can be overridden to extend to the function of just checking for the ending.
+     * @return
+     */
+    public FilenameFilter getFilenameFilter() {
+    	return new FilenameFilter() {
+
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.matches(".*" + getFilenameEndRegex());
+			}
+    	};
+    }
     
     
     /************************************** ABSTRACT METHODS **********************************************/
@@ -229,17 +272,18 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
      * @return
      */
     protected abstract String getFiletypeName();
-    
-    /**
-     * must return a filename filter which is used when the folder option is used
-     * @return
-     */
-    public abstract FilenameFilter getFilenameFilter();
-    
+        
     /**
      * checks, if a file is valid for a specific filter
      * @param filename
      * @return
      */
     public abstract boolean isFileValid(File file);
+    
+    
+    /**
+     * returns a regex which matches the ends of the files
+     * @return
+     */
+    public abstract String getFilenameEndRegex();
 }

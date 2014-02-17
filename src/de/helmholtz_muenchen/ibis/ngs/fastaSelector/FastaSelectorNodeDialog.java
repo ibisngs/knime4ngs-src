@@ -2,9 +2,7 @@ package de.helmholtz_muenchen.ibis.ngs.fastaSelector;
 
 
 import java.io.File;
-import java.io.FilenameFilter;
 
-import de.helmholtz_muenchen.ibis.utils.FastaFileNameFilter;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.FileSelector.FileSelectorNodeDialog;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
@@ -27,14 +25,9 @@ public class FastaSelectorNodeDialog extends FileSelectorNodeDialog {
 	}
 
 	@Override
-	public FilenameFilter getFilenameFilter() {
-		return new FastaFileNameFilter();
-	}
-
-	@Override
 	public boolean isFileValid(File file) {
 		// check for file ending
-    	if(!new FastaFileNameFilter().accept(file.getParentFile(), file.getName()))
+    	if(!this.getFilenameFilter().accept(file.getParentFile(), file.getName()))
     		return false;
     	
     	// check, if fasta file is valid
@@ -43,5 +36,10 @@ public class FastaSelectorNodeDialog extends FileSelectorNodeDialog {
     	
     	// all checks were ok.
     	return true;
+	}
+
+	@Override
+	public String getFilenameEndRegex() {
+		return FastaSelectorNodeModel.FILENAME_END_REGEX;
 	}
 }
