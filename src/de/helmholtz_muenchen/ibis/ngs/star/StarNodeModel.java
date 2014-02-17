@@ -61,6 +61,7 @@ public class StarNodeModel extends WrapperNodeModel {
     private final static String NAME_OF_OUTPUT_GENOMEDIR_PARAM 	= "--genomeDir";			// output parameter in case of generateGenome run or input in other case
     private final static String NAME_OF_RUN_MODE_PARAM 			= "--runMode";				// parameter in STAR which sets the runMode
     private final static String NAME_OF_FASTAQ_PARAM 			= "--readFilesIn";			// string(s): paths to files that contain input read1 (and, if needed,  read2)
+    private final static String NAME_OF_FASTA_FILES_PARAM		= "--genomeFastaFiles";		// fasta files with genomic sequence for genome files generation
     
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
@@ -73,23 +74,30 @@ public class StarNodeModel extends WrapperNodeModel {
     
     private boolean isBinaryValid 			= false; // true, if last call of validateBinary was ok
     private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
+    private String currentRunMode			= null;	 // current run mode will be set here...TODO: find better way to do that
     
     // the logger instance
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
        
     /**
-     * Constructor for the node model.
+     * add the used settings
      */
-    protected StarNodeModel() {
-        super(1, 1, true, true);
-        
+    static {
         // add values for SettingsModelString
         addSettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
         addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
         addSettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
         addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-        addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
+        addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);	
+    }
+    
+    
+    /**
+     * Constructor for the node model.
+     */
+    protected StarNodeModel() {
+        super(1, 1, true, true);
         
         // assign the SettingsModel
         SET_BINARY_PATH 	= getSettingsModelString(CFGKEY_BINARY_PATH);
@@ -161,11 +169,12 @@ public class StarNodeModel extends WrapperNodeModel {
     	
     	/********************** INPUT ****************************/
     	ArrayList<String> inputArgument = new ArrayList<String>();
-    	inputArgument.add(NAME_OF_FASTAQ_PARAM);   	
     	String parameterFile = "";
     	
     	// get input parameter from runaligner
     	if(isAlignRunMode()) {
+    		inputArgument.add(NAME_OF_FASTAQ_PARAM);   	
+    		
 	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
 	    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
 	    	// add first input file
@@ -189,6 +198,8 @@ public class StarNodeModel extends WrapperNodeModel {
     	}
     	// get input parameter from FastaSelector (which are already absolute)
     	else {
+        	inputArgument.add(NAME_OF_FASTA_FILES_PARAM);   
+        	
     		for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); )
     			inputArgument.add(it.next().getCell(0).toString());
     	}
@@ -271,6 +282,9 @@ public class StarNodeModel extends WrapperNodeModel {
         // configure must have been opened or we won't be here
         hasConfigureOpendOnce = true;
         
+        // get "hot" run mode value to avoid dirty reads
+        currentRunMode = ((SettingsModelString) SET_RUN_MODE.createCloneWithValidatedValue(settings)).getStringValue();
+        
         // get the value even if it is not saved and validate it.
         String binaryPath = ((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue();
         validateBinary(binaryPath);
@@ -278,6 +292,7 @@ public class StarNodeModel extends WrapperNodeModel {
         // validate genome dir, if runMode is alignReads
         if(isAlignRunMode())
         	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue(), binaryPath);
+
     }
     
     /**
@@ -285,20 +300,9 @@ public class StarNodeModel extends WrapperNodeModel {
      * @return
      */
     private boolean isAlignRunMode() {
-    	return DEFAULT_RUN_MODE.equals(SET_RUN_MODE.getStringValue());
+    	return DEFAULT_RUN_MODE.equals(currentRunMode);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected boolean validateBinary(String binaryPath) throws InvalidSettingsException {
-    	boolean ret = super.validateBinary(binaryPath);
-    	
-    	// TODO: check, if this is really a STAR binary, but HOW ?!
-    	isBinaryValid = ret;
-    	return ret;
-    }
     
     /**
      * Checks, if the path contains a genome index for STAR
