@@ -112,6 +112,7 @@ public class StarNodeModel extends WrapperNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	System.out.println("configure");
     	// validate binary
     	if(hasConfigureOpendOnce)
     		validateBinary(SET_BINARY_PATH.getStringValue());
@@ -241,44 +242,13 @@ public class StarNodeModel extends WrapperNodeModel {
         return new BufferedDataTable[]{out};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-        SET_BINARY_PATH.saveSettingsTo(settings);
-        SET_PARAMETER_FILE.saveSettingsTo(settings);
-        SET_RUN_MODE.saveSettingsTo(settings);
-        SET_OUTPUT_FOLDER.saveSettingsTo(settings);
-        SET_GENOME_FOLDER.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	
-        SET_BINARY_PATH.loadSettingsFrom(settings);
-        SET_PARAMETER_FILE.loadSettingsFrom(settings);
-        SET_RUN_MODE.loadSettingsFrom(settings);
-        SET_OUTPUT_FOLDER.loadSettingsFrom(settings);
-        SET_GENOME_FOLDER.loadSettingsFrom(settings);
-    }
-
-    /**
+     /**
      * {@inheritDoc}
      */
     @Override
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-     	
-        SET_BINARY_PATH.validateSettings(settings);
-        SET_PARAMETER_FILE.validateSettings(settings);
-        SET_RUN_MODE.validateSettings(settings);
-        SET_OUTPUT_FOLDER.validateSettings(settings);
-        SET_GENOME_FOLDER.validateSettings(settings);
-        
+     	super.validateSettings(settings);
+       
         // configure must have been opened or we won't be here
         hasConfigureOpendOnce = true;
         

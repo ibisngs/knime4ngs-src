@@ -19,11 +19,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 public class StarNodeDialog extends DefaultNodeSettingsPane {
 
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH 		= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_BINARY_PATH);
-    private final SettingsModelString SET_PARAMETER_FILE 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_PARAMETER_FILE);
-    private final SettingsModelString SET_RUN_MODE 			= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_RUN_MODE);
-    private final SettingsModelString SET_OUTPUT_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER);
-    private final SettingsModelString SET_GENOME_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER);
+    private final SettingsModelString SET_BINARY_PATH 		= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_BINARY_PATH, this);
+    private final SettingsModelString SET_PARAMETER_FILE 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_PARAMETER_FILE, this);
+    private final SettingsModelString SET_RUN_MODE 			= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, this);
+    private final SettingsModelString SET_OUTPUT_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, this);
+    private final SettingsModelString SET_GENOME_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, this);
     
     protected StarNodeDialog() {
         super();

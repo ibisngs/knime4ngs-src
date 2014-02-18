@@ -40,9 +40,9 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
 	private static final String NO_SELECTION_MADE = "--- nothing selected yet ---";
 	
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_FILE_DIR 					= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_DIR);
-    private final SettingsModelString SET_FILE_FILE 				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_FILE);
-    private final SettingsModelString SET_NAME_REGEX				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_REGEX);
+    private final SettingsModelString SET_FILE_DIR 					= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_DIR, this);
+    private final SettingsModelString SET_FILE_FILE 				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_FILE_FILE, this);
+    private final SettingsModelString SET_NAME_REGEX				= FileSelectorNodeModel.getSettingsModelString(FileSelectorNodeModel.CFGKEY_REGEX, this);
     private final SettingsModelStringArray SET_FILE_LIST_DISPLAY	= new SettingsModelStringArray(FileSelectorNodeModel.CFGKEY_FILE_LIST_DISPLAY, new String[0]);
     
 	// components which must be accessible inside a event handler or somewhere else

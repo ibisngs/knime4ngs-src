@@ -122,6 +122,7 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
      */
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    	super.loadValidatedSettingsFrom(settings);
     	// clean the old data
     	FILES.clear();
     	// check, if data is set
@@ -137,11 +138,8 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     }
 
 	@Override
-	protected void saveSettingsTo(NodeSettingsWO settings) {
-	}
-
-	@Override
 	protected void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {
+		super.validateSettings(settings);
         // configure must have been opened or we won't be here
         hasConfigureOpendOnce = true;
 	}
