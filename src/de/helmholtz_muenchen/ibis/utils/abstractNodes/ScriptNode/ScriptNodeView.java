@@ -19,8 +19,8 @@
  */
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeView;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeView;
 
 
 /**
@@ -28,7 +28,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeVie
  * 
  * @author Jonas Zierer
  */
-public abstract class ScriptNodeView<T extends ScriptNodeModel> extends WrapperNodeView<T> {
+public abstract class ScriptNodeView<T extends ScriptNodeModel> extends ExecutorNodeView<T> {
     
 	/**
      * Creates a new view.

@@ -3,10 +3,11 @@ package de.helmholtz_muenchen.ibis.ngs.star;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
 
 /**
  * <code>NodeDialog</code> for the "Star" Node.
@@ -16,10 +17,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  *
  * @author Michael Kluge
  */
-public class StarNodeDialog extends DefaultNodeSettingsPane {
+public class StarNodeDialog extends BinaryWrapperNodeDialog {
 
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH 		= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_BINARY_PATH, this);
     private final SettingsModelString SET_PARAMETER_FILE 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_PARAMETER_FILE, this);
     private final SettingsModelString SET_RUN_MODE 			= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, this);
     private final SettingsModelString SET_OUTPUT_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, this);
@@ -29,7 +29,6 @@ public class StarNodeDialog extends DefaultNodeSettingsPane {
         super();
        
         // create open file/folder components
-        DialogComponentFileChooser dcBinaryPath 	= new DialogComponentFileChooser(SET_BINARY_PATH, "his_id_BINARY_PATH", 0);
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);
         DialogComponentFileChooser dcParameterFile 	= new DialogComponentFileChooser(SET_PARAMETER_FILE, "his_id_PARAMETER_FILE", 0);
        	DialogComponentFileChooser dcGenomeFolder 	= new DialogComponentFileChooser(SET_GENOME_FOLDER, "his_id_GENOME_FOLDER", 0, true);
@@ -38,7 +37,6 @@ public class StarNodeDialog extends DefaultNodeSettingsPane {
        	DialogComponentStringSelection dcRunMode 	= new DialogComponentStringSelection(SET_RUN_MODE, "runMode:", StarNodeModel.DEFAULT_RUN_MODE, StarNodeModel.ALTERNATIVE_RUN_MODE);
        	
        	// set a new title to them
-       	dcBinaryPath.setBorderTitle("path to STAR binary");
        	dcOutputFolder.setBorderTitle("path to output folder");
        	dcParameterFile.setBorderTitle("path to STAR parameter file");
        	dcGenomeFolder.setBorderTitle("path to indexed genome");
@@ -46,8 +44,7 @@ public class StarNodeDialog extends DefaultNodeSettingsPane {
        	// add groups and components
         createNewGroup("generell options");
         addDialogComponent(dcRunMode);
-        addDialogComponent(dcBinaryPath);
-        
+
         createNewGroup("input");
         addDialogComponent(dcParameterFile);
         addDialogComponent(dcGenomeFolder);

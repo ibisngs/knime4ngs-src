@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode;
 
 
 import java.awt.Dimension;
@@ -7,13 +7,13 @@ import org.knime.core.node.NodeView;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.LogPanel;
 
 /**
- * <code>NodeView</code> which shows STDOUT and STDERR in the view
- * Mostly copied from RNodeView and made RNodeView extend this class in order to avoid code duplication.
- * @author Michael Kluge
+ * <code>ExecutorNodeView</code> which shows STDOUT and STDERR in the view
+ * 
  * @author Jonas Zierer
+ * @author Michael Kluge
  *
  */
-public abstract class WrapperNodeView<T extends WrapperNodeModel> extends NodeView<T> {
+public abstract class ExecutorNodeView<T extends ExecutorNodeModel> extends NodeView<T> {
 
     // panel which actually shows the logs
 	private final LogPanel PANEL_LOG; 
@@ -23,7 +23,7 @@ public abstract class WrapperNodeView<T extends WrapperNodeModel> extends NodeVi
      * 
      * @param nodeModel the model class: {@link ScriptNodeModel}
      */
-	protected WrapperNodeView(final T nodeModel) {
+	protected ExecutorNodeView(final T nodeModel) {
         super(nodeModel);
         PANEL_LOG = new LogPanel(nodeModel.getSTDOUT(), nodeModel.getSTDERR());
         PANEL_LOG.setPreferredSize(new Dimension(800, 600));

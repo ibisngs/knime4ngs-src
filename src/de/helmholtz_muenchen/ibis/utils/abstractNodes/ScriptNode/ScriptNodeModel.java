@@ -4,9 +4,9 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
 
-public abstract class ScriptNodeModel extends WrapperNodeModel {
+public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	protected final String SCRIPT;
 
 	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script) {

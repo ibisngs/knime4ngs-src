@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
-import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
@@ -15,14 +14,13 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
- * Abstract class which can be used to implement wrapper nodes for external tools.
- * Mostly copied from ScriptNodeModel and made ScriptNodeModel extend this class in order to avoid code duplication.
+ * Abstract class which uses Executor class to execute commands and can catch STDOUT / STDERR.
  * 
- * @author Michel Kluge
  * @author Jonas Zierer
+ * @author Michel Kluge
  *
  */
-public abstract class WrapperNodeModel extends SettingsStorageNodeModel {
+public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 		
 	// StringBuffer for stdout and stderr
 	private final StringBuffer STDOUT;
@@ -42,7 +40,7 @@ public abstract class WrapperNodeModel extends SettingsStorageNodeModel {
 	 * @param catchStdout catches stdout if true
 	 * @param catchStderr catches stderr if true
 	 */
-	protected WrapperNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
+	protected ExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
 		super(nrInDataPorts, nrOutDataPorts);
 		
 		if(catchStdout)
@@ -72,49 +70,7 @@ public abstract class WrapperNodeModel extends SettingsStorageNodeModel {
 		}
 	}
 	
-	/**
-     * checks, if a binary is there and if the execution flag is set
-     * @param binaryPath path to binary
-     * @return
-     * @throws InvalidSettingsException
-     */
-    protected boolean validateBinary(String binaryPath) throws InvalidSettingsException
-    {
-    	if(binaryPath == null || binaryPath.length() == 0)
-    		throw new InvalidSettingsException("Path to binary is not set.");
-    	
-    	// check, if file can be executed
-    	File binFile = new File(binaryPath);
-    	if(!(binFile.isFile() && binFile.canExecute()))
-    		throw new InvalidSettingsException("Executable flag of '" + binaryPath + "' is not set or file is not found.");
-    	return true;
-    }
-    
-    /**
-     * creates a absolute path name if the path name starts with "./" or "../" which means its a relative
-     * path (to the folder where the binary is located)
-     * @param filenPath path to file
-     * @param binaryPath File which points to the binary
-     * @param isPath true, if its a path and not a filename
-     * @return
-     */
-    protected String getAbsoluteFilename(String filenPath, File binaryPath, boolean isPath) {
-    	// relative path to the binary folder
-    	if(filenPath.startsWith("."))
-    		filenPath = binaryPath.getParentFile().getAbsolutePath() + File.separator + filenPath;
-    	
-    	// check, if path ends with seperator
-    	if(isPath && !filenPath.endsWith(File.separator))
-    		filenPath += File.separator;
-    	
-    	// remove useless "/./"
-    	filenPath = filenPath.replaceAll(File.separator + "\\." + File.separator, File.separator);
 
-    	return filenPath;
-
-    }
-	
-	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS
 	/////////////////////////////////////////////////////////////////////////////////////////////////    

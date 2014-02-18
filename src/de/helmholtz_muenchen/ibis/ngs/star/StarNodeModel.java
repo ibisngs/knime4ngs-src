@@ -18,12 +18,10 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeModel;
-
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
 /**
  * This is the model implementation for the wrapper of STAR.
@@ -33,7 +31,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeMod
  *
  * @author Michael Kluge
  */
-public class StarNodeModel extends WrapperNodeModel {
+public class StarNodeModel extends BinaryWrapperNodeModel {
      
 	// name of the output variables
 	public static final String OUTPUT_NAME_RUN_MODE = "RunMode";
@@ -41,7 +39,7 @@ public class StarNodeModel extends WrapperNodeModel {
 	public static final String OUTPUT_NAME_PARAMETER_CONFIG_FILE = "ParameterConfigFile";
 
     // keys for SettingsModels
-    protected static final String CFGKEY_BINARY_PATH 	= "BinaryPath";
+
     protected static final String CFGKEY_PARAMETER_FILE = "ParameterFile";
     protected static final String CFGKEY_RUN_MODE 		= "RunMode";
     protected static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
@@ -50,7 +48,6 @@ public class StarNodeModel extends WrapperNodeModel {
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
     protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    private static final String DEFAULT_BINARY_PATH 	= "";
     private static final String DEFAULT_PARAMETER_FILE 	= "-";					// must be set by user but is optional
     private static final String DEFAULT_OUTPUT_FOLDER 	= "./output/";			// creates a folder "output" relative to the STAR binary
     private static final String DEFAULT_GENOME_FOLDER 	= "./GenomeDir/";		// searches for the genome index in "GenomeDir" relative to the STAR binary
@@ -66,7 +63,6 @@ public class StarNodeModel extends WrapperNodeModel {
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH		= getSettingsModelString(CFGKEY_BINARY_PATH);
     private final SettingsModelString SET_PARAMETER_FILE	= getSettingsModelString(CFGKEY_PARAMETER_FILE);
     private final SettingsModelString SET_RUN_MODE			= getSettingsModelString(CFGKEY_RUN_MODE);
     private final SettingsModelString SET_OUTPUT_FOLDER		= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
@@ -85,7 +81,6 @@ public class StarNodeModel extends WrapperNodeModel {
      */
     static {
         // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
         addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
         addSettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
         addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
@@ -105,10 +100,7 @@ public class StarNodeModel extends WrapperNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	System.out.println("configure");
-    	// validate binary
-    	if(hasConfigureOpendOnce)
-    		validateBinary(SET_BINARY_PATH.getStringValue());
+    	super.configure(inSpecs);
     	
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
@@ -118,7 +110,7 @@ public class StarNodeModel extends WrapperNodeModel {
     		
             // validate genome dir
             if(hasConfigureOpendOnce)
-            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue(), SET_BINARY_PATH.getStringValue());
+            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue(), getBinaryPath());
     	}
     	else {
     		if(!cn[0].equals(FastaSelectorNodeModel.OUTPUT_NAME_FASTA_FILES))
@@ -137,7 +129,7 @@ public class StarNodeModel extends WrapperNodeModel {
     	
     	exec.setProgress(0.01); // start with the work
     	// some simple arguments
-    	String binaryPath = SET_BINARY_PATH.getStringValue();
+    	String binaryPath = getBinaryPath();
     	File binaryFile = new File(binaryPath);
     	ArrayList<String> runmodeArgument = new ArrayList<String>();
     	runmodeArgument.add(NAME_OF_RUN_MODE_PARAM);
@@ -249,12 +241,13 @@ public class StarNodeModel extends WrapperNodeModel {
         currentRunMode = ((SettingsModelString) SET_RUN_MODE.createCloneWithValidatedValue(settings)).getStringValue();
         
         // get the value even if it is not saved and validate it.
-        String binaryPath = ((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue();
-        validateBinary(binaryPath);
+        //String binaryPath = ((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue();
+       // validateBinary(binaryPath);
+        //TODO:
         
         // validate genome dir, if runMode is alignReads
         if(isAlignRunMode())
-        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue(), binaryPath);
+        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue(), getBinaryPath()); //TODO
 
     }
     

@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.star;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeView;
 
 /**
  * <code>NodeView</code> for the "Star" Node.
@@ -10,7 +10,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeVie
  *
  * @author Michael Kluge
  */
-public class StarNodeView extends WrapperNodeView<StarNodeModel> {
+public class StarNodeView extends ExecutorNodeView<StarNodeModel> {
 
     /**
      * Creates a new view.

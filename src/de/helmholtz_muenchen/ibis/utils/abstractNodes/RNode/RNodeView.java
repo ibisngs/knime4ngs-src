@@ -19,14 +19,14 @@
  */
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.WrapperNode.WrapperNodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeView;
 
 /**
  * <code>NodeView</code> for the "RNodeModel" Node.
  * 
  * @author Jonas Zierer
  */
-public class RNodeView<T extends RNodeModel> extends WrapperNodeView<T> {
+public class RNodeView<T extends RNodeModel> extends ExecutorNodeView<T> {
 
     /**
      * Creates a new view.
