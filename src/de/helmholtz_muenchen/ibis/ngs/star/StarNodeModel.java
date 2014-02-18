@@ -66,11 +66,11 @@ public class StarNodeModel extends WrapperNodeModel {
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH;
-    private final SettingsModelString SET_PARAMETER_FILE;
-    private final SettingsModelString SET_RUN_MODE;
-    private final SettingsModelString SET_OUTPUT_FOLDER;
-    private final SettingsModelString SET_GENOME_FOLDER;
+    private final SettingsModelString SET_BINARY_PATH		= getSettingsModelString(CFGKEY_BINARY_PATH);
+    private final SettingsModelString SET_PARAMETER_FILE	= getSettingsModelString(CFGKEY_PARAMETER_FILE);
+    private final SettingsModelString SET_RUN_MODE			= getSettingsModelString(CFGKEY_RUN_MODE);
+    private final SettingsModelString SET_OUTPUT_FOLDER		= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
+    private final SettingsModelString SET_GENOME_FOLDER		= getSettingsModelString(CFGKEY_GENOME_FOLDER);
     
     private boolean isBinaryValid 			= false; // true, if last call of validateBinary was ok
     private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
@@ -98,13 +98,6 @@ public class StarNodeModel extends WrapperNodeModel {
      */
     protected StarNodeModel() {
         super(1, 1, true, true);
-        
-        // assign the SettingsModel
-        SET_BINARY_PATH 	= getSettingsModelString(CFGKEY_BINARY_PATH);
-        SET_PARAMETER_FILE 	= getSettingsModelString(CFGKEY_PARAMETER_FILE);
-        SET_RUN_MODE 		= getSettingsModelString(CFGKEY_RUN_MODE);
-        SET_OUTPUT_FOLDER 	= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
-        SET_GENOME_FOLDER 	= getSettingsModelString(CFGKEY_GENOME_FOLDER);
     }
     
     /**
