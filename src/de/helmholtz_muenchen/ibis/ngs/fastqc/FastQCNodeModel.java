@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.ngs.fastqc;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -15,14 +16,14 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import uk.ac.babraham.FastQC.FastQCApplication;
-
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
+import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 
@@ -31,10 +32,18 @@ import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
  * This is the model implementation of FastQC.
  * 
  *
- * @author Max
+ * @author hastreiter
  */
 public class FastQCNodeModel extends NodeModel {
     
+	
+    // the logger instance
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(FastQCNodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2ReadFile1";
+	public static final String OUT_COL2 = "Path2ReadFile2";
+	public static final String OUT_COL3 = "Path2filterfile";
 	
     /**
      * Constructor for the node model.
@@ -52,10 +61,11 @@ public class FastQCNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	
+    	    	
     	/**Initialize logfile**/
     	String logfile = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1)+"logfile.txt";
     	ShowOutput.setLogFile(logfile);
@@ -63,114 +73,83 @@ public class FastQCNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
     	/**end initializing logfile**/
 
+
+    	/**Prepare Command**/
+    	ArrayList<String> command = new ArrayList<String>();
     	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
     	
-    	
-    	String sub =path.substring(path.lastIndexOf("/")+1, path.length());
-    	String com="";
-    	if(sub.equals("")){
-    		com="cd "+path+"libs/ ; java -jar FastQC.jar "+readsFile2;
-    	
+    	//Path to Jar
+    	if(sub_path.equals("")){
+    		command.add("java");
+    		command.add("-jar "+path+"libs/FastQC.jar "+readsFile1);
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		com = "cd "+tmpfolder+"libs/ ; java -jar FastQC.jar "+readsFile2;
+    		command.add("cd "+tmpfolder+"libs/ ; java -jar FastQC.jar");
     	}	
-
+    	
+    	/**Execute for first file**/
+    	//command.add(readsFile1);
+    	String[] com = command.toArray(new String[command.size()]);
+    	StringBuffer sysErr = new StringBuffer(50);
+    	Executor.executeCommand(com,exec,LOGGER,null,sysErr);
+    	//Show FastQC Output
+    	LOGGER.info(sysErr);
+    	
+    	/**If Paired-End data**/
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
-			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_FastQC-2";
-				String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-				String logfle = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-				new QSub(com, name, memory, logfle, false);
-	 			logBuffer.append("QSub: " + com + "\n");
-				logBuffer.append("See external logfile: " + logfle + "\n");
-			// end QueueSub ###################################################
-			} else {
-		     	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-		    	Process p1 = b.start();
-		    	p1.waitFor();
-		        logBuffer.append(ShowOutput.getLogEntry(p1,com));
-			}
-		}
-
-    	if(sub.equals("")){
-    		com="cd "+path+"libs/ ; java -jar FastQC.jar "+readsFile1;
-    	}else{//From Jar
-    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		com = "cd "+tmpfolder+"libs/ ; java -jar FastQC.jar "+readsFile1;
-    	}	
-    	
-
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_FastQC-1";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	     	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p1 = b.start();
-	    	p1.waitFor();
-	        logBuffer.append(ShowOutput.getLogEntry(p1,com));
+    		//Replace readsFile1 with readsFile2 and execute again
+    		com[com.length-1] = "-jar "+path+"libs/FastQC.jar "+readsFile2;
+    		//Clear StringBuffer
+    		sysErr.setLength(0);
+    		sysErr.append("\n");
+    		Executor.executeCommand(com,exec,LOGGER,null,sysErr);
+    		//Show FastQC Output
+        	LOGGER.info(sysErr);
 		}
     	
-        //Create Output
+    	
+    	
+        /**Create Output Specs**/
         String outfile = readsFile1 + "_fastqc.filterSettings";
         String outfile2 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
         if(new File(outfile2).exists()) {
         	outfile = outfile2;
         }
         
-        DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2ReadFile1", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2ReadFile2", StringCell.TYPE);
-        DataColumnSpecCreator col3 = new DataColumnSpecCreator("Path2filterfile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec(),col3.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(readsFile1);
-    	StringCell cl2 = new StringCell(readsFile2);
-    	StringCell cl3 = new StringCell(outfile);
-    	DataCell[] c = new DataCell[]{cl1,cl2,cl3};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
+
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()}));
     	
+    	DataCell[] c = new DataCell[]{
+    			new StringCell(readsFile1),
+    			new StringCell(readsFile2),
+    			new StringCell(outfile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+    	/**Push FlowVars**/
     	String secFile = "";
-    	//System.out.println(readsFile1.substring(readsFile1.length()-3,readsFile1.length()));
     	if(readsFile1.substring(readsFile1.length()-3,readsFile1.length()).equals("bam")) {
     		secFile = "true";
-    	} else {
+    	}else {
     		secFile = "false";
     	}
     	pushFlowVariableString("isBAM", secFile);
     	
-    	File zipFile = new File(readsFile1 + "_fastqc.zip");
-    	if(zipFile.exists()) {
-    		zipFile.delete();
-    	}
-    	File zipFile1 = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.zip");
-    	if(zipFile1.exists()) {
-    		zipFile1.delete();
-    	}
-    	if(!readsFile2.equals("")) {
-    		File zipFile2 = new File(readsFile2 + "_fastqc.zip");
-        	if(zipFile2.exists()) {
-        		zipFile2.delete();
-        	}
-        	File zipFile3 = new File(readsFile2.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.zip");
-        	if(zipFile3.exists()) {
-        		zipFile3.delete();
-        	}
-    	}
+    	/**Delete FastQC zip files**/
+    	deleteZipFiles(readsFile1, readsFile2);
     	
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -190,13 +169,41 @@ public class FastQCNodeModel extends NodeModel {
     	
     	// Check input ports
     	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
+    	if(!cn[0].equals(RunFastQCNodeModel.OUT_COL1) && !cn[0].equals(RunFastQCNodeModel.OUT_COL2)) {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
     	}
     	
         return new DataTableSpec[]{null};
     }
 
+    /**
+     * Deletes the FASTQC zip files
+     * @param readsFile1
+     * @param readsFile2
+     */
+    private void deleteZipFiles(String readsFile1, String readsFile2){
+    	File zipFile = new File(readsFile1 + "_fastqc.zip");
+    	if(zipFile.exists()) {
+    		zipFile.delete();
+    	}
+    	File zipFile1 = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.zip");
+    	if(zipFile1.exists()) {
+    		zipFile1.delete();
+    	}
+    	if(!readsFile2.equals("")) {
+    		File zipFile2 = new File(readsFile2 + "_fastqc.zip");
+        	if(zipFile2.exists()) {
+        		zipFile2.delete();
+        	}
+        	File zipFile3 = new File(readsFile2.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.zip");
+        	if(zipFile3.exists()) {
+        		zipFile3.delete();
+        	}
+    	}
+    }
+    
+    
+    
     /**
      * {@inheritDoc}
      */
@@ -242,6 +249,5 @@ public class FastQCNodeModel extends NodeModel {
             CanceledExecutionException {
     	
     }
-
 }
 

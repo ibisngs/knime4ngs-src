@@ -39,7 +39,12 @@ public class RunFastQCNodeModel extends NodeModel {
 	private final SettingsModelString m_readseqfile = new SettingsModelString(RunFastQCNodeModel.CFGKEY_READSEQFILE,"");
 	private final SettingsModelString m_readseqfile2 = new SettingsModelString(RunFastQCNodeModel.CFGKEY_READSEQFILE2,"");
 	private final SettingsModelString m_readType = new SettingsModelString(RunFastQCNodeModel.CFGKEY_READTYPE, "single-end");
-		
+
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2ReadFile1";
+	public static final String OUT_COL2 = "Path2ReadFile2";
+	
+	
     /**
      * Constructor for the node model.
      */
@@ -85,8 +90,8 @@ public class RunFastQCNodeModel extends NodeModel {
 		/**
 		 * Create Output Table
 		 */
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2ReadFile1", FileCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2ReadFile2", FileCell.TYPE);
+    	DataColumnSpecCreator col1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE);
+        DataColumnSpecCreator col2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE);
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     					new DataColumnSpec[]{
@@ -94,7 +99,7 @@ public class RunFastQCNodeModel extends NodeModel {
     							}));
     	FileCell cl1 = (FileCell) FileCellFactory.create(readFile1);
     	FileCell cl2 = (FileCell) FileCellFactory.create(readFile2);
-    	cont.addRowToTable(new DefaultRow("Row0",new DataCell[]{cl1,cl2}));
+    	cont.addRowToTable(new DefaultRow("Row0",new FileCell[]{cl1,cl2}));
     	cont.close();
     	BufferedDataTable out = cont.getTable();
     	

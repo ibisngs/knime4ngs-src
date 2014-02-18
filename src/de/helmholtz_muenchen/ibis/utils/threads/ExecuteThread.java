@@ -61,9 +61,9 @@ public class ExecuteThread implements Callable<Boolean> {
 	@Override
 	public Boolean call() throws Exception {
 		LOGGER.info("Running command: " + this.getCommand());
-
+		
 		//Start the process
-		p = Runtime.getRuntime().exec(command, this.ENVIRONMENT);
+		p = Runtime.getRuntime().exec(this.getCommand(), this.ENVIRONMENT);
 		 
 		//If Output is written to stdout/stderr
 		if(this.stdOutFile!=null){
