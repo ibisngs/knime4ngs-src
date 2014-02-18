@@ -89,7 +89,7 @@ public class StarNodeModel extends WrapperNodeModel {
         addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
         addSettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
         addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-        addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);	
+        addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
     }
     
     
