@@ -100,7 +100,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
     	if(isAlignRunMode()) {
-    		if(!(cn[0].equals(RunAlignerNodeModel.OUTPUT_NAME_READ_FILE1) && cn[1].equals(RunAlignerNodeModel.OUTPUT_NAME_READ_FILE2)))
+    		if(!(cn[0].equals(RunAlignerNodeModel.OUT_COL1) && cn[1].equals(RunAlignerNodeModel.OUT_COL2)))
     			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' node.");
     		
             // validate genome dir

@@ -1,22 +1,21 @@
 package de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.util.ArrayList;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -24,17 +23,27 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 /**
  * This is the model implementation of RawReadManipulator.
  * 
  *
- * @author Sebastian
+ * @author Sebastian Kopetzky,Maximilian Hastreiter
  */
 public class RawReadManipulatorNodeModel extends NodeModel {
     
+    // the logger instance
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(RawReadManipulatorNodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2ReadFile1";
+	public static final String OUT_COL2 = "Path2ReadFile2";
+	
 	public static final String CFGKEY_FILTERFILEEXISTS = "filterfileexists";
 	public static final String CFGKEY_USEOTHERFILTERFILE = "useownfilterfile";
 	public static final String CFGKEY_OTHERFILTERSETTINGSFILE = "otherfiltersettingsfile";
@@ -141,8 +150,6 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	String inFile2 = inData[0].iterator().next().getCell(1).toString();
 //    	String filterFile = inData[0].iterator().next().getCell(2).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String path = RawReadManipulatorNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    	String sub =path.substring(path.lastIndexOf("/")+1, path.length());
     	
     	/**Initialize logfile**/
     	String logfile = inFile1.substring(0,inFile1.lastIndexOf("/")+1)+"logfile.txt";
@@ -151,82 +158,89 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	ShowOutput.writeLogFile(logBuffer);
     	/**end initializing logfile**/
     	
-       	/**Construct string with all parameters**/
-    	StringBuffer call = new StringBuffer(32);
-    	call.append("--in="+inFile1);
+ 	
+    	/**Prepare Command**/
+    	ArrayList<String> command = new ArrayList<String>();
+    	String path = RawReadManipulatorNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
+    	command.add("java");
+    	if(sub_path.equals("")){
+    		command.add("-jar "+path+"/libs/FastQReadFiltering.jar");
+    	
+    	}else{//From Jar
+    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
+    		command.add("-jar "+tmpfolder+"/libs/FastQReadFiltering.jar");
+    	}	
+    	
+    	String infileParameter = "--in="+inFile1;
     	if(readType.equals("paired-end") && !inFile2.equals("")) {
-    		call.append(","+inFile2);   
+    		infileParameter+=","+inFile2; 
         	if(m_preserve.getStringValue().equals("Yes")) {
-        		call.append(" --preserve");
+        		command.add("--preserve");
         	}
     	}
+    	command.add(infileParameter);
+    	
     	if(m_filterfileexists.getBooleanValue()){
-    		call.append(" --filtersettings="+inData[0].iterator().next().getCell(2).toString());
+    		command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
     	}
     	
 		if(m_useotherfilterfile.getBooleanValue()) {
-			call.append(" --filtersettings="+m_otherfiltersettingsfile.getStringValue());
+			command.add("--filtersettings="+m_otherfiltersettingsfile.getStringValue());
     	}
     	if(m_ifbarcodefile.getBooleanValue()){
-    		call.append(" --splitByAndTrimBarcodes="+m_barcodefile.getStringValue());
+    		command.add("--splitByAndTrimBarcodes="+m_barcodefile.getStringValue());
     	}
     	if(m_removeadapters.getBooleanValue()){
-    		call.append(" --removeAdapters="+m_adapters.getStringValue());
+    		command.add("--removeAdapters="+m_adapters.getStringValue());
     	}
     	if(m_dotrimpolyat.getBooleanValue()){
     		String value = m_trimpolyat.getStringValue();
     		value = value.substring(0,1);
-    		call.append(" --trimPolyAT="+value);
+    		command.add("--trimPolyAT="+value);
     	}
     	if(m_lengthcutoff.getBooleanValue()){
-    		call.append(" --minLength="+m_minlength.getIntValue());
+    		command.add("--minLength="+m_minlength.getIntValue());
     	}
-    	call.append(" --threadCount="+m_threadcount.getIntValue());
+    	command.add("--threadCount="+m_threadcount.getIntValue());
     	if(m_ifillumina.getBooleanValue()){
-    		call.append(" --isIlluminaFormat="+m_isillumina.getStringValue());  
+    		command.add("--isIlluminaFormat="+m_isillumina.getStringValue());  
     		if(m_convtophred.getStringValue().equals("Yes")){
-    			call.append(" --convertQualToPhred");
+    			command.add("--convertQualToPhred");
     		}
     	}
     	if(m_removen.getStringValue().equals("Yes")){
-    		call.append(" --discardNReads");
+    		command.add("--discardNReads");
     	}
     	if(m_usequalthreshold.getBooleanValue()){
-    		call.append(" --discardReadBelowAvgQuality="+m_qualthreshold.getIntValue());
+    		command.add("--discardReadBelowAvgQuality="+m_qualthreshold.getIntValue());
     	}
     	if(m_usetrimbyqual.getBooleanValue()){
-    		call.append(" --trimByQual="+m_trimbyqual.getIntValue());
+    		command.add("--trimByQual="+m_trimbyqual.getIntValue());
     	}
     	if(m_trimbothends.getBooleanValue()){
-    		call.append(" --trimByQualBothEnds");
+    		command.add("--trimByQualBothEnds");
     	}
     	
-    	call.append(" --noexit");
-    	//String[] callReady = call.toString().split(" ");
+    	command.add("--noexit");
    	
-    	FileOutputStream errFile = new FileOutputStream(new File(ShowOutput.getLogFile()), true);
-    	FileOutputStream outFile = new FileOutputStream(new File(ShowOutput.getLogFile()), true);
+//    	FileOutputStream errFile = new FileOutputStream(new File(ShowOutput.getLogFile()), true);
+//    	FileOutputStream outFile = new FileOutputStream(new File(ShowOutput.getLogFile()), true);
+//    	
+//    	PrintStream stdErr = new PrintStream(errFile); //append
+//    	PrintStream stdOut = new PrintStream(outFile);
+//    	System.setOut(stdOut);
+//    	System.setErr(stdErr);
     	
-    	PrintStream stdErr = new PrintStream(errFile); //append
-    	PrintStream stdOut = new PrintStream(outFile);
-    	System.setOut(stdOut);
-    	System.setErr(stdErr);
-    	
-    	String com ="";
-    	if(sub.equals("")){
-    		com = "java -jar "+path+"/libs/FastQReadFiltering.jar "+call;
-    	
-    	}else{//From Jar
-    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		com = "java -jar "+tmpfolder+"/libs/FastQReadFiltering.jar "+call;
-    	}	
-    	
-
-    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-    	Process p1 = b.start();
-    	p1.waitFor();
-        logBuffer.append(ShowOutput.getLogEntry(p1, com));
-        
+    	/**Execute for first file**/
+    	String[] com = command.toArray(new String[command.size()]);
+    	StringBuffer sysErr = new StringBuffer(50);
+    	StringBuffer sysOut = new StringBuffer(50);
+    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr);
+        LOGGER.info("-----------------SysError-----------------");
+    	LOGGER.info(sysErr);
+    	LOGGER.info("-----------------SysOut-----------------");
+        LOGGER.info(sysOut);
 //    	if(readType.equals("paired-end") && !inFile2.equals("")) {
 //    		callReady[0] = "--in="+inFile2;
 //   		if(callReady[1].lastIndexOf("filtersettings") != -1) {
@@ -235,38 +249,42 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 //    		RawReadManipulator.main(callReady);
 //    	}
     	
-        //Create Output
-    	String outReadsFile1 = inFile1 + ".filtered.fastq";
-    	if(!new File(outReadsFile1).exists()) {
-    		outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered.fastq";
+        /**Create Output**/
+    	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));
+    	if(!new File(outReadsFile1).exists()) {	//If the file does not exist
+			throw new Exception("The expected outfile "+outReadsFile1+" does not exist....something went wrong!");
     	}
+    	
     	String outReadsFile2 = "";
     	if(!inFile2.equals("")) {
-    		outReadsFile2 = inFile2 + ".filtered.fastq";
+    		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
     		if(!new File(outReadsFile2).exists()) {
-        		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered.fastq";
+    			throw new IOException("The expected outfile "+outReadsFile2+" does not exist....something went wrong!");
         	}
     	}
-        DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2ReadFile1", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2ReadFile2", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(outReadsFile1);
-    	StringCell cl2 = new StringCell(outReadsFile2);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
 
-    	outFile.flush();
-    	errFile.flush();
-    	stdOut.close();
-    	stdErr.close();
+    	
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),}));
+    	
+    	DataCell[] c = new DataCell[]{
+    			(FileCell) FileCellFactory.create(outReadsFile1),
+    			(FileCell) FileCellFactory.create(outReadsFile2)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+
+//    	outFile.flush();
+//    	errFile.flush();
+//    	stdOut.close();
+//    	stdErr.close();
     	ShowOutput.writeLogFile(new StringBuffer(ShowOutput.getNodeEndTime()));
     	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**

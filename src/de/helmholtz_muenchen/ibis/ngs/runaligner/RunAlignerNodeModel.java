@@ -15,23 +15,32 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 /**
  * This is the model implementation of RunAligner.
  * 
+ * @author Jan Quell ,Maximilian Hastreiter
  */
 public class RunAlignerNodeModel extends NodeModel {
     
+	
+    // the logger instance
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(RunAlignerNodeModel.class);
+	
 	// name of the output variables
-	public static final String OUTPUT_NAME_READ_FILE1 = "Path2ReadFile1";
-	public static final String OUTPUT_NAME_READ_FILE2 = "Path2ReadFile2";
+	public static final String OUT_COL1 = "Path2ReadFile1";
+	public static final String OUT_COL2 = "Path2ReadFile2";
 	
 	public static final String CFGKEY_READSEQFILE = "readseqfile";
 	public static final String CFGKEY_READSEQFILE2 = "readseqfile2";
@@ -58,11 +67,15 @@ public class RunAlignerNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
+      	
+    	/**Init and Get Values**/
     	String readFile1 = m_readseqfile.getStringValue();
-    	String readFile2 = readFile1;
+    	String readFile2 = "";
     	String readType = m_readType.getStringValue();
-    	
+    	if(m_readseqfile2.isEnabled() && readType.equals("paired-end")) {
+    		readFile2 = m_readseqfile2.getStringValue();
+    	}
+    		
     	/**Initialize logfile**/
     	String logfile = readFile1.substring(0,readFile1.lastIndexOf("/")+1)+"logfile.txt";
     	ShowOutput.setLogFile(logfile);
@@ -70,54 +83,47 @@ public class RunAlignerNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("RunAligner"));
     	/**end initializing logfile**/
     	
-    	File file1 = new File(readFile1);
-    	File file3 = file1;
-    	if(m_readseqfile2.isEnabled() || readType.equals("auto-detect")) {
-    		readFile2 = m_readseqfile2.getStringValue();
-    		file3 = new File(readFile2);
-    	}
-    	logBuffer.append("Reads File 1: " + readFile1 + "\n");
-    	logBuffer.append("Reads File 2: " + readFile2 + "\n");
-		if(file1.exists() && file3.exists()){
-			logBuffer.append("Sequence file(s) found.\n");
+    	LOGGER.info("Reads File 1: " + readFile1);
+    	LOGGER.info("Reads File 2: " + readFile2);
+    	LOGGER.info("Read Type: " + readType);
+
+		if(new File(readFile1).exists() && new File(readFile1).exists()){
+			LOGGER.info("Sequence file(s) found.");
+		}else{
+			throw new IOException("One or both sequence files cannot be found!");
 		}
-		logBuffer.append("Read Type: " + readType + "\n");
-		
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator(OUTPUT_NAME_READ_FILE1, StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator(OUTPUT_NAME_READ_FILE2, StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(readFile1);
-    	StringCell cl2 = new StringCell(readFile2);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
+	
     	
-    	String secFile = "";
-    	//System.out.println(readFile1.substring(readFile1.length()-3,readFile1.length()));
+    	/**Push FlowVariables**/
+    	String isBAM = "";
     	if(readFile1.substring(readFile1.length()-3,readFile1.length()).equals("bam")) {
-    		secFile = "true";
+    		isBAM = "true";
     	} else {
-    		secFile = "false";
-    	}
-    	if(readType.equals("auto-detect")) {
-    		if(!readFile2.equals("na")) {
-    			readType = "paired-end";
-    		} else {
-    			readType = "single-end";
-    		}
-    		logBuffer.append("Read Type: " + readType + "\n");
+    		isBAM = "false";
     	}
     	pushFlowVariableString("readType", readType);
-    	pushFlowVariableString("isBAM", secFile);
+    	pushFlowVariableString("isBAM", isBAM);
+    	
+    	
+		/**Create Output Table**/
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),}));
+    	
+    	DataCell[] c = new DataCell[]{
+    			(FileCell) FileCellFactory.create(readFile1),
+    			(FileCell) FileCellFactory.create(readFile2)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
     	
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
-    	
-        return new BufferedDataTable[]{out};
+    
+        return new BufferedDataTable[]{outTable};
     	
     }
 

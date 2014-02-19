@@ -22,6 +22,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
@@ -32,7 +34,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * This is the model implementation of FastQC.
  * 
  *
- * @author hastreiter
+ * @author Maximilian Hastreiter
  */
 public class FastQCNodeModel extends NodeModel {
     
@@ -79,17 +81,16 @@ public class FastQCNodeModel extends NodeModel {
     	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
     	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
     	
+    	command.add("java");
     	//Path to Jar
     	if(sub_path.equals("")){
-    		command.add("java");
     		command.add("-jar "+path+"libs/FastQC.jar "+readsFile1);
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		command.add("cd "+tmpfolder+"libs/ ; java -jar FastQC.jar");
+    		command.add("-jar "+tmpfolder+"libs/FastQC.jar "+readsFile1);
     	}	
     	
     	/**Execute for first file**/
-    	//command.add(readsFile1);
     	String[] com = command.toArray(new String[command.size()]);
     	StringBuffer sysErr = new StringBuffer(50);
     	Executor.executeCommand(com,exec,LOGGER,null,sysErr);
@@ -121,14 +122,14 @@ public class FastQCNodeModel extends NodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
     	
     	DataCell[] c = new DataCell[]{
-    			new StringCell(readsFile1),
-    			new StringCell(readsFile2),
-    			new StringCell(outfile)};
+    			(FileCell) FileCellFactory.create(readsFile1),
+    			(FileCell) FileCellFactory.create(readsFile2),
+    			(FileCell) FileCellFactory.create(outfile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
