@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
@@ -118,8 +119,8 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     
 
 	@Override
-	protected HashMap<String, String> getGUIParameters(final BufferedDataTable[] inData) {
-		HashMap<String, String> pars = new HashMap<String, String>();
+	protected LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData) {
+		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
 
 		/********************* RUN MODE ***************************/
 		pars.put(NAME_OF_RUN_MODE_PARAM, SET_RUN_MODE.getStringValue());
@@ -202,15 +203,9 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
         // get "hot" run mode value to avoid dirty reads
         currentRunMode = ((SettingsModelString) SET_RUN_MODE.createCloneWithValidatedValue(settings)).getStringValue();
         
-        // get the value even if it is not saved and validate it.
-        //String binaryPath = ((SettingsModelString) SET_BINARY_PATH.createCloneWithValidatedValue(settings)).getStringValue();
-       // validateBinary(binaryPath);
-        //TODO:
-        
         // validate genome dir, if runMode is alignReads
         if(isAlignRunMode())
         	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue());
-
     }
     
     /**

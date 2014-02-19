@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +14,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.util.Pair;
 
@@ -122,7 +123,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @param inData Input data tables
 	 * @return
 	 */
-	protected abstract HashMap<String, String> getGUIParameters(final BufferedDataTable[] inData);
+	protected abstract LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData);
 	
 	/**
 	 * Returns the output data
@@ -140,10 +141,10 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @return
 	 */
 	protected ArrayList<String> getSetParameters(final BufferedDataTable[] inData) {
-		HashMap<String, String> pars = new HashMap<String, String>();			// merged parameter set
-		HashMap<String, String> parsFile = getParametersFromParameterFile();	// get parameter from file
-		HashMap<String, String> parsAdditional = getAdditionalParameter();		// get parameter from input field
-		HashMap<String, String> parsGUI = getGUIParameters(inData);					// get parameter from GUI
+		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();			// merged parameter set
+		LinkedHashMap<String, String> parsFile = getParametersFromParameterFile();			// get parameter from file
+		LinkedHashMap<String, String> parsAdditional = getAdditionalParameter();			// get parameter from input field
+		LinkedHashMap<String, String> parsGUI = getGUIParameters(inData);					// get parameter from GUI
 		
 		// merge them all together
 		pars.putAll(parsFile);
@@ -155,12 +156,15 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 		for(Iterator<String> it = pars.keySet().iterator(); it.hasNext(); ) {
 			// add parameter name
 			String key = it.next();
-			commands.add(key);
 			
-			// add value, if some is set
-			String value = pars.get(key);
-			if(value.length() != 0)
-				commands.add(value);
+			if(key.length() > 0) {
+				commands.add(key);
+				
+				// add value, if some is set
+				String value = pars.get(key);
+				if(value.length() != 0)
+					commands.add(value);
+			}
 		}
 		
 		// return the commands
@@ -186,8 +190,8 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * Returns the parameter which were set in the additional parameter input field.
 	 * @return
 	 */
-	private HashMap<String, String> getAdditionalParameter() {
-		HashMap<String, String> pars = new HashMap<String, String>();
+	private LinkedHashMap<String, String> getAdditionalParameter() {
+		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
 		String parameter = SET_ADDITIONAL_PARAMETER.getStringValue();
 		
 		// split at REGEX
@@ -203,8 +207,8 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * Returns the values, which are stored in the parameter file, if one is given
 	 * @return
 	 */
-	private HashMap<String, String> getParametersFromParameterFile() {
-		HashMap<String, String> pars = new HashMap<String, String>();
+	private LinkedHashMap<String, String> getParametersFromParameterFile() {
+		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
 		String filename = SET_PARAMETER_FILE.getStringValue();
 
 		// check if some parameter file was set
@@ -223,7 +227,8 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 			// read lines
 			while((line = r.readLine()) != null) {
 				Pair<String, String> p = splitParameter(line);
-				pars.put(p.getFirst(), p.getSecond());
+				if(p.getFirst().length() > 0)
+					pars.put(p.getFirst(), p.getSecond());
 			}
 			// close the file
 			r.close();
