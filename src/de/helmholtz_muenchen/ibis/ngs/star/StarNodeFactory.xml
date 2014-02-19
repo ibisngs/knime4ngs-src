@@ -9,12 +9,16 @@
     <fullDescription>
         <intro>STAR, a "splice aware" RNA-seq aligner, aligns RNA-seq reads to a reference genome using uncompressed suffix arrays.<br /><br />For details, please see paper:<br />Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635<br /><a href="http://bioinformatics.oxfordjournals.org/content/29/1/15">STAR: ultrafast universal RNA-seq aligner</a><br /><br />Options were tested with <i>alpha 2.3.1z</i> but should work also with different versions because of the <b>parameterFile</b> option.</intro>
         
-        
-        <option name="runMode"><i>alignReads</i> or <i>generateGenome</i>:<br /><br/><i>alignReads:</i> aligns reads to a reference genome<br /><i>generateGenome:</i> generates a genome index out of one or more fasta files</option>
-        <option name="path to STAR binary">Path to the compiled STAR binary. Theoretically all versions starting from <i>alpha 2.3.1z</i> should be supported.</option>
-        <option name="path to STAR parameter file">Can be used to set parameters which can not be set directly in this node.<br /><br />Expected syntax: parameterName (without '-' or '--') parameterValue(s)<br />Example: runThreadN 4<br /><br />Supported parameters can be looked up in the <b>parametersDefault</b> file which is shipped together with the <a href="https://code.google.com/p/rna-star/">STAR source files</a>.</option>
-        <option name="path to indexed genome">Path to the genome which was indexed by STAR using the "generate genome mode". This option is only needed in the "align read mode".</option>
-        <option name="path to output folder">Path where all the output data is stored.</option>
+        <tab name="level 0 and 1 options">
+        	<option name="path to STAR binary">Path to the compiled STAR binary. Theoretically all versions starting from <i>alpha 2.3.1z</i> should be supported.</option>
+			<option name="path to parameter file">Can be used to set parameters which can not be set directly in this node.<br /><br />Expected syntax: parameterName (with '-' or '--') parameterValue(s)<br />Example: --runThreadN 4<br /><br />Supported parameters can be looked up in the <b>parametersDefault</b> file which is shipped together with the <a href="https://code.google.com/p/rna-star/">STAR source files</a>.</option>
+			<option name="additional parameters">Parameters can be set like you would normally use them on the command line for this binary. This parameters override the settings in the parameter file and are overridden by the settings of level 2.</option>
+        </tab>
+        <tab name="level 2 options">
+        	<option name="runMode"><i>alignReads</i> or <i>generateGenome</i>:<br /><br/><i>alignReads:</i> aligns reads to a reference genome<br /><i>generateGenome:</i> generates a genome index out of one or more fasta files</option>
+        	<option name="path to indexed genome">Path to the genome which was indexed by STAR using the "generate genome mode". This option is only needed in the "align read mode".</option>
+        	<option name="path to output folder">Path where all the output data is stored.</option>
+        </tab>
     </fullDescription>
     
     <ports>

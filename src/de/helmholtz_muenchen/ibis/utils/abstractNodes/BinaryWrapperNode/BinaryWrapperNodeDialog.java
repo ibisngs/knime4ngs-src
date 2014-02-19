@@ -20,7 +20,7 @@ public abstract class BinaryWrapperNodeDialog extends DefaultNodeSettingsPane {
 	protected BinaryWrapperNodeDialog() {
 		super();
 		// rename default tab
-		setDefaultTabTitle("general options (level 0 and 1)");
+		setDefaultTabTitle("level 0 and 1 options");
 		
         // create open file/folder components
         DialogComponentFileChooser dcBinaryPath = new DialogComponentFileChooser(SET_BINARY_PATH, "his_id_BINARY_PATH", 0);
