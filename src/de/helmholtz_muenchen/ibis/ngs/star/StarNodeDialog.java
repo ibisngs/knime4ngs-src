@@ -19,8 +19,9 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
  */
 public class StarNodeDialog extends BinaryWrapperNodeDialog {
 
+	private final static String BINARY_NAME = "STAR";
+	
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_PARAMETER_FILE 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_PARAMETER_FILE, this);
     private final SettingsModelString SET_RUN_MODE 			= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, this);
     private final SettingsModelString SET_OUTPUT_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, this);
     private final SettingsModelString SET_GENOME_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, this);
@@ -30,7 +31,6 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
        
         // create open file/folder components
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);
-        DialogComponentFileChooser dcParameterFile 	= new DialogComponentFileChooser(SET_PARAMETER_FILE, "his_id_PARAMETER_FILE", 0);
        	DialogComponentFileChooser dcGenomeFolder 	= new DialogComponentFileChooser(SET_GENOME_FOLDER, "his_id_GENOME_FOLDER", 0, true);
 
        	// create string selection component
@@ -38,7 +38,6 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
        	
        	// set a new title to them
        	dcOutputFolder.setBorderTitle("path to output folder");
-       	dcParameterFile.setBorderTitle("path to STAR parameter file");
        	dcGenomeFolder.setBorderTitle("path to indexed genome");
      
        	// add groups and components
@@ -46,7 +45,6 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
         addDialogComponent(dcRunMode);
 
         createNewGroup("input");
-        addDialogComponent(dcParameterFile);
         addDialogComponent(dcGenomeFolder);
         
         createNewGroup("output");
@@ -63,5 +61,10 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
 			}
         });
     }
+
+	@Override
+	protected String getNameOfBinary() {
+		return BINARY_NAME;
+	}
 }
 

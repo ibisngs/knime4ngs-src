@@ -31,7 +31,7 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	private static final String FILE_STDERR = "stderr.log";
 
 	// logger class
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(ScriptNodeModel.class);
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
 
 	/**
 	 * Constructor with number of input and output ports.

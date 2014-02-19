@@ -2,8 +2,10 @@ package de.helmholtz_muenchen.ibis.ngs.star;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -34,13 +36,11 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
 public class StarNodeModel extends BinaryWrapperNodeModel {
      
 	// name of the output variables
-	public static final String OUTPUT_NAME_RUN_MODE = "RunMode";
-	public static final String OUTPUT_NAME_OUTPUT_FOLDER = "OutputFolder";
-	public static final String OUTPUT_NAME_PARAMETER_CONFIG_FILE = "ParameterConfigFile";
+	public static final String OUT_COL1 = "RunMode";
+	public static final String OUT_COL2 = "OutputFolder";
+	public static final String OUT_COL3 = "CallCommand";
 
     // keys for SettingsModels
-
-    protected static final String CFGKEY_PARAMETER_FILE = "ParameterFile";
     protected static final String CFGKEY_RUN_MODE 		= "RunMode";
     protected static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
     protected static final String CFGKEY_GENOME_FOLDER 	= "GenomeFolder";
@@ -48,12 +48,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
     protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    private static final String DEFAULT_PARAMETER_FILE 	= "-";					// must be set by user but is optional
     private static final String DEFAULT_OUTPUT_FOLDER 	= "./output/";			// creates a folder "output" relative to the STAR binary
     private static final String DEFAULT_GENOME_FOLDER 	= "./GenomeDir/";		// searches for the genome index in "GenomeDir" relative to the STAR binary
 
     // name of parameters which are defined in the STAR binary
-    private final static String NAME_OF_PARAMETER_FILE_PARAM 	= "--parametersFiles";		// parameter in STAR which allows the user to define a parameter File
     private final static String NAME_OF_OUTPUT_PREFIX_PARAM 	= "--outFileNamePrefix";	// parameter in STAR which allows the user to set the output folder (relative or absolute)
     private final static String NAME_OF_OUTPUT_GENOMEDIR_PARAM 	= "--genomeDir";			// output parameter in case of generateGenome run or input in other case
     private final static String NAME_OF_RUN_MODE_PARAM 			= "--runMode";				// parameter in STAR which sets the runMode
@@ -63,7 +61,6 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_PARAMETER_FILE	= getSettingsModelString(CFGKEY_PARAMETER_FILE);
     private final SettingsModelString SET_RUN_MODE			= getSettingsModelString(CFGKEY_RUN_MODE);
     private final SettingsModelString SET_OUTPUT_FOLDER		= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
     private final SettingsModelString SET_GENOME_FOLDER		= getSettingsModelString(CFGKEY_GENOME_FOLDER);
@@ -81,12 +78,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      */
     static {
         // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
         addSettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
         addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
         addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
     }
-    
     
     /**
      * Constructor for the node model.
@@ -110,7 +105,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     		
             // validate genome dir
             if(hasConfigureOpendOnce)
-            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue(), getBinaryPath());
+            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
     	}
     	else {
     		if(!cn[0].equals(FastaSelectorNodeModel.OUTPUT_NAME_FASTA_FILES))
@@ -120,112 +115,79 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		return new DataTableSpec[]{null};
     }
     
+    
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+	@Override
+	protected HashMap<String, String> getGUIParameters(final BufferedDataTable[] inData) {
+		HashMap<String, String> pars = new HashMap<String, String>();
+
+		/********************* RUN MODE ***************************/
+		pars.put(NAME_OF_RUN_MODE_PARAM, SET_RUN_MODE.getStringValue());
+		
+		
+		/********************* OUTPUT ****************************/
+    	// check, which kind of output parameter must be set.
+    	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
     	
-    	exec.setProgress(0.01); // start with the work
-    	// some simple arguments
-    	String binaryPath = getBinaryPath();
-    	File binaryFile = new File(binaryPath);
-    	ArrayList<String> runmodeArgument = new ArrayList<String>();
-    	runmodeArgument.add(NAME_OF_RUN_MODE_PARAM);
-    	runmodeArgument.add(SET_RUN_MODE.getStringValue());
-    	
-    	/********************* OUTPUT ****************************/
-    	ArrayList<String> outputArgument = new ArrayList<String>();
-    	// get output folder info and create the folder if needed
-    	String outputFolder = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), binaryFile, true);
-    	File outDir = new File(outputFolder);
+		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
+    	File outDir = new File(outputFolderArgument);
+    	// create folder, if not already there
     	if(!outDir.isDirectory())
     		outDir.mkdirs();
     	
-    	
-    	// check, which kind of output parameter must be set.
-    	String outputFolderParameter = NAME_OF_OUTPUT_PREFIX_PARAM;
-    	if(!isAlignRunMode())
-    		outputFolderParameter = NAME_OF_OUTPUT_GENOMEDIR_PARAM;
-    	
-    	outputArgument.add(outputFolderParameter);
-    	outputArgument.add(outputFolder);
-    	/*********************************************************/
+    	pars.put(outputFolderParameter, outputFolderArgument);
+
     	
     	/********************** INPUT ****************************/
+    	String inputParameter = (isAlignRunMode() ? NAME_OF_FASTAQ_PARAM : NAME_OF_FASTA_FILES_PARAM);
     	ArrayList<String> inputArgument = new ArrayList<String>();
-    	String parameterFile = "";
     	
-    	// get input parameter from runaligner
-    	if(isAlignRunMode()) {
-    		inputArgument.add(NAME_OF_FASTAQ_PARAM);   	
-    		
+    	// get input parameter from run aligner
+    	if(isAlignRunMode()) {	
 	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
 	    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
 	    	// add first input file
-	    	inputArgument.add(getAbsoluteFilename(path2readFile1, binaryFile, false));
+	    	inputArgument.add(getAbsoluteFilename(path2readFile1, false));
 	    	
 	    	// add second input file, if paired mode was selected and both files are different
 	    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
-	    		inputArgument.add(getAbsoluteFilename(path2readFile2, binaryFile, false));
+	    		inputArgument.add(getAbsoluteFilename(path2readFile2, false));
 	    	
-	    	// add genome Folder to parameters
-	    	inputArgument.add(NAME_OF_OUTPUT_GENOMEDIR_PARAM);
-	    	inputArgument.add(getAbsoluteFilename(SET_GENOME_FOLDER.getStringValue(), binaryFile, true));
-	    	
-	    	// optional parameter file
-	    	if(!DEFAULT_PARAMETER_FILE.equals(SET_PARAMETER_FILE.getStringValue())) {	  
-	    		parameterFile = getAbsoluteFilename(SET_PARAMETER_FILE.getStringValue(), binaryFile, false);
-	    	    inputArgument.add(NAME_OF_PARAMETER_FILE_PARAM);
-		    	inputArgument.add(parameterFile);
-	    	}
-	    	    	    	
+	    	// add genome folder to parameters
+	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, SET_GENOME_FOLDER.getStringValue());   	    	
     	}
     	// get input parameter from FastaSelector (which are already absolute)
     	else {
-        	inputArgument.add(NAME_OF_FASTA_FILES_PARAM);   
-        	
     		for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); )
     			inputArgument.add(it.next().getCell(0).toString());
     	}
-    	/*********************************************************/
-    	
-    	/******************* RUN COMMAND *************************/
-    	// collect all commands
-    	ArrayList<String> allCommands = new ArrayList<String>();
-    	allCommands.add(binaryPath);
-    	allCommands.addAll(runmodeArgument);
-    	allCommands.addAll(inputArgument);
-    	allCommands.addAll(outputArgument);
-    	
-		// build command array
-		String[] command = allCommands.toArray(new String[allCommands.size()]);
-		
-		// execute the command
-		exec.setProgress(0.05);
-		executeCommand(exec, command, null);
-		exec.setProgress(1.00); // we are done
-		/*********************************************************/
+    	// add the input parameter
+    	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
 
-		/******************* PREPARE OUTPUT **********************/
-		DataColumnSpecCreator col1 = new DataColumnSpecCreator(OUTPUT_NAME_RUN_MODE, StringCell.TYPE);
-		DataColumnSpecCreator col2 = new DataColumnSpecCreator(OUTPUT_NAME_OUTPUT_FOLDER, StringCell.TYPE);
-		DataColumnSpecCreator col3 = new DataColumnSpecCreator(OUTPUT_NAME_PARAMETER_CONFIG_FILE, StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(), col2.createSpec(), col3.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(SET_RUN_MODE.getStringValue());
-    	StringCell cl2 = new StringCell(outputFolder);
-    	StringCell cl3 = new StringCell(parameterFile);
-    	DataCell[] c = new DataCell[]{cl1, cl2, cl3};
-    	DefaultRow r = new DefaultRow("Row0", c);
-    	cont.addRowToTable(r);
+    	// return the GUI parameter
+		return pars;
+	}
+	
+	
+	@Override
+	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command) {
+		BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()}));
+    	
+    	DataCell[] c = new DataCell[]{
+    			new StringCell(SET_RUN_MODE.getStringValue()),
+    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true)),
+    			new StringCell(command)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
 		
-        return new BufferedDataTable[]{out};
-    }
+        return new BufferedDataTable[]{cont.getTable()};
+	}
 
      /**
      * {@inheritDoc}
@@ -247,7 +209,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
         
         // validate genome dir, if runMode is alignReads
         if(isAlignRunMode())
-        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue(), getBinaryPath()); //TODO
+        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue());
 
     }
     
@@ -266,11 +228,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      * @return
      * @throws InvalidSettingsException
      */
-    protected boolean validateGenomeIndex(String genomePath, String binaryPath) throws InvalidSettingsException {
+    protected boolean validateGenomeIndex(String genomePath) throws InvalidSettingsException {
     	// check for relative path if binary file is valid
-    	File bFile = new File(binaryPath);
-    	if(isBinaryValid && bFile.canRead())
-    		genomePath = getAbsoluteFilename(genomePath, bFile, true);
+    	if(isBinaryValid && new File(getBinaryPath()).canRead())
+    		genomePath = getAbsoluteFilename(genomePath, true);
     	
     	// check if genomePath exists
     	File f = new File(genomePath);

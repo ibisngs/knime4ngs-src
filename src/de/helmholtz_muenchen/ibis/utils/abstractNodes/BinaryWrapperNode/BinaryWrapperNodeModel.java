@@ -1,32 +1,63 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.util.Pair;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 
-
+/**
+ * Can be used for a node which wrapps around a binary.
+ * @author Michael Kluge
+ *
+ */
 public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 
     // keys for SettingsModels
-	protected static final String CFGKEY_BINARY_PATH 	= "BinaryPath";
+	protected static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
+	protected static final String CFGKEY_ADDITIONAL_PARAMETER 	= "AdditionalParameter";
+    protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
 	
 	// initial default values for SettingsModels    
-    private static final String DEFAULT_BINARY_PATH 	= "";
+    private static final String DEFAULT_BINARY_PATH 			= "";
+    private static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
+    private static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH = getSettingsModelString(CFGKEY_BINARY_PATH);
+    private final SettingsModelString SET_BINARY_PATH			= getSettingsModelString(CFGKEY_BINARY_PATH);
+    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= getSettingsModelString(CFGKEY_ADDITIONAL_PARAMETER);
+    private final SettingsModelString SET_PARAMETER_FILE		= getSettingsModelString(CFGKEY_PARAMETER_FILE);
     
+	// logger class
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
+	
+	// regex for additional parameter
+	private static final String PARAMETER_REGEX 	= "(-{1,2}\\w+)\\s*(([^-]|(?<=\\w)-)*)";
+	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
+	private static final String REGEX_WHITESPACE	= "\\s+";
     
     /**
      * add the used settings
      */
     static {
         // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
+    	addSettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
+    	addSettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
+    	addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
     }
 	
 	/**
@@ -48,6 +79,26 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 		return new DataTableSpec[]{null};
 	}
 	
+    @Override
+    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+    	
+    	exec.setProgress(0.01); // tell the user that we started with the work
+    	
+    	// get binary path
+    	String getBinaryPath = getBinaryPath();   	
+    	// get Arguments
+    	ArrayList<String> commands = getSetParameters(inData);
+    	// add binary path as first part of the command
+    	commands.add(0, getBinaryPath);
+    	String[] command = commands.toArray(new String[commands.size()]);
+
+		// execute the command
+		executeCommand(exec, command, null);
+		exec.setProgress(1.00); // we are done
+
+        return getOutputData(exec, ExecuteThread.getCommand(command));
+    }
+	
 	/**
 	 * Returns the binary path which is currently was saved correctly
 	 * @return
@@ -63,6 +114,124 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 */
 	protected String getDefaultBinaryPath() {
 		return DEFAULT_BINARY_PATH;
+	}
+	
+	/**
+	 * Returns the parameters which can be set via the GUI.
+	 * These will override all the other settings.
+	 * @param inData Input data tables
+	 * @return
+	 */
+	protected abstract HashMap<String, String> getGUIParameters(final BufferedDataTable[] inData);
+	
+	/**
+	 * Returns the output data
+	 * @param exec ExecutionContext
+	 * @param command command which was called
+	 * @return
+	 */
+	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command);
+	
+	/**
+	 * Returns the parameters which were set by the parameter file and the additional parameter field
+	 * and by the GUI. 
+	 * Override levels: GUI parameter -> additional parameter -> default parameter file
+	 * @param inData Input data tables
+	 * @return
+	 */
+	protected ArrayList<String> getSetParameters(final BufferedDataTable[] inData) {
+		HashMap<String, String> pars = new HashMap<String, String>();			// merged parameter set
+		HashMap<String, String> parsFile = getParametersFromParameterFile();	// get parameter from file
+		HashMap<String, String> parsAdditional = getAdditionalParameter();		// get parameter from input field
+		HashMap<String, String> parsGUI = getGUIParameters(inData);					// get parameter from GUI
+		
+		// merge them all together
+		pars.putAll(parsFile);
+		pars.putAll(parsAdditional);
+		pars.putAll(parsGUI);
+		
+		// build the command list
+		ArrayList<String> commands = new ArrayList<String>();
+		for(Iterator<String> it = pars.keySet().iterator(); it.hasNext(); ) {
+			// add parameter name
+			String key = it.next();
+			commands.add(key);
+			
+			// add value, if some is set
+			String value = pars.get(key);
+			if(value.length() != 0)
+				commands.add(value);
+		}
+		
+		// return the commands
+		return commands;
+	}
+	
+	/**
+	 * splits a "complete parameter line" at the first space
+	 * @param completeParameter
+	 * @return
+	 */
+	private Pair<String, String> splitParameter(String completeParameter) {
+		String[] split = completeParameter.split(REGEX_WHITESPACE);
+		String par = split[0];
+		String arg = ""; // default argument is empty
+		
+		if(split.length > 1)
+			arg = completeParameter.replaceFirst(split[0] + REGEX_WHITESPACE, "").replaceFirst(REGEX_WHITESPACE + "$", "");
+		return new Pair<String, String>(par, arg);
+	}
+	
+	/**
+	 * Returns the parameter which were set in the additional parameter input field.
+	 * @return
+	 */
+	private HashMap<String, String> getAdditionalParameter() {
+		HashMap<String, String> pars = new HashMap<String, String>();
+		String parameter = SET_ADDITIONAL_PARAMETER.getStringValue();
+		
+		// split at REGEX
+		Matcher m = PARAMETER_PATTERN.matcher(parameter);
+		
+		while(m.find())
+			pars.put(m.group(1), m.group(2));
+		
+		return pars;
+	}
+	
+	/**
+	 * Returns the values, which are stored in the parameter file, if one is given
+	 * @return
+	 */
+	private HashMap<String, String> getParametersFromParameterFile() {
+		HashMap<String, String> pars = new HashMap<String, String>();
+		String filename = SET_PARAMETER_FILE.getStringValue();
+
+		// check if some parameter file was set
+		if(!(filename.length() > 0 && !DEFAULT_PARAMETER_FILE.equals(filename)))
+			return pars;
+
+		// check, if file is there
+		File f = new File(filename);
+		if(!(f.exists() && f.isFile()))
+			return pars;
+
+		// open file
+		try {
+			String line;
+			BufferedReader r = new BufferedReader(new FileReader(f));
+			// read lines
+			while((line = r.readLine()) != null) {
+				Pair<String, String> p = splitParameter(line);
+				pars.put(p.getFirst(), p.getSecond());
+			}
+			// close the file
+			r.close();
+		}
+		catch(Exception e) {
+			LOGGER.error(e.getStackTrace());
+		}
+		return pars;
 	}
 	
 	/**
@@ -87,11 +256,12 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
      * creates a absolute path name if the path name starts with "./" or "../" which means its a relative
      * path (to the folder where the binary is located)
      * @param filenPath path to file
-     * @param binaryPath File which points to the binary
      * @param isPath true, if its a path and not a filename
      * @return
      */
-    protected String getAbsoluteFilename(String filenPath, File binaryPath, boolean isPath) {
+    protected String getAbsoluteFilename(String filenPath, boolean isPath) {
+    	File binaryPath = new File(getBinaryPath());
+     	
     	// relative path to the binary folder
     	if(filenPath.startsWith("."))
     		filenPath = binaryPath.getParentFile().getAbsolutePath() + File.separator + filenPath;
@@ -104,7 +274,5 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	filenPath = filenPath.replaceAll(File.separator + "\\." + File.separator, File.separator);
 
     	return filenPath;
-
     }
-
 }
