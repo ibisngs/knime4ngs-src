@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
