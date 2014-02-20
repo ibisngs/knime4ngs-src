@@ -65,10 +65,6 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelString SET_OUTPUT_FOLDER		= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
     private final SettingsModelString SET_GENOME_FOLDER		= getSettingsModelString(CFGKEY_GENOME_FOLDER);
     
-    private boolean isBinaryValid 			= false; // true, if last call of validateBinary was ok
-    private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
-    private String currentRunMode			= null;	 // current run mode will be set here...TODO: find better way to do that
-    
     // the logger instance
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
@@ -104,8 +100,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' node.");
     		
             // validate genome dir
-            if(hasConfigureOpendOnce)
-            	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
+            validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
     	}
     	else {
     		if(!cn[0].equals(FastaSelectorNodeModel.OUTPUT_NAME_FASTA_FILES))
@@ -188,31 +183,13 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		
         return new BufferedDataTable[]{cont.getTable()};
 	}
-
-     /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-     	super.validateSettings(settings);
-       
-        // configure must have been opened or we won't be here
-        hasConfigureOpendOnce = true;
-        
-        // get "hot" run mode value to avoid dirty reads
-        currentRunMode = ((SettingsModelString) SET_RUN_MODE.createCloneWithValidatedValue(settings)).getStringValue();
-        
-        // validate genome dir, if runMode is alignReads
-        if(isAlignRunMode())
-        	validateGenomeIndex(((SettingsModelString) SET_GENOME_FOLDER.createCloneWithValidatedValue(settings)).getStringValue());
-    }
     
     /**
      * true, if align run mode is configured
      * @return
      */
     private boolean isAlignRunMode() {
-    	return DEFAULT_RUN_MODE.equals(currentRunMode);
+    	return DEFAULT_RUN_MODE.equals(SET_RUN_MODE.getStringValue());
     }
     
     
@@ -224,7 +201,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      */
     protected boolean validateGenomeIndex(String genomePath) throws InvalidSettingsException {
     	// check for relative path if binary file is valid
-    	if(isBinaryValid && new File(getBinaryPath()).canRead())
+    	if(isBinaryValid(getBinaryPath()))
     		genomePath = getAbsoluteFilename(genomePath, true);
     	
     	// check if genomePath exists

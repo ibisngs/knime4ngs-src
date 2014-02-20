@@ -82,13 +82,16 @@ public class FastQCNodeModel extends NodeModel {
     	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
     	
     	command.add("java");
+    	String jarCall = "";
     	//Path to Jar
     	if(sub_path.equals("")){
-    		command.add("-jar "+path+"libs/FastQC.jar "+readsFile1);
+    		jarCall = "-jar "+path+"libs/FastQC.jar ";
+    		
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
-    		command.add("-jar "+tmpfolder+"libs/FastQC.jar "+readsFile1);
+    		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
     	}	
+    	command.add(jarCall + readsFile1);
     	
     	/**Execute for first file**/
     	String[] com = command.toArray(new String[command.size()]);
@@ -100,7 +103,7 @@ public class FastQCNodeModel extends NodeModel {
     	/**If Paired-End data**/
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
     		//Replace readsFile1 with readsFile2 and execute again
-    		com[com.length-1] = "-jar "+path+"libs/FastQC.jar "+readsFile2;
+    		com[com.length-1] = jarCall + readsFile2;
     		//Clear StringBuffer
     		sysErr.setLength(0);
     		sysErr.append("\n");

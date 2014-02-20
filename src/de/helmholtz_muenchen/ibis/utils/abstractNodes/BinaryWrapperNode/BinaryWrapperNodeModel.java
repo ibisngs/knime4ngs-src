@@ -74,7 +74,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	@Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 		// validate binary
-		validateBinary(SET_BINARY_PATH.getStringValue());
+		isBinaryValid(SET_BINARY_PATH.getStringValue());
 		
 		return new DataTableSpec[]{null};
 	}
@@ -244,7 +244,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
      * @return
      * @throws InvalidSettingsException
      */
-    protected boolean validateBinary(String binaryPath) throws InvalidSettingsException
+    protected boolean isBinaryValid(String binaryPath) throws InvalidSettingsException
     {
     	if(binaryPath == null || binaryPath.length() == 0)
     		throw new InvalidSettingsException("Path to binary is not set.");
