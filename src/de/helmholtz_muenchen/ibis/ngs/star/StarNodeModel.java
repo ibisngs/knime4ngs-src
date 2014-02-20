@@ -19,9 +19,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
 
 import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
+import de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
@@ -96,8 +96,9 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
     	if(isAlignRunMode()) {
-    		if(!(cn[0].equals(RunAlignerNodeModel.OUT_COL1) && cn[1].equals(RunAlignerNodeModel.OUT_COL2)))
-    			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' node.");
+    		if(!((cn[0].equals(RunAlignerNodeModel.OUT_COL1) && cn[1].equals(RunAlignerNodeModel.OUT_COL2) ||
+    			(cn[0].equals(RawReadManipulatorNodeModel.OUT_COL1) && cn[1].equals(RawReadManipulatorNodeModel.OUT_COL2)))))
+    			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' or 'RawReadManipulator' node.");
     		
             // validate genome dir
             validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
@@ -157,8 +158,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     			inputArgument.add(it.next().getCell(0).toString());
     	}
     	// add the input parameter
-    	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
-
+    	pars.put(inputParameter, StringUtils.join(inputArgument, "\" \""));
     	// return the GUI parameter
 		return pars;
 	}
