@@ -30,6 +30,9 @@
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory"/>
 		
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
+		
 		<!-- METABOLOMICS -->
 		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
 		<node category-path="/ibis/metabolomics" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory"/>

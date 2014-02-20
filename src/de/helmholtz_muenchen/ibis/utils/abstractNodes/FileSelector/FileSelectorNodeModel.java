@@ -18,7 +18,6 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 
