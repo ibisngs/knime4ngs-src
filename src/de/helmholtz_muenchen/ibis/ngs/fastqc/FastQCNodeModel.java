@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -17,6 +18,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -25,6 +27,7 @@ import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -62,7 +65,6 @@ public class FastQCNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
     	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
@@ -83,13 +85,16 @@ public class FastQCNodeModel extends NodeModel {
     	
     	command.add("java");
     	String jarCall = "";
+    	String path2mergeScript = "";
     	//Path to Jar
     	if(sub_path.equals("")){
     		jarCall = "-jar "+path+"libs/FastQC.jar ";
+    		path2mergeScript = path + "scripts/bash/mergeFsettings.sh";
     		
     	}else{//From Jar
     		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
     		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
+    		path2mergeScript = tmpfolder + "scripts/bash/mergeFsettings.sh";
     	}	
     	command.add(jarCall + readsFile1);
     	
@@ -100,6 +105,10 @@ public class FastQCNodeModel extends NodeModel {
     	//Show FastQC Output
     	LOGGER.info(sysErr);
     	
+        /**Create Output Specs**/
+        String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
+        String outFileSettings = outfile1;
+
     	/**If Paired-End data**/
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
     		//Replace readsFile1 with readsFile2 and execute again
@@ -110,18 +119,28 @@ public class FastQCNodeModel extends NodeModel {
     		Executor.executeCommand(com,exec,LOGGER,null,sysErr);
     		//Show FastQC Output
         	LOGGER.info(sysErr);
+        	//Clear StringBuffer
+    		sysErr.setLength(0);
+    		sysErr.append("\n");
+    		
+    		/** merge the two filter settings files */
+        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
+        	String readFile2Name = new File(readsFile2).getName();
+        	String outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
+        	outFileSettings = outfileMerged; // override this path
+        	
+        	// merge the two settings files
+        	ArrayList<String> commandMerge = new ArrayList<String>();
+        	commandMerge.add(path2mergeScript);
+        	commandMerge.add(outfile1);
+        	commandMerge.add(outfile2);
+        	commandMerge.add(outfileMerged);
+        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr); // do this to avoid escaping
+        	//Show FastQC Output
+        	LOGGER.info(sysErr);
+        	logBuffer.append(sysErr);
 		}
     	
-    	
-    	
-        /**Create Output Specs**/
-        String outfile = readsFile1 + "_fastqc.filterSettings";
-        String outfile2 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
-        if(new File(outfile2).exists()) {
-        	outfile = outfile2;
-        }
-        
-
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
@@ -132,7 +151,7 @@ public class FastQCNodeModel extends NodeModel {
     	DataCell[] c = new DataCell[]{
     			(FileCell) FileCellFactory.create(readsFile1),
     			(FileCell) FileCellFactory.create(readsFile2),
-    			(FileCell) FileCellFactory.create(outfile)};
+    			(FileCell) FileCellFactory.create(outFileSettings)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
