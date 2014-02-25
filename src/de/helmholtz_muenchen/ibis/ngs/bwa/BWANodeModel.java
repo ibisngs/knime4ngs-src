@@ -2,13 +2,13 @@ package de.helmholtz_muenchen.ibis.ngs.bwa;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -21,11 +21,10 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.workflow.NodeProgressEvent;
-import org.knime.core.node.workflow.NodeProgressListener;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
@@ -34,8 +33,10 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 /**
  * This is the model implementation of BWA.
  * 
+ * @author Jan Quell
+ * @author Maximilian Hastreiter
  */
-public class BWANodeModel extends NodeModel implements NodeProgressListener {
+public class BWANodeModel extends NodeModel {
     
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
 	public static final String CFGKEY_BWAFILE = "bwafile";
@@ -47,20 +48,27 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
 	public static final String CFGKEY_READGROUPBOOLEAN = "readgroupboolean";
 	public static final String CFGKEY_ALNALGO = "alnalgo";
 	
-	private final SettingsModelString m_refseqfile = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
-	private final SettingsModelString m_bwafile = new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"");
-	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
-	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED	, false);
-	private final SettingsModelString m_bwtIndex = new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX, "BWT-SW");
-	private final SettingsModelString m_alnalgo = new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO, "BWA-backtrack");
-	private final SettingsModelString m_readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE, "auto-detect");
-	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP, "");
-	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN, false);
 	
-	private final NodeLogger LOGGER = getLogger();
+    // definition of SettingsModel
+	private final SettingsModelString m_refseqfile = new SettingsModelString(CFGKEY_REFSEQFILE,"");
+	private final SettingsModelString m_bwafile = new SettingsModelString(CFGKEY_BWAFILE,"");
+	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
+	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
+	private final SettingsModelString m_bwtIndex = new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
+	private final SettingsModelString m_alnalgo = new SettingsModelString(CFGKEY_ALNALGO,"BWA-backtrack");
+	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"auto-detect");
+	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"");
+	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
+	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2SAMFile";
+	public static final String OUT_COL2 = "Path2RefFile";
+	
+
 	
 	
-//TODO: implement alnignment algos....
     /**
      * Constructor for the node model.
      */
@@ -71,8 +79,7 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	m_readType.setEnabled(false);
     	
     }
-//    void org.knime.core.node.NodeProgressMonitor.checkCanceled() throws CanceledExecutionException
-    
+
     
     
     /**
@@ -90,13 +97,15 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	logBuffer.append(ShowOutput.getNodeStartTime("BWA"));
     	/**end initializing logfile**/
     	
-    	String path2bwa = m_bwafile.getStringValue();
+    	/**
+		 * Get the Parameters
+		 */
     	String path2refFile = m_refseqfile.getStringValue();
     	String path2readFile = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
     	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
     	String readType = m_readType.getStringValue();
-    	String alnalgo = m_alnalgo.getStringValue();
+    	
     	String basePath = path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
     	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
     	String outBaseName = outBaseName1;
@@ -112,21 +121,26 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	String out1Name = basePath+outBaseName+"_aln_sa.sai";
     	String out11Name = basePath+outBaseName1+"_aln_sa_1.sai";
     	String out12Name = basePath+outBaseName2+"_aln_sa_2.sai";
+
+    	Boolean isBam = false;
+    	    	
+    	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {isBam = true;}
+    	
+    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {readType = readTypePrevious;}
+	
+    	if(isBam) {path2readFile2 = path2readFile;}
+    	
+    	String path2bwa = m_bwafile.getStringValue();
+
+    	
+    	if(path2readFile2.length() > 1 && !path2readFile2.equals("na")) {
+    		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
+	    	if(!path2readFile.equals(path2readFile2)) {
+	    		outBaseName = outBaseName1 + "_" + outBaseName2;
+	    	}
+    	}
     	String colorSpaced = "-c ";
 
-
-    	String samse = " samse";
-    	String sampe = " sampe";
-    	String bwasw = " bwasw";
-    	String bwamem = " bwamem";
-    	Boolean isBam = false;
-    	
-    	//Add Read Group if necessary:
-    	if(m_readGroupBoolean.getBooleanValue()){
-    		samse+="-r "+m_readGroup.getStringValue();
-    		sampe+="-r "+m_readGroup.getStringValue();
-    	}
-    	
     	
     	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {
     		isBam = true;
@@ -135,62 +149,49 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
     	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
     		readType = readTypePrevious;
     	}
-    	logBuffer.append("Read Type: " + readType + "\n");
-    	   	
+    	LOGGER.info("Read Type: " + readType + "\n");
+    	/*******************************************************************************************/   	
+    	
     	/**
     	 * Create Index for Read Files
     	 */
 
     	bwa_index(exec,logBuffer, colorSpaced, path2bwa, path2refFile, path2readFile2);
 
-    	
-    	
     	/**
     	 * Run bwa aln
     	 */
-     //    bwa aln sequence.fasta s_1_1_sequence.txt > aln_sa.sai
-    	logBuffer.append("Find the SA coordinates of the input reads.\n");
+    	LOGGER.info("Find the SA coordinates of the input reads.\n");
     	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam);
-    	System.out.println("Finished BWA aln...");
+    	LOGGER.info("Finished BWA aln...");
+    	
     	
     	/**
-    	 * Align reads
+    	 * Map Reads
     	 */
+    	bwa_map(exec,readType,logBuffer,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2);
+    	//TODO CHECK bwa_map method for errors !!!! TODO
     	
-    	if(isBam) {
-			path2readFile2 = path2readFile;
-		}
-// ### BWA-Backtrack ###
-    	if(alnalgo.equals("BWA-backtrack")) {
-    			bwa_backtrack(exec,readType,logBuffer,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,samse,sampe);
-// ### BWA-SW ###
-    	} else if(alnalgo.equals("BWA-SW")) {
-    			bwa_bwasw(exec,logBuffer, path2bwa, bwasw, path2refFile, path2readFile, path2readFile2, out2Name);
-// ### BWA-MEM ###
-    	} else if(alnalgo.equals("BWA-MEM")) {
-    			bwa_mem(exec,logBuffer, path2bwa, bwamem, path2refFile, path2readFile, path2readFile2, out2Name);
-    	}
-
-    	DataColumnSpecCreator col = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2RefFile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col.createSpec(),col1.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(out2Name);
-    	StringCell cl2 = new StringCell(path2refFile);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(out2Name),
+    			(FileCell) FileCellFactory.create(path2refFile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
-
+    	BufferedDataTable outTable = cont.getTable();
+    	
     	pushFlowVariableString("BAMSAMINFILE",out2Name);
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
-    	return new BufferedDataTable[]{out};
-    	
+
+		return new BufferedDataTable[]{outTable};
     }
     
     /**
@@ -211,168 +212,161 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
      * @throws Exception 
      */
     private void bwa_index(ExecutionContext exec,StringBuffer logBuffer, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws Exception{
-    	 // bwa index -a bwtsw sequence.fasta
-    	
-    	//Constant values
-    	String indexBWTSW = " index -a bwtsw ";
-    	String indexIS = " index -a is ";
-    	String index;
-    	String com = "";
-    	
+    	/**Only execute if Index needs to be created**/
     	if(m_checkIndexRefSeq.getBooleanValue()) {
-	    	logBuffer.append("Index reference sequence.\n");
-	    	if(!m_checkColorSpaced.getBooleanValue()) {
-	    		colorSpaced = "";
-	    	}
+    		
+    		LOGGER.info("Indexing reference sequence.\n");
+    		
+        	ArrayList<String> command = new ArrayList<String>();
+        	// Constant values
+        	command.add(path2bwa+" index");
+        	
+        	//Indexing Type
 	    	if(m_bwtIndex.getStringValue() == "BWT-SW") {
-	    		index = indexBWTSW;
+	    		command.add("-a bwtsw");
 	    	} else {
-	    		index = indexIS;
+	    		command.add("-a is");
 	    	}
-	    	com = path2bwa + index + colorSpaced + path2refFile;
-	    	// begin QueueSub #################################################
-			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWAindex";
-				String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-				String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-				new QSub(com, name, memory, logfle, true);
-	 			logBuffer.append("QSub: " + com + "\n");
-				logBuffer.append("See external logfile: " + logfle + "\n");
-			// end QueueSub ###################################################
-			} else {
-	    	//Execute
-	    		Executor.executeCommand(com.split(" "),exec,LOGGER);
-			}
+	    	// Colorspace
+	    	if(m_checkColorSpaced.getBooleanValue()) {
+	    		command.add(colorSpaced);
+	    	}
+	    	
+	    	//Add Reference genome
+	    	command.add(path2refFile);
+
+	    	/**Execute**/
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+			
     	} else {
-    		logBuffer.append("Indexing reference sequence SKIPPED.\n");
+    		LOGGER.info("Indexing reference sequence SKIPPED.\n");
     	}
     }
     
     private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam) throws Exception{
     	
+    	
+    	ArrayList<String> command = new ArrayList<String>();
+    	// Constant values
+    	command.add(path2bwa+" aln");
+    	
     	String outName = basePath+outBaseName+"_aln_sa.sai";
     	String out11Name = basePath+outBaseName1+"_aln_sa_1.sai";
     	String out12Name = basePath+outBaseName2+"_aln_sa_2.sai";
-    	String com = ""; 
     	String outfile = outName;
     	
     	//If Inputfile is in bam format
-    	String bam = "-b0 ";
-    	String bam2 = "-b2 ";
-    	if(!isBam) {
-			bam = "";
-			bam2 = "";
-		}
     	if(readType.equals("paired-end")){
-    		outfile = out11Name;
+    		outfile = out11Name;				//Set Outfile for forward reads
     		if(isBam){
-    			bam = "-b1";
+    			command.add("-b1");
     		}
-    	}
-    	//Perform aln for forward reads OR single end reads
-    	com = path2bwa + " aln"+bam+" "+ path2refFile +" "+ path2readFile +" -f "+ outfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWAaln";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	//Execute
-			Executor.executeCommand(com.split(" "),exec,LOGGER);
-			
+    	}else{	// Single-end
+    		if(isBam){
+    			command.add("-b0");
+    		}
 		}
+    	
+    	//Perform aln for forward reads OR single end reads
+    	command.add(path2refFile);
+    	command.add(path2readFile);
+    	command.add("-f "+outfile);
+    	/**Execute**/
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+   
 		//If paired end, repeat previous step
     	if(readType.equals("paired-end")) {
-    		com = path2bwa + " aln"+bam2+" "+ path2refFile +" "+ path2readFile2 +" -f "+ out12Name;
-    		// begin QueueSub #################################################
-			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWAaln";
-				String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-				String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-				new QSub(com, name, memory, logfle, true);
-	 			logBuffer.append("QSub: " + com + "\n");
-				logBuffer.append("See external logfile: " + logfle + "\n");
-			// end QueueSub ###################################################
-			} else {
-		    	//Execute
-	    		Executor.executeCommand(com.split(" "),exec,LOGGER);
-			}
-    	}
-    }
-    
-    
-    private void bwa_backtrack(ExecutionContext exec,String readType, StringBuffer logBuffer, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String samse, String sampe) throws Exception{
-		String na = "";
-		String com = "";
+    		
+        	if(isBam){
+        		command.set(1, "-b2");        	
+        		command.set(3, path2readFile2);
+            	command.set(4, " -f "+ out12Name);
+        	}else{
+        		command.set(2, path2readFile2);
+            	command.set(3, " -f "+ out12Name);
+        	}
 
-    	if(readType.equals("single-end")) {
-    // bwa samse sequence.fasta aln_sa.sai s_1_1_sequence.txt > aln.sam
-    		logBuffer.append("Generate alignments in the SAM format given single-end reads.\n");
-    		com = path2bwa + samse +" -f "+ out2Name +" "+ path2refFile +" "+ out1Name +" "+ path2readFile;
-    		na = "samse";
-    	} else {
-    // bwa sampe sequence.fasta aln_sa_1.sai aln_sa_2.sai s_1_1_sequence.fq s_1_2_sequence.fq > aln.sam
-    		logBuffer.append("Generate alignments in the SAM format given paired-end reads.\n");
-    		com = path2bwa + sampe +" -f "+ out2Name +" "+ path2refFile +" "+ out11Name +" "+ out12Name +" "+ path2readFile +" "+ path2readFile2;
-    		na = "sampe";
-    	}
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWA" + na;
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	//Execute
-    		Executor.executeCommand(com.split(" "),exec,LOGGER);
+
+        	/**Execute**/
+        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 		}
     }
     
-    private void bwa_bwasw(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwasw, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws Exception{
-    	String com = "";
+    
+  private void bwa_map(ExecutionContext exec,String readType, StringBuffer logBuffer, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2) throws Exception{ 	
     	
-		logBuffer.append("Generate alignments in the SAM format.\n");
-		com = path2bwa + bwasw + " -f " + out2Name +" "+ path2refFile + " " + path2refFile + " " + path2readFile + " " + path2readFile2;
-		// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWA-SW";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	//Execute
-    		Executor.executeCommand(com.split(" "),exec,LOGGER);
-		}
-    }
+  		ArrayList<String> command = new ArrayList<String>();
+  		String alnalgo = m_alnalgo.getStringValue(); 	
+    	
+// ### BWA-Backtrack ###
+    	if(alnalgo.equals("BWA-backtrack")) {
+    		
+        	if(readType.equals("single-end")) {
+        		// bwa samse sequence.fasta aln_sa.sai s_1_1_sequence.txt > aln.sam
+        		LOGGER.info("Generate alignments in the SAM format given single-end reads.\n");
+
+        		command.add(path2bwa+" samse");
+        		
+        		/**Other Options**/
+        		if(m_readGroupBoolean.getBooleanValue()){
+        			command.add("-r "+m_readGroup.getStringValue());
+        		}
+        		/**In and Outfiles**/
+        		command.add("-f "+out2Name);
+        		command.add(path2refFile);
+        		command.add(out1Name);
+        		command.add(path2readFile);
+
+        	} else {
+        		// bwa sampe sequence.fasta aln_sa_1.sai aln_sa_2.sai s_1_1_sequence.fq s_1_2_sequence.fq > aln.sam
+        		LOGGER.info("Generate alignments in the SAM format given paired-end reads.\n");
+        		
+        		command.add(path2bwa+" sampe");
+        		
+        		/**Other Options**/
+        		if(m_readGroupBoolean.getBooleanValue()){
+        			command.add("-r "+m_readGroup.getStringValue());
+        		}
+        		/**In and Outfiles**/
+        		command.add("-f "+out2Name);
+        		command.add(path2refFile);
+        		command.add(out11Name);
+        		command.add(out12Name);
+        		command.add(path2readFile);
+        		command.add(path2readFile2);
+        		
+        	}
+// ### BWA-SW ###
+    	} else if(alnalgo.equals("BWA-SW")) {
+        	LOGGER.info("Generate alignments in the SAM format.\n");
+
+        	command.add(path2bwa+" bwasw");
+        	
+    		/**In and Outfiles**/
+        	command.add("-f "+out2Name);
+        	command.add(path2refFile);
+        	command.add(path2readFile);
+    		if(readType.equals("paired-end")) {
+    			command.add(path2readFile2);
+    		} 		
+// ### BWA-MEM ###
+    	} else if(alnalgo.equals("BWA-MEM")) {
+        	LOGGER.info("Generate alignments in the SAM format.\n");
+
+        	command.add(path2bwa+" mem");
+        	
+    		/**In and Outfiles**/
+        	command.add(path2refFile);
+        	command.add(path2readFile);
+    		if(readType.equals("paired-end")) {
+    			command.add(path2readFile2);
+    		} 
+    	}
+		
+    	/**Execute**/
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	}
     
-    private void bwa_mem(ExecutionContext exec, StringBuffer logBuffer, String path2bwa, String bwamem, String path2refFile, String path2readFile, String path2readFile2, String out2Name) throws Exception{
-    	String com = "";
-		logBuffer.append("Generate alignments in the SAM format.\n");
-		com = path2bwa + bwamem + path2refFile + " " + path2refFile + " " + path2readFile + " " + path2readFile2;
-		// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BWA-MEM";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {	
-	    	//Execute
-    		Executor.executeCommand(com.split(" "),exec,LOGGER,out2Name);
-		}
-    }
     
     
     /**
@@ -483,14 +477,5 @@ public class BWANodeModel extends NodeModel implements NodeProgressListener {
             CanceledExecutionException {
 
     }
-
-
-
-	@Override
-	public void progressChanged(NodeProgressEvent pe) {
-		
-		
-	}
-
 }
 

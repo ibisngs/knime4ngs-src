@@ -96,7 +96,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 		executeCommand(exec, command, null);
 		exec.setProgress(1.00); // we are done
 
-        return getOutputData(exec, ExecuteThread.getCommand(command));
+        return getOutputData(exec, ExecuteThread.getCommand(command),inData);
     }
 	
 	/**
@@ -130,7 +130,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @param command command which was called
 	 * @return
 	 */
-	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command);
+	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData);
 	
 	/**
 	 * Returns the parameters which were set by the parameter file and the additional parameter field

@@ -5,12 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -18,7 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeLogger.LEVEL;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -27,7 +24,6 @@ import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -148,7 +144,7 @@ public class FastQCNodeModel extends NodeModel {
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
     	
-    	DataCell[] c = new DataCell[]{
+    	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(readsFile1),
     			(FileCell) FileCellFactory.create(readsFile2),
     			(FileCell) FileCellFactory.create(outFileSettings)};
