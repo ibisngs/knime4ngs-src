@@ -1,21 +1,21 @@
 package de.helmholtz_muenchen.ibis.ngs.bamsamconverter;
 
-//import java.awt.event.WindowAdapter;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,25 +23,27 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of BAMSAMConverter.
  * 
  *
- * @author 
+ * @author Maximilian Hastreiter
+ * @author Sebastian Kopetzky
  */
 public class BAMSAMConverterNodeModel extends NodeModel {
     
-
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(BAMSAMConverterNodeModel.class);
 	
 	public static final String CFGKEY_PATH2SAMTOOLS="path2samtools";
 	public static final String CFGKEY_METHOD="method";
 	public static final String CFGKEY_INFILE="infile";
 	
-//	public static final String CFGKEY_outputbam="outputbam";
 	public static final String CFGKEY_printsamheader="printsamheader";
 	public static final String CFGKEY_printsamheaderonly="printsamheaderonly";
 	public static final String CFGKEY_uncompressedbam="uncompressedbam";
@@ -77,8 +79,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
 			BAMSAMConverterNodeModel.CFGKEY_METHOD,"");
 	private final SettingsModelString m_infile = new SettingsModelString(
 			BAMSAMConverterNodeModel.CFGKEY_INFILE,"");
-//	private final SettingsModelBoolean m_outputbam = new SettingsModelBoolean(
-//			BAMSAMConverterNodeModel.CFGKEY_outputbam, true);
 	private final SettingsModelBoolean m_printsamheader = new SettingsModelBoolean(
 			BAMSAMConverterNodeModel.CFGKEY_printsamheader, true);
 	private final SettingsModelBoolean m_printsamheaderonly = new SettingsModelBoolean(
@@ -137,6 +137,10 @@ public class BAMSAMConverterNodeModel extends NodeModel {
 	private boolean INSAM1=false;
 	private boolean INBAM=false;
 	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2SamTools";
+	public static String OUT_COL2 = "";
+	
     /**
      * Constructor for the node model.
      */
@@ -153,8 +157,7 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         m_onlygroupreads.setEnabled(false);
         m_onlylibraryreads.setEnabled(false);
         m_printsamheader.setEnabled(false);
-        m_printsamheaderonly.setEnabled(false);
-        
+        m_printsamheaderonly.setEnabled(false);        
     }
 
     /**
@@ -209,118 +212,97 @@ public class BAMSAMConverterNodeModel extends NodeModel {
     	}
 
     	
-    	String com="";
-    	com+=path2samtools+" view ";
-    	if(m_method.getStringValue().equals("SAM->BAM")){com+="-b ";}
-    	if(m_printsamheader.getBooleanValue()&&m_printsamheader.isEnabled()){com+="-h ";}
-    	if(m_printsamheaderonly.getBooleanValue()&&m_printsamheaderonly.isEnabled()){com+="-H ";}
-    	if(m_method.getStringValue().equals("SAM->BAM")){com+="-S ";}
-    	if(m_uncompressedbam.getBooleanValue()&&m_uncompressedbam.isEnabled()){com+="-u ";}
-    	if(m_fastcompression.getBooleanValue()&&m_fastcompression.isEnabled()){com+="-1 ";}
-    	if(m_outhexflag.getBooleanValue()&&m_outhexflag.isEnabled()){com+="-x ";}
-    	if(m_outstringflag.getBooleanValue()&&m_outstringflag.isEnabled()){com+="-X ";}
-    	if(m_printmatchingrecordsonly.getBooleanValue()&&m_printmatchingrecordsonly.isEnabled()){com+="-c ";}
-    	if(m_usebedfile.getBooleanValue()&&m_usebedfile.isEnabled()){com+="-L "+m_bedfile.getStringValue()+" ";}
-    	if(m_userefnamelist.getBooleanValue()&&m_userefnamelist.isEnabled()){com+="-t "+m_refnamelist.getStringValue()+" ";}
-    	if(m_userefseqfile.getBooleanValue()&&m_userefseqfile.isEnabled()){com+="-T "+m_refseqfile.getStringValue()+" ";}
-    	com+="-o "+outputfile+" ";
-    	if(m_uselistofreads.getBooleanValue()&&m_uselistofreads.isEnabled()){com+="-R "+m_listofreads.getStringValue()+" ";}
-    	if(m_userequiredflag.getBooleanValue()&&m_userequiredflag.isEnabled()){com+="-f "+m_requiredflag.getIntValue()+" ";}
-    	if(m_usefilteringflag.getBooleanValue()&&m_usefilteringflag.isEnabled()){com+="-F "+m_filteringflag.getIntValue()+" ";}
-    	com+="-q "+m_minmapqual.getIntValue()+" ";
-    	if(m_useonlylibraryreads.getBooleanValue()&&m_useonlylibraryreads.isEnabled()){com+="-l "+m_onlylibraryreads.getStringValue()+" ";}
-    	if(m_useonlygroupreads.getBooleanValue()&&m_useonlygroupreads.isEnabled()){com+="-s "+m_onlygroupreads.getStringValue()+" ";}
-    	com+=infile;
-    	
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BAMSAMConverter";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = infile.substring(0,infile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-			ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-			Process p = b.start();
-	    	p.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p, com));
-	    	logBuffer.append(ShowOutput.getNodeEndTime());
-	    	ShowOutput.writeLogFile(logBuffer);
-		}
-    	
-    	if(m_method.getStringValue().equals("SAM->BAM")){
-    		
-    	//Sort BAM file
-        logBuffer.append("BAM Sort Process");
-        String path2bamfilesorted = outputfile.substring(0,outputfile.length()-4)+"_sorted";
-        com = path2samtools+" sort "+outputfile+" "+path2bamfilesorted;
-        path2bamfilesorted += ".bam";
-        // begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BAMSAMConverter";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = infile.substring(0,infile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	      	Process p_sortBAM = Runtime.getRuntime().exec(com);
-	      	p_sortBAM.waitFor();
-	      	logBuffer.append(ShowOutput.getLogEntry(p_sortBAM, com));
-		}
-      	
-        if(m_checkbamindex.getBooleanValue()){
-            //Index BAM file   
-            System.out.println("BAM Index Process");
-            com =  path2samtools+" index "+path2bamfilesorted;
-            // begin QueueSub #################################################
-    		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-    			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BAMSAMConverter";
-    			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-    			String logfle = infile.substring(0,infile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-    			new QSub(com, name, memory, logfle, true);
-     			logBuffer.append("QSub: " + com + "\n");
-    			logBuffer.append("See external logfile: " + logfle + "\n");
-    		// end QueueSub ###################################################
-    		} else {
-	            System.out.println(com);
-	            Process p_indexBAM = Runtime.getRuntime().exec(com);
-	            p_indexBAM.waitFor();
-	            logBuffer.append(ShowOutput.getLogEntry(p_indexBAM, com));
-    		}
+    	ArrayList<String> command = new ArrayList<String>();
+    	command.add(path2samtools+" view");
+    	if(m_method.getStringValue().equals("SAM->BAM")){command.add("-b");}
+    	if(m_printsamheader.getBooleanValue()&&m_printsamheader.isEnabled()){command.add("-h");}
+    	if(m_printsamheaderonly.getBooleanValue()&&m_printsamheaderonly.isEnabled()){command.add("-H");}
+    	if(m_method.getStringValue().equals("SAM->BAM")){command.add("-S");}
+    	if(m_uncompressedbam.getBooleanValue()&&m_uncompressedbam.isEnabled()){command.add("-u");}
+    	if(m_fastcompression.getBooleanValue()&&m_fastcompression.isEnabled()){command.add("-1");}
+    	if(m_outhexflag.getBooleanValue()&&m_outhexflag.isEnabled()){command.add("-x");}
+    	if(m_outstringflag.getBooleanValue()&&m_outstringflag.isEnabled()){command.add("-X");}
+    	if(m_printmatchingrecordsonly.getBooleanValue()&&m_printmatchingrecordsonly.isEnabled()){command.add("-c");}
+    	if(m_usebedfile.getBooleanValue()&&m_usebedfile.isEnabled()){command.add("-L "+m_bedfile.getStringValue());}
+    	if(m_userefnamelist.getBooleanValue()&&m_userefnamelist.isEnabled()){command.add("-t "+m_refnamelist.getStringValue());}
+    	if(m_userefseqfile.getBooleanValue()&&m_userefseqfile.isEnabled()){command.add("-T "+m_refseqfile.getStringValue());}
+    	command.add("-o "+outputfile);
+    	if(m_uselistofreads.getBooleanValue()&&m_uselistofreads.isEnabled()){command.add("-R "+m_listofreads.getStringValue());}
+    	if(m_userequiredflag.getBooleanValue()&&m_userequiredflag.isEnabled()){command.add("-f "+m_requiredflag.getIntValue());}
+    	if(m_usefilteringflag.getBooleanValue()&&m_usefilteringflag.isEnabled()){command.add("-F "+m_filteringflag.getIntValue());}
+    	command.add("-q "+m_minmapqual.getIntValue());
+    	if(m_useonlylibraryreads.getBooleanValue()&&m_useonlylibraryreads.isEnabled()){command.add("-l "+m_onlylibraryreads.getStringValue());}
+    	if(m_useonlygroupreads.getBooleanValue()&&m_useonlygroupreads.isEnabled()){command.add("-s "+m_onlygroupreads.getStringValue());}
+    	command.add(infile);
 
-        }else{
-        	logBuffer.append("Skipping BAM Index Process");
-        }
-    	outputfile=path2bamfilesorted;
-    	}
+		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    logBuffer.append(ShowOutput.getNodeEndTime());
+	    ShowOutput.writeLogFile(logBuffer);
+		
     	
-    	
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
-    	DataColumnSpecCreator col2;
+	    /**
+	     * Converting finished, now sort and index if required
+	     */
+	    
+	    
     	if(m_method.getStringValue().equals("SAM->BAM")){
-            col2 = new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE);
-    	}else{
-            col2 = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
+    		command = new ArrayList<String>();	//clear list
+    		
+		    	//Sort BAM file
+		        LOGGER.info("BAM Sort Process");
+		        String path2bamfilesorted = outputfile.substring(0,outputfile.length()-4)+"_sorted";
+		        command.add(path2samtools+" sort");
+		        command.add(outputfile);
+		        command.add(path2bamfilesorted);
+	
+		        Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+				
+		      	
+	        if(m_checkbamindex.getBooleanValue()){
+	            //Index BAM file 
+	        	command = new ArrayList<String>();	//clear list
+	        	path2bamfilesorted += ".bam";
+	        	LOGGER.info("BAM Index Process");
+	        	command.add(path2samtools+" index");
+	        	command.add(path2bamfilesorted);
+	        	
+		        Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    		
+	
+	        }else{
+	        	LOGGER.info("Skipping BAM Index Process");
+	        }
+	        
+	    	outputfile=path2bamfilesorted;
     	}
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2samtools);
-    	StringCell cl2 = new StringCell(outputfile);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	
+    	/**
+    	 * OUTPUT
+    	 */
+    	
+    	if(m_method.getStringValue().equals("SAM->BAM")){
+    		OUT_COL2 = "Path2BAMFile";
+    	}else{
+			OUT_COL2 = "Path2SAMFile";
+    	}
+    	
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2samtools),
+    			(FileCell) FileCellFactory.create(outputfile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
+    	BufferedDataTable outTable = cont.getTable();
     	
     	pushFlowVariableString("MPILEUPINFILE", outputfile);
-    	
-        return new BufferedDataTable[]{out};
+
+		return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -369,7 +351,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         			m_infile.setEnabled(false);
         			m_method.setStringValue("BAM->SAM");
         			m_method.setEnabled(false);       			
-//        			m_outputbam.setEnabled(false);
         			m_uncompressedbam.setEnabled(false);
         			m_uncompressedbam.setBooleanValue(false);
         			m_fastcompression.setEnabled(false);
@@ -380,12 +361,10 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         			m_userefseqfile.setEnabled(false);
         			m_printsamheader.setEnabled(true);
         			m_printsamheaderonly.setEnabled(true);      			
-//        			m_outputbam.setBooleanValue(false);
         			
-        	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
-        	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
-        	        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-        	    	DataTableSpec out = new DataTableSpec(cols);
+        	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", FileCell.TYPE);
+        	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2SAMFile", FileCell.TYPE);
+        	    	DataTableSpec out = new DataTableSpec(new DataColumnSpec[]{col1.createSpec(),col2.createSpec()});
         	        return new DataTableSpec[]{out};		
         		}else if(columnnames[1].equals("Path2SAMFile")){
             		INSAM1=true;
@@ -401,8 +380,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
             		m_infile.setEnabled(false);
             		m_method.setStringValue("SAM->BAM");
             		m_method.setEnabled(false);
-//        			m_outputbam.setEnabled(true);
-//        			m_outputbam.setBooleanValue(true);
         			m_uncompressedbam.setEnabled(true);
         			m_fastcompression.setEnabled(true);
         			m_checkbamindex.setEnabled(true);
@@ -411,8 +388,8 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         			m_printsamheader.setEnabled(false);
         			m_printsamheaderonly.setEnabled(false);
             		
-        	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
-        	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE);
+        	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", FileCell.TYPE);
+        	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2BAMFile", FileCell.TYPE);
         	        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
         	    	DataTableSpec out = new DataTableSpec(cols);
         	        return new DataTableSpec[]{out};	
@@ -434,8 +411,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         		m_infile.setEnabled(false);
         		m_method.setStringValue("SAM->BAM");
         		m_method.setEnabled(false);
-//    			m_outputbam.setEnabled(true);
-//    			m_outputbam.setBooleanValue(true);
     			m_uncompressedbam.setEnabled(true);
     			m_fastcompression.setEnabled(true);
     			m_checkbamindex.setEnabled(true);
@@ -444,8 +419,8 @@ public class BAMSAMConverterNodeModel extends NodeModel {
     			m_printsamheader.setEnabled(false);
     			m_printsamheaderonly.setEnabled(false);
         		
-    	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
-    	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE);
+    	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", FileCell.TYPE);
+    	    	DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2BAMFile", FileCell.TYPE);
     	        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
     	    	DataTableSpec out = new DataTableSpec(cols);
     	    	
@@ -464,7 +439,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         		m_infile.setEnabled(true);
         		m_path2samtools.setEnabled(true);
         		m_method.setEnabled(true);
- //   			m_outputbam.setEnabled(true);
     			m_uncompressedbam.setEnabled(true);
     			m_fastcompression.setEnabled(true);
     			m_checkbamindex.setEnabled(true);
@@ -472,7 +446,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
     			m_userefseqfile.setEnabled(true);
     			m_printsamheader.setEnabled(false);
     			m_printsamheaderonly.setEnabled(false);
-  //  			m_outputbam.setBooleanValue(true);
     			
             	String conversion=m_method.getStringValue();
         		/**
@@ -497,12 +470,12 @@ public class BAMSAMConverterNodeModel extends NodeModel {
             	}else if(conversion.equals("BAM->SAM")&&format.equals("sam")){
                     throw new InvalidSettingsException("BAM->SAM conversion requires BAM input file !");
             	}
-    	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
+    	    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", FileCell.TYPE);
     	    	DataColumnSpecCreator col2;
     	    	if(conversion.equals("SAM->BAM")){
-    	    		col2 = new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE);
+    	    		col2 = new DataColumnSpecCreator("Path2BAMFile", FileCell.TYPE);
     	    	}else{
-    	    		col2 = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
+    	    		col2 = new DataColumnSpecCreator("Path2SAMFile", FileCell.TYPE);
     	    	}
     	    	DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
     	    	DataTableSpec out = new DataTableSpec(cols);
@@ -526,7 +499,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
          m_onlygroupreads.saveSettingsTo(settings);
          m_onlylibraryreads.saveSettingsTo(settings);
          m_outhexflag.saveSettingsTo(settings);
-  //       m_outputbam.saveSettingsTo(settings);
          m_outstringflag.saveSettingsTo(settings);
          m_printmatchingrecordsonly.saveSettingsTo(settings);
          m_printsamheader.saveSettingsTo(settings);
@@ -563,7 +535,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         m_onlygroupreads.loadSettingsFrom(settings);
         m_onlylibraryreads.loadSettingsFrom(settings);
         m_outhexflag.loadSettingsFrom(settings);
- //       m_outputbam.loadSettingsFrom(settings);
         m_outstringflag.loadSettingsFrom(settings);
         m_printmatchingrecordsonly.loadSettingsFrom(settings);
         m_printsamheader.loadSettingsFrom(settings);
@@ -600,7 +571,6 @@ public class BAMSAMConverterNodeModel extends NodeModel {
         m_onlygroupreads.validateSettings(settings);
         m_onlylibraryreads.validateSettings(settings);
         m_outhexflag.validateSettings(settings);
-  //      m_outputbam.validateSettings(settings);
         m_outstringflag.validateSettings(settings);
         m_printmatchingrecordsonly.validateSettings(settings);
         m_printsamheader.validateSettings(settings);

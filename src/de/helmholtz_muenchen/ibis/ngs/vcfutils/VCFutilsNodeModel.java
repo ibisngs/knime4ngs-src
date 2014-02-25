@@ -2,13 +2,16 @@ package de.helmholtz_muenchen.ibis.ngs.vcfutils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -18,14 +21,16 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of VCFutils.
  * 
  *
- * @author 
+ * @author Jan Quell
+ * @author Sebastian Kopetzky
+ * @author Maximilian Hastreiter
  */
 public class VCFutilsNodeModel extends NodeModel {
 	
@@ -85,6 +90,8 @@ public class VCFutilsNodeModel extends NodeModel {
 	private final SettingsModelIntegerBounded m_indelfw = new SettingsModelIntegerBounded(CFGKEY_INDELFW,DEFAULT_INDELFW,0,Integer.MAX_VALUE);
 
 	public static boolean optionalPort=false;	
+	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFutilsNodeModel.class);
 	
     /**
      * Constructor for the node model.
@@ -149,20 +156,19 @@ public class VCFutilsNodeModel extends NodeModel {
     	}
     	String utility = m_utility.getStringValue();
     	String path2vcffile = "";
-    	String com = "";
-    	String minrms = "-Q "+m_minrms.getIntValue() + " ";
-    	String minreaddepth = "-d " + m_minreaddepth.getIntValue() + " ";
-    	String maxreaddepth = "-D " + m_maxreaddepth.getIntValue() + " ";
-    	String minaltbases = "-a " + m_minaltbase.getIntValue() + " ";
-    	String gapfilter = "-w " + m_gapfilter.getIntValue() + " ";
-    	String adjacentgaps = "-W " + m_adjacentgaps.getIntValue() + " ";
-    	String strandpval = "-1 " + m_strandpval.getDoubleValue() + " ";
-    	String baseqpval = "-2 1.0E-" + m_baseqpval.getIntValue() + " ";
-    	String mapqpval = "-3 " + m_mapqpval.getDoubleValue() + " ";
-    	String enddistpval = "-4 " + m_enddistpval.getDoubleValue() + " ";
-    	String hwepval = "-e " + m_hwepval.getDoubleValue() + " ";
+    	String minrms = "-Q "+m_minrms.getIntValue();
+    	String minreaddepth = "-d " + m_minreaddepth.getIntValue();
+    	String maxreaddepth = "-D " + m_maxreaddepth.getIntValue();
+    	String minaltbases = "-a " + m_minaltbase.getIntValue();
+    	String gapfilter = "-w " + m_gapfilter.getIntValue();
+    	String adjacentgaps = "-W " + m_adjacentgaps.getIntValue();
+    	String strandpval = "-1 " + m_strandpval.getDoubleValue();
+    	String baseqpval = "-2 1.0E-" + m_baseqpval.getIntValue();
+    	String mapqpval = "-3 " + m_mapqpval.getDoubleValue();
+    	String enddistpval = "-4 " + m_enddistpval.getDoubleValue();
+    	String hwepval = "-e " + m_hwepval.getDoubleValue();
     	String printfiltered = "";
-    	String indelfilteringwindow = "-l " + m_indelfw.getIntValue() + " ";
+    	String indelfilteringwindow = "-l " + m_indelfw.getIntValue();
     	
     	if(m_printfiltered.getBooleanValue()) {
     		printfiltered="-p ";
@@ -174,64 +180,78 @@ public class VCFutilsNodeModel extends NodeModel {
     		path2vcffile=fle;
     	}
     	
+    	
+    	ArrayList<String> command = new ArrayList<String>();
+    	String outfile = "";
+    	command.add(path2vcf);
+    	
     // "subsam", "listsam", "fillac", "qstats", "hapmap2vcf", "ucscsnp2vcf", "varFilter", "vcf2fq"
     	if(utility.equals("subsam")) {
     // vcfutils.pl subsam <in.vcf> [samples]
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_subsam.vcf";
-    		com = path2vcf + " " + utility + " " + path2vcffile + " > " + path2outputfile2;
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_subsam.vcf";
+    		command.add(utility);
+    		command.add(path2vcffile);
     	} else if(utility.equals("listsam")) {
     // vcfutils.pl listsam <in.vcf>
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_listsam.txt";
-    		com = path2vcf + " " + utility + " " + path2vcffile + " > " + path2outputfile2;
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_listsam.txt";
+    		command.add(utility);
+    		command.add(path2vcffile);
     	} else if(utility.equals("fillac")) {
     // vcfutils.pl fillac <in.vcf>
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_fillac.vcf";
-    		com = path2vcf + " " + utility + " " + path2vcffile + " > " + path2outputfile2;
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_fillac.vcf";
+    		command.add(utility);
+    		command.add(path2vcffile);
     	} else if(utility.equals("qstats")) {
     // vcfutils.pl qstats [-r ref.vcf] <in.vcf>
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_qstats.txt";
-    		String refvcf = "";
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_qstats.txt";
+    		command.add(utility);
     		if(m_qstatusref.getBooleanValue()) {
-    			refvcf = "-r " + m_refvcffile.getStringValue() + " ";
+    			command.add("-r " + m_refvcffile.getStringValue());
     		}
-    		com = path2vcf + " " + utility + " " + refvcf + path2vcffile + " > " + path2outputfile2;
+    		command.add(path2vcffile);
     	} else if(utility.equals("hapmap2vcf")) {
     // vcfutils.pl <in.ucsc.snp> <in.hapmap>
     		String p2hapmapfile = m_hapmapfile.getStringValue();
-    		String path2outputfile2 = p2hapmapfile.substring(0, p2hapmapfile.lastIndexOf("."))+".vcf";
-    		com = path2vcf + " " +  m_snpfile.getStringValue() + " " + p2hapmapfile + " > " + path2outputfile2;
+    		outfile = p2hapmapfile.substring(0, p2hapmapfile.lastIndexOf("."))+".vcf";
+    		command.add(m_snpfile.getStringValue());
+    		command.add(p2hapmapfile);
     	} else if(utility.equals("ucscsnp2vcf")) {
     // vcfutils.pl <in.ucsc.snp>
     		String p2snpfile = m_snpfile.getStringValue();
-    		String path2outputfile2 = p2snpfile.substring(0, p2snpfile.lastIndexOf("."))+".vcf";
-    		com = path2vcf + " " + p2snpfile + " > " + path2outputfile2;
+    		outfile = p2snpfile.substring(0, p2snpfile.lastIndexOf("."))+".vcf";
+    		command.add(p2snpfile);
     	} else if(utility.equals("varFilter")) {
     // vcfutils.pl varFilter [options] <in.vcf>
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_filtered.vcf";
-    		com = path2vcf + " " + utility + " " + minrms + minreaddepth + maxreaddepth + minaltbases + gapfilter + adjacentgaps + strandpval + baseqpval + mapqpval + enddistpval + hwepval + printfiltered + path2vcffile + " > " + path2outputfile2;
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+"_filtered.vcf";
+    		command.add(utility);
+    		command.add(minrms);
+    		command.add(minreaddepth);
+    		command.add(maxreaddepth);
+    		command.add(minaltbases);
+    		command.add(gapfilter);
+    		command.add(adjacentgaps);
+    		command.add(strandpval);
+    		command.add(baseqpval);
+    		command.add(mapqpval);
+    		command.add(enddistpval);
+    		command.add(hwepval);
+    		command.add(printfiltered);
+    		command.add(path2vcffile);
     	} else if(utility.equals("vcf2fq")) {
     // vcfutils.pl vcf2fq [options] <all-site.vcf>
-    		String path2outputfile2 = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+".fq";
-    		com = path2vcf + " " + utility + " " + minreaddepth + maxreaddepth + minrms + indelfilteringwindow + path2vcffile + " > " + path2outputfile2;
+    		outfile = path2vcffile.substring(0, path2vcffile.lastIndexOf("."))+".fq";
+    		command.add(utility);
+    		command.add(minrms);
+    		command.add(minreaddepth);
+    		command.add(maxreaddepth);
+    		command.add(indelfilteringwindow);
+    		command.add(path2vcffile);
     	}
     	
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_VCFutils";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = fle.substring(0,fle.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p = b.start();
-	    	p.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p, com));
-		}
-    	
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	

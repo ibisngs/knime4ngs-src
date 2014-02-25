@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.bcftools;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,15 +24,17 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Bcftools.
  * 
  *
- * @author Max
+ * @author Maximilian Hastreiter
  */
 public class BcftoolsNodeModel extends NodeModel {
     /**
@@ -95,7 +98,6 @@ Contrast calling and association test options:
 	public static final String CFGKEY_SKIPREF="skipref";
 	public static final String CFGKEY_OUTQCALL="outqcall";
 	public static final String CFGKEY_SAMPLELIST="samplelist";
-//	public static final String CFGKEY_INISVCF="inisvcf";
 	public static final String CFGKEY_OUTUNCOMPRESSEDBCF="outuncompressedbcf";
 	//Checkboxes
 	public static final String CFGKEY_IFBEDFILE="ifbedfile";
@@ -178,8 +180,6 @@ Contrast calling and association test options:
 			CFGKEY_OUTQCALL, false);
 	private final SettingsModelString m_samplelist = new SettingsModelString(
 			BcftoolsNodeModel.CFGKEY_SAMPLELIST,"");
-//	private final SettingsModelBoolean m_inisvcf = new SettingsModelBoolean(
-//			CFGKEY_INISVCF, false);
 	private final SettingsModelBoolean m_outuncompressedbcf = new SettingsModelBoolean(
 			CFGKEY_OUTUNCOMPRESSEDBCF, false);
 	//Checkboxes
@@ -231,6 +231,11 @@ Contrast calling and association test options:
 	
 	private boolean OptionalPort=false;
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(BcftoolsNodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2Bcftools";
+	public static final String OUT_COL2 = "Path2BcftoolsOutput";
 	
     /**
      * Constructor for the node model.
@@ -262,16 +267,13 @@ Contrast calling and association test options:
         	m_infile.setStringValue(infile);
         	path2bcftools=inData[0].iterator().next().getCell(0).toString();
         	path2bcftools=path2bcftools.substring(0, path2bcftools.lastIndexOf("/"));
-        	path2bcftools+="/bcftools/bcftools ";
+        	path2bcftools+="/bcftools/bcftools";
         	m_path2bcftools.setStringValue(path2bcftools);
-        	System.out.println(path2bcftools);
     	}else{
         	infile =m_infile.getStringValue();
-        	path2bcftools=m_path2bcftools.getStringValue()+" ";
+        	path2bcftools=m_path2bcftools.getStringValue();
     	}
-    	
-
-    	
+    
     	/**Initialize logfile**/
     	String logfile = infile.substring(0,infile.lastIndexOf("/")+1)+"logfile.txt";
     	ShowOutput.setLogFile(logfile);
@@ -279,12 +281,13 @@ Contrast calling and association test options:
     	logBuffer.append(ShowOutput.getNodeStartTime("Bcftools"));
     	/**end initializing logfile**/
     	
-
+    	
+    	ArrayList<String> command = new ArrayList<String>();
 
     	String method = m_bcfmethod.getStringValue();
-    	String com=path2bcftools+method;
     	String outfile=m_infile.getStringValue();
-    	
+//    	String com=path2bcftools+method;
+    	command.add(path2bcftools+" "+method);
     	
     	if(m_bcfmethod.getStringValue().equals("view")){
         logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools view "));
@@ -292,117 +295,104 @@ Contrast calling and association test options:
     	/**
     	 *    Input/output options
     	 */
-    	if(m_keepallel.getBooleanValue()){com+=" -A";}
-    	if(m_outbcf.getBooleanValue()){com+=" -b";}
-    	if(m_seqdic.isEnabled()){com+=" -D "+m_seqdic.getStringValue();}
-    	if(m_plgenerate.getBooleanValue()){com+=" -F";}
-    	if(m_surpressgenotype.getBooleanValue()){com+=" -G";}
-    	if(m_bedfile.isEnabled()){com+=" -l "+m_bedfile.getStringValue();}
-    	if(m_calcld.getBooleanValue()){com+=" -L";}
-    	if(m_skipref.getBooleanValue()){com+=" -N";}
-    	if(m_outqcall.getBooleanValue()){com+=" -Q";}
-    	if(m_samplelist.isEnabled()){com+=" -s "+m_samplelist.getStringValue();}
+    	if(m_keepallel.getBooleanValue()){command.add("-A");}
+    	if(m_outbcf.getBooleanValue()){command.add("-b");}
+    	if(m_seqdic.isEnabled()){command.add("-D "+m_seqdic.getStringValue());}
+    	if(m_plgenerate.getBooleanValue()){command.add(" -F");}
+    	if(m_surpressgenotype.getBooleanValue()){command.add(" -G");}
+    	if(m_bedfile.isEnabled()){command.add("-l "+m_bedfile.getStringValue());}
+    	if(m_calcld.getBooleanValue()){command.add("-L");}
+    	if(m_skipref.getBooleanValue()){command.add("-N");}
+    	if(m_outqcall.getBooleanValue()){command.add("-Q");}
+    	if(m_samplelist.isEnabled()){command.add("-s "+m_samplelist.getStringValue());}
     	
     	String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
     	
-    	if(fileformat.equals("vcf")){com+=" -S";}
-    	if(m_outuncompressedbcf.getBooleanValue()){com+=" -u";}
+    	if(fileformat.equals("vcf")){command.add("-S");}
+    	if(m_outuncompressedbcf.getBooleanValue()){command.add("-u");}
     	
     	/**
     	 *  Bcftools view Consensus/variant calling options models
     	 */
-    	if(m_snpcalling.getBooleanValue()){com+=" -c";}
-    	if(m_samplecoverage.isEnabled()){com+=" -d "+m_samplecoverage.getDoubleValue();}
-    	if(m_lielihoodana.getBooleanValue()){com+=" -e";}
-    	if(m_callgenotype.getBooleanValue()){com+=" -g";}
-    	if(m_indelsubratio.isEnabled()){com+=" -i "+m_indelsubratio.getDoubleValue();}
-    	if(m_skipindel.getBooleanValue()){com+=" -I";}
-    	com+= " -p "+m_variantif.getDoubleValue();
-    	com+=" -P "+m_typeofprior.getStringValue();
-    	com+=" -t "+m_mutationrate.getDoubleValue();
+    	if(m_snpcalling.getBooleanValue()){command.add("-c");}
+    	if(m_samplecoverage.isEnabled()){command.add("-d "+m_samplecoverage.getDoubleValue());}
+    	if(m_lielihoodana.getBooleanValue()){command.add("-e");}
+    	if(m_callgenotype.getBooleanValue()){command.add("-g");}
+    	if(m_indelsubratio.isEnabled()){command.add("-i "+m_indelsubratio.getDoubleValue());}
+    	if(m_skipindel.getBooleanValue()){command.add("-I");}
+    	command.add("-p "+m_variantif.getDoubleValue());
+    	command.add("-P "+m_typeofprior.getStringValue());
+    	command.add("-t "+m_mutationrate.getDoubleValue());
     	if(!m_constrainedcalling.getStringValue().equals("No constrains")){
-        	com+=" -T "+m_constrainedcalling.getStringValue();
+    		command.add("-T "+m_constrainedcalling.getStringValue());
     	}
-    	if(m_outvariantspnly.getBooleanValue()){com+=" -v";}
+    	if(m_outvariantspnly.getBooleanValue()){command.add("-v");}
     	/**
     	 * Contrast calling and association test models
     	 */
-    	com+=" -1 "+m_numberofgrpsamples.getIntValue();
-    	com+=" -C "+m_posterioricon.getDoubleValue();
-    	com+=" -U "+m_numberofpermuations.getIntValue();
-    	com+=" -X "+m_onlypermutations.getDoubleValue();
+    	command.add("-1 "+m_numberofgrpsamples.getIntValue());
+    	command.add("-C "+m_posterioricon.getDoubleValue());
+    	command.add("-U "+m_numberofpermuations.getIntValue());
+    	command.add("-X "+m_onlypermutations.getDoubleValue());
     	
     	/**
     	 * Infile & Outfile
     	 */
-    	com+=" "+m_infile.getStringValue();
+    	command.add(m_infile.getStringValue());
 
     	if(m_outbcf.getBooleanValue() || m_outuncompressedbcf.getBooleanValue()){
     		outfile+="_view.bcf";
-        	com+=" > "+outfile;
     	}else{
     		outfile+="_view.vcf";
-        	com+=" > "+outfile;
     	}
 
     	}else if(m_bcfmethod.getStringValue().equals("cat")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools cat "));
-        	com+=" "+m_infile.getStringValue();
-        	com+=" "+m_catinfile.getStringValue();
+            command.add(m_infile.getStringValue());
+            command.add(m_catinfile.getStringValue());
         	String secfile =m_catinfile.getStringValue().substring(m_catinfile.getStringValue().lastIndexOf("/")+1,m_catinfile.getStringValue().length());
         	secfile=secfile.substring(0,secfile.lastIndexOf("."));
         	outfile+="_"+secfile+"_cat.bcf";
-        	com+=" > "+outfile;
     	}else if(m_bcfmethod.getStringValue().equals("ldpair")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ldpair "));
-        	com+=" "+m_infile.getStringValue();
-        	com+=" "+m_ldpairinfile.getStringValue();
+            command.add(m_infile.getStringValue());
+            command.add(m_ldpairinfile.getStringValue());
         	outfile+="_ldpair.out";
-        	com+=" > "+outfile;
     	}else if(m_bcfmethod.getStringValue().equals("index")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools index "));
-        	com+=" "+m_infile.getStringValue();
+            command.add(m_infile.getStringValue());
     	}else if(m_bcfmethod.getStringValue().equals("ld")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ld "));
-    		com+=" "+m_infile.getStringValue();
+            command.add(m_infile.getStringValue());
     		outfile+="_ld.out";
-        	com+=" > "+outfile;
     	}
-    	
-    	System.out.println(com);
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bcftools";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = infile.substring(0,infile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	ProcessBuilder b1 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_filter = b1.start();
-	    	p_filter.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_filter, com));
-	    	ShowOutput.writeLogFile(logBuffer);
-		}
 
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2Bcftools", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2BcftoolsOutput", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2bcftools.substring(0,path2bcftools.lastIndexOf("/")+1));
-    	StringCell cl2 = new StringCell(outfile);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
+    	logBuffer.append(ShowOutput.getNodeEndTime());
+    	ShowOutput.writeLogFile(logBuffer);
+
+    	/**
+    	 * Output
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
     	
-    	//Push2FlowVariable
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2bcftools.substring(0,path2bcftools.lastIndexOf("/")+1)),
+    			(FileCell) FileCellFactory.create(outfile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
     	pushFlowVariableString("BCFTOOLSOUT", outfile);
-        return new BufferedDataTable[]{out};
+    	BufferedDataTable outTable = cont.getTable();
+   
+		return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -443,10 +433,6 @@ Contrast calling and association test options:
     			if(!m_ifsamplelist.getBooleanValue()&&(m_constrainedcalling.getStringValue().equals("trioauto")||m_constrainedcalling.getStringValue().equals("trioxd")||m_constrainedcalling.getStringValue().equals("trioxs"))){
     				setWarningMessage("WARNING: You are using trio calling without a specified samplelist file. This may cause errors !");
     			}
-    	//		DataColumnSpec outSpecs1=inSpecs[0].getColumnSpec(0);
-    	//        DataColumnSpecCreator col4 = new DataColumnSpecCreator("Path2BcftoolsOutput", StringCell.TYPE);
-
-    	//		DataTableSpec outSpecs= new DataTableSpec(outSpecs1,col4.createSpec());
 
     			return new DataTableSpec[]{null};
     			
@@ -482,7 +468,6 @@ Contrast calling and association test options:
          m_callgenotype.saveSettingsTo(settings);
          m_constrainedcalling.saveSettingsTo(settings);
          m_indelsubratio.saveSettingsTo(settings);
-//         m_inisvcf.saveSettingsTo(settings);
          m_keepallel.saveSettingsTo(settings);
          m_lielihoodana.saveSettingsTo(settings);
          m_mutationrate.saveSettingsTo(settings);
@@ -529,7 +514,6 @@ Contrast calling and association test options:
         m_callgenotype.loadSettingsFrom(settings);
         m_constrainedcalling.loadSettingsFrom(settings);
         m_indelsubratio.loadSettingsFrom(settings);
-//        m_inisvcf.loadSettingsFrom(settings);
         m_keepallel.loadSettingsFrom(settings);
         m_lielihoodana.loadSettingsFrom(settings);
         m_mutationrate.loadSettingsFrom(settings);
@@ -573,7 +557,6 @@ Contrast calling and association test options:
         m_callgenotype.validateSettings(settings);
         m_constrainedcalling.validateSettings(settings);
         m_indelsubratio.validateSettings(settings);
- //       m_inisvcf.validateSettings(settings);
         m_keepallel.validateSettings(settings);
         m_lielihoodana.validateSettings(settings);
         m_mutationrate.validateSettings(settings);

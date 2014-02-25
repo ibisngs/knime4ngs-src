@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.mpileup;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -24,14 +25,16 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Mpileup.
  * 
  *
- * @author Max
+ * @author Maximilian Hastreiter
  */
 public class MpileupNodeModel extends NodeModel {
 	/*Mpileup
@@ -207,6 +210,11 @@ Output options:
 	private final SettingsModelBoolean m_ifindex = new SettingsModelBoolean(
 			MpileupNodeModel.CFGKEY_IFINDEX,true);
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(MpileupNodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2SamTools";
+	public static final String OUT_COL2 = "Path2MpileupOutfile";
 	
     /**
      * Constructor for the node model.
@@ -233,155 +241,109 @@ Output options:
         	String path2samtools = inData[0].iterator().next().getCell(0).toString();
         	String path2bamfile = inData[0].iterator().next().getCell(1).toString();
     	
-    	
-    	/**Initialize logfile**/
-    	String logfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1)+"logfile.txt";
-    	System.out.println(logfile);
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("Mpileup"));
-    	/**end initializing logfile**/
+	    	
+	    	/**Initialize logfile**/
+	    	String logfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1)+"logfile.txt";
+	    	System.out.println(logfile);
+	    	ShowOutput.setLogFile(logfile);
+	    	StringBuffer logBuffer = new StringBuffer(50);
+	    	logBuffer.append(ShowOutput.getNodeStartTime("Mpileup"));
+	    	/**end initializing logfile**/
 
     	
+	    	String outfile = "";
+	    	
+	    	//If indexing is needed
+	    	if(m_ifindex.getBooleanValue()){
+	    	    /**
+	    	     * 	Process One:
+	    	     * Index reference sequence file
+	    	     */
+	    			ArrayList<String> command = new ArrayList<String>();
+	    	    	LOGGER.info("Index reference sequence");
+	    	    	command.add(path2samtools + " faidx");
+	    	    	command.add(path2seqfile);
+	    	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    			
+	    	}
 
-    	
-    	String fadix = " faidx ";
-    	String mileup = " mpileup ";
-    	String outfile = "";
-    	
-    	//If indexing is needed
-    	if(m_ifindex.getBooleanValue()){
-    	    /**
-    	     * 	Process One:
-    	     * Index reference sequence file
-    	     */
-    	    	ShowOutput.writeLogFile("Index reference sequence");
-    	    	String com = path2samtools + fadix + path2seqfile;
-    	    	// begin QueueSub #################################################
-    			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-    				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Faidx";
-    				String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-    				String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-    				new QSub(com, name, memory, logfle, true);
-    	 			logBuffer.append("QSub: " + com + "\n");
-    				logBuffer.append("See external logfile: " + logfle + "\n");
-    			// end QueueSub ###################################################
-    			} else {
-	    	    	System.out.println(com);
-	    	    	Process p_fadix = Runtime.getRuntime().exec(com);
-	    	    	p_fadix.waitFor();
-	    	    	logBuffer.append(ShowOutput.getLogEntry(p_fadix, com));
-    			}
+	    	
+	  	/**
+	  	 * Process Two:
+	  	 * Run mpileup 	
+	  	 */
+		   // samtools mpileup -uf ref.fa aln1.bam aln2.bam
+	    		ArrayList<String> command = new ArrayList<String>();
+	    		LOGGER.info("Mpileup Process and Bcftools");
+	    		command.add(path2samtools+" mpileup");
+	    		command.add(path2bamfile);
+	    		
+		    	if(m_encoding.getBooleanValue()){command.add("-6");}
+		    	if(m_anamalous.getBooleanValue()){command.add("-A");}
+		    	if(m_probrealign.getBooleanValue()){command.add("-B");}
+		    	command.add("-C "+m_downgrade.getIntValue());
+		    	command.add("-d "+m_maxreads.getIntValue());
+		    	if(m_extendbaq.getBooleanValue()){command.add("-E");}
+		    	if(m_usefaidxfile.getBooleanValue()){command.add("-f "+path2seqfile);}
+		    	if(m_bedfile.isEnabled()){command.add("-l "+m_bedfile.getStringValue());}
+		    	command.add("-q "+m_minmapqual.getIntValue());
+		    	command.add("-Q "+m_minbasequal.getIntValue());
+		    	command.add("-M "+m_capmapqual.getIntValue());
+		    	if(m_excludereadsfile.isEnabled()){command.add("-G "+m_excludereadsfile.getStringValue());}
+		    	if(m_ignorerg.getBooleanValue()){command.add("-R");}
+		    	if(m_pileupregion.isActive()){command.add("-r "+m_pileupregion.getStringValue());}
+		
+		    	
+		    	if(m_outpersample.isEnabled() && m_outpersample.getBooleanValue()){command.add("-D");}
+		    	if(m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()){command.add("-g");}
+		    	if(m_outbasepositions.isEnabled() && m_outbasepositions.getBooleanValue()){command.add("-O");}
+		    	if(m_outmapqual.isEnabled() && m_outmapqual.getBooleanValue()){command.add("-s");}
+		    	if(m_strandbiaspval.isEnabled() && m_strandbiaspval.getBooleanValue()){command.add("-S");}
+		    	if(m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue()){command.add("-u");}
+		    		
+		    	if(m_gapextend.isEnabled()){command.add("-e "+m_gapextend.getIntValue());}
+		    	if(m_minfrac.isEnabled()){command.add("-F "+m_minfrac.getDoubleValue());}
+		    	if(m_homopoly.isEnabled()){command.add("-h "+m_homopoly.getIntValue());}
+		    	if(m_noindel.isEnabled() && m_noindel.getBooleanValue()){command.add("-I");}
+		    	if(m_skipindel.isEnabled()){command.add("-L "+m_skipindel.getIntValue());}
+		    	if(m_mingapreads.isEnabled()){command.add("-m "+m_mingapreads.getIntValue());}
+		    	if(m_gapopen.isEnabled()){command.add("-o "+m_gapopen.getIntValue());}
+		    	if(m_platformlist.isActive()){command.add("-P "+m_platformlist.getStringValue());}
+			
+		    	//If bcf output
+		    	if((m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()) || (m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue())){
+		    		outfile =path2bamfile+"_pileup.bcf";
+		    	}else{
+		       		outfile =path2bamfile+".pileup";
+		    	}
+		    	
+		    	/**
+		    	 * Execute
+		    	 */
+		    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
+		    	logBuffer.append(ShowOutput.getNodeEndTime());
+		    	ShowOutput.writeLogFile(logBuffer);
+		    	
+		    	/**
+		    	 * Output
+		    	 */
+		    	BufferedDataContainer cont = exec.createDataContainer(
+		    			new DataTableSpec(
+		    			new DataColumnSpec[]{
+		    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+		    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+		    	
+		    	FileCell[] c = new FileCell[]{
+		    			(FileCell) FileCellFactory.create(path2samtools),
+		    			(FileCell) FileCellFactory.create(outfile)};
+		    	
+		    	cont.addRowToTable(new DefaultRow("Row0",c));
+		    	cont.close();
+		    	BufferedDataTable outTable = cont.getTable();
+		    	
+
+				return new BufferedDataTable[]{outTable};
     	}
-
-    	
-  	/**
-  	 * Process Two:
-  	 * Run mpileup 	
-  	 */
-   // samtools mpileup -uf ref.fa aln1.bam aln2.bam
-    	System.out.println("Mpileup Process and Bcftools");
-    	String encoding="";
-    	if(m_encoding.getBooleanValue()){encoding="-6 ";}
-    	String anamalous="";
-    	if(m_anamalous.getBooleanValue()){anamalous="-A ";}
-    	String probrealgin="";
-    	if(m_probrealign.getBooleanValue()){probrealgin="-B ";}
-    	String downgrade = "-C "+m_downgrade.getIntValue()+" ";
-    	String maxreads = "-d "+m_maxreads.getIntValue()+" ";
-    	String extendbaq="";
-    	if(m_extendbaq.getBooleanValue()){extendbaq="-E ";}
-    	String faidx2="";
-    	if(m_usefaidxfile.getBooleanValue()){faidx2 = "-f "+path2seqfile+" ";}
-    	String bedfile="";
-    	if(m_bedfile.isEnabled()){bedfile = "-l "+m_bedfile.getStringValue()+" ";}
-    	String minmapqual = "-q "+m_minmapqual.getIntValue()+" ";
-    	String minbasequal = "-Q "+m_minbasequal.getIntValue()+" ";
-    	String capmapqual="-M "+m_capmapqual.getIntValue()+" ";
-    	String excludereads="";
-    	if(m_excludereadsfile.isEnabled()){excludereads="-G "+m_excludereadsfile.getStringValue()+" ";}
-    	String ignorerg="";
-    	if(m_ignorerg.getBooleanValue()){ignorerg="-R ";}
-    	String pileupregion="";
-    	if(m_pileupregion.isActive()){pileupregion="-r "+m_pileupregion.getStringValue()+" ";}
-
-    	
-    	String outpersample ="";
-    	if(m_outpersample.isEnabled() && m_outpersample.getBooleanValue()){outpersample= "-D ";}
-    	String bcfoutput="";
-    	if(m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()){bcfoutput= "-g ";}
-    	String outbasepositions="";
-    	if(m_outbasepositions.isEnabled() && m_outbasepositions.getBooleanValue()){outbasepositions= "-O ";}
-    	String outmapqual="";
-    	if(m_outmapqual.isEnabled() && m_outmapqual.getBooleanValue()){outmapqual= "-s ";}
-    	String strandbiaspval="";
-    	if(m_strandbiaspval.isEnabled() && m_strandbiaspval.getBooleanValue()){strandbiaspval= "-S ";}
-    	String uncompressedbcf="";
-    	if(m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue()){uncompressedbcf= "-u ";}
-    		
-    	String gapextend="";
-    	if(m_gapextend.isEnabled()){gapextend = "-e "+m_gapextend.getIntValue()+" ";}
-    	String minfrac="";
-    	if(m_minfrac.isEnabled()){minfrac="-F "+m_minfrac.getDoubleValue()+" ";}
-    	String homopoly="";
-    	if(m_homopoly.isEnabled()){homopoly = "-h "+m_homopoly.getIntValue()+" ";}
-    	String noindel="";
-    	if(m_noindel.isEnabled() && m_noindel.getBooleanValue()){noindel=" -I ";}
-    	String skipindel ="";
-    	if(m_skipindel.isEnabled()){skipindel = "-L "+m_skipindel.getIntValue()+" ";}
-    	String mingapreads="";
-    	if(m_mingapreads.isEnabled()){mingapreads="-m "+m_mingapreads.getIntValue()+" ";}
-    	String gapopen="";
-    	if(m_gapopen.isEnabled()){gapopen = "-o "+m_gapopen.getIntValue()+" ";}
-    	String platformlist="";
-    	if(m_platformlist.isActive()){platformlist="-P "+m_platformlist.getStringValue()+" ";}
-	
-    	//If bcf output
-    	if((m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()) || (m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue())){
-    		outfile =path2bamfile+"_pileup.bcf";
-    	}else{
-       		outfile =path2bamfile+".pileup";
-    	}
-    	
-    	
-    	
-    	String com = path2samtools + mileup +encoding+anamalous+probrealgin+downgrade+maxreads+extendbaq+excludereads+bedfile+minmapqual+capmapqual+ignorerg+pileupregion+minbasequal+outpersample+bcfoutput+outbasepositions+outmapqual+strandbiaspval+uncompressedbcf+gapextend+minfrac+homopoly+noindel+skipindel+mingapreads+gapopen+platformlist+faidx2+path2bamfile+" > "+outfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Mpileup";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_mileup = b.start();
-	    	p_mileup.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_mileup, com));
-		}
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
-	
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SamTools", StringCell.TYPE);
-        DataColumnSpecCreator col4 = new DataColumnSpecCreator("Path2MpileupOutfile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col4.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2samtools);
-    	StringCell cl4 = new StringCell(outfile);
-    	DataCell[] c = new DataCell[]{cl1,cl4};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
-    	
-        return new BufferedDataTable[]{out};
-    }
 
     /**
      * {@inheritDoc}
