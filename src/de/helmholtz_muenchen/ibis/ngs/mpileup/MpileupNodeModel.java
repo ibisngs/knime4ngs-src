@@ -274,7 +274,7 @@ Output options:
 	  	 */
 		   // samtools mpileup -uf ref.fa aln1.bam aln2.bam
 	    		ArrayList<String> command = new ArrayList<String>();
-	    		LOGGER.info("Mpileup Process and Bcftools");
+	    		LOGGER.info("Mpileup Process");
 	    		command.add(path2samtools+" mpileup");
 	    		command.add(path2bamfile);
 	    		

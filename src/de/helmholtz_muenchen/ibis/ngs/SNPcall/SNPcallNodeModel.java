@@ -2,13 +2,16 @@ package de.helmholtz_muenchen.ibis.ngs.SNPcall;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -18,13 +21,16 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 /**
  * This is the model implementation of SNPcall.
  * 
+ * @author Maximilian Hastreiter
+ * @author Sebastian Kopetzky
+ * @author Jan Quell
  */
 public class SNPcallNodeModel extends NodeModel {
     
@@ -216,6 +222,9 @@ Options: -Q INT    minimum RMS mapping quality for SNPs [10]
 	private final SettingsModelBoolean m_ifreadfile = new SettingsModelBoolean(
 			CFGKEY_IFREADFILE, false);
 	
+	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(SNPcallNodeModel.class);
+	
 
     /**
      * Constructor for the node model.
@@ -257,188 +266,129 @@ Options: -Q INT    minimum RMS mapping quality for SNPs [10]
     	String baseName = path2bamfile;
     	String path2outputfile = path2bamfile.substring(0,path2bamfile.length()-4)+"_SNPs_raw.bcf";
     	String path2outputfile2 = path2bamfile.substring(0,path2bamfile.length()-4)+"_SNPs_flt.vcf";
-    	
-    	String fadix = " faidx ";
-    	String mileup = " mpileup ";
-    	String view = " view -bvcg ";
-    	//String varfilter = " varFilter -D100 > ";
-    	String varfilter = " varFilter ";
+
     	
     /**
      * 	Process One:
      * Index reference sequence file
      */
     	ShowOutput.writeLogFile("Index reference sequence");
-    	String com = path2samtools + fadix + path2seqfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SNPcall-faidx";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	Process p_fadix = Runtime.getRuntime().exec(com);
-	    	p_fadix.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_fadix, com));
-		}
+    	/**
+	     * 	Process One:
+	     * Index reference sequence file
+	     */
+    	ArrayList<String> command = new ArrayList<String>();
+	    	command.add(path2samtools + " faidx");
+	    	command.add(path2seqfile);
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	
   	/**
   	 * Process Two:
   	 * Run mpileup 	
   	 */
-   // samtools mpileup -uf ref.fa aln1.bam aln2.bam | bcftools view -bvcg - > var.raw.bcf
-    	System.out.println("Mpileup Process and Bcftools");
-    	String encoding="";
-    	if(m_encoding.getBooleanValue()){encoding="-6 ";}
-    	String anamalous="";
-    	if(m_anamalous.getBooleanValue()){anamalous="-A ";}
-    	String probrealgin="";
-    	if(m_probrealign.getBooleanValue()){probrealgin="-B ";}
-    	String downgrade = "-C "+m_downgrade.getIntValue()+" ";
-    	String maxreads = "-d "+m_maxreads.getIntValue()+" ";
-    	String extendbaq="";
-    	if(m_extendbaq.getBooleanValue()){extendbaq="-E ";}
-    	String faidx2 = "-f "+path2seqfile+" ";
-    	String bedfile="";
-    	if(m_bedfile.isEnabled()){bedfile = "-l "+m_bedfile.getStringValue()+" ";}
-    	String minmapqual = "-q "+m_minmapqual.getIntValue()+" ";
-    	String minbasequal = "-Q "+m_minbasequal.getIntValue()+" ";
-    	String output ="-g ";
-    	String gapextend="";
-    	if(m_gapextend.isEnabled()){gapextend = "-e "+m_gapextend.getIntValue()+" ";}
-    	String minfrac="";
-    	if(m_minfrac.isEnabled()){minfrac="-F "+m_minfrac.getDoubleValue()+" ";}
-    	String homopoly="";
-    	if(m_homopoly.isEnabled()){homopoly = "-h "+m_homopoly.getIntValue()+" ";}
-    	String noindel="";
-    	if(m_noindel.isEnabled() && m_noindel.getBooleanValue()){noindel="-I ";}
-    	String skipindel ="";
-    	if(m_skipindel.isEnabled()){skipindel = "-L "+m_skipindel.getIntValue()+" ";}
-    	String mingapreads="";
-    	if(m_mingapreads.isEnabled()){mingapreads="-m "+m_mingapreads.getIntValue()+" ";}
-    	String gapopen="";
-    	if(m_gapopen.isEnabled()){gapopen = "-o "+m_gapopen.getIntValue()+" ";}
-    	String excludereads="";
-    	if(m_excludereadsfile.isEnabled()){excludereads="-G "+m_excludereadsfile.getStringValue()+" ";}
-    	String capmapqual="-M "+m_capmapqual.getIntValue()+" ";
-    	String ignorerg="";
-    	if(m_ignorerg.getBooleanValue()){ignorerg="-R ";}
-    	String pileupregion="";
-    	if(m_pileupregion.isActive()){pileupregion="-r "+m_pileupregion.getStringValue()+" ";}
-    	String platformlist="";
-    	if(m_platformlist.isActive()){platformlist="-P "+m_platformlist.getStringValue()+" ";}
-    	String mptempfile = baseName + "_mpileup.bcf";
+	    	command = new ArrayList<String>();
+			LOGGER.info("Mpileup Process");
+			command.add(path2samtools+" mpileup");
+			command.add(path2bamfile);
+			
+			if(m_encoding.getBooleanValue()){command.add("-6");}
+			if(m_anamalous.getBooleanValue()){command.add("-A");}
+	    	if(m_probrealign.getBooleanValue()){command.add("-B");}
+	    	command.add("-C "+m_downgrade.getIntValue());
+	    	command.add("-d "+m_maxreads.getIntValue());
+	    	if(m_extendbaq.getBooleanValue()){command.add("-E");}
+	    	command.add("-f "+path2seqfile);
+	    	if(m_bedfile.isEnabled()){command.add("-l "+m_bedfile.getStringValue());}
+	    	command.add("-q "+m_minmapqual.getIntValue());
+	    	command.add("-Q "+m_minbasequal.getIntValue());
+	    	if(m_gapextend.isEnabled()){command.add("-e "+m_gapextend.getIntValue());}
+	    	if(m_minfrac.isEnabled()){command.add("-F "+m_minfrac.getDoubleValue());}
+	    	if(m_homopoly.isEnabled()){command.add("-h "+m_homopoly.getIntValue());}
+	    	if(m_noindel.isEnabled() && m_noindel.getBooleanValue()){command.add("-I");}
+	    	if(m_skipindel.isEnabled()){command.add("-L "+m_skipindel.getIntValue());}
+	    	if(m_mingapreads.isEnabled()){command.add("-m "+m_mingapreads.getIntValue());}
+	    	if(m_gapopen.isEnabled()){command.add("-o "+m_gapopen.getIntValue());}
+	    	if(m_platformlist.isActive()){command.add("-P "+m_platformlist.getStringValue());}
+	    	if(m_excludereadsfile.isEnabled()){command.add("-G "+m_excludereadsfile.getStringValue());}
+	    	if(m_ignorerg.getBooleanValue()){command.add("-R");}
+	    	if(m_pileupregion.isActive()){command.add("-r "+m_pileupregion.getStringValue());}
+	    	command.add("-M "+m_capmapqual.getIntValue());
+	    	command.add("-g");
+    	
+	    	command.add(path2bamfile);
+	    	
+	    	String mptempfile = baseName + "_mpileup.bcf";
 	
-    	com = path2samtools + mileup +encoding+anamalous+probrealgin+downgrade+maxreads+extendbaq+excludereads+bedfile+minmapqual+capmapqual+ignorerg+pileupregion+minbasequal+output+gapextend+minfrac+homopoly+noindel+skipindel+mingapreads+gapopen+platformlist+faidx2+path2bamfile + " > " + mptempfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SNPcall-mpileup";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_mileup = b.start();
-	    	p_mileup.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_mileup, com));
-		}
+	    	/**
+	    	 * Execute
+	    	 */
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,mptempfile);
+	    	logBuffer.append(ShowOutput.getNodeEndTime());
+	    	ShowOutput.writeLogFile(logBuffer);
+	    	
+	    	
+	   /**
+	    * Convert pileup to bcf
+	   */
+	    	command = new ArrayList<String>();
+	    	LOGGER.info("Convert pileup to bcf");
+	    	command.add(path2bcftools+" view -bvcg");
+	    	command.add(mptempfile);
+	    	
+	    	/**
+	    	 * Execute
+	    	 */
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,path2outputfile);
+	    	logBuffer.append(ShowOutput.getNodeEndTime());
+	    	ShowOutput.writeLogFile(logBuffer);
     	
-    	com = path2bcftools + view + mptempfile + " > " + path2outputfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SNPcall-view";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b1 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_bcfTview = b1.start();
-	    	p_bcfTview.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_bcfTview, com));
-		}
+		
+	    	
+	  /**  	
+	   * Convert bcf to vcf
+	   */
+	    	command = new ArrayList<String>();
+	    	LOGGER.info("Convert bcf to vcf");
+	    	command.add(path2bcftools+" view");
+	    	command.add(path2outputfile);
+	    	String outvcf = path2outputfile + ".vcf";
+	    	/**
+	    	 * Execute
+	    	 */
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outvcf);
+	    	logBuffer.append(ShowOutput.getNodeEndTime());
+	    	ShowOutput.writeLogFile(logBuffer);
+	    	
     	
-    /**
-     * Process Three:
-     * Run bcftools and varFilter	
-     */    	
-    // bcftools view var.raw.bcf | vcfutils.pl varFilter -D100 > var.flt.vcf
-    	String minrms="-Q "+m_minrms.getIntValue()+" ";
-    	String minreaddepth="-d "+m_minreaddepth.getIntValue()+" ";
-    	String maxreaddepth="-D "+m_maxreaddepth.getIntValue()+" ";
-    	String minaltbases="-a "+m_minaltbase.getIntValue()+" ";
-    	String gapfilter="-w "+m_gapfilter.getIntValue()+" ";
-    	String adjacentgaps="-W "+m_adjacentgaps.getIntValue()+" ";
-    	String strandpval="-1 "+m_strandpval.getDoubleValue()+" ";
-    	String baseqpval = "-2 1.0E-" + m_baseqpval.getIntValue() + " ";
-    	String mapqpval="-3 "+m_mapqpval.getDoubleValue()+" ";
-    	String enddistpval = "-4 "+m_enddistpval.getDoubleValue()+" ";
-    	String hwepval="-e "+m_hwepval.getDoubleValue()+" ";
-    	String printfiltered="";
-    	if(m_printfiltered.getBooleanValue()){printfiltered="-p ";}	
-    	String outvcf = path2outputfile + ".vcf";
-    
-    	
-    	logBuffer.append("Bcftools view and Vcfutils");
-    	com =  path2bcftools +" view "+ path2outputfile + " > " + outvcf;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SNPcall-view";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b2 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_filter = b2.start();
-	    	p_filter.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_filter, com));
-		}
-    	
-    	com = path2vcfutils + varfilter +minrms+minreaddepth+maxreaddepth+minaltbases+gapfilter+adjacentgaps+strandpval+baseqpval+mapqpval+enddistpval+hwepval+printfiltered+outvcf+" > " + path2outputfile2;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SNPcall-varFilter";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b2 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_filter = b2.start();
-	    	p_filter.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_filter, com));
-		}
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
+	   /**
+	    * Call variants 	
+	    */
+	    	command = new ArrayList<String>();
+	    	LOGGER.info("Call variants");
+	    	command.add(path2vcfutils+" varFilter");
+	    	command.add("-Q "+m_minrms.getIntValue());
+	    	command.add("-d "+m_minreaddepth.getIntValue());
+	    	command.add("-D "+m_maxreaddepth.getIntValue());
+	    	command.add("-a "+m_minaltbase.getIntValue());
+	    	command.add("-w "+m_gapfilter.getIntValue());
+	    	command.add("-W "+m_adjacentgaps.getIntValue());
+	    	command.add("-1 "+m_strandpval.getDoubleValue());
+	    	command.add("-2 1.0E-" + m_baseqpval.getIntValue());
+	    	command.add("-3 "+m_mapqpval.getDoubleValue());
+	    	command.add("-4 "+m_enddistpval.getDoubleValue());
+	    	command.add("-e "+m_hwepval.getDoubleValue());
+	    	if(m_printfiltered.getBooleanValue()){command.add("-p");}	
+	    	command.add(outvcf);
+	    	/**
+	    	 * Execute
+	    	 */
+	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,path2outputfile2);
+	    	logBuffer.append(ShowOutput.getNodeEndTime());
+	    	ShowOutput.writeLogFile(logBuffer);
     	
         return new BufferedDataTable[]{};
     }
 
-    /*private void deleteTemporaryFile(String filename) {
-    	File file = new File(filename);    	        
-		if(file.exists()){
-			file.delete();
-		}
-    }*/
     
     /**
      * {@inheritDoc}

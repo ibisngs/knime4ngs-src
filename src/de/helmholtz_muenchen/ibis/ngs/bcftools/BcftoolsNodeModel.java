@@ -286,7 +286,6 @@ Contrast calling and association test options:
 
     	String method = m_bcfmethod.getStringValue();
     	String outfile=m_infile.getStringValue();
-//    	String com=path2bcftools+method;
     	command.add(path2bcftools+" "+method);
     	
     	if(m_bcfmethod.getStringValue().equals("view")){
