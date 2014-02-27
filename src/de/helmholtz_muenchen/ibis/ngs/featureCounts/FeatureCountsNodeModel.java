@@ -163,7 +163,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	
 	
 	@Override
-	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command) {
+	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
