@@ -21,6 +21,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
@@ -85,15 +86,14 @@ public class FastQCNodeModel extends NodeModel {
     	//Path to Jar
     	if(sub_path.equals("")){
     		jarCall = "-jar "+path+"libs/FastQC.jar ";
-    		path2mergeScript = path + "scripts/bash/mergeFsettings.sh";
     		
     	}else{//From Jar
-    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1);
+    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1); 
     		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
-    		path2mergeScript = tmpfolder + "scripts/bash/mergeFsettings.sh";
     	}	
+		path2mergeScript = IO.getScriptPath() + "/bash/mergeFsettings.sh";
     	command.add(jarCall + readsFile1);
-    	
+
     	/**Execute for first file**/
     	String[] com = command.toArray(new String[command.size()]);
     	StringBuffer sysErr = new StringBuffer(50);
@@ -127,6 +127,7 @@ public class FastQCNodeModel extends NodeModel {
         	
         	// merge the two settings files
         	ArrayList<String> commandMerge = new ArrayList<String>();
+        	commandMerge.add("sh");
         	commandMerge.add(path2mergeScript);
         	commandMerge.add(outfile1);
         	commandMerge.add(outfile2);
