@@ -2,13 +2,16 @@ package de.helmholtz_muenchen.ibis.ngs.annovar;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -19,12 +22,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Annovar.
  * 
  *
- * @author 
+ * @author Sebastian Kopetzky
  */
 public class AnnovarNodeModel extends NodeModel {
 	/**
@@ -79,6 +83,9 @@ public class AnnovarNodeModel extends NodeModel {
                 --chromosome <string>       examine these specific chromosomes in database file
 
 	 */
+	
+	private final NodeLogger LOGGER = getLogger();
+	
 	
 	/**
 	 * Input arguments
@@ -413,24 +420,22 @@ public class AnnovarNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("Annovar"));
     	/**logfile initialized**/
        	//annotate_variation.pl [arguments] <query-file|table-name> <database-location>
-    	String com="";
+    	ArrayList<String> command = new ArrayList<String>();
     	/**
     	 * Input arguments
     	 */
-    	//System.out.println(m_path2annovar.getStringValue());
-    	//System.out.println("#########");
+
     	if(optionalPort){
-    		com+=inData[0].iterator().next().getCell(1).toString()+"/annotate_variation.pl ";
+    		command.add(inData[0].iterator().next().getCell(1).toString()+"/annotate_variation.pl");
     	}
     	else{
-    		com+=m_path2annovar.getStringValue()+"/annotate_variation.pl ";
+    		command.add(m_path2annovar.getStringValue()+"/annotate_variation.pl");
     	}
     	
     	
-    	if(m_method.getStringValue().equals("geneanno")){com+="--geneanno ";}
-    	if(m_method.getStringValue().equals("regionanno")){com+="--regionanno ";}
-    	if(m_method.getStringValue().equals("filter")){com+="--filter ";}
- //   	com+=m_webfrom.getStringValue()+" ";
+    	if(m_method.getStringValue().equals("geneanno")){command.add("--geneanno");}
+    	if(m_method.getStringValue().equals("regionanno")){command.add("--regionanno");}
+    	if(m_method.getStringValue().equals("filter")){command.add("--filter");}
     	
     	/**
     	 *  Arguments to control input and output models
@@ -445,75 +450,75 @@ public class AnnovarNodeModel extends NodeModel {
     			outfile+="/"+tname;
     	}
 
-    	com+="--outfile "+outfile+" ";
-    	com+="--dbtype "+m_dbtype.getStringValue()+" ";
-    	com+="--buildver "+m_buildver.getStringValue()+" ";
-    	if(m_usegff3dbfile.getBooleanValue()){com+="--gff3dbfile "+m_gff3dbfile.getStringValue()+" ";}
-    	if(m_usegenericdbfile.getBooleanValue()){com+="--genericdbfile "+m_genericdbfile.getStringValue()+" ";}
-    	if(m_usevcfdbfile.getBooleanValue()){com+="--vcfdbfile "+m_vcfdbfile.getStringValue()+" ";}
-    	if(m_usebedfile.getBooleanValue()){com+="--bedfile "+m_bedfile.getStringValue()+" ";}
-    	if(m_separate.getBooleanValue()){com+="--separate ";}
-    	if(m_usecolswanted.getBooleanValue()){com+="--colsWanted "+m_colswanted.getStringValue()+" ";}
-    	if(m_comment.getBooleanValue()){com+="--comment ";}
-    	if(m_usescorecolumn.getBooleanValue()){com+="--scorecolumn "+m_scorecolumn.getIntValue()+" ";}
-    	if(m_exonsort.getBooleanValue()){com+="--exonsort ";}
-    	if(m_transcriptfunction.getBooleanValue()){com+="--transcript_function ";}
-    	if(m_hgvs.getBooleanValue()){com+="--hgvs ";}
-      	if(m_otherinfo.getBooleanValue()){com+="--otherinfo ";}
-      	if(m_infoasscore.getBooleanValue()){com+="--infoasscore ";}
-      	if(m_seqpadding.getBooleanValue()){com+="--seq_padding ";}
+    	command.add("--outfile "+outfile);
+    	command.add("--dbtype "+m_dbtype.getStringValue());
+    	command.add("--buildver "+m_buildver.getStringValue());
+    	if(m_usegff3dbfile.getBooleanValue()){command.add("--gff3dbfile "+m_gff3dbfile.getStringValue());}
+    	if(m_usegenericdbfile.getBooleanValue()){command.add("--genericdbfile "+m_genericdbfile.getStringValue());}
+    	if(m_usevcfdbfile.getBooleanValue()){command.add("--vcfdbfile "+m_vcfdbfile.getStringValue());}
+    	if(m_usebedfile.getBooleanValue()){command.add("--bedfile "+m_bedfile.getStringValue());}
+    	if(m_separate.getBooleanValue()){command.add("--separate");}
+    	if(m_usecolswanted.getBooleanValue()){command.add("--colsWanted "+m_colswanted.getStringValue());}
+    	if(m_comment.getBooleanValue()){command.add("--comment");}
+    	if(m_usescorecolumn.getBooleanValue()){command.add("--scorecolumn "+m_scorecolumn.getIntValue());}
+    	if(m_exonsort.getBooleanValue()){command.add("--exonsort");}
+    	if(m_transcriptfunction.getBooleanValue()){command.add("--transcript_function");}
+    	if(m_hgvs.getBooleanValue()){command.add("--hgvs");}
+      	if(m_otherinfo.getBooleanValue()){command.add("--otherinfo");}
+      	if(m_infoasscore.getBooleanValue()){command.add("--infoasscore");}
+      	if(m_seqpadding.getBooleanValue()){command.add("--seq_padding");}
       	
     	/**
     	 * Arguments to fine-tune the annotation procedure
     	 */
-      	com+="--batchsize "+m_batchsize.getIntValue()+"m ";
-      	com+="--genomebinsize "+m_genomebinsize.getIntValue()+"k ";
-      	com+="--expandbin "+m_expandbin.getIntValue()+" ";
-      	if(m_useneargene.getBooleanValue()){com+="--neargene "+m_neargene.getIntValue()+" ";}
-      	if(m_usescorethreshold.getBooleanValue()){com+="--score_threshold "+m_scorethreshold.getDoubleValue()+" ";}
-      	if(m_reverse.getBooleanValue()){com+="--reverse ";}
-      	if(m_usenormscorethreshold.getBooleanValue()){com+="--normscore_threshold "+m_normscorethreshold.getIntValue()+" ";}
-      	if(m_rawscore.getBooleanValue()){com+="--rawscore ";}
-      	if(m_minqueryfrac.isEnabled()){com+="--minqueryfrac "+m_minqueryfrac.getDoubleValue()+" ";}
-      	if(m_usesplicingthreshold.getBooleanValue()){com+="--splicing_threshold "+m_splicingthreshold.getIntValue()+" ";}
-      	if(m_useindelsplicingthreshold.getBooleanValue()){com+="--indel_splicing_threshold "+m_indelsplicingthreshold.getIntValue()+" ";}
-      	if(m_mafthreshold.isEnabled()){com+="--maf_threshold "+m_mafthreshold.getDoubleValue()+" ";}
-      	if(m_siftthreshold.isEnabled()){com+="--sift_threshold "+m_siftthreshold.getDoubleValue()+" ";}
-      	if(m_precedence.isEnabled()){com+="--precedence "+m_precedence.getStringValue()+" ";}
-      	if(m_indexfilterthreshold.isEnabled()){com+="--indexfilter_threshold "+m_indexfilterthreshold.getDoubleValue()+" ";}
+      	command.add("--batchsize "+m_batchsize.getIntValue()+"m");
+      	command.add("--genomebinsize "+m_genomebinsize.getIntValue()+"k");
+      	command.add("--expandbin "+m_expandbin.getIntValue());
+      	if(m_useneargene.getBooleanValue()){command.add("--neargene "+m_neargene.getIntValue());}
+      	if(m_usescorethreshold.getBooleanValue()){command.add("--score_threshold "+m_scorethreshold.getDoubleValue());}
+      	if(m_reverse.getBooleanValue()){command.add("--reverse");}
+      	if(m_usenormscorethreshold.getBooleanValue()){command.add("--normscore_threshold "+m_normscorethreshold.getIntValue());}
+      	if(m_rawscore.getBooleanValue()){command.add("--rawscore");}
+      	if(m_minqueryfrac.isEnabled()){command.add("--minqueryfrac "+m_minqueryfrac.getDoubleValue());}
+      	if(m_usesplicingthreshold.getBooleanValue()){command.add("--splicing_threshold "+m_splicingthreshold.getIntValue());}
+      	if(m_useindelsplicingthreshold.getBooleanValue()){command.add("--indel_splicing_threshold "+m_indelsplicingthreshold.getIntValue());}
+      	if(m_mafthreshold.isEnabled()){command.add("--maf_threshold "+m_mafthreshold.getDoubleValue());}
+      	if(m_siftthreshold.isEnabled()){command.add("--sift_threshold "+m_siftthreshold.getDoubleValue());}
+      	if(m_precedence.isEnabled()){command.add("--precedence "+m_precedence.getStringValue());}
+      	if(m_indexfilterthreshold.isEnabled()){command.add("--indexfilter_threshold "+m_indexfilterthreshold.getDoubleValue());}
 
     	/**
     	 * Arguments to control memory usage models
     	 */
-      	com+="--memfree "+m_memfree.getIntValue()+" ";
-      	com+="--memtotal "+m_memtotal.getIntValue()+" ";
-      	if(m_chromosome.isEnabled()){com+="--chromosome "+m_chromosome.getStringValue()+" ";}
+      	command.add("--memfree "+m_memfree.getIntValue());
+      	command.add("--memtotal "+m_memtotal.getIntValue());
+      	if(m_chromosome.isEnabled()){command.add("--chromosome "+m_chromosome.getStringValue());}
       	
       	/**
       	 * Output files
       	 */
 		if(optionalPort){ //get name from inData array
 			String qfile = inData[0].iterator().next().getCell(0).toString();
-			com+=qfile+" ";
-		}
-		else{
+			command.add(qfile);
+			command.add(m_databaselocation.getStringValue()); 
+		}else{
 			if(m_usetablename.getBooleanValue())
 			{
-				com+=m_tablename.getStringValue()+" ";
+				command.add(m_tablename.getStringValue());
 			}else{
-				com+=m_queryfile.getStringValue()+" ";
-				com+=m_databaselocation.getStringValue()+" "; 
+				command.add(m_queryfile.getStringValue());
+				command.add(m_databaselocation.getStringValue()); 
 			}
 		}
-      	//System.out.println(com);
 
-      	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-      	Process p_annovar = b.start();
-    	p_annovar.waitFor();
-    	logBuffer.append(ShowOutput.getLogEntry(p_annovar, com));
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
-        // TODO: Return a BufferedDataTable for each output port 
+    	
+    	
         return new BufferedDataTable[]{};
     }
 

@@ -2,7 +2,9 @@ package de.helmholtz_muenchen.ibis.ngs.convert2annovar;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -15,6 +17,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,13 +26,16 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Convert2Annovar.
  * 
  *
- * @author 
+ * @author Sebastian Kopetzky
  */
 public class Convert2AnnovarNodeModel extends NodeModel {
 	
@@ -64,6 +70,12 @@ public class Convert2AnnovarNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_allallele = new SettingsModelBoolean(CFGKEY_ALLALLELE, false);
 	private final SettingsModelBoolean m_withzyg = new SettingsModelBoolean(CFGKEY_WITHZYG, false);
 
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(Convert2AnnovarNodeModel.class);
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2OutFile";
+	public static final String OUT_COL2 = "InstallPath";
+	
+	
     /**
      * Constructor for the node model.
      */
@@ -98,89 +110,89 @@ public class Convert2AnnovarNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("BAMLoader"));
     	/**end initializing logfile**/
     	
-    	String com = "";
-    	String format = "";
+    	ArrayList<String> command = new ArrayList<String>();
+
     	String fileExtension = path2inFile.substring(path2inFile.lastIndexOf(".")+1,path2inFile.length());
-    	String path2outfile = path2inFile.substring(0,path2inFile.lastIndexOf(".")) + ".query ";
+    	String path2outfile = path2inFile.substring(0,path2inFile.lastIndexOf(".")) + ".query";
     	String outfile = "-outfile " + path2outfile;
-    	String snpqval = "";
-    	String snppvalue = "";
-    	String coverage = "";
-    	String maxcoverage = "";
-    	String includeinfo = "";
-    	String allelicfrac = "";
-    	String species = "";
-    	String allallele = "";
-    	String withzyg = "";
+    	
+    	command.add(installPath + "/convert2annovar.pl");
+    	command.add("--verbose");
     	
     	if(fileExtension.equals("vcf")) {
-    		format = "-format vcf4 ";
+    		command.add("-format vcf4");
     	} else if(fileExtension.equals("pileup")) {
-    		format = "-format pileup ";
+    		command.add("-format pileup");
     	} else if(fileExtension.equals("tsv")) {
-    		format = "-format cg ";
+    		command.add("-format cg");
     	} else if(fileExtension.equals("gff")) {
-    		format = "-format gff3-solid ";
+    		command.add("-format gff3-solid");
     	}
-    	if(m_snpqual.isEnabled()) {
+    //	if(m_snpqual.isEnabled()) {
     //		snpqval = "-snpqual " + m_snpqual.getIntValue() + " ";
-    	}
+    //	}
     	if(m_snppvalue.isEnabled()) {
-    		snppvalue = "-snppvalue " + m_snppvalue.getDoubleValue() + " ";
+    		command.add("-snppvalue " + m_snppvalue.getDoubleValue());
     	}
     	if(m_coverage.isEnabled()) {
-    		coverage = "-coverage " + m_coverage.getIntValue() + " ";
+    		command.add("-coverage " + m_coverage.getIntValue());
     	}
     	if(m_maxcoverage.isEnabled()) {
-    		maxcoverage = "-maxcoverage " + m_maxcoverage.getIntValue() + " ";
+    		command.add("-maxcoverage " + m_maxcoverage.getIntValue());
     	}
     	if(m_includeinfo.getBooleanValue()) {
-    		includeinfo = "-includeinfo ";
+    		command.add("-includeinfo");
     	}
     	if(m_allelicfrac.isEnabled()) {
     		if(m_allelicfrac.getBooleanValue()) {
-    			allelicfrac = "-allelicfrac ";
+    			command.add("-allelicfrac");
     		}
     	}
     	if(m_species.isEnabled()) {
     		if (m_species.getBooleanValue()) {
-    			species = "-species human ";
+    			command.add("-species human");
     		}
     	}
     	if(m_allallele.isEnabled()) {
     		if(m_allallele.getBooleanValue()) {
-    			allallele = "-allallele ";
+    			command.add("-allallele");
     		}
     	}
     	if(m_withzyg.isEnabled()) {
     		if(m_withzyg.getBooleanValue()) {
-    			withzyg = "-withzyg ";
+    			command.add("-withzyg");
     		}
     	}
-    // convert2annovar.pl -format pileup -outfile variant.query variant.pileup
-    	com = installPath + "/convert2annovar.pl -v " + format + snpqval + snppvalue + coverage + maxcoverage + includeinfo + allelicfrac + species + allallele + withzyg + outfile + path2inFile;
-    	System.out.println(com);
-    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-    	Process p = b.start();
-    	p.waitFor();
+    	// convert2annovar.pl -format pileup -outfile variant.query variant.pileup
     	
-    	logBuffer.append(ShowOutput.getLogEntry(p, com));
+    	command.add(outfile);
+    	command.add(path2inFile);
+    	
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2OutFile", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("InstallPath", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2outfile);
-    	StringCell cl2 = new StringCell(installPath);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	/**
+    	 * Output
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2outfile),
+    			(FileCell) FileCellFactory.create(installPath)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
-        return new BufferedDataTable[]{out};
+    	BufferedDataTable outTable = cont.getTable();
+
+        return new BufferedDataTable[]{outTable};
     }
 
     /**

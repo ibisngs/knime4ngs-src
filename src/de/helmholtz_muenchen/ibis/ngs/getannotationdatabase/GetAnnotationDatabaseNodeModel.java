@@ -2,23 +2,28 @@ package de.helmholtz_muenchen.ibis.ngs.getannotationdatabase;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of GetAnnotationDatabase.
  * 
+ * @author Sebastian Kopetzky
  */
 public class GetAnnotationDatabaseNodeModel extends NodeModel {
 	
@@ -33,7 +38,7 @@ public class GetAnnotationDatabaseNodeModel extends NodeModel {
 	private final SettingsModelString m_database = new SettingsModelString(CFGKEY_DATABASE,"");
 	private final SettingsModelString m_annotationtype = new SettingsModelString(CFGKEY_ANNOTATIONTYPE,"");
 	private final SettingsModelString m_outname = new SettingsModelString(CFGKEY_OUTNAME,"");
-
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(GetAnnotationDatabaseNodeModel.class);
 	
     /**
      * Constructor for the node model.
@@ -63,7 +68,7 @@ public class GetAnnotationDatabaseNodeModel extends NodeModel {
     	ShowOutput.writeLogFile(logBuffer);
     	/**end initializing logfile**/
     	
-    	String com = "";
+    	ArrayList<String> command = new ArrayList<String>();
     	String installpath = m_installpath.getStringValue() + "/";
     	String program = "annotate_variation.pl ";
     	String database = m_database.getStringValue();
@@ -147,39 +152,16 @@ public class GetAnnotationDatabaseNodeModel extends NodeModel {
     		annoType = "esp5400_all -webfrom annovar";
     	}
 
-    	/*
-    	if(organism.equals("Other DB")) {
-    		outname = m_outname.getStringValue();
-    		database = m_database.getStringValue();
-    	} else if(organism.equals("Human")) {
-			outname = "humandb";
-			database = "hg18";
-		} else if(organism.equals("Chimpanzee")) {
-			outname = "chimpdb";
-			database = "panTro2";
-		} else if(organism.equals("Macaque")) {
-			outname = "macaquedb";
-			database = "rheMac2";
-		} else if(organism.equals("Yeast")) {
-			outname = "yeastdb";
-			database = "sacCer2";
-		} else if(organism.equals("Cow")) {
-			outname = "cowdb";
-			database = "bosTau6";
-		}*/
+
+    	command.add(installpath+program);
+    	command.add("-buildver "+database);
+    	command.add("-downdb " + annoType);
+    	command.add(installpath+outname);  	
     	
-    	String buildver = "-buildver " + database + " ";
-    	String downdb = "-downdb " + annoType + " " + installpath + outname + " ";
-    	
-    	com = installpath + program + buildver + downdb;
-    	
-    	
-    	System.out.println(com);
-    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-    	Process p = b.start();
-    	p.waitFor();
-    	
-    	logBuffer.append(ShowOutput.getLogEntry(p, com));
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
