@@ -23,10 +23,12 @@ public class ExecuteThread implements Callable<Boolean> {
 	private Process p;						// Process for execution
 	private final String stdOutFile;				// Process stdOut Filepath
 	private final String stdErrFile;				// Process stdErr Filepath
+	private final String stdInFile;					// stdin Filepath
 	private final StringBuffer stdOutStr;
 	private final StringBuffer stdErrStr;
 	private StreamThread stdErrStream;
 	private StreamThread stdOutStream;
+	private InputThread stdInStream;
 	private final NodeLogger LOGGER;
 	private final String[] ENVIRONMENT;
 	
@@ -39,11 +41,12 @@ public class ExecuteThread implements Callable<Boolean> {
 	 * @param stdOutStr if not null STDOUT is redirected to this StringBuffer
 	 * @param stdErrStr if not null STDERR is redirected to this StringBuffer
 	 */
-	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment) {
+	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment) {
 		this.command = command;
 
 		this.stdErrFile=stdErrFile;
 		this.stdOutFile=stdOutFile;
+		this.stdInFile=stdInFile;
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
 
@@ -75,6 +78,10 @@ public class ExecuteThread implements Callable<Boolean> {
 			stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile);
 			stdErrStream.start();
 		}
+		if(this.stdInFile!=null){
+			stdInStream = new InputThread(p.getOutputStream(), stdInFile);
+			stdInStream.start();
+		}
 
 		// WAIT FOR PROCESS TO BE FINISHED
 		p.waitFor();
@@ -91,6 +98,9 @@ public class ExecuteThread implements Callable<Boolean> {
 		}
 		if(this.stdErrFile!=null){
 			stdErrStream.interrupt();
+		}
+		if(this.stdInFile!=null){
+			stdInStream.interrupt();
 		}
 		LOGGER.info("finished command "+ command[0]);
 

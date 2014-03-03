@@ -33,6 +33,15 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
 		
+		<!-- LoF Workflow nodes -->
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkrealignment.GATKRealignmentNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkrealignment.GATKRealignmentNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory"/>
+		
 		<!-- METABOLOMICS -->
 		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
 		<node category-path="/ibis/metabolomics" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.edgeRanking.GraphicalModelsNodeFactory"/>
