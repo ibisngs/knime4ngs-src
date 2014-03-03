@@ -6,27 +6,31 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of SnpEffGetDB.
@@ -53,6 +57,12 @@ public class SnpEffGetDBNodeModel extends NodeModel {
 	//.config file will be modified!!!
 	//private final SettingsModelString m_database_folder = new SettingsModelString(
 	//		SnpEffGetDBNodeModel.CFGKEY_DATABASE_FOLDER,"");
+	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(SnpEffGetDBNodeModel.class);
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "snpEffDirectory";
+	public static final String OUT_COL2 = "database";
 	
 	
     /**
@@ -140,15 +150,17 @@ public class SnpEffGetDBNodeModel extends NodeModel {
 	    	//Note: currently database is downloaded into the install directory.
 	    	//		if this should be changed, add the -c option to specify the
 	    	//		path to snpEff.config
-	    	String command = "cd " + snpEffDirectory + "; java -jar snpEff.jar download -v " + dbName;
-	    	//run the task
-	      	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", command);
-	      	Process p_snpEff = b.start();
-	    	p_snpEff.waitFor();  	
-    	    	//TODO remove?
-	    	logBuffer.append(ShowOutput.getLogEntry(p_snpEff, command));
-	    	logBuffer.append(ShowOutput.getNodeEndTime());
-	    	ShowOutput.writeLogFile(logBuffer);
+    		ArrayList<String> command = new ArrayList<String>();
+    		command.add("java");
+    		command.add("-jar snpEff.jar download");
+        	command.add("-v "+dbName);
+        	
+        	/**
+        	 * Execute
+        	 */
+        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+        	logBuffer.append(ShowOutput.getNodeEndTime());
+        	ShowOutput.writeLogFile(logBuffer);
     	}
     	else{
 	    	logBuffer.append("Database " + dbName + " already exists\n");
@@ -156,21 +168,24 @@ public class SnpEffGetDBNodeModel extends NodeModel {
 	    	ShowOutput.writeLogFile(logBuffer);
     	}
     	
-    	//make output table
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("snpEffDirectory", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("database", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(snpEffDirectory);
-    	StringCell cl2 = new StringCell(dbName);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	/**
+    	 * Output
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(snpEffDirectory),
+    			(FileCell) FileCellFactory.create(dbName)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
+    	BufferedDataTable outTable = cont.getTable();
     	    	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**

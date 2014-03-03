@@ -2,13 +2,16 @@ package de.helmholtz_muenchen.ibis.ngs.snpsift;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -19,6 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 
@@ -26,7 +30,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
  * This is the model implementation of SnpSift.
  * 
  *
- * @author Max
+ * @author Maximilian Hastreiter
  */
 public class SnpSiftNodeModel extends NodeModel {
     
@@ -100,6 +104,8 @@ public class SnpSiftNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
 
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(SnpSiftNodeModel.class);
+	
     protected SnpSiftNodeModel() {
     
         // TODO: Specify the amount of input and output ports needed.
@@ -121,77 +127,97 @@ public class SnpSiftNodeModel extends NodeModel {
     	/**logfile initialized**/
     	
         String folder = m_snpeff_folder.getStringValue();
-        String com = "java -jar "+folder+"/SnpSift.jar "; 
+        String stdOutFile = "";
+        ArrayList<String> command = new ArrayList<String>();
+        
+        command.add("java");
+        command.add("-jar "+folder+"/SnpSift.jar");
         boolean filter = false;
         
         String basename = m_invcf.getStringValue().substring(0,m_invcf.getStringValue().lastIndexOf("."));
 
         /**FILTER**/
         if(m_method.getStringValue().equals("Filter")){
-        	com+="filter --file "+m_invcf.getStringValue()+" \"";
+        	command.add("filter");
+        	command.add("--file "+m_invcf.getStringValue());
+        	
+        	String filterString = "";
+        	
         	if(m_filtercoveragebool.getBooleanValue()){
-        		com+=" (DP >= "+m_filtercoverage.getIntValue()+")";
+        		filterString+="(DP >= "+m_filtercoverage.getIntValue()+")";
         		filter = true;
         	}
         	if(m_filterqualbool.getBooleanValue()){
-        		com+=" & (QUAL >= "+m_filterqual.getDoubleValue()+")";
+        		filterString+=" & (QUAL >= "+m_filterqual.getDoubleValue()+")";
         		filter = true;
         	}
         	if(!(m_filterstring.getStringValue().equals(""))){
         		if(filter){
-        			com+=" & ";
+        			filterString+=" & ";
         		}
         	}
-        	com+=m_filterstring.getStringValue()+"\"";
-        	com+=" > "+basename+"_filtered.vcf";
+        	filterString+=m_filterstring.getStringValue();
+        	command.add(filterString);
+        	stdOutFile = basename+"_filtered.vcf";
         }
         
        /**ANNOTATE**/
         if(m_method.getStringValue().equals("Annotate")){
-        	com+="annotate ";
+        	command.add("annotate");
         	if(m_annid.getBooleanValue()){
-        		com+="-id ";
+        		command.add("-id");
         	}
         	if(m_anninfo.isEnabled()){
-        		com+=m_anninfo.getStringValue()+" ";
+        		command.add(m_anninfo.getStringValue());
         	}
-        	com+=m_annvcfdb.getStringValue()+" "+m_invcf.getStringValue()+" > "+basename+"_annotated.vcf";
+        	command.add(m_annvcfdb.getStringValue());
+        	command.add(m_invcf.getStringValue());
+        	
+        	stdOutFile = basename+"_annotated.vcf";
         }
         
         /**TSTV**/
         if(m_method.getStringValue().equals("TsTv")){
-        	com+="tstv "+m_tstvhom.getStringValue()+" "+m_invcf.getStringValue()+" > "+basename+"_tstv.txt";
+        	command.add("tstv");
+        	command.add(m_tstvhom.getStringValue());
+        	command.add(m_invcf.getStringValue());
+        	
+        	stdOutFile = basename+"_tstv.txt";
         }
         
         /**Intervals**/
         if(m_method.getStringValue().equals("Intervals")){
-        	com+="intervals -i "+m_invcf.getStringValue()+" ";
+        	command.add("intervals");
+        	command.add("-i "+m_invcf.getStringValue());
         	if(m_interx.getBooleanValue()){
-        		com+="-x ";
+        		command.add("-x");
         	}
-        	com+=m_interbed.getStringValue() + " > "+basename+"_intervals.vcf";
+        	command.add(m_interbed.getStringValue());
+        	stdOutFile = basename+"_intervals.vcf";
         }
         
         /**dbnsfp**/
         if(m_method.getStringValue().equals("Annotate with dbnsfp")){
-        	com+="dbnsfp ";
+        	command.add("dbnsfp");
         	if(m_dbnsfpfieldsall.getBooleanValue()){
-        		com+="-a ";
+        		command.add("-a");
         	}else{
         		if(m_dbnsfpfields.isActive() && m_dbnsfpfields.isEnabled()){
-        			com+="-f "+m_dbnsfpfields.getStringValue()+" ";
+        			command.add("-f "+m_dbnsfpfields.getStringValue());
         		}	
         	}
-        	com+=m_dbnsfp.getStringValue()+" "+m_invcf.getStringValue()+" > "+basename+"_dbnsfp.vcf";
+        	command.add(m_dbnsfp.getStringValue());
+        	command.add(m_invcf.getStringValue());
+        	stdOutFile = basename+"_dbnsfp.vcf";
         }
         
-    	System.out.println(com);
-    	System.out.println(logfile);
-    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-    	Process p1 = b.start();
-    	p1.waitFor();
-        logBuffer.append(ShowOutput.getLogEntry(p1, com));
-        ShowOutput.writeLogFile(new StringBuffer(ShowOutput.getNodeEndTime()));
+
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,stdOutFile);
+    	logBuffer.append(ShowOutput.getNodeEndTime());
+    	ShowOutput.writeLogFile(logBuffer);
          	
         return null;
     }

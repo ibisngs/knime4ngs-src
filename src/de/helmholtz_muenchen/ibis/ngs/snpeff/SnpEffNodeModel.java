@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.snpeff;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,14 +24,17 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of SnpEff.
  * 
  *
- * @author 
+ * @author Sebastian Kopetzky
  */
 public class SnpEffNodeModel extends NodeModel {
     /*Mandatory options*/
@@ -127,7 +131,11 @@ public class SnpEffNodeModel extends NodeModel {
 	
 	/*Other variables*/
 	private boolean optionalPort = false;
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(SnpEffNodeModel.class);
 	
+	//The Output Col Names
+	public static final String OUT_COL1 = "snpEffDirectory";
+	public static final String OUT_COL2 = "outputFile";
 	
 	/**
      * Constructor for the node model.
@@ -177,84 +185,92 @@ public class SnpEffNodeModel extends NodeModel {
     	
     	/*Make & run command*/
     	//TODO change -Xmx value? Dynamically?
-    	String command = "cd " + snpEffDirectory + "; java -Xmx2500m -jar snpEff.jar eff -s " + outFile + "_summary.html -v " + dbName + " ";
+    	ArrayList<String> command = new ArrayList<String>();
+    	
+    	command.add("java");
+    	command.add("-Xmx2500m -jar "+snpEffDirectory+"/snpEff.jar eff");
+    	command.add("-s "+outFile + "_summary.html");
+    	command.add("-v "+dbName);
+    	
     	//Sequence change filter options
     	if(m_use_minq.getBooleanValue()){
-    		command += "-minQ " + new Double(m_minq.getDoubleValue()).toString() + " ";
+    		command.add("-minQ " + new Double(m_minq.getDoubleValue()).toString());
     	}
     	if(m_use_minc.getBooleanValue()){
-    		command += "-minC " + new Integer(m_minc.getIntValue()).toString() + " ";
+    		command.add("-minC " + new Integer(m_minc.getIntValue()).toString());
     	}
     	if(m_del.getBooleanValue()){
-    		command += "-del ";
+    		command.add("-del");
     	}
     	else if(m_ins.getBooleanValue()){
-    		command += "-ins ";
+    		command.add("-ins");
     	}
     	if(m_het.getBooleanValue()){
-    		command += "-het ";
+    		command.add("-het");
     	}
     	else if(m_hom.getBooleanValue()){
-    		command += "-hom ";
+    		command.add("-hom");
     	}
     	if(m_snp.getBooleanValue()){
-    		command += "-snp ";
+    		command.add("-snp");
     	}
     	else if(m_mnp.getBooleanValue()){
-    		command += "-mnp ";
+    		command.add("-mnp");
     	}
     	
     	//Result filter options
     	if(m_usebedfile.getBooleanValue()){
-    		command += "-fi " + m_bed_file.getStringValue() + " ";
+    		command.add("-fi " + m_bed_file.getStringValue());
     	}
     	if(m_no_downstream.getBooleanValue()){
-    		command += "-no-downstream ";
+    		command.add("-no-downstream");
     	}
     	if(m_no_intergenic.getBooleanValue()){
-    		command += "-no-intergenic ";
+    		command.add("-no-intergenic");
     	}
     	if(m_no_intronic.getBooleanValue()){
-    		command += "-no-intron ";
+    		command.add("-no-intron");
     	}
     	if(m_no_upstream.getBooleanValue()){
-    		command += "-no-upstream ";
+    		command.add("-no-upstream");
     	}
     	if(m_no_utr.getBooleanValue()){
-    		command += "-no-utr ";
+    		command.add("-no-utr");
     	}
     	
     	/*Annotations options*/
     	if(m_lof.getBooleanValue()){
-    		command += "-lof ";
+    		command.add("-lof");
     	}
     	
-    	command +=  vcfFile + " > " + outFile + ".eff.vcf";
-    	//run the task
-      	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", command);
-      	Process p_snpEff = b.start();
-    	p_snpEff.waitFor();  	
+    	command.add(vcfFile);
+
     	
-    	//Write logfile
-    	logBuffer.append(ShowOutput.getLogEntry(p_snpEff, command));
+    	/**
+    	 * Execute
+    	 */
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outFile + ".eff.vcf");
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
-    	//make output table
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("snpEffDirectory", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("outputFile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(snpEffDirectory);
-    	StringCell cl2 = new StringCell(outFile + ".eff.vcf");
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	/**
+    	 * Output
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(snpEffDirectory),
+    			(FileCell) FileCellFactory.create(outFile + ".eff.vcf")};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
+    	BufferedDataTable outTable = cont.getTable();
     	    	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
