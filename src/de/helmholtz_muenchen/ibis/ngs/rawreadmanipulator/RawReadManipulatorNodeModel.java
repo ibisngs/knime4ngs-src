@@ -258,7 +258,6 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 //    	}
     	
         /**Create Output**/
-        inFile1 = new File(inFile1).getCanonicalPath();
     	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));
     	if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile1).getName();
     	if(!new File(outReadsFile1).exists()) {	//If the file does not exist
@@ -267,7 +266,6 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	
     	String outReadsFile2 = "";
     	if(!inFile2.equals("")) {
-    		inFile2 = new File(inFile2).getCanonicalPath();
     		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
     		if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile2).getName();
     		if(!new File(outReadsFile2).exists()) {
