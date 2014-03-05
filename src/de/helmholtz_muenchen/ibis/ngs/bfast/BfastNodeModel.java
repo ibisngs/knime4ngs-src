@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.bfast;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,9 +24,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 public class BfastNodeModel extends NodeModel {
@@ -222,6 +225,13 @@ public class BfastNodeModel extends NodeModel {
 			BfastNodeModel.DEFAULT_INSSTDDEV,
 			0,Integer.MAX_VALUE);
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(BfastNodeModel.class);
+		
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2SAMFile";
+	public static final String OUT_COL2 = "Path2RefFile";
+	
+	
 	/**
      * Constructor for the node model.
      */
@@ -261,9 +271,11 @@ public class BfastNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("Bfast"));
     	/**logfile initialized**/
     	 
+    	ArrayList<String> command = new ArrayList<String>();
+    	
     	
     	 String path2readFile = inData[0].iterator().next().getCell(0).toString();
-    	 String threads = " -n "+m_threads.getIntValue()+" ";
+    	 String threads = "-n "+m_threads.getIntValue();
     	 String outBaseName = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
     	 
     	 //Create Reference Genome   
@@ -272,150 +284,131 @@ public class BfastNodeModel extends NodeModel {
     	 if (m_modeltype.getStringValue().equals("Color space")) {
     		model = "1";
          }
-    		 
-    	 String call_1 = m_bfast.getStringValue() + " fasta2brg -f " + m_fasta.getStringValue() + " -A " + model; //fasta2brg creates ref. genome
-    	     	
-    	// begin QueueSub #################################################
- 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
- 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bfast-fasta2brg";
- 			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
- 			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
- 			new QSub(call_1, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + call_1 + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
- 		// end QueueSub ###################################################
- 		} else {
-	    	 Process p = Runtime.getRuntime().exec(call_1);
-	    	 p.waitFor();
-	    	 logBuffer.append(ShowOutput.getLogEntry(p, call_1));
- 		}
-    	 
+    	
+    	//fasta2brg creates ref. genome
+    	 command.add(m_bfast.getStringValue()+" fasta2brg");
+    	 command.add("-f "+m_fasta.getStringValue());
+    	 command.add("-A "+model);
+
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
     
-    	String tmpdir = "";
-    	if(m_usetmpdir.getBooleanValue()){
-    		tmpdir = " -T "+m_tmpdir.getStringValue()+"/ ";
-    	}
-    	String splitdepth = "";
-    	if(m_usesplitdepth.getBooleanValue()){
-    		splitdepth = " -d "+m_splitdepth.getIntValue()+" ";
-    	}
+
     	
     	//Create Indexed Reference Genome
-    	String maskrepeats = "";
-    	String positions = "";
-    	String contigs = "";
-    	String exonsfile = "";
+    	command.add(m_bfast.getStringValue()+" index");
+    	
+    	command.add("-f "+m_fasta.getStringValue());
+    	command.add("-m "+m_mask.getStringValue());
+    	command.add("-w " + m_hashwidth.getIntValue());
+    	    	
+    	if(m_usetmpdir.getBooleanValue()){
+    		command.add("-T "+m_tmpdir.getStringValue()+"/");
+    	}
+    	
+    	if(m_usesplitdepth.getBooleanValue()){
+    		command.add("-d "+m_splitdepth.getIntValue());
+    	}
+    	
     	if(m_repeatmasker.getBooleanValue()){
-    		maskrepeats = " -R ";
+    		command.add("-R ");
     	}
     	if(m_usecontigs.getBooleanValue()){
-    		contigs = " -s "+m_startcontig.getIntValue()+" -e "+m_endcontig.getIntValue()+" ";
+    		command.add("-s "+m_startcontig.getIntValue()+" -e "+m_endcontig.getIntValue());
     	}
     	if(m_usepos.getBooleanValue()){
-    		positions = " -S "+m_startpos.getIntValue()+" -E "+m_endpos.getIntValue()+" ";
+    		command.add("-S "+m_startpos.getIntValue()+" -E "+m_endpos.getIntValue());
     	}
     	if(m_useexonsfile.getBooleanValue()){
-    		exonsfile = " -x "+m_exonsfile.getStringValue()+" ";
+    		command.add("-x "+m_exonsfile.getStringValue());
     	}
-    	    	
-    	String call_2 = m_bfast.getStringValue() + " index -f " + m_fasta.getStringValue() + " -m " + m_mask.getStringValue() + " -w " + m_hashwidth.getIntValue() + tmpdir + splitdepth + contigs + positions + exonsfile + maskrepeats + threads+" > /dev/null 2>&1";
-    	// begin QueueSub #################################################
- 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
- 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bfast-index";
- 			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
- 			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
- 			new QSub(call_2, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + call_2 + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
- 		// end QueueSub ###################################################
- 		} else {
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", call_2);
-	    	/*for(Integer i=0; i<b.command().size();i++){
-	    	System.out.println(b.command().get(i));
-	    	}*/
-	    	Process z;
-	    	z = b.start();
-	    	z.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(z, call_2));
- 		}
-
-    	 
-    	//Find Candidate Alignments
-    	String compression = "";
     	
+    	command.add(threads);
+
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
+    	 
+     	
+     	
+//    	String call_3 = m_bfast.getStringValue() + " match -f "+m_fasta.getStringValue()+" -r "+path2readFile+" "+
+//        		loadIndexes+" "+compression+" "+strand+" "+startreadnum+" "+endreadnum+" "+maxkeymatches+" "+keymissfraction+" "+maxnummatches+" "+
+//        		mainindexes+" "+secindexes+" "+offsets+" "+keysize+ maxreads +" -t" + threads;
+//    	 	
+//        	//make path for output
+//        	String outPath = m_fasta.getStringValue().substring(0,m_fasta.getStringValue().lastIndexOf('/')+1);
+//        	outPath += "CAL_result";
+//        	call_3 += " > "+outPath;
+
+     	
+    	command.add(m_bfast.getStringValue()+" match");    	
+     	command.add("-f "+m_fasta.getStringValue());
+     	command.add("-r "+path2readFile);
+    	if(m_loadindexes.getStringValue().equals("yes")){
+    		command.add("-l");
+    	}
     	if(m_compresstype.getStringValue().equals("bz2")){
-    		compression = "--bz2";
+    		command.add("--bz2");
     	}
     	else if(m_compresstype.getStringValue().equals("gz")){
-    		compression = "--gz";
+    		command.add("--gz");
     	}
-    	String loadIndexes = "";
-    	if(m_loadindexes.getStringValue().equals("yes")){
-    		loadIndexes = "-l";
-    	}
-    	
-    	String strand = "";
+
     	if(m_strand.getStringValue().equals("both")){
-    		strand = "-w 0";   		
+    		command.add("-w 0");   		
     	}
     	else if(m_strand.getStringValue().equals("forward")){
-    		strand = "-w 1";
+    		command.add("-w 1");
     	}
     	else if(m_strand.getStringValue().equals("reverse")){
-    		strand = "-w 2";
+    		command.add("-w 2");
     	}
     	
-    	String startreadnum = "-s " + m_startreadnum.getIntValue();
-    	String endreadnum = "-e " + m_endreadnum.getIntValue();
-    	String maxkeymatches = "-K " + m_maxkeymatches.getIntValue();
-    	String keymissfraction = "-F " + m_keymissfraction.getDoubleValue();
-    	String maxnummatches = "-M " + m_maxnummatches.getIntValue();
-    	String mainindexes = "";
-    	String secindexes = "";
-    	String offsets = "";
-    	String keysize = "";
-    	String maxreads = "";
+    	command.add("-s " + m_startreadnum.getIntValue());
+    	command.add("-e " + m_endreadnum.getIntValue());
+    	command.add("-K " + m_maxkeymatches.getIntValue());
+    	command.add("-F " + m_keymissfraction.getDoubleValue());
+    	command.add("-M " + m_maxnummatches.getIntValue());
+
     	if(m_usekeysize.getBooleanValue()){
-    		keysize = "-k " + m_keysize.getIntValue();
+    		command.add("-k " + m_keysize.getIntValue());
     	}
     	if(m_usemainindexes.getBooleanValue() && !m_mainindexes.getStringValue().equals("")){
-    		mainindexes = "-i "+m_mainindexes.getStringValue();
+    		command.add("-i "+m_mainindexes.getStringValue());
     	}
     	if(m_usesecindexes.getBooleanValue() && !m_secindexes.getStringValue().equals("")){
-    		secindexes = "-I "+m_secindexes.getStringValue();
+    		command.add("-I "+m_secindexes.getStringValue());
     	}
     	if(m_useoffsets.getBooleanValue() && !m_offsets.getStringValue().equals("")){
-    		offsets = "-o "+m_offsets.getStringValue();
+    		command.add("-o "+m_offsets.getStringValue());
     	}
     	if(m_usemaxreads.getBooleanValue()){
-    		maxreads = " -Q "+m_maxreads.getIntValue()+" ";
+    		command.add("-Q "+m_maxreads.getIntValue());
     	}
-    	
-    	String call_3 = m_bfast.getStringValue() + " match -f "+m_fasta.getStringValue()+" -r "+path2readFile+" "+
-    		loadIndexes+" "+compression+" "+strand+" "+startreadnum+" "+endreadnum+" "+maxkeymatches+" "+keymissfraction+" "+maxnummatches+" "+
-    		mainindexes+" "+secindexes+" "+offsets+" "+keysize+ maxreads +" -t" + threads;
+    	//command.add("-t" + threads);
 	 	
     	//make path for output
     	String outPath = m_fasta.getStringValue().substring(0,m_fasta.getStringValue().lastIndexOf('/')+1);
     	outPath += "CAL_result";
-    	call_3 += " > "+outPath;
-    	
-    	// begin QueueSub #################################################
- 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
- 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bfast-match";
- 			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
- 			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
- 			new QSub(call_3, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + call_3 + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
- 		// end QueueSub ###################################################
- 		} else {
-	    	//System.out.println(call_3+" >"+outPath);
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", call_3);
-			Process r = b.start();
-			r.waitFor();
-			logBuffer.append(ShowOutput.getLogEntry(r, call_3));
- 		}
+
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outPath);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
+     	
+
         
 		/**************************************
 		*		Alignment&postprocessing	  *
@@ -430,39 +423,35 @@ public class BfastNodeModel extends NodeModel {
     	String basePath = path2reffile.substring(0,path2reffile.lastIndexOf('/')+1);
     	String path2Alignoutfile = basePath+outBaseName+"_localalign.out";
     	
-    	String gap="";
+
+
+    	command.add(path2bfast+" localalign");
+    	command.add("-f "+path2reffile);
+    	command.add("-m "+path2match);
     	if(m_gappedalign.getStringValue().equals("ungapped")){
-    		gap="-u ";
+    		command.add("-u");
     	}
-    	String mask="";
     	if(m_mask.getStringValue().equals("No")){
-    		mask=" -U ";
+    		command.add("-U");
     	}
-    	String col=" -A "+color;
-    	//String start = " -s "+m_readstart.getIntValue();
-    	//String stop = " -e "+m_readstop.getIntValue();
-    	String offset = " -o "+m_offset.getIntValue();
-    	String maxmatch = " -M "+m_maxmatches.getIntValue();
-    	String avgmisqual = " -q "+m_avgmisqual.getIntValue();
+    	command.add("-A "+color);
+    	command.add("-o "+m_offset.getIntValue());
+    	command.add("-M "+m_maxmatches.getIntValue());
+    	command.add("-q "+m_avgmisqual.getIntValue());
+    	if(m_usemaxreads.getBooleanValue()){
+    		command.add("-Q "+m_maxreads.getIntValue());
+    	}
+    	command.add(threads);
     	
-    	String call = path2bfast+" localalign -f "+path2reffile+" -m "+path2match+" "+gap+mask+col+offset+maxmatch+avgmisqual + maxreads + threads +"> "+path2Alignoutfile;
-    	//System.out.println(call);
-    	// begin QueueSub #################################################
- 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
- 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bfast-localalign";
- 			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
- 			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
- 			new QSub(call, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + call + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
- 		// end QueueSub ###################################################
- 		} else {
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", call);
-	    	Process p1 = b.start();
-	    	p1.waitFor();
-	        logBuffer.append(ShowOutput.getLogEntry(p1, call));
- 		}
-     
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,path2Alignoutfile);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
+    	
+    	
         //Begin Postprocessing
         int algo2use=-1;
         if(m_algo.getStringValue().equals("No filtering")){
@@ -487,62 +476,53 @@ public class BfastNodeModel extends NodeModel {
         	pairing2use=2;
          }
         
-        String algo = " -a "+algo2use;
-        String pairing = " -Y "+pairing2use;
-        String minqual = " -m "+m_minmapqual.getIntValue();
-        String minnorm = " -M "+m_minnormscore.getIntValue();
-        String inssize = "";
-        String insstd = "";
-        if(m_useavgdev.getBooleanValue()){
-        	inssize = " -v "+m_inssizeavg.getIntValue();
-        	insstd = " -s "+m_insstddev.getIntValue();
-        }
     	String path2Postoutfile = basePath+outBaseName+"_post.sam";
         
-        String call1 = path2bfast+" postprocess -f "+path2reffile+" -i "+path2Alignoutfile+algo+pairing+minqual+minnorm+inssize+insstd + maxreads + threads + "> "+path2Postoutfile;
-        // begin QueueSub #################################################
- 		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
- 			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_Bfast-postprocess";
- 			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
- 			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
- 			new QSub(call1, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + call1 + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
- 		// end QueueSub ###################################################
- 		} else {
-	        //System.out.println(call1);
-	    	ProcessBuilder b1 = new ProcessBuilder("/bin/sh", "-c", call1);
-	    	Process p2 = b1.start();
-	    	p2.waitFor();
-	        logBuffer.append(ShowOutput.getLogEntry(p2, call1));
- 		}
-        
-        
-        
-        //Create Output
-        
-        DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
-        DataColumnSpecCreator col2 = new DataColumnSpecCreator("Path2RefFile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec(),col2.createSpec()};
-     
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2Postoutfile);
-    	StringCell cl2 = new StringCell(path2reffile);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	
+    	command.add(path2bfast+" postprocess");
+    	command.add("-f "+path2reffile);
+    	command.add("-i "+path2Alignoutfile);
+    	command.add("-a "+algo2use);
+    	command.add("-Y "+pairing2use);
+    	command.add("-m "+m_minmapqual.getIntValue());
+    	command.add("-M "+m_minnormscore.getIntValue());
 
-    	DefaultRow d = new DefaultRow("Row0",c);
-    	cont.addRowToTable(d);
+        if(m_useavgdev.getBooleanValue()){
+        	command.add("-v "+m_inssizeavg.getIntValue());
+        	command.add("-s "+m_insstddev.getIntValue());
+        }
+    	if(m_usemaxreads.getBooleanValue()){
+    		command.add("-Q "+m_maxreads.getIntValue());
+    	}
+    	command.add(threads);
+    	
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,path2Postoutfile);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+        
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2Postoutfile),
+    			(FileCell) FileCellFactory.create(path2reffile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
-
+    	BufferedDataTable outTable = cont.getTable();
+    	
     	pushFlowVariableString("BAMSAMINFILE",path2Postoutfile);
+        
     	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
 
     }
 

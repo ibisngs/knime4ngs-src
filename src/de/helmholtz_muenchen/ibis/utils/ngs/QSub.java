@@ -3,7 +3,7 @@ package de.helmholtz_muenchen.ibis.utils.ngs;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
+@Deprecated
 public class QSub {
 
 	String memory = "";
