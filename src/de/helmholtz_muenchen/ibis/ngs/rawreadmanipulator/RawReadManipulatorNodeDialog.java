@@ -7,10 +7,12 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 
@@ -52,6 +54,7 @@ public class RawReadManipulatorNodeDialog extends DefaultNodeSettingsPane {
 	 	final SettingsModelBoolean useOtherFilterFile = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_USEOTHERFILTERFILE, false);
 		final SettingsModelString otherFilterSettingsfile = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_OTHERFILTERSETTINGSFILE,null);
 		final SettingsModelBoolean trimbothends = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_TRIMBOTHENDS, false);
+		final SettingsModelOptionalString outputfolder = new SettingsModelOptionalString(RawReadManipulatorNodeModel.CFGKEY_OUTPUTFOLDER, "", false);
 		
     	/*adapters.setEnabled(false);
 		trimpolyat.setEnabled(false);
@@ -135,6 +138,9 @@ public class RawReadManipulatorNodeDialog extends DefaultNodeSettingsPane {
     			new SettingsModelIntegerBounded(
     				RawReadManipulatorNodeModel.CFGKEY_THREADCOUNT, 4, 1, Integer.MAX_VALUE),
     				"Number of threads to use:", /*step*/ 1));
+    	
+    	createNewGroup("Optional output folder for RRM");
+    	addDialogComponent(new DialogComponentOptionalString(outputfolder, "output folder:"));
     	
     	
     	/**Checkboxes for the optional arguments**/

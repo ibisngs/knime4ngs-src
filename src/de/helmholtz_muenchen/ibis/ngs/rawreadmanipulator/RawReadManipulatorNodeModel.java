@@ -21,6 +21,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -76,6 +77,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 	public static final String CFGKEY_TRIMBYQUAL = "trimbyqual";
 	
 	public static final String CFGKEY_TRIMBOTHENDS = "trimbothends";
+	public static final String CFGKEY_OUTPUTFOLDER = "outputFolder";
 	
 
 	private final SettingsModelBoolean m_useotherfilterfile = new SettingsModelBoolean(CFGKEY_USEOTHERFILTERFILE, false);
@@ -116,6 +118,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_usetrimbyqual = new SettingsModelBoolean(CFGKEY_USETRIMBYQUAL, false);
 	private final SettingsModelIntegerBounded m_trimbyqual = new SettingsModelIntegerBounded(CFGKEY_TRIMBYQUAL, 1, 1, Integer.MAX_VALUE);
 	private final SettingsModelBoolean m_trimbothends = new SettingsModelBoolean(CFGKEY_TRIMBOTHENDS, false);
+	public final SettingsModelOptionalString m_outputfolder = new SettingsModelOptionalString(CFGKEY_OUTPUTFOLDER, "", false);
 	
 	
 	/**
@@ -150,7 +153,8 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	String inFile2 = inData[0].iterator().next().getCell(1).toString();
 //    	String filterFile = inData[0].iterator().next().getCell(2).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	
+    	String outputFolder = new File(m_outputfolder.getStringValue() + File.separator).getAbsolutePath();
+
     	/**Initialize logfile**/
     	String logfile = inFile1.substring(0,inFile1.lastIndexOf("/")+1)+"logfile.txt";
     	ShowOutput.setLogFile(logfile);
@@ -180,6 +184,10 @@ public class RawReadManipulatorNodeModel extends NodeModel {
         	}
     	}
     	command.add(infileParameter);
+    	
+    	if(!outputFolder.isEmpty()) {
+    		command.add("--outDir="+outputFolder);
+    	}
     	
     	if(m_filterfileexists.getBooleanValue()){
     		command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
@@ -250,14 +258,18 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 //    	}
     	
         /**Create Output**/
+        inFile1 = new File(inFile1).getCanonicalPath();
     	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));
+    	if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile1).getName();
     	if(!new File(outReadsFile1).exists()) {	//If the file does not exist
 			throw new Exception("The expected outfile "+outReadsFile1+" does not exist....something went wrong!");
     	}
     	
     	String outReadsFile2 = "";
     	if(!inFile2.equals("")) {
+    		inFile2 = new File(inFile2).getCanonicalPath();
     		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
+    		if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile2).getName();
     		if(!new File(outReadsFile2).exists()) {
     			throw new IOException("The expected outfile "+outReadsFile2+" does not exist....something went wrong!");
         	}
@@ -347,6 +359,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	m_otherfiltersettingsfile.saveSettingsTo(settings);
     	m_useotherfilterfile.saveSettingsTo(settings);
     	m_trimbothends.saveSettingsTo(settings);
+    	m_outputfolder.saveSettingsTo(settings);
     }
 
     /**
@@ -377,6 +390,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	m_useotherfilterfile.loadSettingsFrom(settings);
     	m_otherfiltersettingsfile.loadSettingsFrom(settings);
     	m_trimbothends.loadSettingsFrom(settings);
+    	m_outputfolder.loadSettingsFrom(settings);
     }
 
     /**
@@ -407,6 +421,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	m_useotherfilterfile.validateSettings(settings);
     	m_otherfiltersettingsfile.validateSettings(settings);
     	m_trimbothends.validateSettings(settings);
+    	m_outputfolder.validateSettings(settings);
     }
     
     /**
