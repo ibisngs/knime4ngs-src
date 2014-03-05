@@ -3,10 +3,10 @@ package de.helmholtz_muenchen.ibis.ngs.featureCounts;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeView;
 
 /**
- * <code>NodeView</code> for the "Star" Node.
- * STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays. 
+ * <code>NodeView</code> for the "FeatureCounts" Node.
+ * featureCounts: an efficient general purpose program for assigning sequence reads to genomic features
  * For details, please see paper: 
- * Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635
+ * Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656
  *
  * @author Michael Kluge
  */

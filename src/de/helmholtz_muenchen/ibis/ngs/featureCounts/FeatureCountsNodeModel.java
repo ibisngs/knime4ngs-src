@@ -22,16 +22,15 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
-import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
 /**
- * This is the model implementation for the wrapper of STAR.
- * STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays. 
+ * This is the model implementation for the wrapper of featureCounts.
+ * featureCounts: an efficient general purpose program for assigning sequence reads to genomic features
  * For details, please see paper: 
- * Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635
+ * Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656
  *
  * @author Michael Kluge
  */
@@ -110,16 +109,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
-    	if(isAlignRunMode()) {
-    		if(!((cn[0].equals(RunAlignerNodeModel.OUT_COL1) && cn[1].equals(RunAlignerNodeModel.OUT_COL2) ||
-    			(cn[0].equals(RawReadManipulatorNodeModel.OUT_COL1) && cn[1].equals(RawReadManipulatorNodeModel.OUT_COL2)))))
-    			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' or 'RawReadManipulator' node.");
-    		
-            // TODO: validate gtf file
-            //validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
-    	}
 
-    	
+        // TODO: validate gtf file
+        //validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
+
 		return new DataTableSpec[]{null};
     }
     
@@ -179,37 +172,27 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		
         return new BufferedDataTable[]{cont.getTable()};
 	}
+        
     
     /**
-     * true, if align run mode is configured
-     * @return
-     */
-    private boolean isAlignRunMode() {
-    	//return DEFAULT_RUN_MODE.equals(SET_RUN_MODE.getStringValue());
-    	return false;
-    }
-    
-    
-    /**
-     * Checks, if the path contains a genome index for STAR
-     * @param genomePath
+     * Checks, if the file is a annotation file in the GTF / SAF file
+     * @param path2AnnotationFile
      * @return
      * @throws InvalidSettingsException
      */
-    protected boolean validateGenomeIndex(String genomePath) throws InvalidSettingsException {
-    /*	// check for relative path if binary file is valid
+    protected boolean validateAnnotationFile(String path2AnnotationFile) throws InvalidSettingsException {
+    	// check for relative path if binary file is valid
     	if(isBinaryValid(getBinaryPath()))
-    		genomePath = getAbsoluteFilename(genomePath, true);
+    		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, true);
     	
     	// check if genomePath exists
-    	File f = new File(genomePath);
+    	File f = new File(path2AnnotationFile);
     	if(!(f.isDirectory() && f.exists()))
-    		throw new InvalidSettingsException("Genome path '" + genomePath + "' does not exist.");
+    		throw new InvalidSettingsException("Annotation files '" + path2AnnotationFile + "' does not exist.");
     	
-    	// check if parameter file is there
-    	f = new File(genomePath + File.separator + NAME_OF_GENOME_PARAMETER_FILE);
-    	if(!(f.isFile() && f.canRead()))
-    		throw new InvalidSettingsException("Folder was found but it seems that it does not contain a valid genome index.");    	
+    	// TODO: check if GTF or SAF file is valid
+    	
+    	//	throw new InvalidSettingsException("Folder was found but it seems that it does not contain a valid genome index.");    	
     	// all checks where ok */
     	return true;
     }
