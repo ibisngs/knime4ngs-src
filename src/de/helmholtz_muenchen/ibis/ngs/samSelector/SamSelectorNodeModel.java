@@ -4,7 +4,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.FileSelector.FileSelectorN
 
 
 /**
- * <code>FastaSelectorNodeModel</code> can be used to select multiple fasta files.
+ * <code>FastaSelectorNodeModel</code> can be used to select multiple SAM or BAM files.
  *
  * @author Michael Kluge
  */

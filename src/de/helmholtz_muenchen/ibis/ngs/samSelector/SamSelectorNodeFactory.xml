@@ -3,22 +3,22 @@
     <name>SamSelector</name>
     
     <shortDescription>
-        This node can be used to select multiple fasta files.
+        This node can be used to select multiple SAM or BAM files.
     </shortDescription>
     
     <fullDescription>
-        <intro>This node can be used to select multiple fasta files.<br /><br />A fasta file can be added directly or all fasta files stored in a dictionary can be added.<br />Fasta files must end with ".fasta" or ".fa" and must pass the a fasta check (header, allowed chars) implemented in FileValidator.checkFastaFormat().</intro>
+        <intro>This node can be used to select multiple SAM or BAM files.<br /><br />A SAM/BAM file can be added directly or all SAM/BAM files stored in a dictionary can be added.<br />SAM/BAM files must end with ".sam" or ".bam" and must pass the a file check implemented in FileValidator.checkSamBamFormat().</intro>
         
         
-        <option name="path to fasta file">Can be used to add a single fasta file to the selection. After the file was selected using the FileChooser it must be added by clicking on a button.</option>
-        <option name="path to fasta folder">Can be used to add all fasta files in a dictionary to the selection. After the dictionary was selected using the FileChooser it must be added by clicking on a button.</option>
-        <option name="currently selected fasta files">Displays all the fasta files which are currently selected by this node and will be written to the out-port during execution. With the remove button fasta files which are selected in the listbox can be removed from the selection.</option>
+        <option name="path to SAM/BAM file">Can be used to add a single SAM/BAM file to the selection. After the file was selected using the FileChooser it must be added by clicking on a button.</option>
+        <option name="path to SAM/BAM folder">Can be used to add all SAM/BAM files in a dictionary to the selection. After the dictionary was selected using the FileChooser it must be added by clicking on a button.</option>
+        <option name="currently selected SAM/BAM files">Displays all the SAM/BAM files which are currently selected by this node and will be written to the out-port during execution. With the remove button SAM/BAM files which are selected in the listbox can be removed from the selection.</option>
     </fullDescription>
     
     <ports>
-        <outPort index="0" name="Out-Port">Cell 0: Names of the fasta files are written to the column 'FastaFile'.</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: Names of the SAM/BAM files are written to the column 'SamFiles'.</outPort>
     </ports>    
     <views>
-        <view index="0" name="show selected files">Shows the selected fasta files in a list. (not implemented yet)</view>
+        <view index="0" name="show selected files">Shows the selected SAM/BAM files in a list. (not implemented yet)</view>
     </views>
 </knimeNode>

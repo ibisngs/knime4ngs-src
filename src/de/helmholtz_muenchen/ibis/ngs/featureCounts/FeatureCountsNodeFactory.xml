@@ -3,29 +3,34 @@
     <name>FeatureCounts</name>
     
     <shortDescription>
-        STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays and is "splice aware".
+        featureCounts: an efficient general purpose program for assigning sequence reads to genomic features
     </shortDescription>
     
     <fullDescription>
-        <intro>STAR, a "splice aware" RNA-seq aligner, aligns RNA-seq reads to a reference genome using uncompressed suffix arrays.<br /><br />For details, please see paper:<br />Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635<br /><a href="http://bioinformatics.oxfordjournals.org/content/29/1/15">STAR: ultrafast universal RNA-seq aligner</a><br /><br />Options were tested with <i>alpha 2.3.1z</i> but should work also with different versions because of the <b>parameterFile</b> option.</intro>
+        <intro>featureCounts: an efficient general purpose program for assigning sequence reads to genomic features<br /><br />For details, please see paper:<br />
+       Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656<br />
+       <a href="http://bioinformatics.oxfordjournals.org/content/early/2013/11/30/bioinformatics.btt656.full.pdf">featureCounts: an efficient general purpose program for assigning sequence reads to genomic features</a></intro>
         
         <tab name="level 0 and 1 options">
-        	<option name="path to STAR binary">Path to the compiled STAR binary. Theoretically all versions starting from <i>alpha 2.3.1z</i> should be supported.</option>
-			<option name="path to parameter file">Can be used to set parameters which can not be set directly in this node.<br /><br />Expected syntax: parameterName (with '-' or '--') parameterValue(s)<br />Example: --runThreadN 4<br /><br />Supported parameters can be looked up in the <b>parametersDefault</b> file which is shipped together with the <a href="https://code.google.com/p/rna-star/">STAR source files</a>.</option>
+        	<option name="path to featureCounts binary">Path to the compiled featureCounts binary. Theoretically all versions starting from <i>1.4.3</i> should be supported.</option>
+			<option name="path to parameter file">Can be used to set parameters which can not be set directly in this node.<br /><br />Expected syntax: parameterName (with '-' or '--') parameterValue(s)<br />Example: --runThreadN 4</option>
 			<option name="additional parameters">Parameters can be set like you would normally use them on the command line for this binary. This parameters override the settings in the parameter file and are overridden by the settings of level 2.</option>
         </tab>
         <tab name="level 2 options">
-        	<option name="runMode"><i>alignReads</i> or <i>generateGenome</i>:<br /><br/><i>alignReads:</i> aligns reads to a reference genome<br /><i>generateGenome:</i> generates a genome index out of one or more fasta files</option>
-        	<option name="path to indexed genome">Path to the genome which was indexed by STAR using the "generate genome mode". This option is only needed in the "align read mode".</option>
-        	<option name="path to output folder">Path where all the output data is stored.</option>
+        	<option name="path to annotation file">GTF or SAF annotation file.</option>
+        	<option name="path to output file">Path where the output file should be stored.</option>
+        	<option name="file type">GTF or SAF annotation files are supported.</option>
+        	<option name="feature type used for counting">Feature type which is used for counting when GTF file is used. Default: exon</option>
+        	<option name="count multimapped reads">Counts also reads, which do not map uniquely</option>
+        	<option name="thread number">Number of threads which are used for counting. [1-16]</option>
         </tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">Input depends on the runMode:<br /><br /><b>-alignReads:</b> Input from <i>RunAligner</i> node (single- and paired-reads are supported)<br /><b>-generateGenome:</b> Input from <i>FastaSelector</i> node (list of fasta files)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: runMode (<i>alignReads</i> or <i>generateGenome</i>)<br />Cell 1: path to output folder<br />Cell 2: path to parameter file if one was used</outPort>
+        <inPort index="0" name="In-Port">Cell 0: One or more SAM or BAM files</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: path to output file<br />Cell 1: command which was used to call the binary</outPort>
     </ports>    
     <views>
-        <view index="0" name="STDOUT/STDERR log">Shows the STDOUT and STDERR output of STAR when it was executed successfully.</view>
+        <view index="0" name="STDOUT/STDERR log">Shows the STDOUT and STDERR output of featureCounts when it was executed successfully.</view>
     </views>
 </knimeNode>

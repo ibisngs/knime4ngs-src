@@ -7,8 +7,8 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.FileSelector.FileSelectorN
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 /**
- * <code>NodeDialog</code> for the "FastaSelector" Node.
- * This Node can be used to select multiple fasta files.
+ * <code>NodeDialog</code> for the "SamSelector" Node.
+ * This Node can be used to select multiple SAM or BAM files.
  * 
  * @author Michael Kluge
  */
@@ -30,9 +30,8 @@ public class SamSelectorNodeDialog extends FileSelectorNodeDialog {
     	if(!this.getFilenameFilter().accept(file.getParentFile(), file.getName()))
     		return false;
     	
-    	// TODO check, if fasta file is valid
-    	//if(!FileValidator. .checkFastaFormat(file.getAbsolutePath()))
-    	//	return false;
+    	if(!FileValidator.checkSamBamFormat(file.getAbsolutePath()))
+    		return false;
     	
     	// all checks were ok.
     	return true;

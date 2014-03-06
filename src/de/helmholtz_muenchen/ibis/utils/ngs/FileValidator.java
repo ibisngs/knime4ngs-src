@@ -57,6 +57,16 @@ public class FileValidator {
 		return false;
 	}
 	
+	/**
+	 * Checks, if a file is in SAM or BAM format
+	 * @param path2File
+	 * @return
+	 */
+	public static boolean checkSamBamFormat(String path2File){
+		// TODO: implement check
+		return true;
+	}
+	
 	
 	/**
 	 * Verifies fastq file format by checking only the first (!) entry

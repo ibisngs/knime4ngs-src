@@ -23,7 +23,7 @@
     
     <ports>
         <inPort index="0" name="In-Port">Input depends on the runMode:<br /><br /><b>-alignReads:</b> Input from <i>RunAligner</i> node (single- and paired-reads are supported)<br /><b>-generateGenome:</b> Input from <i>FastaSelector</i> node (list of fasta files)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: runMode (<i>alignReads</i> or <i>generateGenome</i>)<br />Cell 1: path to output folder<br />Cell 2: path to parameter file if one was used</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: runMode (<i>alignReads</i> or <i>generateGenome</i>)<br />Cell 1: path to output folder<br />Cell 2: command which was used to call the binary</outPort>
     </ports>    
     <views>
         <view index="0" name="STDOUT/STDERR log">Shows the STDOUT and STDERR output of STAR when it was executed successfully.</view>

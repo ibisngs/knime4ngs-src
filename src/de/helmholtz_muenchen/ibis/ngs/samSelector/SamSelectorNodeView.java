@@ -4,10 +4,10 @@ import org.knime.core.node.NodeView;
 
 /**
  * <code>NodeView</code> for the "FastaSelector" Node.
- * This Node can be used to select multiple fasta files.
+ * This Node can be used to select multiple SAM or BAM files.
  *
  * @author Michael Kluge
- * TODO: implement the view that it displays the selected fasta files which where written to the output
+ * TODO: implement the view that it displays the selected SAM / BAM files which where written to the output
  */
 public class SamSelectorNodeView extends NodeView<SamSelectorNodeModel> {
 

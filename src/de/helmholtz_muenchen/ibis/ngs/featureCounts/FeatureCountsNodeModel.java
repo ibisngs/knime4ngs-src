@@ -22,8 +22,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
-import de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
 /**
@@ -91,6 +89,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
         addSettingsModelInteger(CFGKEY_THREAD_NUMBER, DEFAULT_THREAD_NUMBER);
         addSettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED, DEAFULT_COUNT_MULTIMAPPED);
         addSettingsModelString(CFGKEY_ANNOTATION_FEATURE, DEFAULT_ANNOTATION_FEATURE);
+        
     }
     
     /**
@@ -107,11 +106,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
     	
-    	// check input port
-    	String[] cn=inSpecs[0].getColumnNames();
-
-        // TODO: validate gtf file
-        //validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
+        validateAnnotationFile(SET_ANNOTATION_FILE.getStringValue());
 
 		return new DataTableSpec[]{null};
     }
@@ -149,7 +144,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     			inputArgument.add(it.next().getCell(0).toString());
 
     	// add the input parameter
-    	pars.put(" ", StringUtils.join(inputArgument, "\" \""));
+    	pars.put(" ", StringUtils.join(inputArgument, " "));
     	// return the GUI parameter
 		return pars;
 	}

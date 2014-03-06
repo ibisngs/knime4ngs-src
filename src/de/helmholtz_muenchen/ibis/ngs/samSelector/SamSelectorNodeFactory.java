@@ -5,8 +5,8 @@ import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "FastaSelector" Node.
- * This Node can be used to select multiple fasta files.
+ * <code>NodeFactory</code> for the "SamSelector" Node.
+ * This Node can be used to select multiple SAM or BAM files.
  *
  * @author Michael Kluge
  */

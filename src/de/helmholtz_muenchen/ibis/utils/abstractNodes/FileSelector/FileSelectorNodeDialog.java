@@ -75,11 +75,11 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
 		empty.add(NO_SELECTION_MADE);
 		DC_FILE_DISPLAY.replaceListItems(empty, NO_SELECTION_MADE);
 		
-		// TODO: get buttons working!!!!
+		// TODO: get buttons working!!!! --> java.lang.AssertionError
         // disable both buttons at first time
-        DC_FILE_DIR_BUTTON.getModel().setEnabled(false);
-        DC_FILE_FILE_BUTTON.getModel().setEnabled(false);
-        DC_FILE_REMOVE_BUTTON.getModel().setEnabled(false);
+        //DC_FILE_DIR_BUTTON.getModel().setEnabled(false);
+        //DC_FILE_FILE_BUTTON.getModel().setEnabled(false);
+        //DC_FILE_REMOVE_BUTTON.getModel().setEnabled(false);
                
         // add elements
         createNewGroup("add " + getFiletypeName() + " files");
