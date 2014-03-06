@@ -158,7 +158,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     			inputArgument.add(it.next().getCell(0).toString());
     	}
     	// add the input parameter
-    	pars.put(inputParameter, StringUtils.join(inputArgument, "\" \""));
+    	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
     	// return the GUI parameter
 		return pars;
 	}

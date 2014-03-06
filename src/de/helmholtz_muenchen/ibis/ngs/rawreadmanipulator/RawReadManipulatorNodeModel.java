@@ -153,7 +153,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	String inFile2 = inData[0].iterator().next().getCell(1).toString();
 //    	String filterFile = inData[0].iterator().next().getCell(2).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String outputFolder = new File(m_outputfolder.getStringValue() + File.separator).getAbsolutePath();
+    	String outputFolder = m_outputfolder.getStringValue().isEmpty() ? "" : new File(m_outputfolder.getStringValue() + File.separator).getAbsolutePath();
 
     	/**Initialize logfile**/
     	String logfile = inFile1.substring(0,inFile1.lastIndexOf("/")+1)+"logfile.txt";

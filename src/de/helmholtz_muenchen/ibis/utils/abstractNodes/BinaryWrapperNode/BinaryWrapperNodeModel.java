@@ -157,12 +157,12 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 			String key = it.next();
 			
 			if(key.length() > 0) {
-				commands.add(key);
-				
 				// add value, if some is set
 				String value = pars.get(key);
 				if(value.length() != 0)
-					commands.add(value);
+					commands.add(key + " " + value);
+				else
+					commands.add(key);
 			}
 		}
 		
