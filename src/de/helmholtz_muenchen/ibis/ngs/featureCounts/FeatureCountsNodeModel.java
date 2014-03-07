@@ -180,9 +180,9 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	if(isBinaryValid(getBinaryPath()))
     		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, true);
     	
-    	// check if genomePath exists
+    	// check if path2AnnotationFile exists
     	File f = new File(path2AnnotationFile);
-    	if(!(f.isDirectory() && f.exists()))
+    	if(!(f.isFile() && f.exists()))
     		throw new InvalidSettingsException("Annotation files '" + path2AnnotationFile + "' does not exist.");
     	
     	// TODO: check if GTF or SAF file is valid
