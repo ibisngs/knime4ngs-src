@@ -20,8 +20,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.bowtie2.Bowtie2NodeModel;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
