@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.segemehl;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -22,9 +23,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Segemehl.
@@ -66,7 +69,11 @@ public class SegemehlNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_checkBisulfiteMapping = new SettingsModelBoolean(CFGKEY_CHECKSBISULFITEMAPPING, false);
 	private final SettingsModelString m_bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"");
 
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2SAMFile";
+	public static final String OUT_COL2 = "Path2RefFile";
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(SegemehlNodeModel.class);
 		
     /**
      * Constructor for the node model.
@@ -93,6 +100,8 @@ public class SegemehlNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	
+    	ArrayList<String> command = new ArrayList<String>();
     	
     	String path2reads1 = inData[0].iterator().next().getCell(0).toString();
     	
@@ -122,7 +131,6 @@ public class SegemehlNodeModel extends NodeModel {
     	String outName = basePath+outBaseName+"_map.sam";
     	String outNameUnmatchedReads = path2refSeq.substring(0,path2refSeq.lastIndexOf("/")+1)+"unmatchedReads.f";
     	int nrOfThreads = m_threads.getIntValue();
-    	String pp = "",pq = "", pt = "", pr = "", pc = "", py = "", ppp = "", ps = "", pf = "", com;
     	
     	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
     		readType = readTypePrevious;
@@ -130,102 +138,105 @@ public class SegemehlNodeModel extends NodeModel {
     	
     // Indexing reference sequence: segemehl -x chr1.idx -d chr1.fa
     	if(m_checkIndexRefSeq.getBooleanValue()) {
-    		System.out.println("Indexing reference sequence.");
-	    	com = path2segemehl + " -x " + path2indexedRefSeq + " -d " + path2refSeq;
-	    	// begin QueueSub #################################################
-			if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-				String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SegemehlIndex";
-				String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-				String logfle = path2reads1.substring(0,path2reads1.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-				new QSub(com, name, memory, logfle, true);
-	 			logBuffer.append("QSub: " + com + "\n");
-				logBuffer.append("See external logfile: " + logfle + "\n");
-			// end QueueSub ###################################################
-			} else {
-		    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-		    	Process p_idx = b.start();
-		    	p_idx.waitFor();
-		    	logBuffer.append(ShowOutput.getLogEntry(p_idx, com));
-			}
+    		LOGGER.info("Indexing reference sequence.");
+    		command.add(path2segemehl);
+    		command.add("-x "+path2indexedRefSeq);
+	    	command.add("-d "+path2refSeq);
+	     	/**
+	     	 * Execute
+	     	 */
+	     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	     	logBuffer.append(ShowOutput.getNodeEndTime());
+	     	ShowOutput.writeLogFile(logBuffer);
+	     	command = new ArrayList<String>();	//Clear Array
+	    	
     	} else {
-    		System.out.println("Indexing reference sequence SKIPPED.");
+    		LOGGER.info("Indexing reference sequence SKIPPED.");
     	}
     	
+    	
     // Match/ align reads: segemehl.x -i chr1.idx -d chr1.fa -q myreads.fa > mymap.sam
-    	System.out.println("Match/ align reads to indexed reference sequence.");
+    	LOGGER.info("Match/ align reads to indexed reference sequence.");
+    	
+    	command.add(path2segemehl);
+    	command.add("-s");
+    	
     	if(m_clip5adapter.getBooleanValue()) {
-    		pp = " -P " + m_adapter5seq.getStringValue();
+    		command.add("-P " + m_adapter5seq.getStringValue());
     	}
     	if(m_clip3adapter.getBooleanValue()) {
     		if(m_autoadapter3seq.getBooleanValue()) {
-    			py = " -Y";
+    			command.add("-Y");
     		} else {
-    			pq = " -Q " + m_adapter3seq.getStringValue();
+    			command.add("-Q " + m_adapter3seq.getStringValue());
     		}
     	}
     	if(m_clippolya.getBooleanValue()) {
-    		pt = " -T";
+    		command.add("-T");
     	}
     	if(m_clip5adapter.getBooleanValue() || m_clip3adapter.getBooleanValue() || m_clippolya.getBooleanValue()) {
-    		pr = " -R " + m_clippingaccuracy.getIntValue();
+    		command.add("-R " + m_clippingaccuracy.getIntValue());
     		if(m_softhardclipping.getStringValue().equals("Hard")) {
-    			pc = " -C";
+    			command.add("-C");
     		}
     	}
     	if(readType.equals("paired-end")) {
-    		ppp = " -p " + path2readFile2;
+    		command.add("-p " + path2readFile2);
     	}
     	if(m_checkSplitReadMapping.getBooleanValue()) {
-    		ps = " -S";
+    		command.add("-S");
     	}
     	if(m_checkBisulfiteMapping.getBooleanValue()) {
     		String bmType = m_bisulfiteMappingType.getStringValue();
     		if(bmType.equals("methylC-seq/Lister et al.")) {
-    			pf = " -F 1";
+    			command.add("-F 1");
     		} else if(bmType.equals("bs-seq/Cokus et al. protocol")) {
-    			pf = " -F 2";
+    			command.add("-F 2");
     		} else if(bmType.equals("PAR-CLIP with 4SU")) {
-    			pf = " -F 3";
+    			command.add("-F 3");
     		} else if(bmType.equals("PAR-CLIP with 6SG")) {
-    			pf = " -F 4";
+    			command.add("-F 4");
     		}
     	}
-    	com = path2segemehl + " -s" + pp + pq + pt + pr + pc + py + ps + pf + " -t " + nrOfThreads + " -i " + path2indexedRefSeq + " -d " + path2refSeq + " -q " + path2reads1 + ppp +  " -o " + outName + " -u " + outNameUnmatchedReads;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_SegemehlAlign";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2reads1.substring(0,path2reads1.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	ProcessBuilder b1 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p_match = b1.start();
-	    	p_match.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p_match, com));
-		}
     	
-    	DataColumnSpecCreator col = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2RefFile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col.createSpec(),col1.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(outName);
-    	StringCell cl2 = new StringCell(path2refSeq);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
+    	command.add("-t "+nrOfThreads);
+    	command.add("-i "+path2indexedRefSeq);
+    	command.add("-d "+path2refSeq);
+    	command.add("-q "+path2reads1);
+    	command.add("-o "+outName);
+    	command.add("-u " + outNameUnmatchedReads);
+    	
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
+     	
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(outName),
+    			(FileCell) FileCellFactory.create(path2refSeq)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
-    	BufferedDataTable out = cont.getTable();
+    	BufferedDataTable outTable = cont.getTable();
     	
     	pushFlowVariableString("BAMSAMINFILE",outName);
     	
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**

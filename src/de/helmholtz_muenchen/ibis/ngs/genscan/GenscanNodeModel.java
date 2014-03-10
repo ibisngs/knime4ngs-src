@@ -2,13 +2,16 @@ package de.helmholtz_muenchen.ibis.ngs.genscan;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -17,8 +20,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.ngs.bowtie2.Bowtie2NodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Genscan.
@@ -46,6 +51,8 @@ public class GenscanNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_ps = new SettingsModelBoolean(GenscanNodeModel.CFGKEY_PS, true);
 	private final SettingsModelIntegerBounded m_psscale = new SettingsModelIntegerBounded(GenscanNodeModel.CFGKEY_PSSCALE, 1, 1, 100);
 
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(GenscanNodeModel.class);
+	
 	
     /**
      * Constructor for the node model.
@@ -66,12 +73,13 @@ public class GenscanNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	ArrayList<String> command = new ArrayList<String>();
+  
     	String path2genscan = m_genscanfile.getStringValue();
     	String model = path2genscan.substring(0,path2genscan.lastIndexOf("/")+1)+"HumanIso.smat";
     	String path2seqfile =  inData[0].iterator().next().getCell(0).toString();
     	String path2outfile = path2seqfile.substring(0,path2seqfile.lastIndexOf("."))+"_genes.txt";
     	String path2outfileps = path2seqfile.substring(0,path2seqfile.lastIndexOf("."))+"_genes.ps";
-    	String v = "", cds = "", ps = "", subopt = "";
     	
     	/**Initialize logfile**/
     	String logfile = path2seqfile.substring(0,path2seqfile.lastIndexOf(".")+1)+"logfile.txt";
@@ -80,44 +88,32 @@ public class GenscanNodeModel extends NodeModel {
     	logBuffer.append(ShowOutput.getNodeStartTime("Genscan"));
     	/**end initializing logfile**/
     	
+    	command.add(path2genscan);
     	if(!m_usematrix.getBooleanValue()) {
     		model = m_matrixfile.getStringValue();
     	}
+    	command.add(model);
+    	command.add(path2seqfile);
     	if(m_verboseoutput.getBooleanValue()) {
-    		v = " -v";
+    		command.add("-v");
     	}
     	if(m_cds.getBooleanValue()) {
-    		cds = " -cds";
+    		command.add("-cds");
     	}
     	if(m_ps.getBooleanValue()) {
-    		ps = " -ps " + path2outfileps + " " + m_psscale.getIntValue();
+    		command.add("-ps " + path2outfileps + " " + m_psscale.getIntValue());
     	}
     	if(m_subopt.getBooleanValue()) {
-    		subopt = " -subopt " + m_suboptcutoff.getDoubleValue();
+    		command.add("-subopt " + m_suboptcutoff.getDoubleValue());
     	}
     	
-    // genscan /home/q/quell/tools/GENSCAN/HumanIso.smat sequence.fasta -v -cds -ps out.ps 1 > out.txt
-    	String com = path2genscan + " " + model + " " + path2seqfile + v + cds + ps + subopt + " > " + path2outfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_GenScan";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2seqfile.substring(0,path2seqfile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p = b.start();
-	    	p.waitFor();
-	    	logBuffer.append(ShowOutput.getLogEntry(p,com));
-		}
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-
+     	/**
+     	 * Execute
+     	 */
+    	// genscan /home/q/quell/tools/GENSCAN/HumanIso.smat sequence.fasta -v -cds -ps out.ps 1 > out.txt
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,path2outfile);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
         return new BufferedDataTable[]{};
     }
 

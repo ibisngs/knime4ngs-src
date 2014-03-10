@@ -2,19 +2,20 @@ package de.helmholtz_muenchen.ibis.ngs.bowtie2;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
-import org.knime.core.data.DataCell;
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -23,9 +24,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.QSub;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Bowtie2.
@@ -187,6 +190,13 @@ public class Bowtie2NodeModel extends NodeModel {
     	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"single-end");
 
     	
+    	private static final NodeLogger LOGGER = NodeLogger.getLogger(Bowtie2NodeModel.class);
+		
+    	//The Output Col Names
+    	public static final String OUT_COL1 = "Path2SAMFile";
+    	public static final String OUT_COL2 = "Path2RefFile";
+    	
+    	
     /**
      * Constructor for the node model.
      */
@@ -229,6 +239,8 @@ public class Bowtie2NodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	ArrayList<String> command = new ArrayList<String>();
+    	
     	/**Initialize logfile**/
     	String fle = inData[0].iterator().next().getCell(0).toString();
     	String logfile = fle.substring(0,fle.lastIndexOf("/")+1)+"logfile.txt";
@@ -256,7 +268,6 @@ public class Bowtie2NodeModel extends NodeModel {
 	    	}
     	}
     	String path2outfile = basePath + outBaseName + "_map.sam";
-    	String com = "";
 
     	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
     		readType = readTypePrevious;
@@ -265,7 +276,6 @@ public class Bowtie2NodeModel extends NodeModel {
     // Options for Indexing
     	Boolean buildIndex = false;
     	String bowtieBuild = installpath + "bowtie2-build";
-    	String noauto = "", packed = "", bmax = "", dcv = "", nodc = "", offrate = "", ftabchars = "", cutoff = "";
     	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
     	Boolean f2 = !new File(path2baseFileName + ".2.bt2").exists();
     	Boolean f3 = !new File(path2baseFileName + ".3.bt2").exists();
@@ -279,78 +289,76 @@ public class Bowtie2NodeModel extends NodeModel {
     // Indexing
     	if(buildIndex) {
     // bowtie2-build [options]* <reference_in> <bt2_base>
-    		logBuffer.append("Build index\n");
+    		LOGGER.info("Build index\n");
+    		
+    		command.add(bowtieBuild);
+    		
     		if(!m_noauto.getBooleanValue()) {
-    			noauto = " --noauto";
+    			command.add("--noauto");
     			if(m_packed.getBooleanValue()) {
-    				packed = " --packed";
+    				command.add("--packed");
     			}
-    			bmax = " --bmaxdivn " + m_bmax.getIntValue();
-    			dcv = " --dcv " + m_dcv.getIntValue();
+    			command.add("--bmaxdivn " + m_bmax.getIntValue());
+    			command.add("--dcv " + m_dcv.getIntValue());
     		}
     		if(m_nodc.getBooleanValue()) {
-    			nodc = " --nodc";
+    			command.add("--nodc");
     		}
-    		offrate = " --offrate " + m_offrate.getIntValue();
-    		ftabchars = " --ftabchars " + m_ftabchars.getIntValue();
+    		command.add("--offrate " + m_offrate.getIntValue());
+    		command.add("--ftabchars " + m_ftabchars.getIntValue());
     		if(m_usecutoff.getBooleanValue()) {
-    			cutoff = " --cutoff " + m_cutoff.getIntValue();
+    			command.add("--cutoff " + m_cutoff.getIntValue());
     		}
-    		com = bowtieBuild + noauto + packed + bmax + dcv + nodc + offrate + ftabchars + cutoff + " " + path2refFile + " " + path2baseFileName;
-    		
-    		// begin QueueSub #################################################
-    		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-    			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BowtieBuild";
-    			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-    			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-    			new QSub(com, name, memory, logfle, true);
-     			logBuffer.append("QSub: " + com + "\n");
-    			logBuffer.append("See external logfile: " + logfle + "\n");
-    		// end QueueSub ###################################################
-    		} else {
-    			System.out.println(com);
-    			ProcessBuilder b = new ProcessBuilder("/bin/sh", "-c", com);
-	        	Process p = b.start();
-	        	p.waitFor();
-	        	logBuffer.append(ShowOutput.getLogEntry(p, com));
-    		}
+    		command.add(path2refFile);
+    		command.add(path2baseFileName);
+         	/**
+         	 * Execute
+         	 */
+         	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+         	logBuffer.append(ShowOutput.getNodeEndTime());
+         	ShowOutput.writeLogFile(logBuffer);
+         	command = new ArrayList<String>();	//Clear Array
+         	
     	} else {
-    		logBuffer.append("Build index SKIPPED\n");
+    		LOGGER.info("Build index SKIPPED\n");
     	}
     	
-    	logBuffer.append("Aligning\n");
-    // Options for Aligning
-    	String reads = "", skip = "", upto = "", trim5 = "", trim3 = "", quals = "", preset = "", n = "", l = "", i = "", nceil = "", dpad = "", gbar = "";
-    	String ignorequals = "", nofw = "", norc = "", alignmenttype = "" , ma = "", mp = "", np = "", rdg = "", rfg = "", scoremin = "", reporting = "";
-    	String d = "", pr = "", minins = "", maxins = "", ff = "", nomixed = "", nodiscordand = "", nodovetail = "", nocontain = "", nooverlap = "";
-    	String threads = "", recorder = "", mm = "", qcfilter = "";
+    	LOGGER.info("Mapping Reads\n");
+
     	String bowtieAlign = installpath + "bowtie2-align";
+    	
+    	command.add(bowtieAlign);
+    	
+    	String reads = "";
     	if(readType.equals("single-end")) {
-    		reads = " -U " + path2readFile;
+    		reads = "-U " + path2readFile;
     	} else {
-    		reads = " -1 " + path2readFile + " -2 " + path2readFile2;
+    		reads = "-1 " + path2readFile + " -2 " + path2readFile2;
     	}
+    	
+    	
     	if(m_useskip.getBooleanValue()) {
-    		skip = " --skip " + m_skip.getIntValue();
+    		command.add("--skip " + m_skip.getIntValue());
     	}
     	if(m_useupto.getBooleanValue()) {
-    		upto = " --upto " + m_upto.getIntValue();
+    		command.add("--upto " + m_upto.getIntValue());
     	}
     	if(m_trim5.getIntValue() > 0) {
-    		trim5 = " --trim5 " + m_trim5.getIntValue(); 
+    		command.add("--trim5 " + m_trim5.getIntValue()); 
     	}
     	if(m_trim3.getIntValue() > 0) {
-    		trim3 = " --trim3 " + m_trim3.getIntValue(); 
+    		command.add("--trim3 " + m_trim3.getIntValue()); 
     	}
     	if(m_quals.getStringValue().equals("Phred+64")) {
-    		quals = " --phred64";
+    		command.add("--phred64");
     	} else if(m_quals.getStringValue().equals("Convert from Solexa to Phred")) {
-    		quals = " --solexa-quals";
+    		command.add("--solexa-quals");
     	} else if(m_quals.getStringValue().equals("Encoded as space-delimited integers")) {
-    		quals = " --int-quals";
+    		command.add("--int-quals");
     	}
     	if(m_usepreset.getBooleanValue()) {
     		String ps = m_preset.getStringValue();
+    		String preset = "";
     		if(ps.equals("very-fast")) {
     			preset = " --very-fast";
     		} else if(ps.equals("fast")) {
@@ -363,126 +371,130 @@ public class Bowtie2NodeModel extends NodeModel {
     		if(m_alignmenttype.getStringValue().equals("local alignment (ends might be soft clipped)")) {
     			preset += "-local";
     		}
+    		command.add(preset);
+    		
     	} else {
-    		n = " -N " + m_n.getIntValue();
-    		l = " -L " + m_l.getIntValue();
-    		i = " -i S," + m_i1.getDoubleValue()+","+m_i2.getDoubleValue();
+    		command.add("-N " + m_n.getIntValue());
+    		command.add("-L " + m_l.getIntValue());
+    		command.add("-i S," + m_i1.getDoubleValue()+","+m_i2.getDoubleValue());
     		if(m_alignmenttype.getStringValue().equals("local alignment (ends might be soft clipped)")) {
-    			alignmenttype += " --local";
+    			command.add("--local");
     		}
     	}
-    	nceil = " --n-ceil " + m_nceil1.getDoubleValue() + "," + m_nceil2.getDoubleValue();
-    	dpad = " --dpad " + m_dpad.getIntValue();
-    	gbar = " --gbar " + m_gbar.getIntValue();
+    	command.add("--n-ceil " + m_nceil1.getDoubleValue() + "," + m_nceil2.getDoubleValue());
+    	command.add("--dpad " + m_dpad.getIntValue());
+    	command.add("--gbar " + m_gbar.getIntValue());
     	if(m_ignorequals.getBooleanValue()) {
-    		ignorequals = " --ignore-quals";
+    		command.add(" --ignore-quals");
     	}
     	if(m_nofw.getBooleanValue()) {
-    		nofw = " --nofw";
+    		command.add("--nofw");
     	}
     	if(m_norc.getBooleanValue()) {
-    		norc = " --norc";
+    		command.add("--norc");
     	}
     	if(m_ma.isEnabled()) {
-    		ma = " --ma " + m_ma.getIntValue();
+    		command.add("--ma " + m_ma.getIntValue());
     	}
-    	mp = " --mp " + m_mp.getIntValue();
-    	np = " --np " + m_np.getIntValue();
-    	rdg = " --rdg " + m_rdg1.getIntValue() + "," + m_rdg2.getIntValue();
-    	rfg = " --rfg " + m_rfg1.getIntValue() + "," + m_rfg2.getIntValue();
-    	scoremin = " --score-min L," + m_scoremin1.getDoubleValue() + "," + m_scoremin2.getDoubleValue();
+    	command.add("--mp " + m_mp.getIntValue());
+    	command.add("--np " + m_np.getIntValue());
+    	command.add("--rdg " + m_rdg1.getIntValue() + "," + m_rdg2.getIntValue());
+    	command.add("--rfg " + m_rfg1.getIntValue() + "," + m_rfg2.getIntValue());
+    	String scoremin = "";
+    	scoremin = "--score-min L," + m_scoremin1.getDoubleValue() + "," + m_scoremin2.getDoubleValue();
     	if(m_alignmenttype.getStringValue().equals("local alignment (ends might be soft clipped)")) {
-    		scoremin = " --score-min G," + m_scoremin1.getDoubleValue() + "," + m_scoremin2.getDoubleValue();
+    		scoremin = "--score-min G," + m_scoremin1.getDoubleValue() + "," + m_scoremin2.getDoubleValue();
     	}
+    	command.add(scoremin);
+    	String reporting = "";
     	if(m_reporting1.getStringValue().equals("Report up to <int> alns per read; MAPQ not meaningful:")) {
-    		reporting = " -k " + m_reporting2.getIntValue();
+    		reporting = "-k " + m_reporting2.getIntValue();
     	} else if(m_reporting1.getStringValue().equals("Report all alignments; very slow, MAPQ not meaningful")) {
-    		reporting = " --all";
+    		reporting = "--all";
     	}
+    	command.add(reporting);
+    	
     	if(m_d.isEnabled()) {
-    		d = " -D " + m_d.getIntValue();
+    		command.add("-D " + m_d.getIntValue());
     	}
     	if(m_r.isEnabled()) {
-    		pr = " -R " + m_r.getIntValue();
+    		command.add("-R " + m_r.getIntValue());
     	}
     	if(readType.equals("paired-end")) {
-	    	minins = " --minins " + m_minins.getIntValue();
-	    	maxins = " --maxins " + m_maxins.getIntValue();
+    		command.add("--minins " + m_minins.getIntValue());
+    		command.add("--maxins " + m_maxins.getIntValue());
 	    	if(m_ff.getStringValue().equals("reverse/forward")) {
-	    		ff = " --rf";
+	    		command.add("--rf");
 	    	} else if(m_ff.getStringValue().equals("forward/forward")) {
-	    		ff = " --ff";
+	    		command.add("--ff");
 	    	}
+	    	
 	    	if(m_nomixed.getBooleanValue()) {
-	    		nomixed = " --no-mixed";
+	    		command.add("--no-mixed");
 	    	}
 	    	if(m_nodiscordand.getBooleanValue()) {
-	    		nodiscordand = " --no-discordant";
+	    		command.add("--no-discordant");
 	    	}
 	    	if(m_nodovetail.getBooleanValue()) {
-	    		nodovetail = " --no-dovetail";
+	    		command.add("--no-dovetail");
 	    	}
 	    	if(m_nocontain.getBooleanValue()) {
-	    		nocontain = " --no-contain";
+	    		command.add("--no-contain");
 	    	}
 	    	if(m_nooverlap.getBooleanValue()) {
-	    		nooverlap = " --no-overlap";
+	    		command.add("--no-overlap");
 	    	}
 	    	
     	}
-    	threads = " --threads " + m_threads.getIntValue();
+    	command.add("--threads " + m_threads.getIntValue());
     	if(m_recorder.getBooleanValue()) {
-    		recorder = " --reorder";
+    		command.add("--reorder");
     	}
     	if(m_mm.getBooleanValue()) {
-    		mm = " --mm";
+    		command.add("--mm");
     	}
     	if(m_qcfilter.getBooleanValue()) {
-    		qcfilter = " --qc-filter";
+    		command.add("--qc-filter");
     	}
-    	    	
+    	  
+    	command.add("-x " + path2baseFileName);
+    	command.add(reads);
+    	command.add("-S " + path2outfile);
+    	
     // Aligning
     // bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
-    	com = bowtieAlign + skip + upto + trim5 + trim3 + quals + alignmenttype + preset + n + l + i + nceil + dpad + gbar + ignorequals + nofw + norc + ma + mp + np + rdg + 
-    					rfg + scoremin + reporting + d + pr + minins + maxins + ff + nomixed + nodiscordand + nodovetail + nocontain + nooverlap + threads + recorder + mm + 
-    					qcfilter + " -x " + path2baseFileName + reads + " -S " + path2outfile;
-    	// begin QueueSub #################################################
-		if(getAvailableInputFlowVariables().containsKey("JobPrefix")) {
-			String name = getAvailableInputFlowVariables().get("JobPrefix").getStringValue() + "_BowtieAlign";
-			String memory = getAvailableInputFlowVariables().get("Memory").getStringValue();
-			String logfle = path2readFile.substring(0,path2readFile.lastIndexOf("/")+1) + "logfile_" + name + ".txt";
-			new QSub(com, name, memory, logfle, true);
- 			logBuffer.append("QSub: " + com + "\n");
-			logBuffer.append("See external logfile: " + logfle + "\n");
-		// end QueueSub ###################################################
-		} else {
-	    	System.out.println(com);
-	    	ProcessBuilder b1 = new ProcessBuilder("/bin/sh", "-c", com);
-	    	Process p1 = b1.start();
-	    	p1.waitFor();
-	    	
-	    	logBuffer.append(ShowOutput.getLogEntry(p1, com));
-		}
-    	DataColumnSpecCreator col = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
-    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Path2RefFile", StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col.createSpec(),col1.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
-    	BufferedDataContainer cont = exec.createDataContainer(table);
-    	StringCell cl1 = new StringCell(path2outfile);
-    	StringCell cl2 = new StringCell(path2refFile);
-    	DataCell[] c = new DataCell[]{cl1,cl2};
-    	DefaultRow r = new DefaultRow("Row0",c);
-    	cont.addRowToTable(r);
-    	cont.close();
-    	BufferedDataTable out = cont.getTable();
 
+     	/**
+     	 * Execute
+     	 */
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	logBuffer.append(ShowOutput.getNodeEndTime());
+     	ShowOutput.writeLogFile(logBuffer);
+     	command = new ArrayList<String>();	//Clear Array
+     	
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2outfile),
+    			(FileCell) FileCellFactory.create(path2refFile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
     	
     	pushFlowVariableString("BAMSAMINFILE",path2outfile);
-    	
+
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
     	
-        return new BufferedDataTable[]{out};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
