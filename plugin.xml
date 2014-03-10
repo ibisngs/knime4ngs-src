@@ -32,6 +32,7 @@
 		
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
+				<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory"/>
 		
 		<node category-path="/ibis" factory-class="de.helmholtz_muenchen.ibis.Test.TestNodeFactory" id="de.helmholtz_muenchen.ibis.Test.TestNodeFactory"/>
 		
