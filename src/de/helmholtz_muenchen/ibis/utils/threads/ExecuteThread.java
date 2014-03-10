@@ -31,6 +31,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	private InputThread stdInStream;
 	private final NodeLogger LOGGER;
 	private final String[] ENVIRONMENT;
+	private final boolean ENABLE_ESCAPE;
 	
 	/**
 	 * ExecuteThread starts process to execute command in a new thread. STDOUT and STDERR are redirected to files or StringBuffers
@@ -40,8 +41,9 @@ public class ExecuteThread implements Callable<Boolean> {
 	 * @param stdErrFile if not null STDERR is redirected to this file
 	 * @param stdOutStr if not null STDOUT is redirected to this StringBuffer
 	 * @param stdErrStr if not null STDERR is redirected to this StringBuffer
+	 * @param enableEscape enables parameter escaping
 	 */
-	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment) {
+	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment, boolean enableEscape) {
 		this.command = command;
 
 		this.stdErrFile=stdErrFile;
@@ -50,6 +52,7 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
 
+		this.ENABLE_ESCAPE = enableEscape;
 		this.LOGGER = logger;
 		if(Environment != null)
 			this.ENVIRONMENT = Environment;
@@ -203,18 +206,27 @@ public class ExecuteThread implements Callable<Boolean> {
 	}
 	
 	private String getCommand(){
-		return getCommand(this.command);
+		return getCommand(this.command, this.ENABLE_ESCAPE);
 	}
 	
-	public static String getCommand(String[] command){
+	public static String getCommand(String[] command, boolean enableEscape){
 		StringBuffer com  = new StringBuffer(command[0]);
 		for(int i=1; i<command.length; i++){
-			if(!command[i].startsWith("-")){
+			if(enableEscape && !command[i].startsWith("-")){
 				com.append(" \"" + command[i] + "\"");
 			}else{
 				com.append(" " + command[i]);
 			}
 		}
 		return com.toString();
+	}
+	
+	/**
+	 * Gets the exit code
+	 * @return
+	 * @throws IllegalThreadStateException
+	 */
+	public int getExitCode() throws IllegalThreadStateException {
+		return p.exitValue();
 	}
 }

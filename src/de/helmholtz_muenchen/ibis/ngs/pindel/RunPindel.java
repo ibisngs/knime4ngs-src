@@ -120,7 +120,7 @@ public class RunPindel {
 		PindelNodeModel.logger.info("Running Pindel...");
 		PindelNodeModel.logger.info("Log files can be found in "+out+".out.log and "+out+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, out+".out.log", out+".err.log", null);
+		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, out+".out.log", out+".err.log", null, true);
 		
 	}
 	
@@ -153,7 +153,7 @@ public class RunPindel {
 		PindelNodeModel.logger.info("Running Pindel2VCF...");
 		PindelNodeModel.logger.info("Log files can be found in "+vout+".out.log and "+vout+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, vout+".out.log", vout+".err.log", null);
+		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, vout+".out.log", vout+".err.log", null, true);
 
 	}
 

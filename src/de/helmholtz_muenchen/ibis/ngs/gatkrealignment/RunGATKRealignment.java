@@ -45,7 +45,7 @@ public class RunGATKRealignment {
 		GATKRealignmentNodeModel.logger.info("Running GATK TargetCreator...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".out.log and "+outputint+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKRealignmentNodeModel.logger, outputint+".out.log", outputint+".err.log", null);
+		Executor.executeCommand(new String[]{cmd}, exec, null, GATKRealignmentNodeModel.logger, outputint+".out.log", outputint+".err.log", null, true);
 	}
 	
 	//calls gatk indel realigner
@@ -88,7 +88,7 @@ public class RunGATKRealignment {
 		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".out.log and "+outputbam+".err.log");
 		
-		Executor.executeCommand(new String[] {cmd}, exec, null, GATKRealignmentNodeModel.logger, outputbam+".out.log", outputbam+".err.log", null);
+		Executor.executeCommand(new String[] {cmd}, exec, null, GATKRealignmentNodeModel.logger, outputbam+".out.log", outputbam+".err.log", null, true);
 	
 		
 	}

@@ -64,7 +64,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_ANNOTATION_TYPE		= "-F";		// annotation type parameter
     
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_FEATURE_TYPE			= getSettingsModelString(CFGKEY_ANNOTATION_TYPE);
+    private final SettingsModelString SET_FEATURE_TYPE			= getSettingsModelString(CFGKEY_ANNOTATION_FEATURE);
     private final SettingsModelString SET_OUTPUT_FILE 			= getSettingsModelString(CFGKEY_OUTPUT_FILE);
     private final SettingsModelString SET_ANNOTATION_FILE		= getSettingsModelString(CFGKEY_ANNOTATION_FILE);
     private final SettingsModelString SET_ANNOTATION_TYPE		= getSettingsModelString(CFGKEY_ANNOTATION_TYPE);
@@ -191,5 +191,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	// all checks where ok */
     	return true;
     }
+
+	@Override
+	protected boolean isParameterEscapingEnabled() {
+		return false;
+	}
 }
 

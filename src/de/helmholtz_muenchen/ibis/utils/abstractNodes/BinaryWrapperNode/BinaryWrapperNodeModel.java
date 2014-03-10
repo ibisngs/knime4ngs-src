@@ -93,10 +93,10 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	String[] command = commands.toArray(new String[commands.size()]);
 
 		// execute the command
-		executeCommand(exec, command, null);
+		executeCommand(exec, command, null, isParameterEscapingEnabled());
 		exec.setProgress(1.00); // we are done
 
-        return getOutputData(exec, ExecuteThread.getCommand(command),inData);
+        return getOutputData(exec, ExecuteThread.getCommand(command, isParameterEscapingEnabled()), inData);
     }
 	
 	/**
@@ -131,6 +131,11 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @return
 	 */
 	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData);
+	
+	/**
+	 * enables or disables parameter escaping
+	 */
+	protected abstract boolean isParameterEscapingEnabled();
 	
 	/**
 	 * Returns the parameters which were set by the parameter file and the additional parameter field

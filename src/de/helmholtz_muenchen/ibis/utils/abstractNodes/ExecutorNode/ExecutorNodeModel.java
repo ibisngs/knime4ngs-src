@@ -58,11 +58,12 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @param exec ExecutionContext
 	 * @param command command which is joined by " " before execution
 	 * @param environment environment variables
+	 * @param enableEscape enables parameter escaping
 	 * @throws CanceledExecutionException
 	 */
-	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment) throws CanceledExecutionException {
+	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape) throws CanceledExecutionException {
 		try {
-			Executor.executeCommand(command, exec, environment, LOGGER, STDOUT, STDERR);
+			Executor.executeCommand(command, exec, environment, LOGGER, STDOUT, STDERR, enableEscape);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			throw(new CanceledExecutionException(e.getMessage()));

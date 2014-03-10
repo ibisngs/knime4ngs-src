@@ -244,7 +244,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	String[] com = command.toArray(new String[command.size()]);
     	StringBuffer sysErr = new StringBuffer(50);
     	StringBuffer sysOut = new StringBuffer(50);
-    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr);
+    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
         LOGGER.info("-----------------SysError-----------------");
     	LOGGER.info(sysErr);
     	LOGGER.info("-----------------SysOut-----------------");

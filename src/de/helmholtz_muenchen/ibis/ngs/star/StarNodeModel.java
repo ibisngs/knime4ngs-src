@@ -216,5 +216,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	// all checks where ok
     	return true;
     }
+    
+	@Override
+	protected boolean isParameterEscapingEnabled() {
+		return true;
+	}
 }
 

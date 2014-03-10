@@ -17,7 +17,7 @@ public class RunVAT {
 		VATNodeModel.logger.info("Running VAT indelMapper...");
 		VATNodeModel.logger.info("Log file can be found in "+vcfout+".err.log");
 		
-		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
+		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin, true);
 		
 	}
 	
@@ -30,7 +30,7 @@ public class RunVAT {
 		VATNodeModel.logger.info("Running VAT snpMapper...");
 		VATNodeModel.logger.info("Log file can be found in "+vcfout+".err.log");
 		
-		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
+		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin, true);
 
 	}
 
