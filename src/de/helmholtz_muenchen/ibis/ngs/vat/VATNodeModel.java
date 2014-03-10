@@ -46,14 +46,6 @@ public class VATNodeModel extends NodeModel {
     static final String CFGKEY_VAT_FOLDER="vat_folder";
     static final String DEF_VAT_FOLDER="";
 	private final SettingsModelString m_VAT_folder = new SettingsModelString(CFGKEY_VAT_FOLDER, DEF_VAT_FOLDER);
-//	// path to snpMapper executable
-//	static final String CFGKEY_SNPMAPPER="snpMapper";
-//	static final String DEF_SNPMAPPER="";
-//	private final SettingsModelString m_snpMapper = new SettingsModelString(CFGKEY_SNPMAPPER, DEF_SNPMAPPER);
-//	// path to indelMapper executable
-//	static final String CFGKEY_INDELMAPPER="indelMapper";
-//	static final String DEF_INDELMAPPER="";
-//	private final SettingsModelString m_indelMapper = new SettingsModelString(CFGKEY_INDELMAPPER, DEF_INDELMAPPER);
 	// path to files gene intervals -> genomic positions of exons
 	static final String CFGKEY_INTERVALS="intervals";
 	static final String DEF_INTERVALS="";
@@ -307,7 +299,7 @@ public class VATNodeModel extends NodeModel {
 	    	colspec[pos++]=new DataColumnSpecCreator("Path2VCFdeletionsFile", StringCell.TYPE).createSpec();    		
     	}
     	if(insertions){
-    		colspec[pos++]=new DataColumnSpecCreator("Path2VCFinsetionsFile", StringCell.TYPE).createSpec();
+    		colspec[pos++]=new DataColumnSpecCreator("Path2VCFinsertionsFile", StringCell.TYPE).createSpec();
     	}
     	if(snps){
     		colspec[pos++]=new DataColumnSpecCreator("Path2VCFsnpFile", StringCell.TYPE).createSpec();
@@ -365,7 +357,7 @@ public class VATNodeModel extends NodeModel {
             throws InvalidSettingsException {
         
     	if(!inSpecs[0].containsName("Path2VCFdeletionsFile")
-    			&& !inSpecs[0].containsName("Path2VCFinsetionsFile") 
+    			&& !inSpecs[0].containsName("Path2VCFinsertionsFile") 
     			&& !inSpecs[0].containsName("Path2VCFsnpFile") 
     			&& !inSpecs[0].containsName("Path2VCFindelFile")){
     		
