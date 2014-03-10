@@ -93,7 +93,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	String[] command = commands.toArray(new String[commands.size()]);
 
 		// execute the command
-		executeCommand(exec, command, null, isParameterEscapingEnabled());
+		executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFile());
 		exec.setProgress(1.00); // we are done
 
         return getOutputData(exec, ExecuteThread.getCommand(command, isParameterEscapingEnabled()), inData);
@@ -136,6 +136,12 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * enables or disables parameter escaping
 	 */
 	protected abstract boolean isParameterEscapingEnabled();
+	
+	/**
+	 * Path to log output file (suffixed with .log or .err) or null if no logs should be written.
+	 * @return
+	 */
+	protected abstract File getPathToLogOutputFile();
 	
 	/**
 	 * Returns the parameters which were set by the parameter file and the additional parameter field

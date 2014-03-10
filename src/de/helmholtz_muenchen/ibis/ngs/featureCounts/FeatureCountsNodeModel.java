@@ -128,7 +128,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		pars.put(NAME_OF_ANNOTATION_FILE, SET_ANNOTATION_FILE.getStringValue());
 		
 		/********************* OUTPUT ****************************/
-		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true);
+		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false);
     	File outDir = new File(outputFolderArgument).getParentFile();
     	// create folder, if not already there
     	if(!outDir.isDirectory())
@@ -178,7 +178,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected boolean validateAnnotationFile(String path2AnnotationFile) throws InvalidSettingsException {
     	// check for relative path if binary file is valid
     	if(isBinaryValid(getBinaryPath()))
-    		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, true);
+    		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, false);
     	
     	// check if path2AnnotationFile exists
     	File f = new File(path2AnnotationFile);
@@ -195,6 +195,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	@Override
 	protected boolean isParameterEscapingEnabled() {
 		return false;
+	}
+	
+	@Override
+	protected File getPathToLogOutputFile() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false));
 	}
 }
 

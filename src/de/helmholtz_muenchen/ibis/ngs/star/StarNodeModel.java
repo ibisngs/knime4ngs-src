@@ -221,5 +221,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	protected boolean isParameterEscapingEnabled() {
 		return true;
 	}
+
+	@Override
+	protected File getPathToLogOutputFile() {
+		return null;
+	}
 }
 

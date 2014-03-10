@@ -61,12 +61,33 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @param enableEscape enables parameter escaping
 	 * @throws CanceledExecutionException
 	 */
-	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape) throws CanceledExecutionException {
+	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape, File path2LogOutput) throws CanceledExecutionException {
 		try {
 			Executor.executeCommand(command, exec, environment, LOGGER, STDOUT, STDERR, enableEscape);
+			// write log files
+			writeLogFiles(path2LogOutput);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
+			// write log files
+			try { writeLogFiles(path2LogOutput); } 
+			catch (IOException e1) { e1.printStackTrace(); }
 			throw(new CanceledExecutionException(e.getMessage()));
+		}
+	}
+	
+	/**
+	 * Writes the log files to the folder
+	 * @param path2LogOutput
+	 * @throws IOException
+	 */
+	private void writeLogFiles(File path2LogOutput) throws IOException {
+		if(path2LogOutput != null && path2LogOutput.isFile()) {
+			File path = path2LogOutput.getParentFile();
+			if(!path.exists()) 
+				path.mkdirs();
+			
+			FileUtils.write(new File(path2LogOutput + ".log"), STDOUT.toString());
+	    	FileUtils.write(new File(path2LogOutput + ".err"), STDERR.toString());
 		}
 	}
 	
