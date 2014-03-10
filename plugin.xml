@@ -11,7 +11,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.genscan.GenscanNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.genscan.GenscanNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samloader.SAMLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samloader.SAMLoaderNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.bamloader.BAMLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bamloader.BAMLoaderNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.generateconsensussequence.GenerateConsensusSequenceNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.generateconsensussequence.GenerateConsensusSequenceNodeFactory"/>
+		<!-- <node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.generateconsensussequence.GenerateConsensusSequenceNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.generateconsensussequence.GenerateConsensusSequenceNodeFactory"/> -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.mpileup.MpileupNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.mpileup.MpileupNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfutils.VCFutilsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfutils.VCFutilsNodeFactory"/>
