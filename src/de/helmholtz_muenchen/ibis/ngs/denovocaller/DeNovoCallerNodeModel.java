@@ -9,10 +9,12 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
 
 /**
  * This is the model implementation of DeNovoCaller.
@@ -33,10 +35,13 @@ public class DeNovoCallerNodeModel extends NodeModel {
 	/**
 	 * Node Models
 	 */
-	private final SettingsModelString m_inputtype = new SettingsModelString(CFGKEY_INPUTTYPE,"");
-	private final SettingsModelString m_pedfile = new SettingsModelString(CFGKEY_PEDFILE,"");
+	private final SettingsModelString m_inputtype = new SettingsModelString(DeNovoCallerNodeModel.CFGKEY_INPUTTYPE,"");
+	private final SettingsModelString m_pedfile = new SettingsModelString(DeNovoCallerNodeModel.CFGKEY_PEDFILE,"");
 	
-	
+	/**
+	 * Logger
+	 */
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(DeNovoCallerNodeModel.class);
 	
     /**
      * Constructor for the node model.
@@ -54,8 +59,18 @@ public class DeNovoCallerNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-        // TODO: Return a BufferedDataTable for each output port 
-        return new BufferedDataTable[]{};
+    	String inputtype = "";
+    	if(m_inputtype.getStringValue().equals("Multi-Sample VCFs (Trios)")){
+    		LOGGER.info("Using 'Trio' filtering.");
+    		inputtype = "Trio";
+    	}else{
+    		LOGGER.info("Using 'Single' filtering.");
+    		inputtype = "Single";
+    	}
+    	
+    	BufferedDataTable[] outTable = DeNovoCaller.findDeNovos(inData[0], m_pedfile.getStringValue(),inputtype, exec, LOGGER);
+    	
+        return outTable;
     }
 
     /**
