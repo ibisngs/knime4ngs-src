@@ -55,6 +55,7 @@
 		<!--<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>-->
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory" id="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory"/>
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory" id="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory"/>
 </extension>
    
 	<extension point="org.knime.workbench.repository.categories">
