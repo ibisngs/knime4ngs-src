@@ -39,22 +39,28 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	public static final String OUT_COL2 = "CallCommand";
 
     // keys for SettingsModels
-    protected static final String CFGKEY_OUTPUT_FILE 		= "OutputFolder";
-    protected static final String CFGKEY_ANNOTATION_FILE	= "AnnotationFile";
-    protected static final String CFGKEY_ANNOTATION_TYPE	= "AnnotationType";
-    protected static final String CFGKEY_ANNOTATION_FEATURE	= "AnnotationFeature";
-    protected static final String CFGKEY_THREAD_NUMBER		= "ThreadNumber";
-    protected static final String CFGKEY_COUNT_MULTIMAPPED	= "MultimappedFlag";
+    protected static final String CFGKEY_OUTPUT_FILE 				= "OutputFolder";
+    protected static final String CFGKEY_ANNOTATION_FILE			= "AnnotationFile";
+    protected static final String CFGKEY_ANNOTATION_TYPE			= "AnnotationType";
+    protected static final String CFGKEY_ANNOTATION_FEATURE			= "AnnotationFeature";
+    protected static final String CFGKEY_THREAD_NUMBER				= "ThreadNumber";
+    protected static final String CFGKEY_COUNT_MULTIMAPPED			= "MultimappedFlag";
+    protected static final String CFGKEY_COUNT_OVERLAPPING_MULTI	= "MultiOverlapping";
+    protected static final String CFGKEY_COUNT_FRAGMENTS			= "Fragments";
+    protected static final String CFGKEY_COUNT_CHIMERIC_FRAGMENTS	= "ChimericFragments";
     
     // initial default values for SettingsModels
-    protected static final String DEFAULT_ANNOTATION_TYPE		= "GTF";			// input of GTF file as annotation is default value
-    protected static final String ALTERNATIVE_ANNOTATION_TYPE 	= "SAF";			// alternative annotation type
-    private static final String DEFAULT_OUTPUT_FOLDER 			= "./output/";		// creates a folder "output" relative to the STAR binary
-    private static final String DEFAULT_ANNOTATION_FILE			= "";
-    private static final String DEFAULT_ANNOTATION_FEATURE		= "exon";			// default feature which is used for counting
-    private static final int DEFAULT_THREAD_NUMBER				= 1;				// default threads to use
-    private static final boolean DEAFULT_COUNT_MULTIMAPPED		= false;			// do not count multimapped reads by default
-
+    protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
+    protected static final String ALTERNATIVE_ANNOTATION_TYPE 		= "SAF";			// alternative annotation type
+    private static final String DEFAULT_OUTPUT_FOLDER 				= "./output/";		// creates a folder "output" relative to the STAR binary
+    private static final String DEFAULT_ANNOTATION_FILE				= "";
+    private static final String DEFAULT_ANNOTATION_FEATURE			= "exon";			// default feature which is used for counting
+    private static final int DEFAULT_THREAD_NUMBER					= 1;				// default threads to use
+    private static final boolean DEAFULT_COUNT_MULTIMAPPED			= false;			// do not count multimapped reads by default
+    private static final boolean DEAFULT_COUNT_MULTI_OVERLAPING		= false;			// do not count multi overlapping reads by default
+    private static final boolean DEAFULT_COUNT_FRAGMENTS			= false;			// only for paired reads
+    private static final boolean DEAFULT_COUNT_CHIMERIC_FRAGMENTS 	= false;			// do not count chimeric fragments
+    
     // name of parameters which are defined in the featureCounts binary
     private final static String NAME_OF_OUTPUT_FILE 		= "-o";		// output file
     private final static String NAME_OF_ANNOTATION_FILE 	= "-a";		// input annotation file
@@ -62,15 +68,21 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_FEATURE_TYPE		= "-t";		// sets the name of the feature which is used for counting
     private final static String NAME_OF_COUNT_MULTIMAPPED	= "-M";		// sets if multimapped reads should be counted or not
     private final static String NAME_OF_ANNOTATION_TYPE		= "-F";		// annotation type parameter
-    
+    private final static String NAME_OF_ASSIGN_MULTI		= "-O";		// enables counting for more than one fragment
+    private final static String NAME_OF_COUNT_FRAGMENTS		= "-p";		// enables count of fragments
+    private final static String NAME_OF_COUNT_CHIMERIC		= "-C";		// disables count of chimeric fragments
+    				
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_FEATURE_TYPE			= getSettingsModelString(CFGKEY_ANNOTATION_FEATURE);
-    private final SettingsModelString SET_OUTPUT_FILE 			= getSettingsModelString(CFGKEY_OUTPUT_FILE);
-    private final SettingsModelString SET_ANNOTATION_FILE		= getSettingsModelString(CFGKEY_ANNOTATION_FILE);
-    private final SettingsModelString SET_ANNOTATION_TYPE		= getSettingsModelString(CFGKEY_ANNOTATION_TYPE);
-    private final SettingsModelInteger SET_THREAD_NUMBER		= getSettingsModelInteger(CFGKEY_THREAD_NUMBER);
-    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED	= getSettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED);
-    
+    private final SettingsModelString SET_FEATURE_TYPE				= getSettingsModelString(CFGKEY_ANNOTATION_FEATURE);
+    private final SettingsModelString SET_OUTPUT_FILE 				= getSettingsModelString(CFGKEY_OUTPUT_FILE);
+    private final SettingsModelString SET_ANNOTATION_FILE			= getSettingsModelString(CFGKEY_ANNOTATION_FILE);
+    private final SettingsModelString SET_ANNOTATION_TYPE			= getSettingsModelString(CFGKEY_ANNOTATION_TYPE);
+    private final SettingsModelInteger SET_THREAD_NUMBER			= getSettingsModelInteger(CFGKEY_THREAD_NUMBER);
+    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= getSettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED);
+    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= getSettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI);
+    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= getSettingsModelBoolean(CFGKEY_COUNT_FRAGMENTS);
+    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= getSettingsModelBoolean(CFGKEY_COUNT_CHIMERIC_FRAGMENTS);
+
     protected final static int MIN_THREADS = 1;
     protected final static int MAX_THREADS = 16;
     
@@ -88,8 +100,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
         addSettingsModelString(CFGKEY_ANNOTATION_FILE, DEFAULT_ANNOTATION_FILE);
         addSettingsModelInteger(CFGKEY_THREAD_NUMBER, DEFAULT_THREAD_NUMBER);
         addSettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED, DEAFULT_COUNT_MULTIMAPPED);
+        addSettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI, DEAFULT_COUNT_MULTI_OVERLAPING);
+        addSettingsModelBoolean(CFGKEY_COUNT_FRAGMENTS, DEAFULT_COUNT_FRAGMENTS);
+        addSettingsModelBoolean(CFGKEY_COUNT_CHIMERIC_FRAGMENTS, DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
         addSettingsModelString(CFGKEY_ANNOTATION_FEATURE, DEFAULT_ANNOTATION_FEATURE);
-        
     }
     
     /**
@@ -118,8 +132,14 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
 
 		/********************* SIMPLE PARAMETER ***************************/
-		if(SET_COUNT_MULTIMAPPED.isEnabled())
+		if(SET_COUNT_MULTIMAPPED.getBooleanValue())
 			pars.put(NAME_OF_COUNT_MULTIMAPPED, "");
+		if(SET_COUNT_OVERLAPPING_MULTI.getBooleanValue())
+			pars.put(NAME_OF_ASSIGN_MULTI, "");
+		if(SET_COUNT_FRAGMENTS.getBooleanValue())
+			pars.put(NAME_OF_COUNT_FRAGMENTS, "");
+		if(!SET_CHIMERIC_FRAGMENTS.getBooleanValue())
+			pars.put(NAME_OF_COUNT_CHIMERIC, "");
 		if(SET_THREAD_NUMBER.getIntValue() > 1)
 			pars.put(NAME_OF_THREAD_NUMBER, Integer.toString(SET_THREAD_NUMBER.getIntValue()));
 		

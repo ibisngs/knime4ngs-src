@@ -27,12 +27,15 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 	private final static String BINARY_NAME = "featureCounts";
 	
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_FEATURE_TYPE			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, this);
-    private final SettingsModelString SET_OUTPUT_FILE 			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FILE, this);
-    private final SettingsModelString SET_ANNOTATION_FILE		= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, this);
-    private final SettingsModelString SET_ANNOTATION_TYPE		= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, this);
-    private final SettingsModelInteger SET_THREAD_NUMBER		= FeatureCountsNodeModel.getSettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, this);
-    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED	= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, this);
+    private final SettingsModelString SET_FEATURE_TYPE				= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, this);
+    private final SettingsModelString SET_OUTPUT_FILE 				= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FILE, this);
+    private final SettingsModelString SET_ANNOTATION_FILE			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, this);
+    private final SettingsModelString SET_ANNOTATION_TYPE			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, this);
+    private final SettingsModelInteger SET_THREAD_NUMBER			= FeatureCountsNodeModel.getSettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, this);
+    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, this);
+    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, this);
+    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, this);
+    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, this);
     
     protected FeatureCountsNodeDialog() {
         super();
@@ -42,8 +45,11 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
        	DialogComponentFileChooser dcAnnotationFile = new DialogComponentFileChooser(SET_ANNOTATION_FILE, "his_id_GENOME_FOLDER_FeatureCounts", 0, ".gtf", ".saf");
        	DialogComponentNumber dcThreadNumber		= new DialogComponentNumber(SET_THREAD_NUMBER, "thread number", 1);
        	DialogComponentString dcFeatureType			= new DialogComponentString(SET_FEATURE_TYPE, "feature type used for counting:"); 					
-       	DialogComponentBoolean dcCountMultimapped 	= new DialogComponentBoolean(SET_COUNT_MULTIMAPPED, "count multimapped reads");
-       			
+     	DialogComponentBoolean dcCountMultimapped 	= new DialogComponentBoolean(SET_COUNT_MULTIMAPPED, "count multimapped reads");
+     	DialogComponentBoolean dcCountOverlapping 	= new DialogComponentBoolean(SET_COUNT_OVERLAPPING_MULTI, "count reads that overlapp multiple features");
+     	DialogComponentBoolean dcCountFragments 	= new DialogComponentBoolean(SET_COUNT_FRAGMENTS, "count fragments instead of reads");
+     	DialogComponentBoolean dcCountChimeric	 	= new DialogComponentBoolean(SET_CHIMERIC_FRAGMENTS, "count chimeric (paired reads)");
+       	
        	// create string selection component
        	DialogComponentStringSelection dcAnnotationType 	= new DialogComponentStringSelection(SET_ANNOTATION_TYPE, "file type:", FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE, FeatureCountsNodeModel.ALTERNATIVE_ANNOTATION_TYPE);
        	
@@ -62,7 +68,12 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         addDialogComponent(dcAnnotationType);
         addDialogComponent(dcFeatureType);
         addDialogComponent(dcCountMultimapped);
+        addDialogComponent(dcCountOverlapping);
         addDialogComponent(dcThreadNumber);
+        
+        createNewGroup("paired read options");
+        addDialogComponent(dcCountFragments);
+        addDialogComponent(dcCountChimeric);
         
         // 
         SET_THREAD_NUMBER.addChangeListener(new ChangeListener() {
