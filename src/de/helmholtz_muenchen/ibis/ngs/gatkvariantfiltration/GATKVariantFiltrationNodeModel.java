@@ -4,7 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -14,7 +19,12 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 /**
@@ -56,28 +66,28 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     private final SettingsModelString m_INFILE = new SettingsModelString(CFGKEY_INFILE, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     
-	private final SettingsModelString m_QUAL= new SettingsModelString(CFGKEY_QUAL, "50.0");
-	private final SettingsModelString m_DP= new SettingsModelString(CFGKEY_DP, "20.0");
-	private final SettingsModelString m_AD= new SettingsModelString(CFGKEY_AD, "5.0");
-	private final SettingsModelString m_QD= new SettingsModelString(CFGKEY_QD, "2.0");
-	private final SettingsModelString m_FS= new SettingsModelString(CFGKEY_FS, "60.0");
-	private final SettingsModelString m_MQ= new SettingsModelString(CFGKEY_MQ, "40.0");
-	private final SettingsModelString m_HS= new SettingsModelString(CFGKEY_HS, "13.0");
-	private final SettingsModelString m_MQR= new SettingsModelString(CFGKEY_MQR, "-12.5");
-	private final SettingsModelString m_RPR= new SettingsModelString(CFGKEY_RPR, "-8.0");
-	private final SettingsModelString m_FilterString = new SettingsModelString(CFGKEY_FilterString, "-");
-	private final SettingsModelString m_FilterName = new SettingsModelString(CFGKEY_FilterName, "-");
+	private final SettingsModelOptionalString m_QUAL= new SettingsModelOptionalString(CFGKEY_QUAL, "<50.0",true);
+	private final SettingsModelOptionalString m_DP= new SettingsModelOptionalString(CFGKEY_DP, "<20.0",true);
+	private final SettingsModelOptionalString m_AD= new SettingsModelOptionalString(CFGKEY_AD, "<5.0",false);
+	private final SettingsModelOptionalString m_QD= new SettingsModelOptionalString(CFGKEY_QD, "<2.0",false);
+	private final SettingsModelOptionalString m_FS= new SettingsModelOptionalString(CFGKEY_FS, ">60.0",false);
+	private final SettingsModelOptionalString m_MQ= new SettingsModelOptionalString(CFGKEY_MQ, "<40.0",false);
+	private final SettingsModelOptionalString m_HS= new SettingsModelOptionalString(CFGKEY_HS, ">13.0",false);
+	private final SettingsModelOptionalString m_MQR= new SettingsModelOptionalString(CFGKEY_MQR, "<-12.5",false);
+	private final SettingsModelOptionalString m_RPR= new SettingsModelOptionalString(CFGKEY_RPR, "<-8.0",false);
+	private final SettingsModelOptionalString m_FilterString = new SettingsModelOptionalString(CFGKEY_FilterString, "Value1<X||Value2>Y||...",false);
+	private final SettingsModelOptionalString m_FilterName = new SettingsModelOptionalString(CFGKEY_FilterName, "---",false);
 	
+	
+	//The Output Col Names
+	public static final String OUT_COL1 = "VCF";
 	
 	/**
 	 * Logger
 	 */
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(GATKVariantFiltrationNodeModel.class);
 	
-	/**
-	 * String that holds the complete filter options
-	 */
-	private static StringBuffer filterString = new StringBuffer();
+
 	
     /**
      * Constructor for the node model.
@@ -98,6 +108,13 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	
+    	/**
+    	 * String that holds the complete filter options
+    	 */
+    	StringBuffer filterString = new StringBuffer();
+    	
+    	
     	ArrayList<String> command = new ArrayList<String>();
  //$com = "java -Xmx4g -jar ".$TOOL_PATH.$GATK_VERSION."/GenomeAnalysisTK.jar -T VariantFiltration -R $REF_GENOME -V $INFILE
  //   	-o $outfile  --filterExpression \"QD < 2.0 || FS > 60.0 || MQ < 40.0 || HaplotypeScore > 13.0
@@ -117,44 +134,64 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	/**
     	 * Create Filter String
     	 */
-    	addToFilterString(m_QUAL);
-    	addToFilterString(m_DP);
-    	addToFilterString(m_AD);
-    	addToFilterString(m_QD);
-    	addToFilterString(m_FS);
-    	addToFilterString(m_MQ);
-    	addToFilterString(m_HS);
-    	addToFilterString(m_MQR);
-    	addToFilterString(m_RPR);
-    	addToFilterString(m_FilterString);
+    	filterString = addToFilterString(m_QUAL,"QUAL",filterString);
+    	filterString = addToFilterString(m_DP,"DP",filterString);
+    	filterString = addToFilterString(m_AD,"AD",filterString);
+    	filterString = addToFilterString(m_QD,"QD",filterString);
+    	filterString = addToFilterString(m_FS,"FS",filterString);
+    	filterString = addToFilterString(m_MQ,"MQ",filterString);
+    	filterString = addToFilterString(m_HS,"HaplotypeScore",filterString);
+    	filterString = addToFilterString(m_MQR,"MappingQualityRankSum",filterString);
+    	filterString = addToFilterString(m_RPR,"ReadPosRankSum",filterString);
+    	filterString = addToFilterString(m_FilterString,"FilterString",filterString);
 
     	
     	command.add(filterString.toString());
     	
-    	if(m_FilterName.isEnabled()){
+    	
+    	if(m_FilterName.isActive()){
     		command.add("--filterName");
     		command.add(m_FilterName.getStringValue());
     	}else{
     		command.add("--filterName");
     		command.add("GATKVariantFiltration");
     	}
+    	System.out.println(StringUtils.join(command, " "));
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(OUTFILE)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
 
-        return new BufferedDataTable[]{};
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
      * Adds the values of SettingsModelString to the filterString if model is enabled
      * @param toAdd
      */
-    private void addToFilterString(SettingsModelString toAdd){
-    	if(toAdd.isEnabled()){
-        	if(filterString.length()==0){
-        		filterString.append(toAdd.getStringValue());
+    private StringBuffer addToFilterString(SettingsModelOptionalString toAdd, String FieldName, StringBuffer filterString){
+    	if(toAdd.isActive()){
+        	if(filterString.length()==0 && !(FieldName.equals(""))){
+        		filterString.append(FieldName+toAdd.getStringValue());
+        	}else if(filterString.length() > 0 && !(FieldName.equals(""))){
+        		filterString.append("||"+FieldName+toAdd.getStringValue());
         	}else{
-        		filterString.append(" || "+toAdd.getStringValue());
+        		filterString.append("||"+toAdd.getStringValue());
         	}
     	}
+    	return filterString;
     }
     
     
