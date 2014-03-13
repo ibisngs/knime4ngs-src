@@ -22,6 +22,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
 /**
@@ -220,6 +221,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	@Override
 	protected File getPathToLogOutputFile() {
 		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false));
+	}
+	
+	@Override
+	protected File getPathToLockFile() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + SuccessfulRunChecker.LOCK_ENDING);
 	}
 }
 

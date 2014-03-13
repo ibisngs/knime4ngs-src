@@ -24,9 +24,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -240,22 +242,36 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 //    	System.setOut(stdOut);
 //    	System.setErr(stdErr);
     	
-    	/**Execute for first file**/
+    	/** check if run was already sucessful **/
     	String[] com = command.toArray(new String[command.size()]);
-    	StringBuffer sysErr = new StringBuffer(50);
-    	StringBuffer sysOut = new StringBuffer(50);
-    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
-        LOGGER.info("-----------------SysError-----------------");
-    	LOGGER.info(sysErr);
-    	LOGGER.info("-----------------SysOut-----------------");
-        LOGGER.info(sysOut);
-//    	if(readType.equals("paired-end") && !inFile2.equals("")) {
-//    		callReady[0] = "--in="+inFile2;
-//   		if(callReady[1].lastIndexOf("filtersettings") != -1) {
-//    			callReady[1] = "--filtersettings="+inData[0].iterator().next().getCell(3).toString();
-//    		}
-//    		RawReadManipulator.main(callReady);
-//    	}
+    	File lockFile = new File(inFile1.substring(0,inFile1.lastIndexOf(".")) + ".RRM" +  SuccessfulRunChecker.LOCK_ENDING);
+    	String lockCommand = ExecuteThread.getCommand(com, true);
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		LOGGER.info("Successful termination state: " + terminationState);
+
+		// do not execute if termination state is true
+		if(!terminationState) {
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+		
+	    	/**Execute for first file**/
+	    	StringBuffer sysErr = new StringBuffer(50);
+	    	StringBuffer sysOut = new StringBuffer(50);
+	    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
+	        LOGGER.info("-----------------SysError-----------------");
+	    	LOGGER.info(sysErr);
+	    	LOGGER.info("-----------------SysOut-----------------");
+	        LOGGER.info(sysOut);
+	//    	if(readType.equals("paired-end") && !inFile2.equals("")) {
+	//    		callReady[0] = "--in="+inFile2;
+	//   		if(callReady[1].lastIndexOf("filtersettings") != -1) {
+	//    			callReady[1] = "--filtersettings="+inData[0].iterator().next().getCell(3).toString();
+	//    		}
+	//    		RawReadManipulator.main(callReady);
+	//    	}
+	        
+	        // node was executed successfully
+	        checker.writeOK();
+		}
     	
         /**Create Output**/
     	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));

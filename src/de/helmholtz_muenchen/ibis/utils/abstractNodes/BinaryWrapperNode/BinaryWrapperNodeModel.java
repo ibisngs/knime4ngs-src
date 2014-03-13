@@ -17,6 +17,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.util.Pair;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 
@@ -91,11 +92,23 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	// add binary path as first part of the command
     	commands.add(0, getBinaryPath);
     	String[] command = commands.toArray(new String[commands.size()]);
+    	
+    	// check if run was already successful 
+    	File lockFile = getPathToLockFile();
+    	String lockCommand = ExecuteThread.getCommand(command, isParameterEscapingEnabled());
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		LOGGER.info("Successful termination state: " + terminationState);
 
-		// execute the command
-		executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFile());
+		// do not execute if termination state is true
+		if(!terminationState) {
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+			
+			// execute the command
+			executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFile());
+			checker.writeOK();
+		}
+		
 		exec.setProgress(1.00); // we are done
-
         return getOutputData(exec, ExecuteThread.getCommand(command, isParameterEscapingEnabled()), inData);
     }
 	
@@ -142,6 +155,12 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @return
 	 */
 	protected abstract File getPathToLogOutputFile();
+	
+	/**
+	 * Path to lock file or null if no check should be performed if node was executed sucessfully already
+	 * @return
+	 */
+	protected abstract File getPathToLockFile();
 	
 	/**
 	 * Returns the parameters which were set by the parameter file and the additional parameter field

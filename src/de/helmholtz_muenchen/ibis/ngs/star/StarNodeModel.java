@@ -23,6 +23,7 @@ import org.knime.core.node.NodeLogger;
 import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
 /**
@@ -225,6 +226,11 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	@Override
 	protected File getPathToLogOutputFile() {
 		return null;
+	}
+
+	@Override
+	protected File getPathToLockFile() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
 	}
 }
 

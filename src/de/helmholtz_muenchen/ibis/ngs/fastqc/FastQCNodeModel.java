@@ -22,6 +22,7 @@ import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
@@ -66,76 +67,92 @@ public class FastQCNodeModel extends NodeModel {
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	    	
-    	/**Initialize logfile**/
-    	String logfile = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
-    	/**end initializing logfile**/
-
-
-    	/**Prepare Command**/
-    	ArrayList<String> command = new ArrayList<String>();
-    	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
-    	
-    	command.add("java");
-    	String jarCall = "";
-    	String path2mergeScript = "";
-    	//Path to Jar
-    	if(sub_path.equals("")){
-    		jarCall = "-jar "+path+"libs/FastQC.jar ";
-    		
-    	}else{//From Jar
-    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1); 
-    		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
-    	}	
-		path2mergeScript = IO.getScriptPath() + "/bash/mergeFsettings.sh";
-    	command.add(jarCall + readsFile1);
-
-    	/**Execute for first file**/
-    	String[] com = command.toArray(new String[command.size()]);
-    	StringBuffer sysErr = new StringBuffer(50);
-    	Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
-    	//Show FastQC Output
-    	LOGGER.info(sysErr);
     	
         /**Create Output Specs**/
         String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
         String outFileSettings = outfile1;
+    	String readFile2Name = new File(readsFile2).getName();
+    	String outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
 
     	/**If Paired-End data**/
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
-    		//Replace readsFile1 with readsFile2 and execute again
-    		com[com.length-1] = jarCall + readsFile2;
-    		//Clear StringBuffer
-    		sysErr.setLength(0);
-    		sysErr.append("\n");
-    		Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
-    		//Show FastQC Output
-        	LOGGER.info(sysErr);
-        	//Clear StringBuffer
-    		sysErr.setLength(0);
-    		sysErr.append("\n");
-    		
-    		/** merge the two filter settings files */
-        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
-        	String readFile2Name = new File(readsFile2).getName();
-        	String outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
         	outFileSettings = outfileMerged; // override this path
-        	
-        	// merge the two settings files
-        	ArrayList<String> commandMerge = new ArrayList<String>();
-        	commandMerge.add("sh");
-        	commandMerge.add(path2mergeScript);
-        	commandMerge.add(outfile1);
-        	commandMerge.add(outfile2);
-        	commandMerge.add(outfileMerged);
-        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr, true); // do this to avoid escaping
-        	//Show FastQC Output
-        	LOGGER.info(sysErr);
-        	logBuffer.append(sysErr);
+    	}
+    	
+    	File lockFile = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
+    	String lockCommand = readsFile1 + "\t" + readsFile2 + "\t" + readType;
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		LOGGER.info("Successful termination state: " + terminationState);
+    	StringBuffer logBuffer = new StringBuffer(50);
+    	
+		// do not execute if termination state is true
+		if(!terminationState) {
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+	
+	    	/**Initialize logfile**/
+	    	String logfile = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1)+"logfile.txt";
+	    	ShowOutput.setLogFile(logfile);
+	    	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
+	    	/**end initializing logfile**/
+	
+	
+	    	/**Prepare Command**/
+	    	ArrayList<String> command = new ArrayList<String>();
+	    	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+	    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
+	    	
+	    	command.add("java");
+	    	String jarCall = "";
+	    	String path2mergeScript = "";
+	    	//Path to Jar
+	    	if(sub_path.equals("")){
+	    		jarCall = "-jar "+path+"libs/FastQC.jar ";
+	    		
+	    	}else{//From Jar
+	    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1); 
+	    		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
+	    	}	
+			path2mergeScript = IO.getScriptPath() + "/bash/mergeFsettings.sh";
+	    	command.add(jarCall + readsFile1);
+	
+	    	/**Execute for first file**/
+	    	String[] com = command.toArray(new String[command.size()]);
+	    	StringBuffer sysErr = new StringBuffer(50);
+	    	Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
+	    	//Show FastQC Output
+	    	LOGGER.info(sysErr);
+	    	
+	    	/**If Paired-End data**/
+	    	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
+	    		//Replace readsFile1 with readsFile2 and execute again
+	    		com[com.length-1] = jarCall + readsFile2;
+	    		//Clear StringBuffer
+	    		sysErr.setLength(0);
+	    		sysErr.append("\n");
+	    		Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
+	    		//Show FastQC Output
+	        	LOGGER.info(sysErr);
+	        	//Clear StringBuffer
+	    		sysErr.setLength(0);
+	    		sysErr.append("\n");
+	    		
+	    		/** merge the two filter settings files */
+	        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
+
+	        	// merge the two settings files
+	        	ArrayList<String> commandMerge = new ArrayList<String>();
+	        	commandMerge.add("sh");
+	        	commandMerge.add(path2mergeScript);
+	        	commandMerge.add(outfile1);
+	        	commandMerge.add(outfile2);
+	        	commandMerge.add(outfileMerged);
+	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr, true); // do this to avoid escaping
+	        	//Show FastQC Output
+	        	LOGGER.info(sysErr);
+	        	logBuffer.append(sysErr);
+			}
+	    	// node was executed successfully
+	    	checker.writeOK();
 		}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
