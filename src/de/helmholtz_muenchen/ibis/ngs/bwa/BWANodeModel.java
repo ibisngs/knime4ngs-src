@@ -20,6 +20,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -47,6 +48,7 @@ public class BWANodeModel extends NodeModel {
 	public static final String CFGKEY_READGROUP = "readgroup";
 	public static final String CFGKEY_READGROUPBOOLEAN = "readgroupboolean";
 	public static final String CFGKEY_ALNALGO = "alnalgo";
+	public static final String CFGKEY_THREADS = "alnthreads";
 	
 	
     // definition of SettingsModel
@@ -59,6 +61,7 @@ public class BWANodeModel extends NodeModel {
 	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
+	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 0, Integer.MAX_VALUE);
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	
@@ -125,13 +128,11 @@ public class BWANodeModel extends NodeModel {
     	Boolean isBam = false;
     	    	
     	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {isBam = true;}
-    	
     	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {readType = readTypePrevious;}
-	
     	if(isBam) {path2readFile2 = path2readFile;}
     	
     	String path2bwa = m_bwafile.getStringValue();
-
+    	int threads = m_ALN_THREADS.getIntValue();
     	
     	if(path2readFile2.length() > 1 && !path2readFile2.equals("na")) {
     		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
@@ -162,7 +163,7 @@ public class BWANodeModel extends NodeModel {
     	 * Run bwa aln
     	 */
     	LOGGER.info("Find the SA coordinates of the input reads.\n");
-    	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam);
+    	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam,threads);
     	LOGGER.info("Finished BWA aln...");
     	
     	
@@ -243,7 +244,7 @@ public class BWANodeModel extends NodeModel {
     	}
     }
     
-    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam) throws Exception{
+    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam, int Threads) throws Exception{
     	
     	
     	ArrayList<String> command = new ArrayList<String>();
@@ -267,6 +268,9 @@ public class BWANodeModel extends NodeModel {
     		}
 		}
     	
+    	//Multi-Threading 
+    	command.add("-t " +Threads);
+    	
     	//Perform aln for forward reads OR single end reads
     	command.add(path2refFile);
     	command.add(path2readFile);
@@ -285,8 +289,6 @@ public class BWANodeModel extends NodeModel {
         		command.set(2, path2readFile2);
             	command.set(3, " -f "+ out12Name);
         	}
-
-
         	/**Execute**/
         	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 		}
@@ -421,6 +423,7 @@ public class BWANodeModel extends NodeModel {
     	m_readGroup.saveSettingsTo(settings);
     	m_readGroupBoolean.saveSettingsTo(settings);
     	m_alnalgo.saveSettingsTo(settings);
+    	m_ALN_THREADS.saveSettingsTo(settings);
     }
 
     /**
@@ -438,6 +441,7 @@ public class BWANodeModel extends NodeModel {
     	m_readGroup.loadSettingsFrom(settings);
     	m_readGroupBoolean.loadSettingsFrom(settings);
     	m_alnalgo.loadSettingsFrom(settings);
+    	m_ALN_THREADS.loadSettingsFrom(settings);
     }
 
     /**
@@ -455,6 +459,7 @@ public class BWANodeModel extends NodeModel {
     	m_readGroup.validateSettings(settings);
     	m_readGroupBoolean.validateSettings(settings);
     	m_alnalgo.validateSettings(settings);
+    	m_ALN_THREADS.validateSettings(settings);
     }
     
     /**

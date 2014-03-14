@@ -8,9 +8,11 @@ import javax.swing.event.ChangeListener;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -25,16 +27,20 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class BWANodeDialog extends DefaultNodeSettingsPane {
 
+	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
+	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
+	private final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
+	private final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "");
+	private final SettingsModelBoolean readGroupBoolean = new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
+	private final SettingsModelIntegerBounded ALN_THREADS = new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,4, 0, Integer.MAX_VALUE);
+
+	
     /**
      * New pane for configuring the BWA node.
      */
     protected BWANodeDialog() {
     	
-    	final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
-    	final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
-    	final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
-    	final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "");
-    	final SettingsModelBoolean readGroupBoolean = new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
+
     	readGroup.setEnabled(false);
     	
     	createNewGroup("BWA");
@@ -51,6 +57,9 @@ public class BWANodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify Read Group Header:"));
     	addDialogComponent(new DialogComponentString(readGroup,""));
     	setHorizontalPlacement(false);
+    	
+    	addDialogComponent(new DialogComponentNumber(ALN_THREADS, "Number of Threads for BWA aln", 1));
+    	
     	readType.setEnabled(false);
     	refseq.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
