@@ -61,7 +61,7 @@ public class BWANodeModel extends NodeModel {
 	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
-	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 0, Integer.MAX_VALUE);
+	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	
@@ -256,6 +256,9 @@ public class BWANodeModel extends NodeModel {
     	String out12Name = basePath+outBaseName2+"_aln_sa_2.sai";
     	String outfile = outName;
     	
+    	//Multi-Threading 
+    	command.add("-t " +Threads);
+    	
     	//If Inputfile is in bam format
     	if(readType.equals("paired-end")){
     		outfile = out11Name;				//Set Outfile for forward reads
@@ -268,8 +271,7 @@ public class BWANodeModel extends NodeModel {
     		}
 		}
     	
-    	//Multi-Threading 
-    	command.add("-t " +Threads);
+
     	
     	//Perform aln for forward reads OR single end reads
     	command.add(path2refFile);
@@ -282,12 +284,12 @@ public class BWANodeModel extends NodeModel {
     	if(readType.equals("paired-end")) {
     		
         	if(isBam){
-        		command.set(1, "-b2");        	
+        		command.set(2, "-b2");        	
+        		command.set(4, path2readFile2);
+            	command.set(5, " -f "+ out12Name);
+        	}else{
         		command.set(3, path2readFile2);
             	command.set(4, " -f "+ out12Name);
-        	}else{
-        		command.set(2, path2readFile2);
-            	command.set(3, " -f "+ out12Name);
         	}
         	/**Execute**/
         	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
