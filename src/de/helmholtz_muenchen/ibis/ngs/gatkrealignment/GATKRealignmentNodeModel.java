@@ -171,6 +171,25 @@ public class GATKRealignmentNodeModel extends NodeModel {
 	private int posMills;
 	private int posDbsnp;
     
+	//Network/Proxy options
+	public static final String CFGKEY_USEPROXY="useproxy";
+	public static final String CFGKEY_PROXYHOST="proxyhost";
+	public static final String CFGKEY_PROXYPORT="proxyport";
+	public static final String CFGKEY_USEPROXYAUTH="useproxyauth";
+	public static final String CFGKEY_PROXYUSER="proxyuser";
+	public static final String CFGKEY_PROXYPASSWORD="proxypassword";
+	
+	private final SettingsModelBoolean m_useproxy = new SettingsModelBoolean(GATKRealignmentNodeModel.CFGKEY_USEPROXY, false);
+	private final SettingsModelString m_proxyhost = new SettingsModelString(
+			GATKRealignmentNodeModel.CFGKEY_PROXYHOST,"");
+	private final SettingsModelString m_proxyport = new SettingsModelString(
+			GATKRealignmentNodeModel.CFGKEY_PROXYPORT,"");
+	private final SettingsModelBoolean m_useproxyauth = new SettingsModelBoolean(GATKRealignmentNodeModel.CFGKEY_USEPROXYAUTH, false);
+	private final SettingsModelString m_proxyuser = new SettingsModelString(
+			GATKRealignmentNodeModel.CFGKEY_PROXYUSER,"");
+	private final SettingsModelString m_proxypassword = new SettingsModelString(
+			GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD,"");
+	
     /**
      * Constructor for the node model.
      */
@@ -179,8 +198,16 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	// 1 in port, 1 out port
         super(1, 1);
         
+
         // file chooser for interval file is disabled from the beginning
         m_interval_file.setEnabled(false);
+        
+        //Proxy options
+    	m_proxyhost.setEnabled(false);
+    	m_proxyport.setEnabled(false);
+    	m_useproxyauth.setEnabled(false);
+    	m_proxyuser.setEnabled(false);
+    	m_proxypassword.setEnabled(false);
     }
 
     /**
@@ -352,13 +379,31 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	String outint =PathProcessor.createOutputFile(base, "intervals", "realigned");
         String outbam =PathProcessor.createOutputFile(base, "bam", "realigned");
         
+        
+		//Enable proxy if needed
+		String proxyOptions = "";
+		if(m_useproxy.getBooleanValue()){
+			
+			proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
+			proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
+			
+			if(m_useproxyauth.getBooleanValue()){
+				
+    			proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
+    			proxyOptions += " -Dhttp.proxyPassword=" + m_proxypassword.getStringValue();
+			}
+			
+			proxyOptions += " ";
+		}
+        
+        
     	logger.info("Start GATK Realignment");
     	
     	// run target creator
-    	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue());
+    	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions);
     	
     	//run realignment
-    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue());
+    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions);
     	
     	// write output table
     	/*
@@ -550,6 +595,14 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_max_reads_cons.saveSettingsTo(settings);
     	m_max_reads_realign.saveSettingsTo(settings);
     	m_alignment_tag.saveSettingsTo(settings);
+    	
+    	//Proxy options
+    	m_useproxy.saveSettingsTo(settings);
+    	m_proxyhost.saveSettingsTo(settings);
+    	m_proxyport.saveSettingsTo(settings);
+    	m_useproxyauth.saveSettingsTo(settings);
+    	m_proxyuser.saveSettingsTo(settings);
+    	m_proxypassword.saveSettingsTo(settings);
 
     }
 
@@ -586,6 +639,14 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_max_reads_cons.loadSettingsFrom(settings);
     	m_max_reads_realign.loadSettingsFrom(settings);
     	m_alignment_tag.loadSettingsFrom(settings);
+    	
+    	//Proxy options
+    	m_useproxy.loadSettingsFrom(settings);
+    	m_proxyhost.loadSettingsFrom(settings);
+    	m_proxyport.loadSettingsFrom(settings);
+    	m_useproxyauth.loadSettingsFrom(settings);
+    	m_proxyuser.loadSettingsFrom(settings);
+    	m_proxypassword.loadSettingsFrom(settings);
 
     }
 
@@ -623,6 +684,14 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_max_reads_cons.validateSettings(settings);
     	m_max_reads_realign.validateSettings(settings);
     	m_alignment_tag.validateSettings(settings);
+    	
+    	//Proxy options
+    	m_useproxy.validateSettings(settings);
+    	m_proxyhost.validateSettings(settings);
+    	m_proxyport.validateSettings(settings);
+    	m_useproxyauth.validateSettings(settings);
+    	m_proxyuser.validateSettings(settings);
+    	m_proxypassword.validateSettings(settings);
     	
     }
     

@@ -10,14 +10,14 @@ public class RunGATKRealignment {
 	
 	
 	//calls gatk targetcreator
-	protected static void targetcreator(ExecutionContext exec, String outputint, String inputbam, String ref, String gatk, String phase1, String mills, String interval, int threads, int maxint, int minreads, double mismatch, int window) throws Exception{
+	protected static void targetcreator(ExecutionContext exec, String outputint, String inputbam, String ref, String gatk, String phase1, String mills, String interval, int threads, int maxint, int minreads, double mismatch, int window, String proxyOptions) throws Exception{
 		
 		//create command string
 		
 		// each data thread requires 2 GB of memory
 		int memory = 2*threads;
 
-		String cmd="java -jar -Xmx"+memory+"G "+gatk;
+		String cmd="java -jar -Xmx"+memory+"G " + proxyOptions + gatk;
 		cmd+=" -T RealignerTargetCreator";
 		cmd+=" -nt "+threads;
 		cmd+=" -R "+ref;
@@ -49,11 +49,11 @@ public class RunGATKRealignment {
 	}
 	
 	//calls gatk indel realigner
-	protected static void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag) throws Exception{
+	protected static void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag, String proxyOptions) throws Exception{
     	
 		//create command string
 
-		String cmd="java -jar -Xmx4G "+gatk;
+		String cmd="java -jar -Xmx4G " + proxyOptions + gatk;
 		cmd+=" -T IndelRealigner";
 		cmd+=" -R "+ref;
 		cmd+=" -I "+inputbam;

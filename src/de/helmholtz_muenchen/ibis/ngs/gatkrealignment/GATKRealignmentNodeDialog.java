@@ -8,11 +8,13 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
 
 /**
  * <code>NodeDialog</code> for the "GATKRealignment" Node.
@@ -91,6 +93,15 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
 	//indicate that files are available form previous node
 	private boolean phase1;
 	private boolean mills;
+	
+	//Proxy options
+	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKRealignmentNodeModel.CFGKEY_USEPROXY, false);
+	final SettingsModelString proxyhost = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYHOST, null);
+	final SettingsModelString proxyport = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYPORT, null);
+	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKRealignmentNodeModel.CFGKEY_USEPROXYAUTH, false);
+	final SettingsModelString proxyuser = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYUSER, null);
+	final SettingsModelString proxypassword = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD, null);
+	
 
     protected GATKRealignmentNodeDialog() {
         super();
@@ -98,6 +109,7 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         createGeneralOptions();
         createTargetCreatorOptions();        
         createIndelRealignmentOptions();
+        createProxyOptions();
                     
     }
     
@@ -222,5 +234,47 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Output");
         addDialogComponent(new DialogComponentBoolean(alignment_tag, "Do not output original cigar string"));
     }
+    
+    private void createProxyOptions(){
+	  	createNewTab("Proxy options");
+	  	createNewGroup("General");
+	  	addDialogComponent(new DialogComponentBoolean(useproxy, "Enable proxy"));
+	  	addDialogComponent(new DialogComponentString(proxyhost, "Proxy host"));
+	  	addDialogComponent(new DialogComponentString(proxyport, "Proxy port"));
+	  	createNewGroup("Authentication");
+	  	addDialogComponent(new DialogComponentBoolean(useproxyauth, "Enable authentication"));
+	  	addDialogComponent(new DialogComponentString(proxyuser, "Proxy username"));
+	  	addDialogComponent(new DialogComponentString(proxypassword, "Proxy password"));
+	
+	  	
+	  	useproxy.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+						if(useproxy.getBooleanValue()){
+							proxyhost.setEnabled(true);
+							proxyport.setEnabled(true);
+							useproxyauth.setEnabled(true);
+						}else{
+							proxyhost.setEnabled(false);
+							proxyport.setEnabled(false);
+							proxyuser.setEnabled(false);
+							proxypassword.setEnabled(false);
+							useproxyauth.setEnabled(false);
+						}
+				}
+			});
+	  	
+	  	useproxyauth.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+						if(useproxy.getBooleanValue() && useproxyauth.getBooleanValue()){
+							proxyuser.setEnabled(true);
+							proxypassword.setEnabled(true);
+						}else{
+							proxypassword.setEnabled(false);
+							proxyuser.setEnabled(false);
+						}
+				}
+			});
+  }
+    
 }
 
