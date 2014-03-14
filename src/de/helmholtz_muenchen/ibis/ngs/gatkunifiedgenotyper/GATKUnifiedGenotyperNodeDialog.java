@@ -10,11 +10,13 @@ import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
 
 /**
  * <code>NodeDialog</code> for the "GATKUnifiedGenotyper" Node.
@@ -88,6 +90,15 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
 	
 	private boolean dbsnp=false;
 	
+	
+	//Proxy options
+	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
+	final SettingsModelString proxyhost = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST, null);
+	final SettingsModelString proxyport = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT, null);
+	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
+	final SettingsModelString proxyuser = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER, null);
+	final SettingsModelString proxypassword = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD, null);
+	
     /**
      * New pane for configuring GATKUnifiedGenotyper node dialog.
      * This is just a suggestion to demonstrate possible default dialog
@@ -98,6 +109,7 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         
         generalOptions();
         UGOptions();
+        proxyOptions();
      
     }
     
@@ -193,5 +205,47 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Number of threads");
         addDialogComponent(new DialogComponentNumber(num_threads, "Threads", 1));
     }
+	
+	
+    private void proxyOptions(){
+	  	createNewTab("Proxy options");
+	  	createNewGroup("General");
+	  	addDialogComponent(new DialogComponentBoolean(useproxy, "Enable proxy"));
+	  	addDialogComponent(new DialogComponentString(proxyhost, "Proxy host"));
+	  	addDialogComponent(new DialogComponentString(proxyport, "Proxy port"));
+	  	createNewGroup("Authentication");
+	  	addDialogComponent(new DialogComponentBoolean(useproxyauth, "Enable authentication"));
+	  	addDialogComponent(new DialogComponentString(proxyuser, "Proxy username"));
+	  	addDialogComponent(new DialogComponentString(proxypassword, "Proxy password"));
+	
+	  	
+	  	useproxy.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+						if(useproxy.getBooleanValue()){
+							proxyhost.setEnabled(true);
+							proxyport.setEnabled(true);
+							useproxyauth.setEnabled(true);
+						}else{
+							proxyhost.setEnabled(false);
+							proxyport.setEnabled(false);
+							proxyuser.setEnabled(false);
+							proxypassword.setEnabled(false);
+							useproxyauth.setEnabled(false);
+						}
+				}
+			});
+	  	
+	  	useproxyauth.addChangeListener(new ChangeListener() {
+				public void stateChanged(ChangeEvent e) {
+						if(useproxy.getBooleanValue() && useproxyauth.getBooleanValue()){
+							proxyuser.setEnabled(true);
+							proxypassword.setEnabled(true);
+						}else{
+							proxypassword.setEnabled(false);
+							proxyuser.setEnabled(false);
+						}
+				}
+			});
+  }
 }
 

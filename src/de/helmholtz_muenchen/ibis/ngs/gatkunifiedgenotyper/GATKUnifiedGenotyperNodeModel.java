@@ -169,6 +169,26 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
 	private int posMills;
 	private int posP1;
 	private int posDbsnp;
+	
+	//Network/Proxy options
+	public static final String CFGKEY_USEPROXY="useproxy";
+	public static final String CFGKEY_PROXYHOST="proxyhost";
+	public static final String CFGKEY_PROXYPORT="proxyport";
+	public static final String CFGKEY_USEPROXYAUTH="useproxyauth";
+	public static final String CFGKEY_PROXYUSER="proxyuser";
+	public static final String CFGKEY_PROXYPASSWORD="proxypassword";
+	
+	private final SettingsModelBoolean m_useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
+	private final SettingsModelString m_proxyhost = new SettingsModelString(
+			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST,"");
+	private final SettingsModelString m_proxyport = new SettingsModelString(
+			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT,"");
+	private final SettingsModelBoolean m_useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
+	private final SettingsModelString m_proxyuser = new SettingsModelString(
+			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER,"");
+	private final SettingsModelString m_proxypassword = new SettingsModelString(
+			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD,"");
+	
     /**
      * Constructor for the node model.
      */
@@ -178,6 +198,12 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         super(1, 1);
         
         m_interval_file.setEnabled(false);
+        //Proxy options
+    	m_proxyhost.setEnabled(false);
+    	m_proxyport.setEnabled(false);
+    	m_useproxyauth.setEnabled(false);
+    	m_proxyuser.setEnabled(false);
+    	m_proxypassword.setEnabled(false);
     }
 
     /**
@@ -336,14 +362,31 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         	indelout=PathProcessor.createOutputFile(base, "vcf", "indels");
         }
         
+		//Enable proxy if needed
+		String proxyOptions = "";
+		if(m_useproxy.getBooleanValue()){
+			
+			proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
+			proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
+			
+			if(m_useproxyauth.getBooleanValue()){
+				
+    			proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
+    			proxyOptions += " -Dhttp.proxyPassword=" + m_proxypassword.getStringValue();
+			}
+			
+			proxyOptions += " ";
+		}
+        
+        
         // call snps
         if(!snpout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue());
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions);
         }
         
         // call indels
         if(!indelout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue());
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions);
         }
         
     	//determine number of output columns
@@ -534,6 +577,14 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         m_gap_cont_pen.saveSettingsTo(settings);
         m_baq.saveSettingsTo(settings);
         m_mbq.saveSettingsTo(settings);
+        
+    	//Proxy options
+    	m_useproxy.saveSettingsTo(settings);
+    	m_proxyhost.saveSettingsTo(settings);
+    	m_proxyport.saveSettingsTo(settings);
+    	m_useproxyauth.saveSettingsTo(settings);
+    	m_proxyuser.saveSettingsTo(settings);
+    	m_proxypassword.saveSettingsTo(settings);
 
     }
 
@@ -566,6 +617,14 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_gap_cont_pen.loadSettingsFrom(settings);
     	m_baq.loadSettingsFrom(settings);
     	m_mbq.loadSettingsFrom(settings);
+    	
+    	//Proxy options
+    	m_useproxy.loadSettingsFrom(settings);
+    	m_proxyhost.loadSettingsFrom(settings);
+    	m_proxyport.loadSettingsFrom(settings);
+    	m_useproxyauth.loadSettingsFrom(settings);
+    	m_proxyuser.loadSettingsFrom(settings);
+    	m_proxypassword.loadSettingsFrom(settings);
         
     }
 
@@ -598,6 +657,14 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_gap_cont_pen.validateSettings(settings);    	
     	m_baq.validateSettings(settings);
     	m_mbq.validateSettings(settings);
+    	
+    	//Proxy options
+    	m_useproxy.validateSettings(settings);
+    	m_proxyhost.validateSettings(settings);
+    	m_proxyport.validateSettings(settings);
+    	m_useproxyauth.validateSettings(settings);
+    	m_proxyuser.validateSettings(settings);
+    	m_proxypassword.validateSettings(settings);
 
     }
     

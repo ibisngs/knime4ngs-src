@@ -174,7 +174,6 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
 	private int posDbsnp;
 
 	//Network/Proxy options
-	//Options for proxy
 	public static final String CFGKEY_USEPROXY="useproxy";
 	public static final String CFGKEY_PROXYHOST="proxyhost";
 	public static final String CFGKEY_PROXYPORT="proxyport";
