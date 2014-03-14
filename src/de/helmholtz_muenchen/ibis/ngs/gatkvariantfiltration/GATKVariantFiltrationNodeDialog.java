@@ -4,7 +4,9 @@ import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -37,10 +39,9 @@ public class GATKVariantFiltrationNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelOptionalString RPR= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_RPR, "< -8.0",false);
 	private final SettingsModelOptionalString FilterString = new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_FilterString, "-",false);
 	private final SettingsModelOptionalString FilterName = new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_FilterName, "-",false);
-	
-	 //$com = "java -Xmx4g -jar ".$TOOL_PATH.$GATK_VERSION."/GenomeAnalysisTK.jar -T VariantFiltration -R $REF_GENOME -V $INFILE
-	 //   	-o $outfile  --filterExpression \"QD < 2.0 || FS > 60.0 || MQ < 40.0 || HaplotypeScore > 13.0
-	 //   	|| MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\" --filterName \"GATKFilter\"";
+	private final SettingsModelIntegerBounded memory_usage = new SettingsModelIntegerBounded(GATKVariantFiltrationNodeModel.CFGKEY_JAVAMEMORY, GATKVariantFiltrationNodeModel.DEF_NUM_JAVAMEMORY, GATKVariantFiltrationNodeModel.MIN_NUM_JAVAMEMORY, GATKVariantFiltrationNodeModel.MAX_NUM_JAVAMEMORY);
+
+
 	
     /**
      * New pane for configuring the GATKVariantFiltration node.
@@ -61,6 +62,10 @@ public class GATKVariantFiltrationNodeDialog extends DefaultNodeSettingsPane {
     	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
     	gatkf.setBorderTitle("Choose the reference genome");
     	addDialogComponent(ref_genome);
+    	
+        //#Memory
+        createNewGroup("");
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
     	
     	createNewTab("Filter Options");
     	

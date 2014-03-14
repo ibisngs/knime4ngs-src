@@ -19,6 +19,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -35,9 +36,6 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  */
 public class GATKVariantFiltrationNodeModel extends NodeModel {
     
-	
-	//--filterExpression \"QD < 2.0 || FS > 60.0 || MQ < 40.0 || HaplotypeScore > 13.0 || MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0
-	
 	
 	/**
 	 * Config Keys
@@ -56,7 +54,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
 	public static final String CFGKEY_RPR = "ReadPosRankSum";
 	public static final String CFGKEY_FilterString = "FilterString";
 	public static final String CFGKEY_FilterName = "FilterName";
-	
+    public static final String CFGKEY_JAVAMEMORY = "gatkmemory";
 	
 	/**
 	 * The SettingsModels
@@ -78,9 +76,15 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
 	private final SettingsModelOptionalString m_FilterString = new SettingsModelOptionalString(CFGKEY_FilterString, "Value1<X||Value2>Y||...",false);
 	private final SettingsModelOptionalString m_FilterName = new SettingsModelOptionalString(CFGKEY_FilterName, "---",false);
 	
+	 // memory usage
+    public static final int DEF_NUM_JAVAMEMORY=4;
+    public static final int MIN_NUM_JAVAMEMORY=1;
+    public static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
+    private final SettingsModelIntegerBounded m_GATK_JAVA_MEMORY = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
+    
 	
 	//The Output Col Names
-	public static final String OUT_COL1 = "VCF";
+	public static final String OUT_COL1 = "FILTERED VARIANTS";
 	
 	/**
 	 * Logger
@@ -116,12 +120,9 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	
     	
     	ArrayList<String> command = new ArrayList<String>();
- //$com = "java -Xmx4g -jar ".$TOOL_PATH.$GATK_VERSION."/GenomeAnalysisTK.jar -T VariantFiltration -R $REF_GENOME -V $INFILE
- //   	-o $outfile  --filterExpression \"QD < 2.0 || FS > 60.0 || MQ < 40.0 || HaplotypeScore > 13.0
- //   	|| MappingQualityRankSum < -12.5 || ReadPosRankSum < -8.0\" --filterName \"GATKFilter\"";
     	
     	command.add("java");
-    	command.add("-Xmx4g -jar "+m_GATK.getStringValue());
+    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
     	command.add("-T VariantFiltration");
     	
     	command.add("-R "+m_REF_GENOME.getStringValue());
@@ -233,6 +234,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
          m_RPR.saveSettingsTo(settings);
          m_FilterString.saveSettingsTo(settings);
          m_FilterName.saveSettingsTo(settings);
+         m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
     }
 
     /**
@@ -255,6 +257,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
         m_RPR.loadSettingsFrom(settings);
         m_FilterString.loadSettingsFrom(settings);
         m_FilterName.loadSettingsFrom(settings);
+        m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
     }
 
     /**
@@ -277,6 +280,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
         m_RPR.validateSettings(settings);
         m_FilterString.validateSettings(settings);
         m_FilterName.validateSettings(settings);
+        m_GATK_JAVA_MEMORY.validateSettings(settings);
     }
     
     /**

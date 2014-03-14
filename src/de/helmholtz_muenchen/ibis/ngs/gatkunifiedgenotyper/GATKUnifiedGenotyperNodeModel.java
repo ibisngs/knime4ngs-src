@@ -73,6 +73,13 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     static final int MAX_NUM_THREADS=Integer.MAX_VALUE;
     private final SettingsModelIntegerBounded m_num_threads= new SettingsModelIntegerBounded(CFGKEY_NUM_THREADS, DEF_NUM_THREADS, MIN_NUM_THREADS, MAX_NUM_THREADS);
     
+    // memory usage
+    public static final String CFGKEY_JAVAMEMORY = "gatkmemory";
+    public static final int DEF_NUM_JAVAMEMORY=4;
+    public static final int MIN_NUM_JAVAMEMORY=1;
+    public static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
+    private final SettingsModelIntegerBounded m_GATK_JAVA_MEMORY = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
+    
     // additional options
     
     // confidence threshold for calling
@@ -378,15 +385,16 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
 			proxyOptions += " ";
 		}
         
+		int GATK_MEMORY_USAGE = m_GATK_JAVA_MEMORY.getIntValue();
         
         // call snps
         if(!snpout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
         // call indels
         if(!indelout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
     	//determine number of output columns
@@ -562,6 +570,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         m_interval_file.saveSettingsTo(settings);
         m_variant_type.saveSettingsTo(settings);
         m_num_threads.saveSettingsTo(settings);
+    	m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
         
         m_call_min_confidence.saveSettingsTo(settings);
         m_emit_min_confidence.saveSettingsTo(settings);
@@ -602,6 +611,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_interval_file.loadSettingsFrom(settings);
     	m_variant_type.loadSettingsFrom(settings);
     	m_num_threads.loadSettingsFrom(settings);
+    	m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
     	
     	m_call_min_confidence.loadSettingsFrom(settings);
     	m_emit_min_confidence.loadSettingsFrom(settings);
@@ -642,6 +652,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_interval_file.validateSettings(settings);
     	m_variant_type.validateSettings(settings);
     	m_num_threads.validateSettings(settings);
+    	m_GATK_JAVA_MEMORY.validateSettings(settings);
     	
     	m_call_min_confidence.validateSettings(settings);
     	m_emit_min_confidence.validateSettings(settings);

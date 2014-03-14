@@ -193,6 +193,14 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
 			GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD,"");
 	
 	
+	public static final String CFGKEY_JAVAMEMORY = "gatkmemory";
+    public static final int DEF_NUM_JAVAMEMORY=8;
+    public static final int MIN_NUM_JAVAMEMORY=1;
+    public static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
+    private final SettingsModelIntegerBounded m_GATK_JAVA_MEMORY = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
+ 
+	
+	
     /**
      * Constructor for the node model.
      */
@@ -451,7 +459,9 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
 			proxyOptions += " ";
 		}
         
-    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions);
+		int GATK_MEMORY_USAGE = m_GATK_JAVA_MEMORY.getIntValue();
+		
+    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	if(m_create_plots.getBooleanValue()){
     		
@@ -459,12 +469,12 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     		String recalaftertable=PathProcessor.createOutputFile(base, "table", "post_recal");
     		String recalplots=PathProcessor.createOutputFile(base, "pdf", "recal_plots");
     		
-    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions);
-    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions);
+    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE);
     		
     	}
     	
-    	RunGATKBaseRecalibration.PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue(), proxyOptions);
+    	RunGATKBaseRecalibration.PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	/*
     	 * output table
@@ -647,6 +657,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_interval_file.saveSettingsTo(settings);
     	m_create_plots.saveSettingsTo(settings);
     	m_cpu_threads.saveSettingsTo(settings);
+    	m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
     	
     	m_context_cov.saveSettingsTo(settings);
     	m_cycle_cov.saveSettingsTo(settings);
@@ -691,6 +702,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_interval_file.loadSettingsFrom(settings);
     	m_create_plots.loadSettingsFrom(settings);
     	m_cpu_threads.loadSettingsFrom(settings);
+    	m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
     	
     	m_context_cov.loadSettingsFrom(settings);
     	m_cycle_cov.loadSettingsFrom(settings);
@@ -735,6 +747,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_interval_file.validateSettings(settings);
     	m_create_plots.validateSettings(settings);
     	m_cpu_threads.validateSettings(settings);
+    	m_GATK_JAVA_MEMORY.validateSettings(settings);
     	
     	m_context_cov.validateSettings(settings);
     	m_cycle_cov.validateSettings(settings);

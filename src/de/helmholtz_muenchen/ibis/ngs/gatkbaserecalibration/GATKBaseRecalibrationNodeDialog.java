@@ -15,6 +15,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+
 /**
  * <code>NodeDialog</code> for the "GATKBaseRecalibration" Node.
  * 
@@ -54,6 +55,8 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString interval_file = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_INTERVAL_FILE, GATKBaseRecalibrationNodeModel.DEF_INTERVAL_FILE);
 	final SettingsModelBoolean create_plots = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_CREATE_PLOTS, GATKBaseRecalibrationNodeModel.DEF_CREATE_PLOTS);
 	final SettingsModelIntegerBounded cpu_threads= new SettingsModelIntegerBounded(GATKBaseRecalibrationNodeModel.CFGKEY_CPU_THREADS, GATKBaseRecalibrationNodeModel.DEF_CPU_THREADS, GATKBaseRecalibrationNodeModel.MIN_CPU_THREADS, GATKBaseRecalibrationNodeModel.MAX_CPU_THREADS);
+	final SettingsModelIntegerBounded memory_usage = new SettingsModelIntegerBounded(GATKBaseRecalibrationNodeModel.CFGKEY_JAVAMEMORY, GATKBaseRecalibrationNodeModel.DEF_NUM_JAVAMEMORY, GATKBaseRecalibrationNodeModel.MIN_NUM_JAVAMEMORY, GATKBaseRecalibrationNodeModel.MAX_NUM_JAVAMEMORY);
+
 	
 	/* 
 	 * BaseRecalibrator
@@ -212,6 +215,10 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
         
         createNewGroup("Number of cpu threads");
         addDialogComponent(new DialogComponentNumber(cpu_threads, "Number of cpu threads", 1, 5));
+        
+        //#Memory
+        createNewGroup("Java Memory");
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
         
     }
         

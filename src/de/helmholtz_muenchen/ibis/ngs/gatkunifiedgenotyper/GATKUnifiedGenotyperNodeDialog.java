@@ -49,7 +49,7 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString interval_file = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_INTERVAL_FILE, GATKUnifiedGenotyperNodeModel.DEF_INTERVAL_FILE);
 	final SettingsModelString variant_type= new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_VARIANT_TYPE, GATKUnifiedGenotyperNodeModel.DEF_VARIANT_TYPE);
 	final SettingsModelIntegerBounded num_threads = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_NUM_THREADS, GATKUnifiedGenotyperNodeModel.DEF_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MIN_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MAX_NUM_THREADS);
-	
+	final SettingsModelIntegerBounded memory_usage = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.DEF_NUM_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.MIN_NUM_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.MAX_NUM_JAVAMEMORY);
 	
 	/* other options
 	 * 
@@ -204,6 +204,10 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         //#threads
         createNewGroup("Number of threads");
         addDialogComponent(new DialogComponentNumber(num_threads, "Threads", 1));
+        
+        //#Memory
+        createNewGroup("Java Memory");
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
     }
 	
 	

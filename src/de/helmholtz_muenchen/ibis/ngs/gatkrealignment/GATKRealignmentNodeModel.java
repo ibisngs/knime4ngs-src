@@ -76,6 +76,13 @@ public class GATKRealignmentNodeModel extends NodeModel {
     static final int MAX_NUM_THREADS=Integer.MAX_VALUE;
     private final SettingsModelIntegerBounded m_num_threads= new SettingsModelIntegerBounded(CFGKEY_NUM_THREADS, DEF_NUM_THREADS, MIN_NUM_THREADS, MAX_NUM_THREADS);
     
+    static final String CFGKEY_JAVAMEMORY = "gatkmemory";
+    static final int DEF_NUM_JAVAMEMORY=8;
+    static final int MIN_NUM_JAVAMEMORY=1;
+    static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
+    private final SettingsModelIntegerBounded m_gatk_java_memory = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
+    
+    
     // target creator
     
     // maximal interval length for realignment
@@ -162,10 +169,10 @@ public class GATKRealignmentNodeModel extends NodeModel {
     private int posRef;
     
 	//variables are only used when previous node is a gatk node
-	boolean gatk=false;
-	boolean p1=false;
-	boolean mills=false;
-	boolean dbsnp=false;
+	public static boolean gatk=false;
+	public static boolean p1=false;
+	public static boolean mills=false;
+	public static boolean dbsnp=false;
 	private int posGatk;
 	private int posP1;
 	private int posMills;
@@ -189,6 +196,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
 			GATKRealignmentNodeModel.CFGKEY_PROXYUSER,"");
 	private final SettingsModelString m_proxypassword = new SettingsModelString(
 			GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD,"");
+		
 	
     /**
      * Constructor for the node model.
@@ -396,14 +404,16 @@ public class GATKRealignmentNodeModel extends NodeModel {
 			proxyOptions += " ";
 		}
         
+		//GATK Memory Usage
+		int GATK_MEMORY_USAGE = m_gatk_java_memory.getIntValue();
         
     	logger.info("Start GATK Realignment");
     	
     	// run target creator
-    	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions);
+    	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	//run realignment
-    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions);
+    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	// write output table
     	/*
@@ -522,6 +532,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     		
     		gatk=true;
     		m_gatk.setEnabled(false);
+    		m_gatk.setStringValue("TableInput");
     		
     		if(inSpecs[0].containsName("Path2phase1")){
     			p1=true;
@@ -578,6 +589,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_use_interval.saveSettingsTo(settings);
     	m_interval_file.saveSettingsTo(settings);
     	m_num_threads.saveSettingsTo(settings);
+    	m_gatk_java_memory.saveSettingsTo(settings);
        
        //target creator
     	m_max_interval.saveSettingsTo(settings);
@@ -622,6 +634,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_use_interval.loadSettingsFrom(settings);
     	m_interval_file.loadSettingsFrom(settings);
     	m_num_threads.loadSettingsFrom(settings);
+    	m_gatk_java_memory.loadSettingsFrom(settings);
     	
     	// target creator
     	m_max_interval.loadSettingsFrom(settings);
@@ -667,6 +680,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_use_interval.validateSettings(settings);
     	m_interval_file.validateSettings(settings);
     	m_num_threads.validateSettings(settings);
+    	m_gatk_java_memory.validateSettings(settings);
     	
     	//target creator
     	m_max_interval.validateSettings(settings);

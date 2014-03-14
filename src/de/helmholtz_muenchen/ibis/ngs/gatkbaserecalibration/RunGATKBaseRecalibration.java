@@ -10,10 +10,10 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 public class RunGATKBaseRecalibration {
 	
 	// first call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions) throws Exception {
+	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
 		//create command string
-		String cmd="java -jar -Xmx4G "+ proxyOptions + gatk;
+		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T BaseRecalibrator";
 		cmd+=" -R "+inputref;
 		cmd+=" -I "+inputbam;
@@ -78,10 +78,10 @@ public class RunGATKBaseRecalibration {
 	
 	
 	// second call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions) throws Exception {
+	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
 		//create command string
-		String cmd="java -jar -Xmx4G "+ proxyOptions + gatk;
+		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T BaseRecalibrator";
 		cmd+=" -R "+inputref;
 		cmd+=" -I "+inputbam;
@@ -144,10 +144,10 @@ public class RunGATKBaseRecalibration {
 		Executor.executeCommand(new String[]{cmd},exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null, true);
 	}
 	
-	protected static void PrintReads(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outbam, boolean outsimple, int cputhreads, String proxyOptions) throws Exception {
+	protected static void PrintReads(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outbam, boolean outsimple, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
 		//create command string
-		String cmd="java -jar -Xmx4G "+ proxyOptions + gatk;
+		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T PrintReads";
 		cmd+=" -R "+inputref;
 		cmd+=" -I "+inputbam;
@@ -167,9 +167,9 @@ public class RunGATKBaseRecalibration {
 		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null, true);
 	}
 	
-	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions) throws Exception {
+	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
-		String cmd="java -jar -Xmx4G "+ proxyOptions + gatk;
+		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T AnalyzeCovariates";
 		cmd+=" -R "+inputref;
 		cmd+=" -before "+beforetable;

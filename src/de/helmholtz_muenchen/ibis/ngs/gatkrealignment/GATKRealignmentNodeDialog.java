@@ -49,6 +49,7 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelBoolean use_interval = new SettingsModelBoolean(GATKRealignmentNodeModel.CFGKEY_USE_INTERVAL, GATKRealignmentNodeModel.DEF_USE_INTERVAL);
 	final SettingsModelString interval_file = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_INTERVAL_FILE, GATKRealignmentNodeModel.DEF_INTERVAL_FILE);
 	final SettingsModelIntegerBounded num_threads = new SettingsModelIntegerBounded(GATKRealignmentNodeModel.CFGKEY_NUM_THREADS, GATKRealignmentNodeModel.DEF_NUM_THREADS, GATKRealignmentNodeModel.MIN_NUM_THREADS, GATKRealignmentNodeModel.MAX_NUM_THREADS);
+	final SettingsModelIntegerBounded memory_usage = new SettingsModelIntegerBounded(GATKRealignmentNodeModel.CFGKEY_JAVAMEMORY, GATKRealignmentNodeModel.DEF_NUM_JAVAMEMORY, GATKRealignmentNodeModel.MIN_NUM_JAVAMEMORY, GATKRealignmentNodeModel.MAX_NUM_JAVAMEMORY);
 	
 	//tab TargetCreator
 	/*
@@ -184,6 +185,10 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         //#threads
         createNewGroup("Number of threads");
         addDialogComponent(new DialogComponentNumber(num_threads, "Threads", 1));
+        
+        //#Memory
+        createNewGroup("Java Memory");
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
     }
     
     private void createTargetCreatorOptions(){
@@ -274,6 +279,7 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
 						}
 				}
 			});
+	  	
   }
     
 }
