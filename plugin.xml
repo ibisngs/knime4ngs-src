@@ -55,6 +55,11 @@
 		<!--<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory" id="de.helmholtz_muenchen.ibis.RNodes.Template.RNodeTemplateNodeFactory"/>-->
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory" id="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory"/>
 		<node category-path="/ibis/utils" factory-class="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory" id="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory"/>
+  <node
+        category-path="/ibis/ngs/ngs_post"
+        factory-class="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory"
+        id="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory">
+  </node>
 
 </extension>
    
