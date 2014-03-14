@@ -27,6 +27,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -172,6 +173,27 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
 	private int posMills;
 	private int posDbsnp;
 
+	//Network/Proxy options
+	//Options for proxy
+	public static final String CFGKEY_USEPROXY="useproxy";
+	public static final String CFGKEY_PROXYHOST="proxyhost";
+	public static final String CFGKEY_PROXYPORT="proxyport";
+	public static final String CFGKEY_USEPROXYAUTH="useproxyauth";
+	public static final String CFGKEY_PROXYUSER="proxyuser";
+	public static final String CFGKEY_PROXYPASSWORD="proxypassword";
+	
+	private final SettingsModelBoolean m_useproxy = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXY, false);
+	private final SettingsModelString m_proxyhost = new SettingsModelString(
+			GATKBaseRecalibrationNodeModel.CFGKEY_PROXYHOST,"");
+	private final SettingsModelString m_proxyport = new SettingsModelString(
+			GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPORT,"");
+	private final SettingsModelBoolean m_useproxyauth = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXYAUTH, false);
+	private final SettingsModelString m_proxyuser = new SettingsModelString(
+			GATKBaseRecalibrationNodeModel.CFGKEY_PROXYUSER,"");
+	private final SettingsModelString m_proxypassword = new SettingsModelString(
+			GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD,"");
+	
+	
     /**
      * Constructor for the node model.
      */
@@ -180,6 +202,13 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
         super(1, 1);
         
         m_interval_file.setEnabled(false);
+        
+        //Proxy options
+    	m_proxyhost.setEnabled(false);
+    	m_proxyport.setEnabled(false);
+    	m_useproxyauth.setEnabled(false);
+    	m_proxyuser.setEnabled(false);
+    	m_proxypassword.setEnabled(false);
     }
 
     /**
@@ -407,7 +436,23 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
         String recaltable=PathProcessor.createOutputFile(base, "table", "recal");
         String recalbam= PathProcessor.createOutputFile(base, "bam", "recal");
         
-    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue());
+		//Enable proxy if needed
+		String proxyOptions = "";
+		if(m_useproxy.getBooleanValue()){
+			
+			proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
+			proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
+			
+			if(m_useproxyauth.getBooleanValue()){
+				
+    			proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
+    			proxyOptions += " -Dhttp.proxyPassword=" + m_proxypassword.getStringValue();
+			}
+			
+			proxyOptions += " ";
+		}
+        
+    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions);
     	
     	if(m_create_plots.getBooleanValue()){
     		
@@ -415,12 +460,12 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     		String recalaftertable=PathProcessor.createOutputFile(base, "table", "post_recal");
     		String recalplots=PathProcessor.createOutputFile(base, "pdf", "recal_plots");
     		
-    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue());
-    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile);
+    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions);
+    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions);
     		
     	}
     	
-    	RunGATKBaseRecalibration.PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue());
+    	RunGATKBaseRecalibration.PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue(), proxyOptions);
     	
     	/*
     	 * output table
@@ -618,6 +663,14 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_mismatch_def_qual.saveSettingsTo(settings);
     	m_simplify_out.saveSettingsTo(settings);
     	
+    	//Proxy options
+    	m_useproxy.saveSettingsTo(settings);
+    	m_proxyhost.saveSettingsTo(settings);
+    	m_proxyport.saveSettingsTo(settings);
+    	m_useproxyauth.saveSettingsTo(settings);
+    	m_proxyuser.saveSettingsTo(settings);
+    	m_proxypassword.saveSettingsTo(settings);
+    	
     }
 
     /**
@@ -653,6 +706,14 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_insertion_def_qual.loadSettingsFrom(settings);
     	m_mismatch_def_qual.loadSettingsFrom(settings);
     	m_simplify_out.loadSettingsFrom(settings);
+    	
+    	//Proxy options
+    	m_useproxy.loadSettingsFrom(settings);
+    	m_proxyhost.loadSettingsFrom(settings);
+    	m_proxyport.loadSettingsFrom(settings);
+    	m_useproxyauth.loadSettingsFrom(settings);
+    	m_proxyuser.loadSettingsFrom(settings);
+    	m_proxypassword.loadSettingsFrom(settings);
 
     }
 
@@ -689,6 +750,14 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_insertion_def_qual.validateSettings(settings);
     	m_mismatch_def_qual.validateSettings(settings);
     	m_simplify_out.validateSettings(settings);
+    	
+    	//Proxy options
+    	m_useproxy.validateSettings(settings);
+    	m_proxyhost.validateSettings(settings);
+    	m_proxyport.validateSettings(settings);
+    	m_useproxyauth.validateSettings(settings);
+    	m_proxyuser.validateSettings(settings);
+    	m_proxypassword.validateSettings(settings);
     	
     	// check if at least one set of polymorphisms is used
     	if(!settings.getBoolean(CFGKEY_USE_PHASE1_1000G) && !settings.getBoolean(CFGKEY_USE_MILLS_1000G) && !settings.getBoolean(CFGKEY_USE_DBSNP)){
