@@ -204,7 +204,7 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Fraction of mismatching base qualities (only for ungapped aligner)");
         addDialogComponent(new DialogComponentNumber(mismatch, "Fraction of base quality mismatches at a position to have high entropy", 0.01, 5));
         
-        createNewGroup("Window Size for clustering SNPs");
+        createNewGroup("Window size for clustering SNPs");
         addDialogComponent(new DialogComponentNumber(window, "Window size", 1, 5));
     }
     
@@ -224,13 +224,13 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Maximum number of consensus sequences to try");
         addDialogComponent(new DialogComponentNumber(max_consensuses, "Consensus threshold", 1, 5));
         
-        createNewGroup("Maximum insert size for realignment of paired end reads");
+        createNewGroup("Maximum insert size for realignment of paired-end reads");
         addDialogComponent(new DialogComponentNumber(max_isize, "Insert size threshold", 10, 5));
         
         createNewGroup("Maximum distance of read to original alignment position");
         addDialogComponent(new DialogComponentNumber(max_pos_move, "Read shift threshold", 1, 5));
         
-        createNewGroup("Maximum number of reads that are use for consensus calculation");
+        createNewGroup("Maximum number of reads used for consensus calculation");
         addDialogComponent(new DialogComponentNumber(max_reads_cons, "Reads for consensus threshold", 1, 5));
         
         createNewGroup("Maximum number of reads for realignment");

@@ -158,8 +158,8 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(gatkf);
     	
     	// dbsnp set for annotation
-    	createNewGroup("SNPs from DBSNP");
-        addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Annotate SNPs with ID from DBSNP"));
+    	createNewGroup("Variants from dbSNP");
+        addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Annotate Variants with ID from dbSNP"));
         DialogComponentFileChooser dbsnpf=new DialogComponentFileChooser(dbsnp_file, "dbsnpset2", JFileChooser.OPEN_DIALOG, false, ".vcf");
         dbsnpf.setBorderTitle("Choose File (disabled if file available from previous node)");
         addDialogComponent(dbsnpf);
@@ -197,9 +197,9 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         });
         
         // variant types
-        createNewGroup("Varaints");
+        createNewGroup("Variants");
         addDialogComponent(new DialogComponentLabel("Choose the variant types to be called"));
-        addDialogComponent(new DialogComponentButtonGroup(variant_type, "", true, new String[] {"SNPs","INDELs","SNPs and Indels (separate files)"}, GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
+        addDialogComponent(new DialogComponentButtonGroup(variant_type, "", true, new String[] {"SNPs","Indels","SNPs and Indels (separate files)"}, GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
         
         //#threads
         createNewGroup("Number of threads");

@@ -142,7 +142,7 @@ public class PicardToolsNodeDialog extends DefaultNodeSettingsPane {
     private void setUpGeneralOptions(){
     	        
         //tool selection
-        createNewGroup("Select PicardTool");
+        createNewGroup("PicardTool selection");
         addDialogComponent(new DialogComponentStringSelection(ptool, "Tool", PicardToolsNodeModel.TOOLS_AVAILABLE));
         //output format
         createNewGroup("Output");
@@ -150,8 +150,8 @@ public class PicardToolsNodeDialog extends DefaultNodeSettingsPane {
         //create index file?
         addDialogComponent(new DialogComponentBoolean(index, "Create index file (required for GATK)"));
         //validation stringency
-        createNewGroup("Choose Validation Stringency");
-        addDialogComponent(new DialogComponentStringSelection(valstring, "Stringency Mode", PicardToolsNodeModel.VALSTRING_AVAILABLE));
+        createNewGroup("Validation stringency");
+        addDialogComponent(new DialogComponentStringSelection(valstring, "Stringency mode", PicardToolsNodeModel.VALSTRING_AVAILABLE));
         
         // change listener that disables/enables index tick box
         bsformat.addChangeListener(new ChangeListener(){
@@ -174,7 +174,7 @@ public class PicardToolsNodeDialog extends DefaultNodeSettingsPane {
         setEnabled(false, "MarkDuplicates");
         
         //remove duplicates
-        createNewGroup("Removal of PCR Duplicates");
+        createNewGroup("Removal of PCR duplicates");
         addDialogComponent(new DialogComponentBoolean(remove_dupl, "Do not write duplicated reads to output file"));
         
         //assume sorted
@@ -197,7 +197,7 @@ public class PicardToolsNodeDialog extends DefaultNodeSettingsPane {
         setEnabled(false, "CollectInsertSizeMetrics");
         
         //metric accumulation level String values
-        createNewGroup("Choose accumulation level for insert size calculation");
+        createNewGroup("Accumulation level for insert size calculation");
         addDialogComponent(new DialogComponentStringSelection(acc_level, "Accumulation level", "ALL_READS", "SAMPLE", "LIBRARY", "READ_GROUP"));
         
         //assume sorted
@@ -218,26 +218,23 @@ public class PicardToolsNodeDialog extends DefaultNodeSettingsPane {
         createNewTab("AddOrReplaceReadGroups");
         setEnabled(true, "AddOrReplaceReadGroups");
         
-        addDialogComponent(new DialogComponentBoolean(use_file_name, "Use filename to create RG tag"));
+        addDialogComponent(new DialogComponentBoolean(use_file_name, "Use file name to create RG tag"));
 
+        createNewGroup("Read group information");
+        
         //ID of RG tag
-        createNewGroup("Enter read group ID");
         addDialogComponent(new DialogComponentString(id_name, "ID name"));
         
         //library name of RG tag
-        createNewGroup("Enter library name");
         addDialogComponent(new DialogComponentString(library_name, "Library name"));
         
         //sample name of RG tag
-        createNewGroup("Enter sample name");
         addDialogComponent(new DialogComponentString(sample_name, "Sample name"));
         
         //sequencing platform unit
-        createNewGroup("Enter sequencing platform unit");
-        addDialogComponent(new DialogComponentString(platform_unit,"platform unit"));
+        addDialogComponent(new DialogComponentString(platform_unit,"Platform unit"));
         
         //sequencing platform selection
-        createNewGroup("Select sequencing platform");
         addDialogComponent(new DialogComponentStringSelection(platform, "Sequencing platform", "ILLUMINA", "SOLID", "LS454", "HELICOS", "PACBIO"));
         
         // change listener to disable/enable name fields

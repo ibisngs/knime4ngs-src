@@ -46,10 +46,10 @@ public class VCFLoaderNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentFileChooser(vcf1, "vcfload1", JFileChooser.OPEN_DIALOG, ".vcf"));
         addDialogComponent(new DialogComponentButtonGroup(type1, "Variant type", false, VCFLoaderNodeModel.AVAIL_TYPES , VCFLoaderNodeModel.AVAIL_TYPES));
         createNewGroup("Second VCF file");
-        addDialogComponent(new DialogComponentBoolean(secondfile, "Load second vcf file"));
+        addDialogComponent(new DialogComponentBoolean(secondfile, "Load second VCF file"));
         addDialogComponent(new DialogComponentFileChooser(vcf2, "vcfload2", JFileChooser.OPEN_DIALOG, ".vcf"));
         addDialogComponent(new DialogComponentButtonGroup(type2, "Variant type", false, VCFLoaderNodeModel.AVAIL_TYPES , VCFLoaderNodeModel.AVAIL_TYPES));
-        addDialogComponent(new DialogComponentLabel("Variant type has to be different from type of first file."));
+        addDialogComponent(new DialogComponentLabel("Variant type has to be different from first file."));
         vcf2.setEnabled(false);
         type2.setEnabled(false);
         

@@ -115,7 +115,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
     
     private void Pindel2VCFParams(){
     	
-    	createNewTab("Pindel2vcf parameters");
+    	createNewTab("Pindel2vcf Parameters");
     	
     	createNewGroup("Reference sequence");
     	addDialogComponent(new DialogComponentBoolean(use_ref_filename, "Use file name as reference name"));
@@ -133,7 +133,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
 		});
     	
     	addDialogComponent(new DialogComponentBoolean(use_cur_date, "Use current date"));
-    	addDialogComponent(new DialogComponentDate(refdate, "Date of the version of thereference sequence"));
+    	addDialogComponent(new DialogComponentDate(refdate, "Date of the version of the reference sequence"));
     	refdate.setEnabled(false);
     	
     	use_cur_date.addChangeListener( new ChangeListener() {
@@ -148,17 +148,17 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
     	
     	createNewGroup("Genotype");
     	addDialogComponent(new DialogComponentNumber(min_reads, "Minimum reads to report genotype", 1, 5));
-    	addDialogComponent(new DialogComponentNumber(hetero_frac, "Proportion of reads defined as heterozygote", 0.01, 5));
-    	addDialogComponent(new DialogComponentNumber(homo_frac, "Proportion of reads defined as homozygot", 0.01, 5));
-    	addDialogComponent(new DialogComponentBoolean(gatk_comp, "Output gatk-compatible genotypes (recommended)"));
+    	addDialogComponent(new DialogComponentNumber(hetero_frac, "Proportion of reads defined as heterozygous", 0.01, 5));
+    	addDialogComponent(new DialogComponentNumber(homo_frac, "Proportion of reads defined as homozygous", 0.01, 5));
+    	addDialogComponent(new DialogComponentBoolean(gatk_comp, "Output GATK-compatible genotypes (recommended)"));
     	
     	createNewGroup("Filter");
     	addDialogComponent(new DialogComponentBoolean(both_strands, "Only output variants that are supported by reads on both strands"));
     	addDialogComponent(new DialogComponentNumber(min_supp_reads, "Minimum number of supporting reads", 1, 5));
-    	addDialogComponent(new DialogComponentNumber(min_size, "Minimum size of the variant", 1, 5));
+    	addDialogComponent(new DialogComponentNumber(min_size, "Minimum variant size", 1, 5));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(limit_size, "Limit variant size"));
-    	addDialogComponent(new DialogComponentNumber(max_size, "Maximum size of the variant", 1, 5));
+    	addDialogComponent(new DialogComponentNumber(max_size, "Maximum variant size", 1, 5));
     	max_size.setEnabled(false);
     	setHorizontalPlacement(false);
     	
@@ -174,10 +174,10 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
     
     private void GeneralOptions(){
     	
-        createNewGroup("Path to pindel executable");
+        createNewGroup("Path to Pindel executable");
         addDialogComponent(new DialogComponentFileChooser(pindel, "pindel", JFileChooser.OPEN_DIALOG, false));
         
-        createNewGroup("Interval for Variant Calling");
+        createNewGroup("Interval for variant calling");
         addDialogComponent(new DialogComponentBoolean(interval, "Restrict variant calling to a certain genomic region"));
         setHorizontalPlacement(true);
         addDialogComponent(new DialogComponentString(chrom, "Chromosome"));
@@ -187,7 +187,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
         start.setEnabled(false);
         end.setEnabled(false);
         setHorizontalPlacement(false);
-        addDialogComponent(new DialogComponentLabel("(Chromosome name has to match reference and bam file header)"));
+        addDialogComponent(new DialogComponentLabel("(Chromosome name has to match reference and BAM file header)"));
         
         // text/number fields for chromosome, start and end only active if interval is used
         interval.addChangeListener(new ChangeListener() {
@@ -200,7 +200,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
 			}
 		});
         
-        createNewGroup("Path to pindel config file");
+        createNewGroup("Path to Pindel config file");
         addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, false));
         create_config.setEnabled(false);
         addDialogComponent(new DialogComponentBoolean(create_config, "Create config file (requires PicardTools: CollectInsertMetrics as previous node)"));
@@ -215,9 +215,9 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
 		});
         
         createNewGroup("Output");
-        addDialogComponent(new DialogComponentBoolean(vcf_out, "Convert pindel output (deletions and small insertions) to vcf format"));
+        addDialogComponent(new DialogComponentBoolean(vcf_out, "Convert Pindel output (deletions and small insertions) to VCF format"));
         DialogComponentFileChooser p2vcf_fc= new DialogComponentFileChooser(pindel2vcf, "p2vcf", JFileChooser.OPEN_DIALOG);
-        p2vcf_fc.setBorderTitle("Path to pindel2vcf converter");
+        p2vcf_fc.setBorderTitle("Path to Pindel2vcf converter");
         addDialogComponent(p2vcf_fc);
         
         // disable file chooser for pindel2vcf converter if output is not converted
@@ -241,7 +241,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
     
     private void PindelParams(){
     	
-        createNewTab("Pindel parameters");
+        createNewTab("Pindel Parameters");
         
         createNewGroup("Minimum number of matching bases");
         addDialogComponent(new DialogComponentLabel("Only consider reads as evidence if they map with more than this number of bases:"));
@@ -266,7 +266,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
     }
     
     
-    /* TODO: extra node for pindel2vcf ?
+    /* 
      * Program:   pindel2vcf (conversion of Pindel output to VCF format)
 Example:   pindel2vcf -p sample3chr20_D -r human_g1k_v36.fasta -R 1000GenomesPilot-NCBI36
               -d 20101123-v sample3chr20_D.vcf

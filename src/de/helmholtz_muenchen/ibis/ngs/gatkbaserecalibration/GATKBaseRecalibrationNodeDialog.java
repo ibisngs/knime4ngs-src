@@ -173,7 +173,7 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
 			}
 		});
         
-        addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Use dbSNP snp set (required for proper recalibration)"));
+        addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Use dbSNP variant set (required for proper recalibration)"));
         DialogComponentFileChooser dbsnpf=new DialogComponentFileChooser(dbsnp_file, "dbsnpset", JFileChooser.OPEN_DIALOG, false, ".vcf");
         dbsnpf.setBorderTitle("Choose File (disabled if file available from previous node)");
         addDialogComponent(dbsnpf);
@@ -210,11 +210,11 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
         	
         });
         
-        createNewGroup("Before after plots");
-        addDialogComponent(new DialogComponentBoolean(create_plots, "Create before after plots for base qualities"));
+        createNewGroup("Before/after plots");
+        addDialogComponent(new DialogComponentBoolean(create_plots, "Create before/after plots for base qualities"));
         
-        createNewGroup("Number of cpu threads");
-        addDialogComponent(new DialogComponentNumber(cpu_threads, "Number of cpu threads", 1, 5));
+        createNewGroup("Number of CPU threads");
+        addDialogComponent(new DialogComponentNumber(cpu_threads, "CPU threads", 1, 5));
         
         //#Memory
         createNewGroup("Java Memory");
@@ -223,7 +223,7 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
     }
         
     private void generateBaseRecalOptions(){
-        createNewTab("BaseReclibrator");
+        createNewTab("BaseRecalibrator");
         
         createNewGroup("Calculation of covariates");
         addDialogComponent(new DialogComponentLabel("Quality score covariate"));
@@ -246,8 +246,8 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentNumber(indel_context_size, "k-mer context size for indels", 1,5));
         addDialogComponent(new DialogComponentNumber(mismatch_context_size,"k-mer context size for mismatches" , 1, 5));
         
-        createNewGroup("Cycle Covariate");
-        addDialogComponent(new DialogComponentNumber(max_cycles,"Cycle Threshold" , 1, 5));
+        createNewGroup("Cycle covariate");
+        addDialogComponent(new DialogComponentNumber(max_cycles,"Cycle threshold" , 1, 5));
         
         createNewGroup("Simplify output");
         addDialogComponent(new DialogComponentBoolean(simplify_out, "Remove all additional tags from BAM file (except read group)"));

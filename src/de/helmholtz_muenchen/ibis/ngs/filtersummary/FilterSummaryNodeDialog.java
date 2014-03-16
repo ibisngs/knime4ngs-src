@@ -65,7 +65,7 @@ public class FilterSummaryNodeDialog extends DefaultNodeSettingsPane {
         
         createNewGroup("Output");
         addDialogComponent(new DialogComponentBoolean(write_stats, "Write summary file with variant counts"));
-        addDialogComponent(new DialogComponentBoolean(org_vcf_col, "Add original vcf info and sample column to variant table"));
+        addDialogComponent(new DialogComponentBoolean(org_vcf_col, "Add original VCF info and sample column to variant table"));
         
         createNewGroup("Annotation");
         
@@ -85,9 +85,9 @@ public class FilterSummaryNodeDialog extends DefaultNodeSettingsPane {
 			}
 		});
         
-        addDialogComponent(new DialogComponentBoolean(ann_pathways, "Annotate pathways from Wikipathways"));
+        addDialogComponent(new DialogComponentBoolean(ann_pathways, "Annotate pathways from WikiPathways"));
         DialogComponentFileChooser dc2 = new DialogComponentFileChooser(wikipathway_file, "wikipath_file", JFileChooser.OPEN_DIALOG, false);
-        dc2.setBorderTitle("Wikipathway file");
+        dc2.setBorderTitle("WikiPathways file");
         addDialogComponent(dc2);
         wikipathway_file.setEnabled(false);
         

@@ -17,7 +17,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
+//import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -34,7 +34,7 @@ import de.helmholtz_muenchen.ibis.ngs.filtersummary.vcf.LoFWorkflowResult;
 public class FilterSummaryNodeModel extends NodeModel {
     
     // the logger instance
-    private static final NodeLogger logger = NodeLogger.getLogger(FilterSummaryNodeModel.class);
+    //private static final NodeLogger logger = NodeLogger.getLogger(FilterSummaryNodeModel.class);
    
    // filter settings
    // minimum read coverage
