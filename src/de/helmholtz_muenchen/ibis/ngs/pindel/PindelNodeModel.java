@@ -217,7 +217,7 @@ public class PindelNodeModel extends NodeModel {
     	m_chrom.setEnabled(false);
     	m_start.setEnabled(false);
     	m_end.setEnabled(false);
-    	m_create_config.setEnabled(false);
+    	m_create_config.setEnabled(true);
     	
     	m_refname.setEnabled(false);
     	m_refdate.setEnabled(false);

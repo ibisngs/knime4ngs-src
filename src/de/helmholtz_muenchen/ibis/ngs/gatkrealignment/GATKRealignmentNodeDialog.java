@@ -188,7 +188,7 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         
         //#Memory
         createNewGroup("Java Memory");
-        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB) per thread", 1));
     }
     
     private void createTargetCreatorOptions(){

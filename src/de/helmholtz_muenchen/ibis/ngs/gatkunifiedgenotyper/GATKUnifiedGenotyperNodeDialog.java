@@ -207,7 +207,7 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         
         //#Memory
         createNewGroup("Java Memory");
-        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB)", 1));
+        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB) per thread", 1));
     }
 	
 	

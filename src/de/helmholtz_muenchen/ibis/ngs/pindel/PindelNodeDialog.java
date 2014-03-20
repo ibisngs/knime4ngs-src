@@ -201,8 +201,8 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
 		});
         
         createNewGroup("Path to Pindel config file");
-        addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, false));
-        create_config.setEnabled(false);
+        addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, true));
+        create_config.setEnabled(true);
         addDialogComponent(new DialogComponentBoolean(create_config, "Create config file (requires PicardTools: CollectInsertMetrics as previous node)"));
         
         // disables file chooser if config file is create by this node
