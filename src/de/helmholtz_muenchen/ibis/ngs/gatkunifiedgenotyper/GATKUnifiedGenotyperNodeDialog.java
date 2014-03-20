@@ -199,7 +199,7 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         // variant types
         createNewGroup("Variants");
         addDialogComponent(new DialogComponentLabel("Choose the variant types to be called"));
-        addDialogComponent(new DialogComponentButtonGroup(variant_type, "", true, new String[] {"SNPs","Indels","SNPs and Indels (separate files)"}, GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
+        addDialogComponent(new DialogComponentButtonGroup(variant_type, "", true, new String[] {"SNPs","Indels","SNPs and Indels (separate files)","SNPs and Indels (one file)"}, GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
         
         //#threads
         createNewGroup("Number of threads");

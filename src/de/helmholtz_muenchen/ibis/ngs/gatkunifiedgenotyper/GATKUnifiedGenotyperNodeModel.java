@@ -63,7 +63,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
  	private final SettingsModelString m_interval_file = new SettingsModelString(CFGKEY_INTERVAL_FILE, DEF_INTERVAL_FILE);
  	// call snps, indels or both
  	static final String CFGKEY_VARIANT_TYPE="variant_type";
- 	static final String [] AVAIL_VARIANT_TYPE={"SNP", "INDEL", "SNP+INDEL"};
+ 	static final String [] AVAIL_VARIANT_TYPE={"SNP", "INDEL", "SNP+INDEL", "BOTH"};
  	static final String DEF_VARIANT_TYPE=AVAIL_VARIANT_TYPE[2];
 	private final SettingsModelString m_variant_type= new SettingsModelString(CFGKEY_VARIANT_TYPE, DEF_VARIANT_TYPE);
     // number of threads for target creator
@@ -369,6 +369,12 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         	indelout=PathProcessor.createOutputFile(base, "vcf", "indels");
         }
         
+        String glmBothout = "";
+        if(m_variant_type.getStringValue().equals(AVAIL_VARIANT_TYPE[3])){
+        	glmBothout=PathProcessor.createOutputFile(base, "vcf", "");
+        }
+        		
+        
 		//Enable proxy if needed
 		String proxyOptions = "";
 		if(m_useproxy.getBooleanValue()){
@@ -395,6 +401,11 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         // call indels
         if(!indelout.equals("")){
         	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        }
+        
+        // call indels
+        if(!glmBothout.equals("")){
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
     	//determine number of output columns
