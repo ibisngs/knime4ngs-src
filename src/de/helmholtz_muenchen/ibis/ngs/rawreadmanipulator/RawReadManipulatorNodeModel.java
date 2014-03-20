@@ -253,10 +253,15 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 		if(!terminationState) {
 			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		
+			String stdOutFile = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered.stdOut.log";
+			String stdErrFile = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered.stdErr.log";
+			
+			
 	    	/**Execute for first file**/
 	    	StringBuffer sysErr = new StringBuffer(50);
 	    	StringBuffer sysOut = new StringBuffer(50);
 	    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
+	    	Executor.executeCommand(com, exec, null, LOGGER, stdOutFile, stdErrFile, null, true);
 	        LOGGER.info("-----------------SysError-----------------");
 	    	LOGGER.info(sysErr);
 	    	LOGGER.info("-----------------SysOut-----------------");
