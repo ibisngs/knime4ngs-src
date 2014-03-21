@@ -11,7 +11,7 @@ public class RunGATKUnifiedGenotyper {
 protected static void CallVariants(ExecutionContext exec, String gatk, String bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
 		//for each thread 2G
-		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE*threads+"G " + proxyOptions + gatk;
+		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G " + proxyOptions + gatk;
 		cmd+=" -T UnifiedGenotyper";
 		cmd+=" -nt "+threads;
 		cmd+=" -I "+bam;
