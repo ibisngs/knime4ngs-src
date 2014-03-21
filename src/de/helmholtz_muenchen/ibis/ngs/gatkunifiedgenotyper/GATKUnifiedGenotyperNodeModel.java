@@ -371,7 +371,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         
         String glmBothout = "";
         if(m_variant_type.getStringValue().equals(AVAIL_VARIANT_TYPE[3])){
-        	glmBothout=PathProcessor.createOutputFile(base, "vcf", "");
+        	glmBothout=PathProcessor.createOutputFile(base, "vcf", "both");
         }
         		
         
@@ -403,7 +403,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
-        // call indels
+        // call both
         if(!glmBothout.equals("")){
         	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
@@ -423,6 +423,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     		colcount++;
     	}
     	
+    	
     	// create column specifications
     	DataColumnSpec [] colspec = new DataColumnSpec[colcount];
     	int count=0;
@@ -432,9 +433,13 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	if(!indelout.equals("")){
         	colspec[count++]=new DataColumnSpecCreator("Path2VCFindelFile", StringCell.TYPE).createSpec();
     	}
+    	if(!glmBothout.equals("")){
+        	colspec[count++]=new DataColumnSpecCreator("Path2VCFFile", StringCell.TYPE).createSpec();
+    	}
     	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
     	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
     	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", StringCell.TYPE).createSpec();
+
     	if(p1){
         	colspec[count++]=new DataColumnSpecCreator("Path2phase1", StringCell.TYPE).createSpec();
     	}
@@ -457,6 +462,9 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	}
     	if(!indelout.equals("")){
     	    row[count++]=new StringCell(indelout);
+    	}
+    	if(!glmBothout.equals("")){
+    	    row[count++]=new StringCell(glmBothout);
     	}
 	    row[count++]=new StringCell(inputfile);
 	    row[count++]=new StringCell(reffile);
