@@ -3,35 +3,41 @@
     <name>VCFLoader</name>
     
     <shortDescription>
-        
+        Node for loading VCF files
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	VCFLoader loads up to two VCF files containing SNPs, insertions, deletions or insertions+deletions (indels).
+        	It is not possible to load two VCF files with the same type of variants in one node instance.
+        	This node is designed to load the results from Pindel or GATKUnifiedGenotyper, but it can be used for VCF files from other sources as well.
+			<br />
+			Successor Loss-of-Function Nodes: VAT, FilterSummary
+        </intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="VCF file">
+        	Set path to the first VCF file 
+    	</option>
+        <option name="Variant type">
+        	Select the mutation type for the variants in the file.
+        	You can choose between SNPs, insertions, deletions and indels (insertions and deletions in the same file).
+    	</option>
+        <option name="Second variant file">
+        	If you want to load a second file, tick the option <i> Load second VCF file </i> and set the path and variant type of the VCF file.
+    	</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <outPort index="0" name="Out-Port">
+        	The outport consists of at most 2 columns. The column names depend on variant type selection.
+        	In the following  lines the string VAR has to be replaced by snp, indel, insertions or deletions according to the variant type.
+			<br />
+			Cell 0: Path2VCFVARFile (path to the first VCF file)
+			<br />
+			Cell 1 (optional) : Path2VCFVARFile (path to the second VCF file)
+    	</outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

@@ -3,35 +3,144 @@
     <name>GATKUnifiedGenotyper</name>
     
     <shortDescription>
-        
+        SNP and Indel caller
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	This is a wrapper node for UnifiedGenotyper which is part of the Genome Analysis Toolkit (GATK). 
+        	It is designed for GATK version 2.8.1. UnifiedGenotyper is based on a Bayesian genotype likelihood model and can identify SNPs and indels. 
+        	Furthermore, it is possible to annotate all found variants with their corresponding dbSNP ID. 
+        	UnifiedGenotyper is a very sensitive caller, but it is known to produce about 10 % false positive variant calls. GATKUnifiedGenotyper produces up to two files with variants in VCF format (Format explained at <a href="http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42"> http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42 </a>)
+			<br />
+			The UnifiedGenotyper manual page can be found at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html </a>
+			<br />
+			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
+			<br />
+			Predecessor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseReaclibrator
+			<br />
+			Predecessor NGS nodes: BAMLoader
+			<br />
+			Successor Loss-of-Function nodes: VAT
+    	</intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <tab name="Options">
+            <option name="Path to GATK jar file">
+            	Set the path to the GATK executable. 
+            	This option is disabled if the path is already defined in the inport.
+        	</option>
+            <option name="Variants from dbSNP">
+            	Tick the option to annotate a variant with its ID from dbSNP and choose the path to the dbSNP VCF file. 
+            	You do not have to select any path if the dbSNP file is already defined in the inport.
+        	</option>
+            <option name="Interval for variant calling">
+            	Check this option to call variants in certain genomic regions. 
+            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+        	</option>
+            <option name="Variants">
+            	Here, you can choose if you want to call only SNPs, only indels or both, SNPs and indels. 
+            	If you decide for both, variants of different types will be written to separate VCF files.
+        	</option>
+            <option name="Number of threads">
+            	Increasing the number of threads speeds up the node, but increases the memory required for the calculations.
+        	</option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        <tab name="UnifiedGenotyper">
+            <option name="Confidence threshold for calling">
+            	The threshold refers to the GATK variant quality score. 
+            	GATK will consider all variants with a score equal or above this threshold as high-confidence variants.
+        	</option>
+            <option name="Confidence threshold for emitting">
+            	The threshold refers to the GATK variant quality score. 
+            	GATK will output all variants with a score equal or above this threshold. 
+            	All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
+        	</option>
+            <option name="PCR error">
+            	Estimate the expected probability of a PCR error. 
+            	This probability is independent of the sequencing error rate. 
+            	The PCR error rate is required for computing fragment-based likelihoods.
+        	</option>
+            <option name="Sample contamination">
+            	By setting this value above zero you force UnifiedGenotyper to ignore this fraction of reads for each genomic position.
+        	</option>
+            <option name="Heterozygosity">
+            	The probabilistic model of UnifiedGenotyper uses the heterozygosity value for calculating the prior likelihood for a mutation at a locus.
+        	</option>
+            <option name="Fraction of deletions">
+            	This value is a threshold for the maximum fraction of overall reads with a deletion at a locus. 
+            	All loci below this threshold are examined for additional variants.
+        	</option>
+            <option name="Minimum base quality score for calling">
+            	his is a threshold concerning the sequencing quality. 
+            	The tool does not call SNPs at positions with a lower score.
+        	</option>
+            <option name="Indel heterozygosity value">
+            	The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.
+        	</option>
+            <option name="Minimum count of indel reads">
+            	The option allows to set the minimum number of supporting reads for an indel. 
+            	Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.
+        	</option>
+            <option name="Minimum fraction of indel reads">
+            	This option is similar to the option <i> minimum count of indel reads </i>. 
+            	It is about the fraction of all supporting reads for variant that are required for considering the variant.
+        	</option>
+            <option name="Indel gap open penalty">
+            	The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
+            	It is used for calculating alignment scores.
+        	</option>
+            <option name="Indel gap continuation penalty">
+            	The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
+            	It is used for calculating alignment scores.
+        	</option>
+            <option name="BAQ mode">
+            	The BAQ mode determines how to calculate the per-base alignment quality (BAQ). 
+            	You can choose between RECALCULATE (which always calculates BAQ), CALCULATE_AS_NECESSARY (which calculates BAQ sometimes) and OFF (which does not calculate BAQ).
+        	</option>
+            <option name="Malformed read filter">
+            	When the length of the read does not match the length of the base quality score, GATK will report an error. 
+            	By ticking this option you force GATK to skip such reads.
+        	</option>
         </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="In-Port">
+        	DCell 0: Path2BAMFile (BAM file for variant calling, it has to be indexed)
+			<br />
+			Cell 1: Path2SEQFile (Reference sequence used for mapping the BAM file, a sequence index and sequence dictionary are required)
+    		<br />
+			Cell 2 (optional): Path2GATKFile (GATK executable)
+    		<br />
+			Cell 3 (optional): Path2phase1 (Indel set from 1000 Genomes project, the node just  passes the cell on to the outport)
+    		<br />
+			Cell 4 (optional): Path2mills (Indel set from Mills and 1000 Genomes project, the node just passes the cell on to the outport)
+			<br />
+			Cell 5 (optional): Path2dbsnp (Set of known variants from dbSNP)
+    		<br />
+			The cell position does not matter. Additional columns are ignored.
+    	</inPort>
+        <outPort index="0" name="Out-Port">
+        	Cell 0: Path2VCFsnpFile (File for all identified SNPs, only available if SNPs were called)
+    		<br />
+			Cell 1: Path2VCFindelFile (File for all identified indels, only available if indels were called)
+			<br />
+    		Cell 2: Path2BAMFile (BAM file used for variant calling)
+    		<br />
+    		Cell 3: Path2SEQFile    (Reference sequence used for mapping the BAM file)
+    		<br />
+    		Cell 4: Path2GATKFile (GATK executable)
+    		<br />
+			Cell 5 (optional): Path2phase1 (Indel set from 1000 Genomes project, this column is passed from the inport to the next node)
+    		<br />
+			Cell 6 (optional): Path2mills (Indel set from Mills and 1000 Genomes project, this column is passed from the inport to the next node)
+			<br />
+			Cell 7 (optional): Path2dbsnp (Variant set from dbSNP, if the variants were annotated with dbSNP data)
+    		<br />
+			The cell positions are not fix. If one cell is absent (because it is optional), the following cell will take its position and the other cells will move along with it.
+    	</outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

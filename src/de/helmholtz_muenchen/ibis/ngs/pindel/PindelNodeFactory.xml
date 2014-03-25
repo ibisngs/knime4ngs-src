@@ -3,35 +3,146 @@
     <name>Pindel</name>
     
     <shortDescription>
-        
+        Pindel - a pattern growth approach to detect breakpoints of large deletions and medium sized insertions from paired-end reads
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	This is a wrapper node for Pindel (designed for version 0.2.4) and the Pindel2VCF converter. 
+        	Pindel is a tool for identifying structural variants in paired-end Illumina reads. 
+        	It finds large deletions, medium-sized insertions, inversions and tandem duplications. 
+        	Currently, this node only focuses on the deletions and short insertions called by Pindel and it is compatible with mappings produced by BWA or MOSAIK only. 
+        	As Pindel has its own output format, this node includes also the Pindel2VCF script. 
+        	It converts the files produced by Pindel to VCF format (Format explained at <a href="http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42"> http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42 </a>).
+			<br />
+			Further information about Pindel and installation instructions are available at <a href="http://gmt.genome.wustl.edu/pindel/0.2.4/index.html"> http://gmt.genome.wustl.edu/pindel/0.2.4/index.html </a>
+			<br />
+			Predecessor Loss-of-Function nodes: PicardTools (it is recommended to use CollectInsertSizeMetrics before running Pindel), GATKRealignment, GATKBaseRecalibration
+			<br />
+			Predecessor NGS nodes: BAMLoader
+			<br />
+			Successor Loss-of-Function nodes: VAT
+    	</intro>
         
+        <tab name="Options">
+            <option name="Path to Pindel executable">
+            	Set the path to the Pindel executable.
+        	</option>
+            <option name="Interval for variant calling">
+            	Tick this option if you only want to call variants in a certain genomic region, i.e. for one chromosome. 
+            	If you choose this option you can enter the chromosome name and the interval coordinates. 
+            	Note that the chromosome name has to match the reference sequence and the header of the input BAM file.
+        	</option>
+            <option name="Path to Pindel config file">
+            	Pindel requires a tab-separated file containing the path to the BAM file (the BAM file has to match the BAM file from the inport), the average insert size and the sample name. 
+            	More information about the Pindel config file format can be found at <a href="http://gmt.genome.wustl.edu/pindel/0.2.4/user-manual.html"> http://gmt.genome.wustl.edu/pindel/0.2.4/user-manual.html </a>
+    			<br />
+				If the previous node is PicardTools CollectInsertSizeMetrics you can tick the option  <i> Generate config file </i> to generate automatically this file. 
+				This option uses the information about the average insert size provided by the previous node.
+        	</option>
+            <option name="Output">
+            	If you choose the option <i> Convert Pindel output to VCF format </i> (required for further analysis using for example VAT) you have to select the path to the Pindel2VCF script. 
+            	Note that this node only converts the Pindel files for small insertions and deletions.
+        	</option>
+            <option name="Runtime and memory">
+            	Increasing the number of threads reduces runtime. 
+            	Increasing the amount of reference sequence loaded into RAM, reduces runtime but increases memory usage.
+        	</option>
+        </tab>
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <tab name="Pindel Parameters">
+            <option name="Minimum number of matching bases">
+            	Pindel considers reads as evidence for a variant if they map correctly with more than the specified number of bases.
+        	</option>
+            <option name="Mismatch threshold">
+            	Pindel does not align a part of read if there is another mapping position with less than the chosen number of base mismatches. 
+            	Increasing this threshold increases accuracy but reduces sensitivity.
+        	</option>
+            <option name="Number of perfect matches at breakpoints">
+            	For considering a breakpoint Pindel requires the selected number of perfectly matching bases around a breakpoint of a split read.
+        	</option>
+            <option name="Sequencing error rate">
+            	Set the expected rate of sequencing errors.
+        	</option>
+            <option name="Maximum allowed mismatch reads">
+            	Pindel considers reads as evidence for a variant if the proportion of mismatching bases is below this threshold.
+        	</option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        
+        <tab name="Pindel2VCF Parameters">
+            <option name="Reference sequence">
+            	Enter name and date of the reference sequence. 
+            	If you do not know them you can check the option <i> Use file name as reference name </i> and <i> Use current date </i>.
+        	</option>
+            <option name="Minimum number of reads to report genotype">
+            	This option defines the minimum coverage for reporting the variant. 
+            	You should adapt this value to the overall sequencing coverage. 
+            	Increasing this value reduces the number of false positive variant calls but can also remove true variants.
+        	</option>
+            <option name="Proportion of reads defined as heterozygous">
+            	This threshold value refers to the number of reads supporting the variant compared to the overall number of reads at this site. 
+            	All variants above this and below the homozygosity threshold are considered as heterozygous. 
+            	Genotype 0/0 is assigned to all variants below this threshold.
+        	</option>
+            <option name="Proportion of reads defined as homozygous">
+            	This threshold value refers to the number of reads supporting the variant compared to the overall number of reads at this site. 
+            	All variants above this threshold are regarded as homozygous.
+        	</option>
+            <option name="Output GATK-compatible genotypes">
+            	It is recommended to check this option if you want to use the VCF files in further analysis. 
+            	The flag changes the format of the genotype tag.
+        	</option>
+            <option name="Only output variants that are supported by reads on both strands">
+				Tick this option to avoid strand-biased variant calls and reduce putative false positive variants. 
+				If this option is selected, Pindel2VCF just outputs variants that are supported by at least one read on the forward strand and one read on the reverse strand.
+        	</option>
+            <option name="Minimum number of supporting reads">
+            	Choose the minimum number of reads supporting a variant for writing the variant to the output file. 
+            	This is another possibility to remove putative false positives.
+        	</option>
+            <option name="Minimum/ Maximum size of the variant">
+            	Define the minimal and maximal length of the variants that should be written to the output file. 
+            	If you use the default settings no variant is excluded from the output because of its size.
+        	</option>
         </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+        <inPort index="0" name="In-Port">
+        	Cell 0: Path2BAMFile (indexed BAM file for variant calling)
+			<br />
+    		Cell 1: Path2SEQFile (reference sequence used for mapping the BAM file)
+			<br />
+			Cell 2 (optional): Path2ISMetrics (file produced by PicardTools CollectInsertSize with information about the insert size distribution)
+			<br />
+			The cell position does not matter. Additional columns are ignored.
+    	</inPort>
+        <outPort index="0" name="Out-Port">
+    	    Outport depends on the output options.
+  			<br />
+    		Outport with VCF output:
+    		<br />
+    		Cell 0: Path2VCFdeletionsFile (VCF file containing all deletions)
+			<br />
+			Cell 1: Path2VCFinsertionsFile (VCF file containing all small insertions)
+			<br />
+			Cell 2: Path2BAMFile (BAM file from inport)
+			<br />
+			Cell 3: Path2SEQFile (reference genome from inport)
+			<br />
+			Outport without VCF output
+    		<br />
+    		Cell 0: Path2PindelDFile (Pindel file containing all deletions)
+			<br />
+			Cell 1: Path2PindelSIFile (Pindel file containing all small insertions)
+			<br />
+			Cell 2: Path2BAMFile (BAM file from inport)
+			<br />
+			Cell 3: Path2SEQFile (reference genome from inport)
+    	</outPort>
+    </ports>
+        
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

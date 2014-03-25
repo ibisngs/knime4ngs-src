@@ -3,35 +3,124 @@
     <name>PicardTools</name>
     
     <shortDescription>
-        
+        Tools to manipulate SAM/BAM files
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	This is a wrapper node for PicardTools. 
+        	It comes along with version 1.102 of PicardTools. 
+        	PicardTools is a popular java tool suite for modifying files in SAM/BAM format (Format specification at <a href="http://samtools.github.io/hts-specs/SAMv1.pdf"> http://samtools.github.io/hts-specs/SAMv1.pdf </a>).
+			Currently, the PicardTools node implements four tools: AddOrReplaceReadGroups, CollectInsertSizeMetrics, MarkDuplicates and SortSam.
+			<br />
+			AddOrReplaceReadGroups overwrites read group information in the BAM/SAM file header and adds all reads to the new read group.
+			<br />
+			CollectInsertSizeMetric calculates the statistical distribution of the insert size for paired-end reads (distance between leftmost mapping position of a read and rightmost mapping position of its mate).
+			<br />
+			MarkDuplicates tries to identify reads that are PCR duplicates. 
+			It either removes them from the file or marks them using the FLAG attribute.
+			<br />
+			SortSam sorts a SAM or BAM file by mapping position or by read name.
+			<br />
+			Further information about PicardTools can be found at <a href="http://picard.sourceforge.net/command-line-overview.shtml"> http://picard.sourceforge.net/command-line-overview.shtml </a>
+			<br />
+			Predecessor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseRecalibration
+			<br />
+			Predecessor NGS nodes: BAMLoader, SAMLoader, BWA
+			<br />
+			Successor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseRecalibration, GATKUnifiedGenotyper
+    	</intro>
         
+
+        <tab name="Options">
+            <option name="PicardTool selection">
+            	Choose one of the following four utilities: AddOrReaplceReadGroups, CollectInsertSizeMetrics, MarkDuplicates or SortSam.
+        	</option>
+            <option name="Output">
+            	Decide whether the node should output a BAM or SAM file. 
+            	If you choose BAM format you can additionally create an index file which is required for random access and for using all GATK nodes and Pindel.
+        	</option>
+            <option name="Validation stringency">
+            	Some tools produce incomplete SAM/BAM file output. 
+            	By setting validation stringency to SILENT you force PicardTools to ignore the incomplete fields as far as possible. 
+            	Set validation stringency to STRICT to disable this behaviour.
+        	</option>
+        </tab>
+        <tab name="AddOrReplaceReadGroup">
+            <option name="Use file name to create RG tag">
+            	Tick this option if you have no read group information about your file but require a read group information (for example for the GATK nodes).
+        	</option>
+            <option name="Read group ID">
+            	Enter the identifier of the read group.
+        	</option>
+            <option name="Library name">
+            	Enter the name of the library belonging to the read group.
+        	</option>
+            <option name="Sample name">
+            	Enter the name of the sample belonging to the read group.
+        	</option>
+            <option name="Sequencing platform unit">
+            	Enter the name of the platform unit belonging to the read group.
+        	</option>
+            <option name="Sequencing platform">
+            	Choose which platform was used for sequencing the reads of the read group.
+        	</option>
+        </tab>
+        <tab name="CollectInsertSizeMetrics">
+            <option name="Accumulation level">
+            	The default options ALL_READS infers the insert size distribution of all reads. 
+            	Choosing SAMPLE, LIBRARY or READ_GROUP calculates the distribution for every sample, library or read group.
+        	</option>
+            <option name="Sort order of input file">
+            	Check this option if your file is sorted and this information is not included in the BAM file header. 
+            	This is to facilitate the calculations.
+        	</option>
+            <option name="Discard reads of categories RF, TANDEM, FR">
+            	These categories refer to the orientation and mapping position of paired-end reads. 
+            	If one category has a proportion of less than this threshold it is not considered for calculating insert sizes as they are most likely due to mapping or sequencing errors.
+        	</option>
+            <option name="Deviation">
+            	Often anomalous read mapping distorts the insert size distribution. 
+            	The deviation threshold is to leave out all read pairs with anomalous insert size for plotting and calculation of the average insert size.
+        	</option>
+        </tab>
+        <tab name="MarkDuplicates">
+            <option name="Removal of PCR duplicates">
+            	By ticking this option you remove all PCR duplicates from the output file instead of marking them in the FLAG attribute.
+        	</option>
+            <option name="Sort order of input file">
+            	MarkDuplicates requires a file sorted by mapping position. 
+            	If your file is sorted but this information is not included in the header you should check this option. 
+            	Otherwise MarkDuplicates will reject the file and throw an error.
+        	</option>
+        </tab>
+        <tab name="SortSam">
+            <option name="Sort order">
+            	Choose if you want to sort the reads by mapping position or by read name. 
+            	If you chose no sort order you can use SortSam for simple SAM to BAM or BAM to SAM format conversion or to create an index file.
+        	</option>
+        </tab>
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+        <inPort index="0" name="In-Port">
+        	Cell 0: Path2BAMFile or Path2SAMFile (BAM or SAM file to modify, if you use MarkDuplicates the file has to be sorted by mapping position)
+			<br />
+			Cell 1: Path2SEQFile or Sequence File or Path2RefFile (reference sequence used for mapping the BAM or SAM file)
+			<br />
+			The cell position does not matter. Additional columns are ignored.
+    	</inPort>
+        <outPort index="0" name="Out-Port">
+        	Cell 0: Path2BAMFile or Path2SAMFile (BAM or SAM depending on the output format selected)
+			<br />
+			Cell 1: Path2SEQFile (reference sequence used for mapping the BAM or SAM file)
+    		<br />
+			Cell 2 (optional): Path2ISMetrics (file with information about insert size distribution produced by CollectInsertSizeMetrics)
+    	</outPort>
+    </ports>  
+      
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>
