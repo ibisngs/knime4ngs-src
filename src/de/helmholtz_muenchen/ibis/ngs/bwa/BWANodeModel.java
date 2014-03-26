@@ -367,8 +367,15 @@ public class BWANodeModel extends NodeModel {
     		} 
     	}
 		
+    	
     	/**Execute**/
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	if(alnalgo.equals("BWA-MEM")) {
+    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,out2Name);
+    	}else{
+    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	}
+    	
+    	
 	}
     
     
