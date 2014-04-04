@@ -54,10 +54,10 @@ public class ExecuteThread implements Callable<Boolean> {
 
 		this.ENABLE_ESCAPE = enableEscape;
 		this.LOGGER = logger;
-		if(Environment != null)
-			this.ENVIRONMENT = Environment;
-		else
-			this.ENVIRONMENT = new String[0];
+//		if(Environment != null)
+		this.ENVIRONMENT = Environment;
+//		else
+//			this.ENVIRONMENT = new String[0];
 	}
 
 
@@ -69,8 +69,8 @@ public class ExecuteThread implements Callable<Boolean> {
 		LOGGER.info("Running command: " + this.getCommand());
 		
 		//Start the process
-		p = Runtime.getRuntime().exec(this.getCommand(), this.ENVIRONMENT);
-		 
+		p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
+
 		//If Output is written to stdout/stderr
 		if(this.stdOutFile!=null){
 			stdOutStream = new StreamThread(p.getInputStream(),stdOutFile);

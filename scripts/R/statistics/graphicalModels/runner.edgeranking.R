@@ -2,7 +2,7 @@
 ## PARSE ARGS
 ########################################################################################################################################
 require(argparse)
-parser <- ArgumentParser(prog="graphicalModels.R", description="This Rscript creates graphical models from datamatrices")
+parser <- ArgumentParser(prog="runner.edgeranking.R", description="This Rscript samples random subsets from the datamatrix and ranks all possible edges according to the data")
 
 ## GLOBALS 
 parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file"        , metavar="<path>")

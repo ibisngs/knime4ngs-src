@@ -191,7 +191,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		m_stabSel_sampleNum = settings.getInt(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_N, DEFAULT_SS_SAMPLE_N);
 		m_stabSel_sampleSize = settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, DEFAULT_SS_SAMPLE_S);
 		m_rankerType = settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]);
-		m_rseed = settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED);
+		m_rseed = settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, new Random().nextInt());
 
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
