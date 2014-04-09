@@ -69,7 +69,12 @@ public class ExecuteThread implements Callable<Boolean> {
 		LOGGER.info("Running command: " + this.getCommand());
 		
 		//Start the process
-		p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
+		if(this.command.length==1){
+			p = Runtime.getRuntime().exec(this.getCommand(), this.ENVIRONMENT);
+		}else{
+			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
+		}
+		
 
 		//If Output is written to stdout/stderr
 		if(this.stdOutFile!=null){

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -258,14 +259,14 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 			
 			
 	    	/**Execute for first file**/
-	    	StringBuffer sysErr = new StringBuffer(50);
-	    	StringBuffer sysOut = new StringBuffer(50);
-	    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
-	    	Executor.executeCommand(com, exec, null, LOGGER, stdOutFile, stdErrFile, null, true);
-	        LOGGER.info("-----------------SysError-----------------");
-	    	LOGGER.info(sysErr);
-	    	LOGGER.info("-----------------SysOut-----------------");
-	        LOGGER.info(sysOut);
+//	    	StringBuffer sysErr = new StringBuffer(50);
+//	    	StringBuffer sysOut = new StringBuffer(50);
+//	    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
+	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, LOGGER, stdOutFile, stdErrFile, null, true);
+//	        LOGGER.info("-----------------SysError-----------------");
+//	    	LOGGER.info(sysErr);
+//	    	LOGGER.info("-----------------SysOut-----------------");
+//	        LOGGER.info(sysOut);
 	//    	if(readType.equals("paired-end") && !inFile2.equals("")) {
 	//    		callReady[0] = "--in="+inFile2;
 	//   		if(callReady[1].lastIndexOf("filtersettings") != -1) {

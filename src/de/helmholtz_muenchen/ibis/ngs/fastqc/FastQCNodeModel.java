@@ -118,7 +118,7 @@ public class FastQCNodeModel extends NodeModel {
 	    	/**Execute for first file**/
 	    	String[] com = command.toArray(new String[command.size()]);
 	    	StringBuffer sysErr = new StringBuffer(50);
-	    	Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
+	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr, true);
 	    	//Show FastQC Output
 	    	LOGGER.info(sysErr);
 	    	
@@ -129,7 +129,7 @@ public class FastQCNodeModel extends NodeModel {
 	    		//Clear StringBuffer
 	    		sysErr.setLength(0);
 	    		sysErr.append("\n");
-	    		Executor.executeCommand(com,exec,LOGGER,null,sysErr, true);
+	    		Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr, true);
 	    		//Show FastQC Output
 	        	LOGGER.info(sysErr);
 	        	//Clear StringBuffer
