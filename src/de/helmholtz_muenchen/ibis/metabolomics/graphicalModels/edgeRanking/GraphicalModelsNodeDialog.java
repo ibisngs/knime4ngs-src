@@ -54,6 +54,7 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
     private final SpinnerNumberModel m_stabSel_sampleNum = new SpinnerNumberModel(GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_N, 1, 10000, 1);
     private final SpinnerNumberModel m_stabSel_sampleSize = new SpinnerNumberModel(GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S, 0.0, 1.0, 0.01);
     private final SpinnerNumberModel m_rseed = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+    private final SpinnerNumberModel m_parallel = new SpinnerNumberModel(1, 1, 128, 1);
 	private final JComboBox<String> m_rankerType;
 	
 
@@ -83,6 +84,12 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
         stabSelPanel.add(stabSel_rseed_label);
         final JSpinner stabSel_rseed= new JSpinner(m_rseed);
         stabSelPanel.add(stabSel_rseed);
+        
+        // parallelization
+        final JLabel parallelThreads_label = new JLabel("Number of parallel threads");
+        stabSelPanel.add(parallelThreads_label);
+        final JSpinner parallelThreads= new JSpinner(m_parallel);
+        stabSelPanel.add(parallelThreads);
         
         
         // ranking type
@@ -165,6 +172,7 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
 		m_stabSel_sampleSize.setValue(settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, GraphicalModelsNodeModel.DEFAULT_SS_SAMPLE_S));
 		m_rankerType.setSelectedItem(settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]));
 		m_rseed.setValue(settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, 0));
+		m_parallel.setValue(settings.getInt(GraphicalModelsNodeModel.CFGKEY_PARALLEL, 1));
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		// delete all old content
@@ -213,6 +221,7 @@ public class GraphicalModelsNodeDialog extends NodeDialogPane {
 		settings.addDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize.getNumber().doubleValue());
 		settings.addString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE, (String)this.m_rankerType.getSelectedItem());
 		settings.addInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, m_rseed.getNumber().intValue());
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_PARALLEL, m_parallel.getNumber().intValue());
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_typesRankerPanels.keySet().size();

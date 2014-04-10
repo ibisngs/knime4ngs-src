@@ -175,21 +175,21 @@ rankEdges <- function(D, var.classes,
                       rank.type = "local",
                       edges.indices, 
                       parallel.ranking=FALSE){
-
+	p = ncol(D)
 	## ranking for all types of variables
-	ranks = laply(.data=c(1:ncol(D)), .parallel=parallel.ranking, .inform=T,
+	ranks = laply(.data=c(1:p), .parallel=parallel.ranking, .inform=F,
 		.fun=function(i){
 			#cat("BLABLA ", i, "\n")
 			do.call(paste("ranker", ranker[[var.classes[i]]], sep="."), c(list(colnames(D)[i], D) , ranker.params[[var.classes[i]]]))
 		})
 
-	rownames(ranks) = colnames(ranks)
+	#rownames(ranks) = colnames(ranks)
 	ranks[is.na(ranks)] = -10e10
 	if(rank.type == "local"){
 		# ranks row-wise
-		ranks = aaply(ranks, .margins=1, .fun=function(x)rank(x))
+		ranks = aaply(ranks, .margins=1, .fun=function(x){(rank(x)-1)/(p-1)})
 	}else if(rank.type == "global"){
-		ranks = matrix(rank(ranks), nrow=ncol(D), ncol=ncol(D), dimnames=list(colnames(D), colnames(D)))
+		ranks = matrix((rank(ranks)-1)/(p*p-1), nrow=p, ncol=p)#, dimnames=list(colnames(D), colnames(D))
 	}else{
 		stop(paste("Unknown rank type", rank.type))
 	}
@@ -197,7 +197,7 @@ rankEdges <- function(D, var.classes,
 	## combine local rankings
 	ranks <- get.max.upper.triangle(ranks)
 	ranks <- c(ranks[edges.indices])
-		
+
         return(ranks)
 }
 
@@ -225,6 +225,31 @@ get.max.upper.triangle <- function(A){
     ##  save all values where _lower__ tri is larger
     A.up.tri.max[upper.tri(A)][!DIFF] <- t(A)[upper.tri(A)][!DIFF]
     return(A.up.tri.max)
+}
+
+############################################################################################################
+## GET MIN UPPER TRIANGLE
+############################################################################################################
+## INPUT
+##	A             = symmetric matrix
+##
+## OUTPUT
+##	A matrix with only the upper trianlge filled. Each entry is the maximum of the to symmetric entries
+##	Minimum of each pair A[i,j], A[[j,i] in upper triangle of matrix
+##
+get.min.upper.triangle <- function(A){
+    if (dim(A)[1]!=dim(A)[2])
+        stop("Not a quadratic matrix!")
+
+    p <- dim(A)[1]
+    ## True/False check: Is entry in upper triangle larger than the one in lower triangle
+    DIFF <- A[upper.tri(A)] - t(A)[upper.tri(A)] < 0
+    A.up.tri.min <- matrix(0,p,p)
+    ## save all values where _upper_ tri is larger
+    A.up.tri.min[upper.tri(A)][DIFF] <- A[upper.tri(A)][DIFF]
+    ##  save all values where _lower__ tri is larger
+    A.up.tri.min[upper.tri(A)][!DIFF] <- t(A)[upper.tri(A)][!DIFF]
+    return(A.up.tri.min)
 }
 
 ############################################################################################################

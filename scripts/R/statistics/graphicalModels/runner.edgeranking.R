@@ -22,6 +22,7 @@ parser$add_argument("-z","--sampleSize", type="double"   , action='store'     , 
 parser$add_argument("-t","--rankType"  , type="character", action='store'     , dest='rankType'     , default='local', help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
  
 parser$add_argument("-rs","--rseed"    , type="integer"  , action='store'     , dest='rseed'        ,                  help='random seed for reproducible random samples', metavar="<int>")
+parser$add_argument("-pc","--cores"    , type="integer"  , action='store'     , dest='parallel'     ,                  help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
   
 ## parse
 args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
@@ -78,6 +79,7 @@ if(length(invalid.classes)!=0){
 if(!is.null(args$rseed)){
 	set.seed(args$rseed)
 }
+
 ##########################################################################################################################################
 ## CREATE MODEL
 ##########################################################################################################################################
@@ -86,8 +88,9 @@ model <- mixedGraficalModels(data, #
                              ranker.params = ranker.params,
                              var.classes,
                              stabSel.sampleNum = args$sampleNum, 
-                             stabSel.sampleSize = floor(args$samplesize*nrow(data)), #
-                             parallel.stabSel = TRUE)
+                             stabSel.sampleSize = floor(args$samplesize*nrow(data)),
+                             rankType = args$rankType,
+                             threads = args$parallel)
                              
 #print(names(model))
 

@@ -8,14 +8,10 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 import org.knime.base.node.io.filereader.FileAnalyzer;
 import org.knime.base.node.io.filereader.FileReaderNodeSettings;
@@ -164,26 +160,17 @@ public class IO {
 	//////////////////////////////////////////////////////////////////////////
 	// GET SCRIPT PATH FOR EXECUTING E.G. R-SCRIPTS
 	//////////////////////////////////////////////////////////////////////////
-	public static final String SCRIPTS_SUBDIR = "scripts";
 	private static String SCRIPT_PATH;
 	private static void initScriptPath() {
-		if(SCRIPT_PATH != null) return;
 		// LOCALLY OR FROM JAR?
 		String path = IO.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		if(path.endsWith("jar")){
-			SCRIPT_PATH = "";
-			try {
-				String tmpFolder = createTempDirectory("knime_libs_", "").getCanonicalPath();
-				IO.unzipJar(path, new File(tmpFolder));
-				SCRIPT_PATH = tmpFolder + File.separatorChar;
-			} catch (IOException e) {
-				System.err.println("Couldn't unpack jar to tmp directory");
-				e.printStackTrace();
-			}
-		}else{
-			// EXECUTED LOCALLY
-			SCRIPT_PATH = path + File.separatorChar + SCRIPTS_SUBDIR + File.separatorChar;
-		}
+    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
+    	
+    	if(!sub_path.equals("")){
+    		path = path.substring(0, path.lastIndexOf("/")+1);
+    	}	
+    	
+    	SCRIPT_PATH = path;
 	}
 
 	public static String getScriptPath() {
@@ -193,40 +180,40 @@ public class IO {
 		return(SCRIPT_PATH);
 	}
 
-	/**
-	 * Unzip jar file to directory
-	 * @param jarFile path to jar file
-	 * @param destDir path to target directory
-	 * @throws IOException
-	 */
-	private static void unzipJar(String jarFile, File destDir) throws IOException{
-		if (!destDir.exists()) {
-			System.out.println("JONAS: creating directory: " + destDir.getCanonicalPath());
-			boolean result = destDir.mkdir();  
-
-			if(!result) {    
-				throw(new IOException("Couldn't create temporary directory to extract scripts"));
-			}
-		}
-
-		JarFile jar = new JarFile(jarFile);
-		Enumeration<JarEntry> files = jar.entries();
-		while (files.hasMoreElements()) {
-			JarEntry file = files.nextElement();
-			File f = new File(destDir.getCanonicalPath() + File.separator + file.getName());
-			if (file.isDirectory()) { // if its a directory, create it
-				f.mkdir();
-				continue;
-			}
-			InputStream is = jar.getInputStream(file); // get the input stream
-			FileOutputStream fos = new FileOutputStream(f);
-			while (is.available() > 0) {  // write contents of 'is' to 'fos'
-				fos.write(is.read());
-			}
-			fos.close();
-			is.close();
-		}
-	}
+//	/**
+//	 * Unzip jar file to directory
+//	 * @param jarFile path to jar file
+//	 * @param destDir path to target directory
+//	 * @throws IOException
+//	 */
+//	private static void unzipJar(String jarFile, File destDir) throws IOException{
+//		if (!destDir.exists()) {
+//			System.out.println("JONAS: creating directory: " + destDir.getCanonicalPath());
+//			boolean result = destDir.mkdir();  
+//
+//			if(!result) {    
+//				throw(new IOException("Couldn't create temporary directory to extract scripts"));
+//			}
+//		}
+//
+//		JarFile jar = new JarFile(jarFile);
+//		Enumeration<JarEntry> files = jar.entries();
+//		while (files.hasMoreElements()) {
+//			JarEntry file = files.nextElement();
+//			File f = new File(destDir.getCanonicalPath() + File.separator + file.getName());
+//			if (file.isDirectory()) { // if its a directory, create it
+//				f.mkdir();
+//				continue;
+//			}
+//			InputStream is = jar.getInputStream(file); // get the input stream
+//			FileOutputStream fos = new FileOutputStream(f);
+//			while (is.available() > 0) {  // write contents of 'is' to 'fos'
+//				fos.write(is.read());
+//			}
+//			fos.close();
+//			is.close();
+//		}
+//	}
 
 	/**
 	 * Create a temporary directory in system's standard tmp dir

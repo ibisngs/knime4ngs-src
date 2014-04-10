@@ -1,5 +1,7 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
+import java.io.File;
+
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 
@@ -8,14 +10,16 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeM
 
 public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	protected final String SCRIPT;
-
+	public static final String SCRIPTS_SUBFOLDER = "scripts";
+	
+	
 	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script) {
 		super(nrInDataPorts, nrOutDataPorts, true, true);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	
 	protected String getScriptPath(){
-		return(IO.getScriptPath());
+		return(IO.getScriptPath() + SCRIPTS_SUBFOLDER + File.separatorChar);
 	}
 	
 	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException {

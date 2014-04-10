@@ -29,16 +29,26 @@ mixedGraficalModels <- function(X, #
                                 var.classes,
                                 stabSel.sampleNum = 100, 
                                 stabSel.sampleSize, #
-                                parallel.stabSel = TRUE,#
+                                threads = NULL,#
                                 rank.type = "local",
                                 ...){
 
-	if(parallel.stabSel){
+	## parallelization
+	parallel.stabSel = FALSE
+        if(is.null(threads)){
+		loadLib("doMC")
+		threads = detectCores()
+        }
+	if(threads > 1){
 		loadLib("foreach")
 		loadLib("doMC")
-		registerDoMC(cores=detectCores())
-		warning("USING ", detectCores(), " cores for comuputations!")
+		registerDoMC(cores=threads)
+		warning("USING ", threads, " threads for computations!")
+		parallel.stabSel = TRUE
 	}
+
+	
+	
 	
 	## measure time of the entire procedure
 	time.start <- Sys.time()

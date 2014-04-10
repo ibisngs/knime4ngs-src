@@ -56,6 +56,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	static final String CFGKEY_SS_RANKTYPE        = "stabselRankType";
 	static final String CFGKEY_SS_SAMPLE_S        = "stabselSamplesize";
 	static final String CFGKEY_RANDOM_SEED        = "seed";
+	static final String CFGKEY_PARALLEL           = "parallel";
 
 	/** SETTING MODELS */
 	private final Map<String, String> m_ranker        = new HashMap<String, String>();
@@ -63,6 +64,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 	private int m_stabSel_sampleNum = 1;
 	private double m_stabSel_sampleSize = DEFAULT_SS_SAMPLE_S;
 	private int m_rseed;
+	private int m_parallel;
 	
 	private String m_rankerType = GRAFO_RANKTYPE[0];
 
@@ -102,6 +104,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		this.addArgument("--sampleSize", m_stabSel_sampleSize);
 		this.addArgument("--rankType"  , m_rankerType);
 		this.addArgument("--rseed"     , m_rseed);
+		this.addArgument("--cores"     , m_parallel);
 		
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.edgeRanksSpec(inData[0].getDataTableSpec())); // pasre all to double cells
@@ -192,7 +195,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		m_stabSel_sampleSize = settings.getDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, DEFAULT_SS_SAMPLE_S);
 		m_rankerType = settings.getString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE , GraphicalModelsNodeModel.GRAFO_RANKTYPE[0]);
 		m_rseed = settings.getInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, new Random().nextInt());
-
+		m_parallel = settings.getInt(GraphicalModelsNodeModel.CFGKEY_PARALLEL, Runtime.getRuntime().availableProcessors());
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		String[] types       = settings.getStringArray(GraphicalModelsNodeModel.CFGKEY_VAR_TYPES   , new String[0]);
@@ -220,7 +223,7 @@ public class GraphicalModelsNodeModel extends RNodeModel {
 		settings.addDouble(GraphicalModelsNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize);
 		settings.addString(GraphicalModelsNodeModel.CFGKEY_SS_RANKTYPE, this.m_rankerType);
 		settings.addInt(GraphicalModelsNodeModel.CFGKEY_RANDOM_SEED, m_rseed);
-		
+		settings.addInt(GraphicalModelsNodeModel.CFGKEY_PARALLEL, m_parallel);
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_ranker.keySet().size();
