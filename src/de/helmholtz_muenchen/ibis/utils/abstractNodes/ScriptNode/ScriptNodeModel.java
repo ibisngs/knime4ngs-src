@@ -1,9 +1,11 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
@@ -32,4 +34,30 @@ public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	public String getSCRIPT() {
 		return SCRIPT;
 	}
+	
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	/// OVERIDE KNIME NODE METHODS
+	/////////////////////////////////////////////////////////////////////////////////////////////////
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void reset() {
+		super.reset();
+	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	super.loadInternals(internDir, exec);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	super.saveInternals(internDir, exec);
+    }
 }

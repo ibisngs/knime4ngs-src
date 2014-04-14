@@ -104,7 +104,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 			
 			// execute the command
-			executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFile());
+			executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFolder());
 			checker.writeOK();
 		}
 		
@@ -151,10 +151,10 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	protected abstract boolean isParameterEscapingEnabled();
 	
 	/**
-	 * Path to log output file (suffixed with .log or .err) or null if no logs should be written.
+	 * Path to folder were log files shall be written (or null if no logs should be written)
 	 * @return
 	 */
-	protected abstract File getPathToLogOutputFile();
+	protected abstract File getPathToLogOutputFolder();
 	
 	/**
 	 * Path to lock file or null if no check should be performed if node was executed sucessfully already

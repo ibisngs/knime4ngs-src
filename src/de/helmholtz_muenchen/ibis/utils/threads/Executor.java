@@ -128,6 +128,27 @@ public class Executor {
 	 * @param logger a NodeLogger to write messages to
 	 * @param stdOutFile  File to write STDOUT to, omitted if null
 	 * @param stdErrFile  File to write STDERR to, omitted if null
+	 * @param stdOut  StringBuffer to write STDOUT to, omitted if null
+	 * @param stdErr  StringBuffer to write STDERR to, omitted if null
+	 * @param enableEscape enables parameter escaping
+	 * @throws CanceledExecutionException 
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 */
+	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, boolean enableEscape) throws CanceledExecutionException, InterruptedException, ExecutionException{
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, null, enableEscape);
+	}
+	
+	/**
+	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
+	 * cancel the command if it is requested by the user via the given ExecutionContext
+	 * STDOUT and STDERR are written to files
+	 * STDIN is read from file
+	 * @param command String array contains the program/path to the script in the first entry and all commandline parameters in the following entries
+	 * @param exec ExecutionContext
+	 * @param logger a NodeLogger to write messages to
+	 * @param stdOutFile  File to write STDOUT to, omitted if null
+	 * @param stdErrFile  File to write STDERR to, omitted if null
 	 * @param sdtInFile	  File to read from STDIN, omitted if null
 	 * @param enableEscape enables parameter escaping
 	 * @throws CanceledExecutionException 

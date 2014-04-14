@@ -28,6 +28,7 @@ public abstract class ExecutorNodeView<T extends ExecutorNodeModel> extends Node
         PANEL_LOG.setPreferredSize(new Dimension(800, 600));
         setComponent(PANEL_LOG);    
         setViewTitleSuffix("log");
+        setShowNODATALabel(false); // always show view, never show no data
     }
 
     /** {@inheritDoc} */

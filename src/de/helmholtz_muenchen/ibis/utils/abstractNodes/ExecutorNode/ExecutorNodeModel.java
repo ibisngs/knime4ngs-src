@@ -21,6 +21,10 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  */
 public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 		
+	// dummy messsages
+	public static final String LOGMESSAGE_BEFORE_EXECUTION = "Not yet executed!";
+	public static final String LOGMESSAGE_LOG_DISABLED     = "Not yet executed!";
+	
 	// StringBuffer for stdout and stderr
 	private final StringBuffer STDOUT;
 	private final StringBuffer STDERR;
@@ -43,12 +47,12 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 		super(nrInDataPorts, nrOutDataPorts);
 		
 		if(catchStdout)
-			STDOUT = new StringBuffer();
+			STDOUT = new StringBuffer(LOGMESSAGE_BEFORE_EXECUTION);
 		else
 			STDOUT = null;
 		
 		if(catchStderr)
-			STDERR = new StringBuffer();
+			STDERR = new StringBuffer(LOGMESSAGE_BEFORE_EXECUTION);
 		else
 			STDERR = null;
 	}
@@ -62,34 +66,65 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @throws CanceledExecutionException
 	 */
 	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape, File path2LogOutput) throws CanceledExecutionException {
+		// StringBuffers to write STDOUT and STDERR to
+		if(STDOUT!=null){
+			STDOUT.setLength(0);
+			STDOUT.append("---------------------------------------------------\n");
+		}
+		if(STDERR != null){
+			STDERR.setLength(0);
+			STDERR.append("---------------------------------------------------\n");
+		}
+		
+		// Files to write STDOUT and STDERR to
+		String stdOutFile = null;
+		String stdErrFile = null;
+		if(path2LogOutput != null){
+			if(!path2LogOutput.exists()) {
+				path2LogOutput.mkdirs();
+			}
+			try {
+				stdOutFile = path2LogOutput.getCanonicalPath() + File.separatorChar + FILE_STDOUT;
+				stdErrFile = path2LogOutput.getCanonicalPath() + File.separatorChar + FILE_STDERR;
+			} catch (IOException e) {
+				LOGGER.error(e.getMessage());
+				// write log files
+				throw(new CanceledExecutionException(e.getMessage()));
+			}
+		}
+		
+		
 		try {
-			Executor.executeCommand(command, exec, environment, LOGGER, STDOUT, STDERR, enableEscape);
-			// write log files
-			writeLogFiles(path2LogOutput);
+			Executor.executeCommand(command, exec, environment, LOGGER, stdOutFile, stdErrFile, STDOUT, STDERR, enableEscape);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			// write log files
-			try { writeLogFiles(path2LogOutput); } 
-			catch (IOException e1) { e1.printStackTrace(); }
 			throw(new CanceledExecutionException(e.getMessage()));
+		}
+		
+		if(STDOUT!=null){
+			STDOUT.append("---------------------------------------------------");
+		}
+		if(STDERR != null){
+			STDERR.append("---------------------------------------------------");
 		}
 	}
 	
-	/**
-	 * Writes the log files to the folder
-	 * @param path2LogOutput
-	 * @throws IOException
-	 */
-	private void writeLogFiles(File path2LogOutput) throws IOException {
-		if(path2LogOutput != null && path2LogOutput.isFile()) {
-			File path = path2LogOutput.getParentFile();
-			if(!path.exists()) 
-				path.mkdirs();
-			
-			FileUtils.write(new File(path2LogOutput + ".log"), STDOUT.toString());
-	    	FileUtils.write(new File(path2LogOutput + ".err"), STDERR.toString());
-		}
-	}
+//	/**
+//	 * Writes the log files to the folder
+//	 * @param path2LogOutput
+//	 * @throws IOException
+//	 */
+//	private void writeLogFiles(File path2LogOutput) throws IOException {
+//		if(path2LogOutput != null && path2LogOutput.isFile()) {
+//			File path = path2LogOutput.getParentFile();
+//			if(!path.exists()) 
+//				path.mkdirs();
+//			
+//			FileUtils.write(new File(path2LogOutput + ".log"), STDOUT.toString());
+//	    	FileUtils.write(new File(path2LogOutput + ".err"), STDERR.toString());
+//		}
+//	}
 	
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,8 +135,15 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
      */
     @Override
     protected void reset() {
-		STDOUT.delete(0, STDOUT.length());
-    	STDERR.delete(0, STDERR.length());
+		if(STDOUT!=null){
+			STDOUT.setLength(0);
+			STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
+		}
+		
+		if(STDERR != null){
+			STDERR.setLength(0);
+			STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
+		}
     }
     
     /**
@@ -117,9 +159,11 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
         
     	// set the buffers, if the files are there
     	if(f_stdout.exists()){
+    		STDOUT.setLength(0);
     		STDOUT.append(FileUtils.readFileToString(f_stdout));
     	}
     	if(f_stderr.exists()){
+    		STDERR.setLength(0);
     		STDERR.append(FileUtils.readFileToString(f_stderr));
     	}
     }

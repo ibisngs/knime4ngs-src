@@ -2,7 +2,6 @@ package de.helmholtz_muenchen.ibis.metabolomics.imputing;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -10,9 +9,6 @@ import javax.swing.event.ChangeListener;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
-import org.knime.core.data.DoubleValue;
-import org.knime.core.data.IntValue;
-import org.knime.core.data.StringValue;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
@@ -45,18 +41,20 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 	
 	@Override
 	public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs) throws NotConfigurableException {
-		System.err.println("LOADING SETTINGS");
-		if(specs[0]==null){
+		IN_DATA_SPEC = specs[0];
+		
+		if(IN_DATA_SPEC==null){
 			throw(new NotConfigurableException("No Input data available. Can't configure ImputerNodeDialog!"));
 		}
-		System.err.println("VAR TYPES IN DIALOG: " + StringUtils.join(ImputerNodeModel.getVariableTypes(specs[0]), ","));
+		System.err.println("VAR TYPES IN DIALOG: " + StringUtils.join(ImputerNodeModel.getVariableTypes(IN_DATA_SPEC), ","));
 		String[] selected = null;
-		dialog_types.replaceListItems(ImputerNodeModel.getVariableTypes(specs[0]), selected);
+		dialog_types.replaceListItems(ImputerNodeModel.getVariableTypes(IN_DATA_SPEC), selected);
 		
-		IN_DATA_SPEC = specs[0];
+		
 	}
 
 	private DialogComponentStringListSelection dialog_types;
+	private DialogComponentColumnFilter dialog_columns;
 			
 	@SuppressWarnings("unchecked")
 	protected ImputerNodeDialog() {
@@ -83,10 +81,10 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 		this.createNewTab("Choose Variables to impute");
 		// choose columns directly
 		this.createNewGroup("Select Columns");
-		addDialogComponent(new DialogComponentColumnFilter(
+		dialog_columns = new DialogComponentColumnFilter(
 				m_columns,
-				0, true, IntValue.class, DoubleValue.class, StringValue.class, DataValue.class)
-				);
+				0, true, DataValue.class);
+		addDialogComponent(dialog_columns);		
 		this.closeCurrentGroup();
 		
 		// CHOOSE BY TYPE?
@@ -149,7 +147,7 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 			public void stateChanged(ChangeEvent e) {
 				if(m_chooseByType.getBooleanValue()){
 					m_varType.setEnabled(true);
-					m_columns.setEnabled(false);
+					//m_columns.setEnabled(false);
 				}else{
 					m_varType.setEnabled(false);
 					m_columns.setEnabled(true);
@@ -159,8 +157,10 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 		
 		m_varType.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				List<String> columns = ImputerNodeModel.getColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue()));
-				m_columns.setIncludeList(columns);
+				m_columns.setNewValues(
+						ImputerNodeModel.getSelectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+						ImputerNodeModel.getDeselectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+						false);
 			}
 		});
 

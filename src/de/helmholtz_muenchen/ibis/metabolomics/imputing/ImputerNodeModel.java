@@ -81,14 +81,6 @@ public class ImputerNodeModel extends RNodeModel {
 	@Override
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 
-		// which columns to impute?
-		List<String> columns;
-		if(m_chooseByType.getBooleanValue()){
-			columns = getColumnsByType(inData[0].getSpec(), Arrays.asList(m_varType.getStringArrayValue()));
-		}else{
-			columns = m_columns.getIncludeList();
-		}
-
 		// check if k < num Rows
 		int knn = m_knn_k.getIntValue();
 		if(knn > inData[0].getRowCount()){
@@ -97,7 +89,7 @@ public class ImputerNodeModel extends RNodeModel {
 		}		
 
 		this.addArgument("--method"   , m_method.getStringValue());
-		this.addArgument("--cols"     , columns);
+		this.addArgument("--cols"     , m_columns.getIncludeList());
 		this.addArgument("--knn"      , knn);
 		this.addArgument("--dist"     , m_knn_dist.getStringValue());
 		this.addArgument("--rank.k"   , m_svd_rank.getIntValue());
@@ -113,7 +105,7 @@ public class ImputerNodeModel extends RNodeModel {
 	protected void reset() {
 	}
 
-	public static List<String> getColumnsByType(final DataTableSpec inSpecs, final List<String> types){
+	public static List<String> getSelectedColumnsByType(final DataTableSpec inSpecs, final List<String> types){
 		ArrayList<String> columns = new ArrayList<String>();
 		
 		Iterator<DataColumnSpec> it = inSpecs.iterator();
@@ -121,6 +113,19 @@ public class ImputerNodeModel extends RNodeModel {
 		while(it.hasNext()){
 			d = it.next();
 			if(types.contains(d.getType().getPreferredValueClass().getName())){
+				columns.add(d.getName());
+			}
+		}
+		return(columns);
+	}
+	public static List<String> getDeselectedColumnsByType(final DataTableSpec inSpecs, final List<String> types){
+		ArrayList<String> columns = new ArrayList<String>();
+		
+		Iterator<DataColumnSpec> it = inSpecs.iterator();
+		DataColumnSpec d;
+		while(it.hasNext()){
+			d = it.next();
+			if(!types.contains(d.getType().getPreferredValueClass().getName())){
 				columns.add(d.getName());
 			}
 		}
@@ -232,7 +237,7 @@ public class ImputerNodeModel extends RNodeModel {
 	 */
 	@Override
 	protected void loadInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-
+		super.loadInternals(internDir, exec);
 	}
 
 	/**
@@ -240,7 +245,7 @@ public class ImputerNodeModel extends RNodeModel {
 	 */
 	@Override
 	protected void saveInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-
+		super.saveInternals(internDir, exec);
 	}
 
 }

@@ -219,8 +219,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	}
 	
 	@Override
-	protected File getPathToLogOutputFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false));
+	protected File getPathToLogOutputFolder() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false)).getParentFile();
 	}
 	
 	@Override

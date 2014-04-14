@@ -224,7 +224,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	}
 
 	@Override
-	protected File getPathToLogOutputFile() {
+	protected File getPathToLogOutputFolder() {
 		return null;
 	}
 

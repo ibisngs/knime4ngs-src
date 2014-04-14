@@ -40,12 +40,10 @@ public class LogPanel extends JTabbedPane {
 		textarea_stdout = new JTextArea();
 		textarea_stdout.setLineWrap(false);
 		textarea_stdout.setEditable(false);
-		textarea_stdout.setText(STDOUT);
 		
 		textarea_stderr = new JTextArea();
 		textarea_stderr.setLineWrap(false);
 		textarea_stderr.setEditable(false);
-		textarea_stderr.setText(STDERR);
 		
 		// scrollpanes
 		scollpane_stdout = new JScrollPane(textarea_stdout, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -61,14 +59,22 @@ public class LogPanel extends JTabbedPane {
 		// tabs
 		this.addTab("STDOUT", panel_stdout);
 		this.addTab("STDERR", panel_stderr);
-		
-		
-//		
+
+		// add text and update
+		this.updateView();
 	}
 	
 	private void setText(){
-		textarea_stdout.setText(STDOUT);
-		textarea_stderr.setText(STDERR);
+		if(STDOUT == null){
+			textarea_stdout.setText(ExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
+		}else{
+			textarea_stdout.setText(STDOUT);	
+		}
+		if(STDERR == null){
+			textarea_stderr.setText(ExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
+		}else{
+			textarea_stderr.setText(STDERR);	
+		}
 	}
 	/**
 	 * @see javax.swing.JComponent#paint(java.awt.Graphics)
