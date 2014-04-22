@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<knimeNode icon="./default.png" type="Learner" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+	<name>Mixed Graphical Model (Edge Ranking)</name>
+
+	<shortDescription>
+		Mixed Graphical Models can be estimated using node-wise variable ranking in combination with stability selection as proposed by Fellinghauer et al. (2013).
+		A base-ranking algorithm is applied to each variable, whereby the base-ranker depends on the type of the variable (e.g. nominal, ordinal,...). 
+	</shortDescription>
+
+	<fullDescription>
+		<intro>
+			Mixed Graphical Models can be estimated using node-wise variable ranking in combination with stability selection as proposed by Fellinghauer et al. (2013).
+			A base-ranking algorithm is applied to each variable, whereby the base-ranker depends on the type of the variable (e.g. nominal, ordinal,...). 
+		
+			A base-ranker is applied to each variable to estimate their dependence on all other variables. 
+			Thereby two ranks are generated gor each pair of nodes <i>i</i> and <i>j</i> (one has <i>i</i> as independent variable, the other <i>j</i>). 
+			The maximum of these ranks is used as edge rank.
+		
+			For stability selection <i>n</i> subsamples are drawn from the data and the procedure is repeated for each sub-sample.
+		</intro>
+
+		<tab name="Stability Selection">
+			<option name="Number of Samples">The number of sub-samples which are drawn for stability selection</option>
+			<option name="Ranking Type">specify if local or global ranking shall be applied. When ranking locally, the results of all base-rankers are ranked separately and then combined to one edge rank. Global Ranking means, that the results from all base-rankers are ranked at once.</option>
+		</tab>
+
+		<tab name="Rankers">
+			<option name="Select Type">A base-ranker can be specified for each variable type. Choose a type here.</option>
+			<option name="Ranking Method">Choose a ranking method from this drop-down for the chosen variable type.</option>
+			<option name="Ranking Parameters">One can specify additional parameters (one key=value pair per line). The parameters have to correspond to the parameters of the choosen base-ranker.	</option>
+			<option name ="Available Base-Ranker">
+			<ul>
+				<li><b>Random Forest</b> Variable importance of random forests as rank; parameters described in R-doc <tt>randomForest</tt> (randomForest package)</li>
+				<li><b>Random Forest (party)</b> variable importance of random forests from the R-package party (supporting e.g. ordinal variables) as rank; parametes described in R-doc <tt>ctree</tt> (party-package)</li>
+				<li><b>LASSO</b> the lowest regularization parameter lambda for which a regression coefficient is !=0 as rank; parameters described in R-doc <tt>glmnet</tt>. Especially family is important. The process will fail if family id not compatible with the datatype</li>
+				<li><b>Regression</b> beta estimates of an regression; parametes described in R-doc <tt>glm</tt>. Especially family is important</li>
+			</ul>
+			</option>
+		</tab>
+	</fullDescription>
+
+	<ports>
+	<inPort index="0" name="Data">A data matrix which contains measured variables in the columns and samples in the rows.</inPort>
+	<outPort index="0" name="Edge Ranks">A table which contains one column per edge. The rows contain the edge ranks for each subsample of the stability selection.</outPort>
+	<outPort index="1" name="Meta Information">A data table which contains meta information (number of variables, number of samples, ...)</outPort>
+	</ports>    
+
+	<views>
+	<view index="0" name="Log Messages">STDOUT and STDERR of the R-Job</view>
+	</views>
+</knimeNode>

@@ -1,25 +1,24 @@
-package de.helmholtz_muenchen.ibis.metabolomics.imputing;
+package de.helmholtz_muenchen.ibis.misc.sleepnode;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
-
 /**
- * <code>NodeFactory</code> for the "Imputer" Node.
- * 
+ * <code>NodeFactory</code> for the "SleepNode" Node.
+ * Node sleeps for the given time
  *
  * @author Jonas Zierer
  */
-public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
+public class SleepNodeNodeFactory 
+        extends NodeFactory<SleepNodeNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImputerNodeModel createNodeModel() {
-        return new ImputerNodeModel();
+    public SleepNodeNodeModel createNodeModel() {
+        return new SleepNodeNodeModel();
     }
 
     /**
@@ -27,15 +26,15 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<ImputerNodeModel> createNodeView(final int viewIndex, final ImputerNodeModel nodeModel) {
-        return new RNodeView<ImputerNodeModel>(nodeModel);
+    public NodeView<SleepNodeNodeModel> createNodeView(final int viewIndex, final SleepNodeNodeModel nodeModel) {
+        return null;
     }
 
     /**
@@ -51,7 +50,7 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new ImputerNodeDialog();
+        return new SleepNodeNodeDialog();
     }
 
 }

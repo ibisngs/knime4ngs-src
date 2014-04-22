@@ -136,7 +136,7 @@ public class Executor {
 	 * @throws InterruptedException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, boolean enableEscape) throws CanceledExecutionException, InterruptedException, ExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, null, enableEscape);
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, stdOut, stdErr, null, enableEscape);
 	}
 	
 	/**

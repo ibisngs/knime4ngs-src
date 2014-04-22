@@ -1,25 +1,24 @@
-package de.helmholtz_muenchen.ibis.metabolomics.imputing;
+package de.helmholtz_muenchen.ibis.misc.countMissing;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
-
 /**
- * <code>NodeFactory</code> for the "Imputer" Node.
- * 
+ * <code>NodeFactory</code> for the "RNodeTemplate" Node.
+ * This is a template for a node, which executes a R-Script.
  *
  * @author Jonas Zierer
  */
-public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
+public class CountMissingNodeFactory 
+        extends NodeFactory<CountMissingNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImputerNodeModel createNodeModel() {
-        return new ImputerNodeModel();
+    public CountMissingNodeModel createNodeModel() {
+        return new CountMissingNodeModel();
     }
 
     /**
@@ -27,15 +26,15 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<ImputerNodeModel> createNodeView(final int viewIndex, final ImputerNodeModel nodeModel) {
-        return new RNodeView<ImputerNodeModel>(nodeModel);
+    public NodeView<CountMissingNodeModel> createNodeView(final int viewIndex, final CountMissingNodeModel nodeModel) {
+        return null;
     }
 
     /**
@@ -51,7 +50,7 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new ImputerNodeDialog();
+        return new CountMissingNodeDialog();
     }
 
 }

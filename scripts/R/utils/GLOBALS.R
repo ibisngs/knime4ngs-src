@@ -40,7 +40,7 @@ read.csv3 <- function(filepath, header=T, rownames=T, sep=FILE_SEP, check.names=
 	data <- read.table(file=filepath, header=header, sep=sep, check.names=check.names, fill=fill, ...)
 	if(rownames){
 		row.names(data) <- data[,1]
-		data <- data[,2:ncol(data)]
+		data <- data[,2:ncol(data), drop=F]
 	}
 	return(data)
 }

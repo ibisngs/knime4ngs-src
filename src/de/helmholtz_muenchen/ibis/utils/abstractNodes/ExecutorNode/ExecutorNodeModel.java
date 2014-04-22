@@ -36,6 +36,8 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	// logger class
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
 
+	//private boolean isRunning = false;
+	
 	/**
 	 * Constructor with number of input and output ports.
 	 * @param nrInDataPorts number of input ports
@@ -66,6 +68,7 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @throws CanceledExecutionException
 	 */
 	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape, File path2LogOutput) throws CanceledExecutionException {
+		//isRunning = true;
 		// StringBuffers to write STDOUT and STDERR to
 		if(STDOUT!=null){
 			STDOUT.setLength(0);
@@ -108,24 +111,8 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 		if(STDERR != null){
 			STDERR.append("---------------------------------------------------");
 		}
+		//isRunning=false;
 	}
-	
-//	/**
-//	 * Writes the log files to the folder
-//	 * @param path2LogOutput
-//	 * @throws IOException
-//	 */
-//	private void writeLogFiles(File path2LogOutput) throws IOException {
-//		if(path2LogOutput != null && path2LogOutput.isFile()) {
-//			File path = path2LogOutput.getParentFile();
-//			if(!path.exists()) 
-//				path.mkdirs();
-//			
-//			FileUtils.write(new File(path2LogOutput + ".log"), STDOUT.toString());
-//	    	FileUtils.write(new File(path2LogOutput + ".err"), STDERR.toString());
-//		}
-//	}
-	
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS
@@ -135,15 +122,18 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
      */
     @Override
     protected void reset() {
-		if(STDOUT!=null){
-			STDOUT.setLength(0);
-			STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
-		}
-		
-		if(STDERR != null){
-			STDERR.setLength(0);
-			STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
-		}
+//    	if(!isRunning){ // only delete Logs if node was not interrupted during run
+//			if(STDOUT!=null){
+//				STDOUT.setLength(0);
+//				STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
+//			}
+//			
+//			if(STDERR != null){
+//				STDERR.setLength(0);
+//				STDERR.append(LOGMESSAGE_BEFORE_EXECUTION);
+//			}
+//    	}
+//    	isRunning = false;
     }
     
     /**

@@ -84,6 +84,14 @@ public class RNodeTemplateNodeModel extends RNodeModel {
      * {@inheritDoc}
      */
     @Override
+    protected void reset() {
+    	super.reset();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_count.saveSettingsTo(settings);
         m_string.saveSettingsTo(settings);

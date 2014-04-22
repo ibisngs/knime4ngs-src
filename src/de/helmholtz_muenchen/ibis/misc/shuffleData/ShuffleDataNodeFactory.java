@@ -1,25 +1,23 @@
-package de.helmholtz_muenchen.ibis.metabolomics.imputing;
+package de.helmholtz_muenchen.ibis.misc.shuffleData;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
-
 /**
- * <code>NodeFactory</code> for the "Imputer" Node.
- * 
+ * <code>NodeFactory</code> for the "ShuffleData" Node.
+ * Shuffle data within columns of the input data matrix.
  *
  * @author Jonas Zierer
  */
-public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
+public class ShuffleDataNodeFactory extends NodeFactory<ShuffleDataNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ImputerNodeModel createNodeModel() {
-        return new ImputerNodeModel();
+    public ShuffleDataNodeModel createNodeModel() {
+        return new ShuffleDataNodeModel();
     }
 
     /**
@@ -27,15 +25,15 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public NodeView<ImputerNodeModel> createNodeView(final int viewIndex, final ImputerNodeModel nodeModel) {
-        return new RNodeView<ImputerNodeModel>(nodeModel);
+    public NodeView<ShuffleDataNodeModel> createNodeView(final int viewIndex, final ShuffleDataNodeModel nodeModel) {
+        return null;
     }
 
     /**
@@ -51,7 +49,7 @@ public class ImputerNodeFactory extends NodeFactory<ImputerNodeModel> {
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new ImputerNodeDialog();
+        return new ShuffleDataNodeDialog();
     }
 
 }

@@ -39,8 +39,8 @@ source(args$file.glob)
 ## READ DATA
 ##############################################################################################################
 data <- read.csv3(args$file.in)
-varorder =colnames(data)
-method=args$method
+varorder = colnames(data)
+method   = args$method
 ## optional arguments
 if(is.null(args$columns)){
 	args$columns = colnames(data)
@@ -81,58 +81,59 @@ impute.random <- function(x, cat.cutoff=10){
 	return(x)
 }
 
-# warning("blablablab")
-# print("auf stdout???")
-# stop("this is an error")
-# q(15)
 ##############################################################################################################
 ## impute
 ##############################################################################################################
-if(method == "knn"){
-	loadLib("imputation")
-	dist.mat = NULL
-	if(args$dist == "corr"){
-		loadLib("Hmisc")
-		dist.mat = rcorr(data)
-	}else if(args$dist %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")){
-		dist.mat = dist(data, method=args$dist, diag=FALSE, upper=TRUE)
+if(length(args$columns)>0){
+	if(method == "knn"){
+		loadLib("imputation")
+		dist.mat = NULL
+		if(args$dist == "corr"){
+			loadLib("Hmisc")
+			dist.mat = rcorr(data)
+		}else if(args$dist %in% c("euclidean", "maximum", "manhattan", "canberra", "binary", "minkowski")){
+			dist.mat = dist(data, method=args$dist, diag=FALSE, upper=TRUE)
+		}
+		imputed = kNNImpute(data, k=args$knn, x.dist=dist.mat, verbose=T) ## TODO:distance measure?
+		imputed = imputed$x
+		
+	}else if(method == "lm"){
+		loadLib("imputation")
+		imputed = lmImpute(data)
+	
+	}else if(method == "SVD"){
+		loadLib("imputation")
+		imputed = SVDImpute(data, args$rank.k, num.iters=args$num.iters, verbose=T)
+	
+	}else if(method == "min" || method == "max" || method == "mean"){
+		loadLib("plyr")
+		imputed = t(aaply(.data=data[,args$columns], .margins=2, .fun=impute.simple, method=method))
+		rownames(imputed) = rownames(data)
+		
+	}else if(method == "mice"){ ## TODO additional arguments
+		loadLib("mice", bioC=T)
+		imputed = mice(data)
+		print(imputed$loggedEvents)
+		imputed = imputed$data
+		
+	}else if(method == "random"){ ## TODO variable cutoff for categorical
+		imputed = apply(data[,args$columns], MARGIN=2, FUN=impute.random, cat.cutoff=10)
+		rownames(imputed) = rownames(data)
+		colnames(imputed) = args$columns
+	}else{
+		warning("Method unknown")
+	q()
 	}
-	imputed = kNNImpute(data, k=args$knn, x.dist=dist.mat, verbose=T) ## TODO:distance measure?
-	imputed = imputed$x
 	
-}else if(method == "lm"){
-	loadLib("imputation")
-	imputed = lmImpute(data)
-  
-}else if(method == "SVD"){
-	loadLib("imputation")
-	imputed = SVDImpute(data, args$rank.k, num.iters=args$num.iters, verbose=T)
-  
-}else if(method == "min" || method == "max" || method == "mean"){
-	loadLib("plyr")
-	imputed = t(aaply(.data=data[,args$columns], .margins=2, .fun=impute.simple, method=method))
-	rownames(imputed) = rownames(data)
-	
-}else if(method == "mice"){ ## TODO additional arguments
-	loadLib("mice", bioC=T)
-	imputed = mice(data)
-	print(imputed$loggedEvents)
-	imputed = imputed$data
-	
-}else if(method == "random"){ ## TODO variable cutoff for categorical
-	imputed = apply(data[,args$columns], MARGIN=2, FUN=impute.random, cat.cutoff=10)
-	rownames(imputed) = rownames(data)
-	colnames(imputed) = colnames(data)
-}else{
-	warning("Method unknown")
-  q()
-}
+## replace original data with imputed data
+data[, args$columns] = imputed[, args$columns]
 
+}
 
 ##############################################################################################################
 ## write output
 ##############################################################################################################
-data[, args$columns] = imputed[, args$columns]
+
 data = data[, varorder]
 write.csv3(data, args$file.out)
 

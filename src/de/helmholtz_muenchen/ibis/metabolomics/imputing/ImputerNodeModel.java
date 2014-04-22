@@ -19,7 +19,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -47,7 +46,6 @@ public class ImputerNodeModel extends RNodeModel {
 	/** CFG KEYS */
 	static public final String CFGKEY_IMPUTING_METHOD       = "org.manipulate.impute.method.numerical";
 	static public final String CFGKEY_COLUMNS               = "org.manipulate.impute.columns";
-	static public final String CFGKEY_CHOOSE_BY_TYPE        = "org.manipulate.impute.chooseType";
 	static public final String CFGKEY_VARIABLE_TYPE         = "org.manipulate.impute.varType";
 	// Parameters for single imputation methods
 	static public final String CFGKEY_KNN_DIST              = "org.manipulate.impute.dist";
@@ -59,7 +57,6 @@ public class ImputerNodeModel extends RNodeModel {
 	/** SETTING MODELS */
 	private final SettingsModelString m_method        = new SettingsModelString(ImputerNodeModel.CFGKEY_IMPUTING_METHOD, IMPUTATION_METHODS[0]);
 	private final SettingsModelFilterString m_columns = new SettingsModelFilterString(ImputerNodeModel.CFGKEY_COLUMNS);
-	private final SettingsModelBoolean m_chooseByType = new SettingsModelBoolean(ImputerNodeModel.CFGKEY_CHOOSE_BY_TYPE, true);
 	private final SettingsModelStringArray m_varType  = new SettingsModelStringArray(ImputerNodeModel.CFGKEY_VARIABLE_TYPE, new String[]{});
 	// Parameters for single imputation methods
 	private final SettingsModelString m_knn_dist      = new SettingsModelString(ImputerNodeModel.CFGKEY_KNN_DIST, KNN_DIST_MEAS[0]);
@@ -95,15 +92,19 @@ public class ImputerNodeModel extends RNodeModel {
 		this.addArgument("--rank.k"   , m_svd_rank.getIntValue());
 		this.addArgument("--num.iters", m_svd_niters.getIntValue());
 
-		return(super.execute(inData, exec));
+		BufferedDataTable[] out = super.execute(inData, exec);
+		out[0] = exec.createSpecReplacerTable(out[0], inData[0].getDataTableSpec()); // parse cell types
+
+		return(out);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void reset() {
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	@Override
+//	protected void reset() {
+//		super.reset();
+//	}
 
 	public static List<String> getSelectedColumnsByType(final DataTableSpec inSpecs, final List<String> types){
 		ArrayList<String> columns = new ArrayList<String>();
@@ -195,7 +196,6 @@ public class ImputerNodeModel extends RNodeModel {
 		m_method.saveSettingsTo(settings);
 		m_varType.saveSettingsTo(settings);
 		m_columns.saveSettingsTo(settings);
-		m_chooseByType.saveSettingsTo(settings);
 		m_knn_dist.saveSettingsTo(settings);
 		m_knn_k.saveSettingsTo(settings);
 		m_svd_rank.saveSettingsTo(settings);
@@ -210,7 +210,6 @@ public class ImputerNodeModel extends RNodeModel {
 		m_method.loadSettingsFrom(settings);
 		m_varType.loadSettingsFrom(settings);
 		m_columns.loadSettingsFrom(settings);
-		m_chooseByType.loadSettingsFrom(settings);
 		m_knn_dist.loadSettingsFrom(settings);
 		m_knn_k.loadSettingsFrom(settings);
 		m_svd_rank.loadSettingsFrom(settings);
@@ -225,7 +224,6 @@ public class ImputerNodeModel extends RNodeModel {
 		m_method.validateSettings(settings);
 		m_varType.validateSettings(settings);
 		m_columns.validateSettings(settings);
-		m_chooseByType.validateSettings(settings);
 		m_knn_dist.validateSettings(settings);
 		m_knn_k.validateSettings(settings);
 		m_svd_rank.validateSettings(settings);
