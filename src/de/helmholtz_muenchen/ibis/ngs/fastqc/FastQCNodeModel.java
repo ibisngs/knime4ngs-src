@@ -112,7 +112,7 @@ public class FastQCNodeModel extends NodeModel {
 	    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1); 
 	    		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
 	    	}	
-			path2mergeScript = IO.getScriptPath() + "/bash/mergeFsettings.sh";
+			path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
 	    	command.add(jarCall + readsFile1);
 	
 	    	/**Execute for first file**/
