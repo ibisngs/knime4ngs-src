@@ -11,6 +11,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
@@ -20,7 +21,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	public static final String R_SCRIPTS_PATH =  "R";
 	public static final String GLOBALS_R = IO.getScriptPath() + ScriptNodeModel.SCRIPTS_SUBFOLDER + File.separatorChar + R_SCRIPTS_PATH + File.separatorChar + "utils" + File.separatorChar + "GLOBALS.R";
 
-	private final HashMap<String,String> ARGUMENTS;
+	private final HashMap<String,String> ARGUMENTS = new HashMap<String,String>();;
 	protected final String[] INPUT_FILE_ARGUMENTS;
 	protected final String[] OUTPUT_FILE_ARGUMENTS;
 
@@ -28,9 +29,6 @@ public abstract class RNodeModel extends ScriptNodeModel {
 
 	protected RNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, String[] input_file_arguments, String[] output_file_arguments) {
 		super(nrInDataPorts, nrOutDataPorts, script);
-
-		// init arguments
-		this.ARGUMENTS = new HashMap<String,String>();
 
 		// check number of file names
 		if(input_file_arguments.length != this.getNrInPorts()){
@@ -41,8 +39,25 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		this.INPUT_FILE_ARGUMENTS = input_file_arguments;
 		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;
-
 	}
+	
+	protected RNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script, String[] input_file_arguments, String[] output_file_arguments) {
+		super(inPortTypes, outPortTypes, script);
+
+		
+		// TODO what if PortTypes are not tables to write???
+		 
+		// check number of file names
+		if(input_file_arguments.length > inPortTypes.length){
+			LOGGER.error("HAVING " + this.getNrInPorts() + " INPUT FILES BUT "+ input_file_arguments.length + " NAMES!");
+		}
+		if(output_file_arguments.length > outPortTypes.length){
+			LOGGER.error("HAVING " + this.getNrOutPorts() + " INPUT FILES BUT "+ output_file_arguments.length + " NAMES!");
+		}
+		this.INPUT_FILE_ARGUMENTS = input_file_arguments;
+		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;
+	}
+	
 
 	@Override
 	protected String getScriptPath(){
@@ -50,31 +65,35 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	}
 	
 	protected String getRscriptBinary(){
-		if(!this.getAvailableFlowVariables().containsKey("Rscript")){
-			this.pushFlowVariableString("Rscript", "Rscript");
+		if(this.getAvailableFlowVariables().containsKey("Rscript")){
+			return(this.getAvailableFlowVariables().get("Rscript").getStringValue());
 		}
-		return(this.getAvailableFlowVariables().get("Rscript").getStringValue());
+		return("Rscript");
 	}
 
 
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
 		
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT FILES
 		//////////////////////////////////////////////////////////////////////////
 		exec.setProgress(0.00);
 		exec.setProgress("writing input data");
-		for(int i=0; i < this.getNrInPorts(); i++){
-			File tmpFile = null;
-			try {
-				tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_") + "_input_" , ".csv");
-				this.addArgument(this.INPUT_FILE_ARGUMENTS[i], tmpFile.getCanonicalPath());
-			} catch (IOException e) {
-				LOGGER.error("unable to create temp file!");
-				throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
+		for(int i=0; i < INPUT_FILE_ARGUMENTS.length; i++){
+			if(inData[i] != null){
+				File tmpFile = null;
+				try {
+					tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_") + "_input_" , ".csv");
+					this.addArgument(this.INPUT_FILE_ARGUMENTS[i], tmpFile.getCanonicalPath());
+				} catch (IOException e) {
+					LOGGER.error("unable to create temp file!");
+					throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
+				}
+				IO.writeAsCSV(inData[i], tmpFile, exec, LOGGER);
+			}else{
+				this.removeArgument(this.INPUT_FILE_ARGUMENTS[i]);
 			}
-			IO.writeAsCSV(inData[i], tmpFile, exec, LOGGER);
 		}	
 
 		//////////////////////////////////////////////////////////////////////////
@@ -82,8 +101,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		//////////////////////////////////////////////////////////////////////////
 		exec.setProgress(0.05);
 		exec.setProgress("preparing output data");
-		String[] outFiles = new String[this.getNrOutPorts()];
-		for(int i=0; i < this.getNrOutPorts(); i ++){
+		String[] outFiles = new String[OUTPUT_FILE_ARGUMENTS.length];
+		for(int i=0; i < OUTPUT_FILE_ARGUMENTS.length; i ++){
 			File tmpFile = null;
 			try {
 				tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_") + "_output_" , ".csv");

@@ -15,6 +15,7 @@
 
 	<ports>
 		<inPort index="0" name="Edge Ranks">A ranking of all  edges as produced by the Edge Ranking node</inPort>
+		<inPort index="1" name="Background">A ranking of all  edges for shuffled data as produced by the Background Edge Ranking node</inPort>
 		<outPort index="0" name="Edgeslist">A list of edges including their weights</outPort>
 		<outPort index="1" name="Adajacency">An adjacency matrix</outPort>
 	</ports>    

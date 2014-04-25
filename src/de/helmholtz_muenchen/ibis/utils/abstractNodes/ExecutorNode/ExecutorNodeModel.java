@@ -8,6 +8,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -47,6 +48,27 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 */
 	protected ExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
 		super(nrInDataPorts, nrOutDataPorts);
+		
+		if(catchStdout)
+			STDOUT = new StringBuffer(LOGMESSAGE_BEFORE_EXECUTION);
+		else
+			STDOUT = null;
+		
+		if(catchStderr)
+			STDERR = new StringBuffer(LOGMESSAGE_BEFORE_EXECUTION);
+		else
+			STDERR = null;
+	}
+	
+	/**
+	 * Constructor with number of input and output ports.
+	 * @param nrInDataPorts number of input ports
+	 * @param nrOutDataPorts number of output ports
+	 * @param catchStdout catches stdout if true
+	 * @param catchStderr catches stderr if true
+	 */
+	protected ExecutorNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, boolean catchStdout, boolean catchStderr) {
+		super(inPortTypes, outPortTypes);
 		
 		if(catchStdout)
 			STDOUT = new StringBuffer(LOGMESSAGE_BEFORE_EXECUTION);

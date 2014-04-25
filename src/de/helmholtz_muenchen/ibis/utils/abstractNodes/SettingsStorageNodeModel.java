@@ -14,6 +14,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelLong;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
+import org.knime.core.node.port.PortType;
 import org.knime.core.util.Pair;
 
 /**
@@ -53,7 +54,15 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 	 */
 	protected SettingsStorageNodeModel(int nrInDataPorts, int nrOutDataPorts) {
 		super(nrInDataPorts, nrOutDataPorts);
-		
+		init();
+	}
+	
+	protected SettingsStorageNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes) {
+		super(inPortTypes, outPortTypes);
+		init();
+	}
+	
+	private void init(){
 		// create initial HashMaps
 		SETTINGS_BOOLEAN_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelBoolean>());
 		SETTINGS_STRING_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelString>());
@@ -82,7 +91,6 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
         for(String key : SETTINGS_DOUBLE_RANGE_VALUES.keySet())
 			getSettingsModelDoubleRange(key);
 	}
-	
 	/************************************* SettingsModelBoolean  *************************************/
 	/***********************************************************************************************/
 	

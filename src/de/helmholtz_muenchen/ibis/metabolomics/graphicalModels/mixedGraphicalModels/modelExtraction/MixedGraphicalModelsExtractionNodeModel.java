@@ -21,6 +21,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
+import de.helmholtz_muenchen.ibis.utils.Global;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 
@@ -30,34 +31,42 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 
 	/** CFG KEYS */
-	static final String CFGKEY_PERC_INCLUSION = "percentageInclusion";
-	static final String CFGKEY_EV    = "e.v.";
+	static final String CFGKEY_PERC_INCLUSION = "edge frequency treshold";
+	static final String CFGKEY_EV             = "e.v.";
+	static final String CFGKEY_NUM_OF_EDGES   = "number of edges per model";
 
     
 	/** SETTING MODELS */
 	private final SettingsModelDoubleBounded  m_percIncl = new SettingsModelDoubleBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_PERC_INCLUSION, 0.8, 0.0, 1.0);
-    private final SettingsModelIntegerBounded m_ev       = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 5, 0, Integer.MAX_VALUE);
+	// FWER control only
+	private final SettingsModelIntegerBounded m_ev       = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 5, 0, Integer.MAX_VALUE);
+	// Empirical p-values only
+	private final SettingsModelIntegerBounded m_nEdges   = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_NUM_OF_EDGES, 5, 1, Integer.MAX_VALUE);
 
-    
     /**
      * Constructor for the node model.
      */
     protected MixedGraphicalModelsExtractionNodeModel() {
-        super(1, 2, "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "mixedGraphicalModels.modelExtraction.R", new String[]{"--input"}, new String[]{"--edgeslist", "--adjacency"});
+        super(Global.createOPOs(2,2), Global.createOPOs(2), "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "mixedGraphicalModels.modelExtraction.R", new String[]{"--input", "--background"}, new String[]{"--edgeslist", "--adjacency"});
     }
 
     /**
      * {@inheritDoc}
-     * @throws Exception 
+     * @throws CanceledExecutionException 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
     	this.addArgument("--percIncl", m_percIncl.getDoubleValue());
     	this.addArgument("--ev"      , m_ev.getIntValue());
+    	this.addArgument("--nedges"  , m_nEdges.getIntValue());
 
 		BufferedDataTable[] out = super.execute(inData, exec);
-		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(inData[0].getDataTableSpec())); // parse cell types
-		out[1] = exec.createSpecReplacerTable(out[1], this.getAdjacencyMatSpec(inData[0].getDataTableSpec())); // parse cell types
+		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(new DataTableSpec[]{inData[0].getDataTableSpec(),inData[1]==null?null:inData[1].getDataTableSpec()})); // parse cell types
+		try {
+			out[1] = exec.createSpecReplacerTable(out[1], this.getAdjacencyMatSpec(inData[0].getDataTableSpec()));
+		} catch (InvalidSettingsException e) {
+			throw new CanceledExecutionException(e.getMessage());
+		} // parse cell types
 		
 		return(out);
 	}
@@ -90,8 +99,13 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     	return(new DataTableSpec(adjacencySpecs));
 	}
     
-    private DataTableSpec getEdgeRankSpec(DataTableSpec inSpec){
-    	DataColumnSpec[] edgeRankSpecs = DataTableSpec.createColumnSpecs(new String[]{"v1", "v2", "incl.n", "mean.rank", "incl.perc"}, new DataType[]{DataType.getType(StringCell.class), DataType.getType(StringCell.class), DataType.getType(IntCell.class), DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class)});
+    private DataTableSpec getEdgeRankSpec(DataTableSpec[] inSpecs){
+    	DataColumnSpec[] edgeRankSpecs;
+    	if(inSpecs[1] == null){
+    		edgeRankSpecs = DataTableSpec.createColumnSpecs(new String[]{"v1", "v2", "incl.n", "mean.rank", "incl.perc"}, new DataType[]{DataType.getType(StringCell.class), DataType.getType(StringCell.class), DataType.getType(IntCell.class), DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class)});
+    	}else{
+    		edgeRankSpecs = DataTableSpec.createColumnSpecs(new String[]{"v1", "v2", "incl.n", "mean.rank", "incl.perc", "p.value"}, new DataType[]{DataType.getType(StringCell.class), DataType.getType(StringCell.class), DataType.getType(IntCell.class), DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class)});
+    	}
     	return(new DataTableSpec(edgeRankSpecs));
 	}
     
@@ -102,12 +116,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	
-    	
-    	
-    	
-    	
-    	return new DataTableSpec[]{getEdgeRankSpec(inSpecs[0]), getAdjacencyMatSpec(inSpecs[0])};
+    	return new DataTableSpec[]{getEdgeRankSpec(inSpecs), getAdjacencyMatSpec(inSpecs[0])};
     }
 
     /**
@@ -117,7 +126,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
         m_ev.saveSettingsTo(settings);
         m_percIncl.saveSettingsTo(settings);
-
+        m_nEdges.saveSettingsTo(settings);
     }
 
     /**
@@ -127,6 +136,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
         m_ev.loadSettingsFrom(settings);
         m_percIncl.loadSettingsFrom(settings);
+        m_nEdges.loadSettingsFrom(settings);
     }
 
     /**
@@ -136,7 +146,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
     	m_ev.validateSettings(settings);
         m_percIncl.validateSettings(settings);
-
+        m_nEdges.validateSettings(settings);
     }
     
     /**

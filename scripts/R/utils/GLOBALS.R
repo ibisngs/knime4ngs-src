@@ -18,7 +18,9 @@ loadLib <- function(x, bioC=FALSE){
 			install.packages(x, repos="http://cran.us.r-project.org")
 		}
 	}
-	library(x, character.only=T)
+	if(!require(x, character.only=T)){
+		stop(paste("Can't load package", x))
+	}
 }
 
 ################################################
@@ -88,4 +90,51 @@ strsplit.named <- function(l, split.1="\\s*,\\s*", split.2="\\s*=\\s*", perl=T){
 	}
 	l = as.list(unlist(lapply(split, FUN=strsplit.inner)))
 	return(l)
+}
+
+
+
+
+
+
+
+
+
+
+
+################################################
+### FILEPATHS
+################################################
+thisfile <- function() {
+  if (!is.null(res <- thisfile_source())) res
+  else if (!is.null(res <- thisfile_rscript())) res
+  else NULL
+}
+
+# Helper functions
+thisfile_source <- function() {
+  for (i in -(1:sys.nframe())) {
+    if (identical(sys.function(i), base::source))
+      return (normalizePath(sys.frame(i)$ofile))
+  }
+
+  NULL
+}
+
+thisfile_rscript <- function() {
+  cmdArgs <- commandArgs(trailingOnly = FALSE)
+  cmdArgsTrailing <- commandArgs(trailingOnly = TRUE)
+  cmdArgs <- cmdArgs[seq.int(from=1, length.out=length(cmdArgs) - length(cmdArgsTrailing))]
+  res <- gsub("^(?:--file=(.*)|.*)$", "\\1", cmdArgs)
+
+  # If multiple --file arguments are given, R uses the last one
+  res <- tail(res[res != ""], 1)
+  if (length(res) > 0)
+    return (res)
+
+  NULL
+}
+
+getCWD <- function(){
+	return(normalizePath(if(is.null(thisfile())){getwd()}else{dirname(thisfile())}))
 }

@@ -13,9 +13,16 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.data.IntValue;
+import org.knime.core.data.container.CloseableRowIterator;
+import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.StringCell;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -24,7 +31,10 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
 
+import de.helmholtz_muenchen.ibis.utils.Global;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 
@@ -47,34 +57,40 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	static final int    DEFAULT_SS_SAMPLE_N = 100;
 	static final double DEFAULT_SS_SAMPLE_S = 0.5;
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(MixedGraphicalModelsEdgeRankingNodeModel.class);
+	protected static final NodeLogger LOGGER = NodeLogger.getLogger(MixedGraphicalModelsEdgeRankingNodeModel.class);
 
 	/** CFG KEYS */
-	static final String CFGKEY_RANKER             = "rankers";
-	static final String CFGKEY_PARAMS             = "rankerparams";
-	static final String CFGKEY_VAR_TYPES          = "vartypes";
-	static final String CFGKEY_SS_SAMPLE_N        = "stabselSamplenum";
-	static final String CFGKEY_SS_RANKTYPE        = "stabselRankType";
-	static final String CFGKEY_SS_SAMPLE_S        = "stabselSamplesize";
-	static final String CFGKEY_RANDOM_SEED        = "seed";
-	static final String CFGKEY_PARALLEL           = "parallel";
+	static final String CFGKEY_RANKER             = "ranker";
+	static final String CFGKEY_PARAMS             = "ranker parameters";
+	static final String CFGKEY_VAR_TYPES          = "variable types";
+	static final String CFGKEY_SS_SAMPLE_N        = "(stability selection) sample number";
+	static final String CFGKEY_SS_SAMPLE_S        = "(stability selection) sample size";
+	static final String CFGKEY_SS_RANKTYPE        = "(stability selection) ranking type";
+	static final String CFGKEY_RANDOM_SEED_COL    = "(stability selection) random seed column";
 
 	/** SETTING MODELS */
 	private final Map<String, String> m_ranker        = new HashMap<String, String>();
 	private final HashMap<String, ArrayList<Pair<String,String>>> m_ranker_params = new HashMap<String, ArrayList<Pair<String,String>>>();
-	private int m_stabSel_sampleNum = 1;
+	private int m_stabSel_sampleNum     = DEFAULT_SS_SAMPLE_N;
 	private double m_stabSel_sampleSize = DEFAULT_SS_SAMPLE_S;
-	private int m_rseed;
-	private int m_parallel;
+	private String m_rseed_col;
 	
 	private String m_rankerType = GRAFO_RANKTYPE[0];
+	public static String DEFAULT_AVAILABLE_COLS= "2nd input not available";
 
 	/**
 	 * Constructor for the node model.
 	 */
+	protected MixedGraphicalModelsEdgeRankingNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes ) {
+		super(inPortTypes, outPortTypes, "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "mixedGraphicalModels.edgeranking.R", new String[]{"--data"}, new String[]{"--output", "--output2"});
+	}
+	
+	
+	 /**
+	  * Constructor for the node model.
+	  */
 	protected MixedGraphicalModelsEdgeRankingNodeModel() {
-		super(1, 2, "statistics" + File.separatorChar + "graphicalModels" + File.separatorChar + "mixedGraphicalModels.edgeranking.R", new String[]{"--data"}, new String[]{"--output", "--output2"});
-		m_rseed = new Random().nextInt();
+		this(Global.createOPOs(2,2), Global.createOPOs(2));
 	}
 
 	/**
@@ -82,12 +98,14 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
-		// write variable classes as temp file
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+		////////////////////////////////////////////////////////////////////////////////////
+		// WRITE VARIABLE CLASSES
+		////////////////////////////////////////////////////////////////////////////////////
 		File tmpFile = null;
 		try {
 			tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_") + "_input_" , ".csv");
-			ArrayList<String> classes = getVariableTypes(inData[0].getDataTableSpec());
+			ArrayList<String> classes = Global.getVariableTypes(inData[0].getDataTableSpec());
 			StringBuffer classesFileContent = new StringBuffer();
 			classesFileContent.append("\"" + StringUtils.join(inData[0].getDataTableSpec().getColumnNames(), "\";\"") + "\"");
 			classesFileContent.append("\n");
@@ -100,9 +118,41 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 			throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
 		}
 
-
+		
+		////////////////////////////////////////////////////////////////////////////////////
+		// RANDOM SEEDS FOR SAMPLING
+		////////////////////////////////////////////////////////////////////////////////////
+		int randomSeeds[];		
+		// GET RANDOM SEEDS FROM OPTIONAL INPUT
+		BufferedDataTable randomSeedsTable = inData[1];
+		if (randomSeedsTable != null){
+			randomSeeds = new int[randomSeedsTable.getRowCount()];
+			int randomSeedsColIdx = randomSeedsTable.getDataTableSpec().findColumnIndex(this.m_rseed_col);
+			if(randomSeedsColIdx == -1){
+				throw new CanceledExecutionException("Can't find column >"+this.m_rseed_col+"< in second input table!" ); 
+			}
+			CloseableRowIterator rit = randomSeedsTable.iterator();
+			int rowCounter=0;
+			while(rit.hasNext()){
+				DataRow row = rit.next();
+				IntValue cell = (IntValue)row.getCell(randomSeedsColIdx);
+				randomSeeds[rowCounter++] = cell.getIntValue();
+			}
+		// GENERATE RANDOM SEEDS
+		}else{
+			randomSeeds = new int[this.m_stabSel_sampleNum];
+			Random rand = new Random(System.currentTimeMillis());
+			for(int i=0; i<randomSeeds.length; i++){
+				randomSeeds[i] = rand.nextInt();
+			}
+		}
+		
+		
+		////////////////////////////////////////////////////////////////////////////////////
+		// PARSE PARAMETERS
+		////////////////////////////////////////////////////////////////////////////////////		
 		// types
-		Iterator<String> typesIt = getUniqueVariableTypes(inData[0].getSpec()).iterator();
+		Iterator<String> typesIt = Global.getUniqueVariableTypes(inData[0].getSpec()).iterator();
 
 		// Rankers + Params
 		String ranker = "";
@@ -116,35 +166,43 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		this.addArgument("--param", params.substring( 0, params.length()-PARAMS_SEP_2.length()));
 		
 		// Other parameters
-
-		this.addArgument("--sampleNum" , m_stabSel_sampleNum );
 		this.addArgument("--sampleSize", m_stabSel_sampleSize);
 		this.addArgument("--ranktype"  , m_rankerType);
-		this.addArgument("--rseed"     , m_rseed);
-		this.addArgument("--cores"     , m_parallel);
+
 		
-		BufferedDataTable[] out = super.execute(inData, exec);
-		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRanksSpec(inData[0].getDataTableSpec())); // pasre all to double cells
-		out[1] = exec.createSpecReplacerTable(out[1], this.getMetaInfoSpec(inData[0].getDataTableSpec())); // pasre all to double cells
 		
-		return(out);
-	}
-
-
-	public static ArrayList<String> getVariableTypes(final DataTableSpec inSpec){
-		ArrayList<String> classes = new ArrayList<String>(inSpec.getNumColumns());
-		for(int c=0; c<inSpec.getNumColumns(); c++){
-			classes.add(c, inSpec.getColumnSpec(c).getType().getPreferredValueClass().getName());
+		////////////////////////////////////////////////////////////////////////////////////
+		// DO EDGE RANKING
+		////////////////////////////////////////////////////////////////////////////////////
+		BufferedDataContainer edgeRankContainer = exec.createDataContainer(getEdgeRanksSpec(inData[0].getDataTableSpec()));
+		BufferedDataContainer metaInfContainer = exec.createDataContainer(getMetaInfoSpec(inData[0].getDataTableSpec()));
+		
+		
+		for(int i=0; i<randomSeeds.length; i++){
+			exec.checkCanceled();
+			this.addArgument("--rseed", randomSeeds[i]);
+			this.addArgument("--sampleNum" , 1 );
+			BufferedDataTable[] result = super.execute(new BufferedDataTable[]{inData[0]}, exec);
+			// rename edgeRank rows
+			exec.checkCanceled();
+			CloseableRowIterator it = result[0].iterator();
+			while(it.hasNext()){
+				DataRow row = it.next();
+				edgeRankContainer.addRowToTable(new DefaultRow(row.getKey().getString() + "."+i, row));
+			}
+			
+			// rename metainfo rows
+			exec.checkCanceled();
+			it = result[1].iterator();
+			while(it.hasNext()){
+				DataRow row = it.next();
+				metaInfContainer.addRowToTable(new DefaultRow(row.getKey().getString() + "."+i, row));
+			}
 		}
-		return(classes);
-	}
-
-	public static HashSet<String> getUniqueVariableTypes(final DataTableSpec inSpec){
-		HashSet<String> classes = new HashSet<String>();
-		for(int c=0; c<inSpec.getNumColumns(); c++){
-			classes.add(inSpec.getColumnSpec(c).getType().getPreferredValueClass().getName());
-		}
-		return(classes);
+		exec.checkCanceled();
+		edgeRankContainer.close();
+		metaInfContainer.close();
+		return(new BufferedDataTable[]{edgeRankContainer.getTable(), metaInfContainer.getTable()});
 	}
 
 	/**
@@ -155,8 +213,8 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	 * @throws InvalidSettingsException If column to bin cannot be identified.
 	 */
 	@Override
-	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-		HashSet<String> types = getUniqueVariableTypes(inSpecs[0]);
+	protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+		HashSet<String> types = Global.getUniqueVariableTypes((DataTableSpec)inSpecs[0]);
 		Iterator<String> typesIt = types.iterator();
 		// add newly discovered types
 		while(typesIt.hasNext()){
@@ -167,17 +225,16 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 			}
 		}
 		
-		// colum specs for meta information
-		
-		
-		return new DataTableSpec[]{getEdgeRanksSpec(inSpecs[0]),getMetaInfoSpec(inSpecs[0])};
+		return new PortObjectSpec[]{getEdgeRanksSpec((DataTableSpec)inSpecs[0]),getMetaInfoSpec((DataTableSpec)inSpecs[0])};
 	}
-	private DataTableSpec getMetaInfoSpec(DataTableSpec inSpec){
-		DataColumnSpec[] metaInfoSpecs = DataTableSpec.createColumnSpecs(new String[]{"value"}, new DataType[]{DataType.getType(DoubleCell.class)});
+	
+	
+	public static DataTableSpec getMetaInfoSpec(DataTableSpec inSpec){
+		DataColumnSpec[] metaInfoSpecs = DataTableSpec.createColumnSpecs(new String[]{"variables", "stabSel.Sample.num", "n", "p", "seed", "time"}, new DataType[]{DataType.getType(StringCell.class), DataType.getType(IntCell.class), DataType.getType(IntCell.class), DataType.getType(IntCell.class), DataType.getType(IntCell.class), DataType.getType(DoubleCell.class)});
 		return(new DataTableSpec(metaInfoSpecs));
 	}
 	
-	private DataTableSpec getEdgeRanksSpec(DataTableSpec inSpec){
+	public static DataTableSpec getEdgeRanksSpec(DataTableSpec inSpec){
 		// create DataTableSpec for edge Ranks
 		int nNodes = inSpec.getNumColumns();
 		String[] nodeNames = inSpec.getColumnNames();
@@ -218,9 +275,8 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		m_stabSel_sampleNum = settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_N, DEFAULT_SS_SAMPLE_N);
 		m_stabSel_sampleSize = settings.getDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, DEFAULT_SS_SAMPLE_S);
 		m_rankerType = settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE , MixedGraphicalModelsEdgeRankingNodeModel.GRAFO_RANKTYPE[0]);
-		m_rseed = settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED, new Random().nextInt());
-		m_parallel = settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, Runtime.getRuntime().availableProcessors());
-		
+		m_rseed_col = settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS);
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		String[] types       = settings.getStringArray(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_VAR_TYPES   , new String[0]);
 		String[] ranker      = settings.getStringArray(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANKER      , new String[0]);
@@ -246,9 +302,8 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_N, m_stabSel_sampleNum);
 		settings.addDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize);
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE, this.m_rankerType);
-		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED, m_rseed);
-		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, m_parallel);
-		
+		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, m_rseed_col);
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_ranker.keySet().size();
 
@@ -286,6 +341,32 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		// TODO: validation of settings
 	}
 
+	public BufferedDataTable[] executeAnywhere(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+		return(this.execute(inData, exec));
+	}
+	public void resetAnywhere() {
+		this.reset();
+	}
+    public void validateSettingsAnywhere(NodeSettingsRO settings) throws InvalidSettingsException {		
+    	this.validateSettings(settings);
+    }
+    public void loadValidatedSettingsFromAnywhere(NodeSettingsRO settings) throws InvalidSettingsException {		
+    	this.loadValidatedSettingsFrom(settings);
+    }
+    public void saveSettingsToAnywhere(NodeSettingsWO settings) {		
+    	this.saveSettingsTo(settings);
+    }
+    public PortObjectSpec[] configureAnywhere(final PortObjectSpec[] inSpecs) throws InvalidSettingsException {
+    	return(this.configure(inSpecs));
+    }
+    public void loadInternalsAnywhere(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	this.loadInternals(internDir, exec);
+    }
+    public void saveInternalsAnywhere(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
+    	this.saveInternals(internDir, exec);
+    }
+    
+    
     /**
      * {@inheritDoc}
      */

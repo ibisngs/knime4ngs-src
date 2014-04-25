@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
@@ -17,6 +18,11 @@ public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	
 	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script) {
 		super(nrInDataPorts, nrOutDataPorts, true, true);		
+		this.SCRIPT = getScriptPath() + script;
+	}
+	
+	protected ScriptNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script) {
+		super(inPortTypes, outPortTypes, true, true);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	

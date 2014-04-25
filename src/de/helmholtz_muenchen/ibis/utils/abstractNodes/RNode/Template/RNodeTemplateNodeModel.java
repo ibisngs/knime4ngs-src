@@ -62,7 +62,7 @@ public class RNodeTemplateNodeModel extends RNodeModel {
      * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
     	this.addArgument("--int"   , m_count.getIntValue());
     	this.addArgument("--string", m_string.getStringValue());
     	this.addArgument("--double", m_double.getDoubleValue());

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 	<knimeNode icon="./default.png" type="Learner" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
-	<name>Mixed Graphical Model (Edge Ranking)</name>
+	<name>Mixed Graphical Model (Background Edge Ranking)</name>
 
 	<shortDescription>
 		Mixed Graphical Models can be estimated using node-wise variable ranking in combination with stability selection as proposed by Fellinghauer et al. (2013).
@@ -37,16 +37,21 @@
 			</ul>
 			</option>
 		</tab>
+		
+		<tab name="FDR">
+			<option name="FDR Samples">bliabliablu.</option>
+		</tab>
 	</fullDescription>
 
 	<ports>
 	<inPort index="0" name="Data">A data matrix which contains measured variables in the columns and samples in the rows.</inPort>
-	<inPort index="1" name="Data">(optional) A table which contains a column with random seeds for each Sampling step. If data exists one subsample is computed for each row in this table (which means that Number of Samples parameter is ignored)</inPort>
+	<inPort index="1" name="Random Seeds">(optional) A table which contains a column with random seeds for each Sampling step. If data exists one subsample is computed for each row in this table (which means that Number of Samples parameter is ignored)</inPort>
+	<inPort index="2" name="Random Seeds">(optional) contains a list of Random seeds to be used for shuffling the data. If the input file exists one shuffled sample is done for each row instead of using the parameter <tt>Number of Samples for FDR</tt></inPort>
 	<outPort index="0" name="Edge Ranks">A table which contains one column per edge. The rows contain the edge ranks for each subsample of the stability selection.</outPort>
 	<outPort index="1" name="Meta Information">A data table which contains meta information (number of variables, number of samples, ...)</outPort>
 	</ports>    
 
-	<views>
+	<!--<views>
 	<view index="0" name="Log Messages">STDOUT and STDERR of the R-Job</view>
-	</views>
+	</views>-->
 </knimeNode>

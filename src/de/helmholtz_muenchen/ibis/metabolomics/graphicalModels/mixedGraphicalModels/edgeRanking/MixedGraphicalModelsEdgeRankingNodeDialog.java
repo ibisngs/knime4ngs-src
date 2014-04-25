@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -21,6 +22,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.IntValue;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeLogger;
@@ -28,6 +30,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+
+import de.helmholtz_muenchen.ibis.utils.Global;
 
 
 /**
@@ -52,16 +56,17 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
     private final JPanel m_typesListPanel;
     private final LinkedHashMap<String, RankerDefinitionPanel> m_typesRankerPanels;
     private final SpinnerNumberModel m_stabSel_sampleNum = new SpinnerNumberModel(MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_N, 1, 10000, 1);
+    private final JSpinner stabSel_sampleNum_spinner= new JSpinner(m_stabSel_sampleNum);
     private final SpinnerNumberModel m_stabSel_sampleSize = new SpinnerNumberModel(MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_S, 0.0, 1.0, 0.01);
-    private final SpinnerNumberModel m_rseed = new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
-    private final SpinnerNumberModel m_parallel = new SpinnerNumberModel(1, 1, 128, 1);
-	private final JComboBox<String> m_rankerType;
+    private final JComboBox<String> m_randomSeedsSSCol;
+    private String[] m_availableCols_ssRSeed = new String[]{MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS};
+    private final JComboBox<String> m_rankerType;
 	
 
     /**
      * Creates a new binner dialog.
      */
-    MixedGraphicalModelsEdgeRankingNodeDialog() {
+    protected MixedGraphicalModelsEdgeRankingNodeDialog() {
         super();
         
         // INITIALIZE PANEL FOR STABILITY SELECTION PARAMETERS
@@ -70,7 +75,6 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
         // num samples
         final JLabel stabSel_sampleNum_label     = new JLabel("Number of Samples");
         stabSelPanel.add(stabSel_sampleNum_label);
-        final JSpinner stabSel_sampleNum_spinner= new JSpinner(m_stabSel_sampleNum);
         stabSelPanel.add(stabSel_sampleNum_spinner);
         
         // sample Size
@@ -80,18 +84,12 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
         stabSelPanel.add(stabSel_sampleS_spinner);
         
         // random Seed
-        final JLabel stabSel_rseed_label = new JLabel("Seed for random generator");
-        stabSelPanel.add(stabSel_rseed_label);
-        final JSpinner stabSel_rseed= new JSpinner(m_rseed);
-        stabSelPanel.add(stabSel_rseed);
-        
-        // parallelization
-        final JLabel parallelThreads_label = new JLabel("Number of parallel threads");
-        stabSelPanel.add(parallelThreads_label);
-        final JSpinner parallelThreads= new JSpinner(m_parallel);
-        stabSelPanel.add(parallelThreads);
-        
-        
+        // Random seeds col if optional input is given
+        JLabel label_randomSeed = new JLabel("Random Seed");
+        stabSelPanel.add(label_randomSeed);
+        m_randomSeedsSSCol = new JComboBox<String>(m_availableCols_ssRSeed);
+        stabSelPanel.add(m_randomSeedsSSCol);
+
         // ranking type
         JLabel label_rankerType = new JLabel("Ranking Type");
         stabSelPanel.add(label_rankerType);
@@ -165,14 +163,30 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
 	 */
 	@Override
 	protected void loadSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs) throws NotConfigurableException {
-		HashSet<String> typesCurrent = MixedGraphicalModelsEdgeRankingNodeModel.getUniqueVariableTypes(specs[0]);
+		HashSet<String> typesCurrent = Global.getUniqueVariableTypes(specs[0]);
 		
 		/* NORMAL SETTINGS */
 		m_stabSel_sampleNum.setValue(settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_N, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_N));
 		m_stabSel_sampleSize.setValue(settings.getDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_S));
 		m_rankerType.setSelectedItem(settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE , MixedGraphicalModelsEdgeRankingNodeModel.GRAFO_RANKTYPE[0]));
-		m_rseed.setValue(settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED, 0));
-		m_parallel.setValue(settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, 1));
+
+		if(specs[1] != null){
+			DataTableSpec optionalInputSpecs = (DataTableSpec)specs[1];
+			this.m_availableCols_ssRSeed = Global.getValidCols(optionalInputSpecs, IntValue.class);
+		}else{
+			m_availableCols_ssRSeed = new String[]{MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS};
+		}
+		DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>( m_availableCols_ssRSeed );
+		this.m_randomSeedsSSCol.setModel(model);
+		
+		if(this.m_availableCols_ssRSeed[0].equals(MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS)){
+			this.m_randomSeedsSSCol.setEnabled(false);
+			this.stabSel_sampleNum_spinner.setEnabled(true);
+		}else{
+			this.m_randomSeedsSSCol.setEnabled(true);
+			this.stabSel_sampleNum_spinner.setEnabled(false);
+			this.m_randomSeedsSSCol.setSelectedItem(settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS));	
+		}
 		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		// delete all old content
@@ -220,9 +234,8 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
 		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_N, m_stabSel_sampleNum.getNumber().intValue());
 		settings.addDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize.getNumber().doubleValue());
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE, (String)this.m_rankerType.getSelectedItem());
-		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED, m_rseed.getNumber().intValue());
-		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, m_parallel.getNumber().intValue());
-		
+		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, (String)this.m_randomSeedsSSCol.getSelectedItem());
+
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_typesRankerPanels.keySet().size();
 		

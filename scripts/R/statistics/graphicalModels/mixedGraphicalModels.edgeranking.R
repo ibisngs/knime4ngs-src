@@ -2,7 +2,7 @@
 ## PARSE ARGS
 ########################################################################################################################################
 require(argparse)
-parser <- ArgumentParser(prog="runner.edgeranking.R", description="This Rscript samples random subsets from the datamatrix and ranks all possible edges according to the data")
+parser <- ArgumentParser(prog="mixedGraphicalModels.edgeranking.R", description="This script samples random subsets from the datamatrix and ranks all possible edges according to the data")
 
 ## GLOBALS 
 parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file"        , metavar="<path>")
@@ -29,7 +29,7 @@ parser$add_argument("-pc","--cores"    , type="integer"  , action='store'     , 
 args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 
 print(args)
-# q()
+
 
 ########################################################################################################################################
 ## LOAD LIBRARIES
@@ -39,8 +39,7 @@ source(args$file.glob)
 loadLib("plyr")
 #loadLib("igraph")
 #loadLib("reshape2")
-loadLib("kimisc")
-CWD = normalizePath(if(is.null(thisfile())){getwd()}else{dirname(thisfile())})
+CWD = getCWD()
 source(paste(CWD, "/mixedGraphicalModels.R", sep=""))
 
 
@@ -79,10 +78,10 @@ if(length(invalid.classes)!=0){
 }
 
 ## init random generator
-if(!is.null(args$rseed)){
-	set.seed(args$rseed)
+if(is.null(args$rseed)){
+	args$rseed = sample(.Machine$integer.max, 1)
 }
-
+set.seed(args$rseed)
 ##########################################################################################################################################
 ## CREATE MODEL
 ##########################################################################################################################################
@@ -104,7 +103,7 @@ model <- mixedGraficalModels(data, #
 
 write.csv3(model$ranks, args$file.out1)
 
-metaData = t(data.frame(variables=paste(model$variables, collapse=","), stabSel.Sample.num=model$stabSel.sampleNum, n=model$n, p=model$p, time=model$run.time))
-colnames(metaData) = "value"
+metaData = data.frame(variables=paste(model$variables, collapse=","), stabSel.Sample.num=model$stabSel.sampleNum, n=model$n, p=model$p, seed=args$rseed, time=model$run.time)
+# colnames(metaData) = "value"
 
 write.csv3(metaData, args$file.out2)

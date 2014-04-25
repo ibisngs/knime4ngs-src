@@ -28,8 +28,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
  * @author Jonas Zierer
  */
 public class ShuffleDataNodeModel extends NodeModel {
-	public static final String[] POSSIBLE_STRING_VALUES = {"String 1", "String 2", "Another String"};
-	
 	/** CFG KEYS */
 	static final String CFGKEY_RANDOM_SEED    = "seed";
 	static final String CFGKEY_COLUMNS        = "columns";
@@ -45,10 +43,10 @@ public class ShuffleDataNodeModel extends NodeModel {
         super(1, 1);
     }
 
-    private HashMap<String, Integer> getColIDs(DataTableSpec inData) throws InvalidSettingsException{
+    private static HashMap<String, Integer> getColIDs(DataTableSpec inData, String[] colnames) throws InvalidSettingsException {
     	HashMap<String, Integer> colIDs = new HashMap<String, Integer>();
     	
-    	for(String col: m_list.getIncludeList()){
+    	for(String col: colnames){
     		int colID = inData.findColumnIndex(col);
     		
     		if(colID<0){
@@ -63,31 +61,46 @@ public class ShuffleDataNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
-    	HashMap<String, DataCell[]> colsToShuffle = new HashMap<String, DataCell[]>();
-    	HashMap<String, Integer> ids = getColIDs(inData[0].getDataTableSpec());
-    	String[] colNames = inData[0].getDataTableSpec().getColumnNames();
+    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+    	String[] colsToShuffle = m_list.getIncludeList().toArray(new String[m_list.getIncludeList().size()]);
+    	
+    	BufferedDataTable shuffledData = shuffleData(inData[0], exec, colsToShuffle, this.m_seed.getIntValue());
+    	
+    	
+        return new BufferedDataTable[]{shuffledData};
+    }
+    
+    public static BufferedDataTable shuffleData(BufferedDataTable input, final ExecutionContext exec, String[] colsToShuffleNames, int seed) throws CanceledExecutionException{
+    	HashMap<String, DataCell[]> columnsToShuffle = new HashMap<String, DataCell[]>();
+    	String[] colNames = input.getDataTableSpec().getColumnNames();
+    	HashMap<String, Integer> ids;
+		try {
+			ids = getColIDs(input.getDataTableSpec(), colNames);
+		} catch (InvalidSettingsException e) {
+			throw new CanceledExecutionException(e.getMessage());
+		}
+    	
     	
     	// init data cell collection
-    	for(String col: ids.keySet()){
-    		colsToShuffle.put(col, new DataCell[inData[0].getRowCount()]);
+    	for(String col: colsToShuffleNames){
+    		columnsToShuffle.put(col, new DataCell[input.getRowCount()]);
     	}
     	
     	// collect all dataCells (which shall be shuffled
     	int rowCounter=0;
-    	for(DataRow row: inData[0]){
-    		for(String col: ids.keySet()){
-    			colsToShuffle.get(col)[rowCounter] = row.getCell(ids.get(col));
+    	for(DataRow row: input){
+    		for(String col: colsToShuffleNames){
+    			columnsToShuffle.get(col)[rowCounter] = row.getCell(ids.get(col));
     		}
     		rowCounter++;
     	}
     	
     	// shuffle data
-    	Random random = new Random(m_seed.getIntValue());
+    	Random random = new Random(seed);
     	int index;
     	DataCell temp;
-    	for(String col: colsToShuffle.keySet()){
-    		DataCell[] allCells = colsToShuffle.get(col);
+    	for(String col: colsToShuffleNames){
+    		DataCell[] allCells = columnsToShuffle.get(col);
 
     	    for (int i = allCells.length - 1; i > 0; i--){
     	        index = random.nextInt(i + 1);
@@ -95,18 +108,18 @@ public class ShuffleDataNodeModel extends NodeModel {
     	        allCells[index] = allCells[i];
     	        allCells[i] = temp;
     	    }
-    		colsToShuffle.put(col, allCells);
+    	    columnsToShuffle.put(col, allCells);
     	}
     	
     	
     	// create output
     	rowCounter=0;
-    	BufferedDataContainer output = exec.createDataContainer(inData[0].getDataTableSpec());
-    	for(DataRow rowOld: inData[0]){
+    	BufferedDataContainer output = exec.createDataContainer(input.getDataTableSpec());
+    	for(DataRow rowOld: input){
     		DataCell[] cellsNew = new DataCell[colNames.length];
     		for(int c=0; c<colNames.length; c++){
-    			if(colsToShuffle.containsKey(colNames[c])){
-    				cellsNew[c] = colsToShuffle.get(colNames[c])[rowCounter];
+    			if(columnsToShuffle.containsKey(colNames[c])){
+    				cellsNew[c] = columnsToShuffle.get(colNames[c])[rowCounter];
     			}else{
     				cellsNew[c] = rowOld.getCell(c);
     			}
@@ -116,9 +129,12 @@ public class ShuffleDataNodeModel extends NodeModel {
     		output.addRowToTable(rowNew);
     		rowCounter++;
     	}
+    	
+    	// produce BufferedDataTable for output
     	output.close();
-        return new BufferedDataTable[]{output.getTable()};
+    	return(output.getTable());
     }
+    
     
     /**
      * {@inheritDoc}
