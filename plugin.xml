@@ -8,6 +8,7 @@
 		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.segemehl.SegemehlNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.segemehl.SegemehlNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqcStatisticMerger.FastqcStatisticMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqcStatisticMerger.FastqcStatisticMergerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.genscan.GenscanNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.genscan.GenscanNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samloader.SAMLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samloader.SAMLoaderNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.bamloader.BAMLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bamloader.BAMLoaderNodeFactory"/>

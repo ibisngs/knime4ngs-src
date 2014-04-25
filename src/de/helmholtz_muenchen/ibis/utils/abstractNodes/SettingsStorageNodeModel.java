@@ -11,6 +11,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleRange;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelLong;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.util.Pair;
@@ -28,20 +29,22 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 	
 	// stores the defined SettingsModelString objects
 	private static final HashMap<String, String> SETTINGS_STRING_VALUES = new HashMap<String, String>();
+	private static final HashMap<String, String> SETTINGS_OPTIONAL_STRING_VALUES = new HashMap<String, String>();
 	private static final HashMap<String, String[]> SETTINGS_STRING_ARRAY_VALUES = new HashMap<String, String[]>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelString>> SETTINGS_STRING_OBJECTS 			= new HashMap<Integer, HashMap<String, SettingsModelString>>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelStringArray>> SETTINGS_STRING_ARRAY_OBJECTS = new HashMap<Integer, HashMap<String, SettingsModelStringArray>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelString>> SETTINGS_STRING_OBJECTS 				= new HashMap<Integer, HashMap<String, SettingsModelString>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelOptionalString>> SETTINGS_OPTIONAL_STRING_OBJECT	= new HashMap<Integer, HashMap<String, SettingsModelOptionalString>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelStringArray>> SETTINGS_STRING_ARRAY_OBJECTS 		= new HashMap<Integer, HashMap<String, SettingsModelStringArray>>();
 
 	// stores the defined SettingsModelNumber objects
-	private static final HashMap<String, Integer> SETTINGS_INTEGER_VALUES = new HashMap<String, Integer>();
-	private static final HashMap<String, Double> SETTINGS_DOUBLE_VALUES = new HashMap<String, Double>();
-	private static final HashMap<String, Long> SETTINGS_LONG_VALUES = new HashMap<String, Long>();
-	private static final HashMap<String, Pair<Double, Double>> SETTINGS_DOUBLE_RANGE_VALUES = new HashMap<String, Pair<Double, Double>>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelInteger>> SETTINGS_INTEGER_OBJECTS 			= new HashMap<Integer, HashMap<String, SettingsModelInteger>>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelDouble>> SETTINGS_DOUBLE_OBJECTS 			= new HashMap<Integer, HashMap<String, SettingsModelDouble>>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelLong>> SETTINGS_LONG_OBJECTS 				= new HashMap<Integer, HashMap<String, SettingsModelLong>>();
-	private static final HashMap<Integer, HashMap<String, SettingsModelDoubleRange>> SETTINGS_DOUBLE_RANGE_OBJECTS 	= new HashMap<Integer, HashMap<String, SettingsModelDoubleRange>>();
-	
+	private static final HashMap<String, Integer> SETTINGS_INTEGER_VALUES 		= new HashMap<String, Integer>();
+	private static final HashMap<String, Double> SETTINGS_DOUBLE_VALUES 		= new HashMap<String, Double>();
+	private static final HashMap<String, Long> SETTINGS_LONG_VALUES 			= new HashMap<String, Long>();
+	private static final HashMap<String, Pair<Double, Double>> SETTINGS_DOUBLE_RANGE_VALUES 								= new HashMap<String, Pair<Double, Double>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelInteger>> SETTINGS_INTEGER_OBJECTS 					= new HashMap<Integer, HashMap<String, SettingsModelInteger>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelDouble>> SETTINGS_DOUBLE_OBJECTS 					= new HashMap<Integer, HashMap<String, SettingsModelDouble>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelLong>> SETTINGS_LONG_OBJECTS 						= new HashMap<Integer, HashMap<String, SettingsModelLong>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelDoubleRange>> SETTINGS_DOUBLE_RANGE_OBJECTS 			= new HashMap<Integer, HashMap<String, SettingsModelDoubleRange>>();
+	private static final HashMap<Integer, HashMap<String, SettingsModelOptionalString>> SETTINGS_OPTIONAL_STRING_OBJECTS 	= new HashMap<Integer, HashMap<String, SettingsModelOptionalString>>();
 
 	/**
 	 * Constructor with number of input and output ports.
@@ -54,11 +57,30 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 		// create initial HashMaps
 		SETTINGS_BOOLEAN_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelBoolean>());
 		SETTINGS_STRING_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelString>());
+		SETTINGS_OPTIONAL_STRING_OBJECT.put(hashCode(), new HashMap<String, SettingsModelOptionalString>());
 		SETTINGS_STRING_ARRAY_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelStringArray>());
 		SETTINGS_INTEGER_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelInteger>());
 		SETTINGS_DOUBLE_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelDouble>());
 		SETTINGS_LONG_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelLong>());
 		SETTINGS_DOUBLE_RANGE_OBJECTS.put(hashCode(), new HashMap<String, SettingsModelDoubleRange>());
+		
+        // create all the settings because otherwise they are not saved, if not used in the model in configure...
+        for(String key : SETTINGS_BOOLEAN_VALUES.keySet())
+			getSettingsModelBoolean(key);
+        for(String key : SETTINGS_STRING_VALUES.keySet())
+			getSettingsModelString(key);
+        for(String key : SETTINGS_OPTIONAL_STRING_VALUES.keySet())
+			getSettingsModelOptionalString(key);
+        for(String key : SETTINGS_STRING_ARRAY_VALUES.keySet())
+			getSettingsModelStringArray(key);
+        for(String key : SETTINGS_INTEGER_VALUES.keySet())
+			getSettingsModelInteger(key);
+        for(String key : SETTINGS_DOUBLE_VALUES.keySet())
+			getSettingsModelDouble(key);
+        for(String key : SETTINGS_LONG_VALUES.keySet())
+			getSettingsModelLong(key);
+        for(String key : SETTINGS_DOUBLE_RANGE_VALUES.keySet())
+			getSettingsModelDoubleRange(key);
 	}
 	
 	/************************************* SettingsModelBoolean  *************************************/
@@ -95,7 +117,7 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 		// check, if defined
 		if(SETTINGS_BOOLEAN_VALUES.containsKey(key)) {
 			Integer instanceKey = caller.hashCode();
-			
+
 			// create a new hashMap, if not there yet
 			if(!SETTINGS_BOOLEAN_OBJECTS.containsKey(instanceKey))
 				SETTINGS_BOOLEAN_OBJECTS.put(instanceKey, new HashMap<String, SettingsModelBoolean>());
@@ -163,6 +185,58 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 		}
 		else
 			throw(new IllegalArgumentException("Key '" + key + "' is not defined for SettingsModelString.")); 
+	}
+	
+	
+	/************************************* SettingsModelString  *************************************/
+	/***********************************************************************************************/
+	
+	/**
+	 * adds a new SettingsModelOptionalString
+	 * @param key key for the setting
+	 * @param defaultValue default value of the setting
+	 */
+	protected static void addSettingsModelOptionalString(String key, String defaultValue) {
+		SETTINGS_OPTIONAL_STRING_VALUES.put(key, defaultValue);
+	}
+	
+	/**
+	 * Returns a SettingsModelOptionalString Object for the model node
+	 * @param key
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public SettingsModelOptionalString getSettingsModelOptionalString(String key) throws IllegalArgumentException {
+		return getSettingsModelOptionalString(key, this);
+	}
+	
+	/**
+	 * Returns a SettingsModelOptionalString Object 
+	 * Should be used called if call comes not from the Model!
+	 * @param key key of the SettingsModelOptionalString object
+	 * @param caller object, which called wants to get the settings
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public static SettingsModelOptionalString getSettingsModelOptionalString(String key, final Object caller) throws IllegalArgumentException {
+		// check, if defined
+		if(SETTINGS_OPTIONAL_STRING_VALUES.containsKey(key)) {
+			Integer instanceKey = caller.hashCode();
+			
+			// create a new hashMap, if not there yet
+			if(!SETTINGS_OPTIONAL_STRING_OBJECTS.containsKey(instanceKey))
+				SETTINGS_OPTIONAL_STRING_OBJECTS.put(instanceKey, new HashMap<String, SettingsModelOptionalString>());
+				
+			// check, if settings model is there
+			HashMap<String, SettingsModelOptionalString> models = SETTINGS_OPTIONAL_STRING_OBJECTS.get(instanceKey);
+			if(!models.containsKey(key)) 
+				models.put(key, new SettingsModelOptionalString(key, SETTINGS_OPTIONAL_STRING_VALUES.get(key), false));
+			
+			// return the object
+			return models.get(key);
+		}
+		else
+			throw(new IllegalArgumentException("Key '" + key + "' is not defined for SettingsModelOptionalString.")); 
 	}
 	
 	/********************************** SettingsModelStringArray  **********************************/
@@ -426,7 +500,7 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 	
 	/**************************************** KNIME METHODS ****************************************/
 	/***********************************************************************************************/
-	
+    
     /**
      * {@inheritDoc}
      */
@@ -436,6 +510,8 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
     	for(SettingsModelBoolean set : SETTINGS_BOOLEAN_OBJECTS.get(hashCode()).values())
     		set.validateSettings(settings);
     	for(SettingsModelString set : SETTINGS_STRING_OBJECTS.get(hashCode()).values())
+    		set.validateSettings(settings);
+    	for(SettingsModelString set : SETTINGS_OPTIONAL_STRING_OBJECT.get(hashCode()).values())
     		set.validateSettings(settings);
     	for(SettingsModelStringArray set : SETTINGS_STRING_ARRAY_OBJECTS.get(hashCode()).values())
     		set.validateSettings(settings);
@@ -459,6 +535,8 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
     		set.loadSettingsFrom(settings);
     	for(SettingsModelString set : SETTINGS_STRING_OBJECTS.get(hashCode()).values())
     		set.loadSettingsFrom(settings);
+    	for(SettingsModelString set : SETTINGS_OPTIONAL_STRING_OBJECT.get(hashCode()).values())
+    		set.loadSettingsFrom(settings);
     	for(SettingsModelStringArray set : SETTINGS_STRING_ARRAY_OBJECTS.get(hashCode()).values())
     		set.loadSettingsFrom(settings);
     	for(SettingsModelInteger set : SETTINGS_INTEGER_OBJECTS.get(hashCode()).values())
@@ -477,9 +555,13 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	// get all models and save them
-    	for(SettingsModelBoolean set : SETTINGS_BOOLEAN_OBJECTS.get(hashCode()).values())
-    		set.saveSettingsTo(settings);
+    	for(SettingsModelBoolean set : SETTINGS_BOOLEAN_OBJECTS.get(hashCode()).values()) {
+    		set.saveSettingsTo(settings); 
+    		System.out.println(set);
+    	}
     	for(SettingsModelString set : SETTINGS_STRING_OBJECTS.get(hashCode()).values())
+    		set.saveSettingsTo(settings);
+    	for(SettingsModelString set : SETTINGS_OPTIONAL_STRING_OBJECT.get(hashCode()).values())
     		set.saveSettingsTo(settings);
     	for(SettingsModelStringArray set : SETTINGS_STRING_ARRAY_OBJECTS.get(hashCode()).values())
     		set.saveSettingsTo(settings);
