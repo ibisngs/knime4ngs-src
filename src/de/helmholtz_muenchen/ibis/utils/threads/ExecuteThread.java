@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -31,7 +32,6 @@ public class ExecuteThread implements Callable<Boolean> {
 	private InputThread stdInStream;
 	private final NodeLogger LOGGER;
 	private final String[] ENVIRONMENT;
-	private final boolean ENABLE_ESCAPE;
 	
 	/**
 	 * ExecuteThread starts process to execute command in a new thread. STDOUT and STDERR are redirected to files or StringBuffers
@@ -43,7 +43,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	 * @param stdErrStr if not null STDERR is redirected to this StringBuffer
 	 * @param enableEscape enables parameter escaping
 	 */
-	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment, boolean enableEscape) {
+	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment) {
 		this.command = command;
 
 		this.stdErrFile=stdErrFile;
@@ -52,12 +52,13 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
 
-		this.ENABLE_ESCAPE = enableEscape;
 		this.LOGGER = logger;
-//		if(Environment != null)
-		this.ENVIRONMENT = Environment;
-//		else
-//			this.ENVIRONMENT = new String[0];
+		
+		// workaround for letting jar files run properly!
+		if(Environment == null && command[0].startsWith("java -jar"))
+			this.ENVIRONMENT = new String[0];
+		else
+			this.ENVIRONMENT = Environment;
 	}
 
 
@@ -66,11 +67,11 @@ public class ExecuteThread implements Callable<Boolean> {
 	 */
 	@Override
 	public Boolean call() throws Exception {
-		LOGGER.info("Running command: " + this.getCommand());
+		LOGGER.info("Running command: " + getCommand(this.command));
 		
 		//Start the process
 		if(this.command.length==1){
-			p = Runtime.getRuntime().exec(this.getCommand(), this.ENVIRONMENT);
+			p = Runtime.getRuntime().exec(this.command[0], this.ENVIRONMENT);
 		}else{
 			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
 		}
@@ -209,21 +210,9 @@ public class ExecuteThread implements Callable<Boolean> {
 		}
 		return nodeEntry;
 	}
-	
-	private String getCommand(){
-		return getCommand(this.command, this.ENABLE_ESCAPE);
-	}
-	
-	public static String getCommand(String[] command, boolean enableEscape){
-		StringBuffer com  = new StringBuffer(command[0]);
-		for(int i=1; i<command.length; i++){
-			if(enableEscape && !command[i].startsWith("-")){
-				com.append(" \"" + command[i] + "\"");
-			}else{
-				com.append(" " + command[i]);
-			}
-		}
-		return com.toString();
+		
+	public static String getCommand(String[] command){
+		return StringUtils.join(command, "");
 	}
 	
 	/**

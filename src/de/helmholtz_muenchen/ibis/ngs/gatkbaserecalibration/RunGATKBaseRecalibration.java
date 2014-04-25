@@ -73,7 +73,7 @@ public class RunGATKBaseRecalibration {
 		
 		GATKBaseRecalibrationNodeModel.logger.info(cmd);
 		
-		Executor.executeCommand(new String [] {cmd} ,exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null, true);
+		Executor.executeCommand(new String [] {cmd} ,exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
 	}
 	
 	
@@ -141,7 +141,7 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK BaseRecalibrator...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outtable+".out.log and "+outtable+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd},exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null, true);
+		Executor.executeCommand(new String[]{cmd},exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
 	}
 	
 	protected static void PrintReads(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outbam, boolean outsimple, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
@@ -164,7 +164,7 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK PrintReads...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outbam+".out.log and "+outbam+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null, true);
+		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null);
 	}
 	
 	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
@@ -189,6 +189,6 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK AnalyzeCovariates...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+pplots+".out.log and "+pplots+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null, true);
+		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null);
 	}
 }

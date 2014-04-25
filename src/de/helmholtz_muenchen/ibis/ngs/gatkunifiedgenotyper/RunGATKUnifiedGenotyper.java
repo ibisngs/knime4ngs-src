@@ -50,7 +50,7 @@ protected static void CallVariants(ExecutionContext exec, String gatk, String ba
 		GATKUnifiedGenotyperNodeModel.logger.info("Running GATK UnifiedGenotyper...");
 		GATKUnifiedGenotyperNodeModel.logger.info("Log files can be found in "+out+".out.log and "+out+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKUnifiedGenotyperNodeModel.logger, out+".out.log", out+".err.log", null, true);
+		Executor.executeCommand(new String[]{cmd}, exec, null, GATKUnifiedGenotyperNodeModel.logger, out+".out.log", out+".err.log", null);
 		
 	}
 

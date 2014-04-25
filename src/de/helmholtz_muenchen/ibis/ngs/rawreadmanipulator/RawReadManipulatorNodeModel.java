@@ -246,7 +246,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	/** check if run was already sucessful **/
     	String[] com = command.toArray(new String[command.size()]);
     	File lockFile = new File(inFile1.substring(0,inFile1.lastIndexOf(".")) + ".RRM" +  SuccessfulRunChecker.LOCK_ENDING);
-    	String lockCommand = ExecuteThread.getCommand(com, true);
+    	String lockCommand = ExecuteThread.getCommand(com);
     	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
 		LOGGER.info("Successful termination state: " + terminationState);
 
@@ -262,7 +262,7 @@ public class RawReadManipulatorNodeModel extends NodeModel {
 //	    	StringBuffer sysErr = new StringBuffer(50);
 //	    	StringBuffer sysOut = new StringBuffer(50);
 //	    	Executor.executeCommand(com,exec,LOGGER,sysOut,sysErr, true);
-	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, LOGGER, stdOutFile, stdErrFile, null, true);
+	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, LOGGER, stdOutFile, stdErrFile, null);
 //	        LOGGER.info("-----------------SysError-----------------");
 //	    	LOGGER.info(sysErr);
 //	    	LOGGER.info("-----------------SysOut-----------------");

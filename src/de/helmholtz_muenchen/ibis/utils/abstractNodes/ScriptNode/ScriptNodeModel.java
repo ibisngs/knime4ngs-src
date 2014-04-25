@@ -31,7 +31,7 @@ public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	}
 	
 	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException {
-		executeCommand(exec, this.getCommand(), environment, true, null);
+		executeCommand(exec, this.getCommand(), environment, null);
 	}
 	
 	protected abstract String[] getCommand();

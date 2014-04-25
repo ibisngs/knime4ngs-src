@@ -95,7 +95,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	
     	// check if run was already successful 
     	File lockFile = getPathToLockFile();
-    	String lockCommand = ExecuteThread.getCommand(command, isParameterEscapingEnabled());
+    	String lockCommand = ExecuteThread.getCommand(command);
     	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
 		LOGGER.info("Successful termination state: " + terminationState);
 
@@ -104,12 +104,12 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 			
 			// execute the command
-			executeCommand(exec, command, null, isParameterEscapingEnabled(), getPathToLogOutputFolder());
+			executeCommand(exec, command, null, getPathToLogOutputFolder());
 			checker.writeOK();
 		}
 		
 		exec.setProgress(1.00); // we are done
-        return getOutputData(exec, ExecuteThread.getCommand(command, isParameterEscapingEnabled()), inData);
+        return getOutputData(exec, ExecuteThread.getCommand(command), inData);
     }
 	
 	/**
@@ -144,11 +144,6 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @return
 	 */
 	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData);
-	
-	/**
-	 * enables or disables parameter escaping
-	 */
-	protected abstract boolean isParameterEscapingEnabled();
 	
 	/**
 	 * Path to folder were log files shall be written (or null if no logs should be written)

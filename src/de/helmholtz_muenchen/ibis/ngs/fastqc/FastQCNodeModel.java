@@ -118,7 +118,7 @@ public class FastQCNodeModel extends NodeModel {
 	    	/**Execute for first file**/
 	    	String[] com = command.toArray(new String[command.size()]);
 	    	StringBuffer sysErr = new StringBuffer(50);
-	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr, true);
+	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr);
 	    	//Show FastQC Output
 	    	LOGGER.info(sysErr);
 	    	
@@ -129,7 +129,7 @@ public class FastQCNodeModel extends NodeModel {
 	    		//Clear StringBuffer
 	    		sysErr.setLength(0);
 	    		sysErr.append("\n");
-	    		Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr, true);
+	    		Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr);
 	    		//Show FastQC Output
 	        	LOGGER.info(sysErr);
 	        	//Clear StringBuffer
@@ -146,7 +146,7 @@ public class FastQCNodeModel extends NodeModel {
 	        	commandMerge.add(outfile1);
 	        	commandMerge.add(outfile2);
 	        	commandMerge.add(outfileMerged);
-	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr, true); // do this to avoid escaping
+	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr);
 	        	//Show FastQC Output
 	        	LOGGER.info(sysErr);
 	        	logBuffer.append(sysErr);

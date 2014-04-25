@@ -212,11 +212,6 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	// all checks where ok */
     	return true;
     }
-
-	@Override
-	protected boolean isParameterEscapingEnabled() {
-		return false;
-	}
 	
 	@Override
 	protected File getPathToLogOutputFolder() {

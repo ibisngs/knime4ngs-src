@@ -86,10 +86,9 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @param exec ExecutionContext
 	 * @param command command which is joined by " " before execution
 	 * @param environment environment variables
-	 * @param enableEscape enables parameter escaping
 	 * @throws CanceledExecutionException
 	 */
-	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, boolean enableEscape, File path2LogOutput) throws CanceledExecutionException {
+	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, File path2LogOutput) throws CanceledExecutionException {
 		//isRunning = true;
 		// StringBuffers to write STDOUT and STDERR to
 		if(STDOUT!=null){
@@ -120,7 +119,7 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 		
 		
 		try {
-			Executor.executeCommand(command, exec, environment, LOGGER, stdOutFile, stdErrFile, STDOUT, STDERR, enableEscape);
+			Executor.executeCommand(command, exec, environment, LOGGER, stdOutFile, stdErrFile, STDOUT, STDERR);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
 			// write log files
