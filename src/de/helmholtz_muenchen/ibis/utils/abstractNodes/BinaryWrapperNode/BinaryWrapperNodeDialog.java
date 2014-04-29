@@ -13,10 +13,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 public abstract class BinaryWrapperNodeDialog extends DefaultNodeSettingsPane {
 
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH			= BinaryWrapperNodeModel.getSettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, this);
-    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= BinaryWrapperNodeModel.getSettingsModelString(BinaryWrapperNodeModel.CFGKEY_ADDITIONAL_PARAMETER, this);
-    private final SettingsModelString SET_PARAMETER_FILE		= BinaryWrapperNodeModel.getSettingsModelString(BinaryWrapperNodeModel.CFGKEY_PARAMETER_FILE, this);
-    
+    private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_ADDITIONAL_PARAMETER, BinaryWrapperNodeModel.DEFAULT_ADDITIONAL_PARAMETER);
+    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_PARAMETER_FILE, BinaryWrapperNodeModel.DEFAULT_PARAMETER_FILE);
+   
 	protected BinaryWrapperNodeDialog() {
 		super();
 		// rename default tab

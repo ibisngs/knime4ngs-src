@@ -34,14 +34,14 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
 	
 	// initial default values for SettingsModels    
-    private static final String DEFAULT_BINARY_PATH 			= "";
-    private static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
-    private static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
+    protected static final String DEFAULT_BINARY_PATH 			= "";
+    protected static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
+    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH			= getSettingsModelString(CFGKEY_BINARY_PATH);
-    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= getSettingsModelString(CFGKEY_ADDITIONAL_PARAMETER);
-    private final SettingsModelString SET_PARAMETER_FILE		= getSettingsModelString(CFGKEY_PARAMETER_FILE);
+    private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
+    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
+    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
     
 	// logger class
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
@@ -50,16 +50,6 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	private static final String PARAMETER_REGEX 	= "(-{1,2}\\w+)\\s*(([^-]|(?<=\\w)-)*)";
 	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
 	private static final String REGEX_WHITESPACE	= "\\s+";
-    
-    /**
-     * add the used settings
-     */
-    static {
-        // add values for SettingsModelString
-    	addSettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
-    	addSettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
-    	addSettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
-    }
 	
 	/**
 	 * Constructor with number of input and output ports.
@@ -70,6 +60,14 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 */
 	protected BinaryWrapperNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
 		super(nrInDataPorts, nrOutDataPorts, catchStdout, catchStderr);
+		// init is called by child classes
+	}
+	
+	@Override
+	public void init() {
+		addSetting(SET_BINARY_PATH);
+		addSetting(SET_ADDITIONAL_PARAMETER);
+		addSetting(SET_PARAMETER_FILE);
 	}
 	
 	@Override

@@ -67,21 +67,18 @@ public class FastqcStatisticMergerNodeModel extends SettingsStorageNodeModel {
 	protected static final String CFGKEY_MODULE_ALL 	=  MODULE_ALL;
 	
     // initial default values for SettingsModels    
-	private static final String DEFAULT_INPUT_FOLDER 	= "";		
-    private static final String DEFAULT_OUTPUT_FOLDER 	= "";	
+	protected static final String DEFAULT_INPUT_FOLDER 	= "";		
+	protected static final String DEFAULT_OUTPUT_FOLDER 	= "";	
     
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_INPUT_FOLDER	= getSettingsModelString(CFGKEY_INPUT_FOLDER, this);
-    private final SettingsModelString SET_OUTPUT_FOLDER = getSettingsModelString(CFGKEY_OUTPUT_FOLDER, this);
-
+    private final SettingsModelString SET_INPUT_FOLDER	= new SettingsModelString(CFGKEY_INPUT_FOLDER, DEFAULT_INPUT_FOLDER);
+    private final SettingsModelString SET_OUTPUT_FOLDER = new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelBoolean SET_ALL_MODULES = new SettingsModelBoolean(FastqcStatisticMergerNodeModel.CFGKEY_MODULE_ALL, false);
+    
 	 /**
      * add the used settings
      */
     static {
-        // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_INPUT_FOLDER, DEFAULT_INPUT_FOLDER);
-        addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-        
         // add modules
         MODULE_NAMES.add(MODULE_BASIC);
         MODULE_NAMES.add(MODULE_BSQ);
@@ -94,13 +91,7 @@ public class FastqcStatisticMergerNodeModel extends SettingsStorageNodeModel {
         MODULE_NAMES.add(MODULE_SDL);
         MODULE_NAMES.add(MODULE_OS);
         MODULE_NAMES.add(MODULE_FOC);
-        MODULE_NAMES.add(MODULE_STATUS);
-        MODULE_NAMES.add(MODULE_ALL);
-        
-        // add the SettingsModelString
-        for(String moduleName : MODULE_NAMES) {
-        	addSettingsModelBoolean(moduleName, false);
-        }
+        MODULE_NAMES.add(MODULE_STATUS); 
     }
 	
 	
@@ -109,6 +100,22 @@ public class FastqcStatisticMergerNodeModel extends SettingsStorageNodeModel {
      */
     protected FastqcStatisticMergerNodeModel() {
         super(0, 2);
+        init();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void init() {
+    	addSetting(SET_INPUT_FOLDER);
+    	addSetting(SET_OUTPUT_FOLDER);
+    	addSetting(SET_ALL_MODULES);
+    	
+        // add modules
+        for(String moduleName : MODULE_NAMES) {
+        	addSetting(new SettingsModelBoolean(moduleName, false));
+        }
     }
 
     /**
@@ -129,7 +136,7 @@ public class FastqcStatisticMergerNodeModel extends SettingsStorageNodeModel {
     	
     	// run through all activated modules
     	for(String moduleName : MODULE_NAMES) {
-    		SettingsModelBoolean option = getSettingsModelBoolean(moduleName);
+    		SettingsModelBoolean option = (SettingsModelBoolean) getSetting(moduleName);
     		if(!moduleName.equals(MODULE_ALL)) {
 	    		// check, if that module was activated in the GUI
 	    		if(option.getBooleanValue()) {
@@ -212,7 +219,7 @@ public class FastqcStatisticMergerNodeModel extends SettingsStorageNodeModel {
     	boolean activated = false;
     	// test if at least one module is activated
     	for(String moduleName : MODULE_NAMES) {
-    		SettingsModelBoolean option = getSettingsModelBoolean(moduleName);
+    		SettingsModelBoolean option = (SettingsModelBoolean) getSetting(moduleName);
 	    	if(option.getBooleanValue()) {
 	    		activated = true;
 	    		break;

@@ -27,16 +27,16 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 	private final static String BINARY_NAME = "featureCounts";
 	
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_FEATURE_TYPE				= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, this);
-    private final SettingsModelString SET_OUTPUT_FILE 				= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FILE, this);
-    private final SettingsModelString SET_ANNOTATION_FILE			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, this);
-    private final SettingsModelString SET_ANNOTATION_TYPE			= FeatureCountsNodeModel.getSettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, this);
-    private final SettingsModelInteger SET_THREAD_NUMBER			= FeatureCountsNodeModel.getSettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, this);
-    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, this);
-    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, this);
-    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, this);
-    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= FeatureCountsNodeModel.getSettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, this);
-    
+    private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FEATURE);
+    private final SettingsModelString SET_OUTPUT_FILE 				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FILE, FeatureCountsNodeModel.DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FILE);
+    private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE);
+    private final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, FeatureCountsNodeModel.DEFAULT_THREAD_NUMBER);
+    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, FeatureCountsNodeModel.DEAFULT_COUNT_MULTIMAPPED);
+    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, FeatureCountsNodeModel.DEAFULT_COUNT_MULTI_OVERLAPING);
+    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_FRAGMENTS);
+    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
+
     protected FeatureCountsNodeDialog() {
         super();
        

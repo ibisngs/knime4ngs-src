@@ -70,6 +70,10 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		return("Rscript");
 	}
+	
+	// not used in childs of this class
+	@Override
+	public void init() {};
 
 
 	@Override

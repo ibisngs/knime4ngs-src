@@ -49,8 +49,8 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
     protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    private static final String DEFAULT_OUTPUT_FOLDER 	= "./output/";			// creates a folder "output" relative to the STAR binary
-    private static final String DEFAULT_GENOME_FOLDER 	= "./GenomeDir/";		// searches for the genome index in "GenomeDir" relative to the STAR binary
+    protected static final String DEFAULT_OUTPUT_FOLDER 	= "./output/";			// creates a folder "output" relative to the STAR binary
+    protected static final String DEFAULT_GENOME_FOLDER 	= "./GenomeDir/";		// searches for the genome index in "GenomeDir" relative to the STAR binary
 
     // name of parameters which are defined in the STAR binary
     private final static String NAME_OF_OUTPUT_PREFIX_PARAM 	= "--outFileNamePrefix";	// parameter in STAR which allows the user to set the output folder (relative or absolute)
@@ -62,29 +62,32 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_RUN_MODE			= getSettingsModelString(CFGKEY_RUN_MODE);
-    private final SettingsModelString SET_OUTPUT_FOLDER		= getSettingsModelString(CFGKEY_OUTPUT_FOLDER);
-    private final SettingsModelString SET_GENOME_FOLDER		= getSettingsModelString(CFGKEY_GENOME_FOLDER);
+    private final SettingsModelString SET_RUN_MODE			= new SettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
+    private final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
     
     // the logger instance
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
        
     /**
-     * add the used settings
-     */
-    static {
-        // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
-        addSettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-        addSettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
-    }
-    
-    /**
      * Constructor for the node model.
      */
     protected StarNodeModel() {
         super(1, 1, true, true);
+        init();
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void init() {
+    	super.init();
+    	
+    	addSetting(SET_RUN_MODE);
+    	addSetting(SET_OUTPUT_FOLDER);
+    	addSetting(SET_GENOME_FOLDER);
     }
     
     /**
@@ -93,7 +96,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
-    	
+
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
     	if(isAlignRunMode()) {

@@ -22,9 +22,9 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
 	private final static String BINARY_NAME = "STAR";
 	
 	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_RUN_MODE 			= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, this);
-    private final SettingsModelString SET_OUTPUT_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, this);
-    private final SettingsModelString SET_GENOME_FOLDER 	= StarNodeModel.getSettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, this);
+    private final SettingsModelString SET_RUN_MODE			= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
+    private final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
     
     protected StarNodeDialog() {
         super();

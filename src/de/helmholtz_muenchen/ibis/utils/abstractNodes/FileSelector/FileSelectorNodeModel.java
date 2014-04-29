@@ -18,6 +18,7 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 
@@ -40,30 +41,37 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     protected static final String DEFAULT_FILE_DIR = "-";
     protected static final String DEFAULT_FILE_FILE = "-";
     protected static final String DEFAULT_REGEX = ".*";
-       
+    
+	// definition of SettingsModel (all prefixed with SET)
+    private final SettingsModelString SET_FILE_DIR 					= new SettingsModelString(CFGKEY_FILE_DIR, DEFAULT_FILE_DIR);
+    private final SettingsModelString SET_FILE_FILE 				= new SettingsModelString(CFGKEY_FILE_FILE, DEFAULT_FILE_FILE);
+    private final SettingsModelString SET_NAME_REGEX				= new SettingsModelString(CFGKEY_REGEX, DEFAULT_REGEX);
+    
     // storage 
     private final HashSet<String> FILES		= new HashSet<String>();
     private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
     
     // the logger instance
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(FileSelectorNodeModel.class);
-   
-	/**
-	 * add keys to hash
-	 */
-	static {
-        // add values for SettingsModelString
-        addSettingsModelString(CFGKEY_FILE_DIR, DEFAULT_FILE_DIR);
-        addSettingsModelString(CFGKEY_FILE_FILE, DEFAULT_FILE_FILE);	
-        addSettingsModelString(CFGKEY_REGEX, DEFAULT_REGEX);
-	}
-	
+   	
     /**
      * Constructor for the node model.
      */
     protected FileSelectorNodeModel() {
         super(0, 1);
+        init();
     }
+    
+    
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public void init() {
+		addSetting(SET_FILE_DIR);
+		addSetting(SET_FILE_FILE);
+		addSetting(SET_NAME_REGEX);
+	}
     
     /**
      * {@inheritDoc}
