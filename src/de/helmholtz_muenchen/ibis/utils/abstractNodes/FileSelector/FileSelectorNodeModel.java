@@ -62,7 +62,6 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
         init();
     }
     
-    
     /**
      * {@inheritDoc}
      */
@@ -82,7 +81,18 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     	if(hasConfigureOpendOnce && FILES.size() == 0)
     		throw new InvalidSettingsException("Select at least one " + getFiletypeName() + " file.");
     	
-    	return new DataTableSpec[]{null};
+    	return new DataTableSpec[]{getDataOutSpec1()};
+    }
+    
+    /**
+     * returns the first output specifications of this node
+     * @return
+     */
+    private DataTableSpec getDataOutSpec1() {
+    	DataColumnSpecCreator col1 = new DataColumnSpecCreator(getNameOfOutputCol(), StringCell.TYPE);
+        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec()};
+        
+        return new DataTableSpec(cols);
     }
 
     /**
@@ -93,9 +103,7 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
     	exec.setProgress(0.01);
 
     	/******************* PREPARE OUTPUT **********************/
-		DataColumnSpecCreator col1 = new DataColumnSpecCreator(getNameOfOutputCol(), StringCell.TYPE);
-        DataColumnSpec[] cols = new DataColumnSpec[]{col1.createSpec()};
-    	DataTableSpec table = new DataTableSpec(cols);
+    	DataTableSpec table = getDataOutSpec1();
     	BufferedDataContainer cont = exec.createDataContainer(table);
     	
     	// write output to table

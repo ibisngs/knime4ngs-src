@@ -173,15 +173,22 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		return pars;
 	}
 	
+    /**
+     * returns the first output specifications of this node
+     * @return
+     */
+    private DataTableSpec getDataOutSpec1() {
+    	return new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec()});
+    }
+	
 	
 	@Override
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
-		BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec()}));
-    	
+		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
+		
     	DataCell[] c = new DataCell[]{
     			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true)),
     			new StringCell(command)};

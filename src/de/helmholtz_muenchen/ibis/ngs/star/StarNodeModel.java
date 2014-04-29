@@ -112,7 +112,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects the output of a 'FastaSelector' node.");
     	}
     	
-		return new DataTableSpec[]{null};
+		return new DataTableSpec[]{getDataOutSpec1()};
     }
     
     
@@ -167,15 +167,21 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		return pars;
 	}
 	
-	
-	@Override
-	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
-		BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
+    /**
+     * returns the first output specifications of this node
+     * @return
+     */
+    private DataTableSpec getDataOutSpec1() {
+    	return new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()});
+    }
+	
+	@Override
+	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
+		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
     	DataCell[] c = new DataCell[]{
     			new StringCell(SET_RUN_MODE.getStringValue()),
