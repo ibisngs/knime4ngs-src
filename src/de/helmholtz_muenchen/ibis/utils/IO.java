@@ -19,6 +19,7 @@ import org.knime.base.node.io.filereader.FileTable;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.util.tokenizer.SettingsStatus;
 
@@ -302,4 +303,26 @@ public class IO {
 			}
 		});
 	}
+		
+	/**
+     * checks, if a binary is there and (if the execution flag is set)
+     * @param binaryPath path to binary
+     * @param mustBeExecuteable true, if executable flag must be set
+     * @return
+     * @throws InvalidSettingsException
+     */
+    public static boolean isBinaryValid(String binaryPath, boolean mustBeExecuteable) throws InvalidSettingsException
+    {
+    	if(binaryPath == null || binaryPath.length() == 0)
+    		throw new InvalidSettingsException("Path to binary is not set.");
+    	
+    	// check, if file can be executed
+    	File binFile = new File(binaryPath);
+    	if(!binFile.isFile())
+    		throw new InvalidSettingsException("Binary is not found at '" + binaryPath + "'.");
+    	
+    	if(mustBeExecuteable && !binFile.canExecute())
+    		throw new InvalidSettingsException("Executable flag of '" + binaryPath + "' is not set.");
+    	return true;
+    }
 }

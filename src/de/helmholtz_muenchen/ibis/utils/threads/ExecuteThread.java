@@ -94,7 +94,7 @@ public class ExecuteThread implements Callable<Boolean> {
 
 		// WAIT FOR PROCESS TO BE FINISHED
 		p.waitFor();
-
+		
 		if(this.stdErrStr != null){
 			this.stdErrStr.append(getLogEntryStdErr(p));
 		}

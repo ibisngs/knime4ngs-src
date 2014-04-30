@@ -31,6 +31,7 @@
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory"/>
 		
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory"/>
@@ -45,14 +46,14 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post"  factory-class="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory" />
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory"/>
 			
 		<!-- METABOLOMICS -->
 		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
-		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRanking.MixedGraphicalModelsEdgeRankingNodeFactory"    id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRanking.MixedGraphicalModelsEdgeRankingNodeFactory"/>
+		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRanking.MixedGraphicalModelsEdgeRankingNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRanking.MixedGraphicalModelsEdgeRankingNodeFactory"/>
 		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.modelExtraction.MixedGraphicalModelsExtractionNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.modelExtraction.MixedGraphicalModelsExtractionNodeFactory"/>
-		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.gaussianGraphicalModel.GaussianGraphicalModelNodeFactory"                       id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.gaussianGraphicalModel.GaussianGraphicalModelNodeFactory"/>
-		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRankingFDRbackground.MixedGraphicalModelsEdgeRankingBackgroundNodeFactory"                       id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRankingFDRbackground.MixedGraphicalModelsEdgeRankingBackgroundNodeFactory"/>
+		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.gaussianGraphicalModel.GaussianGraphicalModelNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.gaussianGraphicalModel.GaussianGraphicalModelNodeFactory"/>
+		<node category-path="/ibis/graphicalModels" factory-class="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRankingFDRbackground.MixedGraphicalModelsEdgeRankingBackgroundNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.graphicalModels.mixedGraphicalModels.edgeRankingFDRbackground.MixedGraphicalModelsEdgeRankingBackgroundNodeFactory"/>
 		
 		<!-- MISC -->
 		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.countMissing.CountMissingNodeFactory" id="de.helmholtz_muenchen.ibis.CountMissing.CountMissingNodeFactory"/>
@@ -60,8 +61,6 @@
 		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.shuffleData.ShuffleDataNodeFactory" id="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory"/>
 		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.sleepnode.SleepNodeNodeFactory" id="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory"/>
   		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.adjustPvalues.PValAdjustNodeFactory" id="de.helmholtz_muenchen.ibis.misc.adjustPvalues.PValAdjustNodeFactory"/>
-  
-
 </extension>
    
 	<extension point="org.knime.workbench.repository.categories">
@@ -74,8 +73,8 @@
 		<category icon="/libs/icons/icon_r_green2.png" level-id="gatk" name="GATK" path="/ibis/ngs/ngs_post/"/>
 		<!-- METABOLOMICS -->
 		<category icon="/libs/icons/metabolomics_sugar.png" level-id="metabolomics" name="Metabolomics" path="/ibis/"/>
-		<category icon="/libs/icons/metabolomics_pre.png"   level-id="pre"          name="Pre-"  path="/ibis/metabolomics/"/>
-		<category icon="/libs/icons/metabolomics_post.png"  level-id="post"         name="Post-" path="/ibis/metabolomics/"/>
+		<category icon="/libs/icons/metabolomics_pre.png" level-id="pre" name="Pre-" path="/ibis/metabolomics/"/>
+		<category icon="/libs/icons/metabolomics_post.png" level-id="post" name="Post-" path="/ibis/metabolomics/"/>
 		<!-- MISC -->
 		<category icon="/libs/icons/ibis.png" level-id="misc" name="Misc" path="/ibis/"/>
 		<!-- GRAPHICAL MODELS -->

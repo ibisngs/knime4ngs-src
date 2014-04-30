@@ -17,6 +17,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.util.Pair;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
@@ -269,14 +270,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
      */
     protected boolean isBinaryValid(String binaryPath) throws InvalidSettingsException
     {
-    	if(binaryPath == null || binaryPath.length() == 0)
-    		throw new InvalidSettingsException("Path to binary is not set.");
-    	
-    	// check, if file can be executed
-    	File binFile = new File(binaryPath);
-    	if(!(binFile.isFile() && binFile.canExecute()))
-    		throw new InvalidSettingsException("Executable flag of '" + binaryPath + "' is not set or file is not found.");
-    	return true;
+    	return IO.isBinaryValid(binaryPath, true);
     }
     
     /**
