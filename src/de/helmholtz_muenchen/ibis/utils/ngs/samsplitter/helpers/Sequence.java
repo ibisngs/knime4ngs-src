@@ -5,6 +5,8 @@ package de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers;
 
 import java.util.Arrays;
 
+import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.samhelpers.SamSplitter;
+
 
 /**
  * @author Jhoser
@@ -97,7 +99,10 @@ public class Sequence
 					System.out.flush();
 					System.err.flush();
 					System.err.println("Given Sequence length and given quality length differ... cannot continue. Aborting.");
-					System.exit(2);
+					if(!SamSplitter.noExit) 
+						System.exit(2);
+					else
+						throw new IllegalArgumentException("Given Sequence length and given quality length differ... cannot continue. Aborting.");
 				}
 			sequence = null;
 			qual = null;

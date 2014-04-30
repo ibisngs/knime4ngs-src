@@ -29,6 +29,7 @@ public class SamSplitter
 		private File outFileDir;
 		private File outFileStub;
 		private int samSplitSize;
+		public static boolean noExit = false; // If no exit is set, instead of System.exit() a Exception will be throwed
 		
 		public void setOutDir(String strOutDir) throws ParameterInvalidException 
 			{
@@ -41,7 +42,10 @@ public class SamSplitter
 						else
 							{
 								System.err.println("We need a directory to place the files, not a file!");
-								System.exit(5);
+								if(!noExit) 
+									System.exit(5);
+								else
+									throw new IllegalArgumentException("We need a directory to place the files, not a file!");
 							}
 						
 						
@@ -72,7 +76,10 @@ public class SamSplitter
 					{
 						System.err.println("--in=File cannot be null;");
 						SamSplitter.giveArgsExplanation();
-						System.exit(6);
+						if(!noExit) 
+							System.exit(6);
+						else
+							throw new IllegalArgumentException("--in=File cannot be null;");
 					}
 			}
 		

@@ -16,6 +16,7 @@ import java.util.HashMap;
 import de.helmholtz_muenchen.ibis.ThreadedReadFilter.utils.FileHelpers;
 import de.helmholtz_muenchen.ibis.ThreadedReadFilter.utils.ParameterInvalidException;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.Sequence;
+import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.samhelpers.SamSplitter;
 
 
 /**
@@ -154,7 +155,10 @@ public class TIGRrepairer {
 											br.close();
 											bwFwd.close();
 											bwRev.close();
-											System.exit(3);
+											if(!SamSplitter.noExit) 
+												System.exit(3);
+											else
+												throw new IllegalArgumentException("Sorry, we only do TIGR for now.");
 										}
 								}
 						}

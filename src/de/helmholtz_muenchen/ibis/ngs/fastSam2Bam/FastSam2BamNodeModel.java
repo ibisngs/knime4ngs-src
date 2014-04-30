@@ -34,6 +34,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.FileHelpers;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.samhelpers.SamSplitter;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -147,6 +148,8 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     		// check, if bam file is already there
     		if(!(new File(nameOfBamFile).exists() && new File(nameOfBaiFile).exists())) {
 	    		// run SamSplitter
+    			FileHelpers.noExitRule = true; 	// do not call System.exit()!
+    			SamSplitter.noExit = true; 		// do not call System.exit()!
 				SamSplitter ssr = new SamSplitter();
 				ssr.setInFile(inputFile);
 				ssr.setOutDir(tmpPath.getAbsolutePath());
