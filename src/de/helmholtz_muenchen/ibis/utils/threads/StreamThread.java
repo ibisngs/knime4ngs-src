@@ -94,7 +94,6 @@ public class StreamThread extends Thread {
 				if(this.fillFile)
 					{
 						outstream.write(bytes,0,read);
-						System.out.println("printing to file...");
 					}
 				if(!this.fillFile && !this.fillSB)
 					{

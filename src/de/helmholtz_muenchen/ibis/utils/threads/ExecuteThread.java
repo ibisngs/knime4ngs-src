@@ -83,13 +83,9 @@ public class ExecuteThread implements Callable<Boolean> {
 		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);
 		stdErrStream.start();
 		
-
-		System.out.println("Going for wait!");
 		// WAIT FOR PROCESS TO BE FINISHED
-
 		p.waitFor();
 		
-		System.out.println("Done WAITING!!!!");
 //		if(this.stdErrStr != null){
 //			this.stdErrStr.append(getLogEntryStdErr(p));
 //		}
