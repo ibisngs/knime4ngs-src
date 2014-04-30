@@ -30,9 +30,12 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	private final StringBuffer STDOUT;
 	private final StringBuffer STDERR;
 	
-	// filenames of stdout and stderr
+	// filenames of saved stdout and stderr
 	private static final String FILE_STDOUT = "stdout.log";
 	private static final String FILE_STDERR = "stderr.log";
+
+	private String stdout_custom = null;
+	private String stderr_custom = null;
 
 	// logger class
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
@@ -88,49 +91,54 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	 * @param environment environment variables
 	 * @throws CanceledExecutionException
 	 */
-	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, File path2LogOutput) throws CanceledExecutionException {
+	protected void executeCommand(final ExecutionContext exec, String[] command, String[] environment, File path2Stdout,  File path2Stderr) throws CanceledExecutionException {
 		//isRunning = true;
 		// StringBuffers to write STDOUT and STDERR to
 		if(STDOUT!=null){
 			STDOUT.setLength(0);
-			STDOUT.append("---------------------------------------------------\n");
+			STDOUT.append("----------------------- START ----------------------------\n");
 		}
 		if(STDERR != null){
 			STDERR.setLength(0);
-			STDERR.append("---------------------------------------------------\n");
+			STDERR.append("----------------------- START ----------------------------\n");
 		}
 		
 		// Files to write STDOUT and STDERR to
-		String stdOutFile = null;
-		String stdErrFile = null;
-		if(path2LogOutput != null){
-			if(!path2LogOutput.exists()) {
-				path2LogOutput.mkdirs();
+		if(path2Stdout != null) {
+			if(!path2Stdout.getParentFile().exists()) {
+				path2Stdout.getParentFile().mkdirs();
 			}
 			try {
-				stdOutFile = path2LogOutput.getCanonicalPath() + File.separatorChar + FILE_STDOUT;
-				stdErrFile = path2LogOutput.getCanonicalPath() + File.separatorChar + FILE_STDERR;
+				stdout_custom = path2Stdout.getCanonicalPath();
 			} catch (IOException e) {
 				LOGGER.error(e.getMessage());
-				// write log files
+				throw(new CanceledExecutionException(e.getMessage()));
+			}
+		}
+		if(path2Stderr != null) {
+			if(!path2Stderr.getParentFile().exists()) {
+				path2Stderr.getParentFile().mkdirs();
+			}
+			try {
+				stderr_custom = path2Stderr.getCanonicalPath();
+			} catch (IOException e) {
+				LOGGER.error(e.getMessage());
 				throw(new CanceledExecutionException(e.getMessage()));
 			}
 		}
 		
-		
 		try {
-			Executor.executeCommand(command, exec, environment, LOGGER, stdOutFile, stdErrFile, STDOUT, STDERR);
+			Executor.executeCommand(command, exec, environment, LOGGER, stdout_custom, stderr_custom, STDOUT, STDERR);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage());
-			// write log files
 			throw(new CanceledExecutionException(e.getMessage()));
 		}
 		
 		if(STDOUT!=null){
-			STDOUT.append("---------------------------------------------------");
+			STDOUT.append("------------------------ END --------------------------");
 		}
 		if(STDERR != null){
-			STDERR.append("---------------------------------------------------");
+			STDERR.append("------------------------ END --------------------------");
 		}
 		//isRunning=false;
 	}

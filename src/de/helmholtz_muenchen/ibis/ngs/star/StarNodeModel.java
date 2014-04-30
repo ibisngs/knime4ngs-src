@@ -227,14 +227,20 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	return true;
     }
     
-	@Override
-	protected File getPathToLogOutputFolder() {
-		return null;
-	}
 
 	@Override
 	protected File getPathToLockFile() {
 		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
+	}
+
+	@Override
+	protected File getPathToStderrFile() {
+		return null;
+	}
+
+	@Override
+	protected File getPathToStdoutFile() {
+		return null;
 	}
 }
 

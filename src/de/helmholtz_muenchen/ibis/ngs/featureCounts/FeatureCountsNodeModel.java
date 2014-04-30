@@ -222,12 +222,17 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	// all checks where ok */
     	return true;
     }
-	
+    
 	@Override
-	protected File getPathToLogOutputFolder() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false)).getParentFile();
+	protected File getPathToStderrFile() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + ".out");
 	}
-	
+
+	@Override
+	protected File getPathToStdoutFile() {
+		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + ".err");
+	}
+		
 	@Override
 	protected File getPathToLockFile() {
 		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + SuccessfulRunChecker.LOCK_ENDING);

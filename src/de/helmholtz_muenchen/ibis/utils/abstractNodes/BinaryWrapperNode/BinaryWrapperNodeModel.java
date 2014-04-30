@@ -103,7 +103,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 			
 			// execute the command
-			executeCommand(exec, command, null, getPathToLogOutputFolder());
+			executeCommand(exec, command, null, getPathToStdoutFile(), getPathToStderrFile());
 			checker.writeOK();
 		}
 		
@@ -145,10 +145,17 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	protected abstract BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData);
 	
 	/**
-	 * Path to folder were log files shall be written (or null if no logs should be written)
+	 * Path to a file where STDERR should be written (or null if no log should be written)
 	 * @return
 	 */
-	protected abstract File getPathToLogOutputFolder();
+	protected abstract File getPathToStderrFile();
+	
+	
+	/**
+	 * Path to a file where STDOUT should be written (or null if no log should be written)
+	 * @return
+	 */
+	protected abstract File getPathToStdoutFile();
 	
 	/**
 	 * Path to lock file or null if no check should be performed if node was executed sucessfully already

@@ -77,40 +77,40 @@ public class ExecuteThread implements Callable<Boolean> {
 		}
 		
 
-		//If Output is written to stdout/stderr
-		if(this.stdOutFile!=null){
-			stdOutStream = new StreamThread(p.getInputStream(),stdOutFile);
-			stdOutStream.start();
+		stdOutStream = new StreamThread(p.getInputStream(),stdOutFile,this.stdOutStr);
+		stdOutStream.start();
+		
+		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);
+		stdErrStream.start();
+		
 
-		}
-		if(this.stdErrFile!=null){//Start both streams
-			stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile);
-			stdErrStream.start();
-		}
-		if(this.stdInFile!=null){
-			stdInStream = new InputThread(p.getOutputStream(), stdInFile);
-			stdInStream.start();
-		}
-
+		System.out.println("Going for wait!");
 		// WAIT FOR PROCESS TO BE FINISHED
+
 		p.waitFor();
 		
-		if(this.stdErrStr != null){
-			this.stdErrStr.append(getLogEntryStdErr(p));
-		}
-		if(this.stdOutStr != null){
-			this.stdOutStr.append(getLogEntryStdOut(p));
-		}
+		System.out.println("Done WAITING!!!!");
+//		if(this.stdErrStr != null){
+//			this.stdErrStr.append(getLogEntryStdErr(p));
+//		}
+//		if(this.stdOutStr != null){
+//			this.stdOutStr.append(getLogEntryStdOut(p));
+//		}
+//		// INTERRUPT STREAMS
+//		if(this.stdOutFile!=null){
+//			stdOutStream.interrupt();
+//		}
+//		if(this.stdErrFile!=null){
+//			stdErrStream.interrupt();
+//		}
 		// INTERRUPT STREAMS
-		if(this.stdOutFile!=null){
-			stdOutStream.interrupt();
-		}
-		if(this.stdErrFile!=null){
-			stdErrStream.interrupt();
-		}
 		if(this.stdInFile!=null){
 			stdInStream.interrupt();
 		}
+		
+		stdOutStream.interrupt();
+		stdErrStream.interrupt();
+		
 		LOGGER.info("finished command "+ command[0]);
 
 		return new Boolean(p.exitValue()==0);
