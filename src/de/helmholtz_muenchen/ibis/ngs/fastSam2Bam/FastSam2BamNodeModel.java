@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -125,7 +126,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	String nameOfBaiFile = "";
     	
     	// create tmp folder
-    	String randomID = this.getClass().getSimpleName() + "_" + (System.currentTimeMillis() / 1000L);
+    	String randomID = this.getClass().getSimpleName() + "_" + (System.currentTimeMillis() / 1000L) + "_" + new Random().nextInt(10000);
     	File tmpPath = new File(SET_TMP_PATH.getStringValue() + File.separator + randomID);
     	if(!tmpPath.mkdirs()) 
     		throw new FileNotFoundException("Could not create temp path '" + tmpPath.getAbsolutePath() + "'.");
