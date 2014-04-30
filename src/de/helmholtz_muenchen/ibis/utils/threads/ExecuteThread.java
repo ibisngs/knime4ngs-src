@@ -208,7 +208,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	}
 		
 	public static String getCommand(String[] command){
-		return StringUtils.join(command, "");
+		return StringUtils.join(command, " ");
 	}
 	
 	/**

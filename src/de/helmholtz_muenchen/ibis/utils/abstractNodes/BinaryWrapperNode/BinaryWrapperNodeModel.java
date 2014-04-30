@@ -94,16 +94,16 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	
     	// check if run was already successful 
     	File lockFile = getPathToLockFile();
-    	String lockCommand = ExecuteThread.getCommand(command);
-    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+    	String joinedCommand = ExecuteThread.getCommand(command);
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, joinedCommand);
 		LOGGER.info("Successful termination state: " + terminationState);
 
 		// do not execute if termination state is true
 		if(!terminationState) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, joinedCommand);
 			
 			// execute the command
-			executeCommand(exec, command, null, getPathToStdoutFile(), getPathToStderrFile());
+			executeCommand(exec, new String[]{joinedCommand}, null, getPathToStdoutFile(), getPathToStderrFile());
 			checker.writeOK();
 		}
 		
