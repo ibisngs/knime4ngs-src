@@ -220,7 +220,7 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
 		// test all files in folder
 		for(File f : fpath.listFiles()) {
 			// if name is ok, add it
-			if(f.isFile() && f.getName().equals(this.getNameOfStatisticFile())) {
+			if(f.isFile() && f.getName().matches(this.getNameOfStatisticFile())) {
 				files.add(f.getAbsolutePath());
 			}
 			// call function recursive
