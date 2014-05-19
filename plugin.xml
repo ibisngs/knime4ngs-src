@@ -37,6 +37,8 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.summarizelof.SummarizeLOFNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.summarizelof.SummarizeLOFNodeFactory"/>
+		
 		
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
