@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.StatisticMerger.StatisticMergerNodeModel;
@@ -157,5 +158,8 @@ public class FastqcStatisticMergerNodeModel extends StatisticMergerNodeModel {
 	public String getMergerName() {
 		return MERGER_NAME;
 	}
+
+	@Override
+	public void finalize(BufferedWriter outfile) throws IOException {}
 }
 

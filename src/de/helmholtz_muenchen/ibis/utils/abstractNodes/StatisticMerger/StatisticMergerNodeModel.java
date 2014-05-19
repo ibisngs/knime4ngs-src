@@ -106,6 +106,9 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
 			    		extractTable(moduleName, file, outfileBW, writeHeader);
 			    		writeHeader = false;
 			    	}
+			    	
+			    	outfileBW.flush();
+			    	finalize(outfileBW);
 			    	// close outfile
 			    	outfileBW.close();
 			    	// write output Table
@@ -278,4 +281,10 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
      * @return
      */
     public abstract String getMergerName();
+    
+    /**
+     * Is called after all files for a module were processed
+     * @param outfile
+     */
+	public abstract void finalize(BufferedWriter outfile) throws IOException;
 }

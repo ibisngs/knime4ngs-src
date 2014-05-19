@@ -1,21 +1,21 @@
-package de.helmholtz_muenchen.ibis.ngs.fastqcStatisticMerger;
+package de.helmholtz_muenchen.ibis.ngs.starStatisticMerger;
 
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeView</code> for the "FastqcStatisticMergerNodeModel" Node.
+ * <code>NodeView</code> for the "StarStatisticMergerNode" Node.
  * 
  *
  * @author Michael Kluge
  */
-public class FastqcStatisticMergerNodeView extends NodeView<FastqcStatisticMergerNodeModel> {
+public class StarStatisticMergerNodeView extends NodeView<StarStatisticMergerNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link FastqcStatisticMergerNodeModel})
+     * @param nodeModel The model (class: {@link StarStatisticMergerNodeModel})
      */
-    protected FastqcStatisticMergerNodeView(final FastqcStatisticMergerNodeModel nodeModel) {
+    protected StarStatisticMergerNodeView(final StarStatisticMergerNodeModel nodeModel) {
         super(nodeModel);
     }
 

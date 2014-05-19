@@ -47,7 +47,7 @@ public abstract class StatisticMergerNodeView extends DefaultNodeSettingsPane {
         
         // add the module names
         createNewGroup("modules to merge");
-        
+        // add all modules
         for(String moduleName : StatisticMergerNodeModel.getModuleNames(this.MERGER_NAME)) {
         	SettingsModelBoolean option = new SettingsModelBoolean(moduleName, false);
         	DialogComponentBoolean com = new DialogComponentBoolean(option, moduleName);
@@ -55,9 +55,11 @@ public abstract class StatisticMergerNodeView extends DefaultNodeSettingsPane {
         	MODULE_OPTIONS.put(moduleName, option);
         }
    
-        // add all modules
         DialogComponentBoolean com = new DialogComponentBoolean(SET_ALL_MODULES, StatisticMergerNodeModel.CFGKEY_MODULE_ALL);
     	addDialogComponent(com);
+    	
+        if(StatisticMergerNodeModel.getModuleNames(this.MERGER_NAME).size() <= 1)
+        	SET_ALL_MODULES.setEnabled(false);
         
         // add change listener to all checkbox
         SET_ALL_MODULES.addChangeListener(new ChangeListener() {

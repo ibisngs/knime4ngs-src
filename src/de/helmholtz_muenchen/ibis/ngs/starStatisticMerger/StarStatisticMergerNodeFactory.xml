@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_yellow.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>StarStatisticMerger</name>
+    
+    <shortDescription>
+        This node can be used to merge statistics of the STAR node.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node can be used to merge the mapping statistics of multiple STAR runs into one file in order to post-process that data.</intro>
+        
+        
+        <option name="path to folder with STAR Outputs">The node searches recursively all folders and sub-folders of the input directory for output files of a STAR run.</option>
+        <option name="path to output folder">Output files with the name of each selected module will be created there.</option>
+		<option name="modules to merge">Modules for which the data should be merged must be selected here. At least one module must be selected.</option>
+       
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="module files">Cell 0: name of module<br />Cell 1: path to the merged file</outPort>
+        <outPort index="1" name="STAR files">Cell 0: path to the STAR output files which were merged</outPort>
+    </ports>    
+    <views>
+    	<view index="0" name="">No view implemented.</view>
+    </views>
+</knimeNode>
