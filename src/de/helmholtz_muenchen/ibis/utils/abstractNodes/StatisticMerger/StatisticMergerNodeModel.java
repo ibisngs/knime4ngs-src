@@ -108,6 +108,7 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
 			    	String moduleFileName = moduleName.replace(" ", "_") + FILE_ENDING;
 			    	boolean writeHeader = true;
 			    	String outfile = new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + moduleFileName).getAbsolutePath();
+			    	new File(outfile).delete();
 			    	BufferedWriter outfileBW = new BufferedWriter(new FileWriter(outfile));
 			    	
 			    	// run though all files
