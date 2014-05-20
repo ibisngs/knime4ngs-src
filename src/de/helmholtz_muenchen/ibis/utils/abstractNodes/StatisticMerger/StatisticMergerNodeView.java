@@ -55,26 +55,27 @@ public abstract class StatisticMergerNodeView extends DefaultNodeSettingsPane {
         	MODULE_OPTIONS.put(moduleName, option);
         }
    
-        DialogComponentBoolean com = new DialogComponentBoolean(SET_ALL_MODULES, StatisticMergerNodeModel.CFGKEY_MODULE_ALL);
-    	addDialogComponent(com);
-    	
-        if(StatisticMergerNodeModel.getModuleNames(this.MERGER_NAME).size() <= 1)
-        	SET_ALL_MODULES.setEnabled(false);
         
-        // add change listener to all checkbox
-        SET_ALL_MODULES.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				for(String moduleName : StatisticMergerNodeModel.getModuleNames(MERGER_NAME)) {
-					SettingsModelBoolean option = MODULE_OPTIONS.get(moduleName);
-
-					if(SET_ALL_MODULES.getBooleanValue())
-						option.setBooleanValue(true); // enable checkbox
-					else 
-						option.setBooleanValue(false); // disable checkbox
+    	// only, add this checkbox, if more than one element is in the list.
+        if(StatisticMergerNodeModel.getModuleNames(this.MERGER_NAME).size() > 1) {
+        	DialogComponentBoolean com = new DialogComponentBoolean(SET_ALL_MODULES, StatisticMergerNodeModel.CFGKEY_MODULE_ALL);
+    		addDialogComponent(com);
+        
+	        // add change listener to all checkbox
+	        SET_ALL_MODULES.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent arg0) {
+					for(String moduleName : StatisticMergerNodeModel.getModuleNames(MERGER_NAME)) {
+						SettingsModelBoolean option = MODULE_OPTIONS.get(moduleName);
+	
+						if(SET_ALL_MODULES.getBooleanValue())
+							option.setBooleanValue(true); // enable checkbox
+						else 
+							option.setBooleanValue(false); // disable checkbox
+					}
 				}
-			}
-        });
+	        });
+        }
     }
     
     /**

@@ -65,7 +65,10 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
     public void init() {
     	addSetting(SET_INPUT_FOLDER);
     	addSetting(SET_OUTPUT_FOLDER);
-    	addSetting(SET_ALL_MODULES);
+    	
+    	// add only, if more than one module is there
+    	if(this.getModuleNames().size() > 1)
+    		addSetting(SET_ALL_MODULES);
     	
         // add modules
         for(String moduleName : this.getModuleNames()) {
