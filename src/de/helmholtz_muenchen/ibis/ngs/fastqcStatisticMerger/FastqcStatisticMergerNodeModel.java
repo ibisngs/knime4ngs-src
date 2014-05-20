@@ -112,8 +112,8 @@ public class FastqcStatisticMergerNodeModel extends StatisticMergerNodeModel {
 						// check, if starts with char for header line
 						if(line.startsWith(HEADER_PREFIX)) {
 							if(writeHeader) {
-								if(!isStatusMode)
-									outfile.write(line + TAB + HEADER_NAME);
+								if(!isStatusMode) 
+									outfile.write(line.replaceFirst(TAB + "$", "") + TAB + HEADER_NAME);
 								else
 									outfile.write(HEADER_STATUS + TAB + HEADER_NAME);
 								// do not write another header in case of status merger
@@ -122,7 +122,7 @@ public class FastqcStatisticMergerNodeModel extends StatisticMergerNodeModel {
 							}
 						}
 						else if(!isStatusMode) {
-							outfile.write(line + TAB + name);
+							outfile.write(line.replaceFirst(TAB + "$", "") + TAB + name);
 							outfile.newLine();
 						}
 						// statusMode
