@@ -86,9 +86,15 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
     	File outputFolder = new File(SET_OUTPUT_FOLDER.getStringValue());
     	if(!outputFolder.isDirectory())
     			outputFolder.mkdirs();
-
+    	
+    	// test if input folder is there
+    	String inputPath = SET_INPUT_FOLDER.getStringValue();
+    	if(!new File(inputPath).isDirectory()) {
+    		throw new IllegalArgumentException("Input path '" + inputPath + "' was not found.");
+    	}
+    		
     	// get all files in folder
-    	ArrayList<String> dataFiles = this.getStatisticFiles(SET_INPUT_FOLDER.getStringValue());
+    	ArrayList<String> dataFiles = this.getStatisticFiles(inputPath);
     	BufferedDataContainer cont1 = exec.createDataContainer(getDataOutSpec1());
     	BufferedDataContainer cont2 = exec.createDataContainer(getDataOutSpec2());
     	int i = 0;
@@ -173,7 +179,7 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	// test if input folder is set
     	if(SET_INPUT_FOLDER.getStringValue().isEmpty())
-    		throw new InvalidSettingsException("Input folder path may not be empty.");
+    		throw new InvalidSettingsException("Input folder path may not be empty.");    	
     	// test if output folder is set
     	if(SET_OUTPUT_FOLDER.getStringValue().isEmpty())
 		throw new InvalidSettingsException("Output folder path may not be empty.");
