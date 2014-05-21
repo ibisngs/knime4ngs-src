@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,8 +34,8 @@ public class RawReadManipulatorStatisticMergerNodeModel extends StatisticMergerN
 	protected static final String MODULE_START = "Stats for Module: >(.*)<";
 	protected static final String MODULE_SEP = " -> " + TAB;
 			
-	private final StringBuffer CONTENT = new StringBuffer();
-	
+	HashMap<String, HashMap<String, String>> VALUES = new HashMap<String, HashMap<String, String>>();
+
 	static {
 		// add module name
 		ArrayList<String> modules = new ArrayList<String>();
@@ -45,13 +49,10 @@ public class RawReadManipulatorStatisticMergerNodeModel extends StatisticMergerN
 		// test if correct file is given
 		if(!f.isFile() || !f.canRead() || !f.getName().matches(DATA_FILE))
 			return false;
-		
+
 		// open file
 		try {
 			BufferedReader r = new BufferedReader(new FileReader(f));
-			
-			StringBuffer headerB = new StringBuffer();
-			StringBuffer valuesB = new StringBuffer();
 			
 			String line = null;
 			@SuppressWarnings("unused")
@@ -61,6 +62,7 @@ public class RawReadManipulatorStatisticMergerNodeModel extends StatisticMergerN
 			boolean nextIsValue = false;
 			Pattern p = Pattern.compile(MODULE_START);
 			Matcher m = null;
+			String filename = f.getName().replaceFirst(END_FILENAME, "");
 			
 			// read lines
 			while((line = r.readLine()) != null) {
@@ -80,32 +82,20 @@ public class RawReadManipulatorStatisticMergerNodeModel extends StatisticMergerN
 					// try to split line
 					String tmp[] = line.split(MODULE_SEP);
 					if(tmp.length == 2) {
-						valueName = tmp[0];
+						valueName = tmp[0].replace(" ", "_");
 						value = tmp[1];
 						
-						// if header should be written
-						if(writeHeader) {
-							headerB.append(valueName.replace(" ", "_"));
-							headerB.append(TAB);
-						}
-						valuesB.append(value);
-						valuesB.append(TAB);
+						// check, if name is already stored in hashmap
+						if(!this.VALUES.containsKey(valueName)) 
+							this.VALUES.put(valueName, new HashMap<String, String>());
+						
+						// store the value
+						this.VALUES.get(valueName).put(filename, value);
 					}
 					// reset module status
 					nextIsValue = false;
 				}
-			}
-			// add the filename
-			headerB.append(NAME_OF_FILE);
-			valuesB.append(f.getName().replaceFirst(END_FILENAME, ""));	
-
-			// write to buffer
-			if(writeHeader) 
-				CONTENT.append(headerB.toString());
-			
-			CONTENT.append(NEWLINE);
-			CONTENT.append(valuesB.toString());
-			
+			}	
 			// close the file
 			r.close();
 			return true;
@@ -118,7 +108,46 @@ public class RawReadManipulatorStatisticMergerNodeModel extends StatisticMergerN
 	
 	@Override
 	public void finalize(BufferedWriter outfile) throws IOException {
-		outfile.write(CONTENT.toString());
+		// write header
+		StringBuffer buff = new StringBuffer(NAME_OF_FILE + TAB);
+		HashSet<String> filenames = new HashSet<String>();
+		LinkedHashSet<String> names = new LinkedHashSet<String>();
+		
+		// get header and filenames
+		for(Iterator<String> it = this.VALUES.keySet().iterator(); it.hasNext(); ) {
+			String name = it.next();
+			buff.append(name);
+			if(it.hasNext())
+				buff.append(TAB);
+			
+			// get all files
+			filenames.addAll(this.VALUES.get(name).keySet());
+			names.add(name);
+		}
+		buff.append(NEWLINE);
+		
+		// get for each file all vars
+		for(Iterator<String> it = filenames.iterator(); it.hasNext(); ) {
+			String file = it.next();
+			buff.append(file + TAB);
+			// get all values
+			for(Iterator<String> itNames = names.iterator(); itNames.hasNext(); ) {
+				String name = itNames.next();
+				if(this.VALUES.get(name).containsKey(file))
+					buff.append(this.VALUES.get(name).get(file));
+				else
+					buff.append("0");
+				
+				if(itNames.hasNext())
+					buff.append(TAB);
+			}
+			
+			// make newline if not last file
+			if(it.hasNext())
+				buff.append(NEWLINE);
+		}
+		// write stuff to file
+		outfile.write(buff.toString());
 		outfile.flush();
 	}
 
