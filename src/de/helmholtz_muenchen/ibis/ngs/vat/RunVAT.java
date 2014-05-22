@@ -17,7 +17,7 @@ public class RunVAT {
 		VATNodeModel.logger.info("Running VAT indelMapper...");
 		VATNodeModel.logger.info("Log file can be found in "+vcfout+".err.log");
 		
-		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
+		Executor.executeCommand(new String []{cmd}, exec, new String[]{"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/share/tmp/knime/libs/libbios-1.0.0/lib:/home/share/tmp/knime/libs/gsl-1.16/lib"}, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
 		
 	}
 	
@@ -30,7 +30,7 @@ public class RunVAT {
 		VATNodeModel.logger.info("Running VAT snpMapper...");
 		VATNodeModel.logger.info("Log file can be found in "+vcfout+".err.log");
 		
-		Executor.executeCommand(new String []{cmd}, exec, null, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
+		Executor.executeCommand(new String []{cmd}, exec, new String[]{"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/share/tmp/knime/libs/libbios-1.0.0/lib:/home/share/tmp/knime/libs/gsl-1.16/lib"}, VATNodeModel.logger, vcfout, vcfout+".err.log", vcfin);
 
 	}
 
