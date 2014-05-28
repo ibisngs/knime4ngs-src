@@ -11,13 +11,15 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.defaultnodesettings.SettingsModelColumnName;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
 
 public abstract class RNodeModel extends ScriptNodeModel {
-
+	public static final String ROW_ID = "ROWID"; // column name used for rowID
+	
 	public static final String R_SCRIPTS_PATH =  "R";
 	public static final String GLOBALS_R = IO.getScriptPath() + ScriptNodeModel.SCRIPTS_SUBFOLDER + File.separatorChar + R_SCRIPTS_PATH + File.separatorChar + "utils" + File.separatorChar + "GLOBALS.R";
 
@@ -26,7 +28,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	protected final String[] OUTPUT_FILE_ARGUMENTS;
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(RNodeModel.class);
-
+	
 	protected RNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, String[] input_file_arguments, String[] output_file_arguments) {
 		super(nrInDataPorts, nrOutDataPorts, script);
 
@@ -43,8 +45,6 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	
 	protected RNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script, String[] input_file_arguments, String[] output_file_arguments) {
 		super(inPortTypes, outPortTypes, script);
-
-		
 		// TODO what if PortTypes are not tables to write???
 		 
 		// check number of file names
@@ -76,9 +76,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	public void init() {};
 
 
-	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
-		
+	protected void prepareInputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
+
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT FILES
 		//////////////////////////////////////////////////////////////////////////
@@ -99,10 +98,9 @@ public abstract class RNodeModel extends ScriptNodeModel {
 				this.removeArgument(this.INPUT_FILE_ARGUMENTS[i]);
 			}
 		}	
-
-		//////////////////////////////////////////////////////////////////////////
-		// PREPARE OUTPUT FILES
-		//////////////////////////////////////////////////////////////////////////
+	}
+	
+	protected String[] prepareOutputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
 		exec.setProgress(0.05);
 		exec.setProgress("preparing output data");
 		String[] outFiles = new String[OUTPUT_FILE_ARGUMENTS.length];
@@ -117,6 +115,20 @@ public abstract class RNodeModel extends ScriptNodeModel {
 				throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
 			}
 		}	
+		return(outFiles);
+	}
+	
+	@Override
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+		//////////////////////////////////////////////////////////////////////////
+		// PREPARE INPUT DATA
+		//////////////////////////////////////////////////////////////////////////
+		prepareInputData(inData, exec);
+		
+		//////////////////////////////////////////////////////////////////////////
+		// PREPARE OUTPUT FILES
+		//////////////////////////////////////////////////////////////////////////
+		String[] outFiles = prepareOutputData(inData, exec);
 
 		//////////////////////////////////////////////////////////////////////////
 		// RUN COMMAND
@@ -136,7 +148,6 @@ public abstract class RNodeModel extends ScriptNodeModel {
 
 		return(output);
 	}
-
 
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS
@@ -168,6 +179,15 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	}
 	public void addArgument(String arg, float value){
 		this.addArgument(arg, String.valueOf(value));
+	}
+	public void addArgument(String arg, SettingsModelColumnName value){
+		if(value.getColumnName() == null){
+			if(value.useRowID()){
+				this.addArgument(arg, RNodeModel.ROW_ID);	
+			}
+		}else{
+			this.addArgument(arg, value.getColumnName());
+		}
 	}
 	public void removeArgument(String arg){
 		this.ARGUMENTS.remove(arg);

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>Regression (Batch)</name>
+    
+    <shortDescription>
+        Perform Regression for selected variables simultanously.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node performs a regression on each selected target variable using the selected independent variables (the same for all targets). Depending on the choosen distribution of the target variables linear/logistic/... regression is performed.</intro>
+        <option name="Target Variable">Choose (dependent) target variables for which the regression shall be performed</option>
+        <option name="Distribution of Target variable">Choose the family of the target variable (cf. glm in R)</option>
+        <option name="Independent Variable">Choose Independent Variables used for each regression</option>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="data table">Data with variables in the columns and samples in the rows</inPort>
+        <outPort index="0" name="Result">Table which contains p-values for each choosen target variable</outPort>
+        <outPort index="1" name="Residuals">As the input table, but all choosen target variables are replaced with the residuals of the regression model</outPort>
+    </ports>    
+    <views>
+        <view index="0" name="R Logs">STDOUT and STDERR of the according R process</view>
+    </views>
+</knimeNode>

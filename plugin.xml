@@ -64,6 +64,19 @@
 		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.shuffleData.ShuffleDataNodeFactory" id="de.helmholtz_muenchen.ibis.shuffleData.ShuffleDataNodeFactory"/>
 		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.sleepnode.SleepNodeNodeFactory" id="de.helmholtz_muenchen.ibis.sleepnode.SleepNodeNodeFactory"/>
   		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.adjustPvalues.PValAdjustNodeFactory" id="de.helmholtz_muenchen.ibis.misc.adjustPvalues.PValAdjustNodeFactory"/>
+		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.outlierRemoval.OutlierRemovalNodeFactory" id="de.helmholtz_muenchen.ibis.misc.outlierRemoval.OutlierRemovalNodeFactory"/>
+  		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.normalize.NormalizeNodeFactory" id="de.helmholtz_muenchen.ibis.misc.normalize.NormalizeNodeFactory"/>
+  		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.pca.PCANodeFactory" id="de.helmholtz_muenchen.ibis.misc.pca.PCANodeFactory"/>
+  		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.regression.RegressionNodeFactory" id="de.helmholtz_muenchen.ibis.misc.regression.RegressionNodeFactory"/>
+  		<node category-path="/ibis/misc" factory-class="de.helmholtz_muenchen.ibis.misc.regression.batch.RegressionBatchNodeFactory" id="de.helmholtz_muenchen.ibis.misc.regression.batch.RegressionBatchNodeFactory"/>
+  		
+  		<!-- PLOTTING -->
+		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.boxplot.BoxplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.boxplot.BoxplotNodeFactory"/>
+		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.histogram.HistogramNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.histogram.HistogramNodeFactory"/>
+		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
+		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
+		
+
 </extension>
    
 	<extension point="org.knime.workbench.repository.categories">
@@ -78,6 +91,8 @@
 		<category icon="/libs/icons/metabolomics_sugar.png" level-id="metabolomics" name="Metabolomics" path="/ibis/"/>
 		<category icon="/libs/icons/metabolomics_pre.png" level-id="pre" name="Pre-" path="/ibis/metabolomics/"/>
 		<category icon="/libs/icons/metabolomics_post.png" level-id="post" name="Post-" path="/ibis/metabolomics/"/>
+		<!-- PLOTTING -->
+		<category icon="/libs/icons/metabolomics_sugar.png" level-id="plotting" name="Plotting" path="/ibis/"/>
 		<!-- MISC -->
 		<category icon="/libs/icons/ibis.png" level-id="misc" name="Misc" path="/ibis/"/>
 		<!-- GRAPHICAL MODELS -->

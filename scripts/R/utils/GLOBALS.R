@@ -3,7 +3,7 @@
 ################################################
 ## FILES
 FILE_SEP <- ";"
-
+XLS_DATE_ORIGIN = "1899-12-30"
 
 ################################################
 ### LIBRARIES
@@ -65,6 +65,19 @@ merge.byrownames = function(x,y, ...){
   d = d[, !grepl("Row.names", colnames(d))]
   
   return(d)
+}
+merge.all = function(l, by...){
+  if(length(l)==0){
+	return(null)
+  }else if(length(l)==1){
+	return(l[[1]])
+  }else{
+	result = l[[1]]
+	for(i in 2:length(l)){
+		result = merge(result, l[[i]], by=by, all=T, suffixes=F)
+	}
+	return(result)
+  }
 }
 
 ## split string in named list "name1=value1,name2=value2"
@@ -138,3 +151,4 @@ thisfile_rscript <- function() {
 getCWD <- function(){
 	return(normalizePath(if(is.null(thisfile())){getwd()}else{dirname(thisfile())}))
 }
+
