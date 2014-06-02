@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.FileHelpers;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.ParameterInvalidException;
@@ -27,7 +26,7 @@ public class SamSplitter
 		private static final String SPLITSIZE_STR = "--splitsize=";
 		private File inFile;
 		private File outFileDir;
-		private File outFileStub;
+		//private File outFileStub;
 		private int samSplitSize;
 		public static boolean noExit = false; // If no exit is set, instead of System.exit() a Exception will be throwed
 		
@@ -99,7 +98,7 @@ public class SamSplitter
 		public void split()
 			{
 				String line;
-				long a = System.nanoTime();
+				//long a = System.nanoTime();
 				
 				BufferedWriter bwOut = null;
 				BufferedReader br;

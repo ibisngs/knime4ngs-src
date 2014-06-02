@@ -52,8 +52,6 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
 
-		System.out.println("MY STDIN FILE: " + this.stdInFile);
-		
 		this.LOGGER = logger;
 		
 		// workaround for letting jar files run properly!
@@ -77,7 +75,6 @@ public class ExecuteThread implements Callable<Boolean> {
 		}else{
 			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
 		}
-		
 
 		stdOutStream = new StreamThread(p.getInputStream(),stdOutFile,this.stdOutStr);
 		stdOutStream.start();
@@ -93,19 +90,6 @@ public class ExecuteThread implements Callable<Boolean> {
 		// WAIT FOR PROCESS TO BE FINISHED
 		p.waitFor();
 		
-//		if(this.stdErrStr != null){
-//			this.stdErrStr.append(getLogEntryStdErr(p));
-//		}
-//		if(this.stdOutStr != null){
-//			this.stdOutStr.append(getLogEntryStdOut(p));
-//		}
-//		// INTERRUPT STREAMS
-//		if(this.stdOutFile!=null){
-//			stdOutStream.interrupt();
-//		}
-//		if(this.stdErrFile!=null){
-//			stdErrStream.interrupt();
-//		}
 		// INTERRUPT STREAMS
 		if(this.stdInFile!=null){
 			stdInStream.interrupt();

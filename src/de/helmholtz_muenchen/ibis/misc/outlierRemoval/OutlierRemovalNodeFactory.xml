@@ -10,7 +10,7 @@
         <intro></intro>
         <option name="Method for Outlier Detection">choose the outlier detection method (currently only deviation from mean)</option>
         <option name="Select Variables">Choose which variables from which outliers shall be removed</option>
-        <option name="SDs">(deviation from mean) exclude measurements which deviate more than <i>x<\i> standard deviations from the mean value of the variable</option>
+        <option name="SDs">(deviation from mean) exclude measurements which deviate more than x standard deviations from the mean value of the variable</option>
     </fullDescription>
     
     <ports>

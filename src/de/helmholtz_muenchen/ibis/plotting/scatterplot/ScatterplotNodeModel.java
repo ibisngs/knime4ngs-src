@@ -56,7 +56,7 @@ public class ScatterplotNodeModel extends RPlottingNodeModel {
      * @throws CanceledExecutionException 
      */
     @Override
-    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws CanceledExecutionException {
+    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
     	if(m_matrix.getBooleanValue()){
     		this.addArgument("--matrix", m_matrix_columns.getIncludeList());
     		this.m_col_x.setEnabled(false);

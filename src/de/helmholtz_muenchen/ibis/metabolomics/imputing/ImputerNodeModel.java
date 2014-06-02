@@ -74,9 +74,10 @@ public class ImputerNodeModel extends RNodeModel {
 
 	/**
 	 * {@inheritDoc}
+	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 
 		// check if k < num Rows
 		int knn = m_knn_k.getIntValue();

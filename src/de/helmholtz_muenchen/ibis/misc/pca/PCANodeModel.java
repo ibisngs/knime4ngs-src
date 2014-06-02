@@ -38,13 +38,14 @@ public class PCANodeModel extends RNodeModel {
 	static public final String CFGKEY_COLUMNS          = "columns";
 	static public final String CFGKEY_SCALE            = "scale";
 	static public final String CFGKEY_CENTER           = "center";
-
+	static public final String CFGKEY_NAS              = "fail on NA";
 
 	/** SETTING MODELS */
 	private final SettingsModelFilterString m_columns   = new SettingsModelFilterString(PCANodeModel.CFGKEY_COLUMNS);
 	protected final SettingsModelBoolean m_scale        = new SettingsModelBoolean(PCANodeModel.CFGKEY_SCALE, false);
 	protected final SettingsModelBoolean m_center       = new SettingsModelBoolean(PCANodeModel.CFGKEY_CENTER, false);
-	  
+	private final SettingsModelBoolean m_naaction               = new SettingsModelBoolean(PCANodeModel.CFGKEY_NAS, false);
+
 
 	/**
 	 * Constructor for the node model.
@@ -57,10 +58,11 @@ public class PCANodeModel extends RNodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		this.addArgument("--cols"     , m_columns.getIncludeList());
 		this.setFlag("--scale", m_scale.getBooleanValue());
 		this.setFlag("--center", m_center.getBooleanValue());
+		this.setFlag("--failOnNA", m_naaction.getBooleanValue());
 		
 		BufferedDataTable[] out = super.execute(inData, exec);
 		//out[0] = exec.createSpecReplacerTable(out[0], inData[0].getDataTableSpec()); // parse cell types
@@ -95,6 +97,7 @@ public class PCANodeModel extends RNodeModel {
 		m_columns.saveSettingsTo(settings);
 		m_scale.saveSettingsTo(settings);
 		m_center.saveSettingsTo(settings);
+		m_naaction.saveSettingsTo(settings);
 	}
 
 	/**
@@ -105,6 +108,7 @@ public class PCANodeModel extends RNodeModel {
 		m_columns.loadSettingsFrom(settings);
 		m_scale.loadSettingsFrom(settings);
 		m_center.loadSettingsFrom(settings);
+		m_naaction.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -115,6 +119,7 @@ public class PCANodeModel extends RNodeModel {
 		m_columns.validateSettings(settings);
 		m_scale.validateSettings(settings);
 		m_center.validateSettings(settings);
+		m_naaction.validateSettings(settings);
 	}
 
 	/**

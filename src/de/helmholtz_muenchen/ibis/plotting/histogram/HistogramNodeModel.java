@@ -54,7 +54,7 @@ public class HistogramNodeModel extends RPlottingNodeModel {
      * @throws CanceledExecutionException 
      */
     @Override
-    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws CanceledExecutionException {
+    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
     	this.setFlag("--dens"      , m_density.getBooleanValue());
     	this.setFlag("--densCurve" , m_density_curve.getBooleanValue());
     	this.addArgument("--binwidth", m_binwidth.getDoubleValue());

@@ -63,9 +63,10 @@ public class RegressionBatchNodeModel extends RNodeModel {
 
 	/**
 	 * {@inheritDoc}
+	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		this.addArgument("--target"     , m_target.getIncludeList());
 		this.addArgument("--target.family", m_target_family.getStringValue());
 		

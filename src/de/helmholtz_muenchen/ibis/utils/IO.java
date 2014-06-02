@@ -265,6 +265,38 @@ public class IO {
 		return out;
 	}
 	
+	public static String tail(String s, int maxLines) {
+		String tmp = s;
+		StringBuffer b = new StringBuffer();
+		
+		for(int i=0; i<maxLines; i++){
+			int lasteNewline = tmp.lastIndexOf("\n");
+			if(lasteNewline>=0){
+				if(i>0){
+					b.insert(0, "\n");
+				}
+				b.insert(0, tmp.substring(lasteNewline+1));
+				tmp = tmp.substring(0, lasteNewline);
+			}
+		}
+		return b.toString();
+	}
+	public static String head(String s, int maxLines) {
+		String tmp = s;
+		StringBuffer b = new StringBuffer();
+		
+		for(int i=0; i<maxLines; i++){
+			int firstNewline = tmp.indexOf("\n");
+			if(firstNewline>=0){
+				if(i>0){
+					b.append("\n");
+				}
+				b.append(tmp.substring(0,firstNewline-1));
+				tmp = tmp.substring(firstNewline, tmp.length());
+			}
+		}
+		return b.toString();
+	}
 	
 	/**
 	 * returns all the files in a folder filtered by filename

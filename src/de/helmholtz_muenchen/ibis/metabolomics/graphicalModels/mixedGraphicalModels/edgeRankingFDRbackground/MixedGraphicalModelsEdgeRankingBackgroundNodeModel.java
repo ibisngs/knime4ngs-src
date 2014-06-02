@@ -66,7 +66,7 @@ public class MixedGraphicalModelsEdgeRankingBackgroundNodeModel extends NodeMode
 	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{	
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{	
 		////////////////////////////////////////////////////////////////////////////////////
 		// RANDOM SEEDS FOR SHUFFLING
 		////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +108,9 @@ public class MixedGraphicalModelsEdgeRankingBackgroundNodeModel extends NodeMode
 			BufferedDataTable inputShuffled = ShuffleDataNodeModel.shuffleData(inData[INPORT_DATA], exec, inData[INPORT_DATA].getDataTableSpec().getColumnNames(), randomSeeds[i]);
 			
 			// edge Ranking
-			BufferedDataTable[] result = this.edgeRanker.executeAnywhere(new BufferedDataTable[] {inputShuffled, inData[INPORT_RANDOM_SEEDS_STAB_SEL]}, exec);
+			BufferedDataTable[] result;
+			result = this.edgeRanker.executeAnywhere(new BufferedDataTable[] {inputShuffled, inData[INPORT_RANDOM_SEEDS_STAB_SEL]}, exec);
+
 
 			// rename edgeRank rows
 			exec.checkCanceled();

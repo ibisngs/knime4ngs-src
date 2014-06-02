@@ -41,10 +41,10 @@ public class GaussianGraphicalModelNodeModel extends RNodeModel {
 
     /**
      * {@inheritDoc}
-     * @throws CanceledExecutionException 
+     * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{  	
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{  	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(inData[0].getDataTableSpec())); // parse cell types
 

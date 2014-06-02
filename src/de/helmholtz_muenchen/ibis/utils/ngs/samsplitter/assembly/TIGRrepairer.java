@@ -71,7 +71,7 @@ public class TIGRrepairer {
 	private void readAndRePair() 
 		{
 			String line;
-			long a = System.nanoTime();
+			//long a = System.nanoTime();
 			
 			BufferedWriter bwFwd,bwRev,bwSngl;
 			BufferedReader br;

@@ -52,10 +52,10 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 
     /**
      * {@inheritDoc}
-     * @throws CanceledExecutionException 
+     * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
     	this.addArgument("--percIncl", m_percIncl.getDoubleValue());
     	this.addArgument("--ev"      , m_ev.getIntValue());
     	this.addArgument("--nedges"  , m_nEdges.getIntValue());

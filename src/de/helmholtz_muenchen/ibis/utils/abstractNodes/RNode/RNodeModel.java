@@ -16,6 +16,7 @@ import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
+import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
 public abstract class RNodeModel extends ScriptNodeModel {
 	public static final String ROW_ID = "ROWID"; // column name used for rowID
@@ -119,7 +120,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	}
 	
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT DATA
 		//////////////////////////////////////////////////////////////////////////
@@ -136,7 +137,12 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		exec.setProgress(0.10);
 		exec.setProgress("executing script");
 		LOGGER.info("Running Rscript with arguments: " + getArgumentsAsVector());
-		super.executeScript(exec, null);
+		try{
+			super.executeScript(exec, null);
+		} catch(UnsuccessfulExecutionException e){
+			throw new UnsuccessfulExecutionException("R command failed\n"+IO.tail(this.getSTDOUT(), 5));	
+		}
+
 
 		//////////////////////////////////////////////////////////////////////////
 		// READ DATA
@@ -149,6 +155,10 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		return(output);
 	}
 
+	public static String tail(String string){
+		int i = string.lastIndexOf("\n");
+		return(string.substring(i));
+	}
 	/////////////////////////////////////////////////////////////////////////////////////////////////
 	/// OVERIDE KNIME NODE METHODS
 	/////////////////////////////////////////////////////////////////////////////////////////////////

@@ -54,7 +54,7 @@ public class BoxplotNodeModel extends RPlottingNodeModel {
      * @throws CanceledExecutionException 
      */
     @Override
-    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws CanceledExecutionException {
+    protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
     	this.addArgument("--points", m_points.getStringValue());
     	if(m_boxpercol.getBooleanValue()){
     		this.addArgument("--columns", m_boxpercol_columns.getIncludeList());

@@ -18,6 +18,7 @@ parser$add_argument("-c","--cols"    , type="character", action="store"     , de
 #parser$add_argument("-m","--method"  , type="character", action="store"     , dest="method"     ,                 help="method used for normalization"  , metavar="<'quantile normalize'>")
 parser$add_argument(       "--scale" , action="store_true",  dest="scale"   , help="scale data before calculating principal components" )
 parser$add_argument(       "--center" , action="store_true",  dest="center" , help="center data before calculating principal components" )
+parser$add_argument(     "--failOnNA" , action="store_true",  dest="fail.on.na" , help="set flag if program shall fail if data contains missing values. Only complete cases are used otherwise." )
 
 
 ## parse
@@ -44,11 +45,17 @@ if(is.null(args$columns)){
 	args$columns = unlist(strsplit(args$columns, ","))
 }
 
+x = data[ , args$columns]
+x = x[ complete.cases(x), ]
+if(args$fail.on.na && nrow(x) != nrow(data)){
+	cat("Data contains missing values!")
+	stop("Data contains missing values!", call.=F)
 
+}
 ##############################################################################################################
 ## PCA
 ##############################################################################################################
-pc = prcomp(data[, args$columns], center=args$center, scale=args$scale)
+pc = prcomp(x, center=args$center, scale=args$scale)
 
 
 ##############################################################################################################
@@ -68,7 +75,10 @@ rownames(data.var.expl) = colnames(pc$x)
 ##############################################################################################################
 ## write output
 ##############################################################################################################
-output = data.frame(data[, !colnames(data) %in% args$columns], pc$x)
+output = data[ , !colnames(data) %in% args$columns ]
+output[ , colnames(pc$x)] = NA
+output[ rownames(pc$x), colnames(pc$x)] = pc$x
+
 write.csv3(output, args$file.out)
 write.csv3(pc$rotation, args$file.rotation)
 write.csv3(data.var.expl, args$file.varexplained)

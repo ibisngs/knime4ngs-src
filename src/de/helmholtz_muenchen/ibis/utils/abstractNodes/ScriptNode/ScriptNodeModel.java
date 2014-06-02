@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -10,6 +11,7 @@ import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
 public abstract class ScriptNodeModel extends ExecutorNodeModel {
 	protected final String SCRIPT;
@@ -30,7 +32,7 @@ public abstract class ScriptNodeModel extends ExecutorNodeModel {
 		return(IO.getScriptPath() + SCRIPTS_SUBFOLDER + File.separatorChar);
 	}
 	
-	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException {
+	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException, IOException, InterruptedException, ExecutionException, UnsuccessfulExecutionException {
 		executeCommand(exec, this.getCommand(), environment, null, null);
 	}
 	

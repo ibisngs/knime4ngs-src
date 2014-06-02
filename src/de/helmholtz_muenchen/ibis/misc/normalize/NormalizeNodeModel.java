@@ -53,9 +53,10 @@ public class NormalizeNodeModel extends RNodeModel {
 
 	/**
 	 * {@inheritDoc}
+	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		this.addArgument("--cols"     , m_columns.getIncludeList());
 		this.addArgument("--method"      , m_method.getStringValue());
 

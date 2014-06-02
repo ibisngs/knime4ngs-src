@@ -99,7 +99,7 @@ public abstract class RPlottingNodeModel extends RNodeModel {
 	
 
 	@Override
-	protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws CanceledExecutionException {
+	protected ImagePortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
 		BufferedDataTable[] inData = new BufferedDataTable[inObjects.length];
 		for(int i=0; i<inData.length; i++){
 				inData[i] = (BufferedDataTable)inObjects[i];

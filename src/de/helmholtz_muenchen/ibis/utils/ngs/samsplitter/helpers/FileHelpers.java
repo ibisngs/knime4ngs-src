@@ -18,7 +18,6 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import org.itadaki.bzip2.BZip2InputStream;
-import org.itadaki.bzip2.BZip2OutputStream;
 
 
 /**

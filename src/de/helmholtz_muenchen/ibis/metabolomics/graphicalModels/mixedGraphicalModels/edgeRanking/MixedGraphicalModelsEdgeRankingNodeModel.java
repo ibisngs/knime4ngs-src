@@ -98,7 +98,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	 * @throws Exception 
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		////////////////////////////////////////////////////////////////////////////////////
 		// WRITE VARIABLE CLASSES
 		////////////////////////////////////////////////////////////////////////////////////
@@ -341,7 +341,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		// TODO: validation of settings
 	}
 
-	public BufferedDataTable[] executeAnywhere(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	public BufferedDataTable[] executeAnywhere(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		return(this.execute(inData, exec));
 	}
 	public void resetAnywhere() {

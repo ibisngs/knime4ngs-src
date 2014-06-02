@@ -63,7 +63,7 @@ public class RegressionNodeModel extends RNodeModel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
 		this.addArgument("--target"     , m_target.getStringValue());
 		this.addArgument("--target.family", m_target_family.getStringValue());
 		

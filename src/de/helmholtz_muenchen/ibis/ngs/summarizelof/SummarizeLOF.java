@@ -399,7 +399,7 @@ public class SummarizeLOF {
 	}
 	
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private static void printMap(Map<String,ArrayList<String>> Map, String Outfile, String Header) {
 		try {
 			PrintWriter writer = new PrintWriter(Outfile, "UTF-8");
@@ -431,7 +431,7 @@ public class SummarizeLOF {
 		
 	}//printMap
 	
-	@SuppressWarnings({ "rawtypes", "unused" })
+	@SuppressWarnings({ "rawtypes", "unused", "unchecked" })
 	private static void printMap(Map<String,ArrayList<String>> Map) {
 		
 		Map<String, ArrayList<String>> map = new TreeMap<String, ArrayList<String>>(Map);

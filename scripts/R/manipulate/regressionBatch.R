@@ -55,12 +55,10 @@ for(t in args$target){
 
 	## coefficients
 	results = rbind(results, data.frame(target=t, p=anov[2, "Pr(>F)"], n=sum(complete.cases(data[, c(t,args$confounders)]))))
-	complete.cases(data[, c(t,args$confounders)])
-	## residuals
-	residuals[, t] = glm$residuals
 
 	
-	#colnames(residuals) = args$target
+	## residuals
+	residuals[names(glm$residuals), t] = glm$residuals
 }
 ##############################################################################################################
 ## write output

@@ -60,7 +60,7 @@ public class PValAdjustNodeModel extends RNodeModel {
      * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
     	ColumnRearranger inputRearranger = new ColumnRearranger(inData[0].getDataTableSpec());
     	inputRearranger.keepOnly(m_pvalcol.getStringValue());
     	BufferedDataTable datain = exec.createColumnRearrangeTable(inData[0], inputRearranger, exec);

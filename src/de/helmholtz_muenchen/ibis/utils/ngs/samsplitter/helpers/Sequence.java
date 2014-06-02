@@ -3,8 +3,6 @@
  */
 package de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers;
 
-import java.util.Arrays;
-
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.samhelpers.SamSplitter;
 
 

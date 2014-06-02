@@ -24,9 +24,8 @@ public class PCANodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelFilterString m_columns   = new SettingsModelFilterString(PCANodeModel.CFGKEY_COLUMNS);
 	protected final SettingsModelBoolean m_scale        = new SettingsModelBoolean(PCANodeModel.CFGKEY_SCALE, false);
 	protected final SettingsModelBoolean m_center       = new SettingsModelBoolean(PCANodeModel.CFGKEY_CENTER, false);
-	  
+	private final SettingsModelBoolean m_naaction               = new SettingsModelBoolean(PCANodeModel.CFGKEY_NAS, false);
 
-	
     /**
      * New pane for configuring OutlierRemoval node dialog.
      * This is just a suggestion to demonstrate possible default dialog
@@ -50,6 +49,9 @@ public class PCANodeDialog extends DefaultNodeSettingsPane {
         this.addDialogComponent(new DialogComponentBoolean(
         		m_center,
                 "center data"));
+		addDialogComponent(new DialogComponentBoolean(
+				m_naaction,
+				"Fail on NA"));
 		this.closeCurrentGroup();
 
  
