@@ -93,7 +93,7 @@ public class RawReadManipulatorNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Trim 3'/5' Poly-A/T prefixes:");
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(dotrimpolyat, "Trim Poly-A/T"));
-    	addDialogComponent(new DialogComponentStringSelection(trimpolyat, "Trim which end?","5\'", "3\'"));
+    	addDialogComponent(new DialogComponentStringSelection(trimpolyat, "Trim which end?","3\'","5\'"));
     	setHorizontalPlacement(false);
     	
     	createNewGroup("Discard reads with avg. quality below threshold");
