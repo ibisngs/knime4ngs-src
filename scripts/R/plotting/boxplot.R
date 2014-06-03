@@ -38,7 +38,7 @@ if(!is.null(args$columns) && args$columns!=""){
 	loadLib("reshape2")
 	args$columns = unlist(strsplit(args$columns, ","))
 	data.m = melt(data[, args$columns])
-	data = data.frame(data[, !colnames(data)%in%args$columns], data.m)
+	data = data.frame(data[, !colnames(data)%in%args$columns], data.m, row.names=c(1:nrow(data.m)))
 	args$col.x="variable"
 	args$col.y="value"
 }

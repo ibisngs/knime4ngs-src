@@ -11,10 +11,12 @@ import org.knime.core.data.DataValue;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -34,37 +36,38 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 
 	private DataTableSpec IN_DATA_SPEC;
-	
+
 	@Override
 	public void loadAdditionalSettingsFrom(final NodeSettingsRO settings, final DataTableSpec[] specs) throws NotConfigurableException {
 		IN_DATA_SPEC = specs[0];
-		
+
 		if(IN_DATA_SPEC==null){
 			throw(new NotConfigurableException("No Input data available. Can't configure ImputerNodeDialog!"));
 		}
 		//System.err.println("VAR TYPES IN DIALOG: " + StringUtils.join(ImputerNodeModel.getVariableTypes(IN_DATA_SPEC), ","));
 		String[] selected = null;
 		dialog_types.replaceListItems(ImputerNodeModel.getVariableTypes(IN_DATA_SPEC), selected);
-		
-		
+
+
 	}
 
 	private DialogComponentStringListSelection dialog_types;
 	private DialogComponentColumnFilter dialog_columns;
-			
+
+	/** SETTING MODELS */
+	private final SettingsModelString m_method          = new SettingsModelString(ImputerNodeModel.CFGKEY_IMPUTING_METHOD, ImputerNodeModel.IMPUTATION_METHODS[0]);
+	private final SettingsModelFilterString m_columns   = new SettingsModelFilterString(ImputerNodeModel.CFGKEY_COLUMNS);
+	private final SettingsModelStringArray m_varType    = new SettingsModelStringArray(ImputerNodeModel.CFGKEY_VARIABLE_TYPE, new String[]{});
+	private final SettingsModelBoolean m_chooseType     = new SettingsModelBoolean(ImputerNodeModel.CFGKEY_CHOOSE_TYPE, false);
+	// Parameters for single imputation methods
+	private final SettingsModelString m_knn_dist        = new SettingsModelString(ImputerNodeModel.CFGKEY_KNN_DIST, ImputerNodeModel.KNN_DIST_MEAS[0]);
+	private final SettingsModelInteger m_knn_k          = new SettingsModelInteger(ImputerNodeModel.CFGKEY_KNN_K, 5);
+	private final SettingsModelInteger m_svd_rank       = new SettingsModelInteger(ImputerNodeModel.CFGKEY_RANK, 5);
+	private final SettingsModelInteger m_svd_niters     = new SettingsModelInteger(ImputerNodeModel.CFGKEY_NUMITERS, 5);
+
 	@SuppressWarnings("unchecked")
 	protected ImputerNodeDialog() {
 		super();
-
-		/** SETTING MODELS */
-		final SettingsModelString m_method        = new SettingsModelString(ImputerNodeModel.CFGKEY_IMPUTING_METHOD, ImputerNodeModel.IMPUTATION_METHODS[0]);
-		final SettingsModelFilterString m_columns = new SettingsModelFilterString(ImputerNodeModel.CFGKEY_COLUMNS);
-		final SettingsModelStringArray m_varType  = new SettingsModelStringArray(ImputerNodeModel.CFGKEY_VARIABLE_TYPE, new String[]{});
-		// Parameters for single imputation methods
-		final SettingsModelString m_knn_dist      = new SettingsModelString(ImputerNodeModel.CFGKEY_KNN_DIST, ImputerNodeModel.KNN_DIST_MEAS[0]);
-		final SettingsModelInteger m_knn_k        = new SettingsModelInteger(ImputerNodeModel.CFGKEY_KNN_K, 5);
-		final SettingsModelInteger m_svd_rank     = new SettingsModelInteger(ImputerNodeModel.CFGKEY_RANK, 5);
-		final SettingsModelInteger m_svd_niters   = new SettingsModelInteger(ImputerNodeModel.CFGKEY_NUMITERS, 5);
 
 
 		// method for imputation
@@ -81,7 +84,12 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 				0, true, DataValue.class);
 		addDialogComponent(dialog_columns);		
 		this.closeCurrentGroup();
-		
+
+		// CHOOSE BY TYPE?
+		addDialogComponent(new DialogComponentBoolean(
+				m_chooseType,
+				"Choose by Type"));
+
 		// CHOOSE BY TYPE
 		dialog_types = new DialogComponentStringListSelection(
 				m_varType,
@@ -132,16 +140,32 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 				}
 			}
 		});
+
+		m_chooseType.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				m_columns.setEnabled(!m_chooseType.getBooleanValue());
+				m_varType.setEnabled( m_chooseType.getBooleanValue());
+			}
+		});
+		m_columns.setEnabled(!m_chooseType.getBooleanValue());
+		m_varType.setEnabled( m_chooseType.getBooleanValue());
 		
 		m_varType.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				m_columns.setNewValues(
-						ImputerNodeModel.getSelectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
-						ImputerNodeModel.getDeselectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
-						false);
+				if(m_chooseType.getBooleanValue()){
+					m_columns.setNewValues(
+							ImputerNodeModel.getSelectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+							ImputerNodeModel.getDeselectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+							false);
+				}
 			}
 		});
-
+		if(m_chooseType.getBooleanValue()){
+			m_columns.setNewValues(
+					ImputerNodeModel.getSelectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+					ImputerNodeModel.getDeselectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
+					false);
+		}
 	}
 }
 

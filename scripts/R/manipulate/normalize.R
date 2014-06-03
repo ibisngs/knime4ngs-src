@@ -27,6 +27,7 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 ########################################################################################################################################
 source(args$file.glob)
 loadLib("GenABEL")
+loadLib("nortest")
 
 ##############################################################################################################
 ## READ DATA
@@ -49,8 +50,9 @@ stats = data.frame(row.names = args$columns, normality.before=rep(NA, times=leng
 
 
 for(c in args$columns){
-	st = shapiro.test(data[, c])
-	stats[c, "normality.before"] = st$p.value
+	#st = shapiro.test(data[, c])
+	ad = ad.test(data[, c])
+	stats[c, "normality.before"] = ad$p.value
 }
 
 
@@ -61,23 +63,27 @@ if(args$method == "quantile normalize"){
 	for(c in args$columns){
 		data[, c] = rntransform(data[, c])
 	}
+}else if(args$method == "z-score"){
+	for(c in args$columns){
+		data[, c] = scale(data[, c], center=T, scale=T)
+	}
 }
 
 
 
 ##############################################################################################################
-## check normality againZ
+## check normality again
 ##############################################################################################################
 for(c in args$columns){
-	st = shapiro.test(data[, c])
-	stats[ c, "normality.after"] = st$p.value
+	#st = shapiro.test(data[, c])
+	ad = ad.test(data[, c])
+	stats[c, "normality.after"] = ad$p.value
 }
-
+stats$pgain = stats$normality.before/stats$normality.after 
 
 ##############################################################################################################
 ## write output
 ##############################################################################################################
-
 write.csv3(data, args$file.out)
 write.csv3(stats, args$file.stats)
 

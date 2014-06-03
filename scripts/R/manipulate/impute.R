@@ -71,7 +71,7 @@ impute.simple <- function(x, method="min"){
 }
 impute.random <- function(x, cat.cutoff=10){
 	if(length(unique(x))>cat.cutoff & is.numeric(x)){
-		x.mean = mean(x, rm=T)
+		x.mean = mean(x, na.rm=T)
 		x.sd   = sd(x, na.rm=T)
 		#cat("mean: ", x.mean, "  sd:", x.sd)
 		x[is.na(x)] <- rnorm(sum(is.na(x)), mean=x.mean, sd=x.sd)
@@ -125,8 +125,8 @@ if(length(args$columns)>0){
 	q()
 	}
 	
-## replace original data with imputed data
-data[, args$columns] = imputed[, args$columns]
+	## replace original data with imputed data
+	data[, args$columns] = imputed[, args$columns]
 
 }
 

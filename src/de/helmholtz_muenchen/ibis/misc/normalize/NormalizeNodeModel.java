@@ -28,7 +28,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
  * @author Jonas Zierer
  */
 public class NormalizeNodeModel extends RNodeModel {
-	public static final String[] METHODS = new String[]{"quantile normalize"};
+	public static final String[] METHODS = new String[]{"quantile normalize", "z-score"};
 			
 	/** LOGGER */
 	@SuppressWarnings("unused")
@@ -68,7 +68,7 @@ public class NormalizeNodeModel extends RNodeModel {
 
 
     private DataTableSpec getStatsSpec(){
-    	DataColumnSpec[] statsSpecs = DataTableSpec.createColumnSpecs(new String[]{"normality.before", "normality.after"}, new DataType[]{DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class)});
+    	DataColumnSpec[] statsSpecs = DataTableSpec.createColumnSpecs(new String[]{"normality.before", "normality.after", "pgain"}, new DataType[]{DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class), DataType.getType(DoubleCell.class)});
     	return(new DataTableSpec(statsSpecs));
 	}
     

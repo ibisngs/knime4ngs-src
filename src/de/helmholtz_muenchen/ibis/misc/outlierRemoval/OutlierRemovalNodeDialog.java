@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.misc.outlierRemoval;
 
-import org.knime.core.data.DataValue;
+import org.knime.core.data.DoubleValue;
+import org.knime.core.data.IntValue;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -47,7 +48,7 @@ public class OutlierRemovalNodeDialog extends DefaultNodeSettingsPane {
 		this.createNewGroup("Select Variables");
 		addDialogComponent(new DialogComponentColumnFilter(
 				m_columns,
-				0, true, DataValue.class));
+				0, true, IntValue.class, DoubleValue.class));
 		this.closeCurrentGroup();
 		
 		// sds

@@ -19,6 +19,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -44,25 +45,27 @@ public class ImputerNodeModel extends RNodeModel {
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ImputerNodeModel.class);
 
 	/** CFG KEYS */
-	static public final String CFGKEY_IMPUTING_METHOD       = "org.manipulate.impute.method.numerical";
-	static public final String CFGKEY_COLUMNS               = "org.manipulate.impute.columns";
-	static public final String CFGKEY_VARIABLE_TYPE         = "org.manipulate.impute.varType";
+	static public final String CFGKEY_IMPUTING_METHOD       = "Method";
+	static public final String CFGKEY_COLUMNS               = "Columns";
+	static public final String CFGKEY_CHOOSE_TYPE           = "chose type";
+	static public final String CFGKEY_VARIABLE_TYPE         = "Variable Type";
 	// Parameters for single imputation methods
-	static public final String CFGKEY_KNN_DIST              = "org.manipulate.impute.dist";
-	static public final String CFGKEY_KNN_K                 = "org.manipulate.impute.k";
-	static public final String CFGKEY_RANK                  = "org.manipulate.impute.rankk";
-	static public final String CFGKEY_NUMITERS              = "org.manipulate.impute.numiters";
+	static public final String CFGKEY_KNN_DIST              = "KNN Dist";
+	static public final String CFGKEY_KNN_K                 = "KNN K";
+	static public final String CFGKEY_RANK                  = "Rank K";
+	static public final String CFGKEY_NUMITERS              = "Num of Iterations";
 
 
 	/** SETTING MODELS */
-	private final SettingsModelString m_method        = new SettingsModelString(ImputerNodeModel.CFGKEY_IMPUTING_METHOD, IMPUTATION_METHODS[0]);
-	private final SettingsModelFilterString m_columns = new SettingsModelFilterString(ImputerNodeModel.CFGKEY_COLUMNS);
-	private final SettingsModelStringArray m_varType  = new SettingsModelStringArray(ImputerNodeModel.CFGKEY_VARIABLE_TYPE, new String[]{});
+	private final SettingsModelString m_method          = new SettingsModelString(ImputerNodeModel.CFGKEY_IMPUTING_METHOD, ImputerNodeModel.IMPUTATION_METHODS[0]);
+	private final SettingsModelFilterString m_columns   = new SettingsModelFilterString(ImputerNodeModel.CFGKEY_COLUMNS);
+	private final SettingsModelStringArray m_varType    = new SettingsModelStringArray(ImputerNodeModel.CFGKEY_VARIABLE_TYPE, new String[]{});
+	private final SettingsModelBoolean m_chooseType     = new SettingsModelBoolean(ImputerNodeModel.CFGKEY_CHOOSE_TYPE, false);
 	// Parameters for single imputation methods
-	private final SettingsModelString m_knn_dist      = new SettingsModelString(ImputerNodeModel.CFGKEY_KNN_DIST, KNN_DIST_MEAS[0]);
-	private final SettingsModelInteger m_knn_k        = new SettingsModelInteger(ImputerNodeModel.CFGKEY_KNN_K, 5);
-	private final SettingsModelInteger m_svd_rank     = new SettingsModelInteger(ImputerNodeModel.CFGKEY_RANK, 5);
-	private final SettingsModelInteger m_svd_niters   = new SettingsModelInteger(ImputerNodeModel.CFGKEY_NUMITERS, 5);
+	private final SettingsModelString m_knn_dist        = new SettingsModelString(ImputerNodeModel.CFGKEY_KNN_DIST, ImputerNodeModel.KNN_DIST_MEAS[0]);
+	private final SettingsModelInteger m_knn_k          = new SettingsModelInteger(ImputerNodeModel.CFGKEY_KNN_K, 5);
+	private final SettingsModelInteger m_svd_rank       = new SettingsModelInteger(ImputerNodeModel.CFGKEY_RANK, 5);
+	private final SettingsModelInteger m_svd_niters     = new SettingsModelInteger(ImputerNodeModel.CFGKEY_NUMITERS, 5);
 	
 
 	/**
@@ -196,6 +199,7 @@ public class ImputerNodeModel extends RNodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 		m_method.saveSettingsTo(settings);
 		m_varType.saveSettingsTo(settings);
+		m_chooseType.saveSettingsTo(settings);
 		m_columns.saveSettingsTo(settings);
 		m_knn_dist.saveSettingsTo(settings);
 		m_knn_k.saveSettingsTo(settings);
@@ -210,6 +214,7 @@ public class ImputerNodeModel extends RNodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
 		m_method.loadSettingsFrom(settings);
 		m_varType.loadSettingsFrom(settings);
+		m_chooseType.loadSettingsFrom(settings);
 		m_columns.loadSettingsFrom(settings);
 		m_knn_dist.loadSettingsFrom(settings);
 		m_knn_k.loadSettingsFrom(settings);
@@ -224,6 +229,7 @@ public class ImputerNodeModel extends RNodeModel {
 	protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
 		m_method.validateSettings(settings);
 		m_varType.validateSettings(settings);
+		m_chooseType.validateSettings(settings);
 		m_columns.validateSettings(settings);
 		m_knn_dist.validateSettings(settings);
 		m_knn_k.validateSettings(settings);
