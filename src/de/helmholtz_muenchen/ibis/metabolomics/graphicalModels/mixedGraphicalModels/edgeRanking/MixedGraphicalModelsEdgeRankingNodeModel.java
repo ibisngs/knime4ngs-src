@@ -115,7 +115,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 			this.addArgument("--fclasses", tmpFile.getCanonicalPath());
 		} catch (IOException e) {
 			LOGGER.error("Unable to create temp file!");
-			throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
+			throw(new IOException("unable to create temp file!" + e.getMessage()));
 		}
 
 		
@@ -129,7 +129,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 			randomSeeds = new int[randomSeedsTable.getRowCount()];
 			int randomSeedsColIdx = randomSeedsTable.getDataTableSpec().findColumnIndex(this.m_rseed_col);
 			if(randomSeedsColIdx == -1){
-				throw new CanceledExecutionException("Can't find column >"+this.m_rseed_col+"< in second input table!" ); 
+				throw new InvalidSettingsException("Can't find column >"+this.m_rseed_col+"< in second input table!" ); 
 			}
 			CloseableRowIterator rit = randomSeedsTable.iterator();
 			int rowCounter=0;

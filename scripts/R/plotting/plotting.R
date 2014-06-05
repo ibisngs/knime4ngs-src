@@ -13,22 +13,22 @@ plotting.addArgs = function(parser){
 	parser$add_argument("-y" , "--col.y"       , type="character", action="store"      , dest="col.y"                          , help="name of column to be plotted on y-axis (defining different boxes)" , metavar="<column name>")
 	# color
 	parser$add_argument("-c" , "--col.color"   , type="character", action="store"      , dest="col.color"                      , help="name of column which defines color"         , metavar="<column name>")
-	parser$add_argument("-cl", "--lab.color"   , type="character", action="store"      , dest="label.color"                    , help="label for color legend"         , metavar="<column name>")
+	parser$add_argument("-cl", "--lab.color"   , type="character", action="store"      , dest="lab.color"                    , help="label for color legend"         , metavar="<column name>")
 	parser$add_argument("-cs", "--scale.color" , type="character", action="store"      , dest="scale.color"                    , help="scale palette of color"         , metavar="<string>")
 	# fill color
 	parser$add_argument("-f" , "--col.fill"    , type="character", action="store"      , dest="col.fill"                       , help="name of column which defines fill"          , metavar="<column name>")
-	parser$add_argument("-fl", "--lab.fill"    , type="character", action="store"      , dest="label.fill"                     , help="label for fill color legend"          , metavar="<column name>")
+	parser$add_argument("-fl", "--lab.fill"    , type="character", action="store"      , dest="lab.fill"                     , help="label for fill color legend"          , metavar="<column name>")
 	parser$add_argument("-fs", "--scale.fill"  , type="character", action="store"      , dest="scale.fill"                     , help="scale palette of fill color"         , metavar="<string>")
 	# shape
 	parser$add_argument("-s" , "--col.shape"   , type="character", action="store"      , dest="col.shape"                      , help="name of column which defines shape"          , metavar="<column name>")
-	parser$add_argument("-sl", "--lab.shape"   , type="character", action="store"      , dest="label.shape"                    , help="label for shape legend"          , metavar="<string>")
+	parser$add_argument("-sl", "--lab.shape"   , type="character", action="store"      , dest="lab.shape"                    , help="label for shape legend"          , metavar="<string>")
 	# facet
 	parser$add_argument("-fx", "--facet.x"     , type="character", action="store"      , dest="col.facet.x"                    , help="name of column which defines x axis of facet grid"         , metavar="<column name>")
 	parser$add_argument("-fy", "--facet.y"     , type="character", action="store"      , dest="col.facet.y"                    , help="name of column which defines x axis of facet grid"         , metavar="<column name>")
 	# labels
-	parser$add_argument("-t" , "--title"       , type="character", action="store"      , dest="label.plot"                     , help="Title of plot"   , metavar="<String>")
-	parser$add_argument("-xl", "--lab.x"       , type="character", action="store"      , dest="label.x"                        , help="Label of x axis" , metavar="<String>")
-	parser$add_argument("-yl", "--lab.y"       , type="character", action="store"      , dest="label.y"                        , help="Label of y axis" , metavar="<String>")
+	parser$add_argument("-t" , "--title"       , type="character", action="store"      , dest="lab.plot"                     , help="Title of plot"   , metavar="<String>")
+	parser$add_argument("-xl", "--lab.x"       , type="character", action="store"      , dest="lab.x"                        , help="Label of x axis" , metavar="<String>")
+	parser$add_argument("-yl", "--lab.y"       , type="character", action="store"      , dest="lab.y"                        , help="Label of y axis" , metavar="<String>")
 	# output
 	parser$add_argument("-w" , "--width"       , type="integer"  , action="store"      , dest="width"         , default=800    , help="width of image"  , metavar="<int>")
 	parser$add_argument(       "--height"      , type="integer"  , action="store"      , dest="height"        , default=600    , help="height of image" , metavar="<int>")
@@ -128,12 +128,24 @@ multiLegendAlign <- function(p, align="left"){
 ##############################################################################################################
 ## CHECK ARGS
 ##############################################################################################################
+replaceInvalidChars = function(x){
+	 gsub("[^0-9A-Za-z\\.]", "...", x) 
+}
+
 plotting.checkArgs = function(args){
+	## x
+	args$col.x     = replaceInvalidChars(args$col.x)
+	
+	## y
+	args$col.y     = replaceInvalidChars(args$col.y)
+	
 	## color
 	if( is.null(args$col.color) || is.na(args$col.color)|| args$col.color=="NULL" || args$col.color=="" || args$col.color=="NA" ){
 		args$col.color <- NULL
 		args$lab.color <- NULL
 	}else{
+		args$col.color = replaceInvalidChars(args$col.color)
+		
 		if(is.null(args$lab.color) || args$lab.color == "NULL"){
 			args$lab.color = NULL
 		}else if(args$lab.color == "NA" || args$lab.color == ""){
@@ -146,6 +158,8 @@ plotting.checkArgs = function(args){
 		args$col.fill <- NULL
 		args$lab.fill <- NULL
 	}else{
+		args$col.fill = replaceInvalidChars(args$col.fill)
+		
 		if(is.null(args$lab.fill) || args$lab.fill == "NULL"){
 			args$lab.fill = NULL
 		}else if(args$lab.fill == "NA" || args$lab.fill == ""){
@@ -158,6 +172,8 @@ plotting.checkArgs = function(args){
 		args$col.shape <- NULL
 		args$lab.shape <- NULL
 	}else{
+		args$col.shape = replaceInvalidChars(args$col.shape)
+		
 		if(is.null(args$lab.shape) || args$lab.shape == "NULL"){
 			args$lab.shape = NULL
 		}else if(args$lab.shape == "NA" || args$lab.shape == ""){
@@ -166,18 +182,18 @@ plotting.checkArgs = function(args){
 	}
 
 	## X Label
-	if( is.null(args$label.x) || args$label.x == "" || args$label.x == "NA" || args$label.x == "NULL" ){
-		args$label.x = NULL
+	if( is.null(args$lab.x) || args$lab.x == "" || args$lab.x == "NA" || args$lab.x == "NULL" ){
+		args$lab.x = NULL
 	}
 
 	## Y Label
-	if( is.null(args$label.y) || args$label.y == "" || args$label.y == "NA" || args$label.y == "NULL" ){
-		args$label.y = NULL
+	if( is.null(args$lab.y) || args$lab.y == "" || args$lab.y == "NA" || args$lab.y == "NULL" ){
+		args$lab.y = NULL
 	}
 
 	## Main Label
-	if( is.null(args$label.plot) || args$label.plot == "" || args$label.plot == "NA" || args$label.plot == "NULL" ){
-		args$label.plot = NULL
+	if( is.null(args$lab.plot) || args$lab.plot == "" || args$lab.plot == "NA" || args$lab.plot == "NULL" ){
+		args$lab.plot = NULL
 	}
 	
 	## Facets
@@ -192,9 +208,19 @@ plotting.checkArgs = function(args){
 	if(!is.null(args$scale.color) && args$scale.color!="default"){
 		## todo
 	}
+	
+	
 	return(args)
 }
 
+plotting.readData <- function(args){
+	data <- read.csv3(args$file.in)
+	data$ROWID = rownames(data)
+	
+	colnames(data) = replaceInvalidChars(colnames(data))
+
+	return(data) 
+}
 
 ##############################################################################################################
 ## ADD LABEL AND GUIDES
@@ -209,16 +235,16 @@ plotting.addScalesAndLabelsAndGuides = function(p, args){
 	}
 	
 	## labels
-	p <- p + labs(x=args$label.x, y=args$label.y, title=args$label.plot, color=args$label.color, shape=args$label.shape, fill=args$label.fill)
+	p <- p + labs(x=args$lab.x, y=args$lab.y, title=args$lab.plot, color=args$lab.color, shape=args$lab.shape, fill=args$lab.fill)
 
 	## guides
-	if(is.null(args$label.color)){
+	if(is.null(args$lab.color)){
 		p <- p + guides(color="none")
 	}
-	if(is.null(args$label.fill)){
+	if(is.null(args$lab.fill)){
 		p <- p + guides(fill="none")
 	}
-	if(is.null(args$label.shape)){
+	if(is.null(args$lab.shape)){
 		p <- p + guides(shape="none")
 	}
 	return(p)

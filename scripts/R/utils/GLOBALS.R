@@ -9,8 +9,9 @@ XLS_DATE_ORIGIN = "1899-12-30"
 ### LIBRARIES
 ################################################
 loadLib <- function(x, bioC=FALSE){
-	if(!require(x, character.only=T)){
-		warning("installing package ", x)
+	isInstalled =  is.element(x, installed.packages()[,1])
+	
+	if(!isInstalled){
 		if(bioC){
 			source("http://bioconductor.org/biocLite.R")
 			biocLite(x)
@@ -18,9 +19,7 @@ loadLib <- function(x, bioC=FALSE){
 			install.packages(x, repos="http://cran.us.r-project.org")
 		}
 	}
-	if(!require(x, character.only=T)){
-		stop(paste("Can't load package", x))
-	}
+	require(x, character.only=T)
 }
 
 ################################################

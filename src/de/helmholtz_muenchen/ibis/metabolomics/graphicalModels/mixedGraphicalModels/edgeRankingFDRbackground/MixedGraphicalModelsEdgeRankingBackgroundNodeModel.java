@@ -77,7 +77,7 @@ public class MixedGraphicalModelsEdgeRankingBackgroundNodeModel extends NodeMode
 			randomSeeds = new int[randomSeedsTable.getRowCount()];
 			int randomSeedsColIdx = randomSeedsTable.getDataTableSpec().findColumnIndex(this.m_randomSeedsCol);
 			if(randomSeedsColIdx == -1){
-				throw new CanceledExecutionException("Can't find column >"+this.m_randomSeedsCol+"< in second input table!" ); 
+				throw new InvalidSettingsException("Can't find column >"+this.m_randomSeedsCol+"< in second input table!" ); 
 			}
 			CloseableRowIterator rit = randomSeedsTable.iterator();
 			int rowCounter=0;

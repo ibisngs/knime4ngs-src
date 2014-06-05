@@ -186,7 +186,7 @@ public class Executor {
 		// check for exit code
 		if(executorThread.getExitCode() != 0) {
 			logger.error("Exit code was not 0: '"+ executorThread.getExitCode() +"'!");
-			throw(new CanceledExecutionException("Exit code was not 0: '"+ executorThread.getExitCode() +"' for " + ExecuteThread.getCommand(command)));
+			throw(new UnsuccessfulExecutionException("Exit code was not 0: '"+ executorThread.getExitCode() +"' for " + ExecuteThread.getCommand(command)));
 		}
 	}
 }

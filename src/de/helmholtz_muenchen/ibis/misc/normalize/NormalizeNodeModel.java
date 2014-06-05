@@ -28,7 +28,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
  * @author Jonas Zierer
  */
 public class NormalizeNodeModel extends RNodeModel {
-	public static final String[] METHODS = new String[]{"quantile normalize", "z-score"};
+	public static final String[] METHODS = new String[]{"quantile normalize", "z-score", "rank transformation"};
 			
 	/** LOGGER */
 	@SuppressWarnings("unused")

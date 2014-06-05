@@ -61,7 +61,7 @@ public class ShuffleDataNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException {
+    protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
     	String[] colsToShuffle = m_list.getIncludeList().toArray(new String[m_list.getIncludeList().size()]);
     	
     	BufferedDataTable shuffledData = shuffleData(inData[0], exec, colsToShuffle, this.m_seed.getIntValue());
@@ -70,15 +70,11 @@ public class ShuffleDataNodeModel extends NodeModel {
         return new BufferedDataTable[]{shuffledData};
     }
     
-    public static BufferedDataTable shuffleData(BufferedDataTable input, final ExecutionContext exec, String[] colsToShuffleNames, int seed) throws CanceledExecutionException{
+    public static BufferedDataTable shuffleData(BufferedDataTable input, final ExecutionContext exec, String[] colsToShuffleNames, int seed) throws CanceledExecutionException, InvalidSettingsException{
     	HashMap<String, DataCell[]> columnsToShuffle = new HashMap<String, DataCell[]>();
     	String[] colNames = input.getDataTableSpec().getColumnNames();
-    	HashMap<String, Integer> ids;
-		try {
-			ids = getColIDs(input.getDataTableSpec(), colNames);
-		} catch (InvalidSettingsException e) {
-			throw new CanceledExecutionException(e.getMessage());
-		}
+    	HashMap<String, Integer> ids = getColIDs(input.getDataTableSpec(), colNames);
+
     	
     	
     	// init data cell collection

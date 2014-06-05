@@ -15,7 +15,7 @@
     <ports>
         <inPort index="0" name="data table">Data with variables in the columns and samples in the rows</inPort>
         <outPort index="0" name="Result">As the input table, but all chosen variables are replaced by the normalized variables</outPort>
-        <outPort index="1" name="Residuals">Table which contains one row for each normalized variables comparing the normality (Shapiro-Wilk test) before and after normalization.</outPort>
+        <outPort index="1" name="Normality Statistics">Table which contains one row for each normalized variables comparing the normality (Shapiro-Wilk test) before and after normalization.</outPort>
     </ports>    
     <views>
         <view index="0" name="R Logs">STDOUT and STDERR of the according R process</view>

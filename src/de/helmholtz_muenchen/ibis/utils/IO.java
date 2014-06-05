@@ -68,6 +68,8 @@ public class IO {
 	 * @throws CanceledExecutionException
 	 */
 	public static BufferedDataTable readCSV(final ExecutionContext exec,String filepath, boolean rowHeader, boolean colHeader) throws IOException, CanceledExecutionException{
+		exec.checkCanceled();
+		
 		URL url = new URL("file:"+filepath);
 
 		// set reader
@@ -92,20 +94,14 @@ public class IO {
 	 * @param rowHeader
 	 * @param colHeader
 	 * @return
+	 * @throws CanceledExecutionException 
+	 * @throws IOException 
 	 */
-	public static BufferedDataTable[] readCSV(ExecutionContext exec, String[] files, NodeLogger logger, boolean rowHeader, boolean colHeader) {
+	public static BufferedDataTable[] readCSV(ExecutionContext exec, String[] files, NodeLogger logger, boolean rowHeader, boolean colHeader) throws CanceledExecutionException, IOException {
 		BufferedDataTable[] result = new BufferedDataTable[files.length];
 
 		for(int i=0; i<files.length;i++){
-			try {
-				result[i] = IO.readCSV(exec, files[i], rowHeader, colHeader);
-			} catch (IOException e){
-				logger.error("readCSV: IOException.");
-				e.printStackTrace();
-			} catch (CanceledExecutionException e ){
-				logger.error("readCSV: Execution canceled.");
-				e.printStackTrace();
-			}
+			result[i] = IO.readCSV(exec, files[i], rowHeader, colHeader);
 		}
 		return result;
 	}
@@ -118,8 +114,9 @@ public class IO {
 	 * @param file file to write to
 	 * @param exec execution environment
 	 * @throws CanceledExecutionException 
+	 * @throws IOException 
 	 */
-	public static void writeAsCSV(final BufferedDataTable inData, File file, ExecutionContext exec, NodeLogger logger) throws CanceledExecutionException {
+	public static void writeAsCSV(final BufferedDataTable inData, File file, ExecutionContext exec, NodeLogger logger) throws CanceledExecutionException, IOException {
 		FileWriterSettings writerSettings = getWriterSettings();
 		File parentDir = file.getParentFile();
 
@@ -134,28 +131,17 @@ public class IO {
 
 		// create output stream
 		OutputStream outStream = null;
-		try {
-			outStream = new FileOutputStream(file, false);
-		} catch (FileNotFoundException e) {
-			logger.error("Unable to create OutputStream");
-			e.printStackTrace();
+		outStream = new FileOutputStream(file, false);
+
+
+		CSVWriter tableWriter = new CSVWriter(new OutputStreamWriter(outStream),writerSettings);
+		tableWriter.write(inData, exec);
+		tableWriter.close();
+
+		if (tableWriter.hasWarningMessage()) {
+			logger.warn(tableWriter.getLastWarningMessage());
 		}
 
-		// table writer
-		try {
-			CSVWriter tableWriter = new CSVWriter(new OutputStreamWriter(outStream),writerSettings);
-			tableWriter.write(inData, exec);
-			tableWriter.close();
-
-			if (tableWriter.hasWarningMessage()) {
-				logger.warn(tableWriter.getLastWarningMessage());
-			}
-
-		} catch (IOException e) {
-			logger.error("Writing to table '" + file.getAbsolutePath() + "' cancled");
-			e.printStackTrace();
-			throw(new CanceledExecutionException("Writing to table '" + file.getAbsolutePath() + "' cancled\n" + e.getMessage()));
-		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////

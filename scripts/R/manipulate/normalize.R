@@ -26,8 +26,9 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 ## LOAD LIBRARIES
 ########################################################################################################################################
 source(args$file.glob)
-loadLib("GenABEL")
+
 loadLib("nortest")
+
 
 ##############################################################################################################
 ## READ DATA
@@ -59,13 +60,17 @@ for(c in args$columns){
 ##############################################################################################################
 ## Normalize
 ##############################################################################################################
-if(args$method == "quantile normalize"){
+if(args$method == "rank transformation"){
+	loadLib("GenABEL")
 	for(c in args$columns){
 		data[, c] = rntransform(data[, c])
 	}
+}else if(args$method == "quantile normalize"){
+	loadLib("preprocessCore", bioC=T)
+	data[, args$columns] = normalize.quantiles(as.matrix(data[, args$columns]))
 }else if(args$method == "z-score"){
 	for(c in args$columns){
-		data[, c] = scale(data[, c], center=T, scale=T)
+		data[, c] = (data[, c]-mean(data[, c], na.rm=T))/sd(data[, c], na.rm=T)
 	}
 }
 
@@ -79,7 +84,7 @@ for(c in args$columns){
 	ad = ad.test(data[, c])
 	stats[c, "normality.after"] = ad$p.value
 }
-stats$pgain = stats$normality.before/stats$normality.after 
+stats$pgain = log10(stats$normality.before/stats$normality.after)
 
 ##############################################################################################################
 ## write output

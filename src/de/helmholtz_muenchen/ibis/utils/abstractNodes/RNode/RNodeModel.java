@@ -8,7 +8,6 @@ import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelColumnName;
@@ -77,7 +76,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	public void init() {};
 
 
-	protected void prepareInputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
+	protected void prepareInputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
 
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT FILES
@@ -85,6 +84,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		exec.setProgress(0.00);
 		exec.setProgress("writing input data");
 		for(int i=0; i < INPUT_FILE_ARGUMENTS.length; i++){
+			exec.checkCanceled();
 			if(inData[i] != null){
 				File tmpFile = null;
 				try {
@@ -92,20 +92,22 @@ public abstract class RNodeModel extends ScriptNodeModel {
 					this.addArgument(this.INPUT_FILE_ARGUMENTS[i], tmpFile.getCanonicalPath());
 				} catch (IOException e) {
 					LOGGER.error("unable to create temp file!");
-					throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
+					throw(e);
 				}
 				IO.writeAsCSV(inData[i], tmpFile, exec, LOGGER);
 			}else{
 				this.removeArgument(this.INPUT_FILE_ARGUMENTS[i]);
 			}
+			exec.checkCanceled();
 		}	
 	}
 	
-	protected String[] prepareOutputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws CanceledExecutionException{
+	protected String[] prepareOutputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
 		exec.setProgress(0.05);
 		exec.setProgress("preparing output data");
 		String[] outFiles = new String[OUTPUT_FILE_ARGUMENTS.length];
 		for(int i=0; i < OUTPUT_FILE_ARGUMENTS.length; i ++){
+			exec.checkCanceled();
 			File tmpFile = null;
 			try {
 				tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_") + "_output_" , ".csv");
@@ -113,7 +115,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 				outFiles[i] = tmpFile.getCanonicalPath();
 			} catch (IOException e) {
 				LOGGER.error("unable to create temp file!");
-				throw(new CanceledExecutionException("unable to create temp file!" + e.getMessage()));
+				throw(e);
 			}
 		}	
 		return(outFiles);

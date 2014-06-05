@@ -62,12 +62,8 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(new DataTableSpec[]{inData[0].getDataTableSpec(),inData[1]==null?null:inData[1].getDataTableSpec()})); // parse cell types
-		try {
-			out[1] = exec.createSpecReplacerTable(out[1], this.getAdjacencyMatSpec(inData[0].getDataTableSpec()));
-		} catch (InvalidSettingsException e) {
-			throw new CanceledExecutionException(e.getMessage());
-		} // parse cell types
-		
+		out[1] = exec.createSpecReplacerTable(out[1], this.getAdjacencyMatSpec(inData[0].getDataTableSpec()));
+
 		return(out);
 	}
     

@@ -169,8 +169,7 @@ public abstract class RPlottingNodeModel extends RNodeModel {
 			output = new ImagePortObject[]{new ImagePortObject(imageContent, spec)};
 		} catch (IOException e) {
 			exec.setMessage("Error while reading the image!\n" + e.getMessage());
-			e.printStackTrace();
-			throw new CanceledExecutionException("Error while reading the image!\n" + e.getMessage());
+			throw(e);
 		}
 		
 
