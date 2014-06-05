@@ -49,6 +49,9 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 		dialog_types.replaceListItems(ImputerNodeModel.getVariableTypes(IN_DATA_SPEC), selected);
 
 
+		cl_method.stateChanged(new ChangeEvent(m_method));
+		cl_chooseType.stateChanged(new ChangeEvent(m_varType));
+		cl_varType.stateChanged(new ChangeEvent(m_varType));
 	}
 
 	private DialogComponentStringListSelection dialog_types;
@@ -65,6 +68,11 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelInteger m_svd_rank       = new SettingsModelInteger(ImputerNodeModel.CFGKEY_RANK, 5);
 	private final SettingsModelInteger m_svd_niters     = new SettingsModelInteger(ImputerNodeModel.CFGKEY_NUMITERS, 5);
 
+	/** CHANGE LISTENER */
+	private final ChangeListener cl_method;
+	private final ChangeListener cl_chooseType;
+	private final ChangeListener cl_varType;
+	
 	@SuppressWarnings("unchecked")
 	protected ImputerNodeDialog() {
 		super();
@@ -125,7 +133,7 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 
 
 		// change listener
-		m_method.addChangeListener(new ChangeListener() {
+		cl_method = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				m_knn_k.setEnabled(false);
 				m_knn_dist.setEnabled(false);
@@ -139,18 +147,18 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 					m_svd_niters.setEnabled(true);
 				}
 			}
-		});
+		};
+		m_method.addChangeListener(cl_method);
 
-		m_chooseType.addChangeListener(new ChangeListener() {
+		cl_chooseType = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				m_columns.setEnabled(!m_chooseType.getBooleanValue());
 				m_varType.setEnabled( m_chooseType.getBooleanValue());
 			}
-		});
-		m_columns.setEnabled(!m_chooseType.getBooleanValue());
-		m_varType.setEnabled( m_chooseType.getBooleanValue());
-		
-		m_varType.addChangeListener(new ChangeListener() {
+		};
+		m_chooseType.addChangeListener(cl_chooseType);
+
+		cl_varType = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				if(m_chooseType.getBooleanValue()){
 					m_columns.setNewValues(
@@ -159,13 +167,9 @@ public class ImputerNodeDialog extends DefaultNodeSettingsPane {
 							false);
 				}
 			}
-		});
-		if(m_chooseType.getBooleanValue()){
-			m_columns.setNewValues(
-					ImputerNodeModel.getSelectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
-					ImputerNodeModel.getDeselectedColumnsByType(IN_DATA_SPEC, Arrays.asList(m_varType.getStringArrayValue())), 
-					false);
-		}
+		};
+		m_varType.addChangeListener(cl_varType);
+		
 	}
 }
 

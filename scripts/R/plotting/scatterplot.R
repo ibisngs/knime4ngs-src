@@ -31,7 +31,7 @@ loadLib("ggplot2")
 ##############################################################################################################
 ## READ FILES
 ##############################################################################################################
-data <- read.csv3(args$file.in)
+data <- plotting.readData(args)
 
 if(!is.null(args$matrix)){
 	args$matrix = unlist(strsplit(args$matrix, ","))
