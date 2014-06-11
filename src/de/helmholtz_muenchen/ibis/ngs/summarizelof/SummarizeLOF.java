@@ -126,7 +126,7 @@ public class SummarizeLOF {
 	     * Write Outfiles
 	     */
 	    String SAMPLE_SUMMARY_OUT 			= VCF_FILE.replace("vcf", "lof_SampleSummary.csv");
-	    String SAMPLE_SUMMARY_HEADER 		= "SAMPLE\tprematureStop\tremovedStop\tspliceOverlap\tinsertionFS\tdeletionFS\tNumberOfLOFs\tNumberOfFullLOFs\tSampleHOM_ParentsALL\tSampleHOM_ParentsALL_FullLOF\tSampleHOM_ParentsHET\tSampleHOM_ParentsHETFullLOF";
+	    String SAMPLE_SUMMARY_HEADER 		= "SAMPLE\tstartOverlap\tendOverlap\tprematureStop\tremovedStop\tspliceOverlap\tinsertionFS\tdeletionFS\tNumberOfLOFs\tNumberOfFullLOFs\tSampleHOM_ParentsALL\tSampleHOM_ParentsALL_FullLOF\tSampleHOM_ParentsHET\tSampleHOM_ParentsHETFullLOF";
 	    String GENE_SUMMARY_OUT 			= VCF_FILE.replace("vcf", "lof_GeneSummary.csv");
 	    String GENE_SUMMARY_HEADER 			= "Gene\tNumberOfAffectedSamples\tDeleteMe";
 		printMap(SAMPLE_SUMMARY,SAMPLE_SUMMARY_OUT,SAMPLE_SUMMARY_HEADER);
@@ -175,8 +175,9 @@ public class SummarizeLOF {
 	  				  /**Get VAT Annotation**/
 	  				  for(String a : ANNOTATIONS){
 	  					  if(a.startsWith("VA=")){
-	  						 VAT_ANNOTATION = a; 
-	  						 break;
+	  							VAT_ANNOTATION = a;  
+	  				
+	  							break;
 	  					  }
 	  				  }
 	  				   				  
@@ -189,9 +190,9 @@ public class SummarizeLOF {
 2:MUC20:ENSG00000176945.11:+:nonsynonymous:1/6:MUC20-011:ENST00000423938.1:382_89_30_P->L
 2:MUC20:ENSG00000176945.11:+:prematureStop:5/6:MUC20-002:ENST00000436408.1:2169_1855_619_R->*:MUC20-201:ENST00000320736.6:1614_1342_448_R->*:MUC20-001:ENST00000447234.2:2127_1855_619_R->*:MUC20-004:ENST00000445522.2:2022_1750_584_R->*:MUC20-202:ENST00000381954.5:1560_1288_430_R->*
 */
+	  					  
 	  					  //Precheck: Check if Annotation line contains LOF Keywords
-	  					  if(VAT_ANNOTATION.contains("prematureStop") || VAT_ANNOTATION.contains("removedStop") || VAT_ANNOTATION.contains("spliceOverlap") || VAT_ANNOTATION.contains("insertionFS") || VAT_ANNOTATION.contains("deletionFS")){
-	  						  
+	  					  if(VAT_ANNOTATION.contains("prematureStop") || VAT_ANNOTATION.contains("removedStop") || VAT_ANNOTATION.contains("spliceOverlap") || VAT_ANNOTATION.contains("insertionFS") || VAT_ANNOTATION.contains("deletionFS") || VAT_ANNOTATION.contains("startOverlap") || VAT_ANNOTATION.contains("endOverlap")){
 	  						 //Remove 'VA=' Tag
 	  						 VAT_ANNOTATION = VAT_ANNOTATION.replaceFirst("VA=", ""); 
 	  						 
@@ -204,9 +205,16 @@ public class SummarizeLOF {
 			  					  String AlleleNumber 	= VAT_FIELDS[0];
 			  					  String Gene 			= VAT_FIELDS[1];
 			  					  String Type 			= VAT_FIELDS[4];
+			  					  
+			  					  if(Type.contains("|")){ 
+			  						  Type = Type.split("|")[0];
+			  					  }
+			  					  
+			  					  
+			  					  
 			  					  String Transcript		= VAT_FIELDS[5];
 			  					   
-			  					  if(Type.equals("prematureStop") || Type.equals("removedStop") || Type.equals("spliceOverlap") || Type.equals("insertionFS") || Type.equals("deletionFS")){
+			  					  if(Type.equals("prematureStop") || Type.equals("removedStop") || Type.equals("spliceOverlap") || Type.equals("insertionFS") || Type.equals("deletionFS") || VAT_ANNOTATION.equals("startOverlap") || VAT_ANNOTATION.equals("endOverlap")){
 			  						  LOF_ALLELES+=AlleleNumber+";"; 
 			  						  LOF_GENE+=Gene+";"; 
 			  						  LOF_TYPE+=Type+";";
@@ -342,6 +350,9 @@ public class SummarizeLOF {
 		       int insFS	= 0;
 		       int delFS	= 0;
 		       
+		       int stOv		= 0;
+		       int endOv	= 0;
+		       
 		       int fullLOFs = 0;
 		       
 		       int NumberOfLOFs = SampleLOFs.size();
@@ -381,6 +392,10 @@ public class SummarizeLOF {
 		    		   insFS++;
 		    	   }else if(Type.equals("deletionFS")){
 		    		   delFS++;
+		    	   }else if(Type.equals("startOverlap")){
+		    		   stOv++;
+		    	   }else if(Type.equals("endOverlap")){
+		    		   endOv++;
 		    	   }else{
 		    		   System.out.println(Type); 
 		    	   }
@@ -391,7 +406,7 @@ public class SummarizeLOF {
 		    	   
 		       }
 		       //Sample Summary with Counts
-		       SAMPLE_SUMMARY.put(SampleID, new ArrayList<String>(Arrays.asList(""+pmStop,""+rmStop,""+spliceO,""+insFS,""+delFS,""+NumberOfLOFs,""+fullLOFs)));
+		       SAMPLE_SUMMARY.put(SampleID, new ArrayList<String>(Arrays.asList(""+stOv,""+endOv,""+pmStop,""+rmStop,""+spliceO,""+insFS,""+delFS,""+NumberOfLOFs,""+fullLOFs)));
 		       
 	    }
 	   
