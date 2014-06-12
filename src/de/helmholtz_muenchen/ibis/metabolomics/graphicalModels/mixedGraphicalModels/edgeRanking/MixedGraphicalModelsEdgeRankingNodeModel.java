@@ -56,6 +56,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 
 	static final int    DEFAULT_SS_SAMPLE_N = 100;
 	static final double DEFAULT_SS_SAMPLE_S = 0.5;
+	static final int    DEFAULT_CORES       = 1;
 	
 	protected static final NodeLogger LOGGER = NodeLogger.getLogger(MixedGraphicalModelsEdgeRankingNodeModel.class);
 
@@ -63,6 +64,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	static final String CFGKEY_RANKER             = "ranker";
 	static final String CFGKEY_PARAMS             = "ranker parameters";
 	static final String CFGKEY_VAR_TYPES          = "variable types";
+	static final String CFGKEY_PARALLEL           = "parallel cores";
 	static final String CFGKEY_SS_SAMPLE_N        = "(stability selection) sample number";
 	static final String CFGKEY_SS_SAMPLE_S        = "(stability selection) sample size";
 	static final String CFGKEY_SS_RANKTYPE        = "(stability selection) ranking type";
@@ -74,9 +76,9 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 	private int m_stabSel_sampleNum     = DEFAULT_SS_SAMPLE_N;
 	private double m_stabSel_sampleSize = DEFAULT_SS_SAMPLE_S;
 	private String m_rseed_col;
-	
-	private String m_rankerType = GRAFO_RANKTYPE[0];
-	public static String DEFAULT_AVAILABLE_COLS= "2nd input not available";
+	private int m_cores              = DEFAULT_CORES;
+	private String m_rankerType         = GRAFO_RANKTYPE[0];
+	public static String DEFAULT_AVAILABLE_COLS = "2nd input not available";
 
 	/**
 	 * Constructor for the node model.
@@ -168,7 +170,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		// Other parameters
 		this.addArgument("--sampleSize", m_stabSel_sampleSize);
 		this.addArgument("--ranktype"  , m_rankerType);
-
+		this.addArgument("--cores"     , m_cores);
 		
 		
 		////////////////////////////////////////////////////////////////////////////////////
@@ -276,7 +278,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		m_stabSel_sampleSize = settings.getDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, DEFAULT_SS_SAMPLE_S);
 		m_rankerType = settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE , MixedGraphicalModelsEdgeRankingNodeModel.GRAFO_RANKTYPE[0]);
 		m_rseed_col = settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS);
-
+		m_cores     = settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_CORES);
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		String[] types       = settings.getStringArray(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_VAR_TYPES   , new String[0]);
 		String[] ranker      = settings.getStringArray(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANKER      , new String[0]);
@@ -303,7 +305,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		settings.addDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize);
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE, this.m_rankerType);
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, m_rseed_col);
-
+		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, m_cores);
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_ranker.keySet().size();
 

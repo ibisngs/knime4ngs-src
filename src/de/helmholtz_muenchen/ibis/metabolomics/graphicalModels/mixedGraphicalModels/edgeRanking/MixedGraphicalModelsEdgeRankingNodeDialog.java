@@ -61,7 +61,7 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
     private final JComboBox<String> m_randomSeedsSSCol;
     private String[] m_availableCols_ssRSeed = new String[]{MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS};
     private final JComboBox<String> m_rankerType;
-	
+    private final SpinnerNumberModel m_cores = new SpinnerNumberModel(MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_CORES, 0, 128, 1);
 
     /**
      * Creates a new binner dialog.
@@ -95,6 +95,12 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
         stabSelPanel.add(label_rankerType);
         m_rankerType = new JComboBox<String>(MixedGraphicalModelsEdgeRankingNodeModel.GRAFO_RANKTYPE);
         stabSelPanel.add(m_rankerType);
+        
+        // number of Cores
+        final JLabel label_cores     = new JLabel("Number of cores");
+        stabSelPanel.add(label_cores);
+        final JSpinner spinner_cores = new JSpinner(m_cores);
+        stabSelPanel.add(spinner_cores);
         
         
         super.addTab(" Stability Selection ", stabSelPanel);
@@ -169,7 +175,8 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
 		m_stabSel_sampleNum.setValue(settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_N, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_N));
 		m_stabSel_sampleSize.setValue(settings.getDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_SS_SAMPLE_S));
 		m_rankerType.setSelectedItem(settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE , MixedGraphicalModelsEdgeRankingNodeModel.GRAFO_RANKTYPE[0]));
-
+		m_cores.setValue(settings.getInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_CORES));
+		
 		if(specs[1] != null){
 			DataTableSpec optionalInputSpecs = (DataTableSpec)specs[1];
 			this.m_availableCols_ssRSeed = Global.getValidCols(optionalInputSpecs, IntValue.class);
@@ -235,7 +242,8 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
 		settings.addDouble(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_SAMPLE_S, m_stabSel_sampleSize.getNumber().doubleValue());
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_SS_RANKTYPE, (String)this.m_rankerType.getSelectedItem());
 		settings.addString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, (String)this.m_randomSeedsSSCol.getSelectedItem());
-
+		settings.addInt(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_PARALLEL, m_cores.getNumber().intValue());
+		
 		/* ADVANCED TYPE/RANKER SETTINGS */
 		int nTypes = this.m_typesRankerPanels.keySet().size();
 		

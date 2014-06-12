@@ -19,16 +19,16 @@ parser$add_argument("-r", "--ranker"   , type="character", action="store"     , 
 parser$add_argument("-p", "--param"    , type="character", action="store"     , dest="ranker.params", default="integer:;numeric:;factor:", help="define ranker methods used for each variable-class (as class1=method1,class2=method2,...)", metavar="<method1:param1=value1,param2=value2; method2:param1=value1,param2=value2,...>")
 
 parser$add_argument("-s","--sampleNum" , type="integer"  , action='store'     , dest='sampleNum'    , default='100'  , help='sum the integers (default: find the max)')
-parser$add_argument("-z","--sampleSize", type="double"   , action='store'     , dest='samplesize'   , default='0.8'    , help='size of each subsample (default:0.8)', metavar='<double>')
+parser$add_argument("-z","--sampleSize", type="double"   , action='store'     , dest='samplesize'   , default='0.8'  , help='size of each subsample (default:0.8)', metavar='<double>')
 parser$add_argument("-t","--ranktype"  , type="character", action='store'     , dest='rankType'     , default='local', help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
  
 parser$add_argument("-rs","--rseed"    , type="integer"  , action='store'     , dest='rseed'        ,                  help='random seed for reproducible random samples', metavar="<int>")
-parser$add_argument("-pc","--cores"    , type="integer"  , action='store'     , dest='parallel'     ,                  help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
+parser$add_argument("-pc","--cores"    , type="integer"  , action='store'     , dest='parallel'     , default=1      , help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
   
 ## parse
 args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 
-print(args)
+#print(args)
 
 
 ########################################################################################################################################
@@ -88,7 +88,7 @@ set.seed(args$rseed)
 model <- mixedGraficalModels(data, #
                              ranker        = ranker,
                              ranker.params = ranker.params,
-                             var.classes,
+                             var.classes   = var.classes,
                              stabSel.sampleNum = args$sampleNum, 
                              stabSel.sampleSize = floor(args$samplesize*nrow(data)),
                              rankType = args$rankType,

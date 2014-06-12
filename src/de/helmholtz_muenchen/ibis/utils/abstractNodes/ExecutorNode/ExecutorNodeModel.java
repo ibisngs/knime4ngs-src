@@ -216,4 +216,13 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
 	public String getSTDERR() {
 		return STDERR.toString();
 	}
+
+//	protected void setSTDOUT(String stdout, boolean reset){
+//		if(reset)this.STDOUT.setLength(0);
+//		this.STDOUT.append(stdout);
+//	}
+//	protected void setSTDERR(String stderr, boolean reset){
+//		if(reset)this.STDERR.setLength(0);
+//		this.STDERR.append(stderr);
+//	}
 }

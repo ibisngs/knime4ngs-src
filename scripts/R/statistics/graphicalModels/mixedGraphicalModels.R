@@ -44,7 +44,7 @@ mixedGraficalModels <- function(X, #
 
 	## parallelization
 	parallel.stabSel = FALSE
-        if(is.null(threads)){
+        if(is.null(threads) | threads<1){
 		loadLib("doMC")
 		threads = detectCores()
         }
