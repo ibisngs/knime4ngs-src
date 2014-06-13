@@ -171,7 +171,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		this.addArgument("--sampleSize", m_stabSel_sampleSize);
 		this.addArgument("--ranktype"  , m_rankerType);
 		this.addArgument("--cores"     , m_cores);
-		
+		this.addArgument("--sampleNum" , m_stabSel_sampleNum );
 		
 		////////////////////////////////////////////////////////////////////////////////////
 		// DO EDGE RANKING
@@ -183,7 +183,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		for(int i=0; i<randomSeeds.length; i++){
 			exec.checkCanceled();
 			this.addArgument("--rseed", randomSeeds[i]);
-			this.addArgument("--sampleNum" , 1 );
+			
 			BufferedDataTable[] result = super.execute(new BufferedDataTable[]{inData[0]}, exec);
 			// rename edgeRank rows
 			exec.checkCanceled();

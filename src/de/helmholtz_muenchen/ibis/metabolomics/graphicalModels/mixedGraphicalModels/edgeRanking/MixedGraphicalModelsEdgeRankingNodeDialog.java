@@ -188,10 +188,8 @@ public class MixedGraphicalModelsEdgeRankingNodeDialog extends NodeDialogPane {
 		
 		if(this.m_availableCols_ssRSeed[0].equals(MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS)){
 			this.m_randomSeedsSSCol.setEnabled(false);
-			this.stabSel_sampleNum_spinner.setEnabled(true);
 		}else{
 			this.m_randomSeedsSSCol.setEnabled(true);
-			this.stabSel_sampleNum_spinner.setEnabled(false);
 			this.m_randomSeedsSSCol.setSelectedItem(settings.getString(MixedGraphicalModelsEdgeRankingNodeModel.CFGKEY_RANDOM_SEED_COL, MixedGraphicalModelsEdgeRankingNodeModel.DEFAULT_AVAILABLE_COLS));	
 		}
 		

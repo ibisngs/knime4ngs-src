@@ -37,8 +37,6 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 source(args$file.glob)
 ## CRAN
 loadLib("plyr")
-#loadLib("igraph")
-#loadLib("reshape2")
 CWD = getCWD()
 source(paste(CWD, "/mixedGraphicalModels.R", sep=""))
 
@@ -82,6 +80,11 @@ if(is.null(args$rseed)){
 	args$rseed = sample(.Machine$integer.max, 1)
 }
 set.seed(args$rseed)
+
+# data = data[1:20,1:3]
+# var.classes = var.classes[1:3]
+# args$sampleNum=10
+#args$parallel=1
 ##########################################################################################################################################
 ## CREATE MODEL
 ##########################################################################################################################################

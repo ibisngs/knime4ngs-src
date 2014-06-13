@@ -18,6 +18,7 @@ parser$add_argument("-p", "--percIncl", type="double"    , action="store"    , d
 
 parser$add_argument("-e", "--ev"      , type="integer"   , action="store"    , dest="ev"        ,                help="(FWER control) upper limit for false positive edges in the resulting graph" , metavar="<int>")
 parser$add_argument("-n", "--nedges"  , type="integer"   , action="store"    , dest="nEdges"    ,                help="(empirical p-values) number of edges to be selected in each sampled model" , metavar="<integer>")
+parser$add_argument("-c", "--cores"   , type="integer"   , action="store"    , dest="cores"     ,                help="number of cores used for calculations" , metavar="<integer>")
 
 
 
@@ -40,6 +41,19 @@ source(paste(CWD, "/mixedGraphicalModels.R", sep=""))
 ##########################################################################################################################################
 edge.ranks <- read.csv3(args$file.in)
 
+## parallelization
+parallel = FALSE
+if(is.null(args$cores) | args$cores<1){
+	loadLib("parallel")
+	args$cores = detectCores()-1
+}
+if(args$cores > 1){
+	loadLib("doMC")
+	registerDoMC(cores=args$cores)
+	warning("USING ", args$cores, " threads for computations!")
+	parallel = TRUE
+}
+
 ##########################################################################################################################################
 ## CREATE MODEL
 ##########################################################################################################################################
@@ -52,7 +66,8 @@ if(!is.null(args$file.backgr)){
 	model = getGraph.empiricalPvalues(edge.ranks,
 	                                  edge.ranks.background,
 	                                  stabSel.sampleNumedges = args$nEdges,
-	                                  stabSel.inclusionPerc=args$percIncl)
+	                                  stabSel.inclusionPerc=args$percIncl,
+	                                  parallel = parallel)
 
 
 ## FWER CONTROL
@@ -62,7 +77,8 @@ if(!is.null(args$file.backgr)){
 	}
 	model = getGraph.FWER(edge.ranks,
 	                      stabSel.inclusionPerc=args$percIncl, #
-	                      E.v=args$ev)
+	                      E.v=args$ev,
+	                      parallel = parallel)
 }
 
 

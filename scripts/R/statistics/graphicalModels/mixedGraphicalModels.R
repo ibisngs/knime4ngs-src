@@ -45,16 +45,16 @@ mixedGraficalModels <- function(X, #
 	## parallelization
 	parallel.stabSel = FALSE
         if(is.null(threads) | threads<1){
-		loadLib("doMC")
-		threads = detectCores()
+		loadLib("parallel")
+		threads = detectCores()-1
         }
 	if(threads > 1){
-		loadLib("foreach")
 		loadLib("doMC")
 		registerDoMC(cores=threads)
 		warning("USING ", threads, " threads for computations!")
 		parallel.stabSel = TRUE
 	}
+	cat("USING ", threads, " threads for computations!")
 
 	
 	
@@ -70,7 +70,7 @@ mixedGraficalModels <- function(X, #
 	}
 
 	if(missing(var.classes)){
-		var.classes = apply(data, MARGIN=2, FUN=class)
+		var.classes = apply(X, MARGIN=2, FUN=class)
 	}
 	
 	## sample subsets for stability selection
@@ -91,7 +91,14 @@ mixedGraficalModels <- function(X, #
 
 	## create output
 	time.end <- Sys.time()
-	MODEL = list(ranks=ranks, variables=colnames(X), stabSel.sampleNum=stabSel.sampleNum, n=n, p=p, run.time=as.numeric(time.end-time.start, units="secs"))
+	MODEL = list(ranks=ranks, variables=colnames(X), stabSel.sampleNum=stabSel.sampleNum, n=n, p=p, run.time=as.numeric(time.end-time.start, units="secs"))	
+	## sample subsets for stability selection
+	samples = llply(.data=c(1:stabSel.sampleNum),.fun=function(i){return(sample(rownames(X),stabSel.sampleSize,replace=F))})
+
+	## order of edges (from an adjacency matrix) as vector
+	edges.matrix  <- matrix(1:(p*p),ncol=p, nrow=p, dimnames=list(colnames(X), colnames(X))) #, 
+	edges.indices <- as.vector(edges.matrix[upper.tri(edges.matrix)])
+
 	return(invisible(MODEL))
 }
 
@@ -102,8 +109,9 @@ mixedGraficalModels <- function(X, #
 # stabSel.edges 	number of edges to choose in each subsample (leave blank if desired E.v is given)
 getEdgesList <- function(edge.ranks, 
                          stabSel.sampleNumedges, #
-                         stabSel.inclusionPerc=0.8){
-	
+                         stabSel.inclusionPerc = 0.8,
+                         parallel = FALSE){
+
 	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
 	p         = length(variables)
 	n.edges    = ncol(edge.ranks)
@@ -111,7 +119,7 @@ getEdgesList <- function(edge.ranks,
 
 		
 	## per stability selection sample choose x best edges ## TODO HIGHER VALUE MEANS HIGHER PROBABILITY OF INCLUSION
-	edges.included            = aaply(.data=edge.ranks, .margins=1, .fun=function(x){a<-rep(0, times=n.edges); a[which(rank(-x) < stabSel.sampleNumedges)]<-1;return(a)}, .expand=FALSE)
+	edges.included            = aaply(.data=edge.ranks, .margins=1, .fun=function(x){a<-rep(0, times=n.edges); a[which(rank(-x) < stabSel.sampleNumedges)]<-1;return(a)}, .expand=FALSE, .parallel=parallel)
 	#colnames(edges.included) = colnames(edge.ranks)
 	#srownames(edges.included)= rownames(edge.ranks)
 	
@@ -133,6 +141,9 @@ getAdjacency <- function(edges, variables, v1="v1", v2="v2", feature="selected")
 	g = graph.data.frame(edges[, c(v1, v2, feature)], directed=F)
 	adjacency = get.adjacency(g,sparse=FALSE, attr=feature)
 	adjacency = adjacency[variables,variables]
+	adjacency = 1*adjacency # to numeric
+	
+	return(adjacency)
 }
 
 
@@ -141,7 +152,8 @@ getAdjacency <- function(edges, variables, v1="v1", v2="v2", feature="selected")
 # E.v			desired maximal number of False positive edges; only guaranteed if stabSel.edges is not given manually
 getGraph.FWER <- function(edge.ranks, 
                           stabSel.inclusionPerc=0.8, #
-                          E.v=20){
+                          E.v=20,
+                          parallel = FALSE){
 
 	## if not given by the user, calculate stabSel.sampleNumedges to meet certain FWER (for details Fellinghauer et al. 2013)	
 	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
@@ -149,7 +161,7 @@ getGraph.FWER <- function(edge.ranks,
 	stabSel.sampleNumedges = floor(sqrt((2*stabSel.inclusionPerc-1) * E.v * p * (p-1) / 2))
 	#cat("Including top ", stabSel.sampleNumedges, "edges from each sample")
 
-	edges = getEdgesList(edge.ranks, stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc)
+	edges = getEdgesList(edge.ranks, stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc, parallel=parallel)
 	edges$selected  = edges$incl.perc >= stabSel.inclusionPerc
 	
 	## generate adjacency matrix from selected edges
@@ -169,7 +181,8 @@ getGraph.FWER <- function(edge.ranks,
 getGraph.empiricalPvalues <- function(edge.ranks, 
                                       edge.ranks.background,
                                       stabSel.sampleNumedges,
-                                      stabSel.inclusionPerc=0.8){
+                                      stabSel.inclusionPerc=0.8,
+                                      parallel=parallel){
 
 	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
 	p         = length(variables)
@@ -182,13 +195,13 @@ getGraph.empiricalPvalues <- function(edge.ranks,
 	background.inclusionPerc = data.frame()
 	background.inclusionNum  = data.frame()
 	for(s in 1:length(background.samples)){
-		edges <- getEdgesList(background.samples[[s]], stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc)
+		edges <- getEdgesList(background.samples[[s]], stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc, parallel=parallel)
 		background.inclusionPerc = rbind(background.inclusionPerc, edges$incl.perc)
 	}
 	colnames(background.inclusionPerc) <- colnames(background.samples[[1]])
 
 	## COMPARE TO REAL DATA
-	edges <- getEdgesList(edge.ranks, stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc)
+	edges <- getEdgesList(edge.ranks, stabSel.sampleNumedges=stabSel.sampleNumedges, stabSel.inclusionPerc=stabSel.inclusionPerc, parallel=parallel)
 	edges$p.value = NA
 	for(e in rownames(edges)){
 		## compare inclusion percentage with background data

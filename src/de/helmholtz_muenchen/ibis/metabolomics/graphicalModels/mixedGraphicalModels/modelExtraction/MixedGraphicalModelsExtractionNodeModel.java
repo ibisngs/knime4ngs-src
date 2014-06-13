@@ -34,6 +34,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 	static final String CFGKEY_PERC_INCLUSION = "edge frequency treshold";
 	static final String CFGKEY_EV             = "e.v.";
 	static final String CFGKEY_NUM_OF_EDGES   = "number of edges per model";
+	static final String CFGKEY_CORES          = "number of cores";
 
     
 	/** SETTING MODELS */
@@ -42,6 +43,8 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 	private final SettingsModelIntegerBounded m_ev       = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 5, 0, Integer.MAX_VALUE);
 	// Empirical p-values only
 	private final SettingsModelIntegerBounded m_nEdges   = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_NUM_OF_EDGES, 5, 1, Integer.MAX_VALUE);
+	// Cores
+	private final SettingsModelIntegerBounded m_cores    = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_CORES, 3, 0, Integer.MAX_VALUE);
 
     /**
      * Constructor for the node model.
@@ -59,7 +62,8 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     	this.addArgument("--percIncl", m_percIncl.getDoubleValue());
     	this.addArgument("--ev"      , m_ev.getIntValue());
     	this.addArgument("--nedges"  , m_nEdges.getIntValue());
-
+    	this.addArgument("--cores", m_cores.getIntValue());
+    	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(new DataTableSpec[]{inData[0].getDataTableSpec(),inData[1]==null?null:inData[1].getDataTableSpec()})); // parse cell types
 		out[1] = exec.createSpecReplacerTable(out[1], this.getAdjacencyMatSpec(inData[0].getDataTableSpec()));
@@ -123,6 +127,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
         m_ev.saveSettingsTo(settings);
         m_percIncl.saveSettingsTo(settings);
         m_nEdges.saveSettingsTo(settings);
+        m_cores.saveSettingsTo(settings);
     }
 
     /**
@@ -133,6 +138,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
         m_ev.loadSettingsFrom(settings);
         m_percIncl.loadSettingsFrom(settings);
         m_nEdges.loadSettingsFrom(settings);
+        m_cores.loadSettingsFrom(settings);
     }
 
     /**
@@ -143,6 +149,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     	m_ev.validateSettings(settings);
         m_percIncl.validateSettings(settings);
         m_nEdges.validateSettings(settings);
+        m_cores.validateSettings(settings);
     }
     
     /**

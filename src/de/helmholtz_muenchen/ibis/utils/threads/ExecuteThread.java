@@ -67,7 +67,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	 */
 	@Override
 	public Boolean call() throws Exception {
-		LOGGER.info("Running command: " + getCommand(this.command));
+		LOGGER.info("Running command: " + getCommandEscaped(this.command));
 		
 		//Start the process
 		if(this.command.length==1){
@@ -200,6 +200,21 @@ public class ExecuteThread implements Callable<Boolean> {
 		
 	public static String getCommand(String[] command){
 		return StringUtils.join(command, " ");
+	}
+	
+	public static String getCommandEscaped(String[] command){
+		if(command==null || command.length==0){
+			return("");
+		}
+		StringBuffer result = new StringBuffer(command[0]);
+		for(int i=1; i<command.length;i++){
+			if(command[i].startsWith("-")){
+				result.append(" " + command[i]);
+			}else{
+				result.append(" \"" + command[i] + "\"");
+			}
+		}
+		return(result.toString());
 	}
 	
 	/**
