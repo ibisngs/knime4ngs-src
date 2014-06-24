@@ -123,7 +123,7 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 		
     	DataCell[] c = new DataCell[]{
     			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true)),
-    			new StringCell(command)};
+    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true) + File.separator + GFF_FILE_NAME)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
