@@ -91,7 +91,7 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	// add binary path as first part of the command
     	commands.add(0, getBinaryPath);
     	String[] command = commands.toArray(new String[commands.size()]);
-    	
+    	System.out.println(ExecuteThread.getCommand(command));
     	// check if run was already successful 
     	File lockFile = getPathToLockFile();
     	String joinedCommand = ExecuteThread.getCommand(command);
