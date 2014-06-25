@@ -6,6 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Creates a GFF3 file which can be indexed by MISO
+ * @author Michael Kluge
+ *
+ */
 public class IndexCreator {
 	
 	private static final String BASE_NAME 		= "fromGTF";
@@ -41,15 +46,15 @@ public class IndexCreator {
 			File file_ri = new File(base.getAbsolutePath() + File.separator + BASE_NAME + FILENAME_RI);
 			
 			if(file_se.exists())
-				parser.add(new SEParser(file_se.getAbsolutePath(), bw));
+				parser.add(new SEParser(file_se.getAbsolutePath(), bw, null));
 			if(file_mxe.exists())
-				parser.add(new MXEParser(file_mxe.getAbsolutePath(), bw));
+				parser.add(new MXEParser(file_mxe.getAbsolutePath(), bw, null));
 			if(file_a5ss.exists())
-				parser.add(new A5SSParser(file_a5ss.getAbsolutePath(), bw));
+				parser.add(new A5SSParser(file_a5ss.getAbsolutePath(), bw, null));
 			if(file_a3ss.exists())
-				parser.add(new A3SSParser(file_a3ss.getAbsolutePath(), bw));
+				parser.add(new A3SSParser(file_a3ss.getAbsolutePath(), bw, null));
 			if(file_ri.exists())
-				parser.add(new RIParser(file_ri.getAbsolutePath(), bw));
+				parser.add(new RIParser(file_ri.getAbsolutePath(), bw, null));
 			
 			// add novel parsers if wished
 			if(alsoNovel) {
@@ -60,15 +65,15 @@ public class IndexCreator {
 				File file_ri_novel = new File(base.getAbsolutePath() + File.separator + BASE_NAME + NOVE_NAME + FILENAME_RI);
 				
 				if(file_se_novel.exists())
-					parser.add(new SEParser(file_se_novel.getAbsolutePath(), bw));
+					parser.add(new SEParser(file_se_novel.getAbsolutePath(), bw, null));
 				if(file_mxe_novel.exists())
-					parser.add(new MXEParser(file_mxe_novel.getAbsolutePath(), bw));
+					parser.add(new MXEParser(file_mxe_novel.getAbsolutePath(), bw, null));
 				if(file_a5ss_novel.exists())
-					parser.add(new A5SSParser(file_a5ss_novel.getAbsolutePath(), bw));
+					parser.add(new A5SSParser(file_a5ss_novel.getAbsolutePath(), bw, null));
 				if(file_a3ss_novel.exists())
-					parser.add(new A3SSParser(file_a3ss_novel.getAbsolutePath(), bw));
+					parser.add(new A3SSParser(file_a3ss_novel.getAbsolutePath(), bw, null));
 				if(file_ri_novel.exists())
-					parser.add(new RIParser(file_ri_novel.getAbsolutePath(), bw));
+					parser.add(new RIParser(file_ri_novel.getAbsolutePath(), bw, null));
 			}
 			// close file handle
 			bw.flush();
@@ -80,4 +85,8 @@ public class IndexCreator {
 			}
 		}
 	}
+	
+	/*public static void main(String[] args) throws IOException {
+		IndexCreator ic = new IndexCreator("/storageNGS/ngs1/projects/other/Mouse_beckers_huypens/michael/mRNA/MATS/ASEvents", false, "/tmp/fuuu");
+	}*/
 }

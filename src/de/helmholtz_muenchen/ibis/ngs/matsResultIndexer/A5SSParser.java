@@ -40,23 +40,23 @@ public class A5SSParser extends MatsOutputParser {
 	}
 		
 
-	public A5SSParser(String path, BufferedWriter bw) throws IOException {
-		super(path, bw);
+	public A5SSParser(String path, BufferedWriter bw, Double FDR) throws IOException {
+		super(path, bw, FDR);
 	}
 
 	@Override
-	protected void getEvent(String split[]) throws IOException {
+	protected String getEvent(String split[]) throws IOException {
 		
 		String gene = split[this.NAME2ID.get(GENE_NAME)];
 		String chr = split[this.NAME2ID.get(CHR_NAME)];
-		boolean plusStrand = (split[this.NAME2ID.get(STRAND_NAME)]).equals(Exon.PLUS_STRAND);
+		boolean plusStrand = (split[this.NAME2ID.get(STRAND_NAME)]).toCharArray()[0] == Exon.PLUS_STRAND;
 		int LongEs = Integer.parseInt(split[this.NAME2ID.get(EXON_LONG_START_NAME)]);
 		int LongEe = Integer.parseInt(split[this.NAME2ID.get(EXON_LONG_END_NAME)]);
 		int ShortEs = Integer.parseInt(split[this.NAME2ID.get(EXON_SHORT_START_NAME)]);
 		int ShortEe = Integer.parseInt(split[this.NAME2ID.get(EXON_SHORT_END_NAME)]);
 		int FlankEs = Integer.parseInt(split[this.NAME2ID.get(EXON_FLANKING_START_NAME)]);
 		int FlankEe = Integer.parseInt(split[this.NAME2ID.get(EXON_FLANKING_END_NAME)]);
-		
+
 		Exon longE = new Exon(chr, LongEs, LongEe, plusStrand);
 		Exon shortE = new Exon(chr, ShortEs, ShortEe, plusStrand);
 		Exon flankE = new Exon(chr, FlankEs, FlankEe, plusStrand);
@@ -68,10 +68,15 @@ public class A5SSParser extends MatsOutputParser {
 		String geneLine = this.getGeneLine(gene, chr, longE, shortE, flankE);
 		
 		this.write(geneLine, name, i1, i2);
+		
+		if(this.isSignificant(split)) {
+			return name;
+		}
+		return null;
 	}
 
 	@Override
-	protected String getType() {
+	public String getType() {
 		return TYPE;
 	}
 }

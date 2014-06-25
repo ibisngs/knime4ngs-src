@@ -15,6 +15,7 @@ import java.util.HashMap;
  */
 public abstract class MatsOutputParser {
 	
+	protected static final String NAME_FDR = "FDR";
 	public static final String GENNAME = ";Genename=";
 	public static final String COMMENT_SEP = ";";
 	public static final String NAME = "Name=";
@@ -28,20 +29,34 @@ public abstract class MatsOutputParser {
 	
 	private BufferedReader BR;
 	protected BufferedWriter BW;
+	protected boolean SILENT_MODE = false;
+	protected final Double FDR;
+	protected final ArrayList<String> EVENT_NAMES = new ArrayList<String>();
 	
 	/**
 	 * Constructor
 	 * @param path
 	 * @throws IOException
 	 */
-	public MatsOutputParser(String path, BufferedWriter bw) throws IOException {
+	public MatsOutputParser(String path, BufferedWriter bw, Double FDR) throws IOException {
 		File f = this.openFile(path);
 		
 		if(f != null) {
 			this.BR = new BufferedReader(new FileReader(f));
 			this.BW = bw;
+			
+			// check, if silence mode is on
+			if(FDR != null && FDR <= 1 & FDR >= 0) {
+				this.SILENT_MODE = true;
+				this.FDR = FDR;
+			}
+			else 
+				this.FDR = null;
+			
 			this.processFile();
 		}
+		else 
+			this.FDR = null;
 	}
 	
 	/**
@@ -71,8 +86,13 @@ public abstract class MatsOutputParser {
 			while((line = this.BR.readLine()) != null) {
 				String split[] = line.split(TAB);
 				
-				if(split.length == length) 
-					this.getEvent(split);
+				if(split.length == length) {
+					String name = this.getEvent(split);
+					
+					// add the name, if in silent mode
+					if(this.SILENT_MODE && name != null)
+						EVENT_NAMES.add(name);
+				}
 				else 
 					throw new IllegalArgumentException("Line '" + line + "' has not enough or too much cols.");
 			}
@@ -88,8 +108,12 @@ public abstract class MatsOutputParser {
 	protected int init(String head) {
 		String split[] = head.split(TAB);
 		boolean found;
+		// get names to find
+		ArrayList<String> names = NAMES.get(this.getType());
+		if(this.SILENT_MODE)
+			names.add(NAME_FDR);
 		
-		for(String n : NAMES.get(this.getType())) {
+		for(String n : names) {
 			found = false;
 			for(int i = 0; i < split.length; i++) {
 				if(split[i].equals(n)) {
@@ -190,42 +214,67 @@ public abstract class MatsOutputParser {
 	 * @throws IOException 
 	 */
 	protected void write(String geneHeader, String name, Isoform ...isoform) throws IOException {
-		int ii = 1;
-		
-		if(this.BW != null) {
-			this.BW.write(geneHeader);
-			this.BW.write(NEWLINE);
+		// do nothing in case of silent mode because only the name should be fetched
+		if(!this.SILENT_MODE) {
+			int ii = 1;
 			
-			for(Isoform i : isoform) {
-				this.BW.write(i.toGFF3(name.toString(), ii));
+			if(this.BW != null) {
+				this.BW.write(geneHeader);
 				this.BW.write(NEWLINE);
-				ii++;
+				
+				for(Isoform i : isoform) {
+					this.BW.write(i.toGFF3(name.toString(), ii));
+					this.BW.write(NEWLINE);
+					ii++;
+				}
 			}
-		}
-		else {
-			
-			this.BW.append(geneHeader);
-			this.BW.append(NEWLINE);
-			
-			for(Isoform i : isoform) {
-				this.BW.append(i.toGFF3(name.toString(), ii));
+			else {
+				
+				this.BW.append(geneHeader);
 				this.BW.append(NEWLINE);
-				ii++;
+				
+				for(Isoform i : isoform) {
+					this.BW.append(i.toGFF3(name.toString(), ii));
+					this.BW.append(NEWLINE);
+					ii++;
+				}
 			}
 		}
 	}
+	
+	/**
+	 * checks, if a event is significant or not based on the FDR value
+	 * @param split
+	 * @return
+	 */
+	protected boolean isSignificant(String split[]) {
+		if(this.SILENT_MODE && this.FDR != null) {
+			return Double.parseDouble(split[this.NAME2ID.get(NAME_FDR)]) <= this.FDR;
+		}
+		return false;
+	}
+	
+	/**
+	 * significant event names or emtpy list if no valid FDR was set
+	 * @return
+	 */
+	public ArrayList<String> getSigEvents() {
+		return new ArrayList<String>(this.EVENT_NAMES);
+	}
+	
 	/****************************** ABSTRACT METHODS *****************************/
 	
 	/**
 	 * Processes a single line of the file and adds the gff3 annotation to the StringBuffer
 	 * @param split
+	 * @return name of the event
 	 * @throws IOException 
 	 */
-	protected abstract void getEvent(String split[]) throws IOException;
+	protected abstract String getEvent(String split[]) throws IOException;
 	
 	/**
 	 * Returns the type of the event
 	 * @return
 	 */
-	protected abstract String getType();
+	public abstract String getType();
 }

@@ -40,16 +40,16 @@ public class RIParser extends MatsOutputParser {
 	}
 		
 
-	public RIParser(String path, BufferedWriter bw) throws IOException {
-		super(path, bw);
+	public RIParser(String path, BufferedWriter bw, Double FDR) throws IOException {
+		super(path, bw, FDR);
 	}
 
 	@Override
-	protected void getEvent(String split[]) throws IOException {
+	protected String getEvent(String split[]) throws IOException {
 		
 		String gene = split[this.NAME2ID.get(GENE_NAME)];
 		String chr = split[this.NAME2ID.get(CHR_NAME)];
-		boolean plusStrand = (split[this.NAME2ID.get(STRAND_NAME)]).equals(Exon.PLUS_STRAND);
+		boolean plusStrand = (split[this.NAME2ID.get(STRAND_NAME)]).toCharArray()[0] == Exon.PLUS_STRAND;
 		int RIs = Integer.parseInt(split[this.NAME2ID.get(EXON_RI_START_NAME)]);
 		int RIe = Integer.parseInt(split[this.NAME2ID.get(EXON_RI_END_NAME)]);
 		int UPs = Integer.parseInt(split[this.NAME2ID.get(EXON_UP_START_NAME)]);
@@ -68,10 +68,15 @@ public class RIParser extends MatsOutputParser {
 		String geneLine = this.getGeneLine(gene, chr, up, ri, down);
 		
 		this.write(geneLine, name, i1, i2);
+		
+		if(this.isSignificant(split)) {
+			return name;
+		}
+		return null;
 	}
 
 	@Override
-	protected String getType() {
+	public String getType() {
 		return TYPE;
 	}
 }

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>MatsResultPlotter</name>
+    
+    <shortDescription>
+        This node can be used to plot the events which were found with MATS with the sashimi plot of MISO.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node can be used to plot the events which were found with MATS with the sashimi plot of MISO.</intro>
+        
+		<option name="path to sashimi plot script">Path to the sashimi plot script (version 0.5.2 was the most recent version yet) .</option>
+		<option name="path to settings file">path to config file of the script (description can be found on the authors website <a href="http://genes.mit.edu/burgelab/miso/docs/sashimi.html">documentation</a></option>
+		<option name="path to input folder (MATS_output)">Path to the output of MATS (MATS_output)</option>
+        <option name="path to output folder">Path where the plots should be stored.</option>
+        <option name="include reads and do not only look at junctions">Should the output of MATS with or without reads which do not cover any junction be used.</option>
+        <option name="FDR cutoff">FDR cutoff which is used to find significant events.</option>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port name">Output of MatsResultIndexer</inPort>
+        <outPort index="0" name="Out-Port name">Cell 0: path to output folder</outPort>
+    </ports>    
+    <views>
+        <view index="0" name="not implemented">not implemented</view>
+    </views>
+</knimeNode>
