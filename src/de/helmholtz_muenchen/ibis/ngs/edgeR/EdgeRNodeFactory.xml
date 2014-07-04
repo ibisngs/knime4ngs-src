@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>EdgeR</name>
+    
+	<shortDescription>
+    	This node can detect differential expressed genes using the EdgeR package.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node can find differential expressed genes using the EdgeR package. It takes as input a count table and a annotation file.</intro>
+        
+        <option name="method for calculation of normalization factors">method which is used for calculation of the normalization factors against different library sizes (default: TMM)</option>
+        <option name="p.value correction method">method which is used for p-value correction against multiple testing (default: BH)</option>
+    </fullDescription>
+    <ports>
+        <inPort index="0" name="count table">Cell 0: ID of feature
+        <br />Cell 1...n: count of feature in sample
+        <br />Must contain a header line with the names of the samples
+        </inPort>
+        <inPort index="1" name="condition table">Cell 0: Name of the sample like it is named in the count table
+        <br />Cell 1: condition (should only contain two conditions)
+        </inPort>
+        <outPort index="0" name="DE expressed genes">Cell 0: ID of feature
+        <br />Cell 1: log2 foldchange 
+        <br />Cell 2: average log2 CPM expression
+        <br />Cell 3: P-Value
+        <br />Cell 4: adjusted P-Value
+        </outPort>
+    </ports>    
+    <views>
+        <view index="0" name="not implemented">not implemented</view>
+    </views>
+</knimeNode>

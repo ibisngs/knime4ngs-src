@@ -14,8 +14,9 @@ public class LimmaNodeDialog extends DefaultNodeSettingsPane {
     private final SettingsModelString SET_CORRECTION	= new SettingsModelString(LimmaNodeModel.CFGKEY_CORRECTION_METHOD, LimmaNodeModel.DEFAULT_CORRECTION_METHOD);
     private final SettingsModelString SET_NORM_FACTOR	= new SettingsModelString(LimmaNodeModel.CFGKEY_NORMALIZE_METHOD_FACTOR, LimmaNodeModel.DEFAULT_NORMALIZE_METHOD_FACTOR);
     private final SettingsModelString SET_METHOD_CPM	= new SettingsModelString(LimmaNodeModel.CFGKEY_NORMALIZE_METHOD_CPM, LimmaNodeModel.DEFAULT_NORMALIZE_METHOD_CPM);
-    private final SettingsModelString SET_VS			= new SettingsModelString(LimmaNodeModel.CFGKEY_VS, LimmaNodeModel.DEFAULT_VS);
-
+    @SuppressWarnings("unused")
+	private final SettingsModelString SET_VS			= new SettingsModelString(LimmaNodeModel.CFGKEY_VS, LimmaNodeModel.DEFAULT_VS);
+ 
 	/**
 	 * Constructor
 	 */
