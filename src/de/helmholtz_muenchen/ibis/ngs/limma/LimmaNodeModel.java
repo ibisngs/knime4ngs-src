@@ -88,6 +88,15 @@ public class LimmaNodeModel extends RNodeModel {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
 	}
 	
+	@Override
+	public void init() {
+		super.init();
+		this.addSetting(SET_CORRECTION);
+		this.addSetting(SET_NORM_FACTOR);
+		this.addSetting(SET_METHOD_CPM);
+		this.addSetting(SET_VS);
+	}
+	
     /**
      * {@inheritDoc}
      * @throws Exception 

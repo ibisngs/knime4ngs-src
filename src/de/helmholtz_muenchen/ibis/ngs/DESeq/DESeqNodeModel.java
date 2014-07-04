@@ -42,7 +42,6 @@ public class DESeqNodeModel extends RNodeModel {
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_METHOD	= new SettingsModelString(CFGKEY_METHOD, DEFAULT_METHOD);
     private final SettingsModelString SET_SHEARING	= new SettingsModelString(CFGKEY_SHEARING, DEFAULT_SHEARING);
-    @SuppressWarnings("unused")
 	private final SettingsModelString SET_VS			= new SettingsModelString(CFGKEY_VS, DEFAULT_VS);
     
 
@@ -72,6 +71,14 @@ public class DESeqNodeModel extends RNodeModel {
      */
 	protected DESeqNodeModel() {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
+	}
+	
+	@Override
+	public void init() {
+		super.init();
+		this.addSetting(SET_METHOD);
+		this.addSetting(SET_SHEARING);
+		this.addSetting(SET_VS);
 	}
 	
     /**
