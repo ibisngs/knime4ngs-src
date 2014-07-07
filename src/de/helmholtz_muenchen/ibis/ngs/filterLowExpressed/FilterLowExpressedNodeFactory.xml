@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>FilterLowExpressed</name>
+    
+	<shortDescription>
+    	This node can be used to filter low expressed genes before differential expression analysis.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node can be used to filter low expressed genes before differential expression analysis. It takes as input a count table and a annotation file.</intro>
+        
+        <option name="minimum read number">minimum number of reads per sample (default: 10)</option>
+        <option name="fraction of samples">fraction of samples which must have the minimum read number (default: 0.5)</option>
+        <option name="test for both conditions separately">if checked, condition must be fulfilled for both conditions separately (default: true)</option>
+    </fullDescription>
+    <ports>
+        <inPort index="0" name="count table">Cell 0: ID of feature
+        <br />Cell 1...n: count of feature in sample
+        <br />Must contain a header line with the names of the samples
+        </inPort>
+        <inPort index="1" name="condition table">Cell 0: Name of the sample like it is named in the count table
+        <br />Cell 1: condition (should only contain two conditions)
+        </inPort>
+        <outPort index="0" name="count table">
+        Same format as input count table but some genes were filtered out based on the settings.
+        </outPort>
+    </ports>    
+    <views>
+        <view index="0" name="not implemented">not implemented</view>
+    </views>
+</knimeNode>
