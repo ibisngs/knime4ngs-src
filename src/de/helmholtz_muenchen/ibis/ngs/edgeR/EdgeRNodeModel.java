@@ -42,7 +42,6 @@ public class EdgeRNodeModel extends RNodeModel {
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_CORRECTION	= new SettingsModelString(CFGKEY_CORRECTION_METHOD, DEFAULT_CORRECTION_METHOD);
     private final SettingsModelString SET_NORM_FACTOR	= new SettingsModelString(CFGKEY_NORMALIZE_METHOD_FACTOR, DEFAULT_NORMALIZE_METHOD_FACTOR);
-    @SuppressWarnings("unused")
 	private final SettingsModelString SET_VS			= new SettingsModelString(CFGKEY_VS, DEFAULT_VS);
     
  
