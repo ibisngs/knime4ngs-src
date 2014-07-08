@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+    <name>FeatureCountsMerger</name>
+    
+    <shortDescription>
+		This node can be used to merge the results of multiple feature count runs.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>This node can be used to merge the results of multiple feature count runs. As input it expects a list of feature count files and returns a table with the merged counts.</intro>
+        
+        <option name="path to output file">path where the merged file should be stored</option>
+        <option name="remove the path of the file in the header">takes only the name of the file as header caption</option>
+        <option name="remove the ending of the file in the header">removes the ending of the file for the header caption</option>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="featureCountFiles">In the first column the path to feature count files are expected.</inPort>
+        <outPort index="0" name="merged count file">Contains the merged feature count file.</outPort>
+    </ports>    
+    <views>
+        <view index="0" name="no view implemented">no view implemented</view>
+    </views>
+</knimeNode>

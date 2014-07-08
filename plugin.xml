@@ -82,6 +82,8 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
+
 </extension>
    
 	<extension point="org.knime.workbench.repository.categories">
