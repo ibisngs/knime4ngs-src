@@ -16,7 +16,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * @author Michael Kluge
  *
  */
-public abstract class StatisticMergerNodeView extends DefaultNodeSettingsPane {
+public abstract class StatisticMergerNodeDialog extends DefaultNodeSettingsPane {
 
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_INPUT_FOLDER	= new SettingsModelString(StatisticMergerNodeModel.CFGKEY_INPUT_FOLDER, StatisticMergerNodeModel.DEFAULT_INPUT_FOLDER);
@@ -27,7 +27,7 @@ public abstract class StatisticMergerNodeView extends DefaultNodeSettingsPane {
     private final HashMap<String, SettingsModelBoolean> MODULE_OPTIONS = new HashMap<String, SettingsModelBoolean>();
     private final String MERGER_NAME;
     
-    protected StatisticMergerNodeView() {
+    protected StatisticMergerNodeDialog() {
     	this.MERGER_NAME = this.getMergerName();
     	
     	// create open file/folder components
