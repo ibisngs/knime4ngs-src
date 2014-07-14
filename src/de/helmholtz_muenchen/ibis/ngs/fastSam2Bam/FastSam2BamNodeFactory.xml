@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
     <name>FastSam2Bam</name>
     
     <shortDescription>
-        
+        Converts sam to bam files in parallel.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>Converts efficiently SAM files into the compressed BAM format using multiple threads in parallel and creates an index file.</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="path to samtool binaries">path to the samtools installation</option>
+        <option name="path to picard tool binaries">dpath to the picard tools installation</option>
+        <option name="path to output folder">path to the output folder</option>
+        <option name="path to genome in fasta format">path to the genome which was used for alignment</option>
+        <option name="number of cores">number of cores which should be used for conversion</option>
+        <option name="number of reads per split">number of reads per junk</option>
+        <option name="temp path">path where the temp files should be stored (must be fast)</option>
+        <option name="use RAM (/dev/shm/) as temp folder">uses /dev/shm which is a memory device in some unix distributions as temp folder</option>
+        <option name="delete sam file after conversion">deletes the SAM file after conversion; dangerous option because if conversion fails and is not correctly detected the sam file is lost!</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="SAMFile">Path to the SAM file</inPort>
+        <outPort index="0" name="Out-Port name"><b>Cell 0:</b> Path to BAM file<br /><b>Cell 1:</b> Path to index file</b></outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name="not implemented">not implemented</view>
     </views>
 </knimeNode>
