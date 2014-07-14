@@ -46,6 +46,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.DESeq.DESeqNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.DESeq.DESeqNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.edgeR.EdgeRNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.edgeR.EdgeRNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 		
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
@@ -82,7 +83,6 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 
 </extension>
    
