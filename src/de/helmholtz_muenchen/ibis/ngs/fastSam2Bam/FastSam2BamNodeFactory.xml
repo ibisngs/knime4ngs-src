@@ -23,7 +23,7 @@
     
     <ports>
         <inPort index="0" name="SAMFile">Path to the SAM file</inPort>
-        <outPort index="0" name="Out-Port name"><b>Cell 0:</b> Path to BAM file<br /><b>Cell 1:</b> Path to index file</b></outPort>
+        <outPort index="0" name="Out-Port name"><b>Cell 0:</b> Path to BAM file<br /><b>Cell 1:</b> Path to index file</outPort>
     </ports>    
     <views>
         <view index="0" name="not implemented">not implemented</view>
