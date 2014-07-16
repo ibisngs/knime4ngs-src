@@ -78,6 +78,7 @@ public abstract class RPlottingNodeDialog extends DefaultNodeSettingsPane {
       			m_col_x,
       			"X-axis",
       			0, true, false, DataValue.class));
+
       	addDialogComponent(d_col_y);
       	
       	

@@ -125,6 +125,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		// RANDOM SEEDS FOR SAMPLING
 		////////////////////////////////////////////////////////////////////////////////////
 		int randomSeeds[];		
+		int samplesPerSeed = this.m_stabSel_sampleNum;
 		// GET RANDOM SEEDS FROM OPTIONAL INPUT
 		BufferedDataTable randomSeedsTable = inData[1];
 		if (randomSeedsTable != null){
@@ -147,6 +148,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 			for(int i=0; i<randomSeeds.length; i++){
 				randomSeeds[i] = rand.nextInt();
 			}
+			samplesPerSeed = 1;
 		}
 		
 		
@@ -171,7 +173,7 @@ public class MixedGraphicalModelsEdgeRankingNodeModel extends RNodeModel {
 		this.addArgument("--sampleSize", m_stabSel_sampleSize);
 		this.addArgument("--ranktype"  , m_rankerType);
 		this.addArgument("--cores"     , m_cores);
-		this.addArgument("--sampleNum" , m_stabSel_sampleNum );
+		this.addArgument("--sampleNum" , samplesPerSeed );
 		
 		////////////////////////////////////////////////////////////////////////////////////
 		// DO EDGE RANKING

@@ -1,20 +1,3 @@
-# ########################################################################################################################################
-# ## LOAD ARGUMENTS
-# ########################################################################################################################################
-# require(argparse)
-# parser <- ArgumentParser(prog="mixedGraphicalModels.R", description="This script is not intendet to be run! Use the wrapper scripts!")
-# 
-# ## GLOBALS 
-# parser$add_argument("-g", "--globals", type="character", action="store", dest="file.global", required=TRUE, help="path to globals file", metavar="<path>")
-# 
-# ## parse
-# args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
-# 
-# ########################################################################################################################################
-# ## LOAD LIBRARIES
-# ########################################################################################################################################
-# source(args$file.glob)
-
 ## CRAN
 loadLib("plyr")
 ## rankers
@@ -112,18 +95,14 @@ getEdgesList <- function(edge.ranks,
                          stabSel.inclusionPerc = 0.8,
                          parallel = FALSE){
 
-	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
-	p         = length(variables)
 	n.edges    = ncol(edge.ranks)
 	n.subsets  = nrow(edge.ranks)
 
-		
 	## per stability selection sample choose x best edges ## TODO HIGHER VALUE MEANS HIGHER PROBABILITY OF INCLUSION
 	edges.included            = aaply(.data=edge.ranks, .margins=1, .fun=function(x){a<-rep(0, times=n.edges); a[which(rank(-x) < stabSel.sampleNumedges)]<-1;return(a)}, .expand=FALSE, .parallel=parallel)
 	#colnames(edges.included) = colnames(edge.ranks)
 	#srownames(edges.included)= rownames(edge.ranks)
 	
-
 	## count number (and percentage) of samples in which a certain edge is included
 	edges           = data.frame(do.call(rbind, strsplit(colnames(edge.ranks), split = "~")))
 	colnames(edges) = c("v1", "v2")
@@ -205,7 +184,7 @@ getGraph.empiricalPvalues <- function(edge.ranks,
 	edges$p.value = NA
 	for(e in rownames(edges)){
 		## compare inclusion percentage with background data
-		edges[e, "p.value"] = pnorm(edges[e, "incl.perc"], mean=mean(background.inclusionPerc[, e]), sd=sd(background.inclusionPerc[, e]), lower.tail=F)
+		edges[e, "p.value"] = pnorm(edges[e, "incl.perc"], mean=mean(background.inclusionPerc[, e]), sd=sd(background.inclusionPerc[, e])+0.000000000001, lower.tail=F)
 	}
 	
 	## generate adjacency matrix from selected edges

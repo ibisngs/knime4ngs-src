@@ -12,14 +12,17 @@ loadLib <- function(x, bioC=FALSE){
 	isInstalled =  is.element(x, installed.packages()[,1])
 	
 	if(!isInstalled){
+		cat("Trying to install ", x, "...")
 		if(bioC){
 			source("http://bioconductor.org/biocLite.R")
 			biocLite(x)
 		}else{
-			install.packages(x, repos="http://cran.us.r-project.org")
+			success = install.packages(x, repos="http://cran.us.r-project.org")
+			cat(success)
 		}
 	}
 	require(x, character.only=T)
+	cat("... done\n")
 }
 
 ################################################
@@ -111,7 +114,25 @@ strsplit.named <- function(l, split.1="\\s*,\\s*", split.2="\\s*=\\s*", perl=T){
 
 
 
+################################################
+### CODING OF VARIABLES
+################################################
+YES = "yes"
+NO  = "no" 
 
+#### recode
+## x : variable
+## levels: list of new levels of the variable; each level contains a list of old codings which should be replaced
+recode = function(x, levels=list(), others=NA){
+	for(l in names(levels)){
+		x[ x %in% levels[[l]] ] = l
+	}
+	x[ !x %in% names(levels) ] = others
+	return(x)
+}
+recode.binary = function(x, yes=c("y", "Y", "yes"), no=c("n", "N", "No", "NO", "no"), others=NA){
+	recode(x, list('yes'=yes, 'no'=no), others=others)
+}
 
 
 ################################################
