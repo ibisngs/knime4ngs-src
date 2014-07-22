@@ -4,45 +4,46 @@
 plotting.addArgs = function(parser){
 
 	## GLOBALS 
-	parser$add_argument("-g", "--globals"      , type="character", action="store"      , dest="file.global" , required=TRUE, help="path to globals file"        , metavar="<path>")
+	parser <- add_option(parser, c("-g", "--globals"      ), type="character", action="store"      , dest="file.global"                 , help="path to globals file"                                              , metavar="<path>")
 	## IN- AND OUTPUT-FILES
-	parser$add_argument( "--data"              , type="character", action="store"      , dest="file.in"     , required=TRUE, help="path to input data file (cols=variables, rows=observations)", metavar="<path>")
+	parser <- add_option(parser, c( "--data"              ), type="character", action="store"      , dest="file.in"                     , help="path to input data file (cols=variables, rows=observations)"       , metavar="<path>")
 
 	## ARGUMENTS
-	parser$add_argument("-x" , "--col.x"       , type="character", action="store"      , dest="col.x"                          , help="name of column to be plotted on x-axis (defining different boxes)" , metavar="<column name>")
-	parser$add_argument("-y" , "--col.y"       , type="character", action="store"      , dest="col.y"                          , help="name of column to be plotted on y-axis (defining different boxes)" , metavar="<column name>")
+	parser <- add_option(parser, c("-x" , "--col.x"       ), type="character", action="store"      , dest="col.x"                       , help="name of column to be plotted on x-axis (defining different boxes)" , metavar="<column name>")
+	parser <- add_option(parser, c("-y" , "--col.y"       ), type="character", action="store"      , dest="col.y"                       , help="name of column to be plotted on y-axis (defining different boxes)" , metavar="<column name>")
 	# color
-	parser$add_argument("-c" , "--col.color"   , type="character", action="store"      , dest="col.color"                      , help="name of column which defines color"         , metavar="<column name>")
-	parser$add_argument("-cl", "--lab.color"   , type="character", action="store"      , dest="lab.color"                    , help="label for color legend"         , metavar="<column name>")
-	parser$add_argument("-cs", "--scale.color" , type="character", action="store"      , dest="scale.color"                    , help="scale palette of color"         , metavar="<string>")
+	parser <- add_option(parser, c("-c" , "--col.color"   ), type="character", action="store"      , dest="col.color"                   , help="name of column which defines color"                                , metavar="<column name>")
+	parser <- add_option(parser, c("-cl", "--lab.color"   ), type="character", action="store"      , dest="lab.color"                   , help="label for color legend"                                            , metavar="<column name>")
+	parser <- add_option(parser, c("-cs", "--scale.color" ), type="character", action="store"      , dest="scale.color"                 , help="scale palette of color"                                            , metavar="<string>")
 	# fill color
-	parser$add_argument("-f" , "--col.fill"    , type="character", action="store"      , dest="col.fill"                       , help="name of column which defines fill"          , metavar="<column name>")
-	parser$add_argument("-fl", "--lab.fill"    , type="character", action="store"      , dest="lab.fill"                     , help="label for fill color legend"          , metavar="<column name>")
-	parser$add_argument("-fs", "--scale.fill"  , type="character", action="store"      , dest="scale.fill"                     , help="scale palette of fill color"         , metavar="<string>")
+	parser <- add_option(parser, c("-f" , "--col.fill"    ), type="character", action="store"      , dest="col.fill"                    , help="name of column which defines fill"                                 , metavar="<column name>")
+	parser <- add_option(parser, c("-fl", "--lab.fill"    ), type="character", action="store"      , dest="lab.fill"                    , help="label for fill color legend"                                       , metavar="<column name>")
+	parser <- add_option(parser, c("-fs", "--scale.fill"  ), type="character", action="store"      , dest="scale.fill"                  , help="scale palette of fill color"                                       , metavar="<string>")
 	# shape
-	parser$add_argument("-s" , "--col.shape"   , type="character", action="store"      , dest="col.shape"                      , help="name of column which defines shape"          , metavar="<column name>")
-	parser$add_argument("-sl", "--lab.shape"   , type="character", action="store"      , dest="lab.shape"                    , help="label for shape legend"          , metavar="<string>")
+	parser <- add_option(parser, c("-s" , "--col.shape"   ), type="character", action="store"      , dest="col.shape"                   , help="name of column which defines shape"                                , metavar="<column name>")
+	parser <- add_option(parser, c("-sl", "--lab.shape"   ), type="character", action="store"      , dest="lab.shape"                   , help="label for shape legend"                                            , metavar="<string>")
 	# facet
-	parser$add_argument("-fx", "--facet.x"     , type="character", action="store"      , dest="col.facet.x"                    , help="name of column which defines x axis of facet grid"         , metavar="<column name>")
-	parser$add_argument("-fy", "--facet.y"     , type="character", action="store"      , dest="col.facet.y"                    , help="name of column which defines x axis of facet grid"         , metavar="<column name>")
+	parser <- add_option(parser, c("-fx", "--facet.x"     ), type="character", action="store"      , dest="col.facet.x"                 , help="name of column which defines x axis of facet grid"                 , metavar="<column name>")
+	parser <- add_option(parser, c("-fy", "--facet.y"     ), type="character", action="store"      , dest="col.facet.y"                 , help="name of column which defines x axis of facet grid"                 , metavar="<column name>")
 	# labels
-	parser$add_argument("-t" , "--title"       , type="character", action="store"      , dest="lab.plot"                     , help="Title of plot"   , metavar="<String>")
-	parser$add_argument("-xl", "--lab.x"       , type="character", action="store"      , dest="lab.x"                        , help="Label of x axis" , metavar="<String>")
-	parser$add_argument("-yl", "--lab.y"       , type="character", action="store"      , dest="lab.y"                        , help="Label of y axis" , metavar="<String>")
+	parser <- add_option(parser, c("-t" , "--title"       ), type="character", action="store"      , dest="lab.plot"                    , help="Title of plot"                                                     , metavar="<String>")
+	parser <- add_option(parser, c("-xl", "--lab.x"       ), type="character", action="store"      , dest="lab.x"                       , help="Label of x axis"                                                   , metavar="<String>")
+	parser <- add_option(parser, c("-yl", "--lab.y"       ), type="character", action="store"      , dest="lab.y"                       , help="Label of y axis"                                                   , metavar="<String>")
 	# output
-	parser$add_argument("-w" , "--width"       , type="integer"  , action="store"      , dest="width"         , default=800    , help="width of image"  , metavar="<int>")
-	parser$add_argument(       "--height"      , type="integer"  , action="store"      , dest="height"        , default=600    , help="height of image" , metavar="<int>")
-	parser$add_argument("-i" , "--image"       , type="character", action="store"      , dest="image"         , required=TRUE  , help="name of png file" , metavar="<path>")
+	parser <- add_option(parser, c("-w" , "--width"       ), type="integer"  , action="store"      , dest="width"         , default=800 , help="width of image"                                                    , metavar="<int>")
+	parser <- add_option(parser, c(       "--height"      ), type="integer"  , action="store"      , dest="height"        , default=600 , help="height of image"                                                   , metavar="<int>")
+	parser <- add_option(parser, c("-i" , "--image"       ), type="character", action="store"      , dest="image"         ,             , help="name of png file"                                                  , metavar="<path>")
+	
+	return(parser)
 }
 
-
-    
 
 
 ##############################################################################################################
 ## PLOT IMAGE
 ##############################################################################################################
 plotting.print = function(p, args){
+	loadLib("grid")
 	png(args$image, width=args$width, height=args$height)
 		grid.draw(multiLegendAlign(p))
 	dev.off()
@@ -76,8 +77,6 @@ plotting.makePairs <- function(data){
 ##############################################################################################################
 geom_default = function(colour=NA, shape=NA, legend=NA){
 	loadLib("ggplot2")
-	loadLib("grid")
-	
 	props = theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
 	## LEGEND
@@ -86,7 +85,6 @@ geom_default = function(colour=NA, shape=NA, legend=NA){
 			props <- props + theme(legend.position=c(0,1), legend.justification=c(0,1), legend.direction="vertical", legend.box="vertical")
 		}
 	}
-# 	
 	return(props)
 }
 
@@ -95,6 +93,8 @@ geom_default = function(colour=NA, shape=NA, legend=NA){
 ## ALIGN MULTIPLE LEGENDS
 ##############################################################################################################
 multiLegendAlign <- function(p, align="left"){
+	loadLib("ggplot2")
+	loadLib("grid")
 	data <- ggplot_build(p)
 	gtable <- ggplot_gtable(data)
 
@@ -216,9 +216,7 @@ plotting.checkArgs = function(args){
 plotting.readData <- function(args){
 	data <- read.csv3(args$file.in)
 	data$ROWID = rownames(data)
-	
 	colnames(data) = replaceInvalidChars(colnames(data))
-
 	return(data) 
 }
 
@@ -226,6 +224,7 @@ plotting.readData <- function(args){
 ## ADD LABEL AND GUIDES
 ##############################################################################################################
 plotting.addScalesAndLabelsAndGuides = function(p, args){
+	loadLib("ggplot2")
 	## scales
 	if(!is.null(args$scale.color) && args$scale.color!="default"){
 		p <- p + scale_color_brewer(palette=args$scale.color)
@@ -256,6 +255,7 @@ plotting.addScalesAndLabelsAndGuides = function(p, args){
 ## ADD FACETS
 ##############################################################################################################
 plotting.addFacets = function(p, args){
+	loadLib("ggplot2")
 	if( !is.null(args$col.facet.x) || !is.null(args$col.facet.y)){
 		if(is.null(args$col.facet.x)){
 			args$col.facet.x = "."
@@ -268,5 +268,65 @@ plotting.addFacets = function(p, args){
 		}
 		p <- p + facet_grid(as.formula(paste(args$col.facet.x,args$col.facet.y, sep=" ~ ")), scales = args$facet.scales)
 	}
+	return(p)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##############################################################################################################
+## ADD FACETS
+##############################################################################################################
+plotting.histogram = function(data, args){
+
+	## bin width 
+	if(is.null(args$binwidth) || args$binwidth<=0){
+		args$binwidth = NULL
+	}
+
+	## create plot
+	p <- ggplot(data, aes_string(x=args$col.x, color=args$col.color, fill=args$col.fill))
+
+
+	## histogram
+	if(args$dens){
+		p <- p + geom_histogram(aes(y=..density..))
+		if(args$dens.cur){
+			if(is.null(args$dens.color)){
+				args$dens.color = "black"
+			}
+			p <- p +  geom_density(alpha=.2, color=args$dens.color)
+		}
+	}else{
+		p <- p + geom_histogram(binwidth=args$binwidth)
+	}
+
+
+	## add facets
+	p = plotting.addFacets(p, args)
+
+	## add scales, labels and guides
+	p = plotting.addScalesAndLabelsAndGuides(p, args)
+
+	## change layout
+	p <- p + geom_default(legend=="vertical")
+	
 	return(p)
 }

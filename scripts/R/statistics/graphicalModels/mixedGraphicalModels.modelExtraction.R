@@ -1,29 +1,41 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
-parser <- ArgumentParser(prog="mixedGraphicalModels.modelExtraction.R", description="Extract mixed graphical models from sampled edgerankings")
+require(optparse)
+parser <- OptionParser(usage = "usage: %prog [options]", description = "Extract mixed graphical models from sampled edgerankings", epilogue = "(c) Jonas Zierer")
 
 ## GLOBALS 
-parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file"        , metavar="<path>")
+parser <- add_option(parser, c("-g", "--globals" ), type="character", action="store", dest="file.global",                help="path to globals file"        , metavar="<path>")
 
 ## IN- AND OUTPUT-FILES
-parser$add_argument( "--input"       , type="character", action="store"     , dest="file.in"    , required=TRUE, help="path to input data file with edge ranks(cols=variables, rows=observations)", metavar="<path>")
-parser$add_argument( "--background"  , type="character", action="store"     , dest="file.backgr",                help="path to input data file with edge ranks from randomly shuffled data for background distribution estimation(cols=variables, rows=observations). If this parameter is used, empirical p-values are calculated and the --ev parameter is ignored.", metavar="<path>")
-parser$add_argument( "--edgeslist"   , type="character", action="store"     , dest="file.el"    ,                help="path to edges list output file"  , metavar="<path>")
-parser$add_argument( "--adjacency"   , type="character", action="store"     , dest="file.adj"   ,                help="path to adjacency matrix output file"  , metavar="<path>")
+parser <- add_option(parser, c( "--input"        ), type="character", action="store", dest="file.in"    ,                help="path to input data file with edge ranks(cols=variables, rows=observations)", metavar="<path>")
+parser <- add_option(parser, c( "--background"   ), type="character", action="store", dest="file.backgr",                help="path to input data file with edge ranks from randomly shuffled data for background distribution estimation(cols=variables, rows=observations). If this parameter is used, empirical p-values are calculated and the --ev parameter is ignored.", metavar="<path>")
+parser <- add_option(parser, c( "--edgeslist"    ), type="character", action="store", dest="file.el"    ,                help="path to edges list output file"  , metavar="<path>")
+parser <- add_option(parser, c( "--adjacency"    ), type="character", action="store", dest="file.adj"   ,                help="path to adjacency matrix output file"  , metavar="<path>")
 
 ## ARGUMENTS
-parser$add_argument("-p", "--percIncl", type="double"    , action="store"    , dest="percIncl"  , default=0.8  , help="percentage of stability selection samples in which the edge has to be contained to be included in the final model" , metavar="<double>")
-
-parser$add_argument("-e", "--ev"      , type="integer"   , action="store"    , dest="ev"        ,                help="(FWER control) upper limit for false positive edges in the resulting graph" , metavar="<int>")
-parser$add_argument("-n", "--nedges"  , type="integer"   , action="store"    , dest="nEdges"    ,                help="(empirical p-values) number of edges to be selected in each sampled model" , metavar="<integer>")
-parser$add_argument("-c", "--cores"   , type="integer"   , action="store"    , dest="cores"     ,                help="number of cores used for calculations" , metavar="<integer>")
+parser <- add_option(parser, c("-p", "--percIncl"), type="double"    ,action="store", dest="percIncl"  , default=0.8  , help="percentage of stability selection samples in which the edge has to be contained to be included in the final model" , metavar="<double>")
+parser <- add_option(parser, c("-e", "--ev"      ), type="integer"   ,action="store", dest="ev"        ,                help="(FWER control) upper limit for false positive edges in the resulting graph" , metavar="<int>")
+parser <- add_option(parser, c("-n", "--nedges"  ), type="integer"   ,action="store", dest="nEdges"    ,                help="(empirical p-values) number of edges to be selected in each sampled model" , metavar="<integer>")
+parser <- add_option(parser, c("-c", "--cores"   ), type="integer"   ,action="store", dest="cores"     ,                help="number of cores used for calculations" , metavar="<integer>")
 
 
 
 ## parse
-args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
+args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
+## mandatory args
+if(is.null(args$file.global)){
+	print_help(parser)
+	warning("mandatory globals file (--globals) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.in)){
+	print_help(parser)
+	warning("mandatory input file (--input) missing!")
+	q(status=-1)
+}
+
 
 ########################################################################################################################################
 ## LOAD LIBRARIES

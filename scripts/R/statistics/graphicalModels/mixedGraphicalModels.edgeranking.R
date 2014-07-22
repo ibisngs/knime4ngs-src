@@ -1,34 +1,51 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
-parser <- ArgumentParser(prog="mixedGraphicalModels.edgeranking.R", description="This script samples random subsets from the datamatrix and ranks all possible edges according to the data")
+require(optparse)
+parser <- OptionParser(usage = "usage: %prog [options]", description = "This script samples random subsets from the datamatrix and ranks all possible edges according to the data", epilogue = "(c) Jonas Zierer")
 
 ## GLOBALS 
-parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file"        , metavar="<path>")
+parser <- add_option(parser, c("-g", "--globals"), type="character", action="store"     , dest="file.global", help="path to globals file"        , metavar="<path>")
 
 ## IN- AND OUTPUT-FILES
-parser$add_argument( "--data"          , type="character", action="store"     , dest="file.in"    , required=TRUE, help="path to input data file (cols=variables, rows=observations)", metavar="<path>")
-parser$add_argument( "--output"        , type="character", action="store"     , dest="file.out1"  , required=TRUE, help="path to first output file"  , metavar="<path>")
-parser$add_argument( "--output2"       , type="character", action="store"     , dest="file.out2"  , required=TRUE, help="path to second output file" , metavar="<path>")
+parser <- add_option(parser, c("--data"          ), type="character", action="store"     , dest="file.in"    , help="path to input data file (cols=variables, rows=observations)", metavar="<path>")
+parser <- add_option(parser, c("--output"        ), type="character", action="store"     , dest="file.out1"  , help="path to first output file"  , metavar="<path>")
+parser <- add_option(parser, c("--output2"       ), type="character", action="store"     , dest="file.out2"  , help="path to second output file" , metavar="<path>")
 
 ## ARGUMENTS
-parser$add_argument("-c", "--fclasses" , type="character", action="store"     , dest="file.classes" , help="file which contains the same columns as the input data but only one row containing the datatype of the according variable (--classes can be used instead)" , metavar="<path>")
-parser$add_argument("-fc", "--classes" , type="character", action="store"     , dest="classes"      , help="comma-separated list of variable classes (one entry per variable) (default: class) (--fclasses can be used instead)" , metavar="<class.1, class.2, class.3, ..., class.ncol>")
-parser$add_argument("-r", "--ranker"   , type="character", action="store"     , dest="ranker"       , default="integer=randomForest,numeric=randomForest,factor=randomForest", help="define ranker methods used for each variable-class (as class1=method1,class2=method2,...)" , metavar="<class1=method1,class2=method2,...>")
-parser$add_argument("-p", "--param"    , type="character", action="store"     , dest="ranker.params", default="integer:;numeric:;factor:", help="define ranker methods used for each variable-class (as class1=method1,class2=method2,...)", metavar="<method1:param1=value1,param2=value2; method2:param1=value1,param2=value2,...>")
+parser <- add_option(parser, c("-c", "--fclasses"), type="character", action="store"     , dest="file.classes" , help="file which contains the same columns as the input data but only one row containing the datatype of the according variable (--classes can be used instead)" , metavar="<path>")
+parser <- add_option(parser, c("-fc", "--classes"), type="character", action="store"     , dest="classes"      , help="comma-separated list of variable classes (one entry per variable) (default: class) (--fclasses can be used instead)" , metavar="<class.1,class.2,...>")
+parser <- add_option(parser, c("-r", "--ranker"  ), type="character", action="store"     , dest="ranker"       , default="integer=randomForest,numeric=randomForest,factor=randomForest", help="define ranker methods used for each variable-class" , metavar="<class1=method1,class2=method2,...>")
+parser <- add_option(parser, c("-p", "--param"   ), type="character", action="store"     , dest="ranker.params", default="integer:;numeric:;factor:", help="define ranker methods used for each variable-class", metavar="<method1:param1=value1,param2=value2;method2:param1=value1,param2=value2,...>")
 
-parser$add_argument("-s","--sampleNum" , type="integer"  , action='store'     , dest='sampleNum'    , default='100'  , help='sum the integers (default: find the max)')
-parser$add_argument("-z","--sampleSize", type="double"   , action='store'     , dest='samplesize'   , default='0.8'  , help='size of each subsample (default:0.8)', metavar='<double>')
-parser$add_argument("-t","--ranktype"  , type="character", action='store'     , dest='rankType'     , default='local', help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
+parser <- add_option(parser, c("-s","--sampleNum" ), type="integer"  , action='store'     , dest='sampleNum'    , default='100'  , help='sum the integers (default: find the max)')
+parser <- add_option(parser, c("-z","--sampleSize"), type="double"   , action='store'     , dest='samplesize'   , default='0.8'  , help='size of each subsample (default:0.8)', metavar='<double>')
+parser <- add_option(parser, c("-t","--ranktype"  ), type="character", action='store'     , dest='rankType'     , default='local', help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
  
-parser$add_argument("-rs","--rseed"    , type="integer"  , action='store'     , dest='rseed'        ,                  help='random seed for reproducible random samples', metavar="<int>")
-parser$add_argument("-pc","--cores"    , type="integer"  , action='store'     , dest='parallel'     , default=1      , help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
-  
-## parse
-args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
+parser <- add_option(parser, c("-rs","--rseed"    ), type="integer"  , action='store'     , dest='rseed'        ,                  help='random seed for reproducible random samples', metavar="<int>")
+parser <- add_option(parser, c("-pc","--cores"    ), type="integer"  , action='store'     , dest='parallel'     , default=1      , help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
 
-#print(args)
+
+
+args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
+## mandatory args
+if(is.null(args$file.global)){
+	print_help(parser)
+	warning("mandatory globals file (--globals) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.in)){
+	print_help(parser)
+	warning("mandatory input file (--data) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.out1)){
+	print_help(parser)
+	warning("mandatory output file (--output) missing!")
+	q(status=-1)
+}
+
 
 
 ########################################################################################################################################
@@ -103,10 +120,11 @@ model <- mixedGraficalModels(data, #
 ##########################################################################################################################################
 ## OUTPUT RESULTS MODEL
 ##########################################################################################################################################
-
 write.csv3(model$ranks, args$file.out1)
 
-metaData = data.frame(variables=paste(model$variables, collapse=","), stabSel.Sample.num=model$stabSel.sampleNum, n=model$n, p=model$p, seed=args$rseed, time=model$run.time)
-# colnames(metaData) = "value"
 
-write.csv3(metaData, args$file.out2)
+if(!is.null(args$file.out2)){
+	metaData = data.frame(variables=paste(model$variables, collapse=","), stabSel.Sample.num=model$stabSel.sampleNum, n=model$n, p=model$p, seed=args$rseed, time=model$run.time)
+	write.csv3(metaData, args$file.out2)
+}
+

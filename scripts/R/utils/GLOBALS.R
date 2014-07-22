@@ -12,17 +12,17 @@ loadLib <- function(x, bioC=FALSE){
 	isInstalled =  is.element(x, installed.packages()[,1])
 	
 	if(!isInstalled){
-		cat("Trying to install ", x, "...")
+		#cat("Trying to install ", x, "...")
 		if(bioC){
 			source("http://bioconductor.org/biocLite.R")
 			biocLite(x)
 		}else{
 			success = install.packages(x, repos="http://cran.us.r-project.org")
-			cat(success)
+			#cat(success)
 		}
 	}
 	require(x, character.only=T)
-	cat("... done\n")
+	#cat("... done\n")
 }
 
 ################################################

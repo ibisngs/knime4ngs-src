@@ -6,21 +6,31 @@ source(paste(sep="/", script.basename, "plotting.R"))
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
-parser <- ArgumentParser(prog="scatterplot.R", description="Create Scatterplot from Data")
+require(optparse)
+parser <- OptionParser(usage = "usage: %prog [options]", description = "create scatterplot from given data", epilogue = "(c) Jonas Zierer")
 
-## add all plotting args
-plotting.addArgs(parser)
+## add global plotting args
+parser = plotting.addArgs(parser)
 
-## add scatter specific args
-parser$add_argument("-m" , "--matrix"     , metavar="<int>"          , type="character", action="store"   , dest="matrix"                 , help="give a comma separated list of columns for scatterplot matrix (instead of x and y)")
-parser$add_argument("--alpha"             , metavar="<double>"       , type="double"   , action="store"   , dest="alpha" , default=0.6    , help="alpha value of points")
-parser$add_argument("--size"              , metavar="<col1,col2,...>", type="double"   , action="store"   , dest="size"  , default=1      , help="pointsize")
-
-
+## add specific args
+parser <- add_option(parser, c("-m" , "--matrix"), type="character", action="store", dest="matrix"             , help="give a comma separated list of columns for scatterplot matrix (instead of x and y)", metavar="<int>")
+parser <- add_option(parser, c("--alpha"        ), type="double"   , action="store", dest="alpha" , default=0.6, help="alpha value of points"                                                             , metavar="<double>" )
+parser <- add_option(parser, c("--size"         ), type="double"   , action="store", dest="size"  , default=1  , help="pointsize"                                                                         , metavar="<col1,col2,...>")
 
 ## parse
-args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
+args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
+## mandatory args
+if(is.null(args$file.global)){
+	print_help(parser)
+	warning("mandatory globals file (--globals) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.in)){
+	print_help(parser)
+	warning("mandatory input file (--data) missing!")
+	q(status=-1)
+}
 
 ##############################################################################################################
 ## LOAD PACKAGES
