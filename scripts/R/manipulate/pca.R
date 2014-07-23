@@ -1,30 +1,45 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
-parser <- ArgumentParser(prog="pca.R", description="calculate principal components of given data")
+require(optparse)
+parser <- OptionParser(usage = "usage: %prog [options]", description = "calculate principal components of given data", epilogue = "(c) Jonas Zierer")
 
 ## GLOBALS 
-parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file", metavar="<path>")
+parser <- add_option(parser, c("-g", "--globals"), type="character", action="store"     , dest="file.global", help="path to globals file", metavar="<path>")
 
 ## IN- AND OUTPUT-FILES
-parser$add_argument( "--input"       , type="character", action="store"     , dest="file.in"    , required=TRUE, help="path to input file", metavar="<path>")
-parser$add_argument( "--output"      , type="character", action="store"     , dest="file.out"   , required=TRUE, help="path to first output file", metavar="<path>")
-parser$add_argument( "--rotation"       , type="character", action="store"     , dest="file.rotation" , required=TRUE, help="path to first output file", metavar="<path>")
-parser$add_argument( "--varexplained"       , type="character", action="store"     , dest="file.varexplained" , required=TRUE, help="path to first output file", metavar="<path>")
+parser <- add_option(parser, c( "--data"        ), type="character", action="store"     , dest="file.in"           , help="path to input file", metavar="<path>")
+parser <- add_option(parser, c( "--output"      ), type="character", action="store"     , dest="file.out"          , help="path to first output file", metavar="<path>")
+parser <- add_option(parser, c( "--rotation"    ), type="character", action="store"     , dest="file.rotation"     , help="path to first output file", metavar="<path>")
+parser <- add_option(parser, c( "--varexplained"), type="character", action="store"     , dest="file.varexplained" , help="path to first output file", metavar="<path>")
 
 ## ARGUMENTS
-parser$add_argument("-c","--cols"    , type="character", action="store"     , dest="columns"    ,                 help="define the columns which shall be normalized; default:all"  , metavar="<colnames>")
-#parser$add_argument("-m","--method"  , type="character", action="store"     , dest="method"     ,                 help="method used for normalization"  , metavar="<'quantile normalize'>")
-parser$add_argument(       "--scale" , action="store_true",  dest="scale"   , help="scale data before calculating principal components" )
-parser$add_argument(       "--center" , action="store_true",  dest="center" , help="center data before calculating principal components" )
-parser$add_argument(     "--failOnNA" , action="store_true",  dest="fail.on.na" , help="set flag if program shall fail if data contains missing values. Only complete cases are used otherwise." )
+parser <- add_option(parser, c("-c","--cols"    ), type="character", action="store"     , dest="columns"                           , help="define the columns (as comma-separated list or perl-regex) which shall be normalized; default:all"  , metavar="<colnames>")
+#parser <- add_option(parser, c("-m","--method" ), type="character", action="store"     , dest="method"                            , help="method used for normalization"  , metavar="<'quantile normalize'>")
+parser <- add_option(parser, c(       "--scale" )                  , action="store_true", dest="scale"              , default=FALSE, help="scale data before calculating principal components" )
+parser <- add_option(parser, c(       "--center")                  , action="store_true", dest="center"             , default=FALSE, help="center data before calculating principal components" )
+parser <- add_option(parser, c(     "--failOnNA")                  , action="store_true", dest="fail.on.na"         , default=FALSE, help="set flag if program shall fail if data contains missing values. Only complete cases are used otherwise." )
 
 
 ## parse
-#print(commandArgs(trailingOnly=TRUE))
-args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
-#args <- parser$parse_args(args.in)
+args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
+## mandatory args
+if(is.null(args$file.global)){
+	print_help(parser)
+	warning("mandatory globals file (--globals) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.in)){
+	print_help(parser)
+	warning("mandatory input file (--input) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.out)){
+	print_help(parser)
+	warning("mandatory output file (--output) missing!")
+	q(status=-1)
+}
 
 ########################################################################################################################################
 ## LOAD LIBRARIES
@@ -43,11 +58,15 @@ if(is.null(args$columns)){
 	args$columns = colnames(data)
 }else{
 	args$columns = unlist(strsplit(args$columns, ","))
+	if(length(args$columns)==1){
+		args$columns = colnames(data)[grepl(args$columns, colnames(data), perl=T)]
+	}
 }
+
 
 x = data[ , args$columns]
 x = x[ complete.cases(x), ]
-if(args$fail.on.na && nrow(x) != nrow(data)){
+if(args$fail.on.na && (nrow(x) != nrow(data)) ){
 	cat("Data contains missing values!")
 	stop("Data contains missing values!", call.=F)
 
@@ -80,9 +99,12 @@ output[ , colnames(pc$x)] = NA
 output[ rownames(pc$x), colnames(pc$x)] = pc$x
 
 write.csv3(output, args$file.out)
-write.csv3(pc$rotation, args$file.rotation)
-write.csv3(data.var.expl, args$file.varexplained)
-
+if(!is.null(args$file.rotation)){
+	write.csv3(pc$rotation, args$file.rotation)
+}
+if(!is.null(args$file.varexplained)){
+	write.csv3(data.var.expl, args$file.varexplained)
+}
 
 
 

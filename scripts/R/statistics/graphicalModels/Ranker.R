@@ -179,7 +179,6 @@ rankEdges <- function(D, var.classes,
 	## ranking for all types of variables
 	ranks = laply(.data=c(1:p), .parallel=parallel.ranking, .inform=F,
 		.fun=function(i){
-			#cat("BLABLA ", i, "\n")
 			do.call(paste("ranker", ranker[[var.classes[i]]], sep="."), c(list(colnames(D)[i], D) , ranker.params[[var.classes[i]]]))
 		})
 
@@ -198,7 +197,7 @@ rankEdges <- function(D, var.classes,
 	ranks <- get.max.upper.triangle(ranks)
 	ranks <- c(ranks[edges.indices])
 
-        return(ranks)
+	return(ranks)
 }
 
 

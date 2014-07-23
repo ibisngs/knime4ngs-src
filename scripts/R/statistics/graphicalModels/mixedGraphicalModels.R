@@ -23,12 +23,13 @@ mixedGraficalModels <- function(X, #
                                 stabSel.sampleSize, #
                                 threads = NULL,#
                                 rank.type = "local",
+                                pairedSamples = FALSE,
                                 ...){
 
 	## parallelization
 	parallel.stabSel = FALSE
         if(is.null(threads) | threads<1){
-		loadLib("parallel")
+		loadLib("doMC")
 		threads = detectCores()-1
         }
 	if(threads > 1){
@@ -37,10 +38,7 @@ mixedGraficalModels <- function(X, #
 		warning("USING ", threads, " threads for computations!")
 		parallel.stabSel = TRUE
 	}
-	cat("USING ", threads, " threads for computations!")
-
-	
-	
+	cat("USING ", threads, " threads for computations!\n")
 	
 	## measure time of the entire procedure
 	time.start <- Sys.time()
@@ -57,7 +55,15 @@ mixedGraficalModels <- function(X, #
 	}
 	
 	## sample subsets for stability selection
-	samples = llply(.data=c(1:stabSel.sampleNum),.fun=function(i){return(sample(rownames(X),stabSel.sampleSize,replace=F))})
+	sampleNum = stabSel.sampleNum
+	if(pairedSamples){
+		if(stabSel.sampleNum %% 2 != 0){
+			warning("Paired subsample drawing only possible for even sample numbers!")
+			q(status=-1)
+		}
+		sampleNum = stabSel.sampleNum/2
+	}
+	samples = unlist(llply(.data=c(1:sampleNum),.fun=drawSamples, X, stabSel.sampleSize=stabSel.sampleSize, paired=T), recursive=F)
 
 	## order of edges (from an adjacency matrix) as vector
 	edges.matrix  <- matrix(1:(p*p),ncol=p, nrow=p, dimnames=list(colnames(X), colnames(X))) #, 
@@ -74,17 +80,26 @@ mixedGraficalModels <- function(X, #
 
 	## create output
 	time.end <- Sys.time()
-	MODEL = list(ranks=ranks, variables=colnames(X), stabSel.sampleNum=stabSel.sampleNum, n=n, p=p, run.time=as.numeric(time.end-time.start, units="secs"))	
-	## sample subsets for stability selection
-	samples = llply(.data=c(1:stabSel.sampleNum),.fun=function(i){return(sample(rownames(X),stabSel.sampleSize,replace=F))})
-
-	## order of edges (from an adjacency matrix) as vector
-	edges.matrix  <- matrix(1:(p*p),ncol=p, nrow=p, dimnames=list(colnames(X), colnames(X))) #, 
-	edges.indices <- as.vector(edges.matrix[upper.tri(edges.matrix)])
-
+	MODEL = list(ranks=ranks, variables=colnames(X), stabSel.sampleNum=stabSel.sampleNum, n=n, p=p, run.time=as.numeric(time.end-time.start, units="secs"))
+	
+	cat("Finished after ", as.numeric(time.end-time.start, units="hours"), " hours\n")
 	return(invisible(MODEL))
 }
 
+drawSamples = function(i, X, stabSel.sampleSize=0.5 , paired = F){
+	
+	if(!paired){
+		return(list(sample(rownames(X),stabSel.sampleSize,replace=F)))
+	}else{
+		sample.1 = sample(rownames(X),floor(nrow(X)/2),replace=F)
+		sample.2 = rownames(X)[!rownames(X) %in% sample.1]
+		# if uneven sample size -> remove one from sample.2
+		if(length(sample.2) > length(sample.1)){
+			sample.2 = sample.2[-sample(c(1:length(sample.2)), 1)]
+		}
+		return(list(sample.1,sample.2))
+	}
+}
 ##########################################################################################################################################
 ## FUNCTIONS
 ##########################################################################################################################################

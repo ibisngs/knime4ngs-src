@@ -2,32 +2,34 @@
 ## PARSE ARGS
 ########################################################################################################################################
 require(optparse)
-parser <- OptionParser(usage = "usage: %prog [options]", description = "This script samples random subsets from the datamatrix and ranks all possible edges according to the data", epilogue = "(c) Jonas Zierer")
+parser <- OptionParser(usage = "usage: %prog [options]", description = "This script samples random subsets and uses Stability Selection to estimate the edge ranks in subsets", epilogue = "(c) Jonas Zierer")
 
 ## GLOBALS 
-parser <- add_option(parser, c("-g", "--globals"), type="character", action="store"     , dest="file.global", help="path to globals file"        , metavar="<path>")
+parser <- add_option(parser, c("-g", "--globals"  ), type="character", action="store"     , dest="file.global"                                                                            , help="path to globals file"        , metavar="<path>")
 
 ## IN- AND OUTPUT-FILES
-parser <- add_option(parser, c("--data"          ), type="character", action="store"     , dest="file.in"    , help="path to input data file (cols=variables, rows=observations)", metavar="<path>")
-parser <- add_option(parser, c("--output"        ), type="character", action="store"     , dest="file.out1"  , help="path to first output file"  , metavar="<path>")
-parser <- add_option(parser, c("--output2"       ), type="character", action="store"     , dest="file.out2"  , help="path to second output file" , metavar="<path>")
+parser <- add_option(parser, c("--data"           ), type="character", action="store"     , dest="file.in"                                                                                , help="path to input data file (cols=variables, rows=observations)", metavar="<path>")
+parser <- add_option(parser, c("--output"         ), type="character", action="store"     , dest="file.out1"                                                                              , help="path to first output file"  , metavar="<path>")
+parser <- add_option(parser, c("--output2"        ), type="character", action="store"     , dest="file.out2"                                                                              , help="path to second output file" , metavar="<path>")
 
 ## ARGUMENTS
-parser <- add_option(parser, c("-c", "--fclasses"), type="character", action="store"     , dest="file.classes" , help="file which contains the same columns as the input data but only one row containing the datatype of the according variable (--classes can be used instead)" , metavar="<path>")
-parser <- add_option(parser, c("-fc", "--classes"), type="character", action="store"     , dest="classes"      , help="comma-separated list of variable classes (one entry per variable) (default: class) (--fclasses can be used instead)" , metavar="<class.1,class.2,...>")
-parser <- add_option(parser, c("-r", "--ranker"  ), type="character", action="store"     , dest="ranker"       , default="integer=randomForest,numeric=randomForest,factor=randomForest", help="define ranker methods used for each variable-class" , metavar="<class1=method1,class2=method2,...>")
-parser <- add_option(parser, c("-p", "--param"   ), type="character", action="store"     , dest="ranker.params", default="integer:;numeric:;factor:", help="define ranker methods used for each variable-class", metavar="<method1:param1=value1,param2=value2;method2:param1=value1,param2=value2,...>")
+parser <- add_option(parser, c("-c", "--fclasses" ), type="character", action="store"     , dest="file.classes"                                                                           , help="file which contains the same columns as the input data but only one row containing the datatype of the according variable (--classes can be used instead)" , metavar="<path>")
+parser <- add_option(parser, c("-fc", "--classes" ), type="character", action="store"     , dest="classes"                                                                                , help="comma-separated list of variable classes (one entry per variable) (default: class) (--fclasses can be used instead)" , metavar="<class.1,class.2,...>")
+parser <- add_option(parser, c("-r", "--ranker"   ), type="character", action="store"     , dest="ranker"       , default="integer=randomForest,numeric=randomForest,factor=randomForest" , help="define ranker methods used for each variable-class" , metavar="<class1=method1,class2=method2,...>")
+parser <- add_option(parser, c("-p", "--param"    ), type="character", action="store"     , dest="ranker.params", default="integer:;numeric:;factor:"                                     , help="define ranker methods used for each variable-class", metavar="<method1:param1=value1,param2=value2;method2:param1=value1,param2=value2,...>")
 
-parser <- add_option(parser, c("-s","--sampleNum" ), type="integer"  , action='store'     , dest='sampleNum'    , default='100'  , help='sum the integers (default: find the max)')
-parser <- add_option(parser, c("-z","--sampleSize"), type="double"   , action='store'     , dest='samplesize'   , default='0.8'  , help='size of each subsample (default:0.8)', metavar='<double>')
-parser <- add_option(parser, c("-t","--ranktype"  ), type="character", action='store'     , dest='rankType'     , default='local', help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
+parser <- add_option(parser, c("-s","--sampleNum" ), type="integer"  , action='store'     , dest='sampleNum'    , default='100'                                                          , help='sum the integers (default: find the max)')
+parser <- add_option(parser, c("-z","--sampleSize"), type="double"   , action='store'     , dest='samplesize'   , default='0.8'                                                          , help='size of each subsample (default:0.8)', metavar='<double>')
+parser <- add_option(parser, c("-t","--ranktype"  ), type="character", action='store'     , dest='rankType'     , default='local'                                                        , help='shall local or global ranking be applied (global only if just one type of rankers is used!)', metavar="<local|global>")
  
-parser <- add_option(parser, c("-rs","--rseed"    ), type="integer"  , action='store'     , dest='rseed'        ,                  help='random seed for reproducible random samples', metavar="<int>")
-parser <- add_option(parser, c("-pc","--cores"    ), type="integer"  , action='store'     , dest='parallel'     , default=1      , help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
+parser <- add_option(parser, c("-rs","--rseed"    ), type="integer"  , action='store'     , dest='rseed'                                                                                 , help='random seed for reproducible random samples', metavar="<int>")
+parser <- add_option(parser, c("-pc","--cores"    ), type="integer"  , action='store'     , dest='parallel'     , default=1                                                              , help='number of parallel threads used for calculate edgeranking (by default number of cores)', metavar="<int>")
 
+parser <- add_option(parser, c("--pairedSamples"  )                  , action='store_true', dest='pairedSamples', default=FALSE                                                          , help='use paired subsampling as suggested by Shah (2013)')
 
 
 args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
 
 ## mandatory args
 if(is.null(args$file.global)){
@@ -112,6 +114,7 @@ model <- mixedGraficalModels(data, #
                              stabSel.sampleNum = args$sampleNum, 
                              stabSel.sampleSize = floor(args$samplesize*nrow(data)),
                              rankType = args$rankType,
+                             pairedSamples = args$pairedSamples,
                              threads = args$parallel)
                              
 #print(names(model))

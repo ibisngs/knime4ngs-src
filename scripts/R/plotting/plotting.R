@@ -43,7 +43,7 @@ plotting.addArgs = function(parser){
 ## PLOT IMAGE
 ##############################################################################################################
 plotting.print = function(p, args){
-	loadLib("grid")
+	loadLib("gridExtra")
 	png(args$image, width=args$width, height=args$height)
 		grid.draw(multiLegendAlign(p))
 	dev.off()
@@ -76,7 +76,7 @@ plotting.makePairs <- function(data){
 ## DEFAULT THEME
 ##############################################################################################################
 geom_default = function(colour=NA, shape=NA, legend=NA){
-	loadLib("ggplot2")
+	loadLib("gridExtra")
 	props = theme(plot.margin = unit(c(0, 0, 0, 0), "cm"))
 
 	## LEGEND
@@ -93,8 +93,7 @@ geom_default = function(colour=NA, shape=NA, legend=NA){
 ## ALIGN MULTIPLE LEGENDS
 ##############################################################################################################
 multiLegendAlign <- function(p, align="left"){
-	loadLib("ggplot2")
-	loadLib("grid")
+	loadLib("gridExtra")
 	data <- ggplot_build(p)
 	gtable <- ggplot_gtable(data)
 
@@ -224,7 +223,6 @@ plotting.readData <- function(args){
 ## ADD LABEL AND GUIDES
 ##############################################################################################################
 plotting.addScalesAndLabelsAndGuides = function(p, args){
-	loadLib("ggplot2")
 	## scales
 	if(!is.null(args$scale.color) && args$scale.color!="default"){
 		p <- p + scale_color_brewer(palette=args$scale.color)
@@ -255,7 +253,6 @@ plotting.addScalesAndLabelsAndGuides = function(p, args){
 ## ADD FACETS
 ##############################################################################################################
 plotting.addFacets = function(p, args){
-	loadLib("ggplot2")
 	if( !is.null(args$col.facet.x) || !is.null(args$col.facet.y)){
 		if(is.null(args$col.facet.x)){
 			args$col.facet.x = "."
@@ -273,29 +270,10 @@ plotting.addFacets = function(p, args){
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ##############################################################################################################
-## ADD FACETS
+## HISTOGRAM
 ##############################################################################################################
 plotting.histogram = function(data, args){
-
 	## bin width 
 	if(is.null(args$binwidth) || args$binwidth<=0){
 		args$binwidth = NULL
@@ -303,7 +281,6 @@ plotting.histogram = function(data, args){
 
 	## create plot
 	p <- ggplot(data, aes_string(x=args$col.x, color=args$col.color, fill=args$col.fill))
-
 
 	## histogram
 	if(args$dens){
@@ -318,7 +295,6 @@ plotting.histogram = function(data, args){
 		p <- p + geom_histogram(binwidth=args$binwidth)
 	}
 
-
 	## add facets
 	p = plotting.addFacets(p, args)
 
@@ -328,5 +304,86 @@ plotting.histogram = function(data, args){
 	## change layout
 	p <- p + geom_default(legend=="vertical")
 	
+	return(p)
+}
+
+##############################################################################################################
+## SCATTERPLOT
+##############################################################################################################
+plotting.scatterplot = function(data, args){
+	## create plot
+	p <- ggplot(data, aes_string(x=args$col.x, y=args$col.y, fill=args$col.fill, color=args$col.color, shape=args$col.shape)) +
+		geom_point(na.rm = TRUE, alpha=args$alpha, size=args$size) 
+
+	## add facets
+	p = plotting.addFacets(p, args)
+	## add density if matrix
+	if( !is.null(args$matrix)){
+		p <- p + stat_density(aes(x = x, y = ..scaled.. * diff(range(x)) + min(x)), data = data.pairs$densities, position = "identity",colour = "grey20", geom = "line")
+	}
+
+	## add scales, labels and guides
+	p = plotting.addScalesAndLabelsAndGuides(p, args)
+
+	## change layout
+	p <- p + geom_default(legend=="vertical")
+	
+	return(p)
+}
+
+##############################################################################################################
+## BOXPLOT
+##############################################################################################################
+plotting.boxplot = function(data, args){
+	## create plot
+	p <- ggplot(data, aes_string(x=args$col.x, y=args$col.y, fill=args$col.fill))
+
+	## create boxplot
+	#<outliers, no, all, all jittered>
+	if(args$points == "outliers"){
+		p <- p + geom_boxplot() ## todo add shape and or color
+	}else{
+		p <- p + geom_boxplot(outlier.shape = NA) 
+		if(args$points == "all" | args$points == "all jittered"){
+			position="identity"
+			if(args$points == "all jittered"){
+				position = "jittered"
+			}
+			p <- p + geom_point(aes_string(color=args$col.color, shape=args$col.shape), position=position) ## todo add she and color
+		}
+	}
+
+	## add facets
+	p = plotting.addFacets(p, args)
+
+	## add scales, labels and guides
+	p = plotting.addScalesAndLabelsAndGuides(p, args)
+
+	## change layout
+	p <- p + geom_default(legend=="vertical")
+
+	
+	return(p)
+}
+
+
+
+##############################################################################################################
+## BARPLOT
+##############################################################################################################
+plotting.barplot = function(data, args){
+	## create plot	
+	p <- ggplot(data, aes_string(x=args$col.x, y=args$col.y, color=args$col.color, fill=args$col.fill)) + 
+		geom_bar(stat = "identity")
+
+
+	## add facets
+	p = plotting.addFacets(p, args)
+
+	## add scales, labels and guides
+	p = plotting.addScalesAndLabelsAndGuides(p, args)
+
+	## change layout
+	p <- p + geom_default(legend=="vertical")
 	return(p)
 }

@@ -1,33 +1,48 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
-parser <- ArgumentParser(prog="impute.R", description="This imputes missing data in the given data file for each variable (column)")
+require(optparse)
+parser <- OptionParser(usage = "usage: %prog [options]", description = "This script imputes missing data in the given data file for each variable (column)", epilogue = "(c) Jonas Zierer")
 
 ## GLOBALS 
-parser$add_argument("-g", "--globals", type="character", action="store"     , dest="file.global", required=TRUE, help="path to globals file", metavar="<path>")
+parser <- add_option(parser, c("-g", "--globals"), type="character", action="store"     , dest="file.global", help="path to globals file", metavar="<path>")
 
 ## IN- AND OUTPUT-FILES
-parser$add_argument( "--input"       , type="character", action="store"     , dest="file.in"    , required=TRUE, help="path to input file", metavar="<path>")
-parser$add_argument( "--output"      , type="character", action="store"     , dest="file.out"   , required=TRUE, help="path to first output file", metavar="<path>")
+parser <- add_option(parser, c( "--input"       ), type="character", action="store"     , dest="file.in"                         , help="path to input file", metavar="<path>")
+parser <- add_option(parser, c( "--output"      ), type="character", action="store"     , dest="file.out"                        , help="path to first output file", metavar="<path>")
 
 ## ARGUMENTS
-parser$add_argument("-m","--method"  , type="character", action="store"     , dest="method"     , required=TRUE , help="define which method should be used for imputation", metavar="<random, min, max, mean, mice, knn, SVD, lm>")
-parser$add_argument("-c","--cols"    , type="character", action="store"     , dest="columns"    ,                 help="define the columns for which imputation shall be performed; default:all"  , metavar="<colnames>")
+parser <- add_option(parser, c("-m","--method"  ), type="character", action="store"     , dest="method"     , default = "random" , help="define which method should be used for imputation (default:random)", metavar="<random, min, max, mean, mice, knn, SVD, lm>")
+parser <- add_option(parser, c("-c","--cols"    ), type="character", action="store"     , dest="columns"                         , help="define the columns for which imputation shall be performed; default:all"  , metavar="<colnames>")
 
 # knn imputation
-parser$add_argument("--knn"          , type="integer"  , action="store"     , dest="knn"        ,                 help="[KNN-Imputation] the number of neighbors to use for imputation", metavar="<int>")
-parser$add_argument("--dist"         , type="character", action="store"     , dest="dist"       ,                 help="[KNN-Imputation] distance measure used for determination of neighbours", metavar="<corr, euclidean, maximum, manhattan, canberra, binary, minkowski>")
+parser <- add_option(parser, c("--knn"          ), type="integer"  , action="store"     , dest="knn"                             , help="[KNN-Imputation] the number of neighbors to use for imputation", metavar="<int>")
+parser <- add_option(parser, c("--dist"         ), type="character", action="store"     , dest="dist"                            , help="[KNN-Imputation] distance measure used for determination of neighbours", metavar="<corr, euclidean, maximum, manhattan, canberra, binary, minkowski>")
 
 # SVD imputation
-parser$add_argument("--rank.k"       , type="integer"  , action="store"     , dest="rank.k"     ,                 help="[SVD-Imputation] the rank-k approximation to use for x", metavar="<int>")
-parser$add_argument("--num.iters"    , type="integer"  , action="store"     , dest="num.iters"  ,                 help="[SVD-Imputation] the number of times to compute the rank-k approximation and impute the missing data", metavar="<int>")
+parser <- add_option(parser, c("--rank.k"       ), type="integer"  , action="store"     , dest="rank.k"                          , help="[SVD-Imputation] the rank-k approximation to use for x", metavar="<int>")
+parser <- add_option(parser, c("--num.iters"    ), type="integer"  , action="store"     , dest="num.iters"                       , help="[SVD-Imputation] the number of times to compute the rank-k approximation and impute the missing data", metavar="<int>")
 
 
 ## parse
-#print(commandArgs(trailingOnly=TRUE))
-args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
-#args <- parser$parse_args(args.in)
+args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)
+
+## mandatory args
+if(is.null(args$file.global)){
+	print_help(parser)
+	warning("mandatory globals file (--globals) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.in)){
+	print_help(parser)
+	warning("mandatory input file (--input) missing!")
+	q(status=-1)
+}
+if(is.null(args$file.out)){
+	print_help(parser)
+	warning("mandatory output file (--output) missing!")
+	q(status=-1)
+}
 
 ########################################################################################################################################
 ## LOAD LIBRARIES

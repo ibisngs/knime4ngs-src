@@ -7,7 +7,7 @@ source(paste(sep="/", script.basename, "plotting.R"))
 ## PARSE ARGS
 ########################################################################################################################################
 require(optparse)
-parser <- OptionParser(usage = "usage: %prog [options]", description = Create Barplot from Data"", epilogue = "(c) Jonas Zierer")
+parser <- OptionParser(usage = "usage: %prog [options]", description = "Create Barplot from Data", epilogue = "(c) Jonas Zierer")
 
 ## add global plotting args
 parser = plotting.addArgs(parser)
@@ -49,19 +49,7 @@ args = plotting.checkArgs(args)
 ##############################################################################################################
 ## PLOTTING
 ##############################################################################################################   
-## create plot
-p <- ggplot(data, aes_string(x=args$col.x, y=args$col.y, color=args$col.color, fill=args$col.fill)) + 
-	geom_bar(stat = "identity")
-
-
-## add facets
-p = plotting.addFacets(p, args)
-
-## add scales, labels and guides
-p = plotting.addScalesAndLabelsAndGuides(p, args)
-
-## change layout
-p <- p + geom_default(legend=="vertical")
+p = plotting.barplot(data, args)
 
 
 ##############################################################################################################

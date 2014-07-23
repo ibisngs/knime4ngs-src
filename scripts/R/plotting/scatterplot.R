@@ -67,23 +67,7 @@ args = plotting.checkArgs(args)
 ##############################################################################################################
 ## PLOTTING
 ##############################################################################################################   
-## create plot
-p <- ggplot(data, aes_string(x=args$col.x, y=args$col.y, fill=args$col.fill, color=args$col.color, shape=args$col.shape)) +
-	geom_point(na.rm = TRUE, alpha=args$alpha, size=args$size) 
-
-
-## add facets
-p = plotting.addFacets(p, args)
-## add density if matrix
-if( !is.null(args$matrix)){
-	p <- p + stat_density(aes(x = x, y = ..scaled.. * diff(range(x)) + min(x)), data = data.pairs$densities, position = "identity",colour = "grey20", geom = "line")
-}
-
-## add scales, labels and guides
-p = plotting.addScalesAndLabelsAndGuides(p, args)
-
-## change layout
-p <- p + geom_default(legend=="vertical")
+p = plotting.scatterplot(data, args)
 
 
 ##############################################################################################################

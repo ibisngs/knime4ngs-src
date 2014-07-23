@@ -13,10 +13,10 @@ parser <- OptionParser(usage = "usage: %prog [options]", description = "create h
 parser = plotting.addArgs(parser)
 
 ## add specific args
-parser <- add_option(parser, c("-b" , "--binwidth" ), type="double", action="store"     , dest="binwidth"  , help="width of image"                , metavar="<double>")
-parser <- add_option(parser, c(       "--dens"     ),                action="store_true", dest="dens"      , help="plot density instead of counts" )
-parser <- add_option(parser, c(       "--densCurve"),                action="store_true", dest="dens.cur"  , help="plot density curve layer" )
-parser <- add_option(parser, c(       "--densColor"),                action="store"     , dest="dens.color", help="color of density curve"        , metavar="<color>")
+parser <- add_option(parser, c("-b" , "--binwidth" ), type="double", action="store"     , dest="binwidth"                 , help="width of image"                , metavar="<double>")
+parser <- add_option(parser, c(       "--dens"     ),                action="store_true", dest="dens"      , default=FALSE, help="plot density instead of counts" )
+parser <- add_option(parser, c(       "--densCurve"),                action="store_true", dest="dens.cur"  , default=FALSE, help="plot density curve layer" )
+parser <- add_option(parser, c(       "--densColor"),                action="store"     , dest="dens.color"               , help="color of density curve"        , metavar="<color>")
 
 ## parse
 args = parse_args(parser, args = commandArgs(trailingOnly = TRUE), print_help_and_exit = TRUE, positional_arguments = FALSE)

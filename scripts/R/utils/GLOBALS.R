@@ -40,14 +40,33 @@ write.csv3 <- function(x, file = "", row.names.name="row.names", quote=TRUE, sep
 	options("scipen" = 0) # back to default
 }
 
-read.csv3 <- function(filepath, header=T, rownames=T, sep=FILE_SEP, check.names=FALSE, fill=T, ...){
+read.csv3 <- function(filepath, header=T, rownames=T, sep=FILE_SEP, check.names=FALSE, fill=T, date.formats=c(), ...){
 	data <- read.table(file=filepath, header=header, sep=sep, check.names=check.names, fill=fill, ...)
 	if(rownames){
 		row.names(data) <- data[,1]
 		data <- data[,2:ncol(data), drop=F]
 	}
+	
+	if(!is.null(date.formats) & length(date.formats)>0){
+		data = parseDates(data, date.formats)
+	}
 	return(data)
 }
+
+parseDates = function(data, date.formats=c("%Y-%m-%d")){
+	for(c in colnames(data)){
+		if(!is.character(data[,c]) & !is.factor(data[,c])) next;
+		if (all(is.na(data[,c]))) next
+		
+		for (f in date.formats) {
+			d <- as.Date(as.character(data[,c]), f)
+			if (any(is.na(d[!is.na(data[,c])]))) next
+			data[, c] <- d
+		}
+	}
+	return(data)
+}
+
 
 ## get parent directory of file
 parent <- function(x){
