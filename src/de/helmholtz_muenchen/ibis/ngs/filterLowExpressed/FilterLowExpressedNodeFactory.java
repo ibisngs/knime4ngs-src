@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+
 /**
  * <code>NodeFactory</code> for the "FilterLowExpressed" Node.
  * 
@@ -33,8 +35,9 @@ public class FilterLowExpressedNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<FilterLowExpressedNodeModel> createNodeView(final int viewIndex, final FilterLowExpressedNodeModel nodeModel) {
-        return new FilterLowExpressedNodeView(nodeModel);
+    public RNodeView<FilterLowExpressedNodeModel> createNodeView(final int viewIndex, final FilterLowExpressedNodeModel nodeModel) {
+        //return new FilterLowExpressedNodeView(nodeModel);
+        return new RNodeView<FilterLowExpressedNodeModel>(nodeModel);
     }
 
     /**
