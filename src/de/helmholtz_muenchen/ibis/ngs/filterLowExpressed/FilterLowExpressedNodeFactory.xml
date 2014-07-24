@@ -18,8 +18,8 @@
         <br />Cell 1...n: count of feature in sample
         <br />Must contain a header line with the names of the samples
         </inPort>
-        <inPort index="1" name="condition table">Cell 0: Name of the sample like it is named in the count table
-        <br />Cell 1: condition (should only contain two conditions)
+        <inPort index="1" name="condition table">RowNames: Name of the sample like it is named in the count table
+        <br />Cell 0: condition (should only contain two conditions and column should be named condition)
         </inPort>
         <outPort index="0" name="count table">
         Same format as input count table but some genes were filtered out based on the settings.
