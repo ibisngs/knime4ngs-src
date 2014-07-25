@@ -51,7 +51,7 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(MatsResultIndexerNodeModel.class);
 	
 	 protected MatsResultIndexerNodeModel() {
-        super(0, 1, true, true);
+        super(0, 1, false, false);
         init();
     }
 	 
