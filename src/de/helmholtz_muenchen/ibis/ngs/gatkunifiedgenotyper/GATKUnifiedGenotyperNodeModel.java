@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Iterator;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -220,27 +221,51 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Row Iterator
+    	Iterator<DataRow> it = inData[0].iterator();
+    	
     	//retrieve information from table
-        DataRow r=inData[0].iterator().next();
+        DataRow r = null;
         
         // bam file   
         
-        // check bam input file
-        String inputfile=r.getCell(posBam).toString();
+        String[] inputfiles = new String[inData[0].getRowCount()];
+        // check bam input files
+        int row_counter = 0;
+        while(it.hasNext()){
+        	DataRow curr_Row = it.next();
+        	if(row_counter==0){	//Store first row for 
+        		r=curr_Row;
+        	}
+        	inputfiles[row_counter]=curr_Row.getCell(posBam).toString();
+        	row_counter++;
+        }
+               
+        /** Check Number of Inputs**/
+        boolean multi_sample_input = false;
+        if(row_counter>1){
+        	multi_sample_input = true;
+        }
+        
         
         // check if path is null
-        if(inputfile.equals("")){
+        if(inputfiles.length==0){
         	throw new Exception("No bam file available, something went wrong with the previous node!");
         }
         
         // check path to bam file
-        if(!Files.exists(Paths.get(inputfile))){
-        	throw new Exception("Path to input bam file: "+inputfile+" does not exist");
+        if(!Files.exists(Paths.get(inputfiles[0]))){
+        	throw new Exception("Path to input bam file: "+inputfiles[0]+" does not exist");
         }
         
         //process path to input file -> location and base name of output file
-        String base = PathProcessor.getBase(inputfile);
-        String fileextension = PathProcessor.getExt(inputfile);
+        String base = PathProcessor.getBase(inputfiles[0]);
+        
+        if(multi_sample_input){
+        	base = base+"_AllSamples";
+        }
+        
+        String fileextension = PathProcessor.getExt(inputfiles[0]);
 
         
         // check bam format
@@ -249,7 +274,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         }
         
         // check bam file index
-        if(!Files.exists(Paths.get(base+".bai"))){
+        if(!Files.exists(Paths.get(base+".bai")) && !multi_sample_input){
         		throw new Exception("Missing bam file index: "+base+".bai");
         }
         
@@ -395,17 +420,17 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         
         // call snps
         if(!snpout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
         // call indels
         if(!indelout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
         // call both
         if(!glmBothout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfile, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
         }
         
     	//determine number of output columns
@@ -466,7 +491,12 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	if(!glmBothout.equals("")){
     	    row[count++]=new StringCell(glmBothout);
     	}
-	    row[count++]=new StringCell(inputfile);
+    	if(multi_sample_input){
+    		row[count++]=new StringCell(inputfiles[0]);
+    	}else{
+    		row[count++]=new StringCell("MULTI_SAMPLE_INPUT");
+    	}
+	    
 	    row[count++]=new StringCell(reffile);
 	    row[count++]=new StringCell(gatkfile);
 	    if(p1){

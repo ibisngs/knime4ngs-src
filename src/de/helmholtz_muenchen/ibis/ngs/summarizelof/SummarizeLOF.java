@@ -93,7 +93,8 @@ public class SummarizeLOF {
 					    		   
 						    	   if(SampleFullLOF.equals("TRUE") && PaternalFullLOF.equals("TRUE") && MaternalFullLOF.equals("TRUE")){
 						    		   SampleHOM_ParentsHET_FULLLOF++;
-						    		   System.out.println(Gene);
+						    		   
+						    		   System.out.println(Gene+"\t"+SampleID);
 						    	   }
 					    		   
 					    	   } 
@@ -182,8 +183,7 @@ public class SummarizeLOF {
 	  				  }
 	  				   				  
 	  				  /**If VAT Annotation is available**/
-	  				  if(!VAT_ANNOTATION.equals("NA")){
-	  					  
+	  				  if(!VAT_ANNOTATION.equals("NA")){	  					  
 /**
 * VA=1:MUC20:ENSG00000176945.11:+:nonsynonymous:1/6:MUC20-011:ENST00000423938.1:382_89_30_P->Q
 1:MUC20:ENSG00000176945.11:+:synonymous:5/6:MUC20-002:ENST00000436408.1:2169_1855_619_R->R:MUC20-201:ENST00000320736.6:1614_1342_448_R->R:MUC20-001:ENST00000447234.2:2127_1855_619_R->R:MUC20-004:ENST00000445522.2:2022_1750_584_R->R:MUC20-202:ENST00000381954.5:1560_1288_430_R->R
@@ -201,6 +201,8 @@ public class SummarizeLOF {
 		  					  
 		  					  for(String annotation : VAT_SUB_ANNOTATION){
 		  						  
+		  						 
+		  						  
 		  						  String[] VAT_FIELDS = annotation.split(":");
 			  					  String AlleleNumber 	= VAT_FIELDS[0];
 			  					  String Gene 			= VAT_FIELDS[1];
@@ -208,9 +210,7 @@ public class SummarizeLOF {
 			  					  
 			  					  if(Type.contains("|")){ 
 			  						  Type = Type.split("|")[0];
-			  					  }
-			  					  
-			  					  
+			  					  }		  					
 			  					  
 			  					  String Transcript		= VAT_FIELDS[5];
 			  					   
@@ -227,14 +227,19 @@ public class SummarizeLOF {
 		  					  
 		  					  //Now search for affected individuals
 		  					  for(int i = 9; i < fields.length;i++){
-		  						  
+		  						 
 		  						  String SampleID 			= HEADER[i]; 
 		  						  String IndividualEntry 	= fields[i];
-		  						  String GT 				= IndividualEntry.split(":")[0]; 
+		  						  String GT 				= IndividualEntry.split(":")[0];
+		  						  
+		  						  //Workaround for Pindel GTs "."
+		  						  if(GT.equals(".")){
+		  							  GT = "./.";
+		  						  }
 		  						  String[] GT_fields 		= GT.split("[/|]");
 		  						  String Type 				= "";
 		  						  String FullLOF			= "";
-		  						  
+		  							  
 		  						  //Index of the GT Alleles in the LOF_TYPE_FIELDS Array; -1 indicates missing value
 		  						  int IndexFirstAllele  = contains(GT_fields[0], LOF_ALLELES_FIELDS);
 		  						  int IndexSecondAllele = contains(GT_fields[1], LOF_ALLELES_FIELDS);

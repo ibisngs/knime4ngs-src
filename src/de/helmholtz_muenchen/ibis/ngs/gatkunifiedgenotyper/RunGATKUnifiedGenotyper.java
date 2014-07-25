@@ -8,13 +8,17 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 public class RunGATKUnifiedGenotyper {
 	
-protected static void CallVariants(ExecutionContext exec, String gatk, String bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+protected static void CallVariants(ExecutionContext exec, String gatk, String[] bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
 		
 		//for each thread 2G
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G " + proxyOptions + gatk;
 		cmd+=" -T UnifiedGenotyper";
 		cmd+=" -nt "+threads;
-		cmd+=" -I "+bam;
+		
+		for(int i=0;i<bam.length;i++){
+			cmd+=" -I "+bam[i];
+		}
+		
 		cmd+=" -R "+ref;
 		cmd+=" -o "+out;
 		cmd+=" -glm "+snpIndel;
