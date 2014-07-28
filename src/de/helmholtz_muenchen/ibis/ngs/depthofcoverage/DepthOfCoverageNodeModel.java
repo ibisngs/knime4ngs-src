@@ -100,8 +100,9 @@ public class DepthOfCoverageNodeModel extends NodeModel {
     	DepthOfCoverageNodeModel.logger.info("Log files can be found in "+outfile+".out.log and "+outfile+".err.log");
     	
 		Executor.executeCommand(new String[]{cmd}, exec, null, DepthOfCoverageNodeModel.logger, outfile+".out.log", outfile+".err.log", null);
-
-    	
+		
+    	DepthOfCoverage.processCoverageFile(outfile);
+		
         return null;
     }
 
