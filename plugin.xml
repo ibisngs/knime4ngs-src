@@ -48,6 +48,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
 </extension>
 		
 		<!-- LoF Workflow nodes -->

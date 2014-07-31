@@ -99,8 +99,8 @@ public class DepthOfCoverageNodeModel extends NodeModel {
     	DepthOfCoverageNodeModel.logger.info("Running GATK DepthOfCoverage...");
     	DepthOfCoverageNodeModel.logger.info("Log files can be found in "+outfile+".out.log and "+outfile+".err.log");
     	
-		Executor.executeCommand(new String[]{cmd}, exec, null, DepthOfCoverageNodeModel.logger, outfile+".out.log", outfile+".err.log", null);
-		
+		//Executor.executeCommand(new String[]{cmd}, exec, null, DepthOfCoverageNodeModel.logger, outfile+".out.log", outfile+".err.log", null);
+		System.out.println("GATK finished, processing outfiles");
     	DepthOfCoverage.processCoverageFile(outfile);
 		
         return null;

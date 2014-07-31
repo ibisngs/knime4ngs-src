@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 public class DepthOfCoverage {
@@ -16,25 +17,36 @@ public class DepthOfCoverage {
 	    try(BufferedReader br = new BufferedReader(new FileReader(DoCOutfile))) {
 	       
 	    	String line;
-	    	int totalBasePairs = 0;
+	    	double totalBasePairs = 0;
+	    	
+	    	br.readLine();	//Skip Header
+	    	
 	    	while ((line = br.readLine()) != null) {
 	    		totalBasePairs++;
 	    		int curr_coverage = Integer.parseInt(line.split("\t")[3]);
+
 	    		if(curr_coverage>101){
 	    			curr_coverage=101;
 	    		}
+	    		
 	    		Coverage[curr_coverage]++;        	
 	        }
-
-		    //Everything counted, now get %-values
-		    double[] perc = new double[101];
-		    int remaining = totalBasePairs;
-		    for(int i = 0; i<101;i++){
-		    	remaining = totalBasePairs-Coverage[i];		//Anzahl von BasePairs mit Cov > Coverage[i]
-		    	perc[i] = remaining/totalBasePairs*100;
-		    }
 	    	
-		    System.out.println(Arrays.toString(perc));
+		    //Everything counted, now get %-values
+//		    double[] perc = new double[101];
+//		    perc[0]=100;
+	    	PrintWriter writer = new PrintWriter(DoCOutfile+"_DoCSummary.csv", "UTF-8");	    	
+		    double remaining = totalBasePairs;
+		    writer.print("100.00");
+		    for(int i = 1; i<101;i++){
+		    	remaining = remaining-Coverage[i-1];		//Anzahl von BasePairs mit Cov > Coverage[i]
+		    	double value = remaining/totalBasePairs*100;
+		    	value = (double)Math.round(value * 100) / 100;
+//		    	perc[i] = value;
+		    	writer.print("\t"+value);
+		    }
+		    writer.close();
+		    
 	    	
 	    	
 	    } catch (FileNotFoundException e) {
