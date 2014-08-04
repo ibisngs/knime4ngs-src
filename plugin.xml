@@ -48,9 +48,8 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filterLowExpressed.FilterLowExpressedNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
-</extension>
-		
+		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
+
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkrealignment.GATKRealignmentNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkrealignment.GATKRealignmentNodeFactory"/>
@@ -86,7 +85,7 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
-   
+   </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
 		<!-- NGS -->
