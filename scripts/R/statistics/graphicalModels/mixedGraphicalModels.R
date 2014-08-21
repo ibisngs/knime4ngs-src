@@ -63,7 +63,7 @@ mixedGraficalModels <- function(X, #
 		}
 		sampleNum = stabSel.sampleNum/2
 	}
-	samples = unlist(llply(.data=c(1:sampleNum),.fun=drawSamples, X, stabSel.sampleSize=stabSel.sampleSize, paired=T), recursive=F)
+	samples = unlist(llply(.data=c(1:sampleNum),.fun=drawSamples, X, stabSel.sampleSize=stabSel.sampleSize, paired=pairedSamples), recursive=F)
 
 	## order of edges (from an adjacency matrix) as vector
 	edges.matrix  <- matrix(1:(p*p),ncol=p, nrow=p, dimnames=list(colnames(X), colnames(X))) #, 
@@ -146,12 +146,16 @@ getAdjacency <- function(edges, variables, v1="v1", v2="v2", feature="selected")
 # E.v			desired maximal number of False positive edges; only guaranteed if stabSel.edges is not given manually
 getGraph.FWER <- function(edge.ranks, 
                           stabSel.inclusionPerc=0.8, #
-                          E.v=20,
+                          E.v=0.05,
+                          pairedSamples=TRUE,
                           parallel = FALSE){
 
-	## if not given by the user, calculate stabSel.sampleNumedges to meet certain FWER (for details Fellinghauer et al. 2013)	
+		
 	variables = unique(unlist(strsplit(colnames(edge.ranks), "~")))
 	p         = length(variables)
+	E.v       = floor(E.v * ncol(edge.ranks))
+	
+	## if not given by the user, calculate stabSel.sampleNumedges to meet certain FWER (for details Fellinghauer et al. 2013)
 	stabSel.sampleNumedges = floor(sqrt((2*stabSel.inclusionPerc-1) * E.v * p * (p-1) / 2))
 	#cat("Including top ", stabSel.sampleNumedges, "edges from each sample")
 

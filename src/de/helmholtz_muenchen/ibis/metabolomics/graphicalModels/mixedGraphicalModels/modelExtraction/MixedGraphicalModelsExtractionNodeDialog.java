@@ -4,7 +4,9 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
@@ -17,11 +19,13 @@ public class MixedGraphicalModelsExtractionNodeDialog extends DefaultNodeSetting
 	/** SETTING MODELS */
 	private final SettingsModelDoubleBounded  m_percIncl = new SettingsModelDoubleBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_PERC_INCLUSION, 0.8, 0.0, 1.0);
 	// FWER control only
-	private final SettingsModelIntegerBounded m_ev       = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 5, 0, Integer.MAX_VALUE);
+	private final SettingsModelDoubleBounded m_ev        = new SettingsModelDoubleBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 0.05, 0.0, 1.0);
 	// Empirical p-values only
 	private final SettingsModelIntegerBounded m_nEdges   = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_NUM_OF_EDGES, 5, 1, Integer.MAX_VALUE);
 	// Cores
 	private final SettingsModelIntegerBounded m_cores    = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_CORES, 3, 0, Integer.MAX_VALUE);
+	// Paired subsamples
+	private final SettingsModelBoolean m_pairedSamples   = new SettingsModelBoolean(MixedGraphicalModelsExtractionNodeModel.CFGKEY_PAIRED_SAMPLES, true);
 
     
 	protected MixedGraphicalModelsExtractionNodeDialog() {
@@ -37,7 +41,11 @@ public class MixedGraphicalModelsExtractionNodeDialog extends DefaultNodeSetting
         this.createNewGroup("Intrinsic False-Positive Control (FWER)");
         addDialogComponent(new DialogComponentNumber(
         		m_ev,
-        		"E(V):", /*step*/ 1, /*componentwidth*/ 5)
+        		"E(V):", /*step*/ 0.05, /*componentwidth*/ 5)
+        );
+        addDialogComponent(new DialogComponentBoolean(
+        		m_pairedSamples,
+        		"Paired Subsamples?")
         );
         this.closeCurrentGroup();
         

@@ -18,6 +18,7 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
@@ -35,16 +36,18 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
 	static final String CFGKEY_EV             = "e.v.";
 	static final String CFGKEY_NUM_OF_EDGES   = "number of edges per model";
 	static final String CFGKEY_CORES          = "number of cores";
+	static final String CFGKEY_PAIRED_SAMPLES = "use paired random subsamples";
 
-    
 	/** SETTING MODELS */
 	private final SettingsModelDoubleBounded  m_percIncl = new SettingsModelDoubleBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_PERC_INCLUSION, 0.8, 0.0, 1.0);
 	// FWER control only
-	private final SettingsModelIntegerBounded m_ev       = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 5, 0, Integer.MAX_VALUE);
+	private final SettingsModelDoubleBounded m_ev        = new SettingsModelDoubleBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_EV, 0.05, 0.0, 1.0);
 	// Empirical p-values only
 	private final SettingsModelIntegerBounded m_nEdges   = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_NUM_OF_EDGES, 5, 1, Integer.MAX_VALUE);
 	// Cores
 	private final SettingsModelIntegerBounded m_cores    = new SettingsModelIntegerBounded(MixedGraphicalModelsExtractionNodeModel.CFGKEY_CORES, 3, 0, Integer.MAX_VALUE);
+	// Paired subsamples
+	private final SettingsModelBoolean m_pairedSamples   = new SettingsModelBoolean(MixedGraphicalModelsExtractionNodeModel.CFGKEY_PAIRED_SAMPLES, true);
 
     /**
      * Constructor for the node model.
@@ -60,9 +63,10 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
     @Override
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
     	this.addArgument("--percIncl", m_percIncl.getDoubleValue());
-    	this.addArgument("--ev"      , m_ev.getIntValue());
+    	this.addArgument("--ev"      , m_ev.getDoubleValue());
     	this.addArgument("--nedges"  , m_nEdges.getIntValue());
     	this.addArgument("--cores", m_cores.getIntValue());
+    	this.setFlag("--pairedSamples", m_pairedSamples.getBooleanValue());
     	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getEdgeRankSpec(new DataTableSpec[]{inData[0].getDataTableSpec(),inData[1]==null?null:inData[1].getDataTableSpec()})); // parse cell types
@@ -128,6 +132,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
         m_percIncl.saveSettingsTo(settings);
         m_nEdges.saveSettingsTo(settings);
         m_cores.saveSettingsTo(settings);
+        m_pairedSamples.saveSettingsTo(settings);
     }
 
     /**
@@ -139,6 +144,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
         m_percIncl.loadSettingsFrom(settings);
         m_nEdges.loadSettingsFrom(settings);
         m_cores.loadSettingsFrom(settings);
+        m_pairedSamples.loadSettingsFrom(settings);
     }
 
     /**
@@ -150,6 +156,7 @@ public class MixedGraphicalModelsExtractionNodeModel extends RNodeModel {
         m_percIncl.validateSettings(settings);
         m_nEdges.validateSettings(settings);
         m_cores.validateSettings(settings);
+        m_pairedSamples.validateSettings(settings);
     }
     
     /**
