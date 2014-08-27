@@ -14,12 +14,12 @@
         <option name="test for both conditions separately">if checked, condition must be fulfilled for both conditions separately (default: true)</option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Cell 0: ID of feature
+        <inPort index="0" name="count table">Row names: ID of feature
         <br />Cell 1...n: count of feature in sample
         <br />Must contain a header line with the names of the samples
         </inPort>
-        <inPort index="1" name="condition table">RowNames: Name of the sample like it is named in the count table
-        <br />Cell 0: condition (should only contain two conditions and column should be named condition)
+        <inPort index="1" name="condition table">Row names: Name of the sample like it is named in the count table
+        <br />Cell 1: condition (should only contain two conditions and column should be named condition)
         </inPort>
         <outPort index="0" name="count table">
         Same format as input count table but some genes were filtered out based on the settings.

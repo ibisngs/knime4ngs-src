@@ -13,11 +13,11 @@
         <option name="sharing mode">sharing mode after empirical dispersion was calculated (default: maximum)</option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Cell 0: ID of feature
+        <inPort index="0" name="count table">Row names: ID of feature
         <br />Cell 1...n: count of feature in sample
         <br />Must contain a header line with the names of the samples
         </inPort>
-        <inPort index="1" name="condition table">Cell 0: Name of the sample like it is named in the count table
+        <inPort index="1" name="condition table">Row names: Name of the sample like it is named in the count table
         <br />Cell 1: condition (should only contain two conditions)
         </inPort>
         <outPort index="0" name="DE expressed genes">Cell 0: ID of feature
