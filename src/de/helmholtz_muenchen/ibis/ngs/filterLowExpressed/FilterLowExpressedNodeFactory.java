@@ -36,10 +36,9 @@ public class FilterLowExpressedNodeFactory
      */
     @Override
     public RNodeView<FilterLowExpressedNodeModel> createNodeView(final int viewIndex, final FilterLowExpressedNodeModel nodeModel) {
-        //return new FilterLowExpressedNodeView(nodeModel);
         return new RNodeView<FilterLowExpressedNodeModel>(nodeModel);
     }
-
+    
     /**
      * {@inheritDoc}
      */

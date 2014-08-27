@@ -4,6 +4,9 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.ngs.edgeR.EdgeRNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+
 /**
  * <code>NodeFactory</code> for the "DESeq" Node.
  * 
@@ -35,7 +38,7 @@ public class DESeqNodeFactory
     @Override
     public NodeView<DESeqNodeModel> createNodeView(final int viewIndex,
             final DESeqNodeModel nodeModel) {
-        return new DESeqNodeView(nodeModel);
+        return new RNodeView<DESeqNodeModel>(nodeModel);
     }
 
     /**

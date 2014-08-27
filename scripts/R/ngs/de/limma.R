@@ -24,9 +24,9 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 ## LOAD LIBRARIES
 ########################################################################################################################################
 source(args$file.glob)
-library(Biobase)
-library(limma)
-library(edgeR)
+loadLib("Biobase", bioC=TRUE)
+loadLib("limma", bioC=TRUE)
+loadLib("edgeR", bioC=TRUE)
 
 
 ########################################################################################################################################

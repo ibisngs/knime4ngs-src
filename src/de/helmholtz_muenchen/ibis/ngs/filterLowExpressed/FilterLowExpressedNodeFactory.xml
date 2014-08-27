@@ -26,6 +26,6 @@
         </outPort>
     </ports>    
     <views>
-        <view index="0" name="not implemented">not implemented</view>
+        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
     </views>
 </knimeNode>

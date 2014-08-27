@@ -23,8 +23,8 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 ## LOAD LIBRARIES
 ########################################################################################################################################
 source(args$file.glob)
-library(DESeq)
-library(edgeR)
+loadLib("DESeq", bioC=TRUE)
+loadLib("edgeR", bioC=TRUE)
 
 ########################################################################################################################################
 ## LOAD COUNTS
