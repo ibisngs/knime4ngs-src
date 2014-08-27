@@ -120,6 +120,14 @@ public class MatsResultPlotterNodeModel extends ExecutorNodeModel {
 			FDRFinder finder = new FDRFinder(inputFolder, includeReads, FDR);
 			HashMap<String, ArrayList<String>> events = finder.getSigEvents();
 			
+			for(String type : events.keySet()) {
+				ArrayList<String> eve = events.get(type);
+				System.out.println("type; " + type);
+				for(String e : eve) {
+					System.out.println(e);
+				}
+			}
+			
 			// build command array
 			ArrayList<String> command = new ArrayList<String>();
 			command.add(PYTHON_BIN);

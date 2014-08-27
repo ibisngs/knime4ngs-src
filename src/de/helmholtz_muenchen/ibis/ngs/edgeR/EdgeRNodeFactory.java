@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+
 /**
  * <code>NodeFactory</code> for the "EdgeR" Node.
  * 
@@ -35,7 +37,7 @@ public class EdgeRNodeFactory
     @Override
     public NodeView<EdgeRNodeModel> createNodeView(final int viewIndex,
             final EdgeRNodeModel nodeModel) {
-        return new EdgeRNodeView(nodeModel);
+        return new RNodeView<EdgeRNodeModel>(nodeModel);
     }
 
     /**
