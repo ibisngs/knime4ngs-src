@@ -128,7 +128,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	command.add("-R "+m_REF_GENOME.getStringValue());
     	command.add("-V "+m_INFILE.getStringValue());
     	
-    	String OUTFILE = m_INFILE.getStringValue().replaceAll(".vcf", "GATKfiltered.vcf");
+    	String OUTFILE = m_INFILE.getStringValue().replaceAll(".vcf", "_GATKfiltered.vcf");
     	command.add("-o "+OUTFILE);
     	command.add("--filterExpression");
   

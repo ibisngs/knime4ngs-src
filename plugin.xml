@@ -49,7 +49,9 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.mats.MatsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.mats.MatsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory"/>
-		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory"/>
+
 
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
@@ -86,7 +88,7 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
-	</extension>
+</extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
 		<!-- NGS -->

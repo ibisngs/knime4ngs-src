@@ -97,7 +97,7 @@ public class StreamThread extends Thread {
 					}
 				if(!this.fillFile && !this.fillSB)
 					{
-						System.out.println("Discarding " + read + "bytes due to no file / Buffer to write to...");
+//						System.out.println("Discarding " + read + "bytes due to no file / Buffer to write to...");
 					}
 			}
 
