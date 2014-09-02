@@ -113,6 +113,7 @@ public class StarStatisticMergerNodeModel extends StatisticMergerNodeModel {
 	public void finalize(BufferedWriter outfile) throws IOException {
 		outfile.write(CONTENT.toString());
 		outfile.flush();
+		this.CONTENT.delete(0, this.CONTENT.length());
 	}
 
 	@Override
