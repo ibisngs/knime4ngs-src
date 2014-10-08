@@ -3,25 +3,16 @@
     <name>DepthOfCoverage</name>
     
     <shortDescription>
-        
+        Assess sequence coverage by a wide array of metrics, partitioned by sample, read group, or library
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>This tool processes a set of bam files to determine coverage at different levels of partitioning and aggregation. Coverage can be analyzed per locus, per interval, per gene, or in total</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Outfile suffix"> Suffix that will be appended to the outfiles</option>
+        <option name="GATK Filter Terms"> Additional GATK Read Filters that shall be used for processing. All Filters can be found at https://www.broadinstitute.org/gatk/guide/tooldocs/</option>
+
     </fullDescription>
     
     <ports>
