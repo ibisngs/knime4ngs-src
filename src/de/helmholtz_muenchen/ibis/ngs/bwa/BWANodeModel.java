@@ -162,9 +162,14 @@ public class BWANodeModel extends NodeModel {
     	/**
     	 * Run bwa aln
     	 */
-    	LOGGER.info("Find the SA coordinates of the input reads.\n");
-    	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam,threads);
-    	LOGGER.info("Finished BWA aln...");
+    	
+    	
+    	if(!m_alnalgo.getStringValue().equals("BWA-MEM")){
+        	LOGGER.info("Find the SA coordinates of the input reads.\n");
+        	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam,threads);
+        	LOGGER.info("Finished BWA aln...");
+    	}
+
     	
     	
     	/**
