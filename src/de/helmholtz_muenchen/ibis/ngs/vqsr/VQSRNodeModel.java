@@ -110,8 +110,22 @@ public class VQSRNodeModel extends NodeModel {
     	StringBuffer stdErr = new StringBuffer();
     	StringBuffer stdOut = new StringBuffer();
     	
-    	Executor.executeCommand(createRecalibrationCommand(),exec,LOGGER,stdOut,stdErr);
-    	Executor.executeCommand(applyRecalibrationCommand(),exec,LOGGER,stdOut,stdErr);
+    	//Check if path to GATK is available
+    	String PATH2GATK = "";
+    	int GATK_INDEX = inData[0].getDataTableSpec().findColumnIndex("Path2GATKFile");
+    	if(GATK_INDEX!=-1){
+    		PATH2GATK = inData[0].iterator().next().getCell(GATK_INDEX).toString();
+    	}
+    	//Check if path to GATK is available
+    	String PATH2REFSEQ = "";
+    	int REFSEQ_INDEX = inData[0].getDataTableSpec().findColumnIndex("Path2SEQFile");
+    	if(REFSEQ_INDEX!=-1){
+    		PATH2REFSEQ = inData[0].iterator().next().getCell(REFSEQ_INDEX).toString();
+    	}
+    	
+    	
+    	Executor.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ),exec,LOGGER,stdOut,stdErr);
+    	Executor.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ),exec,LOGGER,stdOut,stdErr);
     	
         // TODO: Return a BufferedDataTable for each output port 
         return inData;
@@ -121,9 +135,23 @@ public class VQSRNodeModel extends NodeModel {
      *Creates Recalibration Command
      * @return
      */
-    private String[] createRecalibrationCommand(){
+    private String[] createRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ){
     	
     	ArrayList<String> command = new ArrayList<String>();
+    	
+    	String GATK;
+    	if(!PATH2GATK.equals("")){
+    		GATK = PATH2GATK;
+    	}else{
+    		GATK = m_GATK.getStringValue();
+    	}
+    	
+    	String REFSEQ;
+    	if(!PATH2REFSEQ.equals("")){
+    		REFSEQ = PATH2REFSEQ;
+    	}else{
+    		REFSEQ = m_REF_GENOME.getStringValue();
+    	}
     	
     	//Process Infile Name to obtain output file names
     	String infile 		= m_INFILE.getStringValue();
@@ -141,9 +169,9 @@ public class VQSRNodeModel extends NodeModel {
     	}
     	
     	command.add("java -jar");
-    	command.add(m_GATK.getStringValue());
+    	command.add(GATK);
     	command.add("-T VariantRecalibrator");
-    	command.add("-R "+m_REF_GENOME.getStringValue());
+    	command.add("-R "+REFSEQ);
     	command.add("-input "+m_INFILE.getStringValue());
     	
     	//Add resources
@@ -178,9 +206,22 @@ public class VQSRNodeModel extends NodeModel {
      *Creates Recalibration Command
      * @return
      */
-    private String[] applyRecalibrationCommand(){
+    private String[] applyRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ){
     	
     	ArrayList<String> command = new ArrayList<String>();
+    	
+    	String GATK;
+    	if(!PATH2GATK.equals("")){
+    		GATK = PATH2GATK;
+    	}else{
+    		GATK = m_GATK.getStringValue();
+    	}
+    	String REFSEQ;
+    	if(!PATH2REFSEQ.equals("")){
+    		REFSEQ = PATH2REFSEQ;
+    	}else{
+    		REFSEQ = m_REF_GENOME.getStringValue();
+    	}
     	
     	//Process Infile Name to obtain output file names
     	String infile 		= m_INFILE.getStringValue();
@@ -198,9 +239,9 @@ public class VQSRNodeModel extends NodeModel {
     	}
     	
     	command.add("java -jar");
-    	command.add(m_GATK.getStringValue());
+    	command.add(GATK);
     	command.add("-T ApplyRecalibration");
-    	command.add("-R "+m_REF_GENOME.getStringValue());
+    	command.add("-R "+REFSEQ);
     	command.add("-input "+m_INFILE.getStringValue()); 	
        	command.add("-mode "+m_MODE.getStringValue());
     	
@@ -231,6 +272,23 @@ public class VQSRNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	if(inSpecs[0].containsName("Path2GATKFile")){
+    		m_GATK.setEnabled(false);
+    		m_GATK.setStringValue("GATK Path already set");
+    		System.out.println("Found GATK Path in inData");
+    	}else{
+    		System.out.println("No path to GATK found in inData. User input required.");
+    	}
+    	
+    	if(inSpecs[0].containsName("Path2SEQFile")){
+    		m_REF_GENOME.setEnabled(false);
+    		m_REF_GENOME.setStringValue("Reference Sequence already set");
+    		System.out.println("Found Reference Sequence in inData");
+    	}else{
+    		System.out.println("No path to Reference Sequence found in inData. User input required.");
+    	}
+    	
+    	
         // TODO: generated method stub
         return new DataTableSpec[]{null};
     }

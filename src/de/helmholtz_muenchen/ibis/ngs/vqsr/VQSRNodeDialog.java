@@ -1,7 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.vqsr;
 
-import java.io.File;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -67,7 +65,7 @@ public class VQSRNodeDialog extends DefaultNodeSettingsPane {
     
     	createNewGroup("GATK Jar");
     	addDialogComponent(new DialogComponentFileChooser(m_GATK, "gatk_vqsr", 0, ".jar"));
-
+    	
     	createNewGroup("Reference Genome");
     	addDialogComponent(new DialogComponentFileChooser(m_REF_GENOME, "gatk_vqsr_ref_genome", 0, ".fa",".fasta",".txt"));
     	
@@ -132,7 +130,7 @@ public class VQSRNodeDialog extends DefaultNodeSettingsPane {
 				m_RESOURCES_STRING_4.setEnabled(m_RESOURCES_BOOLEAN_4.getBooleanValue());	
 			}
 		});
-    	
+    	   	
     }
 }
 

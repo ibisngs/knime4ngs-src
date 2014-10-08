@@ -3,25 +3,19 @@
     <name>VQSR</name>
     
     <shortDescription>
-        
+        Create a Gaussian mixture model by looking at the annotations values over a high quality subset of the input call set and then evaluate all input variants.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>The purpose of the variant recalibrator is to assign a well-calibrated probability to each variant call in a call set. You can then create highly accurate call sets by filtering based on this single estimate for the accuracy of each call. The approach taken by variant quality score recalibration is to develop a continuous, covarying estimate of the relationship between SNP call annotations (QD, MQ, HaplotypeScore, and ReadPosRankSum, for example) and the probability that a SNP is a true genetic variant versus a sequencing or data processing artifact. This model is determined adaptively based on "true sites" provided as input, typically HapMap 3 sites and those sites found to be polymorphic on the Omni 2.5M SNP chip array. This adaptive error model can then be applied to both known and novel variation discovered in the call set of interest to evaluate the probability that each call is real. The score that gets added to the INFO field of each variant is called the VQSLOD. It is the log odds ratio of being a true variant versus being false under the trained Gaussian mixture model Fore more information see https://www.broadinstitute.org/gatk/gatkdocs/ </intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Recalibration Mode"> Recalibration mode to employ, SNPs or Indels</option>
+        <option name="Tranche levels ">The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data. (in percent, that is 1.0 for 1 percent)</option>
+		<option name="Annotation"> The names of the annotations which should used for calculations</option>
+		<option name="Recalibration Mode"> Recalibration mode to employ, SNPs or Indels</option>
+		<option name="TS Filter Level"> The truth sensitivity level at which to start filtering</option>
+		<option name="Resources"> A list of sites for which to apply a prior probability of being correct but which aren't used by the algorithm (training and truth sets are required to run). Example: dbsnp,known=true,training=false,truth=false,prior=6.0 </option>
+
     </fullDescription>
     
     <ports>
