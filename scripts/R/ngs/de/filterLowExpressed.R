@@ -16,6 +16,8 @@ parser$add_argument("--output", type="character", action="store", dest="file.out
 parser$add_argument("--keepReads", type="integer", action="store", dest="keepReads", required=TRUE, help="normalization method for size factors", metavar="<char>")
 parser$add_argument("--keepFraction", type="double", action="store", dest="keepFraction", required=TRUE, help="normalization method for CPM values", metavar="<char>")
 parser$add_argument("--bothConditionsSeperate", type="integer", action="store", dest="bothConditionsSeperate", required=TRUE, help="correction method for p-values", metavar="<char>")
+parser$add_argument("--filterMode", type="integer", action="store", dest="filterMode", required=TRUE, help="filter mode", metavar="<char>")
+
 
 ## parse
 args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
@@ -47,12 +49,18 @@ Cn2 <- unique(pData$condition)[2]
 
 C1 <- rownames(pData)[which(pData$condition == Cn1)]
 C2 <- rownames(pData)[which(pData$condition == Cn2)]
- 
-if(args$bothConditionsSeperate == 1) {
-	keep <- rowSums(exprs[, C1]>args$keepReads) >= args$keepFraction*length(C1) & rowSums(exprs[, C2]>args$keepReads) >= args$keepFraction*length(C2)
+print(args$filterMode)
+# minimum filter mode
+if(args$filterMode == 0) {
+	if(args$bothConditionsSeperate == 1) {
+		keep <- rowSums(exprs[, C1]>=args$keepReads) >= args$keepFraction*length(C1) & rowSums(exprs[, C2]>=args$keepReads) >= args$keepFraction*length(C2)
+	}
+	if(args$bothConditionsSeperate != 1) {
+		keep <- rowSums(exprs[, rownames(pData)]>=args$keepReads) >= args$keepFraction*nrow(pData) 
+	}
 }
-if(args$bothConditionsSeperate != 1) {
-	keep <- rowSums(exprs[, rownames(pData)]>args$keepReads) >= args$keepFraction*nrow(pData) 
+if(args$filterMode == 1) {
+		keep <- rowSums(exprs[, C1]) >= args$keepReads | rowSums(exprs[, C2]) >= args$keepReads
 }
 
 # strip results 
