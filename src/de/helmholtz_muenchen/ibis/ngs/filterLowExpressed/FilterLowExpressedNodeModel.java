@@ -1,17 +1,12 @@
 package de.helmholtz_muenchen.ibis.ngs.filterLowExpressed;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -56,6 +51,7 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      */
 	protected FilterLowExpressedNodeModel() {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
+		this.init();
 	}
 	
 	@Override
@@ -74,7 +70,6 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
     @Override
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{    	
 		BufferedDataTable[] out = super.execute(inData, exec);
-		System.out.println("exxe: " + this.SET_MODE.getStringValue());
 		out[0] = exec.createSpecReplacerTable(out[0], this.getSpec(inData[0].getDataTableSpec())); // parse cell types
 
 		return(out);
@@ -94,67 +89,13 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	
     	// add values set in GUI
     	this.addArgument("--keepReads", this.SET_KEEP_READS.getIntValue());
     	this.addArgument("--keepFraction", this.SET_KEEP_FRACTION.getDoubleValue());
     	this.addArgument("--bothConditionsSeperate", this.SET_BOTH_SEP.getBooleanValue() ? "1" : "0");
     	this.addArgument("--filterMode", this.SET_MODE.getStringValue().equals(DEFAULT_MODE) ? "1" : "0");
     	
-    	
-    	System.out.println(this.SET_KEEP_READS.getIntValue());
-    	System.out.println(this.SET_KEEP_FRACTION.getDoubleValue());
-    	System.out.println(this.SET_BOTH_SEP.getBooleanValue());
- 
-    	
-    	System.out.println("------------------------");
-    	System.out.println(this.SET_MODE.getStringValue().equals(DEFAULT_MODE));
     	return new DataTableSpec[]{getSpec(inSpecs[0])};
-    }
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void reset() {
-		super.reset();
-	}
-	
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-    	super.loadInternals(internDir, exec); // load output from stdout and stderr
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir, final ExecutionMonitor exec) throws IOException, CanceledExecutionException {
-    	super.saveInternals(internDir, exec); // save output from stdout and stderr
     }
 }
 
