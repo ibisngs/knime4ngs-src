@@ -27,18 +27,14 @@ public class DESeqNodeModel extends RNodeModel {
     // keys for SettingsModels
     protected static final String CFGKEY_METHOD 	= "method";
     protected static final String CFGKEY_SHEARING 	= "shearing";
-    protected static final String CFGKEY_VS			= "VS";
     
     // initial default values for SettingsModels
     protected static final String DEFAULT_METHOD = "pooled";
     protected static final String DEFAULT_SHEARING = "maximum";
-    protected static final String DEFAULT_VS = "";
     
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_METHOD	= new SettingsModelString(CFGKEY_METHOD, DEFAULT_METHOD);
     private final SettingsModelString SET_SHEARING	= new SettingsModelString(CFGKEY_SHEARING, DEFAULT_SHEARING);
-	private final SettingsModelString SET_VS			= new SettingsModelString(CFGKEY_VS, DEFAULT_VS);
-    
 
     // the logger instance
 	@SuppressWarnings("unused")
@@ -74,7 +70,6 @@ public class DESeqNodeModel extends RNodeModel {
 		super.init();
 		this.addSetting(SET_METHOD);
 		this.addSetting(SET_SHEARING);
-		this.addSetting(SET_VS);
 	}
 	
     /**

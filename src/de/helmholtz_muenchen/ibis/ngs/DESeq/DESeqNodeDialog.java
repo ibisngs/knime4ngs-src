@@ -13,10 +13,8 @@ public class DESeqNodeDialog extends DefaultNodeSettingsPane {
 	
     private final SettingsModelString SET_METHOD	= new SettingsModelString(DESeqNodeModel.CFGKEY_METHOD, DESeqNodeModel.DEFAULT_METHOD);
     private final SettingsModelString SET_SHEARING	= new SettingsModelString(DESeqNodeModel.CFGKEY_SHEARING, DESeqNodeModel.DEFAULT_SHEARING);
-    @SuppressWarnings("unused")
-	private final SettingsModelString SET_VS			= new SettingsModelString(DESeqNodeModel.CFGKEY_VS, DESeqNodeModel.DEFAULT_VS);
-
-	/**
+	
+    /**
 	 * Constructor
 	 */
     protected DESeqNodeDialog() {

@@ -13,10 +13,8 @@ public class EdgeRNodeDialog extends DefaultNodeSettingsPane {
 	
     private final SettingsModelString SET_CORRECTION	= new SettingsModelString(EdgeRNodeModel.CFGKEY_CORRECTION_METHOD, EdgeRNodeModel.DEFAULT_CORRECTION_METHOD);
     private final SettingsModelString SET_NORM_FACTOR	= new SettingsModelString(EdgeRNodeModel.CFGKEY_NORMALIZE_METHOD_FACTOR, EdgeRNodeModel.DEFAULT_NORMALIZE_METHOD_FACTOR);
-    @SuppressWarnings("unused")
-	private final SettingsModelString SET_VS			= new SettingsModelString(EdgeRNodeModel.CFGKEY_VS, EdgeRNodeModel.DEFAULT_VS);
- 
-	/**
+
+    /**
 	 * Constructor
 	 */
     protected EdgeRNodeDialog() {
