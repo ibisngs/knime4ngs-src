@@ -28,20 +28,16 @@ public class LimmaNodeModel extends RNodeModel {
     protected static final String CFGKEY_CORRECTION_METHOD 			= "PvalueCorrection";
     protected static final String CFGKEY_NORMALIZE_METHOD_FACTOR 	= "NormalizeMethodFactor";
     protected static final String CFGKEY_NORMALIZE_METHOD_CPM 		= "NormalizeMethodCPM";
-    protected static final String CFGKEY_VS							= "VS";
     
     // initial default values for SettingsModels
     protected static final String DEFAULT_CORRECTION_METHOD = "BH";
     protected static final String DEFAULT_NORMALIZE_METHOD_FACTOR = "TMM";
     protected static final String DEFAULT_NORMALIZE_METHOD_CPM = "quantile";
-    protected static final String DEFAULT_VS = "";
     
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_CORRECTION	= new SettingsModelString(CFGKEY_CORRECTION_METHOD, DEFAULT_CORRECTION_METHOD);
     private final SettingsModelString SET_NORM_FACTOR	= new SettingsModelString(CFGKEY_NORMALIZE_METHOD_FACTOR, DEFAULT_NORMALIZE_METHOD_FACTOR);
-    private final SettingsModelString SET_METHOD_CPM	= new SettingsModelString(CFGKEY_NORMALIZE_METHOD_CPM, DEFAULT_NORMALIZE_METHOD_CPM);
-	private final SettingsModelString SET_VS			= new SettingsModelString(CFGKEY_VS, DEFAULT_VS);
-    
+    private final SettingsModelString SET_METHOD_CPM	= new SettingsModelString(CFGKEY_NORMALIZE_METHOD_CPM, DEFAULT_NORMALIZE_METHOD_CPM);  
  
     // the logger instance
 	@SuppressWarnings("unused")
@@ -89,7 +85,6 @@ public class LimmaNodeModel extends RNodeModel {
 		this.addSetting(SET_CORRECTION);
 		this.addSetting(SET_NORM_FACTOR);
 		this.addSetting(SET_METHOD_CPM);
-		this.addSetting(SET_VS);
 	}
 	
     /**
