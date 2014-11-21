@@ -33,16 +33,16 @@ public class InputThread extends Thread{
     	
     	System.out.println("starting stdinthread for: "+filepath);
     	
+    	
+    	
         try {
-           
-            byte[] b = new byte[32768];
-            
+        	
+            byte[] b = new byte[131072];
             int read = 0;
             
             // read= -1 -> end of file
-            while (read > -1) {
+            while (read > -1) {	
                 read = input.read(b, 0, b.length);
-                //System.out.println("read: " + new String(b));
                 if (read > -1) {
                     output.write(b, 0, read);
                 }
