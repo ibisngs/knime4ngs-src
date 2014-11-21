@@ -29,9 +29,11 @@ public class SummarizeLOF {
 	 * @param PED_FILE
 	 * @param VCF_FILE
 	 * @return
+	 * @throws UnsupportedEncodingException 
+	 * @throws FileNotFoundException 
 	 */
 	@SuppressWarnings("unchecked")
-	public String[] getLOFs(String PED_FILE, String VCF_FILE){
+	public String[] getLOFs(String PED_FILE, String VCF_FILE) throws FileNotFoundException, UnsupportedEncodingException{
 		
 		//Read PED File
 		HashMap<String,String> PED = new PEDFile(PED_FILE).getPED();
@@ -43,6 +45,13 @@ public class SummarizeLOF {
 		HashMap<String,ArrayList<String>>[] LOFSummaries = getLOFSummary(LOF_GENES);
 		HashMap<String,ArrayList<String>> SAMPLE_SUMMARY= LOFSummaries[0];
 		HashMap<String,ArrayList<String>> GENE_SUMMARY= LOFSummaries[1];
+		
+		
+		//2 more outfiles for LOF genes
+		String CHILD_LOFS		 					= VCF_FILE.replace("vcf", "childLOFs.csv");
+	    String SampleHOM_ParentsHET_FULLLOF_FILE	= VCF_FILE.replace("vcf", "SampleHOM_ParentsHET_FULLLOF.csv");
+	    PrintWriter writer_CHILD_LOFS = new PrintWriter(CHILD_LOFS, "UTF-8");
+	    PrintWriter writer_SampleHOM_ParentsHET_FULLLOF = new PrintWriter(SampleHOM_ParentsHET_FULLLOF_FILE, "UTF-8");
 		
 		//Get Hom-Het Stats
 		Iterator<String> iterator = PED.keySet().iterator();  
@@ -74,6 +83,8 @@ public class SummarizeLOF {
 					       String SampleHomHet = Info.split(";")[0];
 					       String SampleFullLOF = Info.split(";")[3];
 				    	   
+					       writer_CHILD_LOFS.println(Gene+"\t"+SampleID);
+					       
 					       if(Paternal_LOF_GENES.containsKey(Gene) && Maternal_LOF_GENES.containsKey(Gene) && SampleHomHet.equals("hom")){
 					    	
 					    	   SampleHOM_ParentsALL++;	
@@ -93,6 +104,7 @@ public class SummarizeLOF {
 					    		   
 						    	   if(SampleFullLOF.equals("TRUE") && PaternalFullLOF.equals("TRUE") && MaternalFullLOF.equals("TRUE")){
 						    		   SampleHOM_ParentsHET_FULLLOF++;
+						    		   writer_SampleHOM_ParentsHET_FULLLOF.println(Gene+"\t"+SampleID);
 						    		   
 						    		   System.out.println(Gene+"\t"+SampleID);
 						    	   }
@@ -132,7 +144,11 @@ public class SummarizeLOF {
 	    String GENE_SUMMARY_HEADER 			= "Gene\tNumberOfAffectedSamples\tDeleteMe";
 		printMap(SAMPLE_SUMMARY,SAMPLE_SUMMARY_OUT,SAMPLE_SUMMARY_HEADER);
 		printMap(GENE_SUMMARY,GENE_SUMMARY_OUT,GENE_SUMMARY_HEADER);	
-	    
+		
+		//Close File writers
+	    writer_CHILD_LOFS.close();
+	    writer_SampleHOM_ParentsHET_FULLLOF.close();
+		
 		return new String[]{SAMPLE_SUMMARY_OUT,GENE_SUMMARY_OUT};
 	}
 	
@@ -214,11 +230,12 @@ public class SummarizeLOF {
 			  					  
 			  					  String Transcript		= VAT_FIELDS[5];
 			  					   
-			  					  if(Type.equals("prematureStop") || Type.equals("removedStop") || Type.equals("spliceOverlap") || Type.equals("insertionFS") || Type.equals("deletionFS") || VAT_ANNOTATION.equals("startOverlap") || VAT_ANNOTATION.equals("endOverlap")){
+			  					  if(Type.equals("prematureStop") || Type.equals("removedStop") || Type.equals("spliceOverlap") || Type.equals("insertionFS") || Type.equals("deletionFS") || Type.equals("startOverlap") || Type.equals("endOverlap")){
 			  						  LOF_ALLELES+=AlleleNumber+";"; 
 			  						  LOF_GENE+=Gene+";"; 
 			  						  LOF_TYPE+=Type+";";
 			  						  LOF_TRANSCRIPT+=Transcript+";";
+			  						  System.out.println(LOF_TYPE);
 			  					  }
 		  					  }
 		  					  String [] LOF_ALLELES_FIELDS = LOF_ALLELES.split(";");

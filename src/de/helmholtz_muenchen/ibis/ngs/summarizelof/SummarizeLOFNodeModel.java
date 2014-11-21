@@ -62,6 +62,7 @@ public class SummarizeLOFNodeModel extends NodeModel {
     	String VCF_INFILE;
     	String PED_FILE;
     	
+    	System.out.println(optionalPort);
     	if(optionalPort){	//Input Table available
     		//Get File via Table
     		VCF_INFILE = inData[0].iterator().next().getCell(0).toString();
@@ -69,7 +70,7 @@ public class SummarizeLOFNodeModel extends NodeModel {
     		//Get File via FileSelector
     		VCF_INFILE = m_vcfin.getStringValue();
     	}
-    	
+    	System.out.println("Infile: "+VCF_INFILE);
     	PED_FILE = m_pedfile.getStringValue();
     	
     	//Execute
