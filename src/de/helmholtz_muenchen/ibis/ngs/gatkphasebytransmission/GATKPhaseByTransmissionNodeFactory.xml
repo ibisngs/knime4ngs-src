@@ -3,25 +3,15 @@
     <name>GATKPhaseByTransmission</name>
     
     <shortDescription>
-        
+        Computes the most likely genotype combination and phases trios and parent/child pairs
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>PhaseByTransmission is a GATK tool that 1) computes the most likely genotype combination and phases trios and parent/child pairs given their genotype likelihoods and a mutation prior and 2) phases all sites were parent/child transmission can be inferred unambiguously. It reports the genotype combination (and hence phasing) probability.</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="De novo prior">Prior for de novo mutations</option>
+
     </fullDescription>
     
     <ports>

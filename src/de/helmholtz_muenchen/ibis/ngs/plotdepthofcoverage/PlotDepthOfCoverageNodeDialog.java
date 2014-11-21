@@ -29,9 +29,9 @@ public class PlotDepthOfCoverageNodeDialog extends DefaultNodeSettingsPane {
     protected PlotDepthOfCoverageNodeDialog() {
 
     	
-    	createNewGroup("Path to GATK jar file");
+    	createNewGroup("Path to Folder with Plot Data");
     	addDialogComponent(new DialogComponentFileChooser(m_infolder, "his_id_GATK_PlotDoC", 0,true,""));
-    	addDialogComponent(new DialogComponentString(m_filesuffix, "File Suffix of files to find...)"));
+    	addDialogComponent(new DialogComponentString(m_filesuffix, "File Suffix of files to find with Coverage Data)"));
     	
     	
     }

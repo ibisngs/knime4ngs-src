@@ -145,9 +145,6 @@ public class KGGSeqNodeModel extends NodeModel {
     	
     	Executor.executeCommand(createCommand(),exec,LOGGER,stdOut,stdErr);
     	
-    	System.out.println(stdErr);
-    	
-        // TODO: Return a BufferedDataTable for each output port 
         return inData;
     }
 
@@ -230,6 +227,8 @@ public class KGGSeqNodeModel extends NodeModel {
     	if(m_PUBMED.isActive()){
     		command.add("--pubmed-mining "+m_PUBMED.getStringValue());
     	}
+    	
+    	command.add("--no-resource-check");
     	
     	System.out.println(StringUtils.join(command, " "));
     	

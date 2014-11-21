@@ -39,22 +39,22 @@ public class GATKPhaseByTransmissionNodeDialog extends DefaultNodeSettingsPane {
     	
     	createNewGroup("Path to GATK jar file");
     	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(GATK, "gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
-    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
+//    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
     	addDialogComponent(gatkf);
     	
     	createNewGroup("GATK Infile");
     	DialogComponentFileChooser infile= new DialogComponentFileChooser(INFILE, "infile_variant_filter", JFileChooser.OPEN_DIALOG, false, ".vcf");
-    	gatkf.setBorderTitle("Choose File for filtering");
+//    	gatkf.setBorderTitle("Choose File for filtering");
     	addDialogComponent(infile);
     	
     	createNewGroup("Reference Genome");
     	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
-    	gatkf.setBorderTitle("Choose the reference genome");
+//    	gatkf.setBorderTitle("Choose the reference genome");
     	addDialogComponent(ref_genome);
     	
     	createNewGroup("PED File");
     	DialogComponentFileChooser ped_file= new DialogComponentFileChooser(PED_FILE, "ped_file", JFileChooser.OPEN_DIALOG, false, ".ped");
-    	gatkf.setBorderTitle("Choose the PED file)");
+//    	gatkf.setBorderTitle("Choose the PED file)");
     	addDialogComponent(ped_file);
     	
     	createNewGroup("");
