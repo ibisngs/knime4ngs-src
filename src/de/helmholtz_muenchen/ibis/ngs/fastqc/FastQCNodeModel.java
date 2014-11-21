@@ -66,17 +66,23 @@ public class FastQCNodeModel extends NodeModel {
     	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
+    	    	
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
         /**Create Output Specs**/
         String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
         String outFileSettings = outfile1;
-    	String readFile2Name = new File(readsFile2).getName();
-    	String outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
-
+    	
+    	String outfileMerged = outfile1;
+    	String readFile2Name;
+    	  	
+    	
     	/**If Paired-End data**/
     	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
+    		readFile2Name = new File(readsFile2).getName();
         	outFileSettings = outfileMerged; // override this path
+        	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
+
     	}
     	
     	File lockFile = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
@@ -84,6 +90,7 @@ public class FastQCNodeModel extends NodeModel {
     	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
 		LOGGER.info("Successful termination state: " + terminationState);
     	StringBuffer logBuffer = new StringBuffer(50);
+
     	
 		// do not execute if termination state is true
 		if(!terminationState) {
@@ -95,7 +102,7 @@ public class FastQCNodeModel extends NodeModel {
 	    	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
 	    	/**end initializing logfile**/
 	
-	
+	    	
 	    	/**Prepare Command**/
 	    	ArrayList<String> command = new ArrayList<String>();
 	    	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
@@ -115,13 +122,14 @@ public class FastQCNodeModel extends NodeModel {
 			path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
 	    	command.add(jarCall + readsFile1);
 	
+	    	
 	    	/**Execute for first file**/
 	    	String[] com = command.toArray(new String[command.size()]);
 	    	StringBuffer sysErr = new StringBuffer(50);
 	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr);
 	    	//Show FastQC Output
 	    	LOGGER.info(sysErr);
-	    	
+
 	    	/**If Paired-End data**/
 	    	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
 	    		//Replace readsFile1 with readsFile2 and execute again
