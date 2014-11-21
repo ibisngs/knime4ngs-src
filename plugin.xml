@@ -39,7 +39,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory"/>
+		<!-- <node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.denovocaller.DeNovoCallerNodeFactory"/> -->
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.limma.LimmaNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.limma.LimmaNodeFactory"/>
@@ -52,6 +52,9 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotdepthofcoverage.PlotDepthOfCoverageNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.vqsr.VQSRNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vqsr.VQSRNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.summarizelof.SummarizeLOFNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.summarizelof.SummarizeLOFNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkselectvariants.GATKSelectVariantsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkselectvariants.GATKSelectVariantsNodeFactory"/>
+
 
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>

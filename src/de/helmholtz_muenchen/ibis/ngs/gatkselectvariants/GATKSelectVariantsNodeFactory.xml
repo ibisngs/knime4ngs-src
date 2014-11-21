@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>GATKSelectVariants</name>
+    
+    <shortDescription>
+        Creates a SNP and Indel Subset of a given VCF File
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Creates a SNP and Indel Subset of a given VCF File using the GATK SelectVariants walker</intro>
+        
+        
+            <option name="Path to GATK jar file">
+            	Set the path to the GATK executable. 
+        	</option>
+        	
+        	<option name="Path to Reference Genome">
+            	Set the path to the Reference Genome. 
+        	</option>
+        	
+        	<option name="VCF Column">
+            	Select the column (of Output Table of the previous node) in which the VCF Input file is defined.. 
+        	</option>
+        	
+        	
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port">
+        Cell [1..x]: Path to VCF infile. Exact column can be selected by using the node parameters
+        <br />
+		</inPort>
+        <outPort index="0" name="SNPs">
+		        Cell [0]: Path to SNP VCF File
+        <br />
+        </outPort>
+       
+        <outPort index="1" name="INDELs">
+		        Cell [0]: Path to INDEL VCF File
+        <br />
+        </outPort>
+    </ports>    
+    <views>
+    <view index="0" name=""></view>
+    </views>
+</knimeNode>
