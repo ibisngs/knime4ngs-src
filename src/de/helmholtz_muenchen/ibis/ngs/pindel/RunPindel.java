@@ -73,6 +73,11 @@ public class RunPindel {
 		}
 		PindelNodeModel.logger.info("Mean insert size: "+mean_is);
 		
+		/**
+		 * Convert double to int to avoid wrong IDs in VCF File
+		 */
+		int mean = (int)Double.parseDouble(mean_is);
+		
 		String samplename=Paths.get(PathProcessor.getBase(bamfile)).getFileName().toString();
 		
 		/* format of config file
@@ -83,7 +88,7 @@ public class RunPindel {
 		Writer_Output wo = new Writer_Output(configfile);
 		wo.writeFile(bamfile);
 		wo.writeFile("\t");
-		wo.writeFile(mean_is);
+		wo.writeFile(mean+"");
 		wo.writeFile("\t");
 		wo.writeFile(samplename);	
 		
