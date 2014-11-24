@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
@@ -22,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of GATKPhaseByTransmission.
@@ -96,6 +98,8 @@ public class GATKPhaseByTransmissionNodeModel extends NodeModel {
     	command.add("-o "+OUTFILE);
     	
     	command.add("-ped "+m_PED_FILE.getStringValue());
+    	
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null);
     	
     	/**
     	 * OUTPUT
