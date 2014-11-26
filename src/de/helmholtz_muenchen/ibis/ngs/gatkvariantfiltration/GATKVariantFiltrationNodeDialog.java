@@ -25,7 +25,7 @@ public class GATKVariantFiltrationNodeDialog extends DefaultNodeSettingsPane {
 
 	
     private final SettingsModelString GATK = new SettingsModelString(GATKVariantFiltrationNodeModel.CFGKEY_GATK_PATH, "");
-    private final SettingsModelString INFILE = new SettingsModelString(GATKVariantFiltrationNodeModel.CFGKEY_INFILE, "");
+//    private final SettingsModelString INFILE = new SettingsModelString(GATKVariantFiltrationNodeModel.CFGKEY_INFILE, "");
     private final SettingsModelString REF_GENOME = new SettingsModelString(GATKVariantFiltrationNodeModel.CFGKEY_REF_GENOME, "");
     
 	private final SettingsModelOptionalString QUAL= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_QUAL, "< 50.0",true);
@@ -53,10 +53,10 @@ public class GATKVariantFiltrationNodeDialog extends DefaultNodeSettingsPane {
     	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
     	addDialogComponent(gatkf);
     	
-    	createNewGroup("GATK Infile");
-    	DialogComponentFileChooser infile= new DialogComponentFileChooser(INFILE, "infile_variant_filter", JFileChooser.OPEN_DIALOG, false, ".vcf");
-    	gatkf.setBorderTitle("Choose File for filtering");
-    	addDialogComponent(infile);
+//    	createNewGroup("GATK Infile");
+//    	DialogComponentFileChooser infile= new DialogComponentFileChooser(INFILE, "infile_variant_filter", JFileChooser.OPEN_DIALOG, false, ".vcf");
+//    	gatkf.setBorderTitle("Choose File for filtering");
+//    	addDialogComponent(infile);
     	
     	createNewGroup("Reference Genome");
     	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");

@@ -41,7 +41,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
 	 * Config Keys
 	 */
 	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
-	public static final String CFGKEY_INFILE = "INFILE";
+//	public static final String CFGKEY_INFILE = "INFILE";
 	public static final String CFGKEY_REF_GENOME = "REFGENOME";
 	public static final String CFGKEY_QUAL = "Quality score";
 	public static final String CFGKEY_DP = "depth of reads ";
@@ -61,7 +61,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
 	 */
 	
     private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
-    private final SettingsModelString m_INFILE = new SettingsModelString(CFGKEY_INFILE, "");
+//    private final SettingsModelString m_INFILE = new SettingsModelString(CFGKEY_INFILE, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     
 	private final SettingsModelOptionalString m_QUAL= new SettingsModelOptionalString(CFGKEY_QUAL, "<50.0",true);
@@ -112,6 +112,19 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	/**
+    	 * Check INFILE
+    	 */
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		if(!INFILE.endsWith(".vcf")){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
+    	}
+    	
     	
     	/**
     	 * String that holds the complete filter options
@@ -126,9 +139,9 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	command.add("-T VariantFiltration");
     	
     	command.add("-R "+m_REF_GENOME.getStringValue());
-    	command.add("-V "+m_INFILE.getStringValue());
+    	command.add("-V "+INFILE);
     	
-    	String OUTFILE = m_INFILE.getStringValue().replaceAll(".vcf", "_GATKfiltered.vcf");
+    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATKfiltered.vcf");
     	command.add("-o "+OUTFILE);
     	command.add("--filterExpression");
   
@@ -211,8 +224,9 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-        // TODO: generated method stub
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -221,7 +235,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	 m_GATK.saveSettingsTo(settings);
-    	 m_INFILE.saveSettingsTo(settings);
+//    	 m_INFILE.saveSettingsTo(settings);
     	 m_REF_GENOME.saveSettingsTo(settings);
          m_AD.saveSettingsTo(settings);
          m_DP.saveSettingsTo(settings);
@@ -244,7 +258,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	m_GATK.loadSettingsFrom(settings);
-   	 	m_INFILE.loadSettingsFrom(settings);
+//   	 	m_INFILE.loadSettingsFrom(settings);
    	 	m_REF_GENOME.loadSettingsFrom(settings);
     	m_AD.loadSettingsFrom(settings);
         m_DP.loadSettingsFrom(settings);
@@ -267,7 +281,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	m_GATK.validateSettings(settings);
-    	m_INFILE.validateSettings(settings);
+//    	m_INFILE.validateSettings(settings);
     	m_REF_GENOME.validateSettings(settings);
     	m_AD.validateSettings(settings);
         m_DP.validateSettings(settings);

@@ -5,7 +5,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -19,6 +23,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
@@ -91,6 +98,9 @@ public class VQSRNodeModel extends NodeModel {
 
     private final SettingsModelDoubleBounded m_TS_FILTER = new SettingsModelDoubleBounded(VQSRNodeModel.CFGKEY_TS_FILTER,99.9,1,100);
 
+	//The Output Col Names
+	public static final String OUT_COL1 = "VQSR VARIANTS";
+    
     /**
      * Constructor for the node model.
      */
@@ -123,13 +133,46 @@ public class VQSRNodeModel extends NodeModel {
     		PATH2REFSEQ = inData[0].iterator().next().getCell(REFSEQ_INDEX).toString();
     	}
     	
-    	String INFILE = inData[0].iterator().next().getCell(0).toString();
+    	//Check Infile
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		if(!INFILE.endsWith(".vcf")){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
+    	}
     	
+    	String outFile;
+    	if(INFILE.endsWith(".vcf")){
+    		outFile = INFILE.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.vcf");
+    	}else{
+    		outFile = INFILE+"_"+m_MODE.getStringValue()+"_VQSR.vcf";
+    	}
+    	
+    	
+    	//Execute
     	Executor.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
     	Executor.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
     	
-        // TODO: Return a BufferedDataTable for each output port 
-        return inData;
+    	
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(outFile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -239,7 +282,7 @@ public class VQSRNodeModel extends NodeModel {
     	}else{
     		recalFile = infile+"_VQSR.recal";
     		tranchesFile = infile+"_VQSR.tranches";
-    		outFile = infile+"_VQSR.vcf";
+    		outFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.vcf";
     	}
     	
     	command.add("java -jar");
@@ -276,6 +319,7 @@ public class VQSRNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	
     	if(inSpecs[0].containsName("Path2GATKFile")){
     		m_GATK.setEnabled(false);
     		m_GATK.setStringValue("GATK Path already set");
@@ -292,9 +336,10 @@ public class VQSRNodeModel extends NodeModel {
     		System.out.println("No path to Reference Sequence found in inData. User input required.");
     	}
     	
-    	
-        // TODO: generated method stub
-        return new DataTableSpec[]{null};
+
+    	return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
     /**
