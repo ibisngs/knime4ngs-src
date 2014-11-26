@@ -40,6 +40,9 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
  */
 public class FastqSplitterNodeModel extends SettingsStorageNodeModel {
 	
+	// TODO: add node description
+	// TODO: fix bug with reloading and not "remembering" ranges correctly!
+	
 	// keys for SettingsModels
     protected static final String CFGKEY_MIN_LENGTH = "SplitterMinLength";
     protected static final String CFGKEY_MAX_LENGTH = "SplitterMaxLength";
