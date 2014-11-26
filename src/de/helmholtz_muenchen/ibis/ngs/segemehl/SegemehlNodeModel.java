@@ -34,8 +34,9 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * 
  */
 public class SegemehlNodeModel extends NodeModel {
-    
+	
 	public static final String CFGKEY_SEGEMEHLFILE = "segemehlfile";
+	public static final String CFGKEY_ACCURACY= "segemehAccuracy";
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
 	public static final String CFGKEY_READTYPE = "readtype";
 	public static final String CFGKEY_THREADS = "threads";
@@ -68,6 +69,7 @@ public class SegemehlNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_checkSplitReadMapping = new SettingsModelBoolean(CFGKEY_CHECKSPLITREADMAPPING, false);
 	private final SettingsModelBoolean m_checkBisulfiteMapping = new SettingsModelBoolean(CFGKEY_CHECKSBISULFITEMAPPING, false);
 	private final SettingsModelString m_bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"");
+	private final SettingsModelIntegerBounded m_accuracy = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_ACCURACY, 90, 0, 100);
 
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
@@ -131,7 +133,7 @@ public class SegemehlNodeModel extends NodeModel {
     	String outName = basePath+outBaseName+"_map.sam";
     	String outNameUnmatchedReads = path2refSeq.substring(0,path2refSeq.lastIndexOf("/")+1)+"unmatchedReads.f";
     	int nrOfThreads = m_threads.getIntValue();
-    	
+    	int accuracy = m_accuracy.getIntValue();
     	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
     		readType = readTypePrevious;
     	}
@@ -198,7 +200,8 @@ public class SegemehlNodeModel extends NodeModel {
     			command.add("-F 4");
     		}
     	}
-    	
+
+    	command.add("-A "+accuracy);
     	command.add("-t "+nrOfThreads);
     	command.add("-i "+path2indexedRefSeq);
     	command.add("-d "+path2refSeq);

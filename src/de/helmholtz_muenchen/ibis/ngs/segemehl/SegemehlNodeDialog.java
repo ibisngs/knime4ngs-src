@@ -45,6 +45,8 @@ public class SegemehlNodeDialog extends DefaultNodeSettingsPane {
     	final SettingsModelString bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"methylC-seq/Lister et al.");
     	final SettingsModelString refseq = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,null);
     	final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CHECKINDEX, true);
+    	final SettingsModelIntegerBounded accuracy = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_ACCURACY, 90, 0, 100);
+
     	autoadapter3seq.setEnabled(false);
     	adapter3seq.setEnabled(false);
     	adapter5seq.setEnabled(false);
@@ -82,6 +84,8 @@ public class SegemehlNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentBoolean(clippolya, "Automatically clip polyA tails"));
     	addDialogComponent(new DialogComponentNumber(clippingaccuracy, "Clipping accuracy [%]:", 1));
     	addDialogComponent(new DialogComponentStringSelection(softhardclipping,"Type of clipping:","Soft (Default)","Hard"));
+    	createNewGroup("Alignment parameters");
+    	addDialogComponent(new DialogComponentNumber(accuracy, "Alignment accuracy [%]:", 1));
 
     	
     	clip5adapter.addChangeListener(new ChangeListener() {
