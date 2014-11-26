@@ -68,21 +68,21 @@ public class VQSRNodeModel extends NodeModel {
     
     private final SettingsModelString m_GATK = new SettingsModelString(VQSRNodeModel.CFGKEY_GATK, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(VQSRNodeModel.CFGKEY_REF_GENOME, "");
-    private final SettingsModelString m_INFILE = new SettingsModelString(VQSRNodeModel.CFGKEY_INFILE, "");
+//    private final SettingsModelString m_INFILE = new SettingsModelString(VQSRNodeModel.CFGKEY_INFILE, "");
     private final SettingsModelString m_MODE = new SettingsModelString(VQSRNodeModel.CFGKEY_MODE, "SNP");
     private final SettingsModelString m_TRANCHE = new SettingsModelString(VQSRNodeModel.CFGKEY_TRANCHE, "-tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0");
     private final SettingsModelString m_AN = new SettingsModelString(VQSRNodeModel.CFGKEY_AN, "-an DP -an QD -an FS -an MQRankSum -an ReadPosRankSum");
     private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_NT,1,1,Integer.MAX_VALUE);
 
-    private final SettingsModelString m_RESOURCES_STRING_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_1, "Type,known=,training=,truth=,prior=");
-    private final SettingsModelString m_RESOURCES_STRING_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_2, "Type,known=,training=,truth=,prior=");
-    private final SettingsModelString m_RESOURCES_STRING_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_3, "Type,known=,training=,truth=,prior=");
-    private final SettingsModelString m_RESOURCES_STRING_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_4, "Type,known=,training=,truth=,prior=");
+    private final SettingsModelString m_RESOURCES_STRING_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_1, "hapmap,known=false,training=true,truth=true,prior=15.0");
+    private final SettingsModelString m_RESOURCES_STRING_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_2, "omni,known=false,training=true,truth=true,prior=12.0");
+    private final SettingsModelString m_RESOURCES_STRING_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_3, "1000G,known=false,training=true,truth=false,prior=10.0");
+    private final SettingsModelString m_RESOURCES_STRING_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_4, "dbsnp,known=true,training=false,truth=false,prior=2.0");
     
-    private final SettingsModelString m_RESOURCES_FILE_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_1, "");
-    private final SettingsModelString m_RESOURCES_FILE_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_2, "");
-    private final SettingsModelString m_RESOURCES_FILE_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_3, "");
-    private final SettingsModelString m_RESOURCES_FILE_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_4, "");
+    private final SettingsModelString m_RESOURCES_FILE_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_1, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/hapmap_3.3.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_2, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_omni2.5.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_3, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_phase1.snps.high_confidence.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_4, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/dbsnp_138.hg19.vcf");
     
     private final SettingsModelBoolean m_RESOURCES_BOOLEAN_1 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_1, true);
     private final SettingsModelBoolean m_RESOURCES_BOOLEAN_2 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_2, true);
@@ -123,9 +123,10 @@ public class VQSRNodeModel extends NodeModel {
     		PATH2REFSEQ = inData[0].iterator().next().getCell(REFSEQ_INDEX).toString();
     	}
     	
+    	String INFILE = inData[0].iterator().next().getCell(0).toString();
     	
-    	Executor.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ),exec,LOGGER,stdOut,stdErr);
-    	Executor.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ),exec,LOGGER,stdOut,stdErr);
+    	Executor.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
+    	Executor.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
     	
         // TODO: Return a BufferedDataTable for each output port 
         return inData;
@@ -135,7 +136,7 @@ public class VQSRNodeModel extends NodeModel {
      *Creates Recalibration Command
      * @return
      */
-    private String[] createRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ){
+    private String[] createRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ, String INFILE){
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
@@ -154,7 +155,10 @@ public class VQSRNodeModel extends NodeModel {
     	}
     	
     	//Process Infile Name to obtain output file names
-    	String infile 		= m_INFILE.getStringValue();
+//    	String infile 		= m_INFILE.getStringValue();
+    	String infile		= INFILE;
+    	
+    	
     	String recalFile 	= "";
     	String tranchesFile	= "";
     	String plotFile		= "";
@@ -172,7 +176,7 @@ public class VQSRNodeModel extends NodeModel {
     	command.add(GATK);
     	command.add("-T VariantRecalibrator");
     	command.add("-R "+REFSEQ);
-    	command.add("-input "+m_INFILE.getStringValue());
+    	command.add("-input "+infile);
     	
     	//Add resources
     	if(m_RESOURCES_BOOLEAN_1.getBooleanValue()){
@@ -206,7 +210,7 @@ public class VQSRNodeModel extends NodeModel {
      *Creates Recalibration Command
      * @return
      */
-    private String[] applyRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ){
+    private String[] applyRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ,String INFILE){
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
@@ -224,7 +228,7 @@ public class VQSRNodeModel extends NodeModel {
     	}
     	
     	//Process Infile Name to obtain output file names
-    	String infile 		= m_INFILE.getStringValue();
+    	String infile 		= INFILE;
     	String recalFile 	= "";
     	String tranchesFile	= "";
     	String outFile		= "";
@@ -242,7 +246,7 @@ public class VQSRNodeModel extends NodeModel {
     	command.add(GATK);
     	command.add("-T ApplyRecalibration");
     	command.add("-R "+REFSEQ);
-    	command.add("-input "+m_INFILE.getStringValue()); 	
+    	command.add("-input "+infile); 	
        	command.add("-mode "+m_MODE.getStringValue());
     	
     	command.add("-recalFile "+recalFile);
@@ -300,7 +304,7 @@ public class VQSRNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
          m_AN.saveSettingsTo(settings);
          m_GATK.saveSettingsTo(settings);
-         m_INFILE.saveSettingsTo(settings);
+//         m_INFILE.saveSettingsTo(settings);
          m_MODE.saveSettingsTo(settings);
          m_NT.saveSettingsTo(settings);
          m_REF_GENOME.saveSettingsTo(settings);
@@ -330,7 +334,7 @@ public class VQSRNodeModel extends NodeModel {
             throws InvalidSettingsException {
         m_AN.loadSettingsFrom(settings);
         m_GATK.loadSettingsFrom(settings);
-        m_INFILE.loadSettingsFrom(settings);
+//        m_INFILE.loadSettingsFrom(settings);
         m_MODE.loadSettingsFrom(settings);
         m_NT.loadSettingsFrom(settings);
         m_REF_GENOME.loadSettingsFrom(settings);
@@ -359,7 +363,7 @@ public class VQSRNodeModel extends NodeModel {
             throws InvalidSettingsException {
         m_AN.validateSettings(settings);
         m_GATK.validateSettings(settings);
-        m_INFILE.validateSettings(settings);
+//        m_INFILE.validateSettings(settings);
         m_MODE.validateSettings(settings);
         m_NT.validateSettings(settings);
         m_REF_GENOME.validateSettings(settings);
