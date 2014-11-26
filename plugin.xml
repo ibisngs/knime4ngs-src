@@ -35,6 +35,7 @@
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.star.StarNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqSplitter.FastqSplitterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqSplitter.FastqSplitterNodeFactory"/>
 		
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
@@ -91,7 +92,6 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
-
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
