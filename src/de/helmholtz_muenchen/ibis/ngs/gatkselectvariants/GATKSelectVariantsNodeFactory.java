@@ -18,7 +18,7 @@ public class GATKSelectVariantsNodeFactory
      */
     @Override
     public GATKSelectVariantsNodeModel createNodeModel() {
-        return new GATKSelectVariantsNodeModel();
+        return new GATKSelectVariantsNodeModel(1,1);
     }
 
     /**

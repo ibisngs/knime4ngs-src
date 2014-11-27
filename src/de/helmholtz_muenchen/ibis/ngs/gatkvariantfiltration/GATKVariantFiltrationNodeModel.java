@@ -141,7 +141,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	command.add("-R "+m_REF_GENOME.getStringValue());
     	command.add("-V "+INFILE);
     	
-    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATKfiltered.vcf");
+    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATK.vcf");
     	command.add("-o "+OUTFILE);
     	command.add("--filterExpression");
   
@@ -173,6 +173,27 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	System.out.println(StringUtils.join(command, " "));
      	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
     	
+     	
+     	/**
+     	 * Remove filtered variants
+     	 */
+    	command = new ArrayList<String>();
+    	
+    	command.add("java");
+    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
+    	command.add("-T SelectVariants");
+    	
+    	command.add("-R "+m_REF_GENOME.getStringValue());
+    	command.add("-V "+OUTFILE);
+    	
+    	String OUTFILE_FILTERED = OUTFILE.replaceAll(".vcf", "filtered.vcf");
+    	command.add("-o "+OUTFILE_FILTERED);
+    	command.add("-ef");
+     	
+    	System.out.println(StringUtils.join(command, " "));
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	
+     	
     	/**
     	 * OUTPUT
     	 */
@@ -182,7 +203,7 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(OUTFILE)};
+    			(FileCell) FileCellFactory.create(OUTFILE_FILTERED)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
