@@ -129,7 +129,8 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	/**
     	 * String that holds the complete filter options
     	 */
-    	StringBuffer filterString = new StringBuffer();
+    	StringBuffer filterStringINFOFIELD = new StringBuffer();
+    	StringBuffer filterStringFORMATFIELD = new StringBuffer();
     	
     	
     	ArrayList<String> command = new ArrayList<String>();
@@ -143,32 +144,56 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	
     	String OUTFILE = INFILE.replaceAll(".vcf", "_GATK.vcf");
     	command.add("-o "+OUTFILE);
-    	command.add("--filterExpression");
+    	
   
     	/**
-    	 * Create Filter String
+    	 * Create Filter String for INFO Field
     	 */
-    	filterString = addToFilterString(m_QUAL,"QUAL",filterString);
-    	filterString = addToFilterString(m_DP,"DP",filterString);
-    	filterString = addToFilterString(m_AD,"AD",filterString);
-    	filterString = addToFilterString(m_QD,"QD",filterString);
-    	filterString = addToFilterString(m_FS,"FS",filterString);
-    	filterString = addToFilterString(m_MQ,"MQ",filterString);
-    	filterString = addToFilterString(m_HS,"HaplotypeScore",filterString);
-    	filterString = addToFilterString(m_MQR,"MappingQualityRankSum",filterString);
-    	filterString = addToFilterString(m_RPR,"ReadPosRankSum",filterString);
-    	filterString = addToFilterString(m_FilterString,"FilterString",filterString);
-
+    	filterStringINFOFIELD = addToFilterString(m_QUAL,"QUAL",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_AD,"AD",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_QD,"QD",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_FS,"FS",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_MQ,"MQ",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_HS,"HaplotypeScore",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_MQR,"MappingQualityRankSum",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_RPR,"ReadPosRankSum",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_FilterString,"FilterString",filterStringINFOFIELD);
+		if(filterStringINFOFIELD.length()!=0){
+			command.add("--filterExpression");
+			command.add(filterStringINFOFIELD.toString());
+		}
     	
-    	command.add(filterString.toString());
+		/**
+		 * Create Filter String for FORMAT Field
+		 */
+		filterStringFORMATFIELD = addToFilterString(m_DP,"DP",filterStringFORMATFIELD);
+		if(filterStringFORMATFIELD.length()!=0){
+			command.add("--genotypeFilterExpression");    	
+    		command.add(filterStringFORMATFIELD.toString());
+    	}
+    	
     	
     	
     	if(m_FilterName.isActive()){
-    		command.add("--filterName");
-    		command.add(m_FilterName.getStringValue());
+    		if(filterStringINFOFIELD.length()!=0){
+        		command.add("--filterName");
+        		command.add(m_FilterName.getStringValue());
+    		}
+    		if(filterStringFORMATFIELD.length()!=0){
+    			command.add("--genotypeFilterName");
+        		command.add(m_FilterName.getStringValue());
+    		}
+    		
     	}else{
-    		command.add("--filterName");
-    		command.add("GATKVariantFiltration");
+    		if(filterStringINFOFIELD.length()!=0){
+        		command.add("--filterName");
+        		command.add("GATKVariantFiltration");
+    		}
+    		if(filterStringFORMATFIELD.length()!=0){
+        		command.add("--genotypeFilterName");
+        		command.add("GATKVariantFiltration");
+    		}
+
     	}
     	System.out.println(StringUtils.join(command, " "));
      	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
