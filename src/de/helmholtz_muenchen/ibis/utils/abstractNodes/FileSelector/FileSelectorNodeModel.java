@@ -18,6 +18,7 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
@@ -29,7 +30,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
  * @author Michael Kluge
  */
 public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
-        
+	   
     // keys for SettingsModels
     protected static final String CFGKEY_FILE_LIST 			= "FileList";
     protected static final String CFGKEY_FILE_DIR 			= "FileDir";
@@ -151,6 +152,13 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
 			}
         }
     }
+    
+    @Override
+	protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	super.saveSettingsTo(settings);
+ 
+    	settings.addStringArray(FileSelectorNodeModel.CFGKEY_FILE_LIST, FILES.toArray(new String[FILES.size()]));
+	}
 
 	@Override
 	protected void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {

@@ -148,7 +148,7 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
         	try {
         		// add the values
 				for(String s : settings.getStringArray(FileSelectorNodeModel.CFGKEY_FILE_LIST))
-					this.FILE_FILES.add(s);
+					this.addFile(s);
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());
 			}
@@ -218,11 +218,9 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
     	FILE_FILES.add(filename);
     	// update the list
     	DC_FILE_DISPLAY.replaceListItems(FILE_FILES, new String[0]);
-    	DC_FILE_DISPLAY.setVisibleRowCount(FILE_FILES.size());
     	
     	// ensure that button is enabled
 		//DC_FILE_REMOVE_BUTTON.getModel().setEnabled(true);
-		DC_FILE_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
     }
     
     /**
@@ -243,9 +241,6 @@ public abstract class FileSelectorNodeDialog extends DefaultNodeSettingsPane {
 		}
 		else
 			DC_FILE_DISPLAY.replaceListItems(FILE_FILES, (String[]) null);
-		
-		// reset the number of rows which are displayed
-		DC_FILE_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
 	}
 	
     /**
