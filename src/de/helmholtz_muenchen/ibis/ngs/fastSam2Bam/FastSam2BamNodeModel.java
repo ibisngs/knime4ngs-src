@@ -135,7 +135,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 			// create worker pool
 			ExecutorService pool = Executors.newFixedThreadPool(cores);			
     		String inputFile = it.next().getCell(0).toString();
-        	nameOfBamFile = inputFile + ".sorted.bam";
+        	nameOfBamFile = SET_OUTPUT_PATH.getStringValue() + File.separator + new File(inputFile).getName() + ".sorted.bam";
         	nameOfBaiFile = nameOfBamFile.replaceFirst(".bam$", ".bai");
         	
     		// check if input file is there
