@@ -28,6 +28,7 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 
 /**
  * This is the model implementation of Segemehl.
@@ -101,7 +102,6 @@ public class SegemehlNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
@@ -207,12 +207,28 @@ public class SegemehlNodeModel extends NodeModel {
     	command.add("-d "+path2refSeq);
     	command.add("-q "+path2reads1);
     	command.add("-o "+outName);
-    	command.add("-u " + outNameUnmatchedReads);
+    	command.add("-u "+outNameUnmatchedReads);
     	
      	/**
      	 * Execute
      	 */
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	String joinedCommand = StringUtils.join(command, " ");
+    	File lockFile = new File(outName + ".klock");
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, joinedCommand);
+    	
+    	// do not execute if termination state is true
+		if(!terminationState) {
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, joinedCommand);
+			
+			// execute the command
+			Executor.executeCommand(new String[]{joinedCommand},exec,LOGGER);
+			checker.writeOK();
+		}
+		else {
+			LOGGER.info("Successful termination state: " + terminationState);
+			logBuffer.append("Successful termination state was found.");
+		}
+
      	logBuffer.append(ShowOutput.getNodeEndTime());
      	ShowOutput.writeLogFile(logBuffer);
      	command = new ArrayList<String>();	//Clear Array
@@ -241,7 +257,7 @@ public class SegemehlNodeModel extends NodeModel {
     	
         return new BufferedDataTable[]{outTable};
     }
-
+	
     /**
      * {@inheritDoc}
      */
