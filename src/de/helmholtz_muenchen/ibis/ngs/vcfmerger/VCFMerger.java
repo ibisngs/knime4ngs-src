@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.vcfmerger;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
@@ -13,6 +12,7 @@ import org.knime.core.node.NodeLogger;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
+
 public class VCFMerger {
 
 	
@@ -20,37 +20,11 @@ public class VCFMerger {
 		public static String mergeVCFs(String GATK,String RefGenome, String Infolder, String Outfolder, String Regex,String GenotypeMergeOption,final ExecutionContext exec, NodeLogger logger){
 			
 			LinkedList<String> Files2Merge = new LinkedList<String>();
-			search(Infolder,Regex,Files2Merge,exec,logger);
+			de.helmholtz_muenchen.ibis.utils.ngs.FileSearch.searchWithV(Infolder,Regex,Files2Merge);
 			String OUTFILE = merge_vcfs(GATK,RefGenome, Files2Merge,Outfolder,GenotypeMergeOption,exec,logger);
-			
 			return OUTFILE;
 		}
-	
-	
 		
-		/**
-		 * Finds all Files in a given Directory that end with regex
-		 * @param dataDirectory
-		 * @param regex
-		 * @param Files2Merge
-		 * @param logger 
-		 */
-		private static void search(String dataDirectory, String regex, LinkedList<String> Files2Merge,final ExecutionContext exec, NodeLogger logger){
-			File root = new File( dataDirectory );
-		    File[] list = root.listFiles();
-		        for ( File f : list ) {
-		            if ( f.isDirectory() ) {
-		            	search( f.getAbsolutePath() , regex, Files2Merge,exec,logger);
-		            }else {
-		            	String filePath = f.getAbsolutePath();
-		            	if(filePath.endsWith(regex)){			//Add if file ends with specified regex
-		            		Files2Merge.add("-V "+filePath);//, new String[]{filePath,"0",null,null,"-1","0"}); 
-		            	}
-		            }
-		        } 
-		}
-		
-	
 		
 		/**
 		 * Executes vcf-merge 

@@ -93,6 +93,7 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
