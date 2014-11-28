@@ -3,35 +3,33 @@
     <name>VCFMerger</name>
     
     <shortDescription>
-        
+        Combines VCF records from different sources.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>Combines VCF records from different sources.</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Folder in which the search is performed">Folder in which input files are searched using the suffix and merged into a single vcf</option>
+        <option name="Outfolder">Location were the Output is stored</option>
+        <option name="File Suffix">Suffix that is used to detect input files</option>
+        <option name="GenotypeMergeOption">
+<b>UNIQUIFY:</b>
+    Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.
+    <br />
+<b>UNSORTED:</b>
+    Take the genotypes in any order.
+    <br />
+<b>REQUIRE_UNIQUE:</b>
+    Require that all samples/genotypes be unique between all inputs. </option>
+
+
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="In-Port name"></inPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

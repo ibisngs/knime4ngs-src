@@ -52,6 +52,23 @@ public class Executor {
 		Executor.executeCommand(command, exec, null, logger, stdOutFile, null, null, null, null);
 	}
 
+	/**
+	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
+	 * cancel the command if it is requested by the user via the given ExecutionContext
+	 * STDERR is omitted in this case
+	 * @param command String array contains the program/path to the script in the first entry and all commandline parameters in the following entries
+	 * @param exec ExecutionContext
+	 * @param logger a NodeLogger to write messages to
+	 * @param stdOutFile path to file to write STDOUT to, omitted if null
+	 * @throws CanceledExecutionException
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws UnsuccessfulExecutionException
+	 */
+	public static void executeCommand(String[] command, ExecutionContext exec,String[] environment, NodeLogger logger, String stdOutFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, null, null, null, null);
+	}
+	
 
 	/**
 	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
@@ -70,6 +87,8 @@ public class Executor {
 	public static void executeCommand(String[] command, ExecutionContext exec, NodeLogger logger, StringBuffer stdOut, StringBuffer stdErr) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
 		Executor.executeCommand(command, exec, null, logger, null, null, stdOut, stdErr, null);
 	}
+	
+	
 	
 	/**
 	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
@@ -109,6 +128,26 @@ public class Executor {
 	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
 		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, stdOut, stdErr, null);
 	}
+	
+	/**
+	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
+	 * cancel the command if it is requested by the user via the given ExecutionContext
+	 * STDOUT and STDERR are written to files
+	 * STDIN is read from file
+	 * @param command String array contains the program/path to the script in the first entry and all commandline parameters in the following entries
+	 * @param exec ExecutionContext
+	 * @param logger a NodeLogger to write messages to
+	 * @param stdOutFile  File to write STDOUT to, omitted if null
+	 * @param stdErrFile  File to write STDERR to, omitted if null
+	 * @throws CanceledExecutionException 
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * @throws UnsuccessfulExecutionException 
+	 */
+	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, null);
+	}
+	
 	
 	/**
 	 * Execute a command in new thread, redirect its STDOUT and STDERR and 
