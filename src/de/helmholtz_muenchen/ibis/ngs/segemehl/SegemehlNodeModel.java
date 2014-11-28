@@ -333,6 +333,7 @@ public class SegemehlNodeModel extends NodeModel {
     	m_checkSplitReadMapping.saveSettingsTo(settings);
     	m_checkBisulfiteMapping.saveSettingsTo(settings);
     	m_bisulfiteMappingType.saveSettingsTo(settings);
+    	m_accuracy.saveSettingsTo(settings);
     }
 
     /**
@@ -357,6 +358,7 @@ public class SegemehlNodeModel extends NodeModel {
     	m_checkSplitReadMapping.loadSettingsFrom(settings);
     	m_checkBisulfiteMapping.loadSettingsFrom(settings);
     	m_bisulfiteMappingType.loadSettingsFrom(settings);
+    	m_accuracy.loadSettingsFrom(settings);
     }
 
     /**
@@ -381,6 +383,7 @@ public class SegemehlNodeModel extends NodeModel {
     	m_checkSplitReadMapping.validateSettings(settings);
     	m_checkBisulfiteMapping.validateSettings(settings);
     	m_bisulfiteMappingType.validateSettings(settings);
+    	m_accuracy.validateSettings(settings);
     }
     
     /**
