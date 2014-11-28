@@ -138,12 +138,15 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
         	nameOfBamFile = SET_OUTPUT_PATH.getStringValue() + File.separator + new File(inputFile).getName() + ".sorted.bam";
         	nameOfBaiFile = nameOfBamFile.replaceFirst(".bam$", ".bai");
         	
+        	
+        	
     		// check if input file is there
     		if(!new File(inputFile).exists()) 
     			throw new FileNotFoundException("Input BAM File '" + inputFile + "' not found.");
     		
     		// check, if bam file is already there
     		if(!(new File(nameOfBamFile).exists() && new File(nameOfBaiFile).exists())) {
+    			new File(SET_OUTPUT_PATH.getStringValue()).mkdirs();
 	    		// run SamSplitter
     			FileHelpers.noExitRule = true; 	// do not call System.exit()!
     			SamSplitter.noExit = true; 		// do not call System.exit()!
