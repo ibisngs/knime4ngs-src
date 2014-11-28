@@ -25,6 +25,7 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.util.Pair;
@@ -41,7 +42,6 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 public class FastqSplitterNodeModel extends SettingsStorageNodeModel {
 	
 	// TODO: add node description
-	// TODO: fix bug with reloading and not "remembering" ranges correctly!
 	
 	// keys for SettingsModels
     protected static final String CFGKEY_MIN_LENGTH = "SplitterMinLength";
@@ -267,7 +267,6 @@ public class FastqSplitterNodeModel extends SettingsStorageNodeModel {
         		String[] names = settings.getStringArray(FastqSplitterNodeModel.CFGKEY_RANGES_NAMES);
         		int[] min = settings.getIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MIN);
         		int[] max = settings.getIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MAX);
-        		
         		// add the values
 				for(int i = 0; i < names.length; i++)
 					this.RANGES.put(names[i], new Pair<Integer, Integer>(min[i], max[i]));
@@ -276,6 +275,28 @@ public class FastqSplitterNodeModel extends SettingsStorageNodeModel {
 			}
         }
     }
+    
+    @Override
+	protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	super.saveSettingsTo(settings);
+
+    	ArrayList<String> n = new ArrayList<String>();
+    	int min[] = new int[this.RANGES.size()];
+    	int max[] = new int[this.RANGES.size()];
+
+    	int i = 0;
+    	for(String name : this.RANGES.keySet()) {
+    		Pair<Integer, Integer> p = this.RANGES.get(name);
+    		n.add(name);
+    		min[i] = p.getFirst();
+    		max[i] = p.getSecond();
+    		i++;
+    	}
+    	// save the hash to the keys
+    	settings.addStringArray(FastqSplitterNodeModel.CFGKEY_RANGES_NAMES, n.toArray(new String[n.size()]));
+    	settings.addIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MIN, min);
+    	settings.addIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MAX, max);
+	}
 
 	@Override
 	protected void validateSettings(NodeSettingsRO settings) throws InvalidSettingsException {

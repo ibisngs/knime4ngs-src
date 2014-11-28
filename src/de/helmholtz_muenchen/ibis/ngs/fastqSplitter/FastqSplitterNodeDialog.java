@@ -59,7 +59,7 @@ public class FastqSplitterNodeDialog extends DefaultNodeSettingsPane {
 	// storage 
 	private final HashMap<String, Pair<Integer, Integer>> RANGES = new HashMap<String, Pair<Integer, Integer>>();
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(FastqSplitterNodeDialog.class);
-	 
+	
     /**
      * New pane for configuring the FastqSplitter node.
      */
@@ -119,26 +119,26 @@ public class FastqSplitterNodeDialog extends DefaultNodeSettingsPane {
         		String[] names = settings.getStringArray(FastqSplitterNodeModel.CFGKEY_RANGES_NAMES);
         		int[] min = settings.getIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MIN);
         		int[] max = settings.getIntArray(FastqSplitterNodeModel.CFGKEY_RANGES_MAX);
-        		
         		// add the values
-				for(int i = 0; i < names.length; i++)
-					this.RANGES.put(names[i], new Pair<Integer, Integer>(min[i], max[i]));
+				for(int i = 0; i < names.length; i++) {
+					this.addRange(names[i], min[i], max[i]);
+				}
 				
 				// update the list
 		    	this.DC_DISPLAY.replaceListItems(getNamesForList(), (String[]) null);
-		    	this.DC_DISPLAY.setVisibleRowCount(this.RANGES.size());
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());
 			}
         }
     }
 
+
     @Override
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
     	ArrayList<String> n = new ArrayList<String>();
     	int min[] = new int[this.RANGES.size()];
     	int max[] = new int[this.RANGES.size()];
-    	
+
     	int i = 0;
     	for(String name : this.RANGES.keySet()) {
     		Pair<Integer, Integer> p = this.RANGES.get(name);
@@ -173,12 +173,10 @@ public class FastqSplitterNodeDialog extends DefaultNodeSettingsPane {
     	this.RANGES.put(rangename, new Pair<Integer, Integer>(min, max));
     	// update the list
     	this.DC_DISPLAY.replaceListItems(getNamesForList(), (String[]) null);
-    	this.DC_DISPLAY.setVisibleRowCount(this.RANGES.size());
-    	
+
     	// ensure that button is enabled
     	//this.DC_REMOVE_BUTTON.getModel().setEnabled(true);
     	//this.DC_CLEAR_BUTTON.getModel().setEnabled(true);
-    	this.DC_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
     }
     
     /**
@@ -200,9 +198,6 @@ public class FastqSplitterNodeDialog extends DefaultNodeSettingsPane {
 		}
 		else
 			this.DC_DISPLAY.replaceListItems(this.getNamesForList(), (String[]) null);
-		
-		// reset the number of rows which are displayed
-		this.DC_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
 	}
 	
 	/**
@@ -217,7 +212,6 @@ public class FastqSplitterNodeDialog extends DefaultNodeSettingsPane {
 		empty.add(NO_SELECTION_MADE);
 		
 		this.DC_DISPLAY.replaceListItems(empty, NO_SELECTION_MADE);
-		this.DC_DISPLAY.setVisibleRowCount(VISIBLE_ITEMS);
 	}
 	
              

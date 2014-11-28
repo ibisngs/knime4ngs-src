@@ -17,7 +17,6 @@ public class FastqSplitterNodeView extends NodeView<FastqSplitterNodeModel> {
      */
     protected FastqSplitterNodeView(final FastqSplitterNodeModel nodeModel) {
         super(nodeModel);
-        // TODO: generated method stub
     }
 
     /**
@@ -25,7 +24,6 @@ public class FastqSplitterNodeView extends NodeView<FastqSplitterNodeModel> {
      */
     @Override
     protected void modelChanged() {
-        // TODO: generated method stub
     }
 
     /**
@@ -33,7 +31,6 @@ public class FastqSplitterNodeView extends NodeView<FastqSplitterNodeModel> {
      */
     @Override
     protected void onClose() {
-        // TODO: generated method stub
     }
 
     /**
@@ -41,7 +38,6 @@ public class FastqSplitterNodeView extends NodeView<FastqSplitterNodeModel> {
      */
     @Override
     protected void onOpen() {
-        // TODO: generated method stub
     }
 
 }
