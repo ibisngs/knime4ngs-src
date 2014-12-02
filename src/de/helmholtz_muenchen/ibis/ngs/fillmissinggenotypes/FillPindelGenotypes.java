@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.knime.core.node.InvalidSettingsException;
+
 /**
  * @author hastreiter
  * Fills missing GTs when merging single-calling Pindel results. Variants with DP<20 will be left as ./. 
@@ -22,8 +24,9 @@ public class FillPindelGenotypes {
  * @param PATH_DATA_DIR
  * @param SUFFIX
  * @throws IOException
+ * @throws InvalidSettingsException 
  */
-	protected static String fillGTs(String VCF_INFILE, String PATH_DATA_DIR, String SUFFIX) throws IOException{
+	protected static String fillGTs(String VCF_INFILE, String PATH_DATA_DIR, String SUFFIX) throws IOException, InvalidSettingsException{
 		
 		/**
 		 * Find Coverage Files
@@ -56,12 +59,19 @@ public class FillPindelGenotypes {
 	        
 	    	String line;
 	        while ((line = br.readLine()) != null) {
-	        	
+
 	        	line = line.replace(System.getProperty("line.separator"), "");
 	        	
 	        	if(line.startsWith("#")){ //Header Line
 	        		if(line.startsWith("#CHROM")){
 	        			Header = line.split("\t");
+	        		
+		        		//Check if all Coverage files are available
+		        		for(int i=9;i<Header.length;i++){
+		        			if(!FileReaders.containsKey(Header[i])){
+		        				throw new InvalidSettingsException("Sample ID "+Header[i]+" does not match any of the detected coverage files! Something seems to be wrong with the sample ids");
+		        			}
+		        		}
 	        		}
 	        		//Write header to new file#
 	        		writer.println(line);

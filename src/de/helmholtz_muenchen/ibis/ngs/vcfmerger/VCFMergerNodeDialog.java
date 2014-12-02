@@ -21,13 +21,13 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  */
 public class VCFMergerNodeDialog extends DefaultNodeSettingsPane {
 
-	  private final SettingsModelString INFOLDER = new SettingsModelString(VCFMergerNodeModel.CFGKEY_INFOLDER, "");
-	  private final SettingsModelString REGEX = new SettingsModelString(VCFMergerNodeModel.CFGKEY_REGEX, "");
-	  private final SettingsModelString OUTFOLDER = new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFOLDER, "");
-	  private final SettingsModelString GATK 		= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GATK, "");
-	  private final SettingsModelString REF_GENOME 	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_REF_GENOME, "");
-	  private final SettingsModelString m_GENOTYPEMERGEOPTION	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
-
+	  private final SettingsModelString INFOLDER 				= new SettingsModelString(VCFMergerNodeModel.CFGKEY_INFOLDER, "");
+	  private final SettingsModelString REGEX 					= new SettingsModelString(VCFMergerNodeModel.CFGKEY_REGEX, "");
+	  private final SettingsModelString OUTFOLDER 				= new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFOLDER, "");
+	  private final SettingsModelString GATK 					= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GATK, "");
+	  private final SettingsModelString REF_GENOME 				= new SettingsModelString(VCFMergerNodeModel.CFGKEY_REF_GENOME, "");
+	  private final SettingsModelString GENOTYPEMERGEOPTION	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
+	  private final SettingsModelString OUTFILETAG			= new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFILETAG, "");
 	
     /**
      * New pane for configuring the VCFMerger node.
@@ -52,7 +52,8 @@ public class VCFMergerNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "Outfolder", 0,true,""));
     	createNewGroup("");
     	addDialogComponent(new DialogComponentString(REGEX, "File Suffix of VCF Files to merge"));
-    	addDialogComponent(new DialogComponentStringSelection(m_GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
+    	addDialogComponent(new DialogComponentString(OUTFILETAG, "Outfile Tag of merged VCF File"));
+    	addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
     	
     }
 }

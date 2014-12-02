@@ -52,9 +52,6 @@ public class FillMissingGenotypesNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-
-//		String PATH_DATA_DIR = "/storageNGS/ngs1/projects/exome/schizo_Rouleau_SCZ/privateData";
-//		String FILE_SUFFIX = "filtered_aln_noDups_realigned_recal";	
     	
     	String INFILE  = inData[0].iterator().next().getCell(0).toString();
     	String OUTFILE = FillPindelGenotypes.fillGTs(INFILE, m_COVERAGEFOLDER.getStringValue(), m_FILESUFFIX.getStringValue());

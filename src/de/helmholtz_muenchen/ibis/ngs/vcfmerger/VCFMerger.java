@@ -17,11 +17,11 @@ public class VCFMerger {
 
 	
 		
-		public static String mergeVCFs(String GATK,String RefGenome, String Infolder, String Outfolder, String Regex,String GenotypeMergeOption,final ExecutionContext exec, NodeLogger logger){
+		public static String mergeVCFs(String GATK,String RefGenome, String Infolder, String Outfolder, String Regex,String GenotypeMergeOption,final ExecutionContext exec, NodeLogger logger, String OUTFILETAG){
 			
 			LinkedList<String> Files2Merge = new LinkedList<String>();
 			de.helmholtz_muenchen.ibis.utils.ngs.FileSearch.searchWithV(Infolder,Regex,Files2Merge);
-			String OUTFILE = merge_vcfs(GATK,RefGenome, Files2Merge,Outfolder,GenotypeMergeOption,exec,logger);
+			String OUTFILE = merge_vcfs(GATK,RefGenome, Files2Merge,Outfolder,GenotypeMergeOption,exec,logger,OUTFILETAG);
 			return OUTFILE;
 		}
 		
@@ -33,11 +33,11 @@ public class VCFMerger {
 		 * @param exec
 		 * @param logger
 		 */
-		private static String merge_vcfs(String GATK,String RefGenome, LinkedList<String> Files2Merge,String Outfolder,String GenotypeMergeOption, ExecutionContext exec, NodeLogger logger){
+		private static String merge_vcfs(String GATK,String RefGenome, LinkedList<String> Files2Merge,String Outfolder,String GenotypeMergeOption, ExecutionContext exec, NodeLogger logger,String OUTFILETAG){
 			ArrayList<String> command = new ArrayList<String>();
 
-			String OUTFILE = Outfolder+"/AllSamples.vcfmerger.vcf";
-			String ERRFILE = Outfolder+"/AllSamples.vcfmerger.vcf.err";
+			String OUTFILE = Outfolder+"/AllSamples_vcfmerger"+OUTFILETAG+".vcf";
+			String ERRFILE = Outfolder+"/AllSamples_vcfmerger"+OUTFILETAG+".vcf.err";
 			
 			command.add("java");
 	    	command.add("-jar "+GATK);

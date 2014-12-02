@@ -28,7 +28,7 @@ public class FillMissingGenotypesNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FillMissingGenotypesNodeDialog() {
 
-    	createNewGroup("Outfolder");
+    	createNewGroup("Folder in which Coverage files can be found");
     	addDialogComponent(new DialogComponentFileChooser(COVERAGEFOLDER, "Folder in which Coverage files can be found", 0,true,""));
     	createNewGroup("");
     	addDialogComponent(new DialogComponentString(FILESUFFIX, "File Suffix of Coverage Files which are used to fill ./. GTs"));

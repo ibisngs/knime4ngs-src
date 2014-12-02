@@ -38,6 +38,7 @@ public class VCFMergerNodeModel extends NodeModel {
     public static final String CFGKEY_GATK						= "gatk";
 	public static final String CFGKEY_REF_GENOME 				= "REFGENOME";
 	public static final String CFGKEY_GENOTYPEMERGEOPTION 		= "genotypemergeoption";
+	public static final String CFGKEY_OUTFILETAG		 		= "outfiletag";
     
     private final SettingsModelString m_GATK 				= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GATK, "");
     private final SettingsModelString m_REF_GENOME 			= new SettingsModelString(VCFMergerNodeModel.CFGKEY_REF_GENOME, "");
@@ -45,6 +46,7 @@ public class VCFMergerNodeModel extends NodeModel {
     private final SettingsModelString m_REGEX 				= new SettingsModelString(VCFMergerNodeModel.CFGKEY_REGEX, "");
     private final SettingsModelString m_OUTFOLDER 			= new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFOLDER, "");
     private final SettingsModelString m_GENOTYPEMERGEOPTION	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
+    private final SettingsModelString m_OUTFILETAG			= new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFILETAG, "");
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFMergerNodeModel.class);
     
@@ -67,7 +69,7 @@ public class VCFMergerNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	String OUTFILE = VCFMerger.mergeVCFs(m_GATK.getStringValue(),m_REF_GENOME.getStringValue(),m_INFOLDER.getStringValue(), m_OUTFOLDER.getStringValue(), m_REGEX.getStringValue(),m_GENOTYPEMERGEOPTION.getStringValue(),exec,LOGGER);
+    	String OUTFILE = VCFMerger.mergeVCFs(m_GATK.getStringValue(),m_REF_GENOME.getStringValue(),m_INFOLDER.getStringValue(), m_OUTFOLDER.getStringValue(), m_REGEX.getStringValue(),m_GENOTYPEMERGEOPTION.getStringValue(),exec,LOGGER,m_OUTFILETAG.getStringValue());
     	
     	/**
     	 * OUTPUT
@@ -118,6 +120,7 @@ public class VCFMergerNodeModel extends NodeModel {
          m_GATK.saveSettingsTo(settings);
          m_REF_GENOME.saveSettingsTo(settings);
          m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
+         m_OUTFILETAG.saveSettingsTo(settings);
     }
 
     /**
@@ -132,6 +135,7 @@ public class VCFMergerNodeModel extends NodeModel {
         m_GATK.loadSettingsFrom(settings);
         m_REF_GENOME.loadSettingsFrom(settings);
         m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
+        m_OUTFILETAG.loadSettingsFrom(settings);
     }
 
     /**
@@ -146,6 +150,7 @@ public class VCFMergerNodeModel extends NodeModel {
         m_GATK.validateSettings(settings);
         m_REF_GENOME.validateSettings(settings);
         m_GENOTYPEMERGEOPTION.validateSettings(settings);
+        m_OUTFILETAG.validateSettings(settings);
     }
     
     /**

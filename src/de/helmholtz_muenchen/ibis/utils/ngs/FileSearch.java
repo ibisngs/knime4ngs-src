@@ -75,7 +75,7 @@ public class FileSearch {
 	    File[] list = root.listFiles();
 	        for ( File f : list ) {
 	            if ( f.isDirectory() ) {
-	            	search( f.getAbsolutePath() , regex, Files2Merge);
+	            	searchWithV( f.getAbsolutePath() , regex, Files2Merge);
 	            }else {
 	            	String filePath = f.getAbsolutePath();
 	            	if(filePath.endsWith(regex)){			//Add if file ends with specified regex
