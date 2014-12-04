@@ -59,7 +59,8 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkfiltervqslod.GATKFilterVQSLODNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkfiltervqslod.GATKFilterVQSLODNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/" factory-class="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/" factory-class="de.helmholtz_muenchen.ibis.ngs.filtergatkvariants.FilterGATKVariantsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filtergatkvariants.FilterGATKVariantsNodeFactory"/>
-
+		<!-- <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory"/> -->
+		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkbamtopileup.GATKBAMtoPileupNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkbamtopileup.GATKBAMtoPileupNodeFactory"/>
 
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
@@ -96,6 +97,7 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
+
 
 </extension>
 	<extension point="org.knime.workbench.repository.categories">

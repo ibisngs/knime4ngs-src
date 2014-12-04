@@ -49,7 +49,7 @@ public class FileSearch {
 		    if (temp.isDirectory()) {
 			searchSuffix(temp);
 		    } else {
-			if (temp.getName().contains(getFileNameToSearch())) {			
+			if (temp.getName().endsWith(getFileNameToSearch())) {			
 			    result.add(temp.getAbsoluteFile().toString());
 		    }
  

@@ -62,11 +62,11 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
     	    	
     	FileSearch fileSearch = new FileSearch();
     	PrintWriter writer = new PrintWriter(m_infolder.getStringValue()+"/DoCSampleSummary.csv", "UTF-8");	 
-    	
-    	
-        //try different directory and filename :)
+
+    	//try different directory and filename :)
     	fileSearch.searchDirectory(new File(m_infolder.getStringValue()), m_filesuffix.getStringValue());
 	    for (String matched : fileSearch.getResult()){
+	    	
 	    	System.out.println("Found : " + matched);
 		
 	    	FileInputStream inputStream = new FileInputStream(matched);
@@ -80,6 +80,7 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
     	writer.close();
 
     	this.addArgument("--in"   , m_infolder.getStringValue()+"/DoCSampleSummary.csv");
+    	
     	
     	super.execute(inData, exec);
     	
