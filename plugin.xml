@@ -59,7 +59,7 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkfiltervqslod.GATKFilterVQSLODNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkfiltervqslod.GATKFilterVQSLODNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/" factory-class="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fillmissinggenotypes.FillMissingGenotypesNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/" factory-class="de.helmholtz_muenchen.ibis.ngs.filtergatkvariants.FilterGATKVariantsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filtergatkvariants.FilterGATKVariantsNodeFactory"/>
-		<!-- <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory"/> -->
+		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.reordervcf.ReorderVCFNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkbamtopileup.GATKBAMtoPileupNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkbamtopileup.GATKBAMtoPileupNodeFactory"/>
 
 		<!-- LoF Workflow nodes -->
