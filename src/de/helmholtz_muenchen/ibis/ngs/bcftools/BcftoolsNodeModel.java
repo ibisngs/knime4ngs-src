@@ -83,6 +83,7 @@ Contrast calling and association test options:
 	public static final String CFGKEY_CATINFILE="catinfile";
 	public static final String CFGKEY_PATH2BCFTOOLS="path2bcftools";
 	public static final String CFGKEY_LDPAIRINFILE="ldpairinfile";
+	public static final String CFGKEY_VCFSAMPLEHEADER="VCFSAMPLEHEADER";
 	
 	
 	/**
@@ -99,6 +100,7 @@ Contrast calling and association test options:
 	public static final String CFGKEY_OUTQCALL="outqcall";
 	public static final String CFGKEY_SAMPLELIST="samplelist";
 	public static final String CFGKEY_OUTUNCOMPRESSEDBCF="outuncompressedbcf";
+
 	//Checkboxes
 	public static final String CFGKEY_IFBEDFILE="ifbedfile";
 	public static final String CFGKEY_IFSEQDIC="ifseqdic";
@@ -155,6 +157,8 @@ Contrast calling and association test options:
 			CFGKEY_CATINFILE, "");
 	private final SettingsModelString m_ldpairinfile = new SettingsModelString(
 			CFGKEY_LDPAIRINFILE, "");
+	private final SettingsModelString m_vcfsampleheader = new SettingsModelString(
+			CFGKEY_VCFSAMPLEHEADER, "");
 	
 	
 	/**
@@ -364,12 +368,24 @@ Contrast calling and association test options:
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ld "));
             command.add(m_infile.getStringValue());
     		outfile+="_ld.out";
+    	}else if(m_bcfmethod.getStringValue().equals("reheader")){
+            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools reheader "));
+            command.add("-s "+m_vcfsampleheader.getStringValue());
+            command.add(m_infile.getStringValue());
+            
+            if(m_infile.getStringValue().endsWith(".vcf")){
+            	outfile+="_reheader.vcf";
+            }else if(m_infile.getStringValue().endsWith(".bcf")){
+            	outfile+="_reheader.bcf";
+            }else{
+            	
+            }
     	}
 
     	/**
     	 * Execute
     	 */
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,outfile,outfile+".stdErr");
     	logBuffer.append(ShowOutput.getNodeEndTime());
     	ShowOutput.writeLogFile(logBuffer);
 
@@ -461,6 +477,7 @@ Contrast calling and association test options:
     	 m_catinfile.saveSettingsTo(settings);
     	 m_path2bcftools.saveSettingsTo(settings);
     	 m_ldpairinfile.saveSettingsTo(settings);
+    	 m_vcfsampleheader.saveSettingsTo(settings);
     	
     	 m_bedfile.saveSettingsTo(settings);
          m_calcld.saveSettingsTo(settings);
@@ -507,6 +524,7 @@ Contrast calling and association test options:
     	m_catinfile.loadSettingsFrom(settings);
    	 	m_path2bcftools.loadSettingsFrom(settings);
    	 	m_ldpairinfile.loadSettingsFrom(settings);
+   	 	m_vcfsampleheader.loadSettingsFrom(settings);
     	
         m_bedfile.loadSettingsFrom(settings);
         m_calcld.loadSettingsFrom(settings);
@@ -550,6 +568,7 @@ Contrast calling and association test options:
    	 	m_catinfile.validateSettings(settings);
    	 	m_path2bcftools.validateSettings(settings);
    	 	m_ldpairinfile.validateSettings(settings);
+   	 	m_vcfsampleheader.validateSettings(settings);
     	
     	m_bedfile.validateSettings(settings);
         m_calcld.validateSettings(settings);

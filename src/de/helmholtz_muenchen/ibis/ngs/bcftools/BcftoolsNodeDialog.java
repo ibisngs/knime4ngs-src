@@ -35,8 +35,10 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	final SettingsModelString catinfile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_CATINFILE,"");
     	final SettingsModelString ldpairinfile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_LDPAIRINFILE,"");
     	final SettingsModelString infile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_INFILE,"");
+    	final SettingsModelString vcfsampleheader = new SettingsModelString(BcftoolsNodeModel.CFGKEY_VCFSAMPLEHEADER, "");
     	catinfile.setEnabled(false);
     	ldpairinfile.setEnabled(false);
+    	vcfsampleheader.setEnabled(false);
     	
     	/**
     	 *Models for Bcftools view
@@ -68,13 +70,15 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to Bcftools");
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, ""),"his_bcft_ID5",""));
     	createNewGroup("");
-    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","view","index", "cat", "ld","ldpair"));
+    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","view","index", "cat", "ld","ldpair","reheader"));
     	createNewGroup("Select Inputfile for selected method");
     	addDialogComponent(new DialogComponentFileChooser(infile,"his_bcft_ID3",".bcf",".vcf"));
     	createNewGroup("Select second BCF file (cat only)");
     	addDialogComponent(new DialogComponentFileChooser(catinfile,"his_bcft_ID4",".bcf"));
     	createNewGroup("Select list file (ldpair only)");
     	addDialogComponent(new DialogComponentFileChooser(ldpairinfile,"hisID_bcft_ldpair",""));
+    	createNewGroup("Select file that includes the new sample names");
+    	addDialogComponent(new DialogComponentFileChooser(vcfsampleheader,"hisID_bcft_vcfsampleheader",""));
     	
     	
     	
@@ -195,6 +199,12 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
 				}else{
 					ldpairinfile.setEnabled(false);
 				}
+				if(bcfmethod.getStringValue().equals("reheader")){
+					vcfsampleheader.setEnabled(true);
+				}else{
+					vcfsampleheader.setEnabled(false);
+				}
+				
 				}
 		});
     	

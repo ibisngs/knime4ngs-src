@@ -21,7 +21,8 @@
        <li>index: Index sorted BCF for random access.</li>
         <li>cat: Concatenate BCF files. The input files are required to be sorted and have identical samples appearing in the same order.</li>
        <li> ld: Compute all-pair R^2 values</li>
-        <li>ldpair: Compute R^2 values for given pairs</li> </ul>
+        <li>ldpair: Compute R^2 values for given pairs</li>
+        <li>reheader: Change Sample Names in VCF Header</li> </ul>
          </option>
 
         <option name="Select Inputfile for selected method"> Requires BCF file for index, cat, ld, and ldpair. View requires a BCF or VCF inputfile. This option is disabled if In-port table is available.
@@ -31,6 +32,9 @@
         </option>
 
         <option name="Select list file (ldpair only)"> File containing the list for which R^2 values shall be computed.
+        </option>
+        
+        <option name="Select file that includes the new sample names"> New sample names, one name per line, in the same order as they appear in the VCF file. Alternatively, only samples which need to be renamed can be listed as "old_name new_name\n" pairs separated by whitespaces, each on separate line. 
         </option>
 
         <option name="############### View In/Out Options ###############">
