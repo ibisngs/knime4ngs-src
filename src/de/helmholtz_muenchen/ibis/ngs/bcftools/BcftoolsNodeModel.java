@@ -436,11 +436,11 @@ Contrast calling and association test options:
     			}else{
 //    				throw new InvalidSettingsException("First column name should be 'Path2SamTools' but it is" +inSpecs[0].getColumnNames()[0]);
     			}
-    			if(colnames[1].equals("Path2MpileupOutfile")){//Path2MpileupOutfile available
-    				m_infile.setEnabled(false);
-    			}else{
-    				throw new InvalidSettingsException("Column name of second column should be 'Path2MpileupOutfile' but it is" +inSpecs[0].getColumnNames()[1]);
-    			}
+//    			if(colnames[1].equals("Path2MpileupOutfile")){//Path2MpileupOutfile available
+//    				m_infile.setEnabled(false);
+//    			}else{
+//    				throw new InvalidSettingsException("Column name of second column should be 'Path2MpileupOutfile' but it is" +inSpecs[0].getColumnNames()[1]);
+//    			}
             	String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
     			if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("view")&&!(m_ifseqdic.getBooleanValue())){
     				throw new InvalidSettingsException("Input is VCF. Output is BCF. Please specify the sequence dictionary.");
