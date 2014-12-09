@@ -434,7 +434,7 @@ Contrast calling and association test options:
     			if(colnames[0].equals("Path2SamTools")){//Path2Samtools available
     				m_path2bcftools.setEnabled(false);
     			}else{
-    				throw new InvalidSettingsException("First column name should be 'Path2SamTools' but it is" +inSpecs[0].getColumnNames()[0]);
+//    				throw new InvalidSettingsException("First column name should be 'Path2SamTools' but it is" +inSpecs[0].getColumnNames()[0]);
     			}
     			if(colnames[1].equals("Path2MpileupOutfile")){//Path2MpileupOutfile available
     				m_infile.setEnabled(false);
@@ -449,7 +449,10 @@ Contrast calling and association test options:
     				setWarningMessage("WARNING: You are using trio calling without a specified samplelist file. This may cause errors !");
     			}
 
-    			return new DataTableSpec[]{null};
+    			return new DataTableSpec[]{new DataTableSpec(
+    	    			new DataColumnSpec[]{
+    	    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    	    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     			
         	}catch(NullPointerException npe){
         			OptionalPort=false;
@@ -463,7 +466,10 @@ Contrast calling and association test options:
     					setWarningMessage("WARNING: You are using trio calling without a specified samplelist file. This may cause errors !");
     				}
     		    	
-    		        return new DataTableSpec[]{null};
+    		        return new DataTableSpec[]{new DataTableSpec(
+    		    			new DataColumnSpec[]{
+    		    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    		    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
         	}
     }
 
