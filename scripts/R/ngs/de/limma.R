@@ -66,6 +66,8 @@ all <- DE
 all$ID <- rownames(all)
 all <- all[, c("ID", "logFC", "AveExpr", "B", "t", "P.Value", "adj.P.Val")]
 colnames(all) <- c("ID", "log2FC", "aveLog2CPM", "B", "t", "PValue", "adj.PValue")
+all$log2FC <- -all$log2FC # invert to get HF/LF
+all$t <- -all$t # invert to get HF/LF
 rownames(all) <- seq(1, nrow(all))
 
 # write results
