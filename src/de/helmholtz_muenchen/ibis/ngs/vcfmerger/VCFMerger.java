@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -17,7 +18,7 @@ public class VCFMerger {
 
 	
 		
-		public static String mergeVCFs(String GATK,String RefGenome, String Infolder, String Outfolder, String Regex,String GenotypeMergeOption,final ExecutionContext exec, NodeLogger logger, String OUTFILETAG){
+		public static String mergeVCFs(String GATK,String RefGenome, String Infolder, String Outfolder, String Regex,String GenotypeMergeOption,final ExecutionContext exec, NodeLogger logger, String OUTFILETAG) throws InvalidSettingsException{
 			
 			LinkedList<String> Files2Merge = new LinkedList<String>();
 			de.helmholtz_muenchen.ibis.utils.ngs.FileSearch.searchWithV(Infolder,Regex,Files2Merge);

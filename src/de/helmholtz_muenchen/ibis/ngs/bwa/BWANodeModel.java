@@ -363,6 +363,10 @@ public class BWANodeModel extends NodeModel {
         	LOGGER.info("Generate alignments in the SAM format.\n");
 
         	command.add(path2bwa+" mem");
+        	command.add("-t "+m_ALN_THREADS.getIntValue());
+    		if(m_readGroupBoolean.getBooleanValue()){
+    			command.add("-R "+m_readGroup.getStringValue());
+    		}
         	
     		/**In and Outfiles**/
         	command.add(path2refFile);

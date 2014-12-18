@@ -142,7 +142,8 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	command.add("-R "+m_REF_GENOME.getStringValue());
     	command.add("-V "+INFILE);
     	
-    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATK.vcf");
+//    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATK.vcf");
+    	String OUTFILE = INFILE.substring(0, INFILE.lastIndexOf('.'))+"_GATK.vcf";
     	command.add("-o "+OUTFILE);
     	
   
@@ -211,7 +212,9 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	command.add("-R "+m_REF_GENOME.getStringValue());
     	command.add("-V "+OUTFILE);
     	
-    	String OUTFILE_FILTERED = OUTFILE.replaceAll(".vcf", "filtered.vcf");
+//    	String OUTFILE_FILTERED = OUTFILE.replaceAll(".vcf", "filtered.vcf");
+    	String OUTFILE_FILTERED = OUTFILE.substring(0, OUTFILE.lastIndexOf('.'))+"filtered.vcf";
+    	
     	command.add("-o "+OUTFILE_FILTERED);
     	command.add("-ef");
      	

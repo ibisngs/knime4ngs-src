@@ -99,6 +99,8 @@
 		
 
 
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance.GATKGenotypeConcordanceNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance.GATKGenotypeConcordanceNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.plotgatkgenotypeconcordance.PlotGATKGenotypeConcordanceNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotgatkgenotypeconcordance.PlotGATKGenotypeConcordanceNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>

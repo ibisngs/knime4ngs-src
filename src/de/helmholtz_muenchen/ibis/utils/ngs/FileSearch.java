@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
  
 public class FileSearch {
@@ -69,20 +70,27 @@ public class FileSearch {
 	 * @param regex
 	 * @param Files2Merge
 	 * @param logger 
+	 * @throws InvalidSettingsException 
 	 */
-	public static void searchWithV(String dataDirectory, String regex, LinkedList<String> Files2Merge){
+	public static void searchWithV(String dataDirectory, String regex, LinkedList<String> Files2Merge) throws InvalidSettingsException{
 		File root = new File( dataDirectory );
+		boolean foundFile = false;
 	    File[] list = root.listFiles();
 	        for ( File f : list ) {
 	            if ( f.isDirectory() ) {
 	            	searchWithV( f.getAbsolutePath() , regex, Files2Merge);
 	            }else {
 	            	String filePath = f.getAbsolutePath();
-	            	if(filePath.endsWith(regex)){			//Add if file ends with specified regex
+	            	if(filePath.matches(regex)){			//Add if file ends with specified regex
 	            		Files2Merge.add("-V "+filePath);//, new String[]{filePath,"0",null,null,"-1","0"}); 
+	            		foundFile = true;
 	            	}
 	            }
 	        } 
+	        
+	        if(!foundFile){
+	        	throw new InvalidSettingsException("Found no file that matches the regex: "+regex+" in folder: "+dataDirectory);
+	        }
 	}
 	
 	/**

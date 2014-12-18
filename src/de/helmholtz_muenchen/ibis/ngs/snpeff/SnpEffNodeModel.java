@@ -319,7 +319,10 @@ public class SnpEffNodeModel extends NodeModel {
         	throw new InvalidSettingsException("Specify an input vcf file!");
         }
     	
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**
