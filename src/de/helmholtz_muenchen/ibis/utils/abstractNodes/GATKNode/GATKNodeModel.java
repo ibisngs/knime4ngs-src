@@ -68,13 +68,13 @@ public abstract class GATKNodeModel extends NodeModel{
     	command.add("-jar "+m_GATK.getStringValue());
     	command.add("-T "+getCommandWalker());
     	command.add("-R "+m_REF_GENOME.getStringValue());    	
-    	command.add(getCommandParameters());
+    	command.add(getCommandParameters(inData));
    
     	String OUTFILE = getOutfile(); 	
     	command.add("-o "+OUTFILE);
     	
     	System.out.println(StringUtils.join(command, " "));
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,OUTFILE+".stdOut",OUTFILE+".stdErr");
      	
     	
      	
@@ -182,7 +182,7 @@ public abstract class GATKNodeModel extends NodeModel{
      * Provides the node specific filter settings
      * @return
      */
-    protected abstract String getCommandParameters();
+    protected abstract String getCommandParameters(final BufferedDataTable[] inData);
     	
     /**
      * Provides the GATK Walker

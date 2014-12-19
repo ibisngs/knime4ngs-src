@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance;
 
+import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -28,7 +29,7 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 	}
 
 	@Override
-	protected String getCommandParameters() {
+	protected String getCommandParameters(final BufferedDataTable[] inData) {
 		String command = "--eval "+m_EVAL.getStringValue();
 		command 	  += " --comp "+m_COMP.getStringValue();
 		

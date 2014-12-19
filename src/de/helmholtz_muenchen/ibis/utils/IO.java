@@ -343,4 +343,20 @@ public class IO {
     		throw new InvalidSettingsException("Executable flag of '" + binaryPath + "' is not set.");
     	return true;
     }
+    
+    /**
+     * Replaces the Fileextension of a given File i.e. file.bam --> file.vcf
+     * @param File The Infile
+     * @param NewExtension The new extension
+     * @return
+     */
+    public static String replaceFileExtension(String File, String NewExtension)
+    {	
+    	int point = 0;
+    	if(NewExtension.startsWith(".")){
+    		point = 1;
+    	}
+    	return File.substring(0, File.lastIndexOf(".")-point)+NewExtension;	
+    }
+    
 }
