@@ -7,31 +7,20 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>Filters a given VCF File using the VQSLOD Value (GATK VQSR)</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Path to GATK jar file">Path to GATK jar file</option>
+        <option name="Reference Genome">Path to Reference Genome</option>
+        <option name="Select Column of inData in which Path to Input VCF is specified"></option>
+        <option name="Enter VQSLOD Cutoff">VQSLOD Cutoff which is used to discard variants. All variants below the given value are removed.</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="In-Port">Has to hold the VCF Infile</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Filtered VCF</outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

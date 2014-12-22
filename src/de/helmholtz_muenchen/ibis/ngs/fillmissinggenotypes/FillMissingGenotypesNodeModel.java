@@ -25,7 +25,7 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
  * This is the model implementation of FillMissingGenotypes.
  * 
  *
- * @author 
+ * @author Maximilian Hastreiter
  */
 public class FillMissingGenotypesNodeModel extends NodeModel {
     

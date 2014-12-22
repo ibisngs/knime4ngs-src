@@ -15,13 +15,10 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+		<inPort index="0" name="In-Port">Cell 0: Path to VCF File that shall be reordered</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to reordered VCF File</outPort>
+    </ports>   
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

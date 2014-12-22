@@ -7,31 +7,21 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>GenotypeConcordance takes in two callsets (vcfs) and tabulates the number of sites which overlap and share alleles, and for each sample, the genotype-by-genotype counts (e.g. the number of sites at which a sample was called homozygous-reference in the EVAL callset, but homozygous-variant in the COMP callset). It outputs these counts as well as convenient proportions (such as the proportion of het calls in the EVAL which were called REF in the COMP) and metrics (such as NRD and NRS). </intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Path to GATK jar file">Path to GATK jar file</option>
+        <option name="Reference Genome">Path to Reference Genome</option>
+        <option name="Evaluation VCF File">Test Set</option>
+        <option name="Comparison VCF File">Truth Set"</option>
+
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="In-Port"></inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Evaluation Outfile</outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

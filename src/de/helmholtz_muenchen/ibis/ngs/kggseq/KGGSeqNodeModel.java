@@ -27,7 +27,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * This is the model implementation of KGGSeq.
  * 
  *
- * @author 
+ * @author Maximilian Hastreiter
  */
 public class KGGSeqNodeModel extends NodeModel {
     
@@ -243,7 +243,7 @@ public class KGGSeqNodeModel extends NodeModel {
             throws InvalidSettingsException {
 
         // TODO: generated method stub
-        return new DataTableSpec[]{null};
+        return inSpecs;
     }
 
     /**
