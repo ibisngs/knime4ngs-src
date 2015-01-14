@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -82,38 +81,25 @@ public class ExecuteThread implements Callable<Boolean> {
 		
 		stdOutStream = new StreamThread(p.getInputStream(),stdOutFile,this.stdOutStr);
 		stdOutStream.start();
-		
-		/*ProcessBuilder pb = new ProcessBuilder("/home/ibis/tim.jeske/test_tool");
-		pb.redirectError(new File(this.stdErrFile));
-		pb.redirectOutput(new File(this.stdOutFile));
-		p = pb.start();*/
-		
-		
-		
+			
 		if(this.stdInFile!=null){
 			stdInStream = new InputThread(p.getOutputStream(), stdInFile);
 			stdInStream.start();
 		}
-		
-		
-		/*while(stdErrStream.isAlive() && stdOutStream.isAlive()) {
-			System.out.println("say yes");
-		}*/
+		// WAIT FOR PROCESS TO BE FINISHED
 		p.waitFor();
-		//p.destroy();
+
 		
 		// INTERRUPT STREAMS
 		if(this.stdInFile!=null){
 			stdInStream.interrupt();
 		}
 
-		/*stdErrStream.interrupt();
-		stdOutStream.interrupt();*/
+		stdErrStream.interrupt();
+		stdOutStream.interrupt();
 		
 		LOGGER.info("finished command "+ command[0]);
-		/*if(p.exitValue()==139) {
-			throw new CanceledExecutionException();
-		}*/
+
 		return new Boolean(p.exitValue()==0);
 	}
 
@@ -151,7 +137,6 @@ public class ExecuteThread implements Callable<Boolean> {
 		if(this.stdErrStr!=null){
 			return(this.stdErrStr.toString());
 		}
-		System.out.println("1");
 		if(this.stdErrFile != null){
 			try {
 				return(IO.tail(new File(this.stdErrFile), NUM_LINES_STDOUT_STDERR));
