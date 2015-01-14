@@ -197,19 +197,13 @@ public class Executor {
 		
 		// wait for executorThread to finish and meanwhile monitor if node was cancled
 		while (!executorResult.isDone()) {
-			
 			// if cancel was requested, an exception will be thrown
 			try{
-				
 				exec.checkCanceled();
-				
 			} catch (CanceledExecutionException e){
-				
 				// kill jobs
 				executorThread.cancel();
-				
 				pool.shutdownNow();
-				
 				while (!pool.isTerminated()) {
 				}
 				throw e;
@@ -217,22 +211,17 @@ public class Executor {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				
 				// ignore interrupted exception
 			}
 		}
-		System.out.println("stelle 1");
+		
 		// check if finished successfully
 		Boolean finishedSuccessfully = executorResult.get();
-		System.out.println("stelle 3");
 		if(!finishedSuccessfully){
-			System.out.println("da bin ich");
-			System.out.println(executorThread);
 			throw(new UnsuccessfulExecutionException("Unsuccessful Execution of " + command[0] + "\n"+IO.tail(executorThread.getSTDERR(), 5)+""));
 		}
 		//logger.info("ThreadPool closed successfully.");
 		
-		System.out.println("stelle 2 "+executorThread.getExitCode());
 		// check for exit code
 		if(executorThread.getExitCode() != 0) {
 			logger.error("Exit code was not 0: '"+ executorThread.getExitCode() +"'!");
