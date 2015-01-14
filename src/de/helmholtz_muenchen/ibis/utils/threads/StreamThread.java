@@ -99,6 +99,25 @@ public class StreamThread extends Thread {
 					{
 //						System.out.println("Discarding " + read + "bytes due to no file / Buffer to write to...");
 					}
+				try {
+					Thread.sleep(1);
+				} catch (InterruptedException e) {
+					System.out.println("interrupted ");
+					
+					while ((read = this.stream.read(bytes)) != -1){
+						if(this.fillSB)
+							{
+								this.sb.append(new String(bytes));
+							}
+						if(this.fillFile)
+							{
+								outstream.write(bytes,0,read);
+							}
+					}
+					
+					outstream.flush();
+					outstream.close();
+				}
 			}
 
 			if(this.fillFile)

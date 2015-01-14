@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -66,7 +67,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	 * Starts to run the command in a new thread and catches STDOUT and STDERR
 	 */
 	@Override
-	public Boolean call() throws Exception {
+	public Boolean call() throws Exception{
 		LOGGER.info("Running command: " + getCommandEscaped(this.command));
 		
 		//Start the process
@@ -76,30 +77,43 @@ public class ExecuteThread implements Callable<Boolean> {
 			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
 		}
 
+		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);
+		stdErrStream.start();
+		
 		stdOutStream = new StreamThread(p.getInputStream(),stdOutFile,this.stdOutStr);
 		stdOutStream.start();
 		
-		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);
-		stdErrStream.start();
+		/*ProcessBuilder pb = new ProcessBuilder("/home/ibis/tim.jeske/test_tool");
+		pb.redirectError(new File(this.stdErrFile));
+		pb.redirectOutput(new File(this.stdOutFile));
+		p = pb.start();*/
+		
+		
 		
 		if(this.stdInFile!=null){
 			stdInStream = new InputThread(p.getOutputStream(), stdInFile);
 			stdInStream.start();
 		}
 		
-		// WAIT FOR PROCESS TO BE FINISHED
+		
+		/*while(stdErrStream.isAlive() && stdOutStream.isAlive()) {
+			System.out.println("say yes");
+		}*/
 		p.waitFor();
+		//p.destroy();
 		
 		// INTERRUPT STREAMS
 		if(this.stdInFile!=null){
 			stdInStream.interrupt();
 		}
-		
-		stdOutStream.interrupt();
-		stdErrStream.interrupt();
+
+		/*stdErrStream.interrupt();
+		stdOutStream.interrupt();*/
 		
 		LOGGER.info("finished command "+ command[0]);
-
+		/*if(p.exitValue()==139) {
+			throw new CanceledExecutionException();
+		}*/
 		return new Boolean(p.exitValue()==0);
 	}
 
@@ -137,6 +151,7 @@ public class ExecuteThread implements Callable<Boolean> {
 		if(this.stdErrStr!=null){
 			return(this.stdErrStr.toString());
 		}
+		System.out.println("1");
 		if(this.stdErrFile != null){
 			try {
 				return(IO.tail(new File(this.stdErrFile), NUM_LINES_STDOUT_STDERR));

@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.knime.base.node.io.filereader.FileAnalyzer;
 import org.knime.base.node.io.filereader.FileReaderNodeSettings;
@@ -230,23 +231,32 @@ public class IO {
 	 * @throws IOException
 	 */
 	public static String tail(File src, int maxLines) throws FileNotFoundException, IOException {
-		BufferedReader reader = new BufferedReader(new FileReader(src));
+		String out = "";
+		
+		Iterator<String> it = new MMapFile(src.getAbsolutePath()).tail(maxLines);
+		while(it.hasNext()) {
+			out+=it.next();
+		}
+		
+		/*BufferedReader reader = new BufferedReader(new FileReader(src));
 		String[] lines = new String[maxLines];
 		int lastNdx = 0;
 		String out = "";
+		
 		for (String line=reader.readLine(); line != null; line=reader.readLine()) {
 			if (lastNdx == lines.length) {
 				lastNdx = 0;
 			}
 			lines[lastNdx++] = line;
 		}
-
+		
 		for (int ndx=lastNdx; ndx != lastNdx-1; ndx++) {
+			System.out.println(lastNdx+" "+ndx);
 			if (ndx == lines.length) {
 				ndx = 0;
 			}
 			out+=lines[ndx]+"\n";
-		}
+		}*/
 
 		return out;
 	}
