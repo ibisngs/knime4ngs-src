@@ -235,7 +235,7 @@ public class IO {
 		
 		Iterator<String> it = new MMapFile(src.getAbsolutePath()).tail(maxLines);
 		while(it.hasNext()) {
-			out+=it.next();
+			out+=it.next()+"\n";
 		}
 		
 		/*BufferedReader reader = new BufferedReader(new FileReader(src));
@@ -273,10 +273,14 @@ public class IO {
 				}
 				b.insert(0, tmp.substring(lasteNewline+1));
 				tmp = tmp.substring(0, lasteNewline);
+			} else if (tmp.length()>0) { //necessary to get first line of s
+				b.insert(0, tmp);
+				tmp = "";
 			}
 		}
 		return b.toString();
 	}
+	
 	public static String head(String s, int maxLines) {
 		String tmp = s;
 		StringBuffer b = new StringBuffer();
