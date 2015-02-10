@@ -101,6 +101,9 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.barplot.BarplotNodeFactory"/>
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
+<node category-path="/" factory-class="test.test.HTETestNodeFactory" id="test.test.HTETestNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory" id="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory"/>
+<node category-path="/" factory-class="test.test2.HTETest2NodeFactory" id="test.test2.HTETest2NodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
