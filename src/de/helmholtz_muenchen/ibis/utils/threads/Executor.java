@@ -194,7 +194,7 @@ public class Executor {
 		
 		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment);
 		Future<Boolean> executorResult = pool.submit(executorThread);
-		
+
 		// wait for executorThread to finish and meanwhile monitor if node was cancled
 		while (!executorResult.isDone()) {
 			// if cancel was requested, an exception will be thrown
@@ -227,5 +227,52 @@ public class Executor {
 			logger.error("Exit code was not 0: '"+ executorThread.getExitCode() +"'!");
 			throw(new UnsuccessfulExecutionException("Exit code was not 0: '"+ executorThread.getExitCode() +"' for " + ExecuteThread.getCommand(command)));
 		}
+	}
+	
+	/**
+	 * duplicate method returning exit code
+	 * @param command
+	 * @param exec
+	 * @param environment
+	 * @param logger
+	 * @param stdOutFile
+	 * @param stdErrFile
+	 * @param stdOut
+	 * @param stdErr
+	 * @param StdInFile
+	 * @return
+	 * @throws CanceledExecutionException
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 */
+	public static int executeCommandWithExitCode(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile) throws CanceledExecutionException, InterruptedException, ExecutionException{
+		exec.checkCanceled();
+		//Create Threadpool + the execution and monitoring threads 
+		ExecutorService pool = Executors.newSingleThreadExecutor();
+		
+		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment);
+		Future<Boolean> executorResult = pool.submit(executorThread);
+
+		// wait for executorThread to finish and meanwhile monitor if node was cancled
+		while (!executorResult.isDone()) {
+			// if cancel was requested, an exception will be thrown
+			try{
+				exec.checkCanceled();
+			} catch (CanceledExecutionException e){
+				// kill jobs
+				executorThread.cancel();
+				pool.shutdownNow();
+				while (!pool.isTerminated()) {
+				}
+				throw e;
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// ignore interrupted exception
+			}
+		}
+		
+		return executorThread.getExitCode();
 	}
 }
