@@ -10,7 +10,8 @@ Bundle-ClassPath: ibis.knimenodes.jar,
  libs/FastQReadFiltering.jar,
  libs/jbzip2-0.9.jar,
  libs/sam-1.102.jar,
- libs/picard-1.102.jar
+ libs/picard-1.102.jar,
+ libs/mysql-connector-java-5.1.34/mysql-connector-java-5.1.34-bin.jar
 Bundle-Activator: de.helmholtz_muenchen.ibis.ngs.bwa.BWANodePlugin
 Bundle-Vendor: IBIS KNIME Team
 Require-Bundle: org.eclipse.core.runtime,
