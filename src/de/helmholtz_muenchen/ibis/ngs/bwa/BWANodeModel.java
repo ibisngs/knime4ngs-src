@@ -23,10 +23,12 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
+import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -384,14 +386,26 @@ public class BWANodeModel extends NodeModel {
     	}
 		
     	
-    	/**Execute**/
-    	if(alnalgo.equals("BWA-MEM")) {
-    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
-    	}else{
-    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-    	}
     	
+    	/** check if run was already sucessful **/
+    	String[] com = command.toArray(new String[command.size()]);
+    	File lockFile = new File(path2readFile.substring(0,path2readFile.lastIndexOf(".")) + ".BWA" +  SuccessfulRunChecker.LOCK_ENDING);
+    	String lockCommand = ExecuteThread.getCommand(com);
+    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		LOGGER.info("Successful termination state: " + terminationState);
     	
+		// do not execute if termination state is true
+		if(!terminationState) {
+			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+		
+	    	/**Execute**/
+	    	if(alnalgo.equals("BWA-MEM")) {
+	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
+	    	}else{
+	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    	}
+	    	checker.writeOK();
+		}
 	}
     
     

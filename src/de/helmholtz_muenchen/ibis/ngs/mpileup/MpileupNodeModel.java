@@ -378,7 +378,6 @@ Output options:
         		//Reference file available-->Enable dialog
     			m_usefaidxfile.setEnabled(true);
     			m_usefaidxfile.setBooleanValue(true);
-    			m_ifindex.setBooleanValue(true);
     			m_ifindex.setEnabled(true);
     		}
 

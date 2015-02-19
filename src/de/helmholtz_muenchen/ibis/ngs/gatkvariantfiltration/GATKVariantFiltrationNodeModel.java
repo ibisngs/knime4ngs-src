@@ -217,9 +217,10 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	
     	command.add("-o "+OUTFILE_FILTERED);
     	command.add("-ef");
+    	command.add("--excludeNonVariants");
      	
     	System.out.println(StringUtils.join(command, " "));
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,OUTFILE_FILTERED+".stdOut",OUTFILE_FILTERED+".stdErr");
      	
      	
     	/**
