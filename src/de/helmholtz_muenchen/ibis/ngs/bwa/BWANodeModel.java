@@ -115,14 +115,15 @@ public class BWANodeModel extends NodeModel {
     	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
     	String outBaseName = outBaseName1;
     	String outBaseName2 = outBaseName1;
-    	String memOut = "";
+    	String memOut = basePath+outBaseName1+"_mem.sam";
+    	
     	if(path2readFile2.length() > 1 && !path2readFile2.equals("na")) {
     		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
 	    	if(!path2readFile.equals(path2readFile2)) {
 	    		outBaseName = outBaseName1 + "_" + outBaseName2;
-	    		memOut = basePath+outBaseName1+"_mem.sam";
-	    		System.out.println(memOut);
 	    	}
+    	}else{
+    		
     	}
     	
     	String out2Name = basePath+outBaseName+"_aln.sam";
