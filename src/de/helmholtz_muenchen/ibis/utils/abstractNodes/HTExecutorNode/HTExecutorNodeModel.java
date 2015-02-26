@@ -3,21 +3,14 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
-import org.apache.commons.io.FileUtils;
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.workflow.FlowVariable;
-import org.knime.core.node.workflow.WorkflowManager;
-
-import test.test.HTETestNodeModel;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
@@ -38,6 +31,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private String lockCommand = "";
 	private String host_name = "";
 	private String node_name = this.getClass().getCanonicalName();
+	private String defaultLockFile = "/home/ibis/tim.jeske/NGSTest/"+node_name+SuccessfulRunChecker.LOCK_ENDING;
 	private int count = 0;
 	private int threshold_value = DEFAULT_THRESHOLD;
 	
@@ -52,9 +46,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 
 	private final SettingsModelInteger threshold = new SettingsModelInteger(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, 1);
-
-	private static final NodeLogger LOGGER = NodeLogger
-			.getLogger(HTETestNodeModel.class);
 
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
 			PortType[] outPortTypes) {
@@ -155,11 +146,14 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			lockCommand += s;
 		}
 
-		LOGGER.info(node_name+" is executed with: use_hte="+use_hte_value+" hte_id="+hte_id+" threshold="+threshold_value);
+		logger.info(node_name+" is executed with: use_hte="+use_hte_value+" hte_id="+hte_id+" threshold="+threshold_value);
 		
+		if(lockFile == null) {
+			lockFile = new File(defaultLockFile);
+		}
 		boolean terminationState = SuccessfulRunChecker
 				.hasTerminatedSuccessfully(lockFile, lockCommand);
-		LOGGER.info("Successful termination state: " + terminationState);
+		logger.info("Successful termination state: " + terminationState);
 
 		//abort execution if node has been executed successfully
 		if (terminationState) {
@@ -177,6 +171,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			}
 			HTEDBHandler htedb = new HTEDBHandler();
 			node_id = htedb.getHTENodeId(lockCommand, node_name, host_name, hte_id);
+			System.out.println("Threshold: "+threshold_value);
 			if(node_id == -1) {
 				node_id = htedb.insertNewHTENode(lockCommand, node_name, host_name,threshold_value, hte_id);
 			} else {
@@ -194,6 +189,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			htedb.closeConnection();
 		} else {
 			//HTE is not used
+			logger.info("HTE is not used");
 			Executor.executeCommand(command, exec, environment, logger,
 					stdOutFile, stdErrFile, stdOut, stdErr, StdInFile);
 			checker.writeOK();
@@ -283,7 +279,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	@Override
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		System.out.println("loadValidatedSettingsFrom");
 		threshold.loadSettingsFrom(settings);
 	}
 
@@ -293,7 +288,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	@Override
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		System.out.println("validateSettings");
 		threshold.validateSettings(settings);
 	}
 

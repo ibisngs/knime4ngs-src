@@ -23,9 +23,12 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	protected HTExecutorNodeDialog() {
 		super();
 
+		createNewGroup("HTE");
 		addDialogComponent(new DialogComponentNumber(new SettingsModelInteger(
 				HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD), "Threshold",
 				HTExecutorNodeModel.DEFAULT_THRESHOLD));
+		
+		
 
 	}
 }

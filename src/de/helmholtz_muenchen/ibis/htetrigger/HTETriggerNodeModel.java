@@ -2,7 +2,6 @@ package de.helmholtz_muenchen.ibis.htetrigger;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -15,7 +14,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-import org.knime.core.node.workflow.FlowVariable;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 
