@@ -104,6 +104,7 @@
 <node category-path="/" factory-class="test.test.HTETestNodeFactory" id="test.test.HTETestNodeFactory"/>
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory" id="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory"/>
 <node category-path="/" factory-class="test.test2.HTETest2NodeFactory" id="test.test2.HTETest2NodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>

@@ -167,7 +167,7 @@ public class RunGATKBaseRecalibration {
 		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null);
 	}
 	
-	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE,String recalintermediate) throws Exception {
 		
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T AnalyzeCovariates";
@@ -175,6 +175,7 @@ public class RunGATKBaseRecalibration {
 		cmd+=" -before "+beforetable;
 		cmd+=" -after "+aftertable;
 		cmd+=" -plots "+pplots;
+		cmd+=" -csv "+recalintermediate;
 		
 		if(!pint.equals("")){
 			cmd+=" -L "+pint;

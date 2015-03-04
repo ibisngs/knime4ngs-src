@@ -15,7 +15,7 @@ public class RunGATKRealignment {
 		//create command string
 		
 		// each data thread requires 2 GB of memory
-		int memory = GATK_MEMORY_USAGE;
+		int memory = GATK_MEMORY_USAGE*threads;
 
 		String cmd="java -jar -Xmx"+memory+"G " + proxyOptions + gatk;
 		cmd+=" -T RealignerTargetCreator";

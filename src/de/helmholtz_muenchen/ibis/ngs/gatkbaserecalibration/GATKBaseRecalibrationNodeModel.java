@@ -468,9 +468,10 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     		// additional output
     		String recalaftertable=PathProcessor.createOutputFile(base, "table", "post_recal");
     		String recalplots=PathProcessor.createOutputFile(base, "pdf", "recal_plots");
+    		String recalintermediate=PathProcessor.createOutputFile(base, "csv", "recal_plots_intermediateData");
     		
     		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
-    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE);
+    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE,recalintermediate);
     		
     	}
     	
