@@ -1,6 +1,17 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
+import javax.swing.JFileChooser;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller.GATKHaplotypeCallerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
 
 /**
  * <code>NodeDialog</code> for the "CombineGVCFs" Node.
@@ -13,13 +24,25 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
  * 
  * @author Maximilian Hastreiter
  */
-public class CombineGVCFsNodeDialog extends DefaultNodeSettingsPane {
+public class CombineGVCFsNodeDialog extends GATKNodeDialog {
 
-    /**
-     * New pane for configuring the CombineGVCFs node.
-     */
-    protected CombineGVCFsNodeDialog() {
-
-    }
+	@Override
+	protected void addDialogComponent() {
+		
+		final SettingsModelString BED_FILE 				= new SettingsModelString(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE, "");
+	    final SettingsModelBoolean BED_FILE_CHECKBOX 	= new SettingsModelBoolean(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
+		
+    	createNewGroup("BED File");
+    	setHorizontalPlacement(true);
+    	addDialogComponent(new DialogComponentBoolean(BED_FILE_CHECKBOX, "BED_FILE_CHECKBOX"));
+    	addDialogComponent(new DialogComponentFileChooser(BED_FILE, "BED_FILE", JFileChooser.OPEN_DIALOG, false, ".bed"));
+		setHorizontalPlacement(false);
+		
+		BED_FILE_CHECKBOX.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+					BED_FILE.setEnabled(BED_FILE_CHECKBOX.getBooleanValue());
+				}
+		});
+	}
 }
 

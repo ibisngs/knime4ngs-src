@@ -1,18 +1,17 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
-import org.knime.core.data.DataTableSpec;
+import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataRow;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 
 /**
@@ -23,6 +22,14 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
  */
 public class CombineGVCFsNodeModel extends GATKNodeModel {
     
+	public static final String CFGKEY_BED_FILE 			= "BED_FILE";
+	public static final String CFGKEY_BED_FILE_CHECKBOX = "BED_FILE_CHECKBOX";
+	
+	private final SettingsModelString m_BED_FILE = new SettingsModelString(CombineGVCFsNodeModel.CFGKEY_BED_FILE, "");
+    private final SettingsModelBoolean m_BED_FILE_CHECKBOX = new SettingsModelBoolean(CombineGVCFsNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
+	
+	private String OUTFILE; 
+    
     /**
      * Constructor for the node model.
      */
@@ -32,119 +39,62 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
         super(1, 1);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
-
-        // TODO: Return a BufferedDataTable for each output port 
-        return new BufferedDataTable[]{};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO: generated method stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-
-        // TODO: generated method stub
-        return new DataTableSpec[]{null};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-         // TODO: generated method stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        // TODO: generated method stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-
+   
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Iterator <DataRow> it = inData[0].iterator();
+		ArrayList<String> command 	= new ArrayList<String>();
+		boolean first = true;
+		while(it.hasNext()){
+			String INFILE = inData[0].iterator().next().getCell(0).toString();
+			
+			if(first){
+				this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
+				first=false;
+			}
+			
+			command.add("--variant "+INFILE);
+
+		}
+		command.add("-L "+m_BED_FILE.getStringValue());
+		
+		return StringUtils.join(command, " ");
 	}
 
 	@Override
 	protected String getCommandWalker() {
-		// TODO Auto-generated method stub
-		return null;
+		return "CombineGVCFs";
 	}
 
 	@Override
 	protected String getOutfile() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.OUTFILE;
 	}
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		// TODO Auto-generated method stub
+		m_BED_FILE.saveSettingsTo(settings);
+		m_BED_FILE_CHECKBOX.saveSettingsTo(settings);
 		
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		// TODO Auto-generated method stub
+		m_BED_FILE.loadSettingsFrom(settings);
+		m_BED_FILE_CHECKBOX.loadSettingsFrom(settings);
 		
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		// TODO Auto-generated method stub
+		m_BED_FILE.validateSettings(settings);
+		m_BED_FILE_CHECKBOX.validateSettings(settings);
 		
 	}
+    
 
 }
 

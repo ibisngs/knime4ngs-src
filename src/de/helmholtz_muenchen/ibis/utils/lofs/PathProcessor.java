@@ -72,16 +72,17 @@ public class PathProcessor {
 		//file exists
 		else{
 			
-			//add integer to file name and increment integer until the file does not exist
-			int n=1;
-			while(Files.exists(Paths.get(filebase+"."+toolextension+n+"."+format))){
-				n++;
-				
-				if(n==10000){
-					throw new Exception("Oops, I'm so sorry, something went wrong, there are too many files");
-				}
-			}
-			return filebase+"."+toolextension+n+"."+format;
+//			//add integer to file name and increment integer until the file does not exist
+//			int n=1;
+//			while(Files.exists(Paths.get(filebase+"."+toolextension+n+"."+format))){
+//				n++;
+//				
+//				if(n==10000){
+//					throw new Exception("Oops, I'm so sorry, something went wrong, there are too many files");
+//				}
+//			}
+//			return filebase+"."+toolextension+n+"."+format;
+			return path;
 		}	
 	}
 	

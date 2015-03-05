@@ -373,4 +373,13 @@ public class IO {
     	return File.substring(0, File.lastIndexOf(".")-point)+NewExtension;	
     }
     
+    /**
+     * Returns the folder in which a file is located
+     * @param File
+     * @return
+     */
+    public static String getBasePath(String File){
+    	return File.substring(0, File.lastIndexOf("/"));
+    }
+    
 }
