@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
+
 /**
  * @author tanzeem.haque
  *
@@ -31,15 +32,17 @@ public class Trio_Simulator {
 	//there cannot be more than 8 deNovo mutation
 //	private final double recombination_rate = 0.01;
 
+
+	int current_chunk;
 	/**
 	 * Attribute
 	 */
+	private FastaCheck fc;
+	private FastaReader fr;
 	private InputScanner in;
 	/**
 	 * ID_List is needed for Knime in order to submit the output files to art
-	 */
-	public ArrayList<String> ID_List = new ArrayList<String>();
-	
+	 */	
 	private ArrayList<String> ID1 = new ArrayList<String>();
 	private ArrayList<Integer> POS1 = new ArrayList<Integer>();
 	private ArrayList<String> prettyMutation1 = new ArrayList<String>();
@@ -47,36 +50,31 @@ public class Trio_Simulator {
 	private ArrayList<Integer> POS2 = new ArrayList<Integer>();
 	private ArrayList<String> prettyMutation2 = new ArrayList<String>();
 	private ArrayList<String> recombined = new ArrayList<String>();
-	private String[] parentalAlleles;
-	private ArrayList<String[]> id_p_allele = new ArrayList<String[]>();
 
 
-	public Trio_Simulator(InputScanner in) {
+	public Trio_Simulator(FastaCheck fc, FastaReader fr, InputScanner in) {
 		// TODO Auto-generated constructor stub
-		setIn(in);
-		for(int i = 0; i < getIn().getFs().size(); i++) {
-			/**
-			 * ID_List will be called in the main method to write the output files.
-			 */
-			ID_List.add(getIn().getFs().getIdentifier(i));
-		}
+		this.fc = fc;
+		this.fr = fr;
+		this.in = in;
+	}
+/*
+	public FastaCheck getFc() {
+		return fc;
 	}
 
-	/**
-	 * @return the in
-	 */
+	protected FastaReader getFr() {
+		return fr;
+	}
+
 	protected InputScanner getIn() {
 		return in;
 	}
 
-	/**
-	 * @param in the in to set
-	 */
-	protected void setIn(InputScanner in) {
-		this.in = in;
+	protected int getCurrentLength() {
+		return currentLength;
 	}
-
-
+*/
 	/**
 	 * @return the iD
 	 */
@@ -121,140 +119,146 @@ public class Trio_Simulator {
 	protected ArrayList<String> getRecombined() {
 		return recombined;
 	}
-	//a1, a2, id
-	protected String[] getParentalAlleles() {
-		return parentalAlleles;
-	}
+
 
 	/**
-	 * @param al1
-	 * @param al2
-	 * Id basically not necessary since the combination is already decided from the very beginning
-	 */
-	protected void setParentalAllele (String al1, String al2){ //, String id) {
-		this.parentalAlleles = new String[2];
-		this.parentalAlleles[0] = al1;
-		this.parentalAlleles[1] = al2;
-//		this.parentalAlleles[2] = id;
-
-	}
-	/**
-	 * @return the id_p_allele
-	 */
-	protected ArrayList<String[]> getId_p_allele() {
-		return id_p_allele;
-	}
-
-	/**
+	 * @param currentChr 
+	 * @param chunk 
+	 * @param chunk 
+	 * @param parentalChromatids 
+	 * @param currentLength 
 	 * @param path
 	 * @param mutationRate: this one is the mutation rate of child : deNovo
 	 * Basically this method creates the whole trio
 	 * @throws InterruptedException
+	 * @throws IOException 
 	 */
-	protected void createTrio () throws InterruptedException {
+	protected void createTrio (int chunk_index, String currentChr) throws InterruptedException, IOException {
 
-		ArrayList<InputData> iData_parents = getIn().getiData_arrList_parents();
-		ArrayList<InputData> iData_deNovo_child = getIn().getiData_arrList_deNovo_child();
-		ArrayList<InputData> iData_recombination_child = getIn().getiData_arrList_recombination_child();
+		InputData iData_parents = this.in.getiData_parents();
+		InputData iData_deNovo_child = this.in.getiData_deNovo_child();
+		InputData iData_recombination_child = this.in.getiData_recombination_child();
+		/**
+		 * DO NOT DELETE THIS
+		 */
+		this.current_chunk = chunk_index;
 
-		long startTime = System.currentTimeMillis();
+//		long startTime = System.currentTimeMillis();
 		generateParents(iData_parents);
-		long endTime = System.currentTimeMillis();
-		NumberFormat formatter = new DecimalFormat("#0.00000");
-		System.out.println("Execution time for MUTATION (parents) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
-
-		startTime = System.currentTimeMillis();
-		generateChild(choose_parentalChromatids(), iData_deNovo_child, iData_recombination_child);
-		endTime = System.currentTimeMillis();
-		formatter = new DecimalFormat("#0.00000");
-		System.out.println("Execution time for DENOVO+RECOMBINATION (child) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
+//		long endTime = System.currentTimeMillis();
+//		NumberFormat formatter = new DecimalFormat("#0.00000");
+//		System.out.println("Execution time for MUTATION (parents) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
 		
+//		startTime = System.currentTimeMillis();
+		generateChild(this.fc.choose_parentalChromatids(), iData_deNovo_child, iData_recombination_child, currentChr);
+//		endTime = System.currentTimeMillis();
+//		formatter = new DecimalFormat("#0.00000");
+//		System.out.println("Execution time for DENOVO+RECOMBINATION (child) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
+
 	}
 	/**
 	 * @param path
 	 * @param iData_parents
-	 * @param i
+	 * @param chunk_index 
 	 * creates the parents by inserting mutations
+	 * @param chunk 
 	 */
-	private void generateParents(ArrayList<InputData> iData_parents) {
+	private void generateParents(InputData iData_parents) {
 
 		String id = "";
 		String path = FrostRunner.INTERNAL_PATH;
 		// parent
-		for (int i = 0; i < getIn().getFs().size(); i++) {
 
-			if (iData_parents.get(i).getPositions().size() != 0) {
-				id = iData_parents.get(i).getId();
+		if (iData_parents.getPositions().size() != 0) {
+			id = this.current_chunk + "_" + iData_parents.getId();
+//			System.out.println("FILE: "+ id);
 
-				String[] parent_file = { path + id + "_F_0.fa",
-						path + id + "_F_1.fa", path + id + "_M_0.fa",
-						path + id + "_M_1.fa" };
-				/**
-				 * check if file exist, else carry on
-				 */
-				delete_existing(parent_file);
-				manipulate(getIn().getFs().getSequence(i), null, iData_parents.get(i), parent_file, id);
 
-			}
+			String[] parent_file = { path + id + "_F_0.fa",
+					path + id + "_F_1.fa", path + id + "_M_0.fa",
+					path + id + "_M_1.fa" };
+			/**
+			 * check if file exist, else carry on
+			 */
+			delete_existing(parent_file);
+			int begin = this.current_chunk*FrostRunner.chunk_length;
+			int end = begin + FrostRunner.chunk_length;
+			if (end > this.fr.getLength())
+				end = this.fr.getLength();
+//			System.out.println("BEGIN: " + begin + "\t" + "END: " + end);
+			mutate(this.fr.getSequence().substring(begin, end), null, iData_parents, parent_file, id, "m");
+
+//			System.out.println("FASTA LENGTH PARENTS: " + this.fr.getSequence() .substring(begin, end).length());
 		}
 	}
 	/**
 	 * @param path
 	 * @param iData_deNovo_child
 	 * @param iData_recombination_child
+	 * @param currentChr 
+	 * @param chunk 
+	 * @param i 
 	 * @param i
 	 * Create the child, first denovo then recombination
+	 * @throws IOException 
 	 */
-	private void generateChild(String[] parental_chromatids, ArrayList<InputData> iData_deNovo_child,
-			ArrayList<InputData> iData_recombination_child) {
+	private void generateChild(String[] parental_chromatids, InputData iData_deNovo_child,
+			InputData iData_recombination_child, String currentChr) throws IOException {
 		
 		String id = "";
 		String path = FrostRunner.INTERNAL_PATH;
-		for (int i = 0; i < getIn().getFs().size(); i++) {
 
-			if (iData_deNovo_child.get(i).getPositions().size() != 0) {
+		if (iData_deNovo_child.getPositions().size() != 0) {
 
-				id = iData_deNovo_child.get(i).getId();
-				String[] parent_file = {path+id+parental_chromatids[0], path+id+parental_chromatids[1]};
-				String[] child_file = { path + id + "_C_0_no_rec.fa",
-						path + id + "_C_1_no_rec.fa", "", "" };
+			id = this.current_chunk + "_" + iData_deNovo_child.getId();
+			String[] parent_file = {path + id + parental_chromatids[0], path+id+parental_chromatids[1]};
+			String[] child_file = { path + id + "_C_0_no_rec.fa",
+					path + id + "_C_1_no_rec.fa", "", "" };
 
-				delete_existing(child_file);
+			delete_existing(child_file);
 
-				FastaReader fr = new FastaReader();
-				fr.readSequenceFromFile(parent_file[0]);
-				String pop = fr.getSequence();
+			FastaReader fr = new FastaReader();
+			fr.readSequenceFromFile(parent_file[0], currentChr);
+			String pop = fr.getSequence();
 
-				fr = new FastaReader();
-				fr.readSequenceFromFile(parent_file[1]);
-				String mom = fr.getSequence();
-				/**
-				 * create child sequence from mom and dad and insert deNovo
-				 */
-				manipulate(pop, mom, iData_deNovo_child.get(i), child_file, id);
-				// Work for child_file is done
+//			System.out.println("FASTA LENGTH CHILD (pop): " + pop.length());
 
-				fr = new FastaReader();
-				fr.readSequenceFromFile(child_file[0]);
-				String child_0 = fr.getSequence();
+			fr = new FastaReader();
+			fr.readSequenceFromFile(parent_file[1], currentChr);
+			String mom = fr.getSequence();
+			
+//			System.out.println("FASTA LENGTH CHILD (mom): " + mom.length());
 
-				fr = new FastaReader();
-				fr.readSequenceFromFile(child_file[1]);
-				String child_1 = fr.getSequence();
+			/**
+			 * create child sequence from mom and dad and insert deNovo
+			 */
+			mutate(pop, mom, iData_deNovo_child, child_file, id, "d");
+			// Work for child_file is done
 
-				String[] child_file_fin = { path + id + "_C_0.fa",
-						path + id + "_C_1.fa"};
+			fr = new FastaReader();
+			fr.readSequenceFromFile(child_file[0], currentChr);
+			String child_0 = fr.getSequence();
 
-				delete_existing(child_file_fin);
-				/**
-				 * recombine child sequence from the non-recombined ones
-				 */
-				recombine(child_0, child_1, iData_recombination_child.get(i),child_file_fin, id);
-				delete_existing(child_file); 
-				// deletes the *C_0_no_rec.fa and *C_1_no_rec.fa since not necessary anymore
+			fr = new FastaReader();
+			fr.readSequenceFromFile(child_file[1], currentChr);
+			String child_1 = fr.getSequence();
+			
+			String[] child_file_fin = { path + id + "_C_0.fa",
+					path + id + "_C_1.fa"};
+
+//			System.out.println("FASTA LENGTH CHILD (nr1): " + child_0.length());
+//			System.out.println("FASTA LENGTH CHILD (nr2): " + child_1.length());
 
 
-			}
+			delete_existing(child_file_fin);
+			/**
+			 * recombine child sequence from the non-recombined ones
+			 * 		if (iData_recombination_child.getPositions().size() != 0) {
+			 */
+			recombine(child_0, child_1, iData_recombination_child,child_file_fin, id);
+			delete_existing(child_file); 
+			// deletes the *C_0_no_rec.fa and *C_1_no_rec.fa since not necessary anymore
+	
 		}
 	}
 
@@ -268,10 +272,12 @@ public class Trio_Simulator {
 	 * @param output10: M0
 	 * @param output11: M1
 	 * @param id
+	 * @param chunk_idx 
 	 * @param sequence_length
 	 */
-	private void manipulate(String seq1, String seq2, InputData inputData, String[] output, String id) {
+	private void mutate(String seq1, String seq2, InputData inputData, String[] output, String id, String mutation_tag) {
 
+		ArrayList<ArrayList<Integer>> input_pos = inputData.getPositions();
 		String output00 = output[0], output01 = output[1], output10 = output[2], output11 = output[3];
 		boolean parent = false;
 		if (seq2 == null)
@@ -284,124 +290,174 @@ public class Trio_Simulator {
 			appendFile(output11, ">"+id+"\n");
 		}
 
-		ArrayList<Integer> input_pos = inputData.getPositions();
 
-		//the first position
-//		if (input_pos.get(0) == 1) {
-//			invokeMutation(char_arrList1, char_arrList2, output00,
-//					output01, output10, output11, 0, id, parent);
-//		}
+		/**
+		 * it is ok to check only seq1, (most of the time, this is the chunk length)
+		 * 1) for parents, seq2 is null
+		 * 2) for child, seq2 is never smaller than de novo mut position, 
+		 * since it had insertions inherited from parents
+		 
+		int mutation_idx = 0; //, tmp_idx = this.current_chunk*FrostRunner.chunk_length;
+
+		if (mutation_tag.equals("m"))
+			mutation_idx = FrostRunner.mutation_index_parent;
+		else if (mutation_tag.equals("d"))
+			mutation_idx = FrostRunner.denovo_index_child;
+		*/
+		int i = this.current_chunk;
+//		System.out.println("chunky: " + i);
+		int tmp_idx = i*FrostRunner.chunk_length;
 		
-		for (int i = 0; i < input_pos.size(); i++) {
-//			System.out.println("Mutating ... " + (i+1) + ". " + input_pos.get(i) );
-			if (i == 0 && input_pos.get(0) == 1) {
-				invokeMutation(seq1, seq2, output00,
-						output01, output10, output11, i, id, parent);
+		if (input_pos.get(i).size()==0) {
+			int start = 0;
+			int stop = seq1.length();
+//			System.out.println("IS EMPTY: " + start + "\t" + stop);
+			unaltered_sequence(seq1, output00, output10, start, stop, parent, id+"_m_"+parent);
+			if (parent)
+				unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);
+			else
+				unaltered_sequence(seq2,output01, output11, start,
+						seq2.length(), parent, id+"_m_"+parent);
+			return;
+		}
+
+		for (int j = 0; j < input_pos.get(i).size(); j++) {
+
+			if (j == 0 && input_pos.get(i).get(0) == 1) {
+				invokeMutation(seq1, seq2, output00, output01, output10, output11, 0, id, parent);
 				continue;
 			}
-			//if j > 0 => input_pos.get(j) !=1
-//			else {
-				//extracting the previous positions
+			//extracting the previous positions
 			int start = 0;
-			if (i > 0)
-				start = input_pos.get(i-1);
-				//stop is also the real index of that position
-				//position is always index+1
-			int stop = input_pos.get(i)-1;
-
+			if (j > 0)
+				start = input_pos.get(i).get(j-1)-tmp_idx;
+			//stop is also the real index of that position
+			//position is always index+1
+			int stop = input_pos.get(i).get(j)-tmp_idx-1;
+			/**
+			 * last chunk
+			 */
+			if (i == this.in.getChunk()-1 && (j == 0)) {
+					start = 0;
+			}
 			unaltered_sequence(seq1, output00, output10, start, stop, parent, id+"_m_"+parent);
 			if (parent)
 				unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);
 			else
 				unaltered_sequence(seq2,output01, output11, start, stop, parent, id+"_m_"+parent);
-			invokeMutation(seq1, seq2, output00,
-						output01, output10, output11, stop, id, parent);
-//			}
+			/**
+			 * checking
+			 */
+			invokeMutation(seq1, seq2, output00, output01, output10, output11, stop, id, parent);
 			//Still something left to append! check the last index
 			//inputData.getPositions().size()-1 = my last index
-			if ((i == input_pos.size()-1 && input_pos.get(i) < seq1.length())
-					|| (seq2 != null && i == input_pos.size()-1
-							&& input_pos.get(i) < seq2.length())){
-				start = input_pos.get(i);
+			if ((j == input_pos.get(i).size()-1 && input_pos.get(i).get(j)-tmp_idx < seq1.length())
+					|| (seq2 != null && j == input_pos.get(i).size()-1 && input_pos.get(i).get(j)-tmp_idx < seq2.length())){
+				start = input_pos.get(i).get(j) - tmp_idx;
 				stop = seq1.length();
+//				System.out.println(start + "\t" + stop);
 				unaltered_sequence(seq1, output00, output10, start, stop, parent, id+"_m_"+parent);
 				if (parent)
-					unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);
+					unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);	
 				else
-					unaltered_sequence(seq2,output01, output11, start,
-							seq2.length(), parent, id+"_m_"+parent);
-
+					unaltered_sequence(seq2,output01, output11, start, seq2.length(), parent, id+"_m_"+parent);
 			}
 		}
 	}
-
+	
 	private void recombine(String seq1, String seq2, InputData inputData, String[] output, String id) {
 
 		String output00 = output[0], output01 = output[1];
-		
 		//possible only for child
 		appendFile(output00, ">"+id+"\n");
 		appendFile(output01, ">"+id+"\n");
 
-		ArrayList<Integer> input_pos = inputData.getPositions();
+		ArrayList<ArrayList<Integer>> input_pos = inputData.getPositions();
+
+		int i = this.current_chunk;
+		int tmp_idx = i*FrostRunner.chunk_length;
+		
+		if (input_pos.get(i).size()==0) {
+			int start = 0;
+			int stop = seq1.length();
+//			System.out.println("IS EMPTY: " + start + "\t" + stop);
+			unaltered_sequence(seq1, output00, "", start, stop, false, id+"_r");
+			unaltered_sequence(seq2,output01, "", start, seq2.length(), false, id+"_r");
+			return;
+		}
 		//for the first position, if not recombining
 		//write the sequence unchanged
-		if (input_pos.get(0) > 1) {
-			unaltered_sequence(seq1, output00, "", 0, input_pos.get(0)-1, false, id+"_r");
-			unaltered_sequence(seq2, output01, "", 0, input_pos.get(0)-1, false, id+"_r");
-//			index = 1;
-		}
-//		else
-//			index = 0;
-		for (int i = 0; i < input_pos.size()-1; i++) {
+		for (int j = 0; j < input_pos.get(i).size(); j++) {
+			if (j == 0 && input_pos.get(i).get(j) > 1+tmp_idx) {
+				unaltered_sequence(seq1, output00, "", 0, input_pos.get(i).get(0)-tmp_idx-1, false, id+"_r");
+				unaltered_sequence(seq2, output01, "", 0, input_pos.get(i).get(0)-tmp_idx-1, false, id+"_r");
+//				System.out.println("RECOMBINE first: " + "\t" + 0 + "\t" + (input_pos.get(i).get(0)-tmp_idx-1));
+			}	
+			if (j < input_pos.get(i).size()-1) {
 				//extracting the previous positions
-				int start = input_pos.get(i)-1;
-				int stop = input_pos.get(i+1)-1;
-				swap(seq1, seq2, output00, output01, start, stop, stop, id+"_r");
-		}
+				int start_idx = input_pos.get(i).get(j)-tmp_idx-1;
+				/**
+				 * last chunk
+				 */
+//				if (i == this.in.getChunk()-1 && (j == 0)) {
+//					start_idx = 0;
+//				}
+				int stop_idx = input_pos.get(i).get(j+1)-tmp_idx-1;
+				swap(seq1, seq2, output00, output01, start_idx, stop_idx, stop_idx, id+"_r", tmp_idx);
+//				System.out.println("RECOMBINE: " + "\t" + start_idx + "\t" + stop_idx);
+			}
+			if (j == input_pos.get(i).size()-1)
+				recombine_last_pos(seq1, seq2, input_pos.get(i), i, output00, output01, id+"_r");
 
-		recombine_last_pos(seq1, seq2, input_pos, output00, output01, id+"_r");
+		}		
 	}
 
 	/**
 	 * @param seq1
 	 * @param seq2
-	 * @param input_pos
+	 * @param input_pos_sublist
 	 * @param output00
 	 * @param output01
 	 * @param id
 	 */
-	private void recombine_last_pos(String seq1, String seq2,
-			ArrayList<Integer> input_pos, String output00, String output01, String id) {
+	private void recombine_last_pos(String seq1, String seq2, ArrayList<Integer> input_pos_sublist, int idx, String output00, String output01, String id) {
 		//Still something left to append! check the last index
 		//inputData.getPositions().size()-1 = my last index
 		//case 2: the last rec position < length of both allele
 		//case 2: the last rec position = the last position of either of the allele=> do nothing
-		if (input_pos.get(input_pos.size()-1) <= seq1.length()
-				&& input_pos.get(input_pos.size()-1) <= seq2.length()){
-			int start = input_pos.get(input_pos.size()-1)-1;
-			int stop1 = seq1.length();
-			int stop2 = seq2.length();
-			swap(seq1, seq2, output00, output01, start, stop1, stop2, id);
-		}
-		else if (input_pos.get(input_pos.size()-1) == seq1.length()
-				&& input_pos.get(input_pos.size()-1) < seq2.length()){
-			int start = input_pos.get(input_pos.size()-1)-1;
-			int stop1 = seq1.length()-1;
-			int stop2 = seq2.length();
-			swap(seq1, seq2, output00, output01, start, stop1, stop2, id);
-		}
-		else if (input_pos.get(input_pos.size()-1) < seq1.length()
-				&& input_pos.get(input_pos.size()-1) == seq2.length()){
-			int start = input_pos.get(input_pos.size()-1)-1;
-			int stop1 = seq1.length();
-			int stop2 = seq2.length()-1;
-			swap(seq1, seq2, output00, output01, start, stop1, stop2, id);
-		}
-		else
-			return;
-	}
+		int tmp_idx = idx*FrostRunner.chunk_length;
+		int start = input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx-1, stop1 = 0, stop2 = 0;
 
+		if (input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx <= seq1.length()
+				&& input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx <= seq2.length()){
+			stop1 = seq1.length();
+			stop2 = seq2.length();
+			swap(seq1, seq2, output00, output01, start, stop1, stop2, id, tmp_idx);
+//			System.out.println("RECOMBINE last: " + "\t" + start + "\t" + stop1 + "\t" + stop2);
+
+		}
+		else if (input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx == seq1.length()
+				&& input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx < seq2.length()){
+			stop1 = seq1.length()-1;
+			stop2 = seq2.length();
+			swap(seq1, seq2, output00, output01, start, stop1, stop2, id, tmp_idx);
+//			System.out.println("RECOMBINE last: " + "\t" + start + "\t" + stop1 + "\t" + stop2);
+
+		}
+		else if (input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx < seq1.length()
+				&& input_pos_sublist.get(input_pos_sublist.size()-1)-tmp_idx == seq2.length()){
+			stop1 = seq1.length();
+			stop2 = seq2.length()-1;
+			swap(seq1, seq2, output00, output01, start, stop1, stop2, id, tmp_idx);
+//			System.out.println("RECOMBINE last: " + "\t" + start + "\t" + stop1 + "\t" + stop2);
+
+		}
+
+		else {
+//			System.out.println("RECOMBINE last: DEI MUDDA " + (idx*FrostRunner.chunk_length) + "\t"+ (input_pos_sublist.get(input_pos_sublist.size()-1)- tmp_idx));
+			return;
+		}
+	}
 	/**
 	 * @param seq1
 	 * @param seq2
@@ -409,22 +465,23 @@ public class Trio_Simulator {
 	 * @param output01
 	 * @param rand
 	 * @param start
+	 * @param tmp_idx2 
 	 * @param stop
 	 */
 	protected void swap(String seq1, String seq2, String output00, String output01, 
-			int start, int stop1, int stop2, String id) {
+			int start, int stop1, int stop2, String id, int tmp_idx) {
 		Random rand = new Random();
 		boolean flip = false;
 		flip = rand.nextBoolean();
 		if (flip) {
 			unaltered_sequence(seq2, output00, "", start, stop2, false, id);
 			unaltered_sequence(seq1, output01, "", start, stop1, false, id);
-			getRecombined().add(id + "\t" + (start+1) + "\t" + getParentalAlleles()[1] + " " + getParentalAlleles()[0]);
+			getRecombined().add(id + "\t" + (start+tmp_idx+1) + "\t" + FrostRunner.parental_chromatids[1] + " " + FrostRunner.parental_chromatids[0]);
 		}
 		else {
 			unaltered_sequence(seq1, output00, "", start, stop1, false, id);
 			unaltered_sequence(seq2, output01, "", start, stop2, false, id);
-			getRecombined().add(id + "\t" + (start+1) + "\t" + getParentalAlleles()[0] + " " + getParentalAlleles()[1]);
+			getRecombined().add(id + "\t" + (start+tmp_idx+1) + "\t" + FrostRunner.parental_chromatids[0] + " " + FrostRunner.parental_chromatids[1]);
 
 		}
 	}
@@ -440,15 +497,16 @@ public class Trio_Simulator {
 	 * @param stop
 	 * @param parent
 	 */
-	private void unaltered_sequence(String seq,
-			String output00, String output10, int start, int stop, boolean parent, String id) {
-
+	private void unaltered_sequence(String seq, String output00, String output10, 
+			int start, int stop, boolean parent, String id) {
+		
 		if (stop > seq.length()){
 			System.out.println("bad shit is happening");
 			System.out.println(stop + " " + seq.length() + " " + id);
 			return;
 		}
 
+//		System.out.println("Start: " + start + "\t" + "Stop: " + stop);
 		char[] tmp00 = new char[stop-start];
 		char[] tmp10 = new char[stop-start];
 		int x = 0;
@@ -484,9 +542,11 @@ public class Trio_Simulator {
 	 * @param parent
 	 */
 	private void invokeMutation(String seq1, String seq2,
-			String output00, String output01, String output10, String output11, int stop, String id, boolean parent) {
+			String output00, String output01, String output10, String output11, 
+			int stop, String id, boolean parent) {
 		// TODO Auto-generated method stub
 		//Now we invoke mutation
+		int tmp_idx = this.current_chunk*FrostRunner.chunk_length;
 		String[] mutated = new String[2];
 		String individuum = "";
 		char[] toMutate = new char[2];
@@ -524,12 +584,12 @@ public class Trio_Simulator {
 		if (parent) {
 			getID1().add(id);
 			//because the real position was at the index of the array which is always x-1
-			getPOS1().add(stop+1);
+			getPOS1().add(stop+tmp_idx+1);
 			getPrettyMutation1().add(m.getParentString());
 		}
 		else {
 			getID2().add(id);
-			getPOS2().add(stop+1);
+			getPOS2().add(stop+tmp_idx+1);
 			getPrettyMutation2().add(m.getChildString());
 		}
 
@@ -618,67 +678,6 @@ public class Trio_Simulator {
 		return char_arrList;
 	}
 
-	/**
-	 * @param fileID : the 4 files from parents
-	 * @param id
-	 * @return the two files to get the mutated sequences to inherit
-	 */
-	private String[] choose_parentalChromatids() {
-		// TODO Auto-generated method stub
-		String[] readFile_for_child = new String[2];
-		int calc_prob = probability();
-
-		switch(calc_prob) {
-
-		case 0: //F0M0
-			setParentalAllele("F0", "M0");
-			this.id_p_allele.add(getParentalAlleles());
-			readFile_for_child[0]="_F_0.fa";
-			readFile_for_child[1]="_M_0.fa";
-			break;
-		case 1:  //F0M1
-			setParentalAllele("F0", "M1");
-			this.id_p_allele.add(getParentalAlleles());
-			readFile_for_child[0]="_F_0.fa";
-			readFile_for_child[1]="_M_1.fa";
-			break;
-		case 2: //F1M0
-			setParentalAllele("F1", "M0");
-			this.id_p_allele.add(getParentalAlleles());
-			readFile_for_child[0]="_F_1.fa";
-			readFile_for_child[1]="_M_0.fa";
-			break;
-		case 3: //F1M1
-			setParentalAllele("F1", "M1");
-			this.id_p_allele.add(getParentalAlleles());
-			readFile_for_child[0]="_F_1.fa";
-			readFile_for_child[1]="_M_1.fa";
-			break;
-
-		}
-//		System.out.println("I CAME IN TO CHOOSE FILE");
-//		for (String s : readFile_for_child) 
-//			System.out.println(s);
-
-		return readFile_for_child;
-	}
-	/**
-	 * Calculates the probability for a random combination of the alleles
-	 * random combination of alleles = 2^23 (for human) = 8388608
-	 * probability of a diploid combination: 2^23!/((2^23-2)!*2!) = 3.5184367894528*10^13,  100/... = 2.84*10^(-12)
-	 */
-	private int probability () {
-		Random rand;
-//		if (in.getSeed() != 0) {
-//			rand = new Random(in.getSeed());
-//		}
-//		else
-			rand = new Random();
-		int i = rand.nextInt(4); // 4 combinations of chromosomes
-		return i;
-
-	}
-
 	@SuppressWarnings("unused")
 	private String readSequence(String fileName) {
 		
@@ -745,7 +744,7 @@ public class Trio_Simulator {
 	private void appendFile(String fileName, String s) {
 		// TODO Auto-generated method stub
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream (fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
-			pw.println(s);
+			pw.write(s);
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
@@ -772,15 +771,16 @@ public class Trio_Simulator {
 		String data = "";
 		if(getPrettyMutation2().size() != 0) {
 			for (int i = 0; i < getPrettyMutation2().size(); i++) {
-				data += getID2().get(i) + "\t" + getPOS2().get(i) + "\t" + getPrettyMutation2().get(i) + "\t";
-				for (int j = 0; j < id_p_allele.size(); j++) {
-//					if (getID2().get(i).equals(id_p_allele.get(j)[2])) {
-						data += id_p_allele.get(j)[0] + "\t" + id_p_allele.get(j)[1]+ "\n";
-//					}
+				if (getPrettyMutation2().get(i) != "") {
+					data += getID2().get(i) + "\t" + getPOS2().get(i) + "\t" + getPrettyMutation2().get(i) + "\t";
+					data += FrostRunner.parental_chromatids[0] + "\t" + FrostRunner.parental_chromatids[1]+ "\n";
 				}
+				else
+					continue;			
 
 			}
 		}
 		return data;
 	}
+
 }

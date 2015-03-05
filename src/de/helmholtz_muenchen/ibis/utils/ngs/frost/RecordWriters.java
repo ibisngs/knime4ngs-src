@@ -2,7 +2,9 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
@@ -11,41 +13,50 @@ import java.util.ArrayList;
  *
  */
 
-public class OutputWriters {
+public class RecordWriters {
 
 	private FastaReader fs;
 	private InputScanner in;
 	private Trio_Simulator trio;
 	
-	public OutputWriters(FastaReader fs, InputScanner in, Trio_Simulator trio) {
+	public RecordWriters(FastaReader fs, InputScanner in, Trio_Simulator trio) {
 		// TODO Auto-generated constructor stub
 		setFs(fs);
 		setIn(in);
 		setTrio(trio);
 	}
 	
+	public RecordWriters() {
+		
+	}
+	
 	protected void write_simple_string(String fileName, String s) {
-		File file = new File(fileName);
-		try {
-			BufferedWriter bw = new BufferedWriter( new FileWriter(file));
-			bw.write(s + "\n");	
-			bw.close();
+		// TODO Auto-generated method stub
+		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			pw.write(s);
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
-		}		
+		}
+//		File file = new File(fileName);
+//		try {
+//			BufferedWriter bw = new BufferedWriter( new FileWriter(file));
+//			bw.write(s + "\n");	
+//			bw.close();
+//		} catch (Exception e) {
+//			System.err.println("Error: " + e.getMessage());
+//			e.printStackTrace();
+//		}		
 	}
 	
-	protected void write_InputData_arrList(String fileName, ArrayList<InputData> iData) {
-		File file = new File(fileName);
-		try {
-			BufferedWriter bw = new BufferedWriter( new FileWriter(file));
-			for (int i = 0; i < iData.size(); i++) {
-				for (int j = 0; j < iData.get(i).getPositions().size(); j++) {
-					bw.write(iData.get(i).getId() + "\t" + iData.get(i).getPositions().get(j) + "\n");
-				}
-			}	
-			bw.close();
+	protected void write_InputData(String fileName, InputData iData, int n) {
+		// TODO Auto-generated method stub
+		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			for (int i = 0; i < iData.getPositions().get(n).size(); i++) {
+				pw.write(iData.getId() + "\t" + iData.getPositions().get(n).get(i) + "\n");
+				
+			}
+			
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
@@ -55,13 +66,10 @@ public class OutputWriters {
 	protected void write_vcf(String fileName, ArrayList<String> ID, 
 			ArrayList<Integer> POS, ArrayList<String> prettyMutation) {
 		// TODO Auto-generated method stub
-		File file = new File(fileName);
-		try {
-			BufferedWriter bw = new BufferedWriter( new FileWriter(file));
+		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 			for (int i = 0; i < prettyMutation.size(); i++) {
-				bw.write(ID.get(i) + "\t" + POS.get(i) + "\t" + prettyMutation.get(i) + "\n");
-			}	
-			bw.close();
+				pw.write(ID.get(i) + "\t" + POS.get(i) + "\t" + prettyMutation.get(i) + "\n");
+			}
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
