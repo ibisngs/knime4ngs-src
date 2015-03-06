@@ -40,7 +40,7 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		String INFILE				= inData[0].iterator().next().getCell(0).toString();
 		ArrayList<String> command 	= new ArrayList<String>();
 		command.add("-I "+INFILE);
-		command.add("-emitRefConfidence GVCF");
+		command.add("--emitRefConfidence GVCF");
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
 		command.add("-L "+m_BED_FILE.getStringValue());
