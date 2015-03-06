@@ -1,14 +1,29 @@
 package de.helmholtz_muenchen.ibis.ngs.art;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
+import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
@@ -16,7 +31,10 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
@@ -24,6 +42,15 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+
+import de.helmholtz_muenchen.ibis.ngs.bamsamconverter.BAMSAMConverterNodeModel;
+import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
+import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
 
 /**
@@ -34,34 +61,87 @@ import org.knime.core.node.NodeSettingsWO;
  */
 public class ArtNodeModel extends NodeModel {
     
-    // the logger instance
-    private static final NodeLogger logger = NodeLogger
-            .getLogger(ArtNodeModel.class);
-        
-    /** the settings key which is used to retrieve and 
-        store the settings (from the dialog or from a settings file)    
-       (package visibility to be usable from the dialog). */
-	static final String CFGKEY_COUNT = "Count";
+	static boolean optionalPort = false;
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(ArtNodeModel.class); //not used yet
+    
+	public static final String ART_PATH = "/home/ibis/tanzeem.haque/Documents/3rd_party_tools/art/art_bin_VanillaIceCream/art_illumina";
+//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs_optionalport/"; 
+	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs/"; 
+
+	/**
+	 * is activated iff optionalPort is set to false
+	 */
+	public static final String CFGKEY_ID_PATH = "id";
+	
+	/**
+	 *-l the length of reads to be simulated
+	 */
+	public static final String CFGKEY_LENGTH = "length";
+	/**
+	 * -m the mean size of DNA/RNA fragments for paired-end simulations
+	 */
+	public static final String CFGKEY_MEAN_SIZE = "mean_size";
+	/**
+	 * -f the fold of read coverage to be simulated or number of reads/read pairs generated for each amplicon
+	 */
+	public static final String CFGKEY_FOLD = "fold";
+		/**
+	 * -s the standard deviation of DNA/RNA fragment size for paired-end simulations.
+	 */
+	public static final String CFGKEY_SD = "standard_dev";
+	/**
+	 * Will be used only as checkbox: optional parameters
+	 */
+	public static final String CFGKEY_USE_NO_MASK = "use_nf_0";
+	public static final String CFGKEY_USE_MATE_PAIR = "use_mp";
+	public static final String CFGKEY_USE_ERROR_FREE = "use_ef";
+	public static final String CFGKEY_USE_SEPERATE_PROFILE = "use_sp";
+	public static final String CFGKEY_USE_QUIET = "use_q";
 
     /** initial default count value. */
-    static final int DEFAULT_COUNT = 100;
+    static final int DEFAULT_LENGTH = 50;
+    static final int DEFAULT_MEAN_SIZE = 200;
+    static final int DEFAULT_FOLD = 20;
+    static final int DEFAULT_SD = 10;
 
-    // example value: the models count variable filled from the dialog 
-    // and used in the models execution method. The default components of the
-    // dialog work with "SettingsModels".
-    private final SettingsModelIntegerBounded m_count =
-        new SettingsModelIntegerBounded(ArtNodeModel.CFGKEY_COUNT,
-                    ArtNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE);
-    
+    private final SettingsModelString m_ID_PATH = new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,""); // path to fasta files
+    /**
+     * User defined parameters
+     */
+    private final SettingsModelIntegerBounded m_LENGTH = new SettingsModelIntegerBounded(ArtNodeModel.CFGKEY_LENGTH, ArtNodeModel.DEFAULT_LENGTH,1, 250);
+    private final SettingsModelIntegerBounded m_MEAN_SIZE = new SettingsModelIntegerBounded(ArtNodeModel.CFGKEY_MEAN_SIZE, ArtNodeModel.DEFAULT_MEAN_SIZE,1, Integer.MAX_VALUE);
+    private final SettingsModelIntegerBounded m_FOLD = new SettingsModelIntegerBounded(ArtNodeModel.CFGKEY_FOLD, ArtNodeModel.DEFAULT_FOLD,1, 100);
+    private final SettingsModelIntegerBounded m_SD = new SettingsModelIntegerBounded(ArtNodeModel.CFGKEY_SD, ArtNodeModel.DEFAULT_LENGTH,1, 100);
+
+    /**
+	 * check box config
+	 */   
+    private final SettingsModelBoolean m_use_NO_MASK = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_NO_MASK, false); //if true, use -nf 0
+	private final SettingsModelBoolean m_use_MATE_PAIR = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_MATE_PAIR, false); //if true, use -mp: if -m >2000 -mp on
+	private final SettingsModelBoolean m_use_ERROR_FREE = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_ERROR_FREE, false); //if true, use -ef
+	private final SettingsModelBoolean m_use_SEPERATE_PROFILE = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_SEPERATE_PROFILE, false); //if true, use -sp
+	private final SettingsModelBoolean m_use_QUIET = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_QUIET, false); //if false, do not use -q
+
+
+	/**The Output Col Names */
+	public static ArrayList<String> IDS;
+	public static final String OUT_COL = "fastq_output_";
+	
+	private ArrayList<Art_object> art_arrList = new ArrayList<Art_object>(); //May be there are more than one chromosome
 
     /**
      * Constructor for the node model.
      */
     protected ArtNodeModel() {
     
-        // TODO one incoming port and one outgoing port is assumed
-        super(1, 1);
+        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+        /**
+         * the user defined param-values are enabled
+         */
+        m_LENGTH.setEnabled(true);
+        m_MEAN_SIZE.setEnabled(true);
+        m_FOLD.setEnabled(true);
+        m_SD.setEnabled(true);
     }
 
     /**
@@ -72,40 +152,145 @@ public class ArtNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
 
         // TODO do something here
-        logger.info("Node Model Stub... this is not yet implemented !");
+//        LOGGER.info("Node Model Stub... this is not yet implemented !");
 
-        
-        // the data table spec of the single output table, 
-        // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[3];
-        allColSpecs[0] = 
-            new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
-        allColSpecs[1] = 
-            new DataColumnSpecCreator("Column 1", DoubleCell.TYPE).createSpec();
-        allColSpecs[2] = 
-            new DataColumnSpecCreator("Column 2", IntCell.TYPE).createSpec();
+    	/**
+    	 * Handling the inputs
+    	 */	
+    	if(optionalPort){
+    		CloseableRowIterator it = inData[0].iterator();
+    		String record = inData[0].getSpec().getName();
+//    		System.out.println(record);
+    		while (it.hasNext()) {
+    			DataRow row = it.next();
+    			String id = row.getKey().toString().substring("Row: ".length());
+//    			String id = fasta_info[0];
+    			if (id.startsWith("record_files"))
+    				break;
+    			System.out.println("ART KNIME ID: " + id);
+    			ArtNodeModel.IDS.add(id);
+    			String[] trio = {
+    					row.getCell(0).toString(), //F_0
+    					row.getCell(1).toString(), //F_1
+    					row.getCell(2).toString(), //M_0
+    					row.getCell(3).toString(), //M_1
+    					row.getCell(4).toString(), //C_0
+    					row.getCell(5).toString() // C_1
+    					};
+//    			for (String s: trio)
+//    				System.out.println("inData 0: "+s);
+    			/**
+    			 * Build a Knime datatyp for the trios (TODO)
+    			 */
+    			art_arrList.add(new Art_object(id, trio));
+    		}
+//    		path2ids = inData[0].iterator().next().getCell(0).toString();
+    	}
+    	else{
+    		String path2ids = m_ID_PATH.getStringValue();
+//    		System.out.println("PATH IS HERE: " + path2ids);
+    		ArtNodeModel.IDS = new ArrayList<String>();
+    		ArtNodeModel.IDS = getIds(path2ids);
+    		art_arrList = getUserInput(path2ids, ArtNodeModel.IDS);
+    	}
+    	/**
+    	 * here we go...
+    	 */
+    	execute_help(exec, art_arrList);
+
+    	
+    	/**
+    	 * The output handler
+    	 */
+    	
+    	int col_num = 2; //ArtNodeModel.IDS.size();
+        DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];/**
+         * create the column(s) for (multi)fastq output of a trio with 6 rows
+         */
+        /**
+    	for (int i = 0; i < col_num; i++) {
+            allColSpecs[i] = new DataColumnSpecCreator("Col. " + (i+1) + ": " + OUT_COL + ArtNodeModel.IDS.get(i), FileCell.TYPE).createSpec();
+
+    	}**/
+        allColSpecs[0] = new DataColumnSpecCreator("Col. 1: " + OUT_COL + "fwd", FileCell.TYPE).createSpec();
+        allColSpecs[1] = new DataColumnSpecCreator("Col. 2: " + OUT_COL + "rev", FileCell.TYPE).createSpec();
+
+
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        // the execution context will provide us with storage capacity, in this
-        // case a data container to which we will add rows sequentially
-        // Note, this container can also handle arbitrary big data tables, it
-        // will buffer to disc if necessary.
         BufferedDataContainer container = exec.createDataContainer(outputSpec);
         // let's add m_count rows to it
-        for (int i = 0; i < m_count.getIntValue(); i++) {
-            RowKey key = new RowKey("Row " + i);
+        /**
+         * creating the 6 rows
+         * i = 0,1,2,3,4,5
+         */
+        FileCell[] cells = new FileCell[col_num];
+        
+        int row_idx = 0;
+        for (int i = 0; i < ArtNodeModel.IDS.size(); i++) {
+        	System.out.println("IDs for output" + ArtNodeModel.IDS.get(i));
+            RowKey key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i));
+
+        	for (int j = 0; j < 3; j++) {
+                switch (j) {
+				case 0:
+	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_F");
+					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_F_fwd.fq");
+					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_F_rev.fq");
+					break;
+				case 1:
+	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_M");
+					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_M_fwd.fq");
+					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_M_rev.fq");
+					break;
+				case 2:
+	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_C");
+					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_C_fwd.fq");
+					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_C_rev.fq");
+					break;
+				
+				}
+                row_idx++;
+
+        	}
+        		
+        
+        /**
+        for (int i = 0; i < 6; i++) {
+            RowKey key = new RowKey("Row " + (i+1));
             // the cells of the current row, the types of the cells must match
+            //number of cells = col_num
             // the column spec (see above)
-            DataCell[] cells = new DataCell[3];
-            cells[0] = new StringCell("String_" + i); 
-            cells[1] = new DoubleCell(0.5 * i); 
-            cells[2] = new IntCell(i);
+			
+           
+			for (int j = 0; j < col_num; j++) {
+				switch (i) {
+				case 0:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_F_fwd.fq");
+					break;
+				case 1:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_F_rev.fq");
+					break;
+				case 2:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_M_fwd.fq");
+					break;
+				case 3:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_M_rev.fq");
+					break;
+				case 4:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_C_fwd.fq");
+					break;
+				case 5:
+					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_C_rev.fq");
+					break;
+				}
+
+			}**/
             DataRow row = new DefaultRow(key, cells);
             container.addRowToTable(row);
             
             // check if the execution monitor was canceled
-            exec.checkCanceled();
-            exec.setProgress(i / (double)m_count.getIntValue(), 
-                "Adding row " + i);
+            exec.checkCanceled();        
+
         }
         // once we are done, we close the container and return its table
         container.close();
@@ -113,6 +298,238 @@ public class ArtNodeModel extends NodeModel {
         return new BufferedDataTable[]{out};
     }
 
+    /**
+     * Helper method for executing commands
+     * @param exec
+     * @param art_obj
+     * @throws CanceledExecutionException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     * @throws UnsuccessfulExecutionException
+     * @throws IOException 
+     */
+    private void execute_help(final ExecutionContext exec, ArrayList<Art_object> art_obj)
+			throws CanceledExecutionException, InterruptedException,
+			ExecutionException, UnsuccessfulExecutionException, IOException {
+		
+		/**
+    	 * "$art -i /".$_[$i].".fa -o /".$_[$i]."_ -l 50 -m 200 -f 20 -s 10 -na -p";
+    	 */
+//    	System.out.println("I CAME TO EXECUTE HELP");
+		
+		for (int i = 0; i < art_obj.size(); i++) { // #chr ids
+
+			for(int j = 0; j < 6; j++) { // # the trios f0, f1, m0, m1, c0, c1
+				ArrayList<String> command = new ArrayList<String>();
+
+				command.add(ArtNodeModel.ART_PATH);
+		    	command.add("-na"); // no aln file
+		    	command.add("-p"); // enable paired-ended reads
+
+		    	if(m_use_NO_MASK.getBooleanValue()) {
+		    		command.add("-nf 0");
+		    	}
+		    	if(m_use_MATE_PAIR.getBooleanValue()) {
+		        	command.add("-mp");
+		    	}
+		    	if(m_use_ERROR_FREE.getBooleanValue()){
+		    		command.add("-ef");
+		    	}
+		    	if(m_use_SEPERATE_PROFILE.getBooleanValue()){
+		    		command.add("-sp");
+		    	}
+		    	if(m_use_QUIET.getBooleanValue()){
+		    		command.add("-q");
+		    	}
+		    	
+		    	command.add("-i");
+		    	command.add(art_obj.get(i).getTrio_fasta()[j]); // the name of the fasta file
+
+		    	/**
+		    	 * Getting the correct output name: chr21_F_0.fa => chr21_F_0_1/2.fq
+		    	 *
+		    	 */
+		    	String[] dir = art_obj.get(i).getTrio_fasta()[j].split("/");
+		    	String prefix = dir[dir.length-1].substring(0, dir[dir.length-1].length()-3); 
+		    	
+		    	command.add("-o");
+		    	command.add(ArtNodeModel.INTERNAL_OUTPUT_PATH + prefix + "_");
+		    	
+		    	command.add("-l");
+		    	command.add(m_LENGTH.getIntValue() + "");
+		    	
+		    	command.add("-m");
+		    	command.add(m_MEAN_SIZE.getIntValue() + "");
+
+		    	command.add("-f");
+		    	command.add(m_FOLD.getIntValue() + "");
+
+		    	command.add("-s");
+		    	command.add(m_SD.getIntValue() + "");
+		    	
+		    	for (String s : command) {
+		    		System.out.print(s + " ");
+		    	}
+		    	System.out.println();
+		    	/**Execute**/
+//				long startTime = System.currentTimeMillis();
+		    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+//				long endTime   = System.currentTimeMillis();
+//				DecimalFormat formatter = new DecimalFormat("#0.00000");
+//				System.out.println("Execution time for Art " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+			}
+			mergeFQs(exec, art_obj.get(i).getId());
+		}
+	}
+
+	/**
+	 * @param path2id: ids.txt file
+	 * @return the ids are retrived from the ids.txt
+	 */
+	private ArrayList<String> getIds(final String path2id) { 
+		
+		ArrayList<String> ids = new ArrayList<String>();
+		/**
+		 * or just ids = FrostRunner.ID_List;
+		 */
+
+		try {
+			// System.out.println(path2id);
+			BufferedReader in = new BufferedReader(new FileReader(path2id));
+			String currentLine = "";
+			
+
+			while ((currentLine = in.readLine()) != null) {
+				if (!currentLine.trim().equals("")) {
+					String [] info = currentLine.split("\t");
+					int chunks = (Integer.parseInt(info[1])/FrostRunner.chunk_length)+1;
+					for (int i = 0; i < chunks; i++)
+						ids.add(i + "_" + info[0]);
+				}
+			}
+			
+		} catch (IOException e) {
+			System.out.println("Error when reading " + path2id);
+			e.printStackTrace();
+
+		}
+
+		return ids;
+	}
+
+	/**
+	 * User upload
+	 * @param path: The path to the folder where we apparently have the Frost output like it should be:
+	 * The fasta files, and the ids.txt
+	 * @return
+	 */
+	private ArrayList<Art_object> getUserInput(final String path, ArrayList<String> ids) {
+		// TODO Auto-generated method stub
+		ArrayList<Art_object> arrList = new ArrayList<Art_object>();
+
+		/**
+		 * Build a Knime datatyp for the trios (TODO)
+		 */		
+		String directory = path.substring(0, path.length()-14);
+		File folder = new File(directory); //../../ids.txt
+//		System.out.println(folder.toString());
+		for(String id : ids) {
+//			System.out.println("ID: " + id);
+			String[] trios = new String[6];
+			for (String fileEntry: folder.list()) {
+//				System.out.println(fileEntry.substring(0, fileEntry.length()-8));
+				if (fileEntry.endsWith(".fa") && fileEntry.startsWith(id)) {
+					trios[0] = directory + "/" + id + "_F_0.fa";
+					trios[1] = directory + "/" + id + "_F_1.fa";
+					trios[2] = directory + "/" + id + "_M_0.fa";
+					trios[3] = directory + "/" + id + "_M_1.fa";
+					trios[4] = directory + "/" + id + "_C_0.fa";
+					trios[5] = directory + "/" + id + "_C_1.fa";
+
+				}
+			}
+//			for (String s: trios)
+//				System.out.println(s);
+			arrList.add(new Art_object(id, trios));
+		}
+//		for (Art_object a: arrList) {
+//			System.out.println(a.getId() + "\t" + a.getTrio_fasta()[0]+ "\t" + a.getTrio_fasta()[1]
+//					+ "\t" + a.getTrio_fasta()[2]+ "\t" + a.getTrio_fasta()[3]
+//							+ "\t" + a.getTrio_fasta()[4]+ "\t" + a.getTrio_fasta()[5]);
+//		}
+		
+		return arrList;
+	}
+
+	/**
+	 * art_object : retrieve the path to the trio fq file (one id)
+	 * @param id 
+	 * @throws UnsuccessfulExecutionException 
+	 * @throws ExecutionException 
+	 * @throws InterruptedException 
+	 * @throws CanceledExecutionException 
+	 * @throws IOException 
+	 */
+	private void mergeFQs(final ExecutionContext exec, String id) throws CanceledExecutionException, InterruptedException,
+	ExecutionException, UnsuccessfulExecutionException, IOException {
+		
+	// TODO Auto-generated method stub
+//		File folder = new File(ArtNodeModel.INTERNAL_OUTPUT_PATH);
+//		for(String fq: folder.list()) {
+//			System.out.println(fq);
+//			
+//		}
+		
+		for (int i = 0; i < 3; i++) {
+			String indiv = "";
+			switch(i) {
+			case 0:
+				indiv = "F";
+				break;
+			case 1:
+				indiv = "M";
+				break;			
+			case 2:
+				indiv = "C";
+				break;
+			}
+			for (int j = 0; j < 2; j++) {
+				String read = ""; int num = 0;
+				switch(j) {
+				case 0:
+					read = "fwd";
+					num = 1;
+					break;
+				case 1:
+					read = "rev";
+					num = 2;
+					break;
+				}
+				String[] input_fqs = {ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_0_" + num + ".fq",
+						ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_1_" + num + ".fq"};
+				String output_fq = ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_" + read + ".fq";
+				
+				ArrayList<String> merge_command = new ArrayList<String>(5);
+				merge_command.add("sh /home/ibis/tanzeem.haque/Documents/Scripts/Sequenciator/mergeFqs.sh");
+				merge_command.add(input_fqs[0]);
+				merge_command.add(input_fqs[1]);
+				merge_command.add(output_fq);
+				
+				for (String s : merge_command) {
+					System.out.print(s + " ");
+				}
+				System.out.println();
+				
+				
+				/**Execute**/
+		    	Executor.executeCommand(new String[]{StringUtils.join(merge_command, " ")},exec,LOGGER);
+		    	boolean fq1_del = new File(input_fqs[0]).delete(), fq2_del = new File(input_fqs[1]).delete();
+		    	System.out.println("FQDEL: " + fq1_del + "\t" + fq2_del);
+		    	
+			}
+		}
+	}
+	
     /**
      * {@inheritDoc}
      */
@@ -135,7 +552,37 @@ public class ArtNodeModel extends NodeModel {
         // to execute. If the node can execute in its current state return
         // the spec of its output data table(s) (if you can, otherwise an array
         // with null elements), or throw an exception with a useful user message
+    	// flowVariables
+        
+    	
+    	/**
+    	 * Check OptionalInputPort
+    	 */
+		try{
+			inSpecs[0].getColumnNames();
+			String[] colNames = inSpecs[0].getColumnNames();
+			optionalPort=true;
+			
+			for (String s : colNames)
+				System.out.println(s);
 
+			if (colNames.length==6 && colNames[0].equals(FrostNodeModel.OUT_COL + "F_0.fa") &&
+					colNames[5].equals(FrostNodeModel.OUT_COL + "C_1.fa")) 
+				m_ID_PATH.setEnabled(false);
+			else
+				throw new InvalidSettingsException("The in-port is invalid! Don't use an in-port or connect the right node.");
+			
+
+    	}catch(NullPointerException npe){
+    		m_ID_PATH.setEnabled(true);
+			optionalPort=false;
+    	
+    	}
+
+		/*******************************************************************
+		 ************         Check if Outfile exists            ***********
+		 *******************************************************************/
+//		System.out.println(optionalPort);
         return new DataTableSpec[]{null};
     }
 
@@ -146,8 +593,17 @@ public class ArtNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
         // TODO save user settings to the config object.
-        
-        m_count.saveSettingsTo(settings);
+        if (!optionalPort)
+        	m_ID_PATH.saveSettingsTo(settings);
+        m_LENGTH.saveSettingsTo(settings);
+        m_MEAN_SIZE.saveSettingsTo(settings);
+        m_FOLD.saveSettingsTo(settings);
+        m_SD.saveSettingsTo(settings);
+        m_use_NO_MASK.saveSettingsTo(settings);
+        m_use_MATE_PAIR.saveSettingsTo(settings);
+        m_use_ERROR_FREE.saveSettingsTo(settings);
+        m_use_SEPERATE_PROFILE.saveSettingsTo(settings);
+        m_use_QUIET.saveSettingsTo(settings);
 
     }
 
@@ -162,8 +618,17 @@ public class ArtNodeModel extends NodeModel {
         // It can be safely assumed that the settings are valided by the 
         // method below.
         
-        m_count.loadSettingsFrom(settings);
-
+    	if (!optionalPort)
+        	m_ID_PATH.loadSettingsFrom(settings);
+        m_LENGTH.loadSettingsFrom(settings);
+        m_MEAN_SIZE.loadSettingsFrom(settings);
+        m_FOLD.loadSettingsFrom(settings);
+        m_SD.loadSettingsFrom(settings);
+        m_use_NO_MASK.loadSettingsFrom(settings);
+        m_use_MATE_PAIR.loadSettingsFrom(settings);
+        m_use_ERROR_FREE.loadSettingsFrom(settings);
+        m_use_SEPERATE_PROFILE.loadSettingsFrom(settings);
+        m_use_QUIET.loadSettingsFrom(settings);
     }
 
     /**
@@ -177,8 +642,17 @@ public class ArtNodeModel extends NodeModel {
         // e.g. if the count is in a certain range (which is ensured by the
         // SettingsModel).
         // Do not actually set any values of any member variables.
-
-        m_count.validateSettings(settings);
+    	if (!optionalPort)
+        	m_ID_PATH.validateSettings(settings);
+        m_LENGTH.validateSettings(settings);
+        m_MEAN_SIZE.validateSettings(settings);
+        m_FOLD.validateSettings(settings);
+        m_SD.validateSettings(settings);
+        m_use_NO_MASK.validateSettings(settings);
+        m_use_MATE_PAIR.validateSettings(settings);
+        m_use_ERROR_FREE.validateSettings(settings);
+        m_use_SEPERATE_PROFILE.validateSettings(settings);
+        m_use_QUIET.validateSettings(settings);
 
     }
     
@@ -214,6 +688,39 @@ public class ArtNodeModel extends NodeModel {
         // of). Save here only the other internals that need to be preserved
         // (e.g. data used by the views).
 
+    }
+    
+    /**
+     * 
+     * A nested internal class for the art inputs
+     * the chromosome id along with the 6 trio fastas
+     * @author tanzeem.haque
+     *
+     */
+    private static class Art_object {
+    	private String id;
+    	private String[] trio_fasta = new String[6];
+    	
+    	private Art_object(String id, String[] trio_fasta) {
+    		setId(id);
+    		setTrio_fasta(trio_fasta);
+    	}
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String[] getTrio_fasta() {
+			return trio_fasta;
+		}
+
+		public void setTrio_fasta(String[] trio_fasta) {
+			this.trio_fasta = trio_fasta;
+		}
     }
 
 }
