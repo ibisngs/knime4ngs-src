@@ -65,6 +65,8 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.plotgatkgenotypeconcordance.PlotGATKGenotypeConcordanceNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.plotgatkgenotypeconcordance.PlotGATKGenotypeConcordanceNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller.GATKHaplotypeCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller.GATKHaplotypeCallerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory"/>
 
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
@@ -110,6 +112,7 @@
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
 		<!-- NGS -->
 		<category icon="/libs/icons/icon_ngs.png" level-id="ngs" name="Next Generation Sequencing" path="/ibis/"/>
+		<category icon="/libs/icons/icon_r_red2.png" level-id="ngs_seq" name="Sequenciator" path="/ibis/ngs/ngs_pre/"/>
 		<category icon="/libs/icons/icon_r_red2.png" level-id="ngs_pre" name="Preprocessing" path="/ibis/ngs/"/>
 		<category icon="/libs/icons/icon_r_yellow2.png" level-id="ngs_asm" name="Mapping" path="/ibis/ngs/"/>
 		<category icon="/libs/icons/icon_r_green2.png" level-id="ngs_post" name="Postprocessing" path="/ibis/ngs/"/>
