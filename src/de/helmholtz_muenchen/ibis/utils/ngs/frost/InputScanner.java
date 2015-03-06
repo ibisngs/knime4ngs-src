@@ -161,7 +161,7 @@ public class InputScanner {
 		double b = a * this.mutRate*5300;
 		int variants =  (int)(b/1);
 //		int variants = 10;
-		System.out.println("Variants: " + variants);
+//		System.out.println("Variants: " + variants);
 		return variants;
 
 	}

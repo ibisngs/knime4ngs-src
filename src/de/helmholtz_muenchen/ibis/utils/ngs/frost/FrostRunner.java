@@ -125,8 +125,12 @@ public class FrostRunner {
 		
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
-		System.err.println("Execution time to check FASTA " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		System.err.println("Execution time to check FASTA " + formatter.format((endTime - startTime) / 1000d) + " seconds" + "\n");
 
+//		System.out.println(fc.input_chr_length.size());
+		for (int i = 0; i < fc.input_chr_length.size(); i++)
+			System.out.println((i+1) +". " + fc.input_chr_length.get(i));
+		
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
 		String ids = "";
@@ -137,6 +141,10 @@ public class FrostRunner {
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
 			int currentLength = Integer.parseInt(fc.input_chr_length.get(i).split("\t")[1]);
+			/**
+			 * Some info printing
+			 */
+			System.out.println();
 			System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
 			FrostRunner.total_mutations = (int)((currentLength/Math.pow(10, 8) * mutRate * 5300)/(1));
 			FrostRunner.total_deNovo = (int)(FrostRunner.total_mutations/5300);
@@ -158,10 +166,12 @@ public class FrostRunner {
 			endTime   = System.currentTimeMillis();
 			formatter = new DecimalFormat("#0.00000");
 			System.err.println("Execution time to read " + currentChr + " FASTA: " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		
 
 			/**
 			 * preparing the mutations and recombination positions
 			 */	
+
 			startTime = System.currentTimeMillis();
 			InputScanner in = new InputScanner(mutRate, recombination, seed, chunk);
 			in.prepare(currentChr, fr.getLength());//currentLength
@@ -173,9 +183,11 @@ public class FrostRunner {
 				 * Creating the trio: invoke parental mutation, denovo for child,
 				 * recombination for child
 				 */	
+			
 			System.out.println("CHUNK SIZE: " + chunk + "\t" + currentChr);
 			startTime = System.currentTimeMillis();
 		
+			
 			for (int j = 0; j < chunk; j++) {
 
 //				System.err.println("P1: " + FrostRunner.parental_chromatids[0] + "\t" + "P2: " + FrostRunner.parental_chromatids[1]);
@@ -187,6 +199,7 @@ public class FrostRunner {
 
 				startTime = System.currentTimeMillis();
 				System.out.println("CHUNKY #"+j);
+				
 //				System.out.println("mutation_index_parents: " + mutation_index_parent);
 //				System.out.println("denovo_index_child: " + denovo_index_child);
 //				System.out.println("recombination_index: " + recombination_index);
@@ -221,10 +234,12 @@ public class FrostRunner {
 //			mutation_index_parent = 0;
 //			denovo_index_child = 0;
 //			recombination_index = 0;
-			System.gc();
+			System.gc();		
+			memory();
 			System.out.println();
 
 		}
+
 		rw.write_simple_string(INTERNAL_PATH + "ids_chunk.txt", ids);
 		
 

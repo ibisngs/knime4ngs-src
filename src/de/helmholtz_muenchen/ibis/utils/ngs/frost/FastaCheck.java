@@ -72,7 +72,7 @@ public class FastaCheck {
 	 */
 	long input_length = 0;
 	/**
-	 * choose the F0 or F1 and M0 or M1 in th every beginninng
+	 * choose the F0 or F1 and M0 or M1 in the very beginninng
 	 */
 	private String[] parentalChromatids;
 	
@@ -105,6 +105,8 @@ public class FastaCheck {
 	        		this.input_chr_length.add(currentLine + "\t" + tmp_l);
 	        		this.input_length += (long) tmp_l;	 
 //	        		System.out.println(tmp_l);
+//	        		FrostRunner.memory();
+
 	        	} 
 //	        	else 
 //	        		continue;

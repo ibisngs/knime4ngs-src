@@ -67,34 +67,44 @@ public final class FastaReader{
 	        }
 	        */
 
-	        
-	        while((currentLine = in.readLine())!= null) {
+        	boolean read = false;
+	        for(currentLine = in.readLine().trim(); currentLine != null; currentLine = in.readLine()) {
 	        	/** while (sc.hasNextLine()) {
 	        	String currentLine = sc.nextLine().trim();**/
 //	        	String tmp_id = "";//currentLine.substring(1).trim();//.replaceAll("\\s+", "_");
 //	        	System.err.println(tmp_id);
-	        	if(currentLine.length() > 0 && currentLine.charAt(0) == '>'&& currentLine.substring(1).trim().replaceAll("\\s+", "_").equals(currentChr)) {
-	        		seq = buffer.toString();
-	        		buffer = new StringBuffer();
-	        		id=currentLine.substring(1).trim();
-	        		System.out.println("ID in FR: " + id);
-	        		FrostRunner.memory();
-	        		   		 	        		
+	        	if(currentLine.length() > 0 && currentLine.charAt(0) == '>') {
+	        		if (currentLine.substring(1).trim()./*replaceAll("\\s+", "_").*/equals(currentChr)) {
+						seq = buffer.toString();
+	        			buffer = new StringBuffer();
+		        		id=currentLine.substring(1).trim();
+//		        		System.out.println("ID in FR: " + id);
+		        		read = true;
+//		        		FrostRunner.memory();
+	        		}
+	        		else {
+	        			read = false;
+//	        			System.out.println("NOT READING");
+		        		continue;
+	        		}
 	        	}
-	        	else if(currentLine.length() > 0 && currentLine.charAt(0) == '>'&& !currentLine.substring(1).trim().replaceAll("\\s+", "_").equals(currentChr)) {
-//	        		System.out.println("skip");
-//	        		buffer = new StringBuffer();
-	        		continue;
-	        		   		 	        		
-	        	}
+	        		
 	        	else {
-        			buffer.append(currentLine.trim());
+					if (read) {
+						buffer.append(currentLine.trim());
+
+					}
+//					else
+//						continue;
+	        		
         		}
 	        }
+//    		FrostRunner.memory();
+
 		
 	        if( buffer.length() != 0 ){
         		seq = buffer.toString(); 
-//        		System.out.println("Length in FR: " + seq.length());
+//        		System.out.println("Sequence: " + seq.substring(seq.length()-10, seq.length()-1));
 	        }
 
 		}

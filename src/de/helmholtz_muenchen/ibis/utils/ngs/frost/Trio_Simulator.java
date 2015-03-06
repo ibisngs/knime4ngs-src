@@ -187,8 +187,8 @@ public class Trio_Simulator {
 				end = this.fr.getLength();
 //			System.out.println("BEGIN: " + begin + "\t" + "END: " + end);
 			mutate(this.fr.getSequence().substring(begin, end), null, iData_parents, parent_file, id, "m");
-
-//			System.out.println("FASTA LENGTH PARENTS: " + this.fr.getSequence() .substring(begin, end).length());
+//			System.out.println("FASTA LENGTH TOTAL: " + this.fr.getLength());
+//			System.out.println("FASTA LENGTH PARENTS: " + this.fr.getSequence().substring(begin, end).length());
 		}
 	}
 	/**
@@ -218,13 +218,13 @@ public class Trio_Simulator {
 			delete_existing(child_file);
 
 			FastaReader fr = new FastaReader();
-			fr.readSequenceFromFile(parent_file[0], currentChr);
+			fr.readSequenceFromFile(parent_file[0], id);
 			String pop = fr.getSequence();
 
 //			System.out.println("FASTA LENGTH CHILD (pop): " + pop.length());
 
 			fr = new FastaReader();
-			fr.readSequenceFromFile(parent_file[1], currentChr);
+			fr.readSequenceFromFile(parent_file[1], id);
 			String mom = fr.getSequence();
 			
 //			System.out.println("FASTA LENGTH CHILD (mom): " + mom.length());
@@ -236,11 +236,11 @@ public class Trio_Simulator {
 			// Work for child_file is done
 
 			fr = new FastaReader();
-			fr.readSequenceFromFile(child_file[0], currentChr);
+			fr.readSequenceFromFile(child_file[0], id);
 			String child_0 = fr.getSequence();
 
 			fr = new FastaReader();
-			fr.readSequenceFromFile(child_file[1], currentChr);
+			fr.readSequenceFromFile(child_file[1], id);
 			String child_1 = fr.getSequence();
 			
 			String[] child_file_fin = { path + id + "_C_0.fa",
