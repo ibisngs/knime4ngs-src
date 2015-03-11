@@ -2,22 +2,13 @@ package de.helmholtz_muenchen.ibis.ngs.art;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DecimalFormat;
+
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
@@ -25,14 +16,11 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.RowKey;
 import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
+
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
@@ -43,14 +31,13 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import de.helmholtz_muenchen.ibis.ngs.bamsamconverter.BAMSAMConverterNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
+import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 
 
 /**
@@ -67,6 +54,7 @@ public class ArtNodeModel extends NodeModel {
 	public static final String ART_PATH = "/home/ibis/tanzeem.haque/Documents/3rd_party_tools/art/art_bin_VanillaIceCream/art_illumina";
 //	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs_optionalport/"; 
 	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs/"; 
+
 
 	/**
 	 * is activated iff optionalPort is set to false
@@ -124,10 +112,11 @@ public class ArtNodeModel extends NodeModel {
 
 
 	/**The Output Col Names */
-	public static ArrayList<String> IDS;
 	public static final String OUT_COL = "fastq_output_";
-	
+	public static ArrayList<String> IDS = new ArrayList<>();
 	private ArrayList<Art_object> art_arrList = new ArrayList<Art_object>(); //May be there are more than one chromosome
+
+	
 
     /**
      * Constructor for the node model.
@@ -149,11 +138,11 @@ public class ArtNodeModel extends NodeModel {
      */
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
+            final ExecutionContext exec) throws CanceledExecutionException, InterruptedException,
+			ExecutionException, UnsuccessfulExecutionException, IOException {
 
         // TODO do something here
 //        LOGGER.info("Node Model Stub... this is not yet implemented !");
-
     	/**
     	 * Handling the inputs
     	 */	
@@ -165,10 +154,16 @@ public class ArtNodeModel extends NodeModel {
     			DataRow row = it.next();
     			String id = row.getKey().toString().substring("Row: ".length());
 //    			String id = fasta_info[0];
-    			if (id.startsWith("record_files"))
+    			if (id.startsWith("record_files")) {
+    				System.err.println(id);
     				break;
+    			}
     			System.out.println("ART KNIME ID: " + id);
-    			ArtNodeModel.IDS.add(id);
+        		/**
+        		 * ArtNodeModel.IDS = new ArrayList<String>();
+        		 * ArtNodeModel.IDS.add(id);
+        		 */
+    			
     			String[] trio = {
     					row.getCell(0).toString(), //F_0
     					row.getCell(1).toString(), //F_1
@@ -182,126 +177,114 @@ public class ArtNodeModel extends NodeModel {
     			/**
     			 * Build a Knime datatyp for the trios (TODO)
     			 */
+        		art_arrList = new ArrayList<Art_object>();
     			art_arrList.add(new Art_object(id, trio));
+    			if (art_arrList.size() > 0)
+    				return output(exec);
+
     		}
-//    		path2ids = inData[0].iterator().next().getCell(0).toString();
+
     	}
     	else{
     		String path2ids = m_ID_PATH.getStringValue();
-//    		System.out.println("PATH IS HERE: " + path2ids);
-    		ArtNodeModel.IDS = new ArrayList<String>();
-    		ArtNodeModel.IDS = getIds(path2ids);
-    		art_arrList = getUserInput(path2ids, ArtNodeModel.IDS);
-    	}
-    	/**
+    		/**
+    		 * ArtNodeModel.IDS = new ArrayList<String>();
+    		 * ArtNodeModel.IDS = getIds(path2ids);
+    		 */
+    		art_arrList = getUserInput(path2ids, getIds(path2ids));
+    	}   
+    	return output(exec); 
+    	
+    }
+
+	private BufferedDataTable[] output(final ExecutionContext exec)
+			throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException, IOException {
+		
+		/**
     	 * here we go...
     	 */
     	execute_help(exec, art_arrList);
+    	System.out.println("REAL SIZE: " + art_arrList.size());
 
-    	
-    	/**
-    	 * The output handler
+		int col_num = 2; //ArtNodeModel.IDS.size();
+    	DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];/**
+    	 * create the column(s) for (multi)fastq output of a trio with 6 rows
     	 */
-    	
-    	int col_num = 2; //ArtNodeModel.IDS.size();
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];/**
-         * create the column(s) for (multi)fastq output of a trio with 6 rows
-         */
-        /**
+    	/**
     	for (int i = 0; i < col_num; i++) {
-            allColSpecs[i] = new DataColumnSpecCreator("Col. " + (i+1) + ": " + OUT_COL + ArtNodeModel.IDS.get(i), FileCell.TYPE).createSpec();
+    	    allColSpecs[i] = new DataColumnSpecCreator("Col. " + (i+1) + ": " + OUT_COL + ArtNodeModel.IDS.get(i), FileCell.TYPE).createSpec();
 
     	}**/
-        allColSpecs[0] = new DataColumnSpecCreator("Col. 1: " + OUT_COL + "fwd", FileCell.TYPE).createSpec();
-        allColSpecs[1] = new DataColumnSpecCreator("Col. 2: " + OUT_COL + "rev", FileCell.TYPE).createSpec();
+    	allColSpecs[0] = new DataColumnSpecCreator("Col. 1: " + OUT_COL + "fwd", FileCell.TYPE).createSpec();
+    	allColSpecs[1] = new DataColumnSpecCreator("Col. 2: " + OUT_COL + "rev", FileCell.TYPE).createSpec();
 
+    	DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+    	BufferedDataContainer container = exec.createDataContainer(outputSpec);
+    	// let's add m_count rows to it
+    	/**
+    	 * creating the 6 rows
+    	 * i = 0,1,2,3,4,5
+    	 */
+    	FileCell[] cells = new FileCell[col_num];
 
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
-        // let's add m_count rows to it
-        /**
-         * creating the 6 rows
-         * i = 0,1,2,3,4,5
-         */
-        FileCell[] cells = new FileCell[col_num];
-        
-        int row_idx = 0;
-        for (int i = 0; i < ArtNodeModel.IDS.size(); i++) {
-        	System.out.println("IDs for output" + ArtNodeModel.IDS.get(i));
-            RowKey key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i));
+    	int row_idx = 0;
+    	for (int i = 0; i < art_arrList.size(); i++) {
+    		String chr = art_arrList.get(i).getId();
+    		System.out.println("IDs for output: " + chr);
+    	    RowKey key = new RowKey("Row row row your boat");
 
-        	for (int j = 0; j < 3; j++) {
-                switch (j) {
-				case 0:
-	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_F");
-					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_F_fwd.fq");
-					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_F_rev.fq");
-					break;
-				case 1:
-	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_M");
-					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_M_fwd.fq");
-					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_M_rev.fq");
-					break;
-				case 2:
-	                key = new RowKey("Row " + (row_idx+1) + ". " + ArtNodeModel.IDS.get(i) + "_C");
-					cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_C_fwd.fq");
-					cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(i) + "_C_rev.fq");
-					break;
-				
-				}
-                row_idx++;
+    		for (int j = 0; j < 3; j++) {
+    	        switch (j) {
+    			case 0:
+    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_F");
+    	            System.out.println("key 0: "+ key.toString());
+    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_fwd.fq");
+    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_rev.fq");
+    				DataRow row = new DefaultRow(key, cells);
+    	    	    container.addRowToTable(row);
+    				break;
+    			case 1:
+    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_M");
+    	            System.out.println("key 1: "+ key.toString());
+    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_fwd.fq");
+    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_rev.fq");
+    				row = new DefaultRow(key, cells);
+    	    	    container.addRowToTable(row);
+    				break;
+    			case 2:
+    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_C");
+    	            System.out.println("key 2: "+ key.toString());
+    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_C_fwd.fq");
+    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_C_rev.fq");
+    				row = new DefaultRow(key, cells);
+    	    	    container.addRowToTable(row);
+    				break;
+    			
+    			}
+//    	        row_idx++;
 
-        	}
-        		
-        
-        /**
-        for (int i = 0; i < 6; i++) {
-            RowKey key = new RowKey("Row " + (i+1));
-            // the cells of the current row, the types of the cells must match
-            //number of cells = col_num
-            // the column spec (see above)
-			
-           
-			for (int j = 0; j < col_num; j++) {
-				switch (i) {
-				case 0:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_F_fwd.fq");
-					break;
-				case 1:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_F_rev.fq");
-					break;
-				case 2:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_M_fwd.fq");
-					break;
-				case 3:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_M_rev.fq");
-					break;
-				case 4:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_C_fwd.fq");
-					break;
-				case 5:
-					cells[j] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + ArtNodeModel.IDS.get(j) + "_C_rev.fq");
-					break;
-				}
+    		}
+    			
 
-			}**/
-            DataRow row = new DefaultRow(key, cells);
-            container.addRowToTable(row);
-            
-            // check if the execution monitor was canceled
-            exec.checkCanceled();        
+    	    /*DataRow row = new DefaultRow(key, cells);
+    	    container.addRowToTable(row);*/
+    	    
+    	    // check if the execution monitor was canceled
+    	    exec.checkCanceled();   
 
         }
-        // once we are done, we close the container and return its table
+    	// once we are done, we close the container and return its table
         container.close();
-        BufferedDataTable out = container.getTable();
+    	BufferedDataTable out = container.getTable();
         return new BufferedDataTable[]{out};
-    }
+
+
+	}
 
     /**
      * Helper method for executing commands
      * @param exec
-     * @param art_obj
+     * @param map
      * @throws CanceledExecutionException
      * @throws InterruptedException
      * @throws ExecutionException
@@ -382,7 +365,8 @@ public class ArtNodeModel extends NodeModel {
 		}
 	}
 
-	/**
+	
+    /**
 	 * @param path2id: ids.txt file
 	 * @return the ids are retrived from the ids.txt
 	 */
@@ -460,7 +444,7 @@ public class ArtNodeModel extends NodeModel {
 		
 		return arrList;
 	}
-
+	
 	/**
 	 * art_object : retrieve the path to the trio fq file (one id)
 	 * @param id 
@@ -472,14 +456,7 @@ public class ArtNodeModel extends NodeModel {
 	 */
 	private void mergeFQs(final ExecutionContext exec, String id) throws CanceledExecutionException, InterruptedException,
 	ExecutionException, UnsuccessfulExecutionException, IOException {
-		
-	// TODO Auto-generated method stub
-//		File folder = new File(ArtNodeModel.INTERNAL_OUTPUT_PATH);
-//		for(String fq: folder.list()) {
-//			System.out.println(fq);
-//			
-//		}
-		
+			
 		for (int i = 0; i < 3; i++) {
 			String indiv = "";
 			switch(i) {
@@ -530,6 +507,33 @@ public class ArtNodeModel extends NodeModel {
 		}
 	}
 	
+	
+	private void mergeChunks(ExecutionContext exec, int size, String chr, String indiv_read) throws CanceledExecutionException, InterruptedException,
+	ExecutionException, UnsuccessfulExecutionException, IOException {
+		// TODO Auto-generated method stub
+		ArrayList<String> merge_command = new ArrayList<String>(5);
+		merge_command.add("sh /home/ibis/tanzeem.haque/Documents/Scripts/Sequenciator/mergeChunks.sh");
+		merge_command.add((size-1) + "");
+		merge_command.add(chr);
+		merge_command.add(indiv_read);
+		
+		for (String s : merge_command) {
+			System.out.print(s + " ");
+		}
+		System.out.println();
+		
+		
+		/**Execute**/
+    	Executor.executeCommand(new String[]{StringUtils.join(merge_command, " ")},exec,LOGGER);
+    	
+    	for (int i = 0; i < size; i++) {
+    		boolean fq_del = new File(i+"_"+chr+"_"+indiv_read+".fq").delete();
+        	System.out.println("FQDEL: " + fq_del);
+    	}
+    	
+		
+	}
+
     /**
      * {@inheritDoc}
      */
@@ -724,4 +728,3 @@ public class ArtNodeModel extends NodeModel {
     }
 
 }
-

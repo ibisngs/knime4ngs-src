@@ -8,7 +8,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -51,8 +50,10 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
         super();
         
     	setHorizontalPlacement(false);
-    	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,""), 
-    			"Testing", 0, ".txt"));
+//    	if(!ArtNodeModel.optionalPort) {
+        	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,""),"Testing", 0, ".txt"));
+
+//      	}
     	
       	addDialogComponent(new DialogComponentNumber(length,"Read length(pb):", /*step*/ 10, /*componentwidth*/ 5));
       	addDialogComponent(new DialogComponentNumber(mean_size,"Mean size of DNA fragment:", /*step*/ 50, /*componentwidth*/ 5));     
@@ -74,6 +75,7 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
 //  		recombination.setEnabled(false);
 //  		seed.setEnabled(false);
 
+      	
       	use_NO_MASK.addChangeListener(new ChangeListener() {
   			public void stateChanged(ChangeEvent e) {
   				use_NO_MASK.setEnabled(true); 				
