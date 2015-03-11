@@ -39,8 +39,8 @@ public class FrostNodeModel extends NodeModel {
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
     private int seed = 999;
     
-	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
-//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
+//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
+	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
 
 
 	public static final String CFGKEY_FASTA = "fasta";

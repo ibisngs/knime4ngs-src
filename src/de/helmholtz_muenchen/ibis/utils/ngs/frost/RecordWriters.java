@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -32,6 +33,7 @@ public class RecordWriters {
 	
 	protected void write_simple_string(String fileName, String s) {
 		// TODO Auto-generated method stub
+		
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 			pw.write(s);
 		} catch (Exception e) {
@@ -51,6 +53,7 @@ public class RecordWriters {
 	
 	protected void write_InputData(String fileName, InputData iData, int n) {
 		// TODO Auto-generated method stub
+		
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 			for (int i = 0; i < iData.getPositions().get(n).size(); i++) {
 				pw.write(iData.getId() + "\t" + iData.getPositions().get(n).get(i) + "\n");
@@ -65,6 +68,7 @@ public class RecordWriters {
 	
 	protected void write_vcf(String fileName, ArrayList<String> ID, 
 			ArrayList<Integer> POS, ArrayList<String> prettyMutation) {
+		
 		// TODO Auto-generated method stub
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 			for (int i = 0; i < prettyMutation.size(); i++) {

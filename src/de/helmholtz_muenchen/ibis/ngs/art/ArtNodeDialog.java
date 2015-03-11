@@ -40,6 +40,7 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
 //	final SettingsModelBoolean SEPERATE_PROFILE = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_SEPERATE_PROFILE, false); //if true, use -sp
 //	final SettingsModelBoolean QUIET = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_QUIET, true); //if false, do not use -q
 
+	final SettingsModelString use_FILE = new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,"");
     final SettingsModelBoolean use_NO_MASK = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_NO_MASK, false); //if true, use -nf 0
 	final SettingsModelBoolean use_MATE_PAIR = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_MATE_PAIR, false); //if true, use -mp: if -m >2000 -mp on
 	final SettingsModelBoolean use_ERROR_FREE = new SettingsModelBoolean(ArtNodeModel.CFGKEY_USE_ERROR_FREE, false); //if true, use -ef
@@ -50,15 +51,21 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
         super();
         
     	setHorizontalPlacement(false);
-//    	if(!ArtNodeModel.optionalPort) {
-        	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,""),"Testing", 0, ".txt"));
-
-//      	}
     	
+    	String s = "";
+    	s = (ArtNodeModel.optionalPort)? "enabled": "diasbled";
+    		
+    	addDialogComponent(new DialogComponentFileChooser(use_FILE,"Testing", 0, ".txt"));
+//    	else
+//    		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean("optionalport", true), "Optional port enabled"));
+    	
+
+
       	addDialogComponent(new DialogComponentNumber(length,"Read length(pb):", /*step*/ 10, /*componentwidth*/ 5));
       	addDialogComponent(new DialogComponentNumber(mean_size,"Mean size of DNA fragment:", /*step*/ 50, /*componentwidth*/ 5));     
       	addDialogComponent(new DialogComponentNumber(fold,"Fold of read coverage:", /*step*/ 1, /*componentwidth*/ 5));
       	addDialogComponent(new DialogComponentNumber(sd,"Standard deviation:", /*step*/ 1, /*componentwidth*/ 5));
+      	
       	addDialogComponent(new DialogComponentBoolean(use_NO_MASK, "Turn off the masking of N region"));
       	addDialogComponent(new DialogComponentBoolean(use_MATE_PAIR, "Turn on mate pair condition"));
       	addDialogComponent(new DialogComponentBoolean(use_ERROR_FREE, "Generate the zero sequencing errors SAM file as well the regular one"));
@@ -66,7 +73,6 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
       	/*+"\n"+"NOTE: art will automatically switch to a mate-pair simulation if the given mean fragment size >= 2000"*/));
       	addDialogComponent(new DialogComponentBoolean(use_QUIET, "Turn off end of run summary"));
 
-      	
 
       	/**
          * checkboxes 
@@ -75,7 +81,15 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
 //  		recombination.setEnabled(false);
 //  		seed.setEnabled(false);
 
-      	
+ 
+//      	if(ArtNodeModel.optionalPort) {
+//      		use_FILE.addChangeListener(new ChangeListener() {
+//      			public void stateChanged(ChangeEvent e) {
+//      				use_FILE.setEnabled(false); 				
+//      			}
+//          	});
+//      	}
+//      	
       	use_NO_MASK.addChangeListener(new ChangeListener() {
   			public void stateChanged(ChangeEvent e) {
   				use_NO_MASK.setEnabled(true); 				

@@ -1,9 +1,12 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+
+import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
 /**
  * @author tanzeem.haque
@@ -12,7 +15,7 @@ import java.util.ArrayList;
 public class FrostRunner {
 
 
-	public static final String INTERNAL_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
+	public static final String INTERNAL_PATH = FrostNodeModel.INTERNAL_OUTPUT_PATH;
 	public static ArrayList<String> ID_List = new ArrayList<String> ();
 	public static int total_mutations;
 	public static int total_deNovo;
@@ -42,7 +45,7 @@ public class FrostRunner {
 		double mutRate = 2.36;
 		int recombination = 1000;
 		int seed = 999;
-
+		
 		long startTime = System.currentTimeMillis();
 
 		if (args.length < 2) {
@@ -95,9 +98,21 @@ public class FrostRunner {
 			print_help();
 		}
 
-		else
-			run(input, mutRate, recombination, seed);
-
+		else {
+			String[] recordFiles = {FrostRunner.INTERNAL_PATH + "parents_run_" + seed + ".txt",
+					FrostRunner.INTERNAL_PATH + "child_run_" + seed + ".txt",
+					FrostRunner.INTERNAL_PATH + "deNovo_" + seed + ".txt",
+					FrostRunner.INTERNAL_PATH + "recombination_" + seed + ".txt",
+					FrostRunner.INTERNAL_PATH + "recombined_seq_" + seed + ".txt",
+					FrostRunner.INTERNAL_PATH + "ids_chunk.txt"
+					};
+			for (String s : recordFiles) {
+				File f = new File (s);
+				if (f.exists())
+					f.delete();
+			}
+			run(input, mutRate, recombination, seed, recordFiles);
+		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
 		System.out.println("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
@@ -113,7 +128,7 @@ public class FrostRunner {
 	 * @throws InterruptedException
 	 * @throws IOException 
 	 */
-	protected static void run(String input, double mutRate, int recombination, int seed) throws InterruptedException, IOException {
+	protected static void run(String input, double mutRate, int recombination, int seed, String[] recordFiles) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub
 
 		/**
@@ -211,17 +226,16 @@ public class FrostRunner {
 				 * Appending into the record files
 				 */
 				rw = new RecordWriters(fr, in, trio);
-				rw.write_simple_string(FrostRunner.INTERNAL_PATH + "parents_run_" + seed + ".txt", trio.getParentInfo());
-				rw.write_simple_string(FrostRunner.INTERNAL_PATH + "child_run_" + seed + ".txt", trio.getChildInfo());
-
-				rw.write_InputData(INTERNAL_PATH + "deNovo_" + seed + ".txt",in.getiData_deNovo_child(), j);			
-				rw.write_InputData(INTERNAL_PATH + "recombination_" + seed + ".txt",in.getiData_recombination_child(), j);
+				rw.write_simple_string(recordFiles[0], trio.getParentInfo());
+				rw.write_simple_string(recordFiles[1], trio.getChildInfo());
+				rw.write_InputData(recordFiles[2],in.getiData_deNovo_child(), j);			
+				rw.write_InputData(recordFiles[3],in.getiData_recombination_child(), j);
 				//writing the recombined file
 				String rec = "";
 				for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
 					rec += rw.getTrio().getRecombined().get(k) + "\n";
 				}
-				rw.write_simple_string(FrostRunner.INTERNAL_PATH + "recombined_seq_" + seed + ".txt", rec);
+				rw.write_simple_string(recordFiles[4], rec);
 
 
 			}
@@ -240,7 +254,7 @@ public class FrostRunner {
 
 		}
 
-		rw.write_simple_string(INTERNAL_PATH + "ids_chunk.txt", ids);
+		rw.write_simple_string(recordFiles[5], ids);
 		
 
 

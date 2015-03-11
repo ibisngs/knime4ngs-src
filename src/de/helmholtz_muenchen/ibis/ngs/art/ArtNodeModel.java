@@ -154,11 +154,11 @@ public class ArtNodeModel extends NodeModel {
     			DataRow row = it.next();
     			String id = row.getKey().toString().substring("Row: ".length());
 //    			String id = fasta_info[0];
-    			if (id.startsWith("record_files")) {
+    			/*if (id.startsWith("record_files")) {
     				System.err.println(id);
     				break;
     			}
-    			System.out.println("ART KNIME ID: " + id);
+    			System.out.println("ART KNIME ID: " + id);*/
         		/**
         		 * ArtNodeModel.IDS = new ArrayList<String>();
         		 * ArtNodeModel.IDS.add(id);
@@ -204,7 +204,7 @@ public class ArtNodeModel extends NodeModel {
     	 * here we go...
     	 */
     	execute_help(exec, art_arrList);
-    	System.out.println("REAL SIZE: " + art_arrList.size());
+//    	System.out.println("REAL SIZE: " + art_arrList.size());
 
 		int col_num = 2; //ArtNodeModel.IDS.size();
     	DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];/**
@@ -230,14 +230,14 @@ public class ArtNodeModel extends NodeModel {
     	int row_idx = 0;
     	for (int i = 0; i < art_arrList.size(); i++) {
     		String chr = art_arrList.get(i).getId();
-    		System.out.println("IDs for output: " + chr);
+//    		System.out.println("IDs for output: " + chr);
     	    RowKey key = new RowKey("Row row row your boat");
 
     		for (int j = 0; j < 3; j++) {
     	        switch (j) {
     			case 0:
     	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_F");
-    	            System.out.println("key 0: "+ key.toString());
+//    	            System.out.println("key 0: "+ key.toString());
     				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_fwd.fq");
     				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_rev.fq");
     				DataRow row = new DefaultRow(key, cells);
@@ -245,7 +245,7 @@ public class ArtNodeModel extends NodeModel {
     				break;
     			case 1:
     	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_M");
-    	            System.out.println("key 1: "+ key.toString());
+//    	            System.out.println("key 1: "+ key.toString());
     				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_fwd.fq");
     				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_rev.fq");
     				row = new DefaultRow(key, cells);
@@ -253,7 +253,7 @@ public class ArtNodeModel extends NodeModel {
     				break;
     			case 2:
     	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_C");
-    	            System.out.println("key 2: "+ key.toString());
+//    	            System.out.println("key 2: "+ key.toString());
     				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_C_fwd.fq");
     				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_C_rev.fq");
     				row = new DefaultRow(key, cells);
@@ -350,10 +350,10 @@ public class ArtNodeModel extends NodeModel {
 		    	command.add("-s");
 		    	command.add(m_SD.getIntValue() + "");
 		    	
-		    	for (String s : command) {
-		    		System.out.print(s + " ");
-		    	}
-		    	System.out.println();
+//		    	for (String s : command) {
+//		    		System.out.print(s + " ");
+//		    	}
+//		    	System.out.println();
 		    	/**Execute**/
 //				long startTime = System.currentTimeMillis();
 		    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
@@ -492,10 +492,10 @@ public class ArtNodeModel extends NodeModel {
 				merge_command.add(input_fqs[1]);
 				merge_command.add(output_fq);
 				
-				for (String s : merge_command) {
-					System.out.print(s + " ");
-				}
-				System.out.println();
+//				for (String s : merge_command) {
+//					System.out.print(s + " ");
+//				}
+//				System.out.println();
 				
 				
 				/**Execute**/
@@ -567,8 +567,7 @@ public class ArtNodeModel extends NodeModel {
 			String[] colNames = inSpecs[0].getColumnNames();
 			optionalPort=true;
 			
-			for (String s : colNames)
-				System.out.println(s);
+//			for (String s : colNames)
 
 			if (colNames.length==6 && colNames[0].equals(FrostNodeModel.OUT_COL + "F_0.fa") &&
 					colNames[5].equals(FrostNodeModel.OUT_COL + "C_1.fa")) 
@@ -582,12 +581,23 @@ public class ArtNodeModel extends NodeModel {
 			optionalPort=false;
     	
     	}
+		System.out.println("Optional Port: " + optionalPort + "\t" + "Enabled: " + m_ID_PATH.isEnabled());
 
-		/*******************************************************************
-		 ************         Check if Outfile exists            ***********
-		 *******************************************************************/
+		int col_num = 2; //ArtNodeModel.IDS.size();
+    	DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];/**
+    	 * create the column(s) for (multi)fastq output of a trio with 6 rows
+    	 */
+    	/**
+    	for (int i = 0; i < col_num; i++) {
+    	    allColSpecs[i] = new DataColumnSpecCreator("Col. " + (i+1) + ": " + OUT_COL + ArtNodeModel.IDS.get(i), FileCell.TYPE).createSpec();
+
+    	}**/
+    	allColSpecs[0] = new DataColumnSpecCreator("Col. 1: " + OUT_COL + "fwd", FileCell.TYPE).createSpec();
+    	allColSpecs[1] = new DataColumnSpecCreator("Col. 2: " + OUT_COL + "rev", FileCell.TYPE).createSpec();
+
+    	DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
 //		System.out.println(optionalPort);
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{outputSpec};
     }
 
     /**
