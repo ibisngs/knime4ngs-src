@@ -39,8 +39,8 @@ public class FrostNodeModel extends NodeModel {
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
     private int seed = 999;
     
-//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
-	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
+	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
+//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
 
 
 	public static final String CFGKEY_FASTA = "fasta";
@@ -74,7 +74,7 @@ public class FrostNodeModel extends NodeModel {
 
 	/**The Output Row Names */
 	public static final String OUT_COL = "fasta_output_";
-	public static final String OUT_ROW_LAST = "record_files_frost";
+	/* public static final String OUT_ROW_LAST = "record_files_frost";*/
     /**
      * Constructor for the node model.
      */
@@ -112,6 +112,13 @@ public class FrostNodeModel extends NodeModel {
     	 // the data table spec of the single output table, 
         // the table will have six columns:
         
+        /**
+         * Record files as flow variable
+         */
+        for(int i = 0; i < 6; i++) {
+            pushFlowVariableString("record file " +(i+1), recordFiles()[i]);
+		}
+        
         int col_num = 6; // 6 fastas
         DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];
         
@@ -127,12 +134,11 @@ public class FrostNodeModel extends NodeModel {
 		
 		
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
+        BufferedDataContainer container = exec.createDataContainer(outputSpec);       
         /**
          * creating the rows
          * i = 0,1, ... #IDS
-         */
-       
+         */  
 		FileCell[] cells = new FileCell[6];
 		for (int j = 0; j < FrostRunner.ID_List.size(); j++) {
 			RowKey key = new RowKey("Row: " + FrostRunner.ID_List.get(j));
@@ -169,13 +175,16 @@ public class FrostNodeModel extends NodeModel {
             container.addRowToTable(row);
 
 		}    
-		RowKey key = new RowKey("Row: " + FrostNodeModel.OUT_ROW_LAST);
-		for(int i = 0; i < 6; i++) {
+		
+		/**
+		 * RowKey key = new RowKey("Row: " + FrostNodeModel.OUT_ROW_LAST);
+		 * for(int i = 0; i < 6; i++) {
 			cells[i] = (FileCell) FileCellFactory.create(recordFiles()[i]);
 			System.out.println(cells[i].toString());
-		}
-		DataRow row = new DefaultRow(key, cells);
-        container.addRowToTable(row);
+			}
+		 * DataRow row = new DefaultRow(key, cells);
+		 * container.addRowToTable(row);
+		 */
 	    // check if the execution monitor was canceled
         exec.checkCanceled();
 		// once we are done, we close the container and return its table
@@ -252,10 +261,23 @@ public class FrostNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-//    	throw new InvalidSettingsException(s);
+    	int col_num = 6; // 6 fastas
+        DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];
+        /**
+         * create the column(s) for (multi)fasta output of a trio
+         */ 
+		allColSpecs[0] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[1] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[2] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[3] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[4] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[5] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_1.fa", FileCell.TYPE).createSpec();
+		
+		
+        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
     	
         // TODO: generated method stub
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{outputSpec};
     }
 
     /**
