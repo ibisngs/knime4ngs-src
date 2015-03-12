@@ -37,7 +37,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 public class FrostNodeModel extends NodeModel {
 	// the logger instance
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
-    private int seed = 999;
+    private static int seed = 999;
     
 //	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
 	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
@@ -116,7 +116,7 @@ public class FrostNodeModel extends NodeModel {
          * Record files as flow variable
          */
         for(int i = 0; i < 6; i++) {
-            pushFlowVariableString("record file " +(i+1), recordFiles()[i]);
+            pushFlowVariableString("record file " +(i+1), FrostNodeModel.recordFiles()[i]);
 		}
         
         int col_num = 6; // 6 fastas
@@ -140,8 +140,8 @@ public class FrostNodeModel extends NodeModel {
          * i = 0,1, ... #IDS
          */  
 		FileCell[] cells = new FileCell[6];
-		for (int j = 0; j < FrostRunner.ID_List.size(); j++) {
-			RowKey key = new RowKey("Row: " + FrostRunner.ID_List.get(j));
+		for (int j = 0; j < FrostRunner.id_list.size(); j++) {
+			RowKey key = new RowKey("Row: " + FrostRunner.id_list.get(j));
 //			System.out.println(key.toString());
 			
 			for (int i = 0; i < 6 ; i++) {
@@ -151,22 +151,22 @@ public class FrostNodeModel extends NodeModel {
 
 				switch (i) {
 					case 0:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_F_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F_0.fa");
 						break;
 					case 1:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_F_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F_1.fa");
 						break;
 					case 2:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_M_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M_0.fa");
 						break;
 					case 3:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_M_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M_1.fa");
 						break;
 					case 4:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_C_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C_0.fa");
 						break;
 					case 5:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.ID_List.get(j) + "_C_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C_1.fa");
 						break;
 				}
 					
@@ -195,15 +195,15 @@ public class FrostNodeModel extends NodeModel {
         
     }
     
-    private String[] recordFiles() {
+    public static String[] recordFiles() {
     	
     	String[] files = new String[6];
     	files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
-    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + this.seed + ".txt";
-    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + this.seed + ".txt";
-    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + this.seed + ".txt";
-    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + this.seed + ".txt";
-    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + this.seed + ".txt";
+    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
+    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
+    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
+    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
+    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
     	return files;
 
     }
