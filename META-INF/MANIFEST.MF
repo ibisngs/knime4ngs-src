@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IBIS Helmholtz-Node extension for KNIME Workbench
 Bundle-SymbolicName: de.helmholtz_muenchen.ibis.knimenodes;singleton:=true
-Bundle-Version: 1.3.5.17
+Bundle-Version: 1.3.5.18
 Bundle-ClassPath: ibis.knimenodes.jar,
  libs/commons-lang3-3.1/commons-lang3-3.1.jar,
  libs/commons-codec-1.8.jar,
