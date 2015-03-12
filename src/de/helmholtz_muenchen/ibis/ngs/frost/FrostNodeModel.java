@@ -39,8 +39,8 @@ public class FrostNodeModel extends NodeModel {
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
     private static int seed = 999;
     
-//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
-	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
+	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs_for_art_tmp/";
+//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
 
 
 	public static final String CFGKEY_FASTA = "fasta";
@@ -198,12 +198,12 @@ public class FrostNodeModel extends NodeModel {
     public static String[] recordFiles() {
     	
     	String[] files = new String[6];
-    	files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
-    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
-    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
-    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
-    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
-    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
+    	files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
+    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
+    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
+    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
+    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
+    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
     	return files;
 
     }

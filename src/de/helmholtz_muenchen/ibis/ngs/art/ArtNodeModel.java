@@ -52,8 +52,8 @@ public class ArtNodeModel extends NodeModel {
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ArtNodeModel.class); //not used yet
     
 	public static final String ART_PATH = "/home/ibis/tanzeem.haque/Documents/3rd_party_tools/art/art_bin_VanillaIceCream/art_illumina";
-//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs_optionalport/"; 
-	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs/"; 
+	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs_optionalport/"; 
+//	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs/"; 
 
 
 	/**
@@ -148,7 +148,7 @@ public class ArtNodeModel extends NodeModel {
     	 */	
     	if(optionalPort){
     		CloseableRowIterator it = inData[0].iterator();
-    		String record = inData[0].getSpec().getName();
+//    		String record = inData[0].getSpec().getName();
 //    		System.out.println(record);
     		while (it.hasNext()) {
     			DataRow row = it.next();
@@ -507,33 +507,6 @@ public class ArtNodeModel extends NodeModel {
 		}
 	}
 	
-	
-	private void mergeChunks(ExecutionContext exec, int size, String chr, String indiv_read) throws CanceledExecutionException, InterruptedException,
-	ExecutionException, UnsuccessfulExecutionException, IOException {
-		// TODO Auto-generated method stub
-		ArrayList<String> merge_command = new ArrayList<String>(5);
-		merge_command.add("sh /home/ibis/tanzeem.haque/Documents/Scripts/Sequenciator/mergeChunks.sh");
-		merge_command.add((size-1) + "");
-		merge_command.add(chr);
-		merge_command.add(indiv_read);
-		
-		for (String s : merge_command) {
-			System.out.print(s + " ");
-		}
-		System.out.println();
-		
-		
-		/**Execute**/
-    	Executor.executeCommand(new String[]{StringUtils.join(merge_command, " ")},exec,LOGGER);
-    	
-    	for (int i = 0; i < size; i++) {
-    		boolean fq_del = new File(i+"_"+chr+"_"+indiv_read+".fq").delete();
-        	System.out.println("FQDEL: " + fq_del);
-    	}
-    	
-		
-	}
-
     /**
      * {@inheritDoc}
      */

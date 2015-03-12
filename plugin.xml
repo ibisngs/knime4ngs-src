@@ -67,6 +67,7 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory"/>
 
 		<!-- LoF Workflow nodes -->
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
@@ -107,8 +108,6 @@
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory" id="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory"/>
 <node category-path="/" factory-class="test.test2.HTETest2NodeFactory" id="test.test2.HTETest2NodeFactory"/>
 
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.art.ArtsLilHelperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.ArtsLilHelperNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
