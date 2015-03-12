@@ -16,10 +16,11 @@ public class FrostRunner {
 
 
 	public static final String INTERNAL_PATH = FrostNodeModel.INTERNAL_OUTPUT_PATH;
-	public static ArrayList<String> ID_List = new ArrayList<String> ();
+	public static ArrayList<String> id_list = new ArrayList<String> ();
 	public static int total_mutations;
 	public static int total_deNovo;
 	static String[] parental_chromatids = new String[2];
+	public static String[] records = new String[6];
 
 //	static int mutation_index_parent = 0;
 //	static int denovo_index_child = 0;
@@ -99,19 +100,13 @@ public class FrostRunner {
 		}
 
 		else {
-			String[] recordFiles = {FrostRunner.INTERNAL_PATH + "parents_run_" + seed + ".txt",
-					FrostRunner.INTERNAL_PATH + "child_run_" + seed + ".txt",
-					FrostRunner.INTERNAL_PATH + "deNovo_" + seed + ".txt",
-					FrostRunner.INTERNAL_PATH + "recombination_" + seed + ".txt",
-					FrostRunner.INTERNAL_PATH + "recombined_seq_" + seed + ".txt",
-					FrostRunner.INTERNAL_PATH + "ids_chunk.txt"
-					};
-			for (String s : recordFiles) {
+			FrostRunner.records = FrostNodeModel.recordFiles();
+			for (String s : records) {
 				File f = new File (s);
 				if (f.exists())
 					f.delete();
 			}
-			run(input, mutRate, recombination, seed, recordFiles);
+			run(input, mutRate, recombination, seed, records);
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
@@ -210,7 +205,7 @@ public class FrostRunner {
 				/**
 				 * ID_List will be called in the main method to write the output files.
 				 */
-				FrostRunner.ID_List.add(j + "_" + currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
+				FrostRunner.id_list.add(j + "_" + currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
 
 				startTime = System.currentTimeMillis();
 				System.out.println("CHUNKY #"+j);
