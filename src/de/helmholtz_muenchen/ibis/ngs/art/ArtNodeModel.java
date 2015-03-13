@@ -52,7 +52,7 @@ public class ArtNodeModel extends NodeModel {
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(ArtNodeModel.class); //not used yet
     
 	public static final String ART_PATH = "/home/ibis/tanzeem.haque/Documents/3rd_party_tools/art/art_bin_VanillaIceCream/art_illumina";
-	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs_optionalport/"; 
+	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/Art/"; 
 //	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Art_outputs/"; 
 
 
