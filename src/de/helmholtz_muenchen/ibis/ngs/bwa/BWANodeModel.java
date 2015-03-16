@@ -16,20 +16,18 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 
@@ -39,7 +37,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * @author Jan Quell
  * @author Maximilian Hastreiter
  */
-public class BWANodeModel extends NodeModel {
+public class BWANodeModel extends HTExecutorNodeModel {
     
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
 	public static final String CFGKEY_BWAFILE = "bwafile";
@@ -215,7 +213,7 @@ public class BWANodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-
+    	super.reset();
     }
 
     /**
@@ -252,7 +250,8 @@ public class BWANodeModel extends NodeModel {
 	    	command.add(path2refFile);
 
 	    	/**Execute**/
-	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+//	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 			
     	} else {
     		LOGGER.info("Indexing reference sequence SKIPPED.\n");
@@ -293,7 +292,8 @@ public class BWANodeModel extends NodeModel {
     	command.add(path2readFile);
     	command.add("-f "+outfile);
     	/**Execute**/
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
    
 		//If paired end, repeat previous step
     	if(readType.equals("paired-end")) {
@@ -307,7 +307,8 @@ public class BWANodeModel extends NodeModel {
             	command.set(4, " -f "+ out12Name);
         	}
         	/**Execute**/
-        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+//        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 		}
     }
     
@@ -387,27 +388,30 @@ public class BWANodeModel extends NodeModel {
     	}
 		
     	
-    	
     	/** check if run was already sucessful **/
-    	String[] com = command.toArray(new String[command.size()]);
+//    	String[] com = command.toArray(new String[command.size()]);
     	File lockFile = new File(path2readFile.substring(0,path2readFile.lastIndexOf(".")) + ".BWA" +  SuccessfulRunChecker.LOCK_ENDING);
-    	String lockCommand = ExecuteThread.getCommand(com);
-    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-		LOGGER.info("Successful termination state: " + terminationState);
+//    	String lockCommand = ExecuteThread.getCommand(com);
+//    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+//		LOGGER.info("Successful termination state: " + terminationState);
     	
 		// do not execute if termination state is true
-		if(!terminationState) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+//		if(!terminationState) {
+//			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		
 	    	/**Execute**/
 	    	if(alnalgo.equals("BWA-MEM")) {
-	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
+//	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
+	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, lockFile, memOut, null, null, null, null);
+
 	    	}else{
-	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+//	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, lockFile, null, null, null, null, null);
+
 	    	}
-	    	checker.writeOK();
+//	    	checker.writeOK();
 		}
-	}
+//	}
     
     
     
@@ -454,6 +458,8 @@ public class BWANodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
     	m_bwafile.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_bwtIndex.saveSettingsTo(settings);
@@ -472,6 +478,8 @@ public class BWANodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
     	m_bwafile.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_bwtIndex.loadSettingsFrom(settings);
@@ -490,6 +498,8 @@ public class BWANodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	/** added for HTE **/
+    	super.validateSettings(settings);
     	m_bwafile.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_bwtIndex.validateSettings(settings);

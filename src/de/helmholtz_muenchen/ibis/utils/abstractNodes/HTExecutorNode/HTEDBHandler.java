@@ -5,20 +5,16 @@ import java.sql.*;
 public class HTEDBHandler {
 	
 	private Connection con;
-	private final String HOST = "ibis218-010-004";
-	private final String DBNAME = "HTE";
-	private final String USER = "hteuser";
+	private final String HOST = "ibisdb01";
+	private final String DBNAME = "ngs_HTE";
+	private final String USER = "ngs_hteuser";
 	private final String PW = "htepass";
 	
 	
-	public HTEDBHandler () {
+	public HTEDBHandler() throws SQLException {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			try {
-				this.con = DriverManager.getConnection("jdbc:mysql://"+HOST+"/"+DBNAME,USER,PW);
-			} catch (SQLException e) {
-				System.err.println("Connection to DB: "+DBNAME+" on host: "+HOST+" could not be created: "+e.getMessage());
-			}
+			this.con = DriverManager.getConnection("jdbc:mysql://"+HOST+"/"+DBNAME,USER,PW);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e) {
 			e.printStackTrace();

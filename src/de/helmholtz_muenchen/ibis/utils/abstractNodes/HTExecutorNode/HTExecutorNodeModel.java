@@ -3,6 +3,7 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.sql.SQLException;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -31,7 +32,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private String lockCommand = "";
 	private String host_name = "";
 	private String node_name = this.getClass().getCanonicalName();
-	private String defaultLockFile = "/home/ibis/tim.jeske/NGSTest/"+node_name+SuccessfulRunChecker.LOCK_ENDING;
+	private String defaultLockFile = "/home/share/tmp/"+node_name+SuccessfulRunChecker.LOCK_ENDING;
 	private int count = 0;
 	private int threshold_value = DEFAULT_THRESHOLD;
 	
@@ -151,6 +152,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		if(lockFile == null) {
 			lockFile = new File(defaultLockFile);
 		}
+		logger.info("klock file can be found in "+lockFile);
 		boolean terminationState = SuccessfulRunChecker
 				.hasTerminatedSuccessfully(lockFile, lockCommand);
 		logger.info("Successful termination state: " + terminationState);
@@ -165,11 +167,22 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 				lockCommand);
 		
 		//if HTE is used
+		HTEDBHandler htedb = null;
+		
+		//establish connection to database
+		if (use_hte_value) {
+			try {
+				htedb = new HTEDBHandler();
+			} catch (SQLException e) {
+				System.err.println("Connection to database could not be established: "+e.getMessage());
+				use_hte_value = false;
+			}
+		}
+		
 		if (use_hte_value) {
 			if(hte_id ==-1) {
 				throw new UnsuccessfulExecutionException("Execute HTETrigger Node before the other nodes in the workflow!");
 			}
-			HTEDBHandler htedb = new HTEDBHandler();
 			node_id = htedb.getHTENodeId(lockCommand, node_name, host_name, hte_id);
 			System.out.println("Threshold: "+threshold_value);
 			if(node_id == -1) {
@@ -227,42 +240,18 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		this.readFlowVariables();
 		
 		if(use_hte_value) {
-			HTEDBHandler htedb = new HTEDBHandler();
-			this.popUpWindow(htedb);
-			htedb.closeConnection();
+			HTEDBHandler htedb;
+			try {
+				htedb = new HTEDBHandler();
+				this.popUpWindow(htedb);
+				htedb.closeConnection();
+			} catch (SQLException e) {
+				System.err.println("Connection to database could not be established: "+e.getMessage());
+				use_hte_value = false;
+				e.printStackTrace();
+			}
+			
 		}
-		
-		/*
-		 
-	 	//should only be executed if reset is called explicitly 
-		
-		Map<String, FlowVariable> map = this.getAvailableFlowVariables();
-		
-		//return if HTE is off
-		if (!map.containsKey("use_hte")) return;
-		if (map.get("use_hte").getIntValue() == 0) return;
-		
-		//HTE is on
-		htedb = new HTEDBHandler();
-		this.popUpWindow();
-		
-		if (map.containsKey("hte_id")) {
-			hte_id = map.get("hte_id").getIntValue();
-		}
-		
-		node_id = htedb.getHTENodeId(lockCommand, node_name, host_name, hte_id);
-		if(node_id == -1) return;
-		
-		
-    	threshold_value = htedb.getHTENodeThreshold(node_id,hte_id);
-    	
-		count = htedb.getHTENodeCount(node_id,hte_id);
-		
-		//HTENode entry is in database
-		this.popUpWindow();
-		htedb.closeConnection();
-		
-		*/
 	}
 
 	/**

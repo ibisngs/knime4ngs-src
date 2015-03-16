@@ -15,6 +15,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "BWA" Node.
  * 
@@ -25,7 +27,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * {@link org.knime.core.node.NodeDialogPane}.
  * 
  */
-public class BWANodeDialog extends DefaultNodeSettingsPane {
+public class BWANodeDialog extends HTExecutorNodeDialog {
 
 	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
@@ -39,8 +41,8 @@ public class BWANodeDialog extends DefaultNodeSettingsPane {
      * New pane for configuring the BWA node.
      */
     protected BWANodeDialog() {
+    	super();
     	
-
     	readGroup.setEnabled(false);
     	
     	createNewGroup("BWA");
@@ -88,6 +90,8 @@ public class BWANodeDialog extends DefaultNodeSettingsPane {
 					}
 			}
 		});
+    	
+    	
 
     	
     }

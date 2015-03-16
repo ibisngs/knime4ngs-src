@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.htetrigger;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -50,7 +51,7 @@ public class HTETriggerNodeModel extends NodeModel {
      */
 	@Override
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-			final ExecutionContext exec) throws Exception {
+			final ExecutionContext exec){ 
 
 		use_hte_value = 0;
 		local_threshold_value = 0;
@@ -60,9 +61,15 @@ public class HTETriggerNodeModel extends NodeModel {
 			use_hte_value = 1;
 			threshold_value = threshold.getIntValue();
 			if(local_threshold.getBooleanValue()) local_threshold_value = 1;
-			HTEDBHandler htedb = new HTEDBHandler();
-			id=htedb.insertNewHTEWorkflow(threshold_value);
-			htedb.closeConnection();	
+			HTEDBHandler htedb;
+			try {
+				htedb = new HTEDBHandler();
+				id=htedb.insertNewHTEWorkflow(threshold_value);
+				htedb.closeConnection();	
+			} catch (SQLException e) {
+				use_hte_value = 0;
+				System.err.println("Connection to database could not be established. Workflow will be run without usage of HTE");
+			}
 		}
 		pushFlowVariableInt("hte_id", id);
 		pushFlowVariableInt("threshold", threshold_value);
