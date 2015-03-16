@@ -106,6 +106,7 @@ public class FrostRunner {
 				if (f.exists())
 					f.delete();
 			}
+
 			run(input, mutRate, recombination, seed, records);
 		}
 		long endTime   = System.currentTimeMillis();
@@ -129,24 +130,24 @@ public class FrostRunner {
 		/**
 		 * Checking input Fasta
 		 */	
-		long startTime = System.currentTimeMillis();
+//		long startTime = System.currentTimeMillis();
 		FastaCheck fc = new FastaCheck(input);
 		FrostRunner.parental_chromatids = fc.getParentalChromatids();
 		
-		long endTime   = System.currentTimeMillis();
-		NumberFormat formatter = new DecimalFormat("#0.00000");
-		System.err.println("Execution time to check FASTA " + formatter.format((endTime - startTime) / 1000d) + " seconds" + "\n");
+//		long endTime   = System.currentTimeMillis();
+//		NumberFormat formatter = new DecimalFormat("#0.00000");
+//		System.err.println("Execution time to check FASTA " + formatter.format((endTime - startTime) / 1000d) + " seconds" + "\n");
 
 //		System.out.println(fc.input_chr_length.size());
-		for (int i = 0; i < fc.input_chr_length.size(); i++)
-			System.out.println((i+1) +". " + fc.input_chr_length.get(i));
+//		for (int i = 0; i < fc.input_chr_length.size(); i++)
+//			System.out.println((i+1) +". " + fc.input_chr_length.get(i));
 		
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
 		String ids = "";
 		
 		System.gc();
-		memory();
+//		memory();
 
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
@@ -168,26 +169,26 @@ public class FrostRunner {
 			/**
 			 * Reading reference Fasta
 			 */	
-			startTime = System.currentTimeMillis();
+//			startTime = System.currentTimeMillis();
 			FastaReader fr = new FastaReader();
 			fr.readSequenceFromFile(input, currentChr);	
-			System.out.println("Actual length of " + currentChr + " from file: " + fr.getLength());
+//			System.out.println("Actual length of " + currentChr + " from file: " + fr.getLength());
 
-			endTime   = System.currentTimeMillis();
-			formatter = new DecimalFormat("#0.00000");
-			System.err.println("Execution time to read " + currentChr + " FASTA: " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+//			endTime   = System.currentTimeMillis();
+//			formatter = new DecimalFormat("#0.00000");
+//			System.err.println("Execution time to read " + currentChr + " FASTA: " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 		
 
 			/**
 			 * preparing the mutations and recombination positions
 			 */	
 
-			startTime = System.currentTimeMillis();
+//			startTime = System.currentTimeMillis();
 			InputScanner in = new InputScanner(mutRate, recombination, seed, chunk);
 			in.prepare(currentChr, fr.getLength());//currentLength
-			endTime   = System.currentTimeMillis();
-			formatter = new DecimalFormat("#0.00000");
-			System.err.println("Execution time to prepare " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+//			endTime   = System.currentTimeMillis();
+//			formatter = new DecimalFormat("#0.00000");
+//			System.err.println("Execution time to prepare " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 
 				/**
 				 * Creating the trio: invoke parental mutation, denovo for child,
@@ -195,7 +196,7 @@ public class FrostRunner {
 				 */	
 			
 			System.out.println("CHUNK SIZE: " + chunk + "\t" + currentChr);
-			startTime = System.currentTimeMillis();
+//			startTime = System.currentTimeMillis();
 		
 			
 			for (int j = 0; j < chunk; j++) {
@@ -207,7 +208,7 @@ public class FrostRunner {
 				 */
 				FrostRunner.id_list.add(j + "_" + currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
 
-				startTime = System.currentTimeMillis();
+//				startTime = System.currentTimeMillis();
 				System.out.println("CHUNKY #"+j);
 				
 //				System.out.println("mutation_index_parents: " + mutation_index_parent);
@@ -234,18 +235,19 @@ public class FrostRunner {
 
 
 			}
-		
-			endTime   = System.currentTimeMillis();
-			formatter = new DecimalFormat("#0.00000");
-			System.err.println("Execution time to create trio of " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+			rw.write_vcf(currentChr+"_"+seed+".vcf", recordFiles[0], recordFiles[1]);
+
+//			endTime   = System.currentTimeMillis();
+//			formatter = new DecimalFormat("#0.00000");
+//			System.err.println("Execution time to create trio of " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 			
 //			rw.write_InputData(INTERNAL_PATH + "deNovo_" + seed + ".txt",in.getiData_deNovo_child());			
 //			mutation_index_parent = 0;
 //			denovo_index_child = 0;
 //			recombination_index = 0;
 			System.gc();		
-			memory();
-			System.out.println();
+//			memory();
+//			System.out.println();
 
 		}
 

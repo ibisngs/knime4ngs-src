@@ -51,6 +51,7 @@ public class FastaCheck {
 
 	/**
 	 * chr_length stores the length of the respective chromosome
+	 * samtools faidx Homo_sapiens_assembly18.fasta 
 	 */
 	final HG_19[] chr_length = {new HG_19("chr1",249250621), new HG_19("chr2",243199373), new HG_19("chr3",198022430), new HG_19("chr4",191154276),
 			 new HG_19("chr5",180915260), new HG_19("chr6",171115067), new HG_19("chr7",159138663), new HG_19("chr8",146364022), 
