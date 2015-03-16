@@ -32,7 +32,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
 	private final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
-	private final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "");
+	private final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
 	private final SettingsModelBoolean readGroupBoolean = new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
 	private final SettingsModelIntegerBounded ALN_THREADS = new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,4, 0, Integer.MAX_VALUE);
 

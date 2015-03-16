@@ -47,17 +47,21 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 		ArrayList<String> command 	= new ArrayList<String>();
 		boolean first = true;
 		while(it.hasNext()){
-			String INFILE = inData[0].iterator().next().getCell(0).toString();
+			DataRow row = it.next();
+			String INFILE = row.getCell(0).toString();
 			
 			if(first){
-				this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
+				this.OUTFILE = IO.replaceFileExtension(INFILE, ".ALLVARIANTS.vcf");
 				first=false;
 			}
-			
+
 			command.add("--variant "+INFILE);
 
 		}
-		command.add("-L "+m_BED_FILE.getStringValue());
+		if(m_BED_FILE_CHECKBOX.getBooleanValue()){
+			command.add("-L "+m_BED_FILE.getStringValue());
+		}
+		
 		
 		return StringUtils.join(command, " ");
 	}

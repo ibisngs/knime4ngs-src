@@ -19,6 +19,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -32,6 +33,7 @@ public abstract class GATKNodeModel extends NodeModel{
 	 */
 	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
 	public static final String CFGKEY_REF_GENOME = "REFGENOME";
+	public static final String CFGKEY_GATK_MEM = "GATK_MEM";
 	
 	/**
 	 * The SettingsModels
@@ -39,6 +41,7 @@ public abstract class GATKNodeModel extends NodeModel{
 	
     private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
+    private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
 
 
 	/**
@@ -65,6 +68,7 @@ public abstract class GATKNodeModel extends NodeModel{
     	ArrayList<String> command = new ArrayList<String>();
     	
     	command.add("java");
+    	command.add("-Xmx"+m_GATK_MEM.getIntValue()+"G");
     	command.add("-jar "+m_GATK.getStringValue());
     	command.add("-T "+getCommandWalker());
     	command.add("-R "+m_REF_GENOME.getStringValue());    	
@@ -130,8 +134,8 @@ public abstract class GATKNodeModel extends NodeModel{
     protected void saveSettingsTo(final NodeSettingsWO settings) {
    	 	m_GATK.saveSettingsTo(settings);
    	 	m_REF_GENOME.saveSettingsTo(settings);
+   	 	m_GATK_MEM.saveSettingsTo(settings);
    	 	saveExtraSettingsTo(settings);
-      	System.out.println("saveSettings");
     }
 
     /**
@@ -142,8 +146,8 @@ public abstract class GATKNodeModel extends NodeModel{
             throws InvalidSettingsException {
       	 m_GATK.loadSettingsFrom(settings);
        	 m_REF_GENOME.loadSettingsFrom(settings);
+       	 m_GATK_MEM.loadSettingsFrom(settings);
        	 loadExtraValidatedSettingsFrom(settings);
-       	 System.out.println("loadSettings");
 
     }
 
@@ -155,8 +159,8 @@ public abstract class GATKNodeModel extends NodeModel{
             throws InvalidSettingsException {
       	 m_GATK.validateSettings(settings);
        	 m_REF_GENOME.validateSettings(settings);
+       	 m_GATK_MEM.validateSettings(settings);
        	 validateExtraSettings(settings);
-       	 System.out.println("validateSettings");
     }
     
     /**

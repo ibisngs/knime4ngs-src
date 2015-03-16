@@ -370,7 +370,7 @@ public class IO {
     	if(NewExtension.startsWith(".")){
     		point = 1;
     	}
-    	return File.substring(0, File.lastIndexOf(".")-point)+NewExtension;	
+    	return File.substring(0, File.lastIndexOf(".")-point+1)+NewExtension;	
     }
     
     /**
