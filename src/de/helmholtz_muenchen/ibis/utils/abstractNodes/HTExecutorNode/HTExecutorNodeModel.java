@@ -1,12 +1,10 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
 
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -26,9 +24,8 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  */
 public abstract class HTExecutorNodeModel extends NodeModel {
 	
-	//variables characterizing the HTE_Node
-	private int hte_id = -1;
-	private int node_id = -1;
+	//variables characterizing the HTExecution
+	private int exec_id = -1;
 	private String lockCommand = "";
 	private String host_name = "";
 	private String node_name = this.getClass().getCanonicalName();
@@ -37,10 +34,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private int threshold_value = DEFAULT_THRESHOLD;
 	
 	//internal flags
-	private boolean use_hte_value = false;
-	private int resetCounter = 0;
-	private boolean calledByException = false;
-	private boolean executionTried = false;
+	private boolean use_hte = false;
 	
 	static final String CFGKEY_DEFAULT_THRESHOLD = "threshold";
 	static final int DEFAULT_THRESHOLD = 1;
@@ -64,19 +58,15 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		if (!map.containsKey("use_hte")) {
 			System.err
 			.println("No information about HTE usage found! Please add the HTETrigger, if you want to use HTE.");
-			use_hte_value=false;
+			use_hte=false;
 			return;
 		}
 		
 		if (map.get("use_hte").getIntValue() == 1) {
-			use_hte_value = true;
+			use_hte = true;
 		} else {
-			use_hte_value = false;
+			use_hte = false;
 		}
-
-		if (map.containsKey("hte_id")) {
-			hte_id = map.get("hte_id").getIntValue();
-		} 
 		
 		boolean use_local_threshold = false;
 		
@@ -100,19 +90,19 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		
 		if (count < threshold_value) {
 			count++;
-			htedb.updateCount(hte_id, node_id, count);
+			htedb.updateCount(exec_id, count);
 			exitcode = Executor.executeCommandWithExitCode(command, exec,
 					environment, logger, stdOutFile, stdErrFile, stdOut,
 					stdErr, StdInFile);
 			if (exitcode == 0) {
-				htedb.writeSuccess(hte_id, node_id);
+				htedb.writeSuccess(exec_id);
 				checker.writeOK();
 				checker.finalize();
 				return;
 			} else if (exitcode == 139) {
-				htedb.writeError(hte_id, node_id, "segmentation fault");
+				htedb.writeError(exec_id, "segmentation fault");
 			} else {
-				htedb.writeError(hte_id, node_id, "exitcode: " + exitcode);
+				htedb.writeError(exec_id, "exitcode: " + exitcode);
 			}
 		}
 
@@ -121,7 +111,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 					+ " could not be completed successfully!");
 			
 			htedb.closeConnection();
-			calledByException = true;
 			throw (new UnsuccessfulExecutionException("Exit code was not 0: '"
 					+ exitcode + "' for " + ExecuteThread.getCommand(command)));
 
@@ -135,8 +124,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			String[] environment, NodeLogger logger,File lockFile, String stdOutFile,
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
-
-		calledByException = false;
 		
 		this.readFlowVariables();
 
@@ -147,7 +134,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			lockCommand += s;
 		}
 
-		logger.info(node_name+" is executed with: use_hte="+use_hte_value+" hte_id="+hte_id+" threshold="+threshold_value);
+		logger.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value);
 		
 		if(lockFile == null) {
 			lockFile = new File(defaultLockFile);
@@ -159,44 +146,27 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 
 		//abort execution if node has been executed successfully
 		if (terminationState) {
-			System.out.println("Node "+node_name+" has been executed succesfully according to klock!");
 			return;
 		}
 			
 		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile,
 				lockCommand);
 		
-		//if HTE is used
 		HTEDBHandler htedb = null;
 		
-		//establish connection to database
-		if (use_hte_value) {
+		//try to establish connection to database
+		if (use_hte) {
 			try {
 				htedb = new HTEDBHandler();
 			} catch (SQLException e) {
 				System.err.println("Connection to database could not be established: "+e.getMessage());
-				use_hte_value = false;
+				use_hte = false;
 			}
 		}
 		
-		if (use_hte_value) {
-			if(hte_id ==-1) {
-				throw new UnsuccessfulExecutionException("Execute HTETrigger Node before the other nodes in the workflow!");
-			}
-			node_id = htedb.getHTENodeId(lockCommand, node_name, host_name, hte_id);
-			System.out.println("Threshold: "+threshold_value);
-			if(node_id == -1) {
-				node_id = htedb.insertNewHTENode(lockCommand, node_name, host_name,threshold_value, hte_id);
-			} else {
-				int tmp_threshold = htedb.getHTENodeThreshold(node_id, hte_id);
-				if(tmp_threshold!=threshold_value) {
-					htedb.updateThreshold(hte_id, node_id, threshold_value);
-				}
-			}
-			if(count>=threshold_value) {
-				this.popUpWindow(htedb);
-			}
-			executionTried = true;
+		if (use_hte) {
+			exec_id = htedb.insertNewHTExecution(lockCommand, node_name, host_name, threshold_value);
+//			System.out.println("########################## this is the exec_id: "+exec_id);
 			recExecuteCommand(command, exec, environment, logger, stdOutFile,
 					stdErrFile, stdOut, stdErr, StdInFile, checker, htedb);
 			htedb.closeConnection();
@@ -207,50 +177,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 					stdOutFile, stdErrFile, stdOut, stdErr, StdInFile);
 			checker.writeOK();
 			checker.finalize();
-		}
-	}
-	
-	private void popUpWindow(HTEDBHandler htedb) {
-		String newline = System.getProperty("line.separator");
-		String message = node_name + " was executed " + count + " times."
-				+ newline + "Your threshold was " + threshold_value+ "." + newline
-				+ "Do you want to reset the count in the DB?";
-		int answer = JOptionPane.showOptionDialog(null, message, "Reset in database?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-		if(answer == JOptionPane.YES_OPTION) {
-			count = 0;
-			
-			htedb.updateCount(hte_id, node_id, 0);
-		}	
-	}
-
-	/**
-	 * called before reset operations of knime node
-	 */
-	@Override
-	protected void reset() {
-		if(!executionTried) return;
-		
-		if(calledByException) {
-			resetCounter++;
-			if(resetCounter<=2) return;
-			calledByException = false;
-			resetCounter = 0;
-		}
-		
-		this.readFlowVariables();
-		
-		if(use_hte_value) {
-			HTEDBHandler htedb;
-			try {
-				htedb = new HTEDBHandler();
-				this.popUpWindow(htedb);
-				htedb.closeConnection();
-			} catch (SQLException e) {
-				System.err.println("Connection to database could not be established: "+e.getMessage());
-				use_hte_value = false;
-				e.printStackTrace();
-			}
-			
 		}
 	}
 
@@ -279,39 +205,4 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			throws InvalidSettingsException {
 		threshold.validateSettings(settings);
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadInternals(final File internDir,
-			final ExecutionMonitor exec) throws IOException,
-			CanceledExecutionException {
-    	/*File f_host = new File(internDir, "host.txt");
-    	File f_lockCommand = new File(internDir, "command.txt");
-        
-    	// set the buffers, if the files are there
-    	if(f_host.exists() && f_lockCommand.exists()){
-
-    		host_name = FileUtils.readFileToString(f_host);
-    		lockCommand= FileUtils.readFileToString(f_lockCommand);
-
-    	}*/
-    	
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveInternals(final File internDir,
-			final ExecutionMonitor exec) throws IOException,
-			CanceledExecutionException {
-		/*File f_host = new File(internDir, "host.txt");
-    	File f_lockCommand = new File(internDir, "command.txt");
-    	
-    	FileUtils.write(f_host, host_name);
-    	FileUtils.write(f_lockCommand, lockCommand);*/
-	}
-
 }

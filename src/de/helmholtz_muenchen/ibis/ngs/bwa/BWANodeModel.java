@@ -213,7 +213,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void reset() {
-    	super.reset();
     }
 
     /**

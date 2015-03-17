@@ -2,7 +2,6 @@ package de.helmholtz_muenchen.ibis.htetrigger;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
@@ -15,8 +14,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
-
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 
 /**
  * This is the model implementation of HTETrigger.
@@ -37,7 +34,7 @@ public class HTETriggerNodeModel extends NodeModel {
 	private final SettingsModelInteger threshold = new SettingsModelInteger(HTETriggerNodeModel.CFGKEY_DEFAULT_THRESHOLD,HTETriggerNodeModel.DEFAULT_THRESHOLD);
 	private final SettingsModelBoolean local_threshold = new SettingsModelBoolean(HTETriggerNodeModel.CFGKEY_LOCAL_THRESHOLD,HTETriggerNodeModel.USE_LOCAL_THRESHOLDS);
 
-	int id, threshold_value, use_hte_value, local_threshold_value;
+	int threshold_value, use_hte_value, local_threshold_value;
 	
     /**
      * Constructor for the node model.
@@ -55,23 +52,12 @@ public class HTETriggerNodeModel extends NodeModel {
 
 		use_hte_value = 0;
 		local_threshold_value = 0;
-		id = -1;
 		threshold_value = DEFAULT_THRESHOLD;
 		if (use_hte.getBooleanValue()) {
 			use_hte_value = 1;
 			threshold_value = threshold.getIntValue();
 			if(local_threshold.getBooleanValue()) local_threshold_value = 1;
-			HTEDBHandler htedb;
-			try {
-				htedb = new HTEDBHandler();
-				id=htedb.insertNewHTEWorkflow(threshold_value);
-				htedb.closeConnection();	
-			} catch (SQLException e) {
-				use_hte_value = 0;
-				System.err.println("Connection to database could not be established. Workflow will be run without usage of HTE");
-			}
 		}
-		pushFlowVariableInt("hte_id", id);
 		pushFlowVariableInt("threshold", threshold_value);
 		pushFlowVariableInt("use_hte", use_hte_value);
 		pushFlowVariableInt("local_threshold", local_threshold_value);
@@ -83,7 +69,6 @@ public class HTETriggerNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-    	//TODO copy status (?)
     }
 
     /**

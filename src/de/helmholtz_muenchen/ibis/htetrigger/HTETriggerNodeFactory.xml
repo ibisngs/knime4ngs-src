@@ -3,35 +3,28 @@
     <name>HTETrigger</name>
     
     <shortDescription>
-        
+        HTETrigger allows to set HTE options
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	This node allows to set options for HTE (high throughput execution) of the nodes of a workflow.
+        	If HTE is used, nodes extending the abstract HTExectuerNode will be restarted several times when their execution has failed.
+        	This node is connected to the first node of the workflow via the Flow Variable Ports.
+        </intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Use HTE?">Check this box, if you like to use HTE.</option>
+        <option name="Threshold">Maximum number of times each node is restarted.</option>
+       	<option name="Set individual thresholds?">Check this box, if you like to set an individual threshold for each node in the workflow.</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+    	<inPort index="0" name=""></inPort>
+        <outPort index="0" name=""></outPort>
+    </ports>
+       
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+		<view index="0" name=""></view>
     </views>
 </knimeNode>
