@@ -9,7 +9,7 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 
@@ -21,6 +21,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
  */
 public class GenotypeGVCFsNodeModel extends GATKNodeModel {
     
+	public static final String CFGKEY_NT_FILE = "NT";
+	
+	private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
+	
 	private String OUTFILE; 
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
@@ -52,6 +56,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			}
 
 			command.add("--variant "+INFILE);
+			command.add("-nt "+m_NT.getIntValue());
 
 		}
 		
@@ -70,21 +75,21 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		// TODO Auto-generated method stub
+		m_NT.saveSettingsTo(settings);
 		
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		// TODO Auto-generated method stub
+		m_NT.loadSettingsFrom(settings);
 		
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		// TODO Auto-generated method stub
+		m_NT.validateSettings(settings);
 		
 	}
 }
