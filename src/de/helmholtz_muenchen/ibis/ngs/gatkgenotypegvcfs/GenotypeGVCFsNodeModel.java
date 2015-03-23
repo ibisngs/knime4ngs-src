@@ -56,10 +56,9 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			}
 
 			command.add("--variant "+INFILE);
-			command.add("-nt "+m_NT.getIntValue());
 
 		}
-		
+		command.add("-nt "+m_NT.getIntValue());
 		return StringUtils.join(command, " ");
 	}
 
