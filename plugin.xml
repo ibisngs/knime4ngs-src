@@ -107,6 +107,7 @@
 		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory" id="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory"/>
 
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.lofstatistics.LOFStatisticsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.lofstatistics.LOFStatisticsNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
