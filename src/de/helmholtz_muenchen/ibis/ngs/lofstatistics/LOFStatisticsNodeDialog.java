@@ -23,6 +23,7 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
      * New pane for configuring the LOFStatistics node.
      */
 	private final SettingsModelString vcfin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_VCF_INFILE,"-");
+	private final SettingsModelString cdsin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_ANNOTATION, "");
 
 
@@ -30,7 +31,10 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
     	
     	//input file
     	createNewGroup("VCF File");
-    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_SummarizeLOFTEE_VCFIN", 0, ".vcf"));
+    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_LOFStatistics_VCFIN", 0, ".vcf"));
+    	
+    	createNewGroup("CDS File");
+    	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa"));
     	
     	//annotation selection
         createNewGroup("Annotation Selection");

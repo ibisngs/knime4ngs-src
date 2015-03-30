@@ -36,6 +36,9 @@ public class LOFStatisticsNodeModel extends NodeModel {
 	static final String CFGKEY_VCF_INFILE = "vcf_infile";
 	final SettingsModelString m_vcfin = new SettingsModelString(CFGKEY_VCF_INFILE,"");
 	
+	static final String CFGKEY_CDS_INFILE = "cds_infile";
+	final SettingsModelString m_cdsin = new SettingsModelString(CFGKEY_CDS_INFILE,"");
+	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
     static final String[] ANNOTATIONS_AVAILABLE={"LOFTEE","VAT"};
@@ -77,8 +80,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     	System.out.println("Annotation: "+m_annotation.getStringValue());
     	
     	//Execute
-    	String cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh38.cds.all.fa";
-    	Summarizer summy = new Summarizer(m_annotation.getStringValue(), vcf_infile, cds_file );
+    	Summarizer summy = new Summarizer(m_annotation.getStringValue(), vcf_infile, m_cdsin.getStringValue());
     	String LOF_Summary[] = {summy.getLoFStatistic()};
     	
     	//Create Output Table
@@ -128,6 +130,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	m_vcfin.saveSettingsTo(settings);
+    	m_cdsin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
     }
 
@@ -138,6 +141,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	m_vcfin.loadSettingsFrom(settings);
+    	m_cdsin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
     }
 
@@ -148,6 +152,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	m_vcfin.validateSettings(settings);
+    	m_cdsin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
     }
     

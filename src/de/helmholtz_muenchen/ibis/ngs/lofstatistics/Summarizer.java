@@ -26,7 +26,6 @@ public class Summarizer {
 	//main statistic
 	private ArrayList<LoFVariant> lof_statistic;
 	private ArrayList<String> additional_titles;
-	private ArrayList<ArrayList<HashSet<String>>> additional_fields;
 	
 	//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetereo]
 	private HashMap<String, HashMap<String,Integer []>> gene_sample_statistic;
@@ -69,8 +68,6 @@ public class Summarizer {
 			additional_titles.add("lof_flags");
 			additional_titles.add("lof_info");
 		}
-		
-		additional_fields = new ArrayList<ArrayList<HashSet<String>>>();
 		
 		lof_statistic = new ArrayList<LoFVariant>();
 		
