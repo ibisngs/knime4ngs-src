@@ -76,14 +76,16 @@ public class Summarizer {
 		
 	}
 	
-	public void getLoFStatistic() {
+	public String getLoFStatistic() {
 		this.extract_LOFs();
+		String outfile = vcf_file.replace("vcf", "lofstatistic.vcf");
 		try {
-			this.writeLOFStatistics();
+			this.writeLOFStatistics(outfile);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return outfile;
 	}
 	
 	/**
@@ -440,8 +442,8 @@ public class Summarizer {
 		}
 	}
 	
-	public  void writeLOFStatistics() throws IOException{
-		String outfile = vcf_file.replace("vcf", "lofstatistic.vcf");
+	public  void writeLOFStatistics(String outfile) throws IOException{
+		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		String [] header = {"chr", "pos", "rsId", "ref_allele", "alt_allele", "gene_id", "gene_symbol", "effect", "consequence", "lof_trans", "all_trans", "obs_hom", "obs_het"};
 		
