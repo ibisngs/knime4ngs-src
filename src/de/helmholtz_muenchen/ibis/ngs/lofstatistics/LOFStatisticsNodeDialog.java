@@ -30,10 +30,10 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
     protected LOFStatisticsNodeDialog() {
     	
     	//input file
-    	createNewGroup("VCF File");
+    	createNewGroup("Path to VCF file");
     	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_LOFStatistics_VCFIN", 0, ".vcf"));
     	
-    	createNewGroup("CDS File");
+    	createNewGroup("Path to CDS file");
     	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa"));
     	
     	//annotation selection

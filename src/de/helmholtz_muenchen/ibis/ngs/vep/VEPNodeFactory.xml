@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>VEP</name>
+    
+    <shortDescription>
+        Variant Effect Predictor
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+        	This node is a wrapper for the Variant Effect Predictor from Ensembl.
+        	Furthermore, it provides the plugin LOFTEE which identifies and filters Loss of Function variants.
+        	<br />
+        	Predecessor nodes (not required): Any node that outputs a VCF file.
+        	<br />
+        	Successor nodes: e.g. LOFStatistics
+        	<br />
+        	Source VEP:<a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
+        	<br />
+        	Source LOFTEE:<a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
+        </intro>
+        
+        <tab name="Standard Options">
+            <option name="HTE Threshold">
+            	Set an individual threshold for high throughput execution (requires the node HTETrigger in the workflow).
+            </option>
+            <option name="Path to VCF file">
+            	Select an input file in vcf format.
+            </option>
+            <option name="Path to variant_effect_predictor.pl">
+            	Select the VEP perl script which can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
+            </option>
+            <option name="Cache usage">
+            	It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
+            	The cache is usually build during the installation of the Ensembl API. 
+            	Otherwise, you can find information in the VEP documentation (see VEP link above). 
+            </option>
+            <option name="Coding only?">
+            	If this checkbox is checked, VEP will only return consequences that fall in the coding regions of transcripts.
+            </option>
+            <option name="Number of forks">
+            	If the number is number is higher than 1, forking is enabled.
+            	Forking can dramatically improve the runtime of VEP.
+         		If LOFTEE is used, it will run ignoring the conservation file as there occur errors when is is accessed by multiple threads.
+            </option>
+            <option name="Choose type of statistic file">
+            	VEP can create a statistic file in html oder plain text format. 
+            </option>
+            <option name="Plugin directory">
+            	Set the plugin directory.
+            	To use LOFTEE the directory of LoF.pm has to be chosen.
+            </option>
+        </tab>
+        <tab name="LOFTEE">
+            <option name="Use LOFTEE?">
+            	Check this box if you want to use LOFTEE.
+            </option>
+            <option name="Path to human_ancestor.fa.gz">
+            	You can find a download link for this file following the LOFTEE link above.
+            </option>
+            <option name="Path to phylocsf.sql">
+            	You can find a download link for this file following the LOFTEE link above.
+            	The conservation file will be ignored, if forking is enabled.
+            </option>
+            <option name="Samtools PATH">
+            	If Samtools are not installed, install it and select the installation directory (can be found by typing "which samtools" in terminal).
+            </option>
+        </tab>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
+        <outPort index="0" name="">
+        	Cell 0: Path2VEP_AnnotationVCF
+        	<br />
+        	Cell 1: Path2VEP_StatsFile
+        </outPort>
+    </ports>    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+</knimeNode>

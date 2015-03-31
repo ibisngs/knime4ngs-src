@@ -127,6 +127,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		
 		this.readFlowVariables();
 
+		this.count = 0;
 		//prepare klock
 		host_name = InetAddress.getLocalHost().getHostName();
 		lockCommand = "";

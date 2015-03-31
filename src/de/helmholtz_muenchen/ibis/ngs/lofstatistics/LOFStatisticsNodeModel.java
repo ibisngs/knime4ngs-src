@@ -47,7 +47,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     //TODO: VEP needs a file containing transcript numbers for each gene
 	
 	//output
-	public static final String OUT_COL1 = "LOF SUMMARY";
+	public static final String OUT_COL1 = "Path2LOF_Statistics";
 	
 	public static boolean optionalPort=false;
 	
