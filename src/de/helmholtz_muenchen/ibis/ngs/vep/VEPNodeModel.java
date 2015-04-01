@@ -102,6 +102,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String vcf_infile, res_file, stats_file, stdOutFile, stdErrFile, cmd;
     	String environment = "";
     	File lockFile;
+//    	String fileBase;
     	
     	//perl script
     	cmd = "perl "+m_veppl.getStringValue();
@@ -115,16 +116,20 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		vcf_infile = m_vcfin.getStringValue();
     	}
     	cmd += " -i " + vcf_infile;
+//    	fileBase = PathProcessor.getBase(vcf_infile);
     	
     	//output file + stats file
     	res_file = vcf_infile.replace("vcf", "VEP_annotation.vcf");
+//    	res_file = PathProcessor.createOutputFile(fileBase,"vcf","VEP_annotation");
     	cmd += " -o " + res_file;
     		
     	if(m_stats_type.getStringValue().equals("html")) {
     		stats_file = vcf_infile.replace("vcf", "VEP_stats.html");
+//    		stats_file = PathProcessor.createOutputFile(fileBase, "html", "VEP_stats");
     		cmd += " --stats_file " + stats_file;
     	} else if(m_stats_type.getStringValue().equals("plain text")) {
     		stats_file = vcf_infile.replace("vcf", "VEP_stats.txt");
+//    		stats_file = PathProcessor.createOutputFile(fileBase, "txt", "VEP_stats");
     		cmd += " --stats_text " + stats_file;
     	} else {
     		stats_file = "";
@@ -160,15 +165,18 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     			cmd += ",conservation_file:"+m_conservation_file.getStringValue();
     		}
     		
-    		environment = "PATH=$PATH:"+m_samtools_path.getStringValue();
+    		environment = "PATH="+System.getenv("PATH")+":"+m_samtools_path.getStringValue();
     	}
     	
     	stdOutFile = vcf_infile.replace("vcf","VEP_stdout.vcf");
-    	stdErrFile = vcf_infile.replace("vcf", "VEP_stderr.vcf");
+//    	stdOutFile = PathProcessor.createOutputFile(fileBase, "txt", "VEP_stdout");
+    	stdErrFile = vcf_infile.replace("vcf","VEP_stderr.vcf");
+//    	stdErrFile = PathProcessor.createOutputFile(fileBase, "txt", "VEP_stderr");
     	lockFile = new File(vcf_infile.substring(0,vcf_infile.lastIndexOf(".")) + ".VEP" +  SuccessfulRunChecker.LOCK_ENDING);
 
     	System.out.println("COMMAND: "+cmd);
     	System.out.println("ENVIRONMENT: "+environment);
+    	
     	super.executeCommand(new String[]{cmd}, exec, new String[]{environment}, logger, lockFile, stdOutFile, stdErrFile, null, null, null);
     	
     	
