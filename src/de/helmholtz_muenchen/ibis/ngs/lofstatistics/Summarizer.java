@@ -79,8 +79,22 @@ public class Summarizer {
 		try {
 			this.writeLOFStatistics(outfile);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.err.println(outfile+ " could not be written!");
 			e.printStackTrace();
+		}
+		return outfile;
+	}
+	
+	public String getSampleStatistic() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+		}
+		this.generateSampleStatistic();
+		String outfile = vcf_file.replace("vcf", "samplestatistic.vcf");
+		try {
+			this.writeSampleStatistic(outfile);
+		} catch (IOException e) {
+			System.err.println(outfile+" could not be written!");
 		}
 		return outfile;
 	}
@@ -439,6 +453,11 @@ public class Summarizer {
 		}
 	}
 	
+	private void generateSampleStatistic() {
+		this.sample_statistic = new HashMap<String, SampleStat>();
+		
+	}
+	
 	public  void writeLOFStatistics(String outfile) throws IOException{
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
@@ -529,6 +548,14 @@ public class Summarizer {
 		}
 		
 		bw.close();
+	}
+	
+	private void writeSampleStatistic(String outfile) throws IOException {
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+		//TODO write HashMap
+		bw.close();
+		
 	}
 	
 	public static void main (String [] args) {
