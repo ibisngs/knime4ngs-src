@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class Summarizer {
@@ -26,15 +27,17 @@ public class Summarizer {
 	//main statistic
 	private ArrayList<LoFVariant> lof_statistic;
 	private ArrayList<String> additional_titles;
+	private HashMap<String,Integer> vep_header; //contains indices for LoF, LoF_filter etc.
+	private int nrOfVEPfields;
 	
-	//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetereo]
+	//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetero]
 	private HashMap<String, HashMap<String,Integer []>> gene_sample_statistic;
+	//gene_id -> [full LoFs, part LoFs, observed LoFs homo, observed LoFs hetero]
+	private HashMap<String, Integer[]> gene_statistic;
+	
 	
 	//sample_id -> fields of SampleStat
 	private HashMap<String, SampleStat> sample_statistic;
-	
-	//gene_id -> [full LoFs, part LoFs, observed LoFs homo, observed LoFs hetero]
-	private HashMap<String, Integer[]> gene_statistic;
 	
 	//transcript_id -> [LoFs, observed LoFs homo, observed LoFs hetero]
 	private HashMap<String, Integer[]> transcript_statistic;
@@ -74,10 +77,27 @@ public class Summarizer {
 	}
 	
 	public String getLoFStatistic() {
-		this.extract_LOFs();
-		String outfile = vcf_file.replace("vcf", "lofstatistic.vcf");
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+		}
+		String outfile = vcf_file.replace("vcf", "lof_statistic.txt");
 		try {
 			this.writeLOFStatistics(outfile);
+		} catch (IOException e) {
+			System.err.println(outfile+ " could not be written!");
+			e.printStackTrace();
+		}
+		return outfile;
+	}
+	
+	public String getGeneStatistic() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+		}
+		String outfile = vcf_file.replace("vcf","gene_statistic.txt");
+		try {
+			this.generateGeneStatistic();
+			this.writeGeneStatistic(outfile);
 		} catch (IOException e) {
 			System.err.println(outfile+ " could not be written!");
 			e.printStackTrace();
@@ -88,11 +108,26 @@ public class Summarizer {
 	public String getSampleStatistic() {
 		if(lof_statistic.size()==0) {
 			this.extract_LOFs();
+			this.generateGeneStatistic();
 		}
 		this.generateSampleStatistic();
-		String outfile = vcf_file.replace("vcf", "samplestatistic.vcf");
+		String outfile = vcf_file.replace("vcf", "sample_statistic.txt");
 		try {
 			this.writeSampleStatistic(outfile);
+		} catch (IOException e) {
+			System.err.println(outfile+" could not be written!");
+		}
+		return outfile;
+	}
+	
+	public String getTranscriptStatistic() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+		}
+		this.generateTranscriptStatistic();
+		String outfile = vcf_file.replace("vcf", "transcript_statistic.txt");
+		try {
+			this.writeTranscriptStatistic(outfile);
 		} catch (IOException e) {
 			System.err.println(outfile+" could not be written!");
 		}
@@ -254,7 +289,6 @@ public class Summarizer {
 		
 		for(String i:infos) {
 			if(i.startsWith("CSQ")) {
-				if(!i.contains("|HC|") && !i.contains("|LC|")) return; //no LoF variants were annotated
 				i = i.replaceFirst("CSQ=","");
 				transcript_annotations = i.split(",");
 				break;
@@ -266,25 +300,36 @@ public class Summarizer {
 		//fill HashMap genes
 		for(String t: transcript_annotations) {
 			
-			if(!t.contains("|HC|") && !t.contains("|LC|")) continue;
-//			System.out.println(t);
 			annotation_fields = t.split("\\|");
 			
+			//work around for annotations ending with ...||
+			String [] tmp = new String [nrOfVEPfields];
+			for(int i = 0; i< annotation_fields.length;i++) {
+				tmp[i] = annotation_fields[i];
+			}
+			for(int j = annotation_fields.length; j < tmp.length; j++) {
+				tmp[j] = "";
+			}
+			annotation_fields = tmp;
+			
+			int confidence_index = vep_header.get("confidence");
+//			System.out.println(t);
+			if(annotation_fields[confidence_index].equals("")) continue;
+			
+			
+			
 			//alt_allele - ref_allele = annotation_fields[0];
-			if(alt.contains(annotation_fields[0]) || annotation_fields[0].equals("-")) { //found a LoF annotation
-				consequence = annotation_fields[1];
-				gene_symbol = annotation_fields[3];
-				gene_id = annotation_fields[4];
-				transcript_id = annotation_fields[6];
-				confidence = annotation_fields[22];
-				filter = annotation_fields[23];
+			int allele_index = vep_header.get("allele");
+			if(alt.contains(annotation_fields[allele_index]) || annotation_fields[allele_index].equals("-")) { //found a LoF annotation
+				consequence = annotation_fields[vep_header.get("consequence")];
+				gene_symbol = annotation_fields[vep_header.get("gene_symbol")];
+				gene_id = annotation_fields[vep_header.get("gene_id")];
+				transcript_id = annotation_fields[vep_header.get("transcript_id")];
+				confidence = annotation_fields[confidence_index];
+				filter = annotation_fields[vep_header.get("lof_filter")];
+				lof_info = annotation_fields[vep_header.get("lof_info")];
+				lof_flags = annotation_fields[vep_header.get("lof_flags")];
 				
-				if(annotation_fields.length>24) {
-					lof_info = annotation_fields[24];
-				}
-				if(annotation_fields.length>25) {
-					lof_flags = annotation_fields[25];
-				}
 				LoFGene g;
 				if(genes.containsKey(gene_id)) {
 					g = genes.get(gene_id);
@@ -304,6 +349,8 @@ public class Summarizer {
 				gene_id2gene_symbol.put(gene_id, gene_symbol);
 			}
 		}
+		
+		if(genes.size()==0) return; //no LoF genes have been found
 
 		ArrayList<String> adapted_genotypes = getAdaptedGenotypes(genotypes, GT_index);
 		for(String str: adapted_genotypes) {
@@ -370,7 +417,7 @@ public class Summarizer {
 		return result;
 	}
 	
-	public void extract_LOFs() {
+	private void extract_LOFs() {
 		
 		gene_id2gene_symbol = new HashMap<String,String>();
 		
@@ -392,7 +439,34 @@ public class Summarizer {
 			    	}
 			        String line = sc.nextLine();
 			        if(line.startsWith("#"))  {
-			        	if(line.startsWith("#CHR")) {
+			        	if(line.startsWith("##INFO=<ID=CSQ")) {
+			        		vep_header = new HashMap<String,Integer>();
+			        		String [] tmp = line.split("\\|");
+			        		nrOfVEPfields = tmp.length;
+			        		String part; 
+			        		for(int i = 0; i<tmp.length; i++) {
+			        			part = tmp[i];
+			        			if(part.contains("Allele")) {
+			        				vep_header.put("allele", i);
+			        			} else if (part.contains("Consequence")) {
+			        				vep_header.put("consequence", i);
+			        			} else if (part.equals("SYMBOL")) {
+			        				vep_header.put("gene_symbol",i);
+			        			} else if (part.contains("Gene")) {
+			        				vep_header.put("gene_id", i);
+			        			} else if (part.contains("Feature")) {
+			        				vep_header.put("transcript_id",i);
+			        			}  else if (part.contains("LoF_filter")) {
+			        				vep_header.put("lof_filter",i);
+			        			} else if (part.contains("LoF_flags")) {
+			        				vep_header.put("lof_flags",i);
+			        			} else if (part.contains("LoF_info")) {
+			        				vep_header.put("lof_info",i);
+			        			} else if (part.contains("LoF")) {
+			        				vep_header.put("confidence",i);
+			        			}
+			        		}
+			        	} else if(line.startsWith("#CHR")) {
 			        		String [] header = line.split("\t");
 			        		sample_ids = new ArrayList<String>();
 			        		for(int i = 9; i< header.length; i++) {
@@ -428,9 +502,8 @@ public class Summarizer {
 			        }
 			        counter++;
 			        /**only for testing**/
-//			        if(counter > 20000) {
-//			        	this.writeLOFStatistics();
-//			        	System.exit(0);
+//			        if(counter > 50000) {
+//			        	return;
 //			        }
 			    }
 			    System.out.println("VCF file processed.");
@@ -453,12 +526,198 @@ public class Summarizer {
 		}
 	}
 	
-	private void generateSampleStatistic() {
-		this.sample_statistic = new HashMap<String, SampleStat>();
+	private void generateGeneStatistic() {
+		//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetereo]
+		gene_sample_statistic = new HashMap<>();
 		
+		HashMap<String, HashMap<String, HashSet<String>>> transcripts_hom = new HashMap<>();
+		HashMap<String, HashMap<String, HashSet<String>>> transcripts_het = new HashMap<>();
+		
+		//gene_id -> [full LoFs, part LoFs, observed LoFs homo, observed LoFs hetero]
+		gene_statistic = new HashMap<>();
+		
+		
+		for(LoFVariant lof: lof_statistic)  {
+			HashMap<String, LoFGene> gene2lof = lof.getGene_id2lofgene_fields();
+			
+			for(String gene_id: gene2lof.keySet()) {
+				
+				Integer [] stats = gene_statistic.get(gene_id);
+				if(stats==null) {
+					stats = new Integer[4];
+					for(int i=0; i<4;i++) {
+						stats[i]=0;
+					}
+				}
+				
+				HashSet<String> transcripts = gene2lof.get(gene_id).getTranscripts();
+				
+				//is variant full LOF
+				if(transcripts.size() == gene_id2transcript_ids.get(gene_id).size()) {
+					stats[0]++;
+				} else {
+					stats[1]++;
+				}
+				
+				for(int i=0; i<lof.getGenotypes().size(); i++) {
+					String gt = lof.getGenotypes().get(i);
+					
+					//homozygote affected transcripts
+					if(gt.charAt(0)==gt.charAt(2) && gt.charAt(0)=='1') {
+						stats[2]++; //LoF is homozygous
+						HashMap<String, HashSet<String>> sample2transcripts = transcripts_hom.get(gene_id);
+						if(sample2transcripts==null) {
+							sample2transcripts = new HashMap<>();
+						}
+						HashSet<String> tmp_set = sample2transcripts.get(sample_ids.get(i));
+						if(tmp_set == null) {
+							tmp_set = new HashSet<>();
+						}
+						
+						tmp_set.addAll(transcripts);
+						sample2transcripts.put(sample_ids.get(i), tmp_set);
+						transcripts_hom.put(gene_id, sample2transcripts);
+					} else if (gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+						stats[3]++; //LoF is heterozygous
+						HashMap<String, HashSet<String>> sample2transcripts = transcripts_het.get(gene_id);
+						if(sample2transcripts==null) {
+							sample2transcripts = new HashMap<>();
+						}
+						HashSet<String> tmp_set = sample2transcripts.get(sample_ids.get(i));
+						if(tmp_set == null) {
+							tmp_set = new HashSet<>();
+						}
+						
+						tmp_set.addAll(transcripts);
+						sample2transcripts.put(sample_ids.get(i), tmp_set);
+						transcripts_het.put(gene_id, sample2transcripts);
+					}
+				}
+				gene_statistic.put(gene_id, stats);
+			}
+		}
+		
+		int hom_lof_nr, het_lof_nr;
+		for(String gene: gene_id2gene_symbol.keySet()) {
+			for(String sample: sample_ids) {
+				HashSet<String> hom_lofs = null;
+				HashSet<String> het_lofs = null;
+				
+				if(transcripts_hom.get(gene)!=null) {
+					hom_lofs = transcripts_hom.get(gene).get(sample);
+				}
+				if(transcripts_het.get(gene)!=null) {
+					het_lofs = transcripts_het.get(gene).get(sample);
+				}
+				
+				if(hom_lofs==null) hom_lofs = new HashSet<>();
+				if(het_lofs==null) het_lofs = new HashSet<>();
+				
+				het_lofs.removeAll(hom_lofs);
+				hom_lof_nr = hom_lofs.size();
+				het_lof_nr = het_lofs.size();
+				HashMap<String, Integer []> sample2nr = gene_sample_statistic.get(gene);
+				if(sample2nr == null) sample2nr = new HashMap<String, Integer[]>();
+				sample2nr.put(sample, new Integer[]{hom_lof_nr,het_lof_nr});
+				gene_sample_statistic.put(gene, sample2nr);
+			}
+		}
 	}
 	
-	public  void writeLOFStatistics(String outfile) throws IOException{
+	private void generateSampleStatistic() {
+		this.sample_statistic = new HashMap<>();
+		ArrayList<String> completeLOFgene, partLOFgene;
+		HashMap<String, Integer> fullLOFs = new HashMap<>();
+		HashMap<String, Integer> partLOFs = new HashMap<>();
+		boolean isFull = false;
+		
+		//fill fullLOFs and partLOFs
+		for(LoFVariant lof:lof_statistic) {
+			HashMap<String, LoFGene> lof_genes = lof.getGene_id2lofgene_fields();
+			isFull = false;
+			for(Entry<String, LoFGene> gene:lof_genes.entrySet()) {
+				int all_trans = gene_id2transcript_ids.get(gene.getKey()).size();
+				int lof_trans = gene.getValue().getNrOfTranscripts();
+				if(all_trans == lof_trans) {
+					isFull = true;
+				}
+			}
+			for(int i = 0; i< lof.getGenotypes().size(); i++) {
+				String gt = lof.getGenotypes().get(i);
+				String sample = sample_ids.get(i);
+				if(gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+					if(isFull) {
+						Integer t = fullLOFs.get(sample);
+						if(t==null) {
+							t = 0;
+						}
+						t++;
+						fullLOFs.put(sample, t);
+					} else {
+						Integer x = partLOFs.get(sample);
+						if(x == null) {
+							x = 0;
+						}
+						x++;
+						partLOFs.put(sample, x);
+					}
+				}
+			}
+		}
+		
+		//get complete LOF genes
+		for(String sample: sample_ids) {
+			
+			completeLOFgene = new ArrayList<>();
+			partLOFgene = new ArrayList<>();
+			
+			for(String gene: gene_id2gene_symbol.keySet()) {
+				int all_trans = gene_id2transcript_ids.get(gene).size();
+				int lof_hom = gene_sample_statistic.get(gene).get(sample)[0];
+				if(all_trans == lof_hom) {
+					completeLOFgene.add(gene);
+				} else {
+					partLOFgene.add(gene);
+				}
+			}
+			sample_statistic.put(sample, new SampleStat(fullLOFs.get(sample),partLOFs.get(sample), completeLOFgene, partLOFgene));
+		}
+	}
+	
+	private void generateTranscriptStatistic() {
+		transcript_statistic = new HashMap<>();
+		for(LoFVariant lofvar: lof_statistic) {
+			HashSet<String> transcripts = new HashSet<>();
+			HashMap<String, LoFGene> lofgene = lofvar.getGene_id2lofgene_fields();
+			int obs_hom = 0;
+			int obs_het = 0;
+			for(String g: lofgene.keySet()) {
+				transcripts.addAll(lofgene.get(g).getTranscripts());
+			}
+			for(String gt: lofvar.getGenotypes()) {
+				if(gt.charAt(0)=='1' && gt.charAt(2)==gt.charAt(0)) {
+					obs_hom ++;
+				} else if(gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+					obs_het ++;
+				}
+			}
+			for(String t: transcripts) {
+				Integer[] stats = transcript_statistic.get(t);
+				if(stats==null) {
+					stats = new Integer[3];
+					for (int i = 0; i< 3; i++) {
+						stats[i]= 0;
+					}
+				}
+				stats[0]++;
+				stats[1]+= obs_hom;
+				stats[2]+= obs_het;
+				transcript_statistic.put(t, stats);
+			}
+		}
+	}
+	
+	private void writeLOFStatistics(String outfile) throws IOException{
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		String [] header = {"chr", "pos", "rsId", "ref_allele", "alt_allele", "gene_id", "gene_symbol", "effect", "consequence", "lof_trans", "all_trans", "obs_hom", "obs_het"};
@@ -550,30 +809,83 @@ public class Summarizer {
 		bw.close();
 	}
 	
+	private void writeGeneStatistic(String outfile) throws IOException {
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+		
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tobs_hom\tobs_het\tall_trans");
+		for(String s: sample_ids) {
+			bw.write("\t"+s);
+		}
+		bw.newLine();
+		for(String gene: gene_id2gene_symbol.keySet()) {
+			bw.write(gene+"\t"+gene_id2gene_symbol.get(gene));
+			for(int i: gene_statistic.get(gene)){
+				bw.write("\t"+i);
+			}
+			bw.write("\t"+gene_id2transcript_ids.get(gene).size());
+			for(String sample: sample_ids) {
+				int hom_lof = gene_sample_statistic.get(gene).get(sample)[0];
+				int het_lof = gene_sample_statistic.get(gene).get(sample)[1];
+				bw.write("\t"+hom_lof+","+het_lof);
+			}
+			bw.newLine();
+		}
+		
+		bw.close();
+	}
+	
 	private void writeSampleStatistic(String outfile) throws IOException {
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		//TODO write HashMap
+		bw.write("sample_id\tfull\tpartial\tknocked_out\tcompleteLOFgenes");
+		bw.newLine();
+		for(String s: sample_statistic.keySet()) {
+			SampleStat stat = sample_statistic.get(s);
+			ArrayList<String> completes = stat.getComplete_LOF_genes();
+			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+completes.size()+"\t");
+			if(completes.size() >= 1) {
+				String gene = completes.remove(0);
+				bw.write(gene +":"+gene_id2gene_symbol.get(gene));
+			}
+			
+			for(String u: completes) {
+				bw.write(","+u+":"+gene_id2gene_symbol.get(u));
+			}
+			bw.newLine();
+		}
 		bw.close();
+	}
+	
+	private void writeTranscriptStatistic(String outfile) throws IOException {
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		
+		bw.write("transcript_id\tgene_id\tgene_symbol\tlofs\tobs_hom\tobs_het");
+		bw.newLine();
+		
+		for(String t: transcript_statistic.keySet()) {
+			String gene_id = transcript_id2gene_id.get(t);
+			String gene_symbol = gene_id2gene_symbol.get(gene_id);
+			Integer [] stats = transcript_statistic.get(t);
+			bw.write(t+"\t"+gene_id+"\t"+gene_symbol+"\t"+stats[0]+"\t"+stats[1]+"\t"+stats[2]);
+			bw.newLine();
+		}
+		
+		bw.close();
 	}
 	
 	public static void main (String [] args) {
 		String vcf_file;
 		String cds_file;
 		
-		/**@ home**/
-//		vcf_file = "/home/tim/LOF_Project_local/files/1000genomes/chr22/variant_effect_LoF.vcf";
-//		cds_file = "/home/tim/LOF_Project_local/files/Homo_sapiens.GRCh38.cds.all.fa";
-		
 		/**@ helmholtz**/
-//		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150325_loftee_q/variant_effect_LoF.vcf";
-		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150319_vat_k/analysis_ready.diabetes.filtered.haplotypecaller.INDEL.vat.vcf";
-		cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh38.cds.all.fa";
+		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/variant_effect_LoF.vcf";
+		cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh37.75.cds.all.fa";
 		
-		
-		Summarizer my = new Summarizer("VAT",vcf_file,cds_file);
-		my.getLoFStatistic();
+		Summarizer my = new Summarizer("LOFTEE",vcf_file,cds_file);
+//		my.getLoFStatistic();
+//		my.getGeneStatistic();
+//		my.getSampleStatistic();
+		my.getTranscriptStatistic();
 	}
 	
 }
