@@ -3,11 +3,11 @@
     <name>Frost</name>
     
     <shortDescription>
-        
+        Fastareader with a Realistic and Optimal Sequence-simulator for a Trio
     </shortDescription>
     
     <fullDescription>
-        <intro>Frost simulates realistic and robust trio data using mutation an drecombination events. It creates 6 fasta outputs for a trio (parents and child) from one fasta. Multiple chromosomes can be submitted too. Please upload one file only.</intro>
+        <intro>Frost simulates realistic and robust trio data using mutation and recombination events. It creates 6 fasta outputs for a trio (parents and child) from one fasta. Multiple chromosomes can be submitted too. Please upload one file only.</intro>
         
         
         <option name="Path to the Fasta file to upload ">Fasta input</option>
@@ -32,11 +32,18 @@
         inPort index="0" name="In-Port name">Description of first input port...</inPort
      -->
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Frost outputs">Trio fastas and record files</outPort>
+        <outPort index="0" name="Frost outputs">6 fasta files for a trio. Record files are saved as flow variable<br></br>
+        					Cell 0: Fasta output for father haploid chromosome 0<br></br>
+        					Cell 1: Fasta output for father haploid chromosome 1<br></br>
+        					Cell 2: Fasta output for mother haploid chromosome 0<br></br>
+        					Cell 3: Fasta output for mother haploid chromosome 1<br></br>
+        					Cell 4: Fasta output for child haploid chromosome 0<br></br>
+        					Cell 5: Fasta output for child haploid chromosome 1</outPort>
+        					
         <!-- possibly more output ports here-->
     </ports>    
     <views>
-        <view index="0" name="name of first view">The 6 fasta outputs serve as input for art-illumina</view>
+        <!--view index="0" name="name of first view">The 6 fasta outputs serve as input for art-illumina</view-->
         <!--view index="1" name="name of second view">Description of second view...</view-->
     </views>
 </knimeNode>
