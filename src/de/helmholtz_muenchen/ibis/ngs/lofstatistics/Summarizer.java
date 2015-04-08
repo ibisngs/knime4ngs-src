@@ -15,6 +15,7 @@ public class Summarizer {
 	private String annotation;
 	private String vcf_file;
 	private String cds_file;
+	private boolean high_confidence;
 	
 	//internal data containers
 	private HashMap<String,String> gene_id2gene_symbol; //filled while calculation!
@@ -49,10 +50,11 @@ public class Summarizer {
 	 * @param cds_file file containing gene id for each transcript id, can be found
 	 *                 here: http://www.ensembl.org/info/data/ftp/index.html
 	 */
-	public Summarizer(String annotation, String vcf_file, String cds_file) {
+	public Summarizer(String annotation, String vcf_file, String cds_file, boolean high_confidence) {
 		this.annotation = annotation;
 		this.vcf_file = vcf_file;
 		this.cds_file = cds_file;
+		this.high_confidence = high_confidence;
 		try {
 			System.out.println("Reading CDS file...");
 			this.readCDSFile();
@@ -110,9 +112,9 @@ public class Summarizer {
 			this.extract_LOFs();
 			this.generateGeneStatistic();
 		}
-		this.generateSampleStatistic();
 		String outfile = vcf_file.replace("vcf", "sample_statistic.txt");
 		try {
+			this.generateSampleStatistic();
 			this.writeSampleStatistic(outfile);
 		} catch (IOException e) {
 			System.err.println(outfile+" could not be written!");
@@ -124,9 +126,9 @@ public class Summarizer {
 		if(lof_statistic.size()==0) {
 			this.extract_LOFs();
 		}
-		this.generateTranscriptStatistic();
 		String outfile = vcf_file.replace("vcf", "transcript_statistic.txt");
 		try {
+			this.generateTranscriptStatistic();
 			this.writeTranscriptStatistic(outfile);
 		} catch (IOException e) {
 			System.err.println(outfile+" could not be written!");
@@ -314,7 +316,12 @@ public class Summarizer {
 			
 			int confidence_index = vep_header.get("confidence");
 //			System.out.println(t);
-			if(annotation_fields[confidence_index].equals("")) continue;
+			
+			if(high_confidence) {
+				if(!annotation_fields[confidence_index].equals("HC")) continue;
+			} else {
+				if(annotation_fields[confidence_index].equals("")) continue;
+			}
 			
 			
 			
@@ -562,7 +569,7 @@ public class Summarizer {
 				for(int i=0; i<lof.getGenotypes().size(); i++) {
 					String gt = lof.getGenotypes().get(i);
 					
-					//homozygote affected transcripts
+					//homozygous affected transcripts
 					if(gt.charAt(0)==gt.charAt(2) && gt.charAt(0)=='1') {
 						stats[2]++; //LoF is homozygous
 						HashMap<String, HashSet<String>> sample2transcripts = transcripts_hom.get(gene_id);
@@ -627,14 +634,25 @@ public class Summarizer {
 	private void generateSampleStatistic() {
 		this.sample_statistic = new HashMap<>();
 		ArrayList<String> completeLOFgene, partLOFgene;
+		//sample id -> number of LoF variants
 		HashMap<String, Integer> fullLOFs = new HashMap<>();
 		HashMap<String, Integer> partLOFs = new HashMap<>();
 		boolean isFull = false;
 		
+		//initialize fullLOFs and partLOFs
+		for(String sample:sample_ids) {
+			fullLOFs.put(sample, 0);
+			partLOFs.put(sample, 0);
+		}
+		
 		//fill fullLOFs and partLOFs
+		
+		//iterate over all LoF variants
 		for(LoFVariant lof:lof_statistic) {
 			HashMap<String, LoFGene> lof_genes = lof.getGene_id2lofgene_fields();
 			isFull = false;
+			
+			//check whether variant effect is full or partial
 			for(Entry<String, LoFGene> gene:lof_genes.entrySet()) {
 				int all_trans = gene_id2transcript_ids.get(gene.getKey()).size();
 				int lof_trans = gene.getValue().getNrOfTranscripts();
@@ -642,22 +660,20 @@ public class Summarizer {
 					isFull = true;
 				}
 			}
+			
+			//iterate over all samples/genotypes
 			for(int i = 0; i< lof.getGenotypes().size(); i++) {
 				String gt = lof.getGenotypes().get(i);
 				String sample = sample_ids.get(i);
+				
+				//check whether sample is affected
 				if(gt.charAt(0)=='1' || gt.charAt(2)=='1') {
 					if(isFull) {
 						Integer t = fullLOFs.get(sample);
-						if(t==null) {
-							t = 0;
-						}
 						t++;
 						fullLOFs.put(sample, t);
 					} else {
 						Integer x = partLOFs.get(sample);
-						if(x == null) {
-							x = 0;
-						}
 						x++;
 						partLOFs.put(sample, x);
 					}
@@ -667,16 +683,16 @@ public class Summarizer {
 		
 		//get complete LOF genes
 		for(String sample: sample_ids) {
-			
 			completeLOFgene = new ArrayList<>();
 			partLOFgene = new ArrayList<>();
-			
 			for(String gene: gene_id2gene_symbol.keySet()) {
 				int all_trans = gene_id2transcript_ids.get(gene).size();
 				int lof_hom = gene_sample_statistic.get(gene).get(sample)[0];
-				if(all_trans == lof_hom) {
-					completeLOFgene.add(gene);
-				} else {
+				int lof_het = gene_sample_statistic.get(gene).get(sample)[1];
+
+				if(all_trans == lof_hom) {//all transcripts are affected by LoF variants
+					completeLOFgene.add(gene); 
+				} else if((lof_hom>0) ||(lof_het>0)){
 					partLOFgene.add(gene);
 				}
 			}
@@ -758,7 +774,7 @@ public class Summarizer {
 				if(gene_id2transcript_ids.containsKey(s)) {
 					nrOfTrans = gene_id2transcript_ids.get(s).size()+"";	
 				} else {
-					System.err.println("According to the CDS file gene "+s+" has no protein coding transcripts.");
+					System.err.println("According to the CDS file gene "+s+" has no protein coding transcripts. The reference genome version of the CDS file and of the files used for the annotation have to be the equal.");
 				}
 				all_trans += "," + nrOfTrans;
 				lof_trans += "," + lofgene.getNrOfTranscripts();
@@ -837,12 +853,13 @@ public class Summarizer {
 	private void writeSampleStatistic(String outfile) throws IOException {
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\tknocked_out\tcompleteLOFgenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\tknocked_out\tcompleteLOFgenes");
 		bw.newLine();
 		for(String s: sample_statistic.keySet()) {
 			SampleStat stat = sample_statistic.get(s);
 			ArrayList<String> completes = stat.getComplete_LOF_genes();
-			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+completes.size()+"\t");
+			int affected = stat.getPart_LOF_genes().size()+completes.size();
+			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+completes.size()+"\t");
 			if(completes.size() >= 1) {
 				String gene = completes.remove(0);
 				bw.write(gene +":"+gene_id2gene_symbol.get(gene));
@@ -873,19 +890,19 @@ public class Summarizer {
 		bw.close();
 	}
 	
-	public static void main (String [] args) {
-		String vcf_file;
-		String cds_file;
-		
-		/**@ helmholtz**/
-		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/variant_effect_LoF.vcf";
-		cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh37.75.cds.all.fa";
-		
-		Summarizer my = new Summarizer("LOFTEE",vcf_file,cds_file);
+//	public static void main (String [] args) {
+//		String vcf_file;
+//		String cds_file;
+//		
+//		/**@ helmholtz**/
+//		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/variant_effect_LoF.vcf";
+//		cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh37.75.cds.all.fa";
+//		
+//		Summarizer my = new Summarizer("LOFTEE",vcf_file,cds_file);
 //		my.getLoFStatistic();
 //		my.getGeneStatistic();
 //		my.getSampleStatistic();
-		my.getTranscriptStatistic();
-	}
+//		my.getTranscriptStatistic();
+//	}
 	
 }

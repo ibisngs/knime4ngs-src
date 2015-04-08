@@ -8,13 +8,24 @@
     
     <fullDescription>
         <intro>
-        	This node generates tab separated statistics for annotated variants.
-        	The standard statistic comprises the following fields: chr, pos, rsId (if available), ref_allele,  alt_allele.
-        	Furthermore, it contains a comma separated list of affected gene ids and symbols, transcript ids and consequences.
-        	Consequences are expressed using the following Sequence Ontology terms: splice_site_variant (splice_accecptor_variant, splice_donor_variant), stop_gained, frameshift_variant.
-        	If a CDS file is provided, the node calculates the effect of a LoF variant.
-        	In contrast to partial LoFs, full LoFs affect all transcripts of a gene.
-        	Moreover, it is calculated how often each variant is observed in a homozygous/heterozygous state.
+        	This node generates four tab separated statistics for annotated variants.
+        	<br />
+        	The lof_statistic comprises the following fields: chr, pos, rsId (if available), ref_allele,  alt_allele, gene_id, gene_symbol, effect (full or partial), consequence, lof_trans, all_trans, obs_hom, obs_het, sampleID [list]. 
+        	The effect can only be calculated if a CDS file is given. 
+        	"Full" indicates that all transcripts of a gene are affected by a LoF variant.
+        	Consequences of LoF variants are expressed using the following Sequence Ontology terms: splice_site_variant (splice_accecptor_variant, splice_donor_variant), stop_gained, frameshift_variant.
+        	The field lof_trans contains the number of transcripts that are affected by the LoF variant. 
+        	The field all_trans contains the number of all transcripts of the gene (requires a CDS file).
+        	obs_hom and obs_het indicate how often each variant is observed in a homozygous/heterozygous state.
+        	The remaining columns contain the genotype for each sample.
+        	The allele . indicates that the genotype could not be examined or that the sample has neither the reference nor the alt allele at this position in the genome.
+        	<br />
+        	The gene_statistic comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), obs_hom, obs_het, all_trans, sampleID [list].
+        	The values for each sample indicate how many transcripts are homozygous/heterozygous affected.
+        	<br />
+        	The sample statistic comprises the following fields: sample_id, full (LoF variants), partial (LoFs variants), affectedGenes, knocked_out (all transcripts are affected by at least one LoF variant), completeLOFgenes [list id:symbol].
+        	<br />
+        	The transcript statistic comprises the following fields: transcript_id, gene_id, gene_symbol, lofs, obs_hom, obs_het.
         	<br />
         	Predecessor nodes (not required): Any node that outputs a VCF file.
         </intro>
@@ -31,7 +42,8 @@
         </option>
         <option name="Annotation Selection">
         	Select the tool that was used to annotate the VCF file.
-        	If LOFTEE was used, the standard statistic additionally contains the fields LoF confidence, failed_filters, lof_flags and lof_infos.
+        	If LOFTEE was used, it is possible to restrict the statistics to high confidence LoF variants.
+        	Moreover, the standard statistic additionally contains the fields confidence, failed_filters, lof_flags and lof_info.
         	Further information can be found here:
         	<br />
         	<a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
@@ -41,7 +53,15 @@
     
     <ports>
         <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
-        <outPort index="0" name="">Cell 0: Path to LoF statistics file.</outPort>
+        <outPort index="0" name="">
+        	Cell 0: Path to LoF statistics file.
+        	<br />
+        	Cell 1: Path to gene statistics file.
+        	<br />
+        	Cell 2: Path to sample statistics file.
+        	<br />
+        	Cell 3: Path to transcript statistics file.
+        </outPort>
     </ports>    
     <views>
         <view index="0" name=""></view>

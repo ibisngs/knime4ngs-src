@@ -16,6 +16,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -43,11 +44,15 @@ public class LOFStatisticsNodeModel extends NodeModel {
     static final String CFGKEY_ANNOTATION="annotation";
     static final String[] ANNOTATIONS_AVAILABLE={"LOFTEE","VAT"};
     final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
-	
-    //TODO: VEP needs a file containing transcript numbers for each gene
+    
+    static final String CFGKEY_HIGH_CONFIDENCE = "high_confidence";
+    final SettingsModelBoolean m_high_confidence = new SettingsModelBoolean(CFGKEY_HIGH_CONFIDENCE,false);
 	
 	//output
 	public static final String OUT_COL1 = "Path2LOF_Statistics";
+	public static final String OUT_COL2 = "Path2Gene_Statistics";
+	public static final String OUT_COL3 = "Path2Sample_Statistics";
+	public static final String OUT_COL4 = "Path2Transcript_Statistics";
 	
 	public static boolean optionalPort=false;
 	
@@ -80,17 +85,27 @@ public class LOFStatisticsNodeModel extends NodeModel {
     	System.out.println("Annotation: "+m_annotation.getStringValue());
     	
     	//Execute
-    	Summarizer summy = new Summarizer(m_annotation.getStringValue(), vcf_infile, m_cdsin.getStringValue());
-    	String LOF_Summary[] = {summy.getLoFStatistic()};
+    	Summarizer summy = new Summarizer(m_annotation.getStringValue(), vcf_infile, m_cdsin.getStringValue(), m_high_confidence.getBooleanValue());
+    	String LOF_Summary[] = new String[4];
+    	LOF_Summary[0] = summy.getLoFStatistic();
+    	LOF_Summary[1] = summy.getGeneStatistic();
+    	LOF_Summary[2] = summy.getSampleStatistic();
+    	LOF_Summary[3] = summy.getTranscriptStatistic();
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(LOF_Summary[0])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[0]),
+    			(FileCell) FileCellFactory.create(LOF_Summary[1]),
+    			(FileCell) FileCellFactory.create(LOF_Summary[2]),
+    			(FileCell) FileCellFactory.create(LOF_Summary[3])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -132,6 +147,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     	m_vcfin.saveSettingsTo(settings);
     	m_cdsin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
+    	m_high_confidence.saveSettingsTo(settings);
     }
 
     /**
@@ -143,6 +159,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     	m_vcfin.loadSettingsFrom(settings);
     	m_cdsin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
+    	m_high_confidence.loadSettingsFrom(settings);
     }
 
     /**
@@ -154,6 +171,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     	m_vcfin.validateSettings(settings);
     	m_cdsin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
+    	m_high_confidence.validateSettings(settings);
     }
     
     /**

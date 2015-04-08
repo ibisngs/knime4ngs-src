@@ -1,8 +1,10 @@
 package de.helmholtz_muenchen.ibis.ngs.lofstatistics;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 
@@ -25,6 +27,7 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString vcfin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_VCF_INFILE,"-");
 	private final SettingsModelString cdsin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_ANNOTATION, "");
+	private final SettingsModelBoolean high_confidence = new SettingsModelBoolean(LOFStatisticsNodeModel.CFGKEY_HIGH_CONFIDENCE,false);
 
 
     protected LOFStatisticsNodeDialog() {
@@ -39,6 +42,7 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
     	//annotation selection
         createNewGroup("Annotation Selection");
         addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFStatisticsNodeModel.ANNOTATIONS_AVAILABLE));
+        addDialogComponent(new DialogComponentBoolean(high_confidence, "Restrict to high confidence LoFs?"));
     }
 }
 
