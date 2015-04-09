@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -227,7 +228,7 @@ public class Summarizer {
 			annotation_fields = a.split(":");
 			if(annotation_fields[0].equals(GT_index+"")) {
 				consequence = replaceVATbySO(annotation_fields[4]);
-				if(consequence==null) return; //no LoF variant annotated
+				if(consequence==null) continue; //no LoF variant annotated
 				gene_id = annotation_fields[2];
 				if(gene_id.contains(".")) {
 					gene_id = gene_id.split("\\.")[0];
@@ -255,6 +256,8 @@ public class Summarizer {
 				genes.put(gene_id, g);
 			}
 		}
+		
+		if(genes.size()==0) return; //no LoF genes have been found
 		
 		ArrayList<String> adapted_genotypes = getAdaptedGenotypes(genotypes, GT_index);
 		for(String str: adapted_genotypes) {
@@ -645,6 +648,7 @@ public class Summarizer {
 			partLOFs.put(sample, 0);
 		}
 		
+		
 		//fill fullLOFs and partLOFs
 		
 		//iterate over all LoF variants
@@ -660,6 +664,7 @@ public class Summarizer {
 					isFull = true;
 				}
 			}
+			
 			
 			//iterate over all samples/genotypes
 			for(int i = 0; i< lof.getGenotypes().size(); i++) {
@@ -680,6 +685,7 @@ public class Summarizer {
 				}
 			}
 		}
+		
 		
 		//get complete LOF genes
 		for(String sample: sample_ids) {
@@ -745,9 +751,9 @@ public class Summarizer {
 		for(String s: additional_titles) {
 			bw.write(s+"\t");
 		}
-		bw.write(sample_ids.remove(0));
-		for(String s:sample_ids) {
-			bw.write("\t"+s);
+		bw.write(sample_ids.get(0));
+		for(int i = 1; i<sample_ids.size(); i++) {
+			bw.write("\t"+sample_ids.get(i));
 		}
 		bw.newLine();
 		
@@ -815,9 +821,9 @@ public class Summarizer {
 			}
 			
 			ArrayList<String> genotypes = l.getGenotypes();
-			bw.write(genotypes.remove(0));
-			for(String gt: genotypes) {
-				bw.write("\t"+gt);
+			bw.write(genotypes.get(0));
+			for(int i=1; i<genotypes.size(); i++) {
+				bw.write("\t"+genotypes.get(i));
 			}
 			bw.newLine();
 		}
@@ -835,7 +841,7 @@ public class Summarizer {
 		bw.newLine();
 		for(String gene: gene_id2gene_symbol.keySet()) {
 			bw.write(gene+"\t"+gene_id2gene_symbol.get(gene));
-			for(int i: gene_statistic.get(gene)){
+			for(Integer i: gene_statistic.get(gene)){
 				bw.write("\t"+i);
 			}
 			bw.write("\t"+gene_id2transcript_ids.get(gene).size());
@@ -858,14 +864,16 @@ public class Summarizer {
 		for(String s: sample_statistic.keySet()) {
 			SampleStat stat = sample_statistic.get(s);
 			ArrayList<String> completes = stat.getComplete_LOF_genes();
+			Collections.sort(completes);
 			int affected = stat.getPart_LOF_genes().size()+completes.size();
 			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+completes.size()+"\t");
 			if(completes.size() >= 1) {
-				String gene = completes.remove(0);
+				String gene = completes.get(0);
 				bw.write(gene +":"+gene_id2gene_symbol.get(gene));
 			}
 			
-			for(String u: completes) {
+			for(int i = 1; i< completes.size(); i++) {
+				String u = completes.get(i);
 				bw.write(","+u+":"+gene_id2gene_symbol.get(u));
 			}
 			bw.newLine();

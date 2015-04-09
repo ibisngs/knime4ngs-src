@@ -73,7 +73,6 @@ public class LOFStatisticsNodeModel extends NodeModel {
 
     	String vcf_infile;
     	
-    	System.out.println(optionalPort);
     	if(optionalPort){	//Input Table available
     		//Get File via Table
     		vcf_infile = inData[0].iterator().next().getCell(0).toString();
