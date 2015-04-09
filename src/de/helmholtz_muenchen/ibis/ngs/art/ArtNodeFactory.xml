@@ -7,15 +7,42 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>ART (art_Illumina Q version) is a simulation program to generate sequence read data of Illumina
+        sequencers. ART generates reads according to the empirical read quality profile summarized from
+        large real read data. ART has been using for testing or benchmarking a variety of methods or tools
+        for next-generation sequencing data analysis, including read alignment, de novo assembly, detection
+        of SNP, CNV, or other structure variation.
         
+        The current KNIME integration of art_Illumina can generate paired-end and  mate-pair reads sequencing simulation
+        of Illumina sequencing platform. The first-read insertion rate is set to default 0.00009, the second-read insertion rate 
+        to 0.00015 as well as the first-read deletion rate to 0.00011 and the second-read deletion rate to 0.00023.
+        The outputs are two FASTQ read files (forward and reverse) out of diploid
+        chromosomes of an individual (2 Fasta files). this integration is optimized for a trio 
+        (father, mother, child) which is created by Frost only. Hence it is strictly suggested to use this integration 
+        combined with Frost.
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
+        We suggest to use the Art node combined with Frost as previous node which would facilitate a parallelized run. 
+        The user can also start this node separately once Frost was already run. </intro>
+        
+        <option name="Path to the directory including the fasta and record files created by Frost">If started separately the user should use this option. If started 
+            with Frost it will be ignored.</option>
+        <option name="Read length (bp)">The length of reads to be simulated.</option>
+        <option name="Mean size of DNA fragments">The mean size of DNA/RNA fragments for paired-end simulations.</option>
+        <option name="Fold of read coverage">The fold of read coverage to be simulated or number of reads/read pairs generated for each amplicon.</option>
+        <option name="Standard deviation">the standard deviation of DNA/RNA fragment size for paired-end simulations.</option>
+        <option name="Turn off the masking of 'N' region">Default: Mask all regions with 'N' with a cutoff frequency of 1 
+        in a window size of the read length for masking genomic regions. Click to turn off masking.</option>
+        <option name="Turn on mate-pair condition">Click to turn on mate-pair condition. NOTE: art will automatically switch to a mate-pair simulation 
+        if the given mean fragment size >= 2000.</option>
+        <option name="Sequencing error free">Click to generate the zero sequencing errors.</option>
+        <option name="Use separate quality profiles">Click to use separate quality profiles for different bases (ATGC).</option>
+        <option name="Quiet">Click to turn off end of run summary.</option>
+ 
+   
         <!-- possibly more options that can also be grouped by tabs -->
         <!--
         <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
+            
             <option name="short name of second option (like in the dialog)">description of second option</option>
         </tab>
         <tab name="Advanced Options">
@@ -25,13 +52,22 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
+        <inPort index="0" name="Art input from Frost">Frost outputs<br></br>
+        					If optional port is available this tool will automatically continue<br></br>
+        					Otherwise the user has to specify the path of the directory with both haploid chromosomes
+        					of each individual (father, mother and child) in fasta format.</inPort>
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Art outputs">Trio fastqs...</outPort>
+        <outPort index="0" name="Art outputs">Trio fastqs<br></br>
+        					Cell 0: Fastq output for the forward read<br></br>
+        					Cell 1: Fastq output for the reverse read<br></br>
+        					Row 0: Read from father (chunkwise)<br></br>
+        					Row 1: Read from mother (chunkwise)<br></br>
+        					Row 2: Read from child (chunkwise)<br></br>					
+        					</outPort>
         <!-- possibly more output ports here-->
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
+        <!--view index="0" name="name of first view">Description of first view...</view-->
         <!--view index="1" name="name of second view">Description of second view...</view-->
     </views>
 </knimeNode>

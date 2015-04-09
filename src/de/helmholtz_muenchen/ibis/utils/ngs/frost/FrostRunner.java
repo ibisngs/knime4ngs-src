@@ -1,10 +1,15 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
@@ -100,6 +105,20 @@ public class FrostRunner {
 		}
 
 		else {
+			/**
+			 *
+			 * files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
+    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
+    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
+    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
+    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
+		files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_" + FrostNodeModel.seed + ".vcf";
+    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";    	
+    	
+			 */
+			/**
+			 * Handling the existing files first
+			 */
 			FrostRunner.records = FrostNodeModel.recordFiles();
 			for (String s : records) {
 				File f = new File (s);
@@ -111,7 +130,7 @@ public class FrostRunner {
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
-		System.out.println("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		FrostRunner.createLog("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 
 
 	}
@@ -155,12 +174,12 @@ public class FrostRunner {
 			/**
 			 * Some info printing
 			 */
-			System.out.println();
-			System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
+			FrostRunner.createLog("\n");
+			FrostRunner.createLog((i+1) + ". "+ currentChr + " " + currentLength);
 			FrostRunner.total_mutations = (int)((currentLength/Math.pow(10, 8) * mutRate * 5300)/(1));
 			FrostRunner.total_deNovo = (int)(FrostRunner.total_mutations/5300);
-			System.out.println("Number of total mutations: " + FrostRunner.total_mutations);
-			System.out.println("Number of total de novo: " + FrostRunner.total_deNovo);
+			FrostRunner.createLog("Number of total mutations: " + FrostRunner.total_mutations);
+			FrostRunner.createLog("Number of total de novo: " + FrostRunner.total_deNovo);
 			
 			int chunk = (currentLength/FrostRunner.chunk_length)+1;
 			
@@ -195,7 +214,7 @@ public class FrostRunner {
 				 * recombination for child
 				 */	
 			
-			System.out.println("CHUNK SIZE: " + chunk + "\t" + currentChr);
+			FrostRunner.createLog("CHUNK SIZE: " + chunk + "\t" + currentChr);
 //			startTime = System.currentTimeMillis();
 		
 			
@@ -209,7 +228,7 @@ public class FrostRunner {
 				FrostRunner.id_list.add(j + "_" + currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
 
 //				startTime = System.currentTimeMillis();
-				System.out.println("CHUNKY #"+j);
+				FrostRunner.createLog("CHUNKY #"+j);
 				
 //				System.out.println("mutation_index_parents: " + mutation_index_parent);
 //				System.out.println("denovo_index_child: " + denovo_index_child);
@@ -222,20 +241,39 @@ public class FrostRunner {
 				 * Appending into the record files
 				 */
 				rw = new RecordWriters(fr, in, trio);
+				/**
+				 * parents_run_
+				 */
 				rw.write_simple_string(recordFiles[0], trio.getParentInfo());
+				/**
+				 * child_run_
+				 */
 				rw.write_simple_string(recordFiles[1], trio.getChildInfo());
-				rw.write_InputData(recordFiles[2],in.getiData_deNovo_child(), j);			
+				/**
+				 * deNovo_
+				 */
+				rw.write_InputData(recordFiles[2],in.getiData_deNovo_child(), j);
+				/**
+				 * recombination_
+				 */
 				rw.write_InputData(recordFiles[3],in.getiData_recombination_child(), j);
 				//writing the recombined file
 				String rec = "";
 				for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
 					rec += rw.getTrio().getRecombined().get(k) + "\n";
 				}
+				/**
+				 * recombined_seq_
+				 */
 				rw.write_simple_string(recordFiles[4], rec);
 
 
 			}
-			rw.write_vcf(currentChr+"_"+seed+".vcf", recordFiles[0], recordFiles[1]);
+			
+			/**
+			 * trio_
+			 */
+			rw.write_vcf(recordFiles[5], recordFiles[0], recordFiles[1]);
 
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");
@@ -250,13 +288,45 @@ public class FrostRunner {
 //			System.out.println();
 
 		}
-
-		rw.write_simple_string(recordFiles[5], ids);
+		/**
+		 * ids_chunks.txt
+		 */
+		rw.write_simple_string(recordFiles[6], ids);
 		
 
 
 	}
 
+	static void createLog(String logInfo) {
+		
+		try (PrintWriter pw = new PrintWriter(new FileOutputStream(FrostRunner.records[7], true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			pw.write(logInfo + "\n");
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace();
+		}
+//		Logger logger = Logger.getLogger("SimulatorLog");  
+//	    FileHandler fh;  
+//
+//	    try {  
+//
+//	        // This block configure the logger with handler and formatter  
+//	        fh = new FileHandler(INTERNAL_PATH + "MyLogFile.log");  
+//	        logger.addHandler(fh);
+//	        logger.setUseParentHandlers(false);
+//	        SimpleFormatter formatter = new SimpleFormatter();  
+//	        fh.setFormatter(formatter);  
+//
+//	        // the following statement is used to log any messages  
+//	        logger.info(logInfo);  
+//
+//	    } catch (SecurityException e) {  
+//	        e.printStackTrace();  
+//	    } catch (IOException e) {  
+//	        e.printStackTrace();  
+//	    }  
+
+	}
 	static void memory() {
 			
 		int mb = 1024*1024;
@@ -264,19 +334,19 @@ public class FrostRunner {
         //Getting the runtime reference from system
         Runtime runtime = Runtime.getRuntime();
          
-        System.out.println("##### Heap utilization statistics [MB] #####");
+        FrostRunner.createLog("##### Heap utilization statistics [MB] #####");
          
         //Print used memory
-        System.out.println("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb);
+        FrostRunner.createLog("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb);
  
         //Print free memory
-        System.out.println("Free Memory:" + runtime.freeMemory() / mb);
+        FrostRunner.createLog("Free Memory:" + runtime.freeMemory() / mb);
          
         //Print total available memory
-        System.out.println("Total Memory:" + runtime.totalMemory() / mb);
+        FrostRunner.createLog("Total Memory:" + runtime.totalMemory() / mb);
  
         //Print Maximum available memory
-        System.out.println("Max Memory:" + runtime.maxMemory() / mb);
+        FrostRunner.createLog("Max Memory:" + runtime.maxMemory() / mb);
 		
 	}
 	

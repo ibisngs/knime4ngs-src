@@ -115,7 +115,7 @@ public class FrostNodeModel extends NodeModel {
         /**
          * Record files as flow variable
          */
-        for(int i = 0; i < 6; i++) {
+        for(int i = 0; i < FrostNodeModel.recordFiles().length; i++) {
             pushFlowVariableString("record file " +(i+1), FrostNodeModel.recordFiles()[i]);
 		}
         
@@ -197,17 +197,20 @@ public class FrostNodeModel extends NodeModel {
     
     public static String[] recordFiles() {
     	
-    	String[] files = new String[6];
+    	String[] files = new String[8];
     	files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
     	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
     	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
     	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
     	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
-    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
+    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_" + FrostNodeModel.seed + ".vcf";
+    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
+    	files[7] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
+
     	return files;
 
     }
-    
+        
     private void executeInput(String input, double mutRate, int rec_num) throws InterruptedException, IOException {
         
         ArrayList<String> command = new ArrayList<String>();

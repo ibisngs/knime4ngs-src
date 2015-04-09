@@ -23,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
@@ -36,6 +37,8 @@ public class GATKPhaseByTransmissionNodeModel extends NodeModel {
 //	my $com = "java -Xmx8g -jar ".$TOOL_PATH.$GATK_VERSION."/GenomeAnalysisTK.jar -T PhaseByTransmission
 //	-R $REF_GENOME -V $INFILE -o $outfile -ped $PED";
 	
+	static boolean optionalPort = false;
+
 	/**
 	 * Config Keys
 	 */
@@ -72,7 +75,8 @@ public class GATKPhaseByTransmissionNodeModel extends NodeModel {
     protected GATKPhaseByTransmissionNodeModel() {
     
         // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
+    	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+    	
     }
 
     /**

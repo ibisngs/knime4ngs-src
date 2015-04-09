@@ -414,7 +414,7 @@ public class ArtNodeModel extends NodeModel {
 		/**
 		 * Build a Knime datatyp for the trios (TODO)
 		 */		
-		String directory = path.substring(0, path.length()-14);
+		String directory = path/*.substring(0, path.length()-14)*/;
 		File folder = new File(directory); //../../ids.txt
 //		System.out.println(folder.toString());
 		for(String id : ids) {

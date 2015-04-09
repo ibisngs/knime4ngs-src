@@ -175,8 +175,9 @@ public class InputScanner {
 //		System.out.println("De Novo: " + (int)(getVariants(length)/5300));
 		
 		int denovo = (int)(getVariants(length)/5300);
+		denovo = (denovo == 0)? 1: denovo;
 //		int denovo = 5;
-		System.out.println("denovo: " + denovo);
+		FrostRunner.createLog("denovo: " + denovo);
 		return denovo;
 	}
 

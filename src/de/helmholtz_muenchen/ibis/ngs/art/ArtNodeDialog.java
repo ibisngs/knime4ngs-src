@@ -54,14 +54,15 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
     	
     	String s = "";
     	s = (ArtNodeModel.optionalPort)? "enabled": "diasbled";
-    		
-    	addDialogComponent(new DialogComponentFileChooser(use_FILE,"Testing", 0, ".txt"));
+    	addDialogComponent(new DialogComponentFileChooser(use_FILE, "Testing", 0, true));
+
+//    	addDialogComponent(new DialogComponentFileChooser(use_FILE,"Testing", 0, ".txt"));
 //    	else
 //    		addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean("optionalport", true), "Optional port enabled"));
     	
 
 
-      	addDialogComponent(new DialogComponentNumber(length,"Read length(pb):", /*step*/ 10, /*componentwidth*/ 5));
+      	addDialogComponent(new DialogComponentNumber(length,"Read length(bp):", /*step*/ 10, /*componentwidth*/ 5));
       	addDialogComponent(new DialogComponentNumber(mean_size,"Mean size of DNA fragment:", /*step*/ 50, /*componentwidth*/ 5));     
       	addDialogComponent(new DialogComponentNumber(fold,"Fold of read coverage:", /*step*/ 1, /*componentwidth*/ 5));
       	addDialogComponent(new DialogComponentNumber(sd,"Standard deviation:", /*step*/ 1, /*componentwidth*/ 5));

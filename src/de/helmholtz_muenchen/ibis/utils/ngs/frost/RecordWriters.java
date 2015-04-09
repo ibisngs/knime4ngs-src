@@ -133,6 +133,7 @@ public class RecordWriters {
 	        e.printStackTrace();
 	    }
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(outFile))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+//			System.out.println("It should write the vcf!");
 			for (VCF_info v : this.vcf)
 				pw.write(v.getContent()+"\n");
 		} catch (Exception e) {
