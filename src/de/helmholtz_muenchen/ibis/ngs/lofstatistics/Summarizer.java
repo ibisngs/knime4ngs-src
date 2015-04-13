@@ -5,14 +5,22 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class Summarizer {
 
+	private static final List<String> SO_TERMS = Arrays.asList("splice_site_variant",
+		"splice_donor_variant",
+		"splice_acceptor_variant",
+		"frameshift_variant",
+		"stop_gained");
+	
 	private String annotation;
 	private String vcf_file;
 	private String cds_file;
@@ -197,6 +205,31 @@ public class Summarizer {
 		return result;
 	}
 	
+	private String formatVEPconsequence(String type) {
+		String result = null;
+		String [] parts;
+		ArrayList<String> consequences = new ArrayList<>();
+		if(type.contains("&")) {
+			parts = type.split("&");
+			for(String p:parts) {
+				if(SO_TERMS.contains(p)) {
+					consequences.add(p);
+				}
+			}
+		} else if (SO_TERMS.contains(type)) {
+			return type;
+		}
+		
+		if(consequences.size()>0) {
+			result = consequences.remove(0);
+		}
+		for(String c: consequences) {
+			result += ","+c;
+		}
+		
+		return result; 
+	}
+	
 	private void getLoFVariantfromVAT(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes) {
 		
 		HashMap<String,LoFGene> genes = new HashMap<String,LoFGene>();
@@ -332,6 +365,7 @@ public class Summarizer {
 			int allele_index = vep_header.get("allele");
 			if(alt.contains(annotation_fields[allele_index]) || annotation_fields[allele_index].equals("-")) { //found a LoF annotation
 				consequence = annotation_fields[vep_header.get("consequence")];
+				consequence = formatVEPconsequence(consequence);
 				gene_symbol = annotation_fields[vep_header.get("gene_symbol")];
 				gene_id = annotation_fields[vep_header.get("gene_id")];
 				transcript_id = annotation_fields[vep_header.get("transcript_id")];

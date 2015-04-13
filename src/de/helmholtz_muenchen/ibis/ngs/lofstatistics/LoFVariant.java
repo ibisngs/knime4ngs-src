@@ -11,7 +11,7 @@ public class LoFVariant {
 	ArrayList<String> genotypes;
 	
 	public LoFVariant (String chr, String pos, String ref_allele, String alt_allele, String rsId, int observed_homo, int observed_hetero, HashMap<String, LoFGene> gene_id2lofgene_fields, ArrayList<String> genotypes) {
-		this.chr = chr;
+		this.chr = chr.replaceAll("[chroCHRO]","");
 		this.pos = pos;
 		this.ref_allele = ref_allele;
 		this.alt_allele = alt_allele;

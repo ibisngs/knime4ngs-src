@@ -110,6 +110,7 @@
 
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory"/>
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.annotationComparator.AnnotationComparatorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.annotationComparator.AnnotationComparatorNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
