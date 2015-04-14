@@ -147,8 +147,9 @@ public class RecordWriters {
 	private void removeDuplicates(ArrayList<Integer> duplicates) {
 		// TODO Auto-generated method stub
 
-				
-		FrostRunner.createLog("Found double mutation in child =>");
+		String s = (duplicates.size() > 0)? "Found double mutation in child =>"
+				:"No double mutation in child";		
+		FrostRunner.createLog(s);
 //		for (int i : duplicates)
 //			FrostRunner.createLog(i + "");
 
