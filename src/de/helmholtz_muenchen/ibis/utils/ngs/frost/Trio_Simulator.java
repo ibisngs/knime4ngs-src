@@ -768,12 +768,15 @@ public class Trio_Simulator {
 
 	protected String getChildInfo() {
 
+		/**
+		 * CHILD ALWAYS GETS M/F AND NOT F/M
+		 */
 		String data = "";
 		if(getPrettyMutation2().size() != 0) {
 			for (int i = 0; i < getPrettyMutation2().size(); i++) {
 				if (getPrettyMutation2().get(i) != "") {
 					data += getID2().get(i) + "\t" + getPOS2().get(i) + "\t" + getPrettyMutation2().get(i) + "\t";
-					data += FrostRunner.parental_chromatids[0] + "\t" + FrostRunner.parental_chromatids[1]+ "\n";
+					data += FrostRunner.parental_chromatids[1] + "\t" + FrostRunner.parental_chromatids[0]+ "\n";
 				}
 				else
 					continue;			

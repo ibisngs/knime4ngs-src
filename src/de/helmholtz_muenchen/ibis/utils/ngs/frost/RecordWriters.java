@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
 
+
 /**
  * @author tanzeem.haque
  * Class to write all info outputs
@@ -105,8 +106,8 @@ public class RecordWriters {
 	        			+"\t"+col[1]
 	        			+"\t"+col[2]/*ref allele*/
 	        			+"\t"+col[3] /*alt allele*/
-	        			+"\t"+"0/0" /*father genotype*/
 	        			+"\t"+"0/0" /*mother genotype*/
+	        			+"\t"+"0/0" /*father genotype*/
 	        			+"\t"+col[4]/*child genotype*/));
 	        }
 	        
@@ -114,18 +115,19 @@ public class RecordWriters {
 	        while(sc.hasNextLine()) {
 	        	String [] col = sc.nextLine().trim().split("\t");
 	        	String c0 = "", c1 ="";
-	        	c0 = (m.equals("M0"))?col[5]/*mother genotype*/.split("/")[0]:col[5].split("/")[1];
-	        	c1 = (f.equals("F0"))?col[4]/*father genotype*/.split("/")[0]:col[4].split("/")[1];
+	        	c0 = (m.equals("M0"))?col[4]/*mother genotype*/.split("/")[0]:col[4].split("/")[1];
+	        	c1 = (f.equals("F0"))?col[5]/*father genotype*/.split("/")[0]:col[5].split("/")[1];
 	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]), 
 	        			col[0]/*id*/
 	    	        			+"\t"+col[1]
 	    	        			+"\t"+col[2]/*ref allele*/
 	    	        			+"\t"+col[3]/*alt allele*/
-	    	        			+"\t"+col[4]/*father genotype*/
-	    	    	        	+"\t"+col[5]/*mother genotype*/
+	    	        			+"\t"+col[4]/*mother genotype*/
+	    	    	        	+"\t"+col[5]/*father genotype*/
 	    	    	        	+"\t"+c0+"/"+c1/*child genotype*/));
 	        }
 	        Collections.sort(this.vcf);
+	        
 	        removeDuplicates(this.duplicates);
 	        
 		}
@@ -144,40 +146,70 @@ public class RecordWriters {
 
 	private void removeDuplicates(ArrayList<Integer> duplicates) {
 		// TODO Auto-generated method stub
-		ArrayList<VCF_info> tmp = new ArrayList<>(this.vcf.size());
-		tmp = this.vcf;
-		int duplicate_idx = 0;
-		for (int i : duplicates) {
-			i = i - duplicate_idx;
-			/**
-			 * saving the parental mutation to add to the denovo mut
-			 */
-			int c0 = (FrostRunner.parental_chromatids[1].equals("M0"))?
-					Integer.parseInt(tmp.get(i).getContent().split("\t")[5]/*mother genotype*/.split("/")[0])
-					:Integer.parseInt(tmp.get(i).getContent().split("\t")[5].split("/")[1]);
-        	int c1 = (FrostRunner.parental_chromatids[0].equals("F0"))?
-        			Integer.parseInt(tmp.get(i).getContent().split("\t")[4]/*father genotype*/.split("/")[0])
-					:Integer.parseInt(tmp.get(i).getContent().split("\t")[4].split("/")[1]);
-        	
-        	String [] c = tmp.get(i-1).getContent().split("\t")[6].split("/");//f/m
-        	c0 += Integer.parseInt(c[1]);//m
-        	c1 += Integer.parseInt(c[0]);//f
-        	String new_content = tmp.get(i).getContent().split("\t")[0]+"\t"
-        						+ tmp.get(i).getContent().split("\t")[1]+"\t"
-        						+ tmp.get(i).getContent().split("\t")[2]+"\t"
-        						+ tmp.get(i-1).getContent().split("\t")[3]+"\t"/*mutated base of the child -> twice*/
-        						+ tmp.get(i).getContent().split("\t")[4]+"\t"
-        						+ tmp.get(i).getContent().split("\t")[5]+"\t"
-        						+ c0 + "/" + c1;
-        	tmp.set(i, new VCF_info(tmp.get(i).getPosition(), new_content));
-//        	System.out.println("Before removing: " + tmp.get(i).getContent());
-        	tmp.remove(i-1);
-//        	System.out.println("After removing: " + tmp.get(i-1).getContent());
-//        	System.out.println("After removing: " + tmp.get(i).getContent());
-        	duplicate_idx++;
+
+				
+		FrostRunner.createLog("Found double mutation in child =>");
+//		for (int i : duplicates)
+//			FrostRunner.createLog(i + "");
+
+		for (int dup_position : duplicates) {
+			for (int i = 0; i < this.vcf.size(); i++) {
+				if (dup_position == this.vcf.get(i).getPosition()) {
+					/**
+					 * the first entry is child entry due to the data structure
+					 */
+					/**
+					 * saving the parental mutation to add to the denovo mut //record from parents file
+					 */
+					int c0 = (FrostRunner.parental_chromatids[1].equals("M0"))?
+							Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[4]/*mother genotype*/.split("/")[0])
+							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[4].split("/")[1]);
+		        	int c1 = (FrostRunner.parental_chromatids[0].equals("F0"))?
+		        			Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[5]/*father genotype*/.split("/")[0])
+							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[5].split("/")[1]);
+		        	/**
+		             * denovo situation
+		             */
+		            String [] c = this.vcf.get(i).getContent().split("\t")[6].split("/"); //record from child file
+		            String denovo = this.vcf.get(i).getContent().split("\t")[3], parent_mut = this.vcf.get(i+1).getContent().split("\t")[3];
+
+		            /**
+		             * KEEP this system out block to check bug
+		             */
+		            FrostRunner.createLog("Child from parent: " + c0 + "/" + c1);
+		            FrostRunner.createLog("Denovo situation: " + c[0] + "/" + c[1]);
+		            FrostRunner.createLog("Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
+
+		            if(!(denovo.equals(parent_mut))
+		            		|| (denovo.equals(parent_mut) && (c0 == 0 || c1 == 0))) { 
+		            /**
+		             * child nucleotide is not the same as parents, that means an authentic denovo
+		             */
+//		            	System.out.println("I ADDED");
+		            	c0 += Integer.parseInt(c[0]);//m
+		            	c1 += Integer.parseInt(c[1]);//f
+		            }
+		            String new_content = this.vcf.get(i).getContent().split("\t")[0]+"\t"
+    						+ this.vcf.get(i).getContent().split("\t")[1]+"\t"
+    						+ this.vcf.get(i).getContent().split("\t")[2]+"\t"
+    						+ this.vcf.get(i).getContent().split("\t")[3]+"\t"/*mutated base of the child -> twice*/
+    						/**
+    						 * BEWARE: STANDARDIZED M F C INSTEAD OF F M C 
+    						 *(Already changed in the class Mutation (getParentString))
+    						 * C always M/F
+    						 */
+    						+ this.vcf.get(i+1).getContent().split("\t")[4]+"\t"/*mother genotype originally from parets file*/
+    						+ this.vcf.get(i+1).getContent().split("\t")[5]+"\t"/*father genotype originally from parets file*/
+    						+ c0 + "/" + c1;
+		            FrostRunner.createLog(new_content);
+		            this.vcf.set(i, new VCF_info(this.vcf.get(i).getPosition(), new_content));
+//    				System.out.println("Before removing: " + tmp.get(i).getContent());
+		            this.vcf.remove(i+1);
+//    				System.out.println("After removing: " + tmp.get(i).getContent());
+		            break;
+				}
+			}
 		}
-		this.vcf= tmp;
-		
 	}
 
 	/**
@@ -256,15 +288,9 @@ public class RecordWriters {
 			// TODO Auto-generated method stub
 			int comp = this.getPosition()-o.getPosition();
 			if (comp==0){
-				duplicates.add(vcf.indexOf(o));
+				duplicates.add(o.getPosition());
 //				System.out.println("SAME");
-//				System.out.println(this.getContent());//child
-//				System.out.println(o.getContent());//parents
-//				
-//	        			
-//	        	int i = vcf.indexOf(o);
-//	        	int j = vcf.indexOf(this);
-//	        	System.out.println(i + "\t" + j);
+
 			}
 
 			return comp;

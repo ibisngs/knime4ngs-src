@@ -363,8 +363,8 @@ public class Mutation {
 		if (getParent_ac_arrList().size() != 0) {
 			for (int i = 0; i < getParent_ac_arrList().size(); i++) {
 				data += getParent_ac_arrList().get(i).getReference() + "\t" + getParent_ac_arrList().get(i).getAltered()
-						+ "\t" + getPg_arrList().get(i).getFather().getAllele1() + "/" + getPg_arrList().get(i).getFather().getAllele2()
 						+ "\t" + getPg_arrList().get(i).getMother().getAllele1() + "/" + getPg_arrList().get(i).getMother().getAllele2()
+						+ "\t" + getPg_arrList().get(i).getFather().getAllele1() + "/" + getPg_arrList().get(i).getFather().getAllele2()
 						+ "\t" + this.individuum;
 			}
 		}
