@@ -62,7 +62,7 @@ public class ArtNodeModel extends NodeModel {
 	public static final String CFGKEY_ID_PATH = "id";
 	
 	/**
-	 *-l the length of reads to be simulated
+//	 *-l the length of reads to be simulated
 	 */
 	public static final String CFGKEY_LENGTH = "length";
 	/**
