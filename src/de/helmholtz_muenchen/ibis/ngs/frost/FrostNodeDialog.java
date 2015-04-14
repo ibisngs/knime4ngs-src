@@ -45,7 +45,7 @@ public class FrostNodeDialog extends DefaultNodeSettingsPane {
     			"Testing", 0, ".fa", ".fasta", ".FASTA"));
     	
       	addDialogComponent(new DialogComponentBoolean(use_MUT, "User specified mutation rate"));
-      	addDialogComponent(new DialogComponentNumber(mutation,"Mutation Rate:", /*step*/ 0.01, /*componentwidth*/ 5));
+      	addDialogComponent(new DialogComponentNumber(mutation,"Mutation Rate (*e-08):", /*step*/ 0.01, /*componentwidth*/ 5));
       	
       	addDialogComponent(new DialogComponentBoolean(use_REC, "User specified #recombination"));
       	addDialogComponent(new DialogComponentNumber(recombination,"#Recombination:", /*step*/ 1, /*componentwidth*/ 5));
