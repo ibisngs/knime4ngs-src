@@ -42,12 +42,29 @@ public class StatLoF {
 		return alt_allele;
 	}
 
-	public HashSet<String> getConsequences() {
-		return consequences;
+	public String getConsequence() {
+		//splice_site_variant is most severe, stop_gained is more severe than frameshift_variant
+		String finalCons = "frameshift_variant";
+		for(String c:consequences) {
+			if(c.equals("splice_site_variant")) {
+				finalCons = c;
+				break;
+			}
+			if(c.equals("stop_gained") && finalCons.equals("frameshift_variant")) {
+				finalCons = "stop_gained";
+			}
+		}
+		return finalCons;
 	}
 
-	public HashSet<String> getEffects() {
-		return effects;
+	public String getEffect() {
+		//melt multiple effects down to full or partial
+		String finalEffect = "partial";
+		for(String e:effects) {
+			finalEffect = e;
+			if(finalEffect.equals("full")) break;
+		}
+		return finalEffect;
 	}
 
 	public int comparePos(StatLoF lof) {
@@ -82,5 +99,4 @@ public class StatLoF {
 	public String toString() {
 		return chr+"\t"+pos+"\t"+ref_allele+"\t"+alt_allele+"\t"+consequences+"\t"+effects;
 	}
-	
 }
