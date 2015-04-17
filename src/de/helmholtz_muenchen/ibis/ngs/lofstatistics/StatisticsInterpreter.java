@@ -16,7 +16,7 @@ public class StatisticsInterpreter {
 	
 	public static void main (String [] args) throws IOException {
 		
-		String file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/hc_lof_stats/variant_effect_LoF.sample_statistic.txt";
+		String file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/hc_lof_stats/variant_effect_LoF.sample_statistic.txt";
 		HashSet<String> myGenes = new HashSet<>();
 		ArrayList<String> sample_ids = new ArrayList<>();
 		TreeMap<String, Integer> gene2occ = new TreeMap<>();
@@ -62,6 +62,7 @@ public class StatisticsInterpreter {
 			System.out.println(s);
 		}
 		
+		System.out.println(myGenes.size()+" genes are completely disabled.");
 		System.out.println("#############");
 		
 		for(Entry<String, Integer> entry:gene2occ.entrySet()) {

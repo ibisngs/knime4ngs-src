@@ -116,18 +116,34 @@ public class Comparison {
 					tmp2.add(second.get(j));
 					j++;
 				}
-				for(int k = 0; k < tmp1.size(); k++) {
-					for(int l = k; l < tmp2.size(); l++) {
-						StatLoF mylof1 = tmp1.get(k);
-						StatLoF mylof2 = tmp2.get(l);
-//						System.out.println(mylof1);
-//						System.out.println(mylof2);
-//						System.out.println("++++++++++++++++++++++++++");
+//				if(tmp1.size()> 1 || tmp2.size()>1) {
+//					System.out.println("...");
+//					System.out.println(tmp1);
+//					System.out.println(tmp2);
+//				}
+				
+				for(StatLoF mylof1: tmp1) {
+					for(StatLoF mylof2 : tmp2) {
+						//check whether ref_allel is equal
 						result.append(mylof1.getChr()+"\t"+mylof1.getPos()+"\t"+mylof1.getRef_allele()+"\t"+mylof1.getAlt_allele()+"\t");
-						result.append(mylof1.getEffect()+"\t"+mylof2.getEffect()+"\t");
-						result.append(mylof1.getConsequence()+"\t"+mylof2.getConsequence());
-						result.append(NEWLINE);
+						if(mylof1.getRef_allele().equals(mylof2.getRef_allele())) {
+							result.append(mylof1.getEffect()+"\t"+mylof2.getEffect()+"\t");
+							result.append(mylof1.getConsequence()+"\t"+mylof2.getConsequence());
+							result.append(NEWLINE);
+							tmp2.remove(mylof2);
+							break;
+						} else {
+							result.append(mylof1.getEffect()+"\t"+"no_variant"+"\t");
+							result.append(mylof1.getConsequence()+"\t"+"no_variant");
+							result.append(NEWLINE);
+						}
 					}
+				}
+				for(StatLoF lof: tmp2) {
+					result.append(lof.getChr()+"\t"+lof.getPos()+"\t"+lof.getRef_allele()+"\t"+lof.getAlt_allele()+"\t");
+					result.append("no_variant"+"\t"+lof.getEffect()+"\t");
+					result.append("no_variant"+"\t"+lof.getConsequence());
+					result.append(NEWLINE);
 				}
 			}
 		}
@@ -140,10 +156,10 @@ public class Comparison {
 			i++;
 		}
 		while(j < second.size()) {
-			StatLoF lof = first.get(j);
+			StatLoF lof = second.get(j);
 			result.append(lof.getChr()+"\t"+lof.getPos()+"\t"+lof.getRef_allele()+"\t"+lof.getAlt_allele()+"\t");
-			result.append(lof.getEffect()+"\t"+"no_variant"+"\t");
-			result.append(lof.getConsequence()+"\t"+"no_variant");
+			result.append("no_variant"+"\t"+lof.getEffect()+"\t");
+			result.append("no_variant"+"\t"+lof.getConsequence());
 			result.append(NEWLINE);
 			j++;
 		}
@@ -161,13 +177,31 @@ public class Comparison {
 	public static void main(String[] args) {
 		
 		String file1,file2,out;
-		
-		file1 = "/home/tim/Dropbox/Studium/Helmholtz/Master/MacArthur/phase1/chr19_macArthur_phase1_v3.vcf";
-		file2 = "/home/tim/LOF_Project_local/files/chr19_20150414/LOFTEE/chr19_20101123_DEL_replaced.VEP_annotation.lof_statistic.txt";
-		out = "/home/tim/LOF_Project_local/files/MacArthurVAT_filter_vs_LOFTEE_all_chr19_phase1_v3.csv";
-		
+	
+//		@home	
+//		file1 = "/home/tim/Dropbox/Studium/Helmholtz/Master/MacArthur/phase1/chr19_macArthur_phase1_v3.vcf";
+//		file2 = "/home/tim/LOF_Project_local/files/chr19_20150414/LOFTEE/chr19_20101123_DEL_replaced.VEP_annotation.lof_statistic.txt";
+//		out = "/home/tim/LOF_Project_local/files/MacArthurVAT_filter_vs_LOFTEE_all_chr19_phase1_v3.csv";
+
+//		vat vs vep
 //		file1 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150319_vat_k/analysis_ready.diabetes.filtered.haplotypecaller.vat.lof_statistic.txt";
-//		file2 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		file2 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		out = "/home/ibis/tim.jeske/KORAdata/analysis_ready/vat_vs_vep_ensembl.csv";
+		
+//		vep (ensembl vs gencode basic)
+//		file1 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		file2 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150415_loftee_gencode-basic/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		out = "/home/ibis/tim.jeske/KORAdata/analysis_ready/vep_ensembl_vs_gencode-basic.csv";
+		
+//		all vs high confidence
+//		file1 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		file2 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/hc_lof_stats/variant_effect_LoF.lof_statistic.txt";
+//		out = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150413_loftee_gmaf_sift_polyphen/all_vs_hc.csv";
+		
+//		vat(ensembl) vs. vep(gencode basic)
+		file1 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150319_vat_k/analysis_ready.diabetes.filtered.haplotypecaller.vat.lof_statistic.txt";
+		file2 = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150415_loftee_gencode-basic/all_lof_stats/variant_effect_LoF.lof_statistic.txt";
+		out = "/home/ibis/tim.jeske/KORAdata/analysis_ready/vat_ensembl_vs_vep_gencode-basic.csv";
 		
 		Comparison my = new Comparison(file1,file2,out);
 		my.compare();
