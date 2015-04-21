@@ -9,46 +9,81 @@
     <fullDescription>
         <intro>
         	This node is a wrapper for the Variant Effect Predictor from Ensembl.
-        	Furthermore, it provides the plugin LOFTEE which identifies and filters Loss of Function variants.
+        	By default VEP annotates PubmedIDs citing existing variants.
+        	The format of the output file is vcf.
+        	The node allows to use the plugins LOFTEE, CADD and ExAC.
+        	<br />
+        	Source: <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
+        	<br />
+        	<br />
+        	LOFTEE is a VEP plugin to identify LoF (loss-of-function) variation.
+        	It implements a set of filters to deem stop-gained, splice site disrupting and frameshift variants as low-confidence LoFs.
+        	<br />
+        	Source: <a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
+        	<br />
+        	<br />
+        	CADD is a VEP plugin that retrieves CADD (Combined Annotation Dependent Depletion) scores for variants from one or two tabix-indexed CADD data files.
+        	<br />
+        	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/CADD.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/CADD.pm</a>
+        	<br />
+        	<br />
+        	ExAC is a VEP plugin that retrieves that retrieves ExAC (Exome Aggregation Consortium Data Set) allele frequencies
+        	<br />
+        	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm</a>
+        	<br />
         	<br />
         	Predecessor nodes (not required): Any node that outputs a VCF file.
         	<br />
         	Successor nodes: e.g. LOFStatistics
-        	<br />
-        	Source VEP:<a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
-        	<br />
-        	Source LOFTEE:<a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
         </intro>
         
         <tab name="Standard Options">
             <option name="HTE Threshold">
             	Set an individual threshold for high throughput execution (requires the node HTETrigger in the workflow).
             </option>
-            <option name="Path to VCF file">
-            	Select an input file in vcf format.
-            </option>
             <option name="Path to variant_effect_predictor.pl">
             	Select the VEP perl script which can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
             </option>
-            <option name="Cache usage">
+            <option name="Path to VCF file">
+            	Select an input file in vcf format.
+            </option>
+            <option name="Folder for output files">
+            	Select a folder to store the output files. If "Overwrite" is checked, existing files will be overwritten.
+            </option>
+            <option name="Use cache?">
             	It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
             	The cache is usually build during the installation of the Ensembl API. 
             	Otherwise, you can find information in the VEP documentation (see VEP link above). 
             </option>
-            <option name="Coding only?">
-            	If this checkbox is checked, VEP will only return consequences that fall in the coding regions of transcripts.
-            </option>
             <option name="Number of forks">
             	If the number is number is higher than 1, forking is enabled.
             	Forking can dramatically improve the runtime of VEP.
-         		If LOFTEE is used, it will run ignoring the conservation file as there occur errors when is is accessed by multiple threads.
+         		If LOFTEE is used, it will run ignoring the conservation file as there occur errors when it is accessed by multiple threads.
             </option>
+            <option name="Coding only?">
+            	If this checkbox is checked, VEP will only return consequences that fall in the coding regions of transcripts.
+            </option>
+            <option name="Choose transcript set">
+            	VEP uses Ensembl transcripts by default.
+            	By choosing GENCODE basic your analysis is limited to transcripts belonging to the GENCODE basic set.
+            	This set has fragmented or problematic transcripts removed.
+            	Alternatively, you can choose the RefSeq transcript set.
+            </option>
+		</tab>
+		
+		<tab name = "Advanced">
             <option name="Choose type of statistic file">
-            	VEP can create a statistic file in html oder plain text format. 
+            	VEP can create a statistic file in html or plain text format. 
+            </option>
+            <option name="Cache directory">
+            	Set the cache directory. Default = "$HOME/.vep/".
             </option>
             <option name="Plugin directory">
-            	Set the plugin directory.
-            	To use LOFTEE the directory of LoF.pm has to be chosen.
+            	Set the plugin directory. Default = "$HOME/.vep/Plugins".
+            </option>
+            <option name="Tabix PATH">
+            	Tabix is required by the plugins CADD and ExAC.
+            	The path can be found by typing "which tabix" in terminal.
             </option>
         </tab>
         <tab name="LOFTEE">
@@ -65,6 +100,23 @@
             <option name="Samtools PATH">
             	If Samtools are not installed, install it and select the installation directory (can be found by typing "which samtools" in terminal).
             </option>
+        </tab>
+        <tab name="CADD">
+        	<option name="Use CADD?">
+        		Check this box if you want to use CADD.
+        	</option>
+        	<option name="Path to CADD file(s)">
+        		You can specify two CADD files, e.g. one containing scores for SNVs and the other for InDels.
+        		CADD files can be downloaded from <a href="http://cadd.gs.washington.edu/download/">http://cadd.gs.washington.edu/download/</a>
+        	</option>
+        </tab>
+        <tab name="ExAC">
+        	<option name="Use ExAC?">
+        		Check this box if you want to use ExAC.
+        	</option>
+        	<option name="Path to ExAC file">
+        		ExAC files can be downloaded from <a href="ftp://ftp.broadinstitute.org/pub/ExAC_release/current">ftp://ftp.broadinstitute.org/pub/ExAC_release/current</a>
+        	</option>
         </tab>
     </fullDescription>
     
