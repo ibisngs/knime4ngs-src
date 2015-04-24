@@ -2,6 +2,8 @@ package de.helmholtz_muenchen.ibis.ngs.vep;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.knime.core.data.DataColumnSpec;
@@ -140,7 +142,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	
     	//perl script
     	String script = m_veppl.getStringValue();
-    	if(script.equals("")) {
+    	if(script.equals("") || Files.notExists(Paths.get(script))) {
     		System.err.println("Path to variant_effect_predictor.pl was not specified!");
     	}
     	cmd = "perl "+script;
@@ -153,7 +155,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}else{
     		//Get File via FileSelector
     		vcf_infile = m_vcfin.getStringValue();
-    		if(vcf_infile.equals("")) {
+    		if(vcf_infile.equals("") || Files.notExists(Paths.get(vcf_infile))) {
     			System.err.println("No input vcf file specified!");
     		}
     	}
@@ -200,10 +202,11 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//cache usage
     	String cache_dir = m_cache_dir.getStringValue();
     	if(m_use_cache.getBooleanValue()) {
-    		if(cache_dir.equals("")) {
+    		if(cache_dir.equals("") || Files.notExists(Paths.get(cache_dir))) {
     			System.err.println("Cache directory was not specified!");
+    		} else {
+    			cmd += " --dir_cache " + cache_dir; 
     		}
-    		cmd += " --dir_cache " + cache_dir; 
     		cmd += " --offline";
     	} else {
     		cmd += " --database";
@@ -217,39 +220,42 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();
-    	if(plugin_dir.equals("")) {
-    		plugin_dir = System.getProperty("file.separator");
+    	if(plugin_dir.equals("")|| Files.notExists(Paths.get(plugin_dir))) {
     		System.err.println("Plugin directory was not specified!");
+    	} else {
+    		cmd += " --dir_plugins " + plugin_dir;
     	}
-    	cmd += " --dir_plugins " + plugin_dir;
     	
-    	String environment;
+    	String environment = "PATH="+System.getenv("PATH") ;
     	String samtools_path = m_samtools_path.getStringValue();
-    	if(samtools_path.equals("")) {
+    	if(samtools_path.equals("")|| Files.notExists(Paths.get(samtools_path))) {
     		System.err.println("Samtools PATH was not specified!");
+    	} else {
+    		environment +=":"+samtools_path;
     	}
     	String tabix_path = m_tabix_path.getStringValue();
-    	if(tabix_path.equals("")) {
+    	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
     		System.err.println("Tabix path was not specified!");
+    	} else {
+    		environment += ":"+tabix_path;
     	}
-    	environment = "PATH="+System.getenv("PATH")+":"+samtools_path;
-    	environment += ":"+tabix_path;
-    	
     	//LOFTEE parameters
+
     	if(m_use_loftee.getBooleanValue()) {
     		cmd += " --plugin LoF";
-    		
     		String human_ancestor = m_human_ancestor.getStringValue();
-    		if(human_ancestor.equals("")) {
+    		if(human_ancestor.equals("")|| Files.notExists(Paths.get(human_ancestor))) {
     			System.err.println("Human ancestor file was not specified!");
+    		} else {
+    			cmd += ",human_ancestor_fa:"+human_ancestor;
     		}
-    		cmd += ",human_ancestor_fa:"+human_ancestor;
     		if(m_forks.getIntValue()<=1) {
     			String conservation_file = m_conservation_file.getStringValue();
-    			if(conservation_file.equals("")) {
+    			if(conservation_file.equals("")|| Files.notExists(Paths.get(conservation_file))) {
     				System.err.println("Phylocsf.sql was not specified!");
+    			} else {
+    				cmd += ",conservation_file:"+conservation_file;
     			}
-    			cmd += ",conservation_file:"+conservation_file;
     		}
     	}
     	
@@ -261,23 +267,25 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}
     	if(m_use_cadd.getBooleanValue()) {
     		cmd += " --plugin CADD";
-    		if(!first_cadd_file.equals("")) {
+    		if(!first_cadd_file.equals("") && Files.exists(Paths.get(first_cadd_file))) {
     			cmd += ","+first_cadd_file;
     		}
-    		if(!sec_cadd_file.equals("")) {
+    		if(!sec_cadd_file.equals("") && Files.exists(Paths.get(sec_cadd_file))) {
     			cmd += ","+sec_cadd_file;
     		}
     	}
     	
     	//ExAC parameters
     	String exac_file = m_exac_file.getStringValue();
-    	if(exac_file.equals("")) {
-			System.err.println("No ExAC file specified!");
-		}
     	if(m_use_exac.getBooleanValue()) {
     		cmd += " --plugin ExAC";
-    		cmd += ","+exac_file;
     	}
+    	if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
+			System.err.println("No ExAC file specified!");
+		} else {
+			cmd += ","+exac_file;
+		}
+    	
     	
     	String stdOutFile = outfileBase.replace("vcf", "vep.stdout");
     	String stdErrFile = outfileBase.replace("vcf", "vep.stderr");
