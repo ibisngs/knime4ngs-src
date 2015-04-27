@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.vepfilter;
+package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author tim.jeske
  */
-public class LOFFilterNodeModel extends NodeModel {
+public class VCFFilterNodeModel extends NodeModel {
     
 	//input
 	static final String CFGKEY_VCFIN = "vcf_infile";
@@ -59,16 +59,16 @@ public class LOFFilterNodeModel extends NodeModel {
     
     private final HashSet<String> TERMS	= new HashSet<String>();
     
-    private static final NodeLogger LOGGER = NodeLogger.getLogger(LOFFilterNodeModel.class);
+    private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFFilterNodeModel.class);
     
     //further filter
     static final String CFGKEY_FILTER = "filter";
-    private final SettingsModelString m_filter = new SettingsModelString(CFGKEY_FILTER,"-");
+    private final SettingsModelString m_filter = new SettingsModelString(CFGKEY_FILTER,"");
     
 	//output col names
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
-    protected LOFFilterNodeModel() {
+    protected VCFFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
         for(String t: DEFAULT_TERMS) {
         	this.TERMS.add(t);
@@ -93,7 +93,6 @@ public class LOFFilterNodeModel extends NodeModel {
     	if(annotation.equals("VAT")) {
     		LOGGER.debug("ANNOTATION: VAT");
     	} else if(annotation.equals("VEP")) {
-    		System.out.println("here");
     		String cmd = "perl";
     		
     		String vepscript = m_vepscript.getStringValue();
@@ -111,15 +110,26 @@ public class LOFFilterNodeModel extends NodeModel {
     		
     		cmd += " -o " + outfile;
     		
+    		String filter_terms = " --filter ";
+    		Object [] terms =  TERMS.toArray();
+    		if(terms.length>0) {
+    			filter_terms += "Consequence is "+terms[0];
+    			for(int i=1; i<terms.length; i++) {
+        			filter_terms += " or Consequence is "+terms[i];
+        		}
+    			cmd += filter_terms;
+    		}
+    		
     		String [] filters = m_filter.getStringValue().split(",");
     		for(String f: filters) {
+    			if(f.equals("")) continue;
+    			f = f.trim();
     			cmd += " --filter \""+f+"\"";
     		}
     		
     		cmd += " --only_matched";
-    		System.out.println("hherww");
-    		LOGGER.info("execute: "+cmd);
-    		Executor.executeCommand(new String[]{cmd}, exec, LOGGER);
+
+    		Executor.executeCommand(new String[]{cmd}, exec,null, LOGGER,  "stdout.txt", "stderr.txt");
     		
     	}
     	
@@ -144,7 +154,9 @@ public class LOFFilterNodeModel extends NodeModel {
     @Override
     protected void reset() {
         this.TERMS.clear();
-
+        for(String t: DEFAULT_TERMS) {
+        	this.TERMS.add(t);
+        }
     }
 
     /**
@@ -168,7 +180,7 @@ public class LOFFilterNodeModel extends NodeModel {
          m_filter.saveSettingsTo(settings);
          m_vepscript.saveSettingsTo(settings);
          m_annotation.saveSettingsTo(settings);
-         settings.addStringArray(LOFFilterNodeModel.CFGKEY_TERM_LIST, TERMS.toArray(new String[TERMS.size()]));
+         settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, TERMS.toArray(new String[TERMS.size()]));
     }
 
     /**
@@ -185,10 +197,10 @@ public class LOFFilterNodeModel extends NodeModel {
         // clean the old data
     	TERMS.clear();
     	// check, if data is set
-        if (settings.containsKey(LOFFilterNodeModel.CFGKEY_TERM_LIST)) {
+        if (settings.containsKey(VCFFilterNodeModel.CFGKEY_TERM_LIST)) {
         	try {
         		// add the values
-				for(String s : settings.getStringArray(LOFFilterNodeModel.CFGKEY_TERM_LIST))
+				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST))
 					this.TERMS.add(s);
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());

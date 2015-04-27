@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.loffilter;
+package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import org.knime.core.node.NodeView;
 
@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFFilterNodeView extends NodeView<LOFFilterNodeModel> {
+public class VCFFilterNodeView extends NodeView<VCFFilterNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link LOFFilterNodeModel})
+     * @param nodeModel The model (class: {@link VCFFilterNodeModel})
      */
-    protected LOFFilterNodeView(final LOFFilterNodeModel nodeModel) {
+    protected VCFFilterNodeView(final VCFFilterNodeModel nodeModel) {
         super(nodeModel);
         // TODO: generated method stub
     }

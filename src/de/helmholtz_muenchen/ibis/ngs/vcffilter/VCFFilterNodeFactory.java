@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.vepfilter;
+package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFFilterNodeFactory 
-        extends NodeFactory<LOFFilterNodeModel> {
+public class VCFFilterNodeFactory 
+        extends NodeFactory<VCFFilterNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LOFFilterNodeModel createNodeModel() {
-        return new LOFFilterNodeModel();
+    public VCFFilterNodeModel createNodeModel() {
+        return new VCFFilterNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class LOFFilterNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<LOFFilterNodeModel> createNodeView(final int viewIndex,
-            final LOFFilterNodeModel nodeModel) {
-        return new LOFFilterNodeView(nodeModel);
+    public NodeView<VCFFilterNodeModel> createNodeView(final int viewIndex,
+            final VCFFilterNodeModel nodeModel) {
+        return new VCFFilterNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class LOFFilterNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new VEPFilterNodeDialog();
+        return new VCFFilterNodeDialog();
     }
 
 }

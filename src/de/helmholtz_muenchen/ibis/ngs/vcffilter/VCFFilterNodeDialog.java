@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.vepfilter;
+package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 
 /**
- * <code>NodeDialog</code> for the "LOFFilter" Node.
+ * <code>NodeDialog</code> for the "VEPFilter" Node.
  * 
  *
  * This node dialog derives from {@link DefaultNodeSettingsPane} which allows
@@ -32,52 +32,52 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
  * 
  * @author tim.jeske
  */
-public class LOFFilterNodeDialog extends DefaultNodeSettingsPane {
+public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring the LOFFilter node.
      */
 	
-	private final SettingsModelString vcf_in = new SettingsModelString(LOFFilterNodeModel.CFGKEY_VCFIN,"-");
-	private final SettingsModelString annotation = new SettingsModelString(LOFFilterNodeModel.CFGKEY_ANNOTATION,"");
-	private final SettingsModelString vep_script = new SettingsModelString(LOFFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
+	private final SettingsModelString vcf_in = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VCFIN,"-");
+	private final SettingsModelString annotation = new SettingsModelString(VCFFilterNodeModel.CFGKEY_ANNOTATION,"");
+	private final SettingsModelString vep_script = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
 	
 	//LOF definition
-	private final SettingsModelString so_term = new SettingsModelString(LOFFilterNodeModel.CFGKEY_SO_TERM,"");
-	private final SettingsModelStringArray chosen_terms = new SettingsModelStringArray(LOFFilterNodeModel.CFGKEY_TERM_LIST, LOFFilterNodeModel.DEFAULT_TERMS);
+	private final SettingsModelString so_term = new SettingsModelString(VCFFilterNodeModel.CFGKEY_SO_TERM,"");
+	private final SettingsModelStringArray chosen_terms = new SettingsModelStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, VCFFilterNodeModel.DEFAULT_TERMS);
 	
 	private final DialogComponentButton ADD_TERM_BUTTON = new DialogComponentButton("Add selected term");
 	
-	private static final String NO_SELECTION_MADE = LOFFilterNodeModel.DEFAULT_TERMS[0];
+	private static final String NO_SELECTION_MADE = VCFFilterNodeModel.DEFAULT_TERMS[0];
 	private final DialogComponentStringListSelection DC_TERM_DISPLAY = new DialogComponentStringListSelection(chosen_terms, "Chosen terms:",NO_SELECTION_MADE);
 	
 	private final DialogComponentButton REMOVE_TERM_BUTTON = new DialogComponentButton("Remove selected term");
 	private final DialogComponentButton RESTORE_DEFAULTS_BUTTON = new DialogComponentButton("Restore default");
 	
 	//filter
-	private final SettingsModelString filter = new SettingsModelString(LOFFilterNodeModel.CFGKEY_FILTER,"-");
+	private final SettingsModelString filter = new SettingsModelString(VCFFilterNodeModel.CFGKEY_FILTER,"");
 	private final DialogComponentString DC_FILTER = new DialogComponentString(filter,"Conditions");
 	
 	HashSet<String> terms = new HashSet<>();
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(LOFFilterNodeModel.class);
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFFilterNodeModel.class);
 	
-    protected LOFFilterNodeDialog() {
+    protected VCFFilterNodeDialog() {
 
     	createNewGroup("Select input file");
     	addDialogComponent(new DialogComponentFileChooser(vcf_in, "his_id_vcfin", 0, ".vcf"));
-    	addDialogComponent(new DialogComponentStringSelection(annotation,"Annotations from",LOFFilterNodeModel.ANNOTATIONS_AVAILABLE));
+    	addDialogComponent(new DialogComponentStringSelection(annotation,"Annotations from",VCFFilterNodeModel.ANNOTATIONS_AVAILABLE));
     	
     	createNewGroup("Path to filter_vep.pl (only VEP)");
     	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
     	
-    	createNewGroup("Define variants considered as LoFs");
+    	createNewGroup("Select variants");
 		addDialogComponent(new DialogComponentStringSelection(so_term,
-				"SO terms", LOFFilterNodeModel.SO_TERMS));
+				"SO terms", VCFFilterNodeModel.SO_TERMS));
 		addDialogComponent(ADD_TERM_BUTTON);
 		
 		DC_TERM_DISPLAY.setVisibleRowCount(5);
-		for(String t: LOFFilterNodeModel.DEFAULT_TERMS) {
+		for(String t: VCFFilterNodeModel.DEFAULT_TERMS) {
 			terms.add(t);
 		}
 		DC_TERM_DISPLAY.replaceListItems(terms, NO_SELECTION_MADE);
@@ -85,10 +85,12 @@ public class LOFFilterNodeDialog extends DefaultNodeSettingsPane {
 		
 		addDialogComponent(REMOVE_TERM_BUTTON);
 		
+		RESTORE_DEFAULTS_BUTTON.setToolTipText("Default SO terms comprise variants that are considered as LoF variants.");
 		addDialogComponent(RESTORE_DEFAULTS_BUTTON);
 		
 		createNewGroup("Filter");
 		DC_FILTER.setToolTipText("Define additional comma separated filters,e.g.\"LoF is HC,ExAC_AF>0.05");
+		DC_FILTER.setSizeComponents(400, 20);
 		addDialogComponent(DC_FILTER);
 
 		ADD_TERM_BUTTON.addActionListener(new ActionListener() {
@@ -138,7 +140,7 @@ public class LOFFilterNodeDialog extends DefaultNodeSettingsPane {
     
     public void restoreDefault() {
     	terms.clear();
-    	for(String t: LOFFilterNodeModel.DEFAULT_TERMS) {
+    	for(String t: VCFFilterNodeModel.DEFAULT_TERMS) {
 			terms.add(t);
 		}
 		DC_TERM_DISPLAY.replaceListItems(terms, NO_SELECTION_MADE);
@@ -149,10 +151,10 @@ public class LOFFilterNodeDialog extends DefaultNodeSettingsPane {
     	// clean the old data
     	this.terms.clear();
     	// check, if data is set
-        if (settings.containsKey(LOFFilterNodeModel.CFGKEY_TERM_LIST)) {
+        if (settings.containsKey(VCFFilterNodeModel.CFGKEY_TERM_LIST)) {
         	try {
         		// add the values
-				for(String s : settings.getStringArray(LOFFilterNodeModel.CFGKEY_TERM_LIST))
+				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST))
 					this.addTerm(s);
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());
@@ -162,7 +164,7 @@ public class LOFFilterNodeDialog extends DefaultNodeSettingsPane {
     
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
     	// save the hash to the key FastaSelectorNodeModel.CFGKEY_FILE_LIST
-    	settings.addStringArray(LOFFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
+    	settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
     }
 }
 

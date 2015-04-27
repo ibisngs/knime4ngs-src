@@ -143,7 +143,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//perl script
     	String script = m_veppl.getStringValue();
     	if(script.equals("") || Files.notExists(Paths.get(script))) {
-    		System.err.println("Path to variant_effect_predictor.pl was not specified!");
+    		logger.error("Path to variant_effect_predictor.pl was not specified!");
     	}
     	cmd = "perl "+script;
     	
@@ -156,7 +156,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		//Get File via FileSelector
     		vcf_infile = m_vcfin.getStringValue();
     		if(vcf_infile.equals("") || Files.notExists(Paths.get(vcf_infile))) {
-    			System.err.println("No input vcf file specified!");
+    			logger.error("No input vcf file specified!");
     		}
     	}
     	cmd += " -i " + vcf_infile;
@@ -203,7 +203,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String cache_dir = m_cache_dir.getStringValue();
     	if(m_use_cache.getBooleanValue()) {
     		if(cache_dir.equals("") || Files.notExists(Paths.get(cache_dir))) {
-    			System.err.println("Cache directory was not specified!");
+    			logger.warn("Cache directory was not specified!");
     		} else {
     			cmd += " --dir_cache " + cache_dir; 
     		}
@@ -221,7 +221,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();
     	if(plugin_dir.equals("")|| Files.notExists(Paths.get(plugin_dir))) {
-    		System.err.println("Plugin directory was not specified!");
+    		logger.warn("Plugin directory was not specified!");
     	} else {
     		cmd += " --dir_plugins " + plugin_dir;
     	}
@@ -229,13 +229,13 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String environment = "PATH="+System.getenv("PATH") ;
     	String samtools_path = m_samtools_path.getStringValue();
     	if(samtools_path.equals("")|| Files.notExists(Paths.get(samtools_path))) {
-    		System.err.println("Samtools PATH was not specified!");
+    		logger.warn("Samtools PATH was not specified!");
     	} else {
     		environment +=":"+samtools_path;
     	}
     	String tabix_path = m_tabix_path.getStringValue();
     	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
-    		System.err.println("Tabix path was not specified!");
+    		logger.warn("Tabix path was not specified!");
     	} else {
     		environment += ":"+tabix_path;
     	}
@@ -245,14 +245,14 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		cmd += " --plugin LoF";
     		String human_ancestor = m_human_ancestor.getStringValue();
     		if(human_ancestor.equals("")|| Files.notExists(Paths.get(human_ancestor))) {
-    			System.err.println("Human ancestor file was not specified!");
+    			logger.error("Human ancestor file was not specified!");
     		} else {
     			cmd += ",human_ancestor_fa:"+human_ancestor;
     		}
     		if(m_forks.getIntValue()<=1) {
     			String conservation_file = m_conservation_file.getStringValue();
     			if(conservation_file.equals("")|| Files.notExists(Paths.get(conservation_file))) {
-    				System.err.println("Phylocsf.sql was not specified!");
+    				logger.warn("Phylocsf.sql was not specified!");
     			} else {
     				cmd += ",conservation_file:"+conservation_file;
     			}
@@ -263,7 +263,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String first_cadd_file = m_first_cadd_file.getStringValue();
     	String sec_cadd_file = m_sec_cadd_file.getStringValue();
     	if(first_cadd_file.equals("") && sec_cadd_file.equals("")) {
-    		System.err.println("No CADD file specified!");
+    		logger.error("No CADD file specified!");
     	}
     	if(m_use_cadd.getBooleanValue()) {
     		cmd += " --plugin CADD";
@@ -281,7 +281,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		cmd += " --plugin ExAC";
     	}
     	if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
-			System.err.println("No ExAC file specified!");
+			logger.error("No ExAC file specified!");
 		} else {
 			cmd += ","+exac_file;
 		}
@@ -291,8 +291,8 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String stdErrFile = outfileBase.replace("vcf", "vep.stderr");
     	File lockFile = new File(outfileBase.replace("vcf", "vep" + SuccessfulRunChecker.LOCK_ENDING));
 
-    	System.out.println("COMMAND: "+cmd);
-    	System.out.println("ENVIRONMENT: "+environment);
+    	logger.info("COMMAND: "+cmd);
+    	logger.info("ENVIRONMENT: "+environment);
     	
     	super.executeCommand(new String[]{cmd}, exec, new String[]{environment}, logger, lockFile, stdOutFile, stdErrFile, null, null, null);
     	

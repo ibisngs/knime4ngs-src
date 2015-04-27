@@ -78,8 +78,11 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.filtersummary.FilterSummaryNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.lofstatistics.LOFStatisticsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.lofstatistics.LOFStatisticsNodeFactory"/>
-			
+		
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcffilter.VCFFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcffilter.VCFFilterNodeFactory"/>
+		
 			
 		<!-- METABOLOMICS -->
 		<node category-path="/ibis/metabolomics/pre" factory-class="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory" id="de.helmholtz_muenchen.ibis.metabolomics.imputing.ImputerNodeFactory"/>
@@ -109,8 +112,6 @@
 		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory" id="de.helmholtz_muenchen.ibis.htetrigger.HTETriggerNodeFactory"/>
 
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs.GenotypeGVCFsNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.annotationComparator.AnnotationComparatorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.annotationComparator.AnnotationComparatorNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
