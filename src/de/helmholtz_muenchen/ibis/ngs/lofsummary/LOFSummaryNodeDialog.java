@@ -19,18 +19,18 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author tim.jeske
  */
-public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
+public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring the LOFStatistics node.
      */
-	private final SettingsModelString vcfin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_VCF_INFILE,"-");
-	private final SettingsModelString cdsin = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_CDS_INFILE,"-");
-	private final SettingsModelString annotation = new SettingsModelString(LOFStatisticsNodeModel.CFGKEY_ANNOTATION, "");
-	private final SettingsModelBoolean high_confidence = new SettingsModelBoolean(LOFStatisticsNodeModel.CFGKEY_HIGH_CONFIDENCE,false);
+	private final SettingsModelString vcfin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_VCF_INFILE,"-");
+	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
+	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
+	private final SettingsModelBoolean high_confidence = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_HIGH_CONFIDENCE,false);
 
 
-    protected LOFStatisticsNodeDialog() {
+    protected LOFSummaryNodeDialog() {
     	
     	//input file
     	createNewGroup("Path to VCF file");
@@ -41,7 +41,7 @@ public class LOFStatisticsNodeDialog extends DefaultNodeSettingsPane {
     	
     	//annotation selection
         createNewGroup("Annotation Selection");
-        addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFStatisticsNodeModel.ANNOTATIONS_AVAILABLE));
+        addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
         addDialogComponent(new DialogComponentBoolean(high_confidence, "Restrict to high confidence LoFs?"));
     }
 }

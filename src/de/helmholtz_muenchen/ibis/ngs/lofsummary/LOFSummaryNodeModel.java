@@ -29,7 +29,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  *
  * @author tim.jeske
  */
-public class LOFStatisticsNodeModel extends NodeModel {
+public class LOFSummaryNodeModel extends NodeModel {
     
 	//configuration
 	
@@ -59,7 +59,7 @@ public class LOFStatisticsNodeModel extends NodeModel {
     /**
      * Constructor for the node model.
      */
-    protected LOFStatisticsNodeModel() {
+    protected LOFSummaryNodeModel() {
     
     	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
     }

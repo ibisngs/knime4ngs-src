@@ -1,21 +1,21 @@
-package de.helmholtz_muenchen.ibis.ngs.lofstatistics;
+package de.helmholtz_muenchen.ibis.ngs.loffilter;
 
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeView</code> for the "LOFStatistics" Node.
+ * <code>NodeView</code> for the "LOFFilter" Node.
  * 
  *
  * @author tim.jeske
  */
-public class LOFStatisticsNodeView extends NodeView<LOFStatisticsNodeModel> {
+public class LOFFilterNodeView extends NodeView<LOFFilterNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link LOFStatisticsNodeModel})
+     * @param nodeModel The model (class: {@link LOFFilterNodeModel})
      */
-    protected LOFStatisticsNodeView(final LOFStatisticsNodeModel nodeModel) {
+    protected LOFFilterNodeView(final LOFFilterNodeModel nodeModel) {
         super(nodeModel);
         // TODO: generated method stub
     }

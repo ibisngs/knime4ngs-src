@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFStatisticsNodeFactory 
-        extends NodeFactory<LOFStatisticsNodeModel> {
+public class LOFSummaryNodeFactory 
+        extends NodeFactory<LOFSummaryNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LOFStatisticsNodeModel createNodeModel() {
-        return new LOFStatisticsNodeModel();
+    public LOFSummaryNodeModel createNodeModel() {
+        return new LOFSummaryNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class LOFStatisticsNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<LOFStatisticsNodeModel> createNodeView(final int viewIndex,
-            final LOFStatisticsNodeModel nodeModel) {
-        return new LOFStatisticsNodeView(nodeModel);
+    public NodeView<LOFSummaryNodeModel> createNodeView(final int viewIndex,
+            final LOFSummaryNodeModel nodeModel) {
+        return new LOFSummaryNodeView(nodeModel);
     }
 
     /**

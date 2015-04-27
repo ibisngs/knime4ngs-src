@@ -1,24 +1,24 @@
-package de.helmholtz_muenchen.ibis.ngs.lofstatistics;
+package de.helmholtz_muenchen.ibis.ngs.loffilter;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "LOFStatistics" Node.
+ * <code>NodeFactory</code> for the "LOFFilter" Node.
  * 
  *
  * @author tim.jeske
  */
-public class LOFStatisticsNodeFactory 
-        extends NodeFactory<LOFStatisticsNodeModel> {
+public class LOFFilterNodeFactory 
+        extends NodeFactory<LOFFilterNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LOFStatisticsNodeModel createNodeModel() {
-        return new LOFStatisticsNodeModel();
+    public LOFFilterNodeModel createNodeModel() {
+        return new LOFFilterNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class LOFStatisticsNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<LOFStatisticsNodeModel> createNodeView(final int viewIndex,
-            final LOFStatisticsNodeModel nodeModel) {
-        return new LOFStatisticsNodeView(nodeModel);
+    public NodeView<LOFFilterNodeModel> createNodeView(final int viewIndex,
+            final LOFFilterNodeModel nodeModel) {
+        return new LOFFilterNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class LOFStatisticsNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new LOFStatisticsNodeDialog();
+        return new LOFFilterNodeDialog();
     }
 
 }

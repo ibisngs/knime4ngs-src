@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFStatisticsNodeView extends NodeView<LOFStatisticsNodeModel> {
+public class LOFSummaryNodeView extends NodeView<LOFSummaryNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link LOFStatisticsNodeModel})
+     * @param nodeModel The model (class: {@link LOFSummaryNodeModel})
      */
-    protected LOFStatisticsNodeView(final LOFStatisticsNodeModel nodeModel) {
+    protected LOFSummaryNodeView(final LOFSummaryNodeModel nodeModel) {
         super(nodeModel);
         // TODO: generated method stub
     }
