@@ -3,31 +3,34 @@
     <name>LOFSummary</name>
     
     <shortDescription>
-        This node generates statistics for annotated LoF variants.
+        This node generates summary files for annotated LoF variants.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	This node generates four tab separated statistics for annotated variants.
-        	<br />
-        	The lof_statistic comprises the following fields: chr, pos, rsId (if available), ref_allele,  alt_allele, gene_id, gene_symbol, effect (full or partial), consequence, lof_trans, all_trans, obs_hom, obs_het, sampleID [list]. 
-        	The effect can only be calculated if a CDS file is given. 
-        	"Full" indicates that all transcripts of a gene are affected by a LoF variant.
-        	Consequences of LoF variants are expressed using the following Sequence Ontology terms: splice_site_variant (splice_accecptor_variant, splice_donor_variant), stop_gained, frameshift_variant.
-        	The field lof_trans contains the number of transcripts that are affected by the LoF variant. 
-        	The field all_trans contains the number of all transcripts of the gene (requires a CDS file).
-        	obs_hom and obs_het indicate how often each variant is observed in a homozygous/heterozygous state.
-        	The remaining columns contain the genotype for each sample.
-        	The allele . indicates that the genotype could not be examined or that the sample has neither the reference nor the alt allele at this position in the genome.
-        	<br />
-        	The gene_statistic comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), obs_hom, obs_het, all_trans, sampleID [list].
-        	The values for each sample indicate how many transcripts are homozygous/heterozygous affected.
-        	<br />
-        	The sample statistic comprises the following fields: sample_id, full (LoF variants), partial (LoFs variants), affectedGenes, knocked_out (all transcripts are affected by at least one LoF variant), completeLOFgenes [list id:symbol].
-        	<br />
-        	The transcript statistic comprises the following fields: transcript_id, gene_id, gene_symbol, lofs, obs_hom, obs_het.
-        	<br />
-        	Predecessor nodes (not required): Any node that outputs a VCF file.
+        	This node generates four tab separated summary files for annotated variants.
+        	<ul>
+        		<li>
+        			The variant_summary comprises the following fields: chr, pos, rsId (if available), ref_allele,  alt_allele, gene_id, gene_symbol, effect (full or partial), consequence, lof_trans, all_trans, obs_hom, obs_het. 
+        			The effect can only be calculated if a CDS file is given.
+        			"Full" indicates that all transcripts of a gene are affected by a LoF variant.
+        			Consequences of LoF variants are expressed using Sequence Ontology terms.
+        			lof_trans contains the number of transcripts that are affected by the LoF variant.
+        			all_trans contains the number of all transcripts of the gene (requires a CDS file).
+        			obs_hom and obs_het indicate how often each variant is observed in a homozygous/heterozygous state.
+        		</li>
+        		<li>
+        			The gene_summary comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), obs_hom, obs_het, all_trans, sampleID [list].
+        			The values for each sample indicate how many transcripts are homozygous/heterozygous affected.
+        		</li>
+        		<li>
+        			The sample_summary comprises the following fields: sample_id, full (LoF variants), partial (LoFs variants), affectedGenes, knocked_out (all transcripts are affected by at least one LoF variant), completeLOFgenes [list id:symbol].
+        		</li>
+        		<li>
+        			The transcript statistic comprises the following fields: transcript_id, gene_id, gene_symbol, lofs, obs_hom, obs_het.
+        		</li>
+        	</ul>
+        	Predecessor nodes (not required): VCFFilter or any node that outputs a VCF file.
         </intro>
         
         <option name="Path to VCF file">
@@ -54,13 +57,13 @@
     <ports>
         <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
         <outPort index="0" name="">
-        	Cell 0: Path to LoF statistics file.
+        	Cell 0: Path to variant summary file.
         	<br />
-        	Cell 1: Path to gene statistics file.
+        	Cell 1: Path to gene summary file.
         	<br />
-        	Cell 2: Path to sample statistics file.
+        	Cell 2: Path to sample summary file.
         	<br />
-        	Cell 3: Path to transcript statistics file.
+        	Cell 3: Path to transcript summary file.
         </outPort>
     </ports>    
     <views>

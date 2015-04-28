@@ -24,7 +24,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.vat.VATNodeModel;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -40,7 +39,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 public class VEPNodeModel extends HTExecutorNodeModel {
 	
 	// the logger instance
-    protected static final NodeLogger logger = NodeLogger.getLogger(VATNodeModel.class);
+    protected static final NodeLogger logger = NodeLogger.getLogger(VEPNodeModel.class);
     
     ArrayList<SettingsModel> models = new ArrayList<SettingsModel>();
     

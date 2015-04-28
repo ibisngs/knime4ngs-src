@@ -27,8 +27,9 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString vcfin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_VCF_INFILE,"-");
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
-	private final SettingsModelBoolean high_confidence = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_HIGH_CONFIDENCE,false);
-
+	private final SettingsModelBoolean loftee_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_LOFTEE_USED,false);
+	private final SettingsModelBoolean exac_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_EXAC_USED,false);
+	private final SettingsModelBoolean cadd_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CADD_USED,false);
 
     protected LOFSummaryNodeDialog() {
     	
@@ -40,9 +41,13 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa"));
     	
     	//annotation selection
-        createNewGroup("Annotation Selection");
+        createNewGroup("Used annotation tool");
         addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
-        addDialogComponent(new DialogComponentBoolean(high_confidence, "Restrict to high confidence LoFs?"));
+        
+        createNewGroup("Used Plugins (VEP only)");
+        addDialogComponent(new DialogComponentBoolean(loftee_used,"LOFTEE"));
+        addDialogComponent(new DialogComponentBoolean(exac_used,"ExAC"));
+        addDialogComponent(new DialogComponentBoolean(cadd_used,"CADD"));
     }
 }
 

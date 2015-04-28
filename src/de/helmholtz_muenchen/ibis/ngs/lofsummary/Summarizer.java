@@ -5,98 +5,77 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Scanner;
 
-public class Summarizer {
+import org.knime.core.node.NodeLogger;
 
-	private static final List<String> SO_TERMS = Arrays.asList("splice_site_variant",
-		"splice_donor_variant",
-		"splice_acceptor_variant",
-		"frameshift_variant",
-		"stop_gained");
+public abstract class Summarizer {
 	
-	private String annotation;
-	private String vcf_file;
-	private String cds_file;
-	private boolean high_confidence;
+	String vcf_file;
+	String cds_file;
 	
 	//internal data containers
-	private HashMap<String,String> gene_id2gene_symbol; //filled while calculation!
-	private HashMap<String,String> transcript_id2gene_id;
-	private HashMap<String,ArrayList<String>> gene_id2transcript_ids;
-	private ArrayList<String> sample_ids;
+	HashMap<String,String> gene_id2gene_symbol; //filled while calculation!
+	HashMap<String,String> transcript_id2gene_id;
+	HashMap<String,ArrayList<String>> gene_id2transcript_ids;
+	ArrayList<String> sample_ids;
 	
-	//statistics
+	//summaries
 	
-	//main statistic
-	private ArrayList<LoFVariant> lof_statistic;
-	private ArrayList<String> additional_titles;
-	private HashMap<String,Integer> vep_header; //contains indices for LoF, LoF_filter etc.
-	private int nrOfVEPfields;
+	//variant summary
+	ArrayList<LoFVariant> lof_statistic;
+	ArrayList<String> additional_titles;
+	HashMap<String,Integer> vep_header; //contains indices for LoF, LoF_filter etc.
+	int nrOfVEPfields;
 	
 	//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetero]
-	private HashMap<String, HashMap<String,Integer []>> gene_sample_statistic;
+	HashMap<String, HashMap<String,Integer []>> gene_sample_statistic;
 	//gene_id -> [full LoFs, part LoFs, observed LoFs homo, observed LoFs hetero]
-	private HashMap<String, Integer[]> gene_statistic;
+	HashMap<String, Integer[]> gene_statistic;
 	
 	
-	//sample_id -> fields of SampleStat
-	private HashMap<String, SampleStat> sample_statistic;
+	//sample_id -> fields of sample summary
+	HashMap<String, SampleStat> sample_statistic;
 	
 	//transcript_id -> [LoFs, observed LoFs homo, observed LoFs hetero]
-	private HashMap<String, Integer[]> transcript_statistic;
+	HashMap<String, Integer[]> transcript_statistic;
+	
+	protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
 	
 	/**
 	 * 
-	 * @param annotation LOFTEE, VAT or others
 	 * @param vcf_file file containing annotation
 	 * @param cds_file file containing gene id for each transcript id, can be found
 	 *                 here: http://www.ensembl.org/info/data/ftp/index.html
 	 */
-	public Summarizer(String annotation, String vcf_file, String cds_file, boolean high_confidence) {
-		this.annotation = annotation;
+	public Summarizer(String vcf_file, String cds_file) {
 		this.vcf_file = vcf_file;
 		this.cds_file = cds_file;
-		this.high_confidence = high_confidence;
 		try {
-			System.out.println("Reading CDS file...");
+			logger.info("Reading CDS file...");
 			this.readCDSFile();
-			System.out.println("CDS file read.");
+			logger.info("CDS file read.");
 		} catch (IOException e) {
-			System.err.println("Reading CDS file failed. LoF effect (full or partial) cannot be calculated.");
-			e.printStackTrace();
+			logger.error("Reading CDS file failed. Variant effect (full or partial) cannot be calculated.");
 		}
 		
 		additional_titles = new ArrayList<String>();
-		
-		//TODO add another annotation
-		if(annotation.equals("LOFTEE")) {
-			additional_titles.add("confidence");
-			additional_titles.add("failed_filters");
-			additional_titles.add("lof_flags");
-			additional_titles.add("lof_info");
-		}
-		
 		lof_statistic = new ArrayList<LoFVariant>();
-		
 	}
 	
 	public String getLoFStatistic() {
 		if(lof_statistic.size()==0) {
 			this.extract_LOFs();
 		}
-		String outfile = vcf_file.replace("vcf", "lof_statistic.txt");
+		String outfile = vcf_file.replace("vcf", "variant_summary.tsv");
 		try {
 			this.writeLOFStatistics(outfile);
 		} catch (IOException e) {
-			System.err.println(outfile+ " could not be written!");
-			e.printStackTrace();
+			logger.error(outfile+ " could not be written!");
 		}
 		return outfile;
 	}
@@ -105,13 +84,12 @@ public class Summarizer {
 		if(lof_statistic.size()==0) {
 			this.extract_LOFs();
 		}
-		String outfile = vcf_file.replace("vcf","gene_statistic.txt");
+		String outfile = vcf_file.replace("vcf","gene_summary.tsv");
 		try {
 			this.generateGeneStatistic();
 			this.writeGeneStatistic(outfile);
 		} catch (IOException e) {
-			System.err.println(outfile+ " could not be written!");
-			e.printStackTrace();
+			logger.error(outfile+ " could not be written!");
 		}
 		return outfile;
 	}
@@ -121,12 +99,12 @@ public class Summarizer {
 			this.extract_LOFs();
 			this.generateGeneStatistic();
 		}
-		String outfile = vcf_file.replace("vcf", "sample_statistic.txt");
+		String outfile = vcf_file.replace("vcf", "sample_summary.tsv");
 		try {
 			this.generateSampleStatistic();
 			this.writeSampleStatistic(outfile);
 		} catch (IOException e) {
-			System.err.println(outfile+" could not be written!");
+			logger.error(outfile+" could not be written!");
 		}
 		return outfile;
 	}
@@ -135,12 +113,12 @@ public class Summarizer {
 		if(lof_statistic.size()==0) {
 			this.extract_LOFs();
 		}
-		String outfile = vcf_file.replace("vcf", "transcript_statistic.txt");
+		String outfile = vcf_file.replace("vcf", "transcript_summary.tsv");
 		try {
 			this.generateTranscriptStatistic();
 			this.writeTranscriptStatistic(outfile);
 		} catch (IOException e) {
-			System.err.println(outfile+" could not be written!");
+			logger.error(outfile+" could not be written!");
 		}
 		return outfile;
 	}
@@ -193,262 +171,7 @@ public class Summarizer {
 		}
 	}
 	
-	private String replaceVATbySO(String type) {
-		String result = null;
-		if(type.equals("spliceOverlap")) {
-			result = "splice_site_variant";
-		} else if(type.equals("prematureStop")){
-			result = "stop_gained";
-		} else if(type.equals("insertionFS") || type.equals("deletionFS")) { 
-			result = "frameshift_variant";
-		}
-		return result;
-	}
-	
-	private String formatVEPconsequence(String type) {
-		String result = null;
-		String [] parts;
-		ArrayList<String> consequences = new ArrayList<>();
-		if(type.contains("&")) {
-			parts = type.split("&");
-			for(String p:parts) {
-				if(SO_TERMS.contains(p)) {
-					consequences.add(p);
-				}
-			}
-		} else if (SO_TERMS.contains(type)) {
-			return type;
-		}
-		
-		if(consequences.size()>0) {
-			result = consequences.remove(0);
-		}
-		for(String c: consequences) {
-			result += ","+c;
-		}
-		
-		return result; 
-	}
-	
-	private void getLoFVariantfromVAT(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes) {
-		
-		HashMap<String,LoFGene> genes = new HashMap<String,LoFGene>();
-		
-		int nrOfTitles = additional_titles.size();
-		
-		//init additional fields
-		
-		int observed_homo = 0;
-		int observed_hetero = 0;
-		String gene_id= "";
-		String consequence="";
-		String gene_symbol;
-		
-		String [] allele_annotations = null;
-		String [] annotation_fields = null;
-		
-		for(String i: infos) {
-			if(i.startsWith("VA")) {
-				i = i.replaceFirst("VA=","");
-				allele_annotations = i.split(",");
-				break;
-			}
-		}
-		
-		if(allele_annotations == null) return; //nothing was annotated
-		
-		for(String a: allele_annotations) {
-			annotation_fields = a.split(":");
-			if(annotation_fields[0].equals(GT_index+"")) {
-				consequence = replaceVATbySO(annotation_fields[4]);
-				if(consequence==null) continue; //no LoF variant annotated
-				gene_id = annotation_fields[2];
-				if(gene_id.contains(".")) {
-					gene_id = gene_id.split("\\.")[0];
-				}
-				gene_symbol = annotation_fields[1];
-				gene_id2gene_symbol.put(gene_id, gene_symbol);
-				
-				LoFGene g;
-				if(genes.containsKey(gene_id)) {
-					g = genes.get(gene_id);
-				} else {
-					g = new LoFGene(nrOfTitles);
-				}
-				g.addConsequence(consequence);
-				
-				for(String s : annotation_fields) {
-					if(s.startsWith("ENST")) {
-						if(s.contains(".")) {
-							g.addTranscript(s.split("\\.")[0]);
-						} else {
-							g.addTranscript(s);
-						}
-					}
-				}
-				genes.put(gene_id, g);
-			}
-		}
-		
-		if(genes.size()==0) return; //no LoF genes have been found
-		
-		ArrayList<String> adapted_genotypes = getAdaptedGenotypes(genotypes, GT_index);
-		for(String str: adapted_genotypes) {
-			if(str.charAt(0)==str.charAt(2) && str.charAt(0)=='1') {
-				observed_homo++;
-			} else if (str.charAt(0)=='1' || str.charAt(2)=='1') {
-				observed_hetero++;
-			}
-		}
-		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, observed_homo, observed_hetero, genes, adapted_genotypes));
-	}
-	
-	/**
-	 * fills lof_statistic and gene_id2gene_symbol
-	 */
-	private void getLoFVariantfromLOFTEE(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes) {
-		
-		
-		HashMap<String,LoFGene> genes = new HashMap<String,LoFGene>();
-		
-		int nrOfTitles = additional_titles.size();
-		
-		//init additional fields
-		
-		int observed_homo = 0;
-		int observed_hetero = 0;
-		String [] transcript_annotations=null;
-		String [] annotation_fields;
-		String gene_id= "";
-		String consequence, transcript_id, confidence, filter;
-		String gene_symbol;
-		String lof_info = "";
-		String lof_flags = "";
-		
-		for(String i:infos) {
-			if(i.startsWith("CSQ")) {
-				i = i.replaceFirst("CSQ=","");
-				transcript_annotations = i.split(",");
-				break;
-			}
-		}
-		
-		if(transcript_annotations == null) return; //nothing was annotated
-		
-		//fill HashMap genes
-		for(String t: transcript_annotations) {
-			
-			annotation_fields = t.split("\\|");
-			
-			//work around for annotations ending with ...||
-			String [] tmp = new String [nrOfVEPfields];
-			for(int i = 0; i< annotation_fields.length;i++) {
-				tmp[i] = annotation_fields[i];
-			}
-			for(int j = annotation_fields.length; j < tmp.length; j++) {
-				tmp[j] = "";
-			}
-			annotation_fields = tmp;
-			
-			int confidence_index = vep_header.get("confidence");
-//			System.out.println(t);
-			
-			if(high_confidence) {
-				if(!annotation_fields[confidence_index].equals("HC")) continue;
-			} else {
-				if(annotation_fields[confidence_index].equals("")) continue;
-			}
-			
-			
-			
-			//alt_allele - ref_allele = annotation_fields[0];
-			int allele_index = vep_header.get("allele");
-			if(alt.contains(annotation_fields[allele_index]) || annotation_fields[allele_index].equals("-")) { //found a LoF annotation
-				consequence = annotation_fields[vep_header.get("consequence")];
-				consequence = formatVEPconsequence(consequence);
-				gene_symbol = annotation_fields[vep_header.get("gene_symbol")];
-				gene_id = annotation_fields[vep_header.get("gene_id")];
-				transcript_id = annotation_fields[vep_header.get("transcript_id")];
-				confidence = annotation_fields[confidence_index];
-				filter = annotation_fields[vep_header.get("lof_filter")];
-				lof_info = annotation_fields[vep_header.get("lof_info")];
-				lof_flags = annotation_fields[vep_header.get("lof_flags")];
-				
-				LoFGene g;
-				if(genes.containsKey(gene_id)) {
-					g = genes.get(gene_id);
-				} else {
-					g = new LoFGene(nrOfTitles);
-				}
-				g.addConsequence(consequence);
-				g.addTranscript(transcript_id);
-				
-				g.addInfo(confidence, additional_titles.indexOf("confidence"));
-				g.addInfo(filter, additional_titles.indexOf("failed_filters"));
-				g.addInfo(lof_info, additional_titles.indexOf("lof_info"));
-				g.addInfo(lof_flags, additional_titles.indexOf("lof_flags"));
-				
-				genes.put(gene_id, g);
-//				System.out.println(genes.size());
-				gene_id2gene_symbol.put(gene_id, gene_symbol);
-			}
-		}
-		
-		if(genes.size()==0) return; //no LoF genes have been found
-
-		ArrayList<String> adapted_genotypes = getAdaptedGenotypes(genotypes, GT_index);
-		for(String str: adapted_genotypes) {
-			if(str.charAt(0)==str.charAt(2) && str.charAt(0)=='1') {
-				observed_homo++;
-			} else if (str.charAt(0)=='1' || str.charAt(2)=='1') {
-				observed_hetero++;
-			}
-		}
-		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, observed_homo, observed_hetero, genes, adapted_genotypes));
-	}
-	
-	
-	private ArrayList<String> getAdaptedGenotypes(ArrayList<String> genotypes, int GT_index) {
-		ArrayList<String> adapted_genotypes = new ArrayList<String>();
-		for(String gt:genotypes) {
-			String [] genotype;
-			String separator;
-			if(gt.contains("/")) {
-				separator = "/";
-				genotype = gt.split("/");
-			} else {
-				separator = "|";
-				genotype = gt.split("\\|");
-			}
-			String first = genotype[0];
-			String second = genotype[1];
-			String first_a = ".";
-			String second_a = ".";
-			if(first.equals(second) && first.equals(GT_index+"")) {
-				first_a = "1";
-				second_a = "1";
-			} else if (first.equals(GT_index+"")) {
-				first_a = "1";
-				if(second.equals("0")) {
-					second_a = "0";
-				}
-			} else if (second.equals(GT_index+"")) {
-				second_a = "1";
-				if(first.equals("0")) {
-					first_a = "0";
-				}
-			} else {
-				first_a = first;
-				second_a = second;
-			}
-			String adapted = first_a+separator+second_a;
-//			if(!adapted.equals(gt)) {
-//				System.out.println("Changed genotype: "+gt+" to "+adapted);
-//			}
-			adapted_genotypes.add(adapted);
-		}
-		return adapted_genotypes;
-	}
+	abstract void getLoFVariant(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes);
 	
 	private  ArrayList<String> getGenotypes(String [] fields) {
 		ArrayList<String> result = new ArrayList<String>();
@@ -466,8 +189,6 @@ public class Summarizer {
 		gene_id2gene_symbol = new HashMap<String,String>();
 		
 		try {
-			System.out.println("Processing VCF file...");
-			int counter = 0;
 			String [] fields;
 			String chr, pos, ref;
 			String [] ids, alt_alleles, infos;
@@ -478,9 +199,6 @@ public class Summarizer {
 			    inputStream = new FileInputStream(vcf_file);
 			    sc = new Scanner(inputStream, "UTF-8");
 			    while (sc.hasNextLine()) {
-			    	if(counter%10000==0) {
-			    		System.out.println("Processed "+counter+" lines...");
-			    	}
 			        String line = sc.nextLine();
 			        if(line.startsWith("#"))  {
 			        	if(line.startsWith("##INFO=<ID=CSQ")) {
@@ -508,6 +226,10 @@ public class Summarizer {
 			        				vep_header.put("lof_info",i);
 			        			} else if (part.contains("LoF")) {
 			        				vep_header.put("confidence",i);
+			        			} else if (part.equals("ExAC_AF")) {
+			        				vep_header.put("ExAC_AF", i);
+			        			} else if (part.equals("CADD_PHRED")) {
+			        				vep_header.put("CADD_PHRED",i);
 			        			}
 			        		}
 			        	} else if(line.startsWith("#CHR")) {
@@ -533,24 +255,12 @@ public class Summarizer {
 			        		if(ids.length>i) {
 			        			id = ids[i];
 			        		}
-//			        		TODO implement some method to retrieve id from dbSNP
-//			        		if(id.equals(".")) {
-//			        			getId(chr, pos, ref, alt_alleles[i]);
-//			        		}
-			        		if(annotation.equals("LOFTEE")) {
-			        			getLoFVariantfromLOFTEE(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
-			        		} else if (annotation.equals("VAT")) {
-			        			getLoFVariantfromVAT(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
-			        		}
+
+			        		getLoFVariant(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
+
 			        	}
 			        }
-			        counter++;
-			        /**only for testing**/
-//			        if(counter > 50000) {
-//			        	return;
-//			        }
 			    }
-			    System.out.println("VCF file processed.");
 			    // note that Scanner suppresses exceptions
 			    if (sc.ioException() != null) {
 			        throw sc.ioException();
@@ -565,8 +275,7 @@ public class Summarizer {
 			}
 			
 		} catch (IOException e) {
-			System.err.println("VCF file couldn't be read!");
-			e.printStackTrace();
+			logger.error("VCF file couldn't be read!");
 		}
 	}
 	
@@ -595,7 +304,6 @@ public class Summarizer {
 				}
 				
 				HashSet<String> transcripts = gene2lof.get(gene_id).getTranscripts();
-				
 				//is variant full LOF
 				if(transcripts.size() == gene_id2transcript_ids.get(gene_id).size()) {
 					stats[0]++;
@@ -607,7 +315,7 @@ public class Summarizer {
 					String gt = lof.getGenotypes().get(i);
 					
 					//homozygous affected transcripts
-					if(gt.charAt(0)==gt.charAt(2) && gt.charAt(0)=='1') {
+					if(gt.charAt(0)==gt.charAt(2) && gt.charAt(0)>'0') {
 						stats[2]++; //LoF is homozygous
 						HashMap<String, HashSet<String>> sample2transcripts = transcripts_hom.get(gene_id);
 						if(sample2transcripts==null) {
@@ -621,7 +329,7 @@ public class Summarizer {
 						tmp_set.addAll(transcripts);
 						sample2transcripts.put(sample_ids.get(i), tmp_set);
 						transcripts_hom.put(gene_id, sample2transcripts);
-					} else if (gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+					} else if (gt.charAt(0)>'0' || gt.charAt(2)>'0') {
 						stats[3]++; //LoF is heterozygous
 						HashMap<String, HashSet<String>> sample2transcripts = transcripts_het.get(gene_id);
 						if(sample2transcripts==null) {
@@ -706,7 +414,7 @@ public class Summarizer {
 				String sample = sample_ids.get(i);
 				
 				//check whether sample is affected
-				if(gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+				if(gt.charAt(0)>'0' || gt.charAt(2)>'0') {
 					if(isFull) {
 						Integer t = fullLOFs.get(sample);
 						t++;
@@ -751,9 +459,9 @@ public class Summarizer {
 				transcripts.addAll(lofgene.get(g).getTranscripts());
 			}
 			for(String gt: lofvar.getGenotypes()) {
-				if(gt.charAt(0)=='1' && gt.charAt(2)==gt.charAt(0)) {
+				if(gt.charAt(0)>'0' && gt.charAt(2)==gt.charAt(0)) {
 					obs_hom ++;
-				} else if(gt.charAt(0)=='1' || gt.charAt(2)=='1') {
+				} else if(gt.charAt(0)>'0' || gt.charAt(2)>'0') {
 					obs_het ++;
 				}
 			}
@@ -779,15 +487,12 @@ public class Summarizer {
 		String [] header = {"chr", "pos", "rsId", "ref_allele", "alt_allele", "gene_id", "gene_symbol", "effect", "consequence", "lof_trans", "all_trans", "obs_hom", "obs_het"};
 		
 		//write header
-		for(String s:header) {
-			bw.write(s+"\t");
+		bw.write(header[0]);
+		for(int i = 1; i < header.length; i++) {
+			bw.write("\t"+header[i]);
 		}
 		for(String s: additional_titles) {
-			bw.write(s+"\t");
-		}
-		bw.write(sample_ids.get(0));
-		for(int i = 1; i<sample_ids.size(); i++) {
-			bw.write("\t"+sample_ids.get(i));
+			bw.write("\t"+s);
 		}
 		bw.newLine();
 		
@@ -814,7 +519,7 @@ public class Summarizer {
 				if(gene_id2transcript_ids.containsKey(s)) {
 					nrOfTrans = gene_id2transcript_ids.get(s).size()+"";	
 				} else {
-					System.err.println("According to the CDS file gene "+s+" has no protein coding transcripts. The reference genome version of the CDS file and of the files used for the annotation have to be the equal.");
+					logger.error("According to the CDS file gene "+s+" has no protein coding transcripts. The reference genome version of the CDS file and of the files used for the annotation have to be the equal.");
 				}
 				all_trans += "," + nrOfTrans;
 				lof_trans += "," + lofgene.getNrOfTranscripts();
@@ -852,12 +557,6 @@ public class Summarizer {
 			for(String s: add_infos) {
 				s = s.replaceFirst(",","");
 				bw.write(s+"\t");
-			}
-			
-			ArrayList<String> genotypes = l.getGenotypes();
-			bw.write(genotypes.get(0));
-			for(int i=1; i<genotypes.size(); i++) {
-				bw.write("\t"+genotypes.get(i));
 			}
 			bw.newLine();
 		}
@@ -931,20 +630,5 @@ public class Summarizer {
 		
 		bw.close();
 	}
-	
-//	public static void main (String [] args) {
-//		String vcf_file;
-//		String cds_file;
-//		
-//		/**@ helmholtz**/
-//		vcf_file = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150401_loftee_q/variant_effect_LoF.vcf";
-//		cds_file = "/home/ibis/tim.jeske/LOFTEE/Homo_sapiens.GRCh37.75.cds.all.fa";
-//		
-//		Summarizer my = new Summarizer("LOFTEE",vcf_file,cds_file);
-//		my.getLoFStatistic();
-//		my.getGeneStatistic();
-//		my.getSampleStatistic();
-//		my.getTranscriptStatistic();
-//	}
 	
 }

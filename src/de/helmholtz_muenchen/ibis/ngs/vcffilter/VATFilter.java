@@ -28,8 +28,7 @@ public class VATFilter {
 		SOtoVAT.put("splice_donor_variant", "spliceOverlap");
 		SOtoVAT.put("splice_acceptor_variant", "spliceOverlap");
 		SOtoVAT.put("stop_gained", "prematureStop");
-		SOtoVAT.put("frameshift_variant", "insertionFS");
-		SOtoVAT.put("frameshift_variant", "deletionFS");
+		SOtoVAT.put("frameshift_variant", "insertionFS,deletionFS");
 		SOtoVAT.put("stop_lost","removedStop");
 		SOtoVAT.put("initiator_codon_variant","startOverlap");
 		SOtoVAT.put("inframe_insertion", "insertionNFS");
@@ -43,7 +42,9 @@ public class VATFilter {
 		lookUpTerms = new HashSet<String>();
 		for(String t: SO_terms) {
 			if(SOtoVAT.containsKey(t)) {
-				lookUpTerms.add(SOtoVAT.get(t));
+				for(String s: SOtoVAT.get(t).split(",")) {
+					lookUpTerms.add(s);
+				}
 			} else {
 				LOGGER.warn("No VAT term found for SO term:"+t);
 			}
@@ -171,12 +172,4 @@ public class VATFilter {
 			e.printStackTrace();
 		}
 	}
-	
-//	public static void main (String [] args) {
-//		String infile = "/home/ibis/tim.jeske/KORAdata/analysis_ready/20150319_vat_k/analysis_ready.diabetes.filtered.haplotypecaller.vat.vcf";
-//		String outfile = infile.replace("vcf", "filtered.vcf");
-//		HashSet<String> myTerms = new HashSet<>();
-//		myTerms.add("stop_gained");
-//		new VATFilter().filter(infile,outfile, myTerms);
-//	}
 }

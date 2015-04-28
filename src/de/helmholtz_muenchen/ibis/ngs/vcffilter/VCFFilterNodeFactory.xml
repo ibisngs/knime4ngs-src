@@ -3,35 +3,40 @@
     <name>VCFFilter</name>
     
     <shortDescription>
-        
+        This node filters annotated VCF files.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	This nodes filters VCF files annotated by VAT or VEP.
+        	The output is a VCF file containing the variants that passed the filters.
+        </intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Input VCF">
+        	VCF file annotated by VAT or VEP.
+        </option>
+        <option name="Path to filter_vep.pl">
+        	This script is used to filter VEP annotations.
+        	It can be found in the VEP installation in ensembl-tools-release../scripts/variant_effect_predictor.
+        </option>
+        <option name="Select variants">
+        	Choose some SO terms to define variants in which you are interested.
+        	Variants that match at least one of the default terms are generally considered as Loss-of-Function variants. 
+        </option>
+        <option name="Filter Conditions">
+        	You can manually define several filters for VCF files annotated by VEP.
+        	If you want to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 you would type:
+        	LoF is HC,ExAC_AF>0.05 (requires the usage of the VEP plugins LOFTEE and ExAC).
+        	More information can be found at:
+        	<a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
+        </option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
+        <outPort index="0" name="">Cell 0: Path to filtered VCF file.</outPort>
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
+        <view index="0" name=""></view>
     </views>
 </knimeNode>

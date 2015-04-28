@@ -2,6 +2,9 @@ package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -13,6 +16,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -31,7 +35,8 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class LOFSummaryNodeModel extends NodeModel {
     
-	//configuration
+	// the logger instance
+    protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
 	
 	//input file
 	static final String CFGKEY_VCF_INFILE = "vcf_infile";
@@ -42,11 +47,18 @@ public class LOFSummaryNodeModel extends NodeModel {
 	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
-    static final String[] ANNOTATIONS_AVAILABLE={"LOFTEE","VAT"};
+    static final String[] ANNOTATIONS_AVAILABLE={"VAT","VEP"};
     final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
     
-    static final String CFGKEY_HIGH_CONFIDENCE = "high_confidence";
-    final SettingsModelBoolean m_high_confidence = new SettingsModelBoolean(CFGKEY_HIGH_CONFIDENCE,false);
+    //VEP plugins
+    static final String CFGKEY_LOFTEE_USED = "loftee_used";
+    final SettingsModelBoolean m_loftee_used = new SettingsModelBoolean(CFGKEY_LOFTEE_USED,false);
+    
+    static final String CFGKEY_EXAC_USED = "exac_used";
+    final SettingsModelBoolean m_exac_used = new SettingsModelBoolean(CFGKEY_EXAC_USED, false);
+    
+    static final String CFGKEY_CADD_USED = "cadd_used";
+    final SettingsModelBoolean m_cadd_used = new SettingsModelBoolean(CFGKEY_CADD_USED,false);
 	
 	//output
 	public static final String OUT_COL1 = "Path2LOF_Statistics";
@@ -79,12 +91,29 @@ public class LOFSummaryNodeModel extends NodeModel {
     	}else{
     		//Get File via FileSelector
     		vcf_infile = m_vcfin.getStringValue();
+    		if(vcf_infile.equals("") || Files.notExists(Paths.get(vcf_infile))) {
+    			logger.error("No input vcf file specified!");
+    		}
     	}
-    	System.out.println("Infile: "+vcf_infile);
-    	System.out.println("Annotation: "+m_annotation.getStringValue());
+    	logger.info("Infile: "+vcf_infile);
+
+    	String cds_file = m_cdsin.getStringValue();
+    	if(cds_file.equals("") || Files.notExists(Paths.get(cds_file))) {
+    		logger.error("No CDS file specified! Variant effect (full or partial) cannot be calculated.");
+    	}
     	
-    	//Execute
-    	Summarizer summy = new Summarizer(m_annotation.getStringValue(), vcf_infile, m_cdsin.getStringValue(), m_high_confidence.getBooleanValue());
+    	Summarizer summy = null;
+    	String annotation = m_annotation.getStringValue();
+    	if(annotation.equals("VAT")) {
+    		summy = new VATSummarizer(vcf_infile, cds_file);
+    	} else if(annotation.equals("VEP")) {
+    		HashSet<String> plugins = new HashSet<String>();
+    		if(m_loftee_used.getBooleanValue()) plugins.add("LOFTEE");
+    		if(m_exac_used.getBooleanValue()) plugins.add("ExAC");
+    		if(m_cadd_used.getBooleanValue()) plugins.add("CADD");
+    		summy = new VEPSummarizer(vcf_infile, cds_file, plugins);
+    	}
+    	
     	String LOF_Summary[] = new String[4];
     	LOF_Summary[0] = summy.getLoFStatistic();
     	LOF_Summary[1] = summy.getGeneStatistic();
@@ -119,7 +148,7 @@ public class LOFSummaryNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        // TODO: generated method stub
+        optionalPort = false;
     }
 
     /**
@@ -135,7 +164,12 @@ public class LOFSummaryNodeModel extends NodeModel {
 			
 		}catch(NullPointerException e){}
 
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -146,7 +180,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.saveSettingsTo(settings);
     	m_cdsin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
-    	m_high_confidence.saveSettingsTo(settings);
+    	m_loftee_used.saveSettingsTo(settings);
+    	m_exac_used.saveSettingsTo(settings);
+    	m_cadd_used.saveSettingsTo(settings);
     }
 
     /**
@@ -158,7 +194,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.loadSettingsFrom(settings);
     	m_cdsin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
-    	m_high_confidence.loadSettingsFrom(settings);
+    	m_loftee_used.loadSettingsFrom(settings);
+    	m_exac_used.loadSettingsFrom(settings);
+    	m_cadd_used.loadSettingsFrom(settings);
     }
 
     /**
@@ -170,7 +208,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.validateSettings(settings);
     	m_cdsin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
-    	m_high_confidence.validateSettings(settings);
+    	m_loftee_used.validateSettings(settings);
+    	m_exac_used.validateSettings(settings);
+    	m_cadd_used.validateSettings(settings);
     }
     
     /**
