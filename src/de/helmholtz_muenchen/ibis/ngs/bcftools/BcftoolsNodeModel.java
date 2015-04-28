@@ -271,7 +271,7 @@ Contrast calling and association test options:
         	m_infile.setStringValue(infile);
         	path2bcftools=inData[0].iterator().next().getCell(0).toString();
         	path2bcftools=path2bcftools.substring(0, path2bcftools.lastIndexOf("/"));
-        	path2bcftools+="/bcftools/bcftools";
+        	path2bcftools+="/bcftools";
         	m_path2bcftools.setStringValue(path2bcftools);
     	}else{
         	infile =m_infile.getStringValue();
@@ -333,7 +333,7 @@ Contrast calling and association test options:
     	/**
     	 * Contrast calling and association test models
     	 */
-    	command.add("-1 "+m_numberofgrpsamples.getIntValue());
+//    	command.add("-1 "+m_numberofgrpsamples.getIntValue()); // this tag doesn't exist as of 28.4.15
     	command.add("-C "+m_posterioricon.getDoubleValue());
     	command.add("-U "+m_numberofpermuations.getIntValue());
     	command.add("-X "+m_onlypermutations.getDoubleValue());

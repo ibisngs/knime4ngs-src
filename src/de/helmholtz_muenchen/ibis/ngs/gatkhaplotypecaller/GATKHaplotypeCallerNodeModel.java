@@ -43,7 +43,8 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		command.add("--emitRefConfidence GVCF");
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
-		command.add("-L "+m_BED_FILE.getStringValue());
+		if(m_BED_FILE_CHECKBOX.isEnabled())
+			command.add("-L "+m_BED_FILE.getStringValue());
 		
 		this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
 

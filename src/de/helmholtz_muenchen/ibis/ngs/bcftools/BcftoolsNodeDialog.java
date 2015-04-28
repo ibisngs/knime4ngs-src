@@ -68,6 +68,7 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	
     	//Main Tab 
     	createNewGroup("Path to Bcftools");
+//    	addDialogComponent(new DialogComponentFileChooser(use_FILE, "Testing", 0, true));
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, ""),"his_bcft_ID5",""));
     	createNewGroup("");
     	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","view","index", "cat", "ld","ldpair","reheader"));

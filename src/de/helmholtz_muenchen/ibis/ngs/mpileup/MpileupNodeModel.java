@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -216,6 +218,13 @@ Output options:
 	public static final String OUT_COL1 = "Path2SamTools";
 	public static final String OUT_COL2 = "Path2MpileupOutfile";
 	
+	
+	/**
+	 * INPUT BAMS F,M,C
+	 */
+	private ArrayList<String> bam_arrList = new ArrayList<>(3);
+	private String path2seqfile ="";
+	private String path2bamfile = "";
     /**
      * Constructor for the node model.
      */
@@ -229,6 +238,8 @@ Output options:
     	m_outbasepositions.setEnabled(false);
     	
     }
+    
+    
 
     /**
      * {@inheritDoc}
@@ -237,13 +248,21 @@ Output options:
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-    		String path2seqfile = getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
-        	String path2samtools = inData[0].iterator().next().getCell(0).toString();
-        	String path2bamfile = inData[0].iterator().next().getCell(1).toString();
+    	
+    		CloseableRowIterator it = inData[0].iterator();
+    		while (it.hasNext()) {
+    			DataRow row = it.next();
+    			bam_arrList.add(row.getCell(0).toString());
+    			System.out.println(row.getCell(0).toString());
+    		}
+    		path2bamfile = inData[0].iterator().next().getCell(0).toString();
+    		path2seqfile = inData[0].iterator().next().getCell(1).toString();//getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
+    		
+        	String path2samtools = "/home/software/bin/samtools";//inData[0].iterator().next().getCell(0).toString();
     	
 	    	
 	    	/**Initialize logfile**/
-	    	String logfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("/")+1)+"logfile.txt";
+	    	String logfile = bam_arrList.get(0).substring(0,path2bamfile.lastIndexOf("/")+1)+"logfile.txt";
 	    	System.out.println(logfile);
 	    	ShowOutput.setLogFile(logfile);
 	    	StringBuffer logBuffer = new StringBuffer(50);
@@ -276,8 +295,10 @@ Output options:
 	    		ArrayList<String> command = new ArrayList<String>();
 	    		LOGGER.info("Mpileup Process");
 	    		command.add(path2samtools+" mpileup");
-	    		command.add(path2bamfile);
-	    		
+	    		for(String s : bam_arrList) {
+		    		command.add(s);
+
+	    		}
 		    	if(m_encoding.getBooleanValue()){command.add("-6");}
 		    	if(m_anamalous.getBooleanValue()){command.add("-A");}
 		    	if(m_probrealign.getBooleanValue()){command.add("-B");}
@@ -288,7 +309,7 @@ Output options:
 		    	if(m_bedfile.isEnabled()){command.add("-l "+m_bedfile.getStringValue());}
 		    	command.add("-q "+m_minmapqual.getIntValue());
 		    	command.add("-Q "+m_minbasequal.getIntValue());
-		    	command.add("-M "+m_capmapqual.getIntValue());
+//		    	command.add("-M "+m_capmapqual.getIntValue()); //doesn't exist as of 28.4.15
 		    	if(m_excludereadsfile.isEnabled()){command.add("-G "+m_excludereadsfile.getStringValue());}
 		    	if(m_ignorerg.getBooleanValue()){command.add("-R");}
 		    	if(m_pileupregion.isActive()){command.add("-r "+m_pileupregion.getStringValue());}
@@ -312,9 +333,11 @@ Output options:
 			
 		    	//If bcf output
 		    	if((m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()) || (m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue())){
-		    		outfile =path2bamfile+"_pileup.bcf";
+		    		outfile = path2bamfile+"_pileup.bcf";
+
 		    	}else{
-		       		outfile =path2bamfile+".pileup";
+		    		outfile = path2bamfile+".pileup";
+		    		
 		    	}
 		    	
 		    	/**
@@ -363,10 +386,10 @@ Output options:
 		/**
 		 * Check if reference file is available
 		 */
-    	if(getAvailableInputFlowVariables().containsKey("Path2seqFile")){
-    		String referencefile=getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
-    		System.out.println(referencefile);
-    		if(referencefile.equals("No reference file")){
+    	/*if(getAvailableInputFlowVariables().containsKey("Path2seqFile")){*/
+//    		String referencefile=path2seqfile;/*getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();*/
+//    		System.out.println(referencefile);
+    		/*if(referencefile.equals("No reference file")){
     			setWarningMessage("Reference sequence file variable not available. Probably you used BAMSAMConverter as a stand-alone node. You cannot use reference sequence for Mpileup now.\n Please use BAMLoader if you want to specify a reference sequence.");
     			//No reference, set Dialog Options to disabled
     			System.out.println("No-->Reference--disable");
@@ -374,29 +397,29 @@ Output options:
     			m_usefaidxfile.setBooleanValue(false);
     			m_ifindex.setBooleanValue(false);
     			m_ifindex.setEnabled(false);
-    		}else{
+    		}else{*/
         		//Reference file available-->Enable dialog
     			m_usefaidxfile.setEnabled(true);
     			m_usefaidxfile.setBooleanValue(true);
     			m_ifindex.setEnabled(true);
-    		}
+    		/*}
 
     	}else{
     		throw new InvalidSettingsException("Reference file variable not available. Mpileup should be connected to BAMSAMConverter or BAMLoader.");
-    	}
+    	}*/
     	
     /**
      * Check In and Outfiles
      */
     	String outfile="";
-    	String path2bamfile="";
-    	if(getAvailableInputFlowVariables().containsKey("MPILEUPINFILE")){
+//    	String path2bamfile="";
+    	/*if(getAvailableInputFlowVariables().containsKey("MPILEUPINFILE")){*/
     		//Get outfile from BAMLoader/BAMSAMConverter
-        	path2bamfile=getAvailableInputFlowVariables().get("MPILEUPINFILE").getStringValue();
-        	String suffix = path2bamfile.substring(path2bamfile.lastIndexOf("."));
-        	if(!suffix.equals(".bam")){
-        		throw new InvalidSettingsException("Something wrong. Infile not in .bam format. Instead it is in "+suffix+" format");
-        	}
+//        	path2bamfile=getAvailableInputFlowVariables().get("MPILEUPINFILE").getStringValue();
+//        	String suffix = path2bamfile.substring(path2bamfile.lastIndexOf("."));
+//        	if(!suffix.equals(".bam")){
+//        		throw new InvalidSettingsException("Something wrong. Infile not in .bam format. Instead it is in "+suffix+" format");
+//        	}
         	//Infile is bam...prepare output file
         	if((m_bcfoutput.isEnabled() && m_bcfoutput.getBooleanValue()) || (m_uncompressedbcf.isEnabled() && m_uncompressedbcf.getBooleanValue())){
         		
@@ -411,9 +434,9 @@ Output options:
             	if(outpath.exists()){
             		throw new InvalidSettingsException("Outfile "+outpath+" already exists ! Please rename or move to other directory.");
             	}
-    	}else{
+    	/*}else{
     		throw new InvalidSettingsException("Infile variable not available. Mpileup should be connected to BAMSAMConverter or BAMLoader.");
-    	}
+    	}*/
     	
         return new DataTableSpec[]{null};
     }
