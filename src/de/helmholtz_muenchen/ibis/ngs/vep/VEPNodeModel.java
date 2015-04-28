@@ -321,7 +321,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void reset() {
-        // TODO: generated method stub
+        optionalPort = false;
     }
 
     /**
@@ -337,7 +337,10 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 			
 		}catch(NullPointerException e){}
 
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**

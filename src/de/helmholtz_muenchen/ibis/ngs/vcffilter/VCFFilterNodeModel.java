@@ -68,6 +68,8 @@ public class VCFFilterNodeModel extends NodeModel {
 	//output col names
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
+	public static boolean optionalPort=false;
+	
     protected VCFFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
         for(String t: DEFAULT_TERMS) {
@@ -82,7 +84,20 @@ public class VCFFilterNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	String infile = m_vcfin.getStringValue();
+    	//input file
+    	String infile;
+    	
+    	if(optionalPort){	//Input Table available
+    		//Get File via Table
+    		infile = inData[0].iterator().next().getCell(0).toString();
+    	}else{
+    		//Get File via FileSelector
+    		infile = m_vcfin.getStringValue();
+    		if(infile.equals("") || Files.notExists(Paths.get(infile))) {
+    			LOGGER.error("No input vcf file specified!");
+    		}
+    	}
+    	
     	String outfile = infile.replace("vcf", "filtered.vcf");
     	
     	LOGGER.debug("CHOSEN TERMS: "+TERMS);
@@ -91,8 +106,10 @@ public class VCFFilterNodeModel extends NodeModel {
     	String annotation = m_annotation.getStringValue();
     	LOGGER.debug(annotation);
     	if(annotation.equals("VAT")) {
-    		LOGGER.debug("ANNOTATION: VAT");
+    		LOGGER.debug("Filter VAT annotation");
+    		new VATFilter().filter(infile, outfile, TERMS);
     	} else if(annotation.equals("VEP")) {
+    		LOGGER.info("Prepare command for filter_vep.pl");
     		String cmd = "perl";
     		
     		String vepscript = m_vepscript.getStringValue();
@@ -129,8 +146,7 @@ public class VCFFilterNodeModel extends NodeModel {
     		
     		cmd += " --only_matched";
 
-    		Executor.executeCommand(new String[]{cmd}, exec,null, LOGGER,  "stdout.txt", "stderr.txt");
-    		
+    		Executor.executeCommand(new String[]{cmd}, exec, LOGGER);
     	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -157,6 +173,7 @@ public class VCFFilterNodeModel extends NodeModel {
         for(String t: DEFAULT_TERMS) {
         	this.TERMS.add(t);
         }
+        optionalPort = false;
     }
 
     /**
@@ -165,6 +182,12 @@ public class VCFFilterNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	
+    	try{
+			inSpecs[0].getColumnNames();
+			optionalPort=true;
+			
+		}catch(NullPointerException e){}
     	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
