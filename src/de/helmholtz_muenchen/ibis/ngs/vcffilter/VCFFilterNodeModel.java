@@ -141,7 +141,7 @@ public class VCFFilterNodeModel extends NodeModel {
     		for(String f: filters) {
     			if(f.equals("")) continue;
     			f = f.trim();
-    			cmd += " --filter \""+f+"\"";
+    			cmd += " --filter "+f;
     		}
     		
     		cmd += " --only_matched";

@@ -612,6 +612,21 @@ public abstract class Summarizer {
 			bw.newLine();
 		}
 		bw.close();
+		//end of original method
+		
+		//TODO is this really useful? => integration to output cols
+		HashSet<String> knockout_genes = new HashSet<>();
+		for(String s: sample_statistic.keySet()) {
+			knockout_genes.addAll(sample_statistic.get(s).getComplete_LOF_genes());
+		}
+		
+		String ko_genes_outfile = outfile.replace("tsv", "ko_genes.txt");
+		BufferedWriter bw2 = new BufferedWriter(new FileWriter(ko_genes_outfile));
+		for(String s: knockout_genes) {
+			bw2.write(s);
+			bw2.newLine();
+		}
+		bw2.close();
 	}
 	
 	private void writeTranscriptStatistic(String outfile) throws IOException {
