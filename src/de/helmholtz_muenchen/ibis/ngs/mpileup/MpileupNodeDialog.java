@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.mpileup;
 
+import javax.swing.JFileChooser;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -13,6 +14,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "Mpileup" Node.
@@ -70,7 +74,7 @@ public class MpileupNodeDialog extends DefaultNodeSettingsPane {
            -P STR       comma separated list of platforms for indels [all]
 
     	 */
-    	
+        final SettingsModelString SAM = new SettingsModelString(MpileupNodeModel.CFGKEY_SAM_PATH, "");
     	final SettingsModelString bedfile=new SettingsModelString(MpileupNodeModel.CFGKEY_BEDFILE,null);
 		final SettingsModelBoolean ifbedfile = new SettingsModelBoolean(MpileupNodeModel.CFGKEY_IFBEDFILE, false);
     	bedfile.setEnabled(false);
@@ -102,7 +106,9 @@ public class MpileupNodeDialog extends DefaultNodeSettingsPane {
     	
     	final SettingsModelOptionalString platformlist = new SettingsModelOptionalString(MpileupNodeModel.CFGKEY_PLATFORMLIST, "", false);
     	
-    	
+    	createNewGroup("Path to samtools software");
+    	addDialogComponent(new DialogComponentFileChooser(SAM, "sam_mpileup", 0, ""));
+
     	createNewGroup("Input Options:");
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(usefaidxfile, "Use indexed reference genome"));

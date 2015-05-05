@@ -82,6 +82,8 @@ Output options:
 	 */
 
 	//Mpileup
+	public static final String CFGKEY_SAM_PATH = "SAM_PATH";
+
 	public static final String CFGKEY_ENCODING = "encoding";
 	public static final String CFGKEY_ANAMALOUS = "anamalous";
 	public static final String CFGKEY_PROBREALIGN="probrealign";
@@ -135,6 +137,8 @@ Output options:
 	/**
 	 * Input models
 	 */
+    private final SettingsModelString m_SAM = new SettingsModelString(CFGKEY_SAM_PATH, "");
+
 	private final SettingsModelBoolean m_encoding = new SettingsModelBoolean(
 			CFGKEY_ENCODING, false);
 	private final SettingsModelBoolean m_anamalous = new SettingsModelBoolean(
@@ -258,7 +262,7 @@ Output options:
     		path2bamfile = inData[0].iterator().next().getCell(0).toString();
     		path2seqfile = inData[0].iterator().next().getCell(1).toString();//getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
     		
-        	String path2samtools = "/home/software/bin/samtools";//inData[0].iterator().next().getCell(0).toString();
+        	String path2samtools = m_SAM.getStringValue();//inData[0].iterator().next().getCell(0).toString();
     	
 	    	
 	    	/**Initialize logfile**/
