@@ -2,32 +2,11 @@ package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class VEPSummarizer extends Summarizer{
-
-	boolean loftee = false;
-	boolean exac = false;
-	boolean cadd = false;
 	
-	public VEPSummarizer(String vcf_file, String cds_file, HashSet<String> usedPlugins) {
+	public VEPSummarizer(String vcf_file, String cds_file) {
 		super(vcf_file, cds_file);
-		
-		if(usedPlugins.contains("LOFTEE")) {
-			loftee = true;
-			additional_titles.add("confidence");
-			additional_titles.add("failed_filters");
-			additional_titles.add("lof_flags");
-			additional_titles.add("lof_info");
-		}
-		if(usedPlugins.contains("ExAC")) {
-			exac = true;
-			additional_titles.add("ExAC_AF");
-		}
-		if(usedPlugins.contains("CADD")) {
-			cadd = true;
-			additional_titles.add("CADD_PHRED");
-		}
 	}
 
 	@Override
@@ -73,7 +52,8 @@ public class VEPSummarizer extends Summarizer{
 			
 			//alt_allele - ref_allele = annotation_fields[0];
 			int allele_index = vep_header.get("allele");
-			if(alt.contains(annotation_fields[allele_index]) || annotation_fields[allele_index].equals("-")) { //found a LoF annotation
+//			if(alt.contains(annotation_fields[allele_index]) || annotation_fields[allele_index].equals("-")) { //found a LoF annotation
+			if(annotation_fields[allele_index].equals(GT_index+"")) {
 				consequence = annotation_fields[vep_header.get("consequence")];
 				gene_symbol = annotation_fields[vep_header.get("gene_symbol")];
 				gene_id = annotation_fields[vep_header.get("gene_id")];
@@ -89,25 +69,8 @@ public class VEPSummarizer extends Summarizer{
 				g.addConsequence(consequence);
 				g.addTranscript(transcript_id);
 				
-				if(loftee) {
-					String confidence = annotation_fields[vep_header.get("confidence")];
-					String filter = annotation_fields[vep_header.get("lof_filter")];
-					String lof_info = annotation_fields[vep_header.get("lof_info")];
-					String lof_flags = annotation_fields[vep_header.get("lof_flags")];
-					g.addInfo(confidence, additional_titles.indexOf("confidence"));
-					g.addInfo(filter, additional_titles.indexOf("failed_filters"));
-					g.addInfo(lof_info, additional_titles.indexOf("lof_info"));
-					g.addInfo(lof_flags, additional_titles.indexOf("lof_flags"));
-				}
-				
-				if(exac) {
-					String exac_score = annotation_fields[vep_header.get("ExAC_AF")];
-					g.addInfo(exac_score, additional_titles.indexOf("ExAC_AF"));
-				}
-				
-				if(cadd) {
-					String cadd_score = annotation_fields[vep_header.get("CADD_PHRED")];
-					g.addInfo(cadd_score, additional_titles.indexOf("CADD_PHRED"));
+				for(String s: additional_titles) {
+					g.addInfo(annotation_fields[vep_header.get(s)], additional_titles.indexOf(s));
 				}
 				
 				genes.put(gene_id, g);
@@ -133,7 +96,6 @@ public class VEPSummarizer extends Summarizer{
 			}
 		}
 		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, observed_homo, observed_hetero, genes, genotypes));
-		
 	}
 
 }

@@ -1,10 +1,8 @@
 package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 
@@ -27,10 +25,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString vcfin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_VCF_INFILE,"-");
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
-	private final SettingsModelBoolean loftee_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_LOFTEE_USED,false);
-	private final SettingsModelBoolean exac_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_EXAC_USED,false);
-	private final SettingsModelBoolean cadd_used = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CADD_USED,false);
-
+	
     protected LOFSummaryNodeDialog() {
     	
     	//input file
@@ -43,11 +38,6 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	//annotation selection
         createNewGroup("Used annotation tool");
         addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
-        
-        createNewGroup("Used Plugins (VEP only)");
-        addDialogComponent(new DialogComponentBoolean(loftee_used,"LOFTEE"));
-        addDialogComponent(new DialogComponentBoolean(exac_used,"ExAC"));
-        addDialogComponent(new DialogComponentBoolean(cadd_used,"CADD"));
     }
 }
 

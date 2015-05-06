@@ -215,6 +215,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	cmd += " --no_progress";
     	cmd += " --vcf";
     	cmd += " --pubmed";
+    	cmd += " --allele_number";
     	
     	
     	//plugin parameters

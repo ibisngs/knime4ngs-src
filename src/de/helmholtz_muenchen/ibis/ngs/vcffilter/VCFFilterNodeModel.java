@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
@@ -110,43 +111,65 @@ public class VCFFilterNodeModel extends NodeModel {
     		new VATFilter().filter(infile, outfile, TERMS);
     	} else if(annotation.equals("VEP")) {
     		LOGGER.info("Prepare command for filter_vep.pl");
-    		String cmd = "perl";
+//    		String cmd = "perl";
+    		ArrayList<String> cmd = new ArrayList<>();
+    		cmd.add("perl");
     		
     		String vepscript = m_vepscript.getStringValue();
     		if(vepscript.equals("") || Files.notExists(Paths.get(vepscript))) {
     			LOGGER.error("Path to filter_vep.pl not specified!");
     		} else {
-    			cmd += " " + vepscript;
+//    			cmd += " " + vepscript;
+    			cmd.add(vepscript);
     		}
     		
     		if(infile.equals("") || Files.notExists(Paths.get(infile))) {
     			LOGGER.error("Input file does not exist");
     		} else {
-    			cmd += " -i " + infile;
+//    			cmd += " -i " + infile;
+    			cmd.add("-i");
+    			cmd.add(infile);
     		}
     		
-    		cmd += " -o " + outfile;
+//    		cmd += " -o " + outfile;
+    		cmd.add("-o");
+    		cmd.add(outfile);
     		
-    		String filter_terms = " --filter ";
+//    		String filter_terms = " --filter \"";
+    		
+    		String filter_terms = "";
     		Object [] terms =  TERMS.toArray();
     		if(terms.length>0) {
+    			cmd.add("--filter");
     			filter_terms += "Consequence is "+terms[0];
     			for(int i=1; i<terms.length; i++) {
         			filter_terms += " or Consequence is "+terms[i];
         		}
-    			cmd += filter_terms;
+    			cmd.add(filter_terms);
+//    			cmd += filter_terms;
     		}
     		
     		String [] filters = m_filter.getStringValue().split(",");
-    		for(String f: filters) {
-    			if(f.equals("")) continue;
-    			f = f.trim();
-    			cmd += " --filter "+f;
+    		if(filters.length>0) {
+    			for(String f: filters) {
+    				if(f.equals("")) continue;
+    				cmd.add("--filter");
+    				f = f.trim();
+    				cmd.add(f);
+//    				cmd += " --filter "+f;
+    			}
     		}
     		
-    		cmd += " --only_matched";
+//    		cmd += " --only_matched";
+    		cmd.add("--only_matched");
 
-    		Executor.executeCommand(new String[]{cmd}, exec, LOGGER);
+    		String [] cmd_array = new String[cmd.size()];
+    		for(int i = 0; i < cmd.size(); i++) {
+    			cmd_array[i] = cmd.get(i);
+    		}
+    		
+//    		Executor.executeCommand(new String[]{cmd}, exec, LOGGER);
+    		Executor.executeCommand(cmd_array, exec, LOGGER);
     	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -262,6 +285,8 @@ public class VCFFilterNodeModel extends NodeModel {
             CanceledExecutionException {
         // TODO: generated method stub
     }
+    
+
 
 }
 

@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import org.knime.core.node.NodeLogger;
 
@@ -123,6 +125,34 @@ public abstract class Summarizer {
 		return outfile;
 	}
 	
+	public String getAnnotationStatistic() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+		}
+		String outfile = vcf_file.replace("vcf", "annotation_summary.tsv");
+		try {
+			this.writeAnnotationStats(outfile);
+		} catch (IOException e) {
+			logger.error(outfile+" could not be written!");
+		}
+		return outfile;
+	}
+	
+	public String getKnockOutGenes() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+			this.generateGeneStatistic();
+			this.generateSampleStatistic();
+		}
+		String outfile = vcf_file.replace("vcf", "knockout_genes.tsv");
+		try {
+			this.writeKnockOutGenes(outfile);
+		} catch (IOException e) {
+			logger.error(outfile+" could not be written!");
+		}
+		return outfile;
+	}
+	
 	/**
 	 * reads CDS file and fills transcript_id2gene_id and gene_id2transcript_ids
 	 * @throws IOException
@@ -208,7 +238,7 @@ public abstract class Summarizer {
 			        		String part; 
 			        		for(int i = 0; i<tmp.length; i++) {
 			        			part = tmp[i];
-			        			if(part.contains("Allele")) {
+			        			if(part.contains("ALLELE_NUM")) {
 			        				vep_header.put("allele", i);
 			        			} else if (part.contains("Consequence")) {
 			        				vep_header.put("consequence", i);
@@ -218,17 +248,23 @@ public abstract class Summarizer {
 			        				vep_header.put("gene_id", i);
 			        			} else if (part.contains("Feature")) {
 			        				vep_header.put("transcript_id",i);
-			        			}  else if (part.contains("LoF_filter")) {
+			        			} else if (part.contains("LoF_filter")) {
+			        				additional_titles.add("lof_filter");
 			        				vep_header.put("lof_filter",i);
 			        			} else if (part.contains("LoF_flags")) {
+			        				additional_titles.add("lof_flags");
 			        				vep_header.put("lof_flags",i);
 			        			} else if (part.contains("LoF_info")) {
+			        				additional_titles.add("lof_info");
 			        				vep_header.put("lof_info",i);
 			        			} else if (part.contains("LoF")) {
+			        				additional_titles.add("confidence");
 			        				vep_header.put("confidence",i);
 			        			} else if (part.equals("ExAC_AF")) {
+			        				additional_titles.add("ExAC_AF");
 			        				vep_header.put("ExAC_AF", i);
 			        			} else if (part.equals("CADD_PHRED")) {
+			        				additional_titles.add("CADD_PHRED");
 			        				vep_header.put("CADD_PHRED",i);
 			        			}
 			        		}
@@ -303,7 +339,11 @@ public abstract class Summarizer {
 					}
 				}
 				
-				HashSet<String> transcripts = gene2lof.get(gene_id).getTranscripts();
+				ArrayList<String> transList = gene2lof.get(gene_id).getTranscripts();
+				HashSet<String> transcripts = new HashSet<>();
+				for(String t:transList) {
+					transcripts.add(t);
+				}
 				//is variant full LOF
 				if(transcripts.size() == gene_id2transcript_ids.get(gene_id).size()) {
 					stats[0]++;
@@ -536,7 +576,7 @@ public abstract class Summarizer {
 				}
 
 				for(int i=0; i < additional_titles.size(); i++) {
-					HashSet<String> infos = lofgene.getInfo(i);
+					ArrayList<String> infos = lofgene.getInfo(i);
 					for(String str:infos) {
 						if(!str.equals("")) {
 							add_infos[i]+=","+str;
@@ -613,20 +653,77 @@ public abstract class Summarizer {
 		}
 		bw.close();
 		//end of original method
-		
-		//TODO is this really useful? => integration to output cols
+	}
+	
+	private void writeKnockOutGenes (String outfile) throws IOException {
 		HashSet<String> knockout_genes = new HashSet<>();
 		for(String s: sample_statistic.keySet()) {
 			knockout_genes.addAll(sample_statistic.get(s).getComplete_LOF_genes());
 		}
 		
-		String ko_genes_outfile = outfile.replace("tsv", "ko_genes.txt");
-		BufferedWriter bw2 = new BufferedWriter(new FileWriter(ko_genes_outfile));
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		for(String s: knockout_genes) {
-			bw2.write(s);
-			bw2.newLine();
+			bw.write(s);
+			bw.newLine();
 		}
-		bw2.close();
+		bw.close();
+	}
+	
+	private void writeAnnotationStats (String outfile) throws IOException {
+		int hc_lof=0;
+		int all_lof=0;
+		TreeMap<String, Integer> term2hc_lof = new TreeMap<>();
+		TreeMap<String, Integer> term2all_lof = new TreeMap<>();
+		
+		int conf_index = additional_titles.indexOf("confidence");
+		
+		for(LoFVariant lof: lof_statistic) {
+			for(LoFGene gene: lof.getGene_id2lofgene_fields().values()) {
+				ArrayList<String> consequences = gene.getConsequences();
+				for(int i = 0; i < consequences.size(); i++) {
+					String term = consequences.get(i);
+					Integer count = term2all_lof.get(term);
+					if(count == null) {
+						count = 0;
+					}
+					count ++;
+					term2all_lof.put(term, count);
+					all_lof++;
+					if(conf_index != -1 && gene.getInfo(conf_index).get(i).equals("HC")) {
+						System.out.println(lof.getChr()+" "+lof.getPos()+" "+lof.getRef_allele()+" "+term+" HC gefunden");
+						hc_lof++;
+						Integer hc_count = term2hc_lof.get(term);
+						if(hc_count == null) {
+							hc_count = 0;
+						}
+						hc_count++;
+						term2hc_lof.put(term, hc_count);
+					}
+				}
+			}
+		}
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+		bw.write("Number of LoF annotations:\t"+all_lof);
+		bw.newLine();
+		bw.write("Number of hc LoF annotations:\t"+hc_lof);
+		bw.newLine();
+		
+		bw.write("#Number of LoF annotations per term:");
+		bw.newLine();
+		for(Map.Entry<String, Integer> entry: term2all_lof.entrySet()) {
+			bw.write(entry.getKey()+"\t"+entry.getValue());
+			bw.newLine();
+		}
+		
+		bw.write("#Number of hc LoF annotations per term:");
+		bw.newLine();
+		for(Map.Entry<String, Integer> entry: term2hc_lof.entrySet()) {
+			bw.write(entry.getKey()+"\t"+entry.getValue());
+			bw.newLine();
+		}
+		bw.close();
+		
 	}
 	
 	private void writeTranscriptStatistic(String outfile) throws IOException {
