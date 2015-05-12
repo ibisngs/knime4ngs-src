@@ -153,6 +153,21 @@ public abstract class Summarizer {
 		return outfile;
 	}
 	
+	public String getSampleKOGeneMatrix() {
+		if(lof_statistic.size()==0) {
+			this.extract_LOFs();
+			this.generateGeneStatistic();
+			this.generateSampleStatistic();
+		}
+		String outfile = vcf_file.replace("vcf", "sample_ko_genes.tsv");
+		try {
+			this.writeSampleKOGeneMatrix(outfile);
+		} catch (IOException e) {
+			logger.error(outfile+" could not be written!");
+		}
+		return outfile;
+	}
+	
 	/**
 	 * reads CDS file and fills transcript_id2gene_id and gene_id2transcript_ids
 	 * @throws IOException
@@ -663,9 +678,46 @@ public abstract class Summarizer {
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		for(String s: knockout_genes) {
-			bw.write(s);
+			bw.write(s+"\t"+this.gene_id2gene_symbol.get(s));
 			bw.newLine();
 		}
+		bw.close();
+	}
+	
+	private void writeSampleKOGeneMatrix(String outfile) throws IOException {
+		HashSet<String> knockout_genes = new HashSet<>();
+		for(String s: sample_statistic.keySet()) {
+			knockout_genes.addAll(sample_statistic.get(s).getComplete_LOF_genes());
+		}
+		
+		Object [] all_ko_genes = knockout_genes.toArray();
+		
+		String header = "";
+		for(Object gene: all_ko_genes) {
+			header += "\t" + this.gene_id2gene_symbol.get(gene+"");
+		}
+		header = header.replaceFirst("\t", "");
+		
+		String line = "";
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+		bw.write(header);
+		bw.newLine();
+		for(String s: sample_ids) {
+			line = s;
+			ArrayList<String> ko_genes = sample_statistic.get(s).getComplete_LOF_genes();
+			for(Object gene: all_ko_genes) {
+				if(ko_genes.contains(gene+"")) {
+					line += "\t1";
+				} else {
+					line += "\t0";
+				}
+			}
+			bw.write(line);
+			bw.newLine();
+		}
+		
+		
 		bw.close();
 	}
 	
@@ -690,7 +742,7 @@ public abstract class Summarizer {
 					term2all_lof.put(term, count);
 					all_lof++;
 					if(conf_index != -1 && gene.getInfo(conf_index).get(i).equals("HC")) {
-						System.out.println(lof.getChr()+" "+lof.getPos()+" "+lof.getRef_allele()+" "+term+" HC gefunden");
+//						System.out.println(lof.getChr()+" "+lof.getPos()+" "+lof.getRef_allele()+" "+term+" HC gefunden");
 						hc_lof++;
 						Integer hc_count = term2hc_lof.get(term);
 						if(hc_count == null) {

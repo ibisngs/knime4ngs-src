@@ -106,6 +106,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	//TODO add to output table
     	summy.getAnnotationStatistic();
     	summy.getKnockOutGenes();
+    	summy.getSampleKOGeneMatrix();
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
