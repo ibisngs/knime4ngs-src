@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>VCFNormalizer</name>
+    
+    <shortDescription>
+        VCF Normalizer using vt
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+        	This node normalizes VCF files using Vt.
+        	Vt splits, left-aligns and trims all variants.
+        	This step is necessary before annotating the file using VEP and loading it into Gemini.
+        	Further information can be found at:
+        	<br />
+        	<a href="http://gemini.readthedocs.org/en/latest/content/preprocessing.html#">http://gemini.readthedocs.org/en/latest/content/preprocessing.html</a>
+        	<br />
+        	<a href="http://genome.sph.umich.edu/wiki/Variant_Normalization">http://genome.sph.umich.edu/wiki/Variant_Normalization</a>
+        </intro>
+        
+        
+        <option name="Path to vt directory">
+        	Select the installation directory of vt.
+        </option>
+        <option name="Path to input VCF file">
+        	Select an input file in vcf or vcf.gz format.
+        </option>
+        <option name="Path to reference genome">
+        	Select the path of reference genome.
+        </option>
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
+        <outPort index="0" name="">
+        	Cell 0: Path2normalizedVCF.
+        </outPort>
+    </ports>    
+    <views>
+        <view index="0" name=""></view>
+    </views>
+</knimeNode>

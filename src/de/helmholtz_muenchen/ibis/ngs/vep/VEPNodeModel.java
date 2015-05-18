@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -19,7 +18,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -40,8 +38,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	
 	// the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(VEPNodeModel.class);
-    
-    ArrayList<SettingsModel> models = new ArrayList<SettingsModel>();
     
     //general options
     static final String CFGKEY_VEP_PL = "vep_pl";
