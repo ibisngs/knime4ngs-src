@@ -196,6 +196,8 @@ public class ArtsLilHelperNodeModel extends NodeModel {
     	int row_idx = 0;
     	for (int i = 0; i < chr_fq_arrList.size(); i++) {
     		String chr = chr_fq_arrList.get(i).getChr();
+        	pushFlowVariableString("Reference", ArtsLilHelperNodeModel.HG_19 + chr + ".fa"); 
+
 //    		System.out.println("IDs for output: " + chr);
     	    RowKey key = new RowKey("Row row row your boat");
 
@@ -260,7 +262,6 @@ public class ArtsLilHelperNodeModel extends NodeModel {
 			System.out.print(s + " ");
 		}
 		System.out.println();
-		
 		
 		/**Execute**/
 		Executor.executeCommand(new String[]{StringUtils.join(merge_command, " ")},exec,LOGGER);

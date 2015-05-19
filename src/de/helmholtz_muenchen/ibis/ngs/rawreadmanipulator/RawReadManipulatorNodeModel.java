@@ -281,6 +281,16 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	
         /**Create Output**/
     	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));
+    	/**
+         * fq format handling. fastq is already handled in Fastqc.jar
+         */
+        if (outReadsFile1.substring(outReadsFile1.length()-2, outReadsFile1.length()).equals("fq"))
+    	{
+//        	System.out.println("HERE 1 " + outReadsFile1);
+        	outReadsFile1 = outReadsFile1.substring(0,inFile1.lastIndexOf(".")) + ".fq.filtered.fastq";
+//        	System.out.println("HERE again 1 " + outReadsFile1);
+    	}
+        
     	if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile1).getName();
     	if(!new File(outReadsFile1).exists()) {	//If the file does not exist
 			throw new Exception("The expected outfile "+outReadsFile1+" does not exist....something went wrong!");
@@ -289,6 +299,15 @@ public class RawReadManipulatorNodeModel extends NodeModel {
     	String outReadsFile2 = "";
     	if(!inFile2.equals("")) {
     		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
+    		/**
+             * fq format handling. fastq is already handled in Fastqc.jar
+             */
+            if (outReadsFile2.substring(outReadsFile2.length()-2, outReadsFile2.length()).equals("fq"))
+        	{
+//            	System.out.println("HERE 2");
+            	outReadsFile2 = outReadsFile2.substring(0,inFile2.lastIndexOf(".")) + ".fq.filtered.fastq";
+        	}
+            
     		if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile2).getName();
     		if(!new File(outReadsFile2).exists()) {
     			throw new IOException("The expected outfile "+outReadsFile2+" does not exist....something went wrong!");

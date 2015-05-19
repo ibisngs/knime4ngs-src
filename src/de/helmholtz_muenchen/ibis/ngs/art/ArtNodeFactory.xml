@@ -67,7 +67,7 @@
         <!-- possibly more output ports here-->
     </ports>    
     <views>
-        <!--view index="0" name="name of first view">Description of first view...</view-->
+        <view index="0" name="View is whatever you can see">Description of first view...</view>
         <!--view index="1" name="name of second view">Description of second view...</view-->
     </views>
 </knimeNode>

@@ -261,7 +261,13 @@ Output options:
     		}
     		path2bamfile = inData[0].iterator().next().getCell(0).toString();
     		path2seqfile = inData[0].iterator().next().getCell(1).toString();//getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
-    		
+    		/**
+        	 * push the reference file extra to flow variable for the phasers in next step
+        	 */
+        	pushFlowVariableString("Reference", path2seqfile); 
+        	/**
+        	 * 
+        	 */
         	String path2samtools = m_SAM.getStringValue();//inData[0].iterator().next().getCell(0).toString();
     	
 	    	
@@ -450,6 +456,7 @@ Output options:
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	m_SAM.saveSettingsTo(settings);
     	m_anamalous.saveSettingsTo(settings);
     	m_bedfile.saveSettingsTo(settings);
     	m_downgrade.saveSettingsTo(settings);
@@ -490,6 +497,7 @@ Output options:
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	m_SAM.loadSettingsFrom(settings);
     	m_anamalous.loadSettingsFrom(settings);
     	m_bedfile.loadSettingsFrom(settings);
     	m_downgrade.loadSettingsFrom(settings);
@@ -530,6 +538,7 @@ Output options:
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	m_SAM.validateSettings(settings);
     	m_anamalous.validateSettings(settings);
     	m_bedfile.validateSettings(settings);
     	m_downgrade.validateSettings(settings);

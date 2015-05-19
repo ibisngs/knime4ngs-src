@@ -53,7 +53,9 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 
 		}
 //		command.add("-I "+INFILE);
-		command.add("--emitRefConfidence GVCF");
+		if (INFILE_arrList.size()==1) {
+			command.add("--emitRefConfidence GVCF");
+		}
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
 		if(m_BED_FILE_CHECKBOX.isEnabled())
@@ -61,7 +63,26 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		
 		this.OUTFILE = IO.replaceFileExtension(INFILE_arrList.get(0), ".gvcf");
 
-		return StringUtils.join(command, " ");
+		String commandLine = StringUtils.join(command, " ");
+		
+		String reffile = "";
+		String[] lines = commandLine.split(" ");
+		for (int i = 0; i < lines.length-1; i++) {
+			if (lines[i] == "-R") {
+				reffile = lines[i+1];
+//				System.out.println(reffile);
+				break;
+			}
+		}
+		
+		/**
+    	 * push the reference file extra to flow variable for the phasers in next step
+    	 */
+    	pushFlowVariableString("Reference", reffile); 
+    	/**
+    	 * 
+    	 */
+		return commandLine;
 	}
 
 	@Override

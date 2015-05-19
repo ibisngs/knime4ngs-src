@@ -463,6 +463,13 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	}
     	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
     	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
+    	/**
+    	 * push the reference file extra to flow variable for the phasers in next step
+    	 */
+    	pushFlowVariableString("Reference", reffile); 
+    	/**
+    	 * 
+    	 */
     	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", StringCell.TYPE).createSpec();
 
     	if(p1){

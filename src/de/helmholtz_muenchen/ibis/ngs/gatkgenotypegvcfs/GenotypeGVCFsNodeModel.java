@@ -22,15 +22,15 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 public class GenotypeGVCFsNodeModel extends GATKNodeModel {
     
 	public static final String CFGKEY_NT_FILE = "NT";
-	
+//	private static final String REFERENCE = "Reference";
+
 	private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
 	
 	private String OUTFILE; 
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
 		super(1, 1);
-	}
-
+   	}
 	/**
      * {@inheritDoc}
      */
@@ -43,6 +43,8 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData) {
 		
+//		String refGenome = getAvailableFlowVariables().get(REFERENCE).getStringValue();
+
 		Iterator <DataRow> it = inData[0].iterator();
 		ArrayList<String> command 	= new ArrayList<String>();
 		boolean first = true;
@@ -58,6 +60,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			command.add("--variant "+INFILE);
 
 		}
+//    	command.add("-R "+refGenome);
 		command.add("-nt "+m_NT.getIntValue());
 		return StringUtils.join(command, " ");
 	}

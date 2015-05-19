@@ -66,11 +66,22 @@ public class FastQCNodeModel extends NodeModel {
     	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
-    	    	
+    	  
+//    	System.out.println("HUIBOO "+readsFile1.substring(readsFile1.length()-2, readsFile1.length()));
+    	
+    	
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
         /**Create Output Specs**/
         String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
+        
+        /**
+         * fq format handling. fastq is already handled in Fastqc.jar
+         */
+        if (readsFile1.substring(readsFile1.length()-2, readsFile1.length()).equals("fq"))
+    	{
+        	outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
+    	}
         String outFileSettings = outfile1;
     	
     	String outfileMerged = outfile1;
@@ -82,7 +93,10 @@ public class FastQCNodeModel extends NodeModel {
     		readFile2Name = new File(readsFile2).getName();
         	outFileSettings = outfileMerged; // override this path
         	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
-
+//        	if (readsFile1.substring(readsFile1.length()-2, readsFile1.length()).equals("fq"))
+//        	{
+//            	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
+//        	}
     	}
     	
     	File lockFile = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
@@ -146,7 +160,10 @@ public class FastQCNodeModel extends NodeModel {
 	    		
 	    		/** merge the two filter settings files */
 	        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
-
+	        	if (readsFile2.substring(readsFile2.length()-2, readsFile2.length()).equals("fq"))
+	         	{
+	             	outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
+	         	}
 	        	// merge the two settings files
 	        	ArrayList<String> commandMerge = new ArrayList<String>();
 	        	commandMerge.add("sh");
