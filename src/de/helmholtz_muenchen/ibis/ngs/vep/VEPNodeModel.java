@@ -210,9 +210,16 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//default VEP parameters
     	cmd += " --no_progress";
     	cmd += " --vcf";
-    	cmd += " --pubmed";
     	cmd += " --allele_number";
-    	
+    	cmd += " --sift b";
+    	cmd += " --polyphen b";
+    	cmd += " --symbol";
+    	cmd += " --numbers";
+    	cmd += " --biotype";
+    	cmd += " --total_length";
+    	cmd += " --canonical";
+    	cmd += " --ccds";
+    	cmd += " --fields Consequence,ALLELE_NUM,Codons,Amino_acids,Gene,SYMBOL,Feature,EXON,PolyPhen,SIFT,Protein_position,BIOTYPE,CANONICAL,CCDS,LoF,LoF_filter,LoF_flags";
     	
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();

@@ -77,7 +77,7 @@ public class VCFNormalizerNodeModel extends NodeModel {
     	if(vcfin.endsWith(".vcf.gz")) {
     		cmd = "zless "+vcfin;
     	} else if (vcfin.endsWith(".vcf")) {
-    		cmd = "less"+vcfin;
+    		cmd = "less "+vcfin;
     	} else {
     		logger.error("VCF infile not correctly specified!");
     	}

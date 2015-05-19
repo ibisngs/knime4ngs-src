@@ -20,8 +20,8 @@
         			obs_hom and obs_het indicate how often each variant is observed in a homozygous/heterozygous state.
         		</li>
         		<li>
-        			The gene_summary comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), obs_hom, obs_het, all_trans, sampleID [list].
-        			The values for each sample indicate how many transcripts are homozygous/heterozygous affected.
+        			The gene_summary comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), affected_samples and ko_samples.
+        			The last both values indicate in how many samples the gene is affected or completely inactivated.
         		</li>
         		<li>
         			The sample_summary comprises the following fields: sample_id, full (LoF variants), partial (LoFs variants), affectedGenes, knocked_out (all transcripts are affected by at least one LoF variant), completeLOFgenes [list id:symbol].

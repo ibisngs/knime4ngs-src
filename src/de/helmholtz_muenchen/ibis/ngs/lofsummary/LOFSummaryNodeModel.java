@@ -98,15 +98,15 @@ public class LOFSummaryNodeModel extends NodeModel {
     		summy = new VEPSummarizer(vcf_infile, cds_file);
     	}
     	
-    	String LOF_Summary[] = new String[4];
+    	String LOF_Summary[] = new String[3];
     	LOF_Summary[0] = summy.getLoFStatistic();
     	LOF_Summary[1] = summy.getGeneStatistic();
     	LOF_Summary[2] = summy.getSampleStatistic();
-    	LOF_Summary[3] = summy.getTranscriptStatistic();
+//    	LOF_Summary[3] = summy.getTranscriptStatistic();
     	//TODO add to output table
-    	summy.getAnnotationStatistic();
-    	summy.getKnockOutGenes();
-    	summy.getSampleKOGeneMatrix();
+//    	summy.getAnnotationStatistic();
+//    	summy.getKnockOutGenes();
+//    	summy.getSampleKOGeneMatrix();
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -114,14 +114,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(LOF_Summary[0]),
     			(FileCell) FileCellFactory.create(LOF_Summary[1]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[2]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[3])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[2])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -156,8 +154,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
     }
 
     /**

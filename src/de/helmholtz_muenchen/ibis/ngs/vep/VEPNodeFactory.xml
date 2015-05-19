@@ -9,7 +9,7 @@
     <fullDescription>
         <intro>
         	This node is a wrapper for the Variant Effect Predictor from Ensembl.
-        	By default VEP annotates PubmedIDs citing existing variants.
+        	By default VEP annotates SIFT and PolyPhen scores.
         	The format of the output file is vcf.
         	The node allows to use the plugins LOFTEE, CADD and ExAC.
         	<br />
