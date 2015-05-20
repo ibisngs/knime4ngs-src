@@ -133,7 +133,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	String cmd;
-    	
+    	boolean is_zip = false;
     	
     	//perl script
     	String script = m_veppl.getStringValue();
@@ -154,21 +154,35 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     			logger.error("No input vcf file specified!");
     		}
     	}
+    	
+    	is_zip = vcf_infile.endsWith(".gz");
     	cmd += " -i " + vcf_infile;
     	
     	String outfileBase = m_outfolder.getStringValue()+ System.getProperty("file.separator")+ new File(vcf_infile).getName();
     	
     	//output file + stats file
     	String res_file,stats_file,stats_type;
-    	res_file = outfileBase.replace("vcf", "vep.vcf");
+    	if(is_zip) {
+    		res_file = outfileBase.replace("vcf.gz", "vep.vcf");
+    	} else {
+    		res_file = outfileBase.replace("vcf", "vep.vcf");
+    	}
     	cmd += " -o " + res_file;
     		
     	stats_type = m_stats_type.getStringValue();
     	if(stats_type.equals("html")) {
-    		stats_file = outfileBase.replace("vcf", "vep_stats.html");
+    		if(is_zip) {
+    			stats_file = outfileBase.replace("vcf.gz", "vep_stats.html");
+    		} else {
+    			stats_file = outfileBase.replace("vcf", "vep_stats.html");
+    		}
     		cmd += " --stats_file " + stats_file;
     	} else if(stats_type.equals("plain text")) {
-    		stats_file = outfileBase.replace("vcf", "vep_stats.txt");
+    		if(is_zip) {
+    			stats_file = outfileBase.replace("vcf.gz", "vep_stats.txt");
+    		} else {
+    			stats_file = outfileBase.replace("vcf", "vep_stats.txt");
+    		}
     		cmd += " --stats_text " + stats_file;
     	} else {
     		stats_file = "";
@@ -210,6 +224,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//default VEP parameters
     	cmd += " --no_progress";
     	cmd += " --vcf";
+    	cmd += " --buffer_size 10000";
     	cmd += " --allele_number";
     	cmd += " --sift b";
     	cmd += " --polyphen b";
@@ -229,18 +244,18 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		cmd += " --dir_plugins " + plugin_dir;
     	}
     	
-    	String environment = "PATH="+System.getenv("PATH") ;
+    	String path_variable = "PATH="+System.getenv("PATH") ;
     	String samtools_path = m_samtools_path.getStringValue();
     	if(samtools_path.equals("")|| Files.notExists(Paths.get(samtools_path))) {
     		logger.warn("Samtools PATH was not specified!");
     	} else {
-    		environment +=":"+samtools_path;
+    		path_variable +=":"+samtools_path;
     	}
     	String tabix_path = m_tabix_path.getStringValue();
     	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
     		logger.warn("Tabix path was not specified!");
     	} else {
-    		environment += ":"+tabix_path;
+    		path_variable += ":"+tabix_path;
     	}
     	//LOFTEE parameters
 
@@ -290,14 +305,34 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 		}
     	
     	
-    	String stdOutFile = outfileBase.replace("vcf", "vep.stdout");
-    	String stdErrFile = outfileBase.replace("vcf", "vep.stderr");
-    	File lockFile = new File(outfileBase.replace("vcf", "vep" + SuccessfulRunChecker.LOCK_ENDING));
+    	String stdOutFile;
+    	if(is_zip) {
+    		stdOutFile = outfileBase.replace("vcf.gz", "vep.stdout");
+    	} else {
+    		stdOutFile = outfileBase.replace("vcf", "vep.stdout");
+    	}
+    	
+    	String stdErrFile;
+    	if(is_zip) {
+    		stdErrFile = outfileBase.replace("vcf.gz", "vep.stderr");
+    	} else {
+    		stdErrFile = outfileBase.replace("vcf", "vep.stderr");
+    	}
+    	
+    	File lockFile;
+    	if(is_zip) {
+    		lockFile = new File(outfileBase.replace("vcf.gz", "vep" + SuccessfulRunChecker.LOCK_ENDING));
+    	} else {
+    		lockFile = new File(outfileBase.replace("vcf", "vep" + SuccessfulRunChecker.LOCK_ENDING));
+    	}
+    	
+    	String perl5lib_variable = "PERL5LIB="+System.getenv("PERL5LIB");
 
     	logger.info("COMMAND: "+cmd);
-    	logger.info("ENVIRONMENT: "+environment);
+    	logger.info("ENVIRONMENT: "+path_variable);
+    	logger.info("PERL5LIB: "+perl5lib_variable);
     	
-    	super.executeCommand(new String[]{cmd}, exec, new String[]{environment}, logger, lockFile, stdOutFile, stdErrFile, null, null, null);
+    	super.executeCommand(new String[]{cmd}, exec, new String[]{path_variable, perl5lib_variable}, logger, lockFile, stdOutFile, stdErrFile, null, null, null);
     	
     	
     	//Create Output Table

@@ -68,7 +68,7 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentFileChooser(veppl, "his_id_VEP_VEPPL", 0, ".pl"));
     	
     	createNewGroup("Path to VCF file");
-    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_VEP_VCFIN", 0, ".vcf"));
+    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_VEP_VCFIN", 0, ".vcf|.vcf.gz"));
     	
     	createNewGroup("Folder for output files");
     	addDialogComponent(new DialogComponentFileChooser(outfolder, "his_id_VEP_OUT", 0, true));
