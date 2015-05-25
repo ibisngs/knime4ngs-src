@@ -7,9 +7,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeModel;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "Beagle" Node.

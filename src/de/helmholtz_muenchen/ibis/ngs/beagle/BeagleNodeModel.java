@@ -30,7 +30,6 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -72,7 +71,7 @@ public class BeagleNodeModel extends NodeModel {
 	//The Output Col Names
 	public static final String OUT_COL1 = "PHASED VARIANTS";
 		
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(GATKPhaseByTransmissionNodeModel.class); //not used yet
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(BeagleNodeModel.class); //not used yet
 		
 	/**
 	 * Command line syntax: java -jar beagle.jar [arguments]
