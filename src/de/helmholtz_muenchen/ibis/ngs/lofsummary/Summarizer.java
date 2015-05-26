@@ -706,7 +706,7 @@ public abstract class Summarizer {
 	private void writeGeneStatistic(String outfile) throws IOException {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 //		bw.write("#analyzed samples="+sample_ids.size());
-		bw.newLine();
+//		bw.newLine();
 		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP(LoF>=1)\taffected_samples\tko_samples\taffected/all");
 		bw.newLine();
 		for(String gene: gene_id2gene_symbol.keySet()) {
@@ -756,7 +756,7 @@ public abstract class Summarizer {
 	private void writeSampleStatistic(String outfile) throws IOException {
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\taffectedGenes\tknocked_out\tcompleteLOFgenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\tknocked_out\tcompleteLOFgenes\taffectedLOFGenes");
 		bw.newLine();
 		for(String s: sample_statistic.keySet()) {
 			SampleStat stat = sample_statistic.get(s);
@@ -764,15 +764,26 @@ public abstract class Summarizer {
 			Collections.sort(completes);
 			int affected = stat.getPart_LOF_genes().size()+completes.size();
 			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+completes.size()+"\t");
+			
+			String affectedGeneList = "";
+			
 			if(completes.size() >= 1) {
 				String gene = completes.get(0);
+				affectedGeneList = gene;
 				bw.write(gene +":"+gene_id2gene_symbol.get(gene));
 			}
 			
 			for(int i = 1; i< completes.size(); i++) {
 				String u = completes.get(i);
+				affectedGeneList += ","+u;
 				bw.write(","+u+":"+gene_id2gene_symbol.get(u));
 			}
+			
+			for(String affGene: stat.getPart_LOF_genes()) {
+				affectedGeneList += ","+affGene;
+			}
+			
+			bw.write("\t"+affectedGeneList);
 			bw.newLine();
 		}
 		bw.close();
