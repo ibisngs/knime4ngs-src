@@ -1,4 +1,5 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
+//package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 
 /**
@@ -6,19 +7,17 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
  * Object for Mutation
  *
  */
-public class ParentalData {
+public class TrioData {
 	
 	private int position;
 	private Allelic_Change alleles;
-	private ParentalGenotype parents;
-	private String parent;
+	private TrioGenotype trio;
 	
-	public ParentalData(int position, Allelic_Change alleles, ParentalGenotype parents, String parent) {
+	public TrioData(int position, Allelic_Change alleles, TrioGenotype trio) {
 		// TODO Auto-generated constructor stub
 		setPosition(position);
 		setAlleles(alleles);
-		setParents(parents);
-		setParent(parent);
+		setTrio(trio);
 	}
 
 	/**
@@ -52,30 +51,17 @@ public class ParentalData {
 	/**
 	 * @return the parents
 	 */
-	protected ParentalGenotype getParents() {
-		return parents;
+	protected TrioGenotype getTrio() {
+		return trio;
 	}
 
 	/**
 	 * @param parents the parents to set
 	 */
-	protected void setParents(ParentalGenotype parents) {
-		this.parents = parents;
+	protected void setTrio(TrioGenotype trio) {
+		this.trio = trio;
 	}
-	/**
-	 * @return the parent
-	 */
-	public String getParent() {
-		return parent;
-	}
-
-	/**
-	 * @param parent the parent to set
-	 */
-	public void setParent(String parent) {
-		this.parent = parent;
-	}	
-
+	
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
@@ -86,15 +72,17 @@ public class ParentalData {
 		data += getPosition() + "\t"
 					+ getAlleles().getReference() + "\t"
 					+ getAlleles().getAltered() + "\t"
-					+ getParents().getFather().getAllele1()
+					+ getTrio().getMother().getAllele1()
 					+ "/"
-					+ getParents().getFather().getAllele2()
+					+ getTrio().getMother().getAllele2()
 					+ "\t"
-					+ getParents().getMother().getAllele1()
+					+ getTrio().getFather().getAllele1()
 					+ "/"
-					+ getParents().getMother().getAllele2()
+					+ getTrio().getFather().getAllele2()
 					+ "\t"
-					+ getParent()
+					+ getTrio().getChild().getAllele1()
+					+ "/"
+					+ getTrio().getChild().getAllele2()
 					+ "\n";
 		
 		return data;

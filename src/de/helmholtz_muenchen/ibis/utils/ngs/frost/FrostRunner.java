@@ -234,7 +234,7 @@ public class FrostRunner {
 //				System.out.println("denovo_index_child: " + denovo_index_child);
 //				System.out.println("recombination_index: " + recombination_index);
 
-				Trio_Simulator trio = new Trio_Simulator(fc, fr, in);
+				TrioSimulator trio = new TrioSimulator(fc, fr, in);
 				trio.createTrio(j, currentChr);	
 				
 				/**

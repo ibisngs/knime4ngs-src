@@ -27,7 +27,7 @@ import java.util.Random;
  *
  */
 
-public class Trio_Simulator {
+public class TrioSimulator {
 
 	//there cannot be more than 8 deNovo mutation
 //	private final double recombination_rate = 0.01;
@@ -52,7 +52,7 @@ public class Trio_Simulator {
 	private ArrayList<String> recombined = new ArrayList<String>();
 
 
-	public Trio_Simulator(FastaCheck fc, FastaReader fr, InputScanner in) {
+	public TrioSimulator(FastaCheck fc, FastaReader fr, InputScanner in) {
 		// TODO Auto-generated constructor stub
 		this.fc = fc;
 		this.fr = fr;

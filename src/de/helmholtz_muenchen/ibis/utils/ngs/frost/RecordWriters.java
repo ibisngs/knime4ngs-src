@@ -25,11 +25,11 @@ public class RecordWriters {
 
 	private FastaReader fs;
 	private InputScanner in;
-	private Trio_Simulator trio;
+	private TrioSimulator trio;
 	private ArrayList<VCF_info> vcf = new ArrayList<>();
 	private ArrayList<Integer> duplicates = new ArrayList<>();
 	
-	public RecordWriters(FastaReader fs, InputScanner in, Trio_Simulator trio) {
+	public RecordWriters(FastaReader fs, InputScanner in, TrioSimulator trio) {
 		// TODO Auto-generated constructor stub
 		setFs(fs);
 		setIn(in);
@@ -244,14 +244,14 @@ public class RecordWriters {
 	/**
 	 * @return the family
 	 */
-	public Trio_Simulator getTrio() {
+	public TrioSimulator getTrio() {
 		return trio;
 	}
 
 	/**
 	 * @param trio the family to set
 	 */
-	public void setTrio(Trio_Simulator trio) {
+	public void setTrio(TrioSimulator trio) {
 		this.trio = trio;
 	}
 	
