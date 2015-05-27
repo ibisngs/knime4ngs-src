@@ -42,9 +42,9 @@ public class FilterGATKVariants {
 	        			String[] fields = line.split("\t");
 	        			for(int i=9;i<fields.length;i++){
 	        				if(i==9){
-	        					PINDEL_VCF_HEADER = fields[i];
+	        					PINDEL_VCF_HEADER = fields[i].split("_")[0];
 	        				}else{
-	        					PINDEL_VCF_HEADER += "\t"+fields[i];
+	        					PINDEL_VCF_HEADER += "\t"+fields[i].split("_")[0];
 	        				}
 	        			}
 	        			
