@@ -34,6 +34,9 @@ public abstract class Summarizer {
 	
 	//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetero]
 	HashMap<String, HashMap<String,Integer []>> gene_sample_statistic;
+	
+	//gene_id -> sample_id -> is_unaffected
+	HashMap<String, HashMap<String,Boolean>> gene_sample_unaffected;
 	//gene_id -> [full LoFs, part LoFs, probability no LoF]
 	HashMap<String, Double[]> gene_statistic;
 	
@@ -213,7 +216,7 @@ public abstract class Summarizer {
 		}
 	}
 	
-	abstract void getLoFVariant(String chr, String pos, String ref, String id, String alt, String af, int GT_index,String[] infos, ArrayList<String> genotypes);
+	abstract void getLoFVariant(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes);
 	
 	private  ArrayList<String> getGenotypes(String [] fields) {
 		ArrayList<String> result = new ArrayList<String>();
@@ -311,9 +314,9 @@ public abstract class Summarizer {
 			        			id = ids[i];
 			        		}
 			        		if(afs == null) {
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], "", i+1,infos, genotypes);
+			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
 			        		} else {
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], afs[i], i+1,infos, genotypes);
+			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
 			        		}
 			        	}
 			        }
@@ -339,6 +342,17 @@ public abstract class Summarizer {
 	private void generateGeneStatistic() {
 		//gene_id -> sample_id -> [LoF transcripts homo, LoF transcripts hetereo]
 		gene_sample_statistic = new HashMap<>();
+		
+		//gene_id -> sample_id -> is_unaffected
+		gene_sample_unaffected = new HashMap<>();
+		for(String gene: gene_id2gene_symbol.keySet()) {
+			for(String sample_id : sample_ids ) {
+				HashMap<String,Boolean> my = gene_sample_unaffected.get(gene);
+				if(my == null) my = new HashMap<>();
+				my.put(sample_id,true);
+				gene_sample_unaffected.put(gene, my);
+			}
+		}
 		
 		//gene_id -> sample_id -> transcripts
 		HashMap<String, HashMap<String, HashSet<String>>> transcripts_hom = new HashMap<>();
@@ -366,7 +380,7 @@ public abstract class Summarizer {
 				}
 				
 				//calculate probability that gene contains no LoF
-				stats[2] = stats[2] * Math.pow((1.0 - Double.parseDouble(lof.getAF())),2);
+				stats[2] = stats[2] * Math.pow((1.0 - lof.getAF()),2);
 				
 				ArrayList<String> transList = gene2lof.get(gene_id).getTranscripts();
 				//copy to remove duplicates
@@ -383,6 +397,13 @@ public abstract class Summarizer {
 				
 				for(int i=0; i<lof.getGenotypes().size(); i++) {
 					String gt = lof.getGenotypes().get(i);
+					
+					if(gt.contains(".") || (gt.charAt(0)>'0' || gt.charAt(2)>'0')) {
+						HashMap<String,Boolean> my = gene_sample_unaffected.get(gene_id);
+						if(my == null) my = new HashMap<>();
+						my.put(sample_ids.get(i), false);
+						gene_sample_unaffected.put(gene_id, my);
+					}
 					
 					//homozygous affected transcripts
 					if(gt.charAt(0)==gt.charAt(2) && gt.charAt(0)>'0') {
@@ -707,7 +728,7 @@ public abstract class Summarizer {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 //		bw.write("#analyzed samples="+sample_ids.size());
 //		bw.newLine();
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP(LoF>=1)\taffected_samples\tko_samples\taffected/all");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP(LoF>=1)\tunaffected_samples\taffected_samples\tko_samples\tobserved_LoF_frequency");
 		bw.newLine();
 		for(String gene: gene_id2gene_symbol.keySet()) {
 			bw.write(gene+"\t"+gene_id2gene_symbol.get(gene));
@@ -720,14 +741,19 @@ public abstract class Summarizer {
 			
 			HashSet<String> affected_samples = new HashSet<>();
 			HashSet<String> ko_samples = new HashSet<>();
+			int healthy_samples = 0;
 			
 			for(String sample_id: sample_ids) {
+				if(gene_sample_unaffected.get(gene).get(sample_id)) {
+					healthy_samples++;
+				}
 				if(sample_statistic.get(sample_id).getPart_LOF_genes().contains(gene)) {
 					affected_samples.add(sample_id);
 				} else if (sample_statistic.get(sample_id).getComplete_LOF_genes().contains(gene)) {
 					ko_samples.add(sample_id);
 				}
 			}
+			bw.write("\t"+healthy_samples);
 			int affected = affected_samples.size()+ko_samples.size();
 			bw.write("\t"+affected);
 //			String sample_ids = "";
@@ -745,7 +771,7 @@ public abstract class Summarizer {
 //			sample_ids = sample_ids.replaceFirst(",", "");
 //			bw.write("\t"+sample_ids);
 			
-			double frequency = ((double) affected)/((double) sample_ids.size());
+			double frequency = ((double) affected)/((double) (healthy_samples+affected));
 			bw.write("\t"+frequency);
 			bw.newLine();
 		}
@@ -780,6 +806,9 @@ public abstract class Summarizer {
 			}
 			
 			for(String affGene: stat.getPart_LOF_genes()) {
+				if(affectedGeneList.equals("")) {
+					affectedGeneList += affGene;
+				}
 				affectedGeneList += ","+affGene;
 			}
 			

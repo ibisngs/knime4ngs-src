@@ -10,12 +10,11 @@ public class LoFVariant {
 	HashMap<String, LoFGene> gene_id2lofgene_fields;
 	ArrayList<String> genotypes;
 	
-	public LoFVariant (String chr, String pos, String ref_allele, String alt_allele, String rsId, String af, int observed_homo, int observed_hetero, HashMap<String, LoFGene> gene_id2lofgene_fields, ArrayList<String> genotypes) {
+	public LoFVariant (String chr, String pos, String ref_allele, String alt_allele, String rsId, int observed_homo, int observed_hetero, HashMap<String, LoFGene> gene_id2lofgene_fields, ArrayList<String> genotypes) {
 		this.chr = chr.replaceAll("[chroCHRO]","");
 		this.pos = pos;
 		this.ref_allele = ref_allele;
 		this.alt_allele = alt_allele;
-		this.af = af;
 		this.rsId = rsId;
 		this.observed_homo = observed_homo;
 		this.observed_hetero = observed_hetero;
@@ -43,8 +42,25 @@ public class LoFVariant {
 		return rsId;
 	}
 	
-	public String getAF() {
-		return af;
+	public double getAF() {
+		double ac = 0.0;
+		double an = 0.0;
+		for(String gt: genotypes) {
+			if(gt.charAt(0)>'0') {
+				ac++;
+				an++;
+			} else if (gt.charAt(0)!='.'){
+				an++;
+			}
+			
+			if(gt.charAt(2)>'0') {
+				ac++;
+				an++;
+			} else if (gt.charAt(2)!='.'){
+				an++;
+			}
+		}
+		return ac/an;
 	}
 
 	public int getObserved_homo() {
