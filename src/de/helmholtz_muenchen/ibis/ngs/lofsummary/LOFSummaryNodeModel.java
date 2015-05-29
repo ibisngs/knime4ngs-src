@@ -90,18 +90,21 @@ public class LOFSummaryNodeModel extends NodeModel {
     		logger.error("No CDS file specified! Variant effect (full or partial) cannot be calculated.");
     	}
     	
+    	String ped_file = "/home/ibis/tim.jeske/SCHIZOanalysis/allIlluminaSamples.ped";
+    	
     	Summarizer summy = null;
     	String annotation = m_annotation.getStringValue();
     	if(annotation.equals("VAT")) {
-    		summy = new VATSummarizer(vcf_infile, cds_file);
+    		summy = new VATSummarizer(vcf_infile, cds_file, ped_file);
     	} else if(annotation.equals("VEP")) {
-    		summy = new VEPSummarizer(vcf_infile, cds_file);
+    		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file);
     	}
     	
     	String LOF_Summary[] = new String[3];
     	LOF_Summary[0] = summy.getLoFStatistic();
     	LOF_Summary[1] = summy.getGeneStatistic();
     	LOF_Summary[2] = summy.getSampleStatistic();
+    	summy.writeTrioSummary(vcf_infile.replace(".vcf", ".trioSum.vcf"));
 //    	LOF_Summary[3] = summy.getTranscriptStatistic();
     	//TODO add to output table
 //    	summy.getAnnotationStatistic();

@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 public class VEPSummarizer extends Summarizer{
 	
-	public VEPSummarizer(String vcf_file, String cds_file) {
-		super(vcf_file, cds_file);
+	public VEPSummarizer(String vcf_file, String cds_file,String ped_file) {
+		super(vcf_file, cds_file,ped_file);
 	}
 
 	@Override
@@ -74,7 +74,14 @@ public class VEPSummarizer extends Summarizer{
 				}
 				
 				genes.put(gene_id, g);
-				gene_id2gene_symbol.put(gene_id, gene_symbol);
+				if(gene_statistic.containsKey(gene_id)) {
+					gene_statistic.get(gene_id).setSymbol(gene_symbol);
+				} else {
+					GeneInfo gi = new GeneInfo();
+					gi.setSymbol(gene_symbol);
+					gene_statistic.put(gene_id, gi);
+				}
+				
 			}
 		}
 		
