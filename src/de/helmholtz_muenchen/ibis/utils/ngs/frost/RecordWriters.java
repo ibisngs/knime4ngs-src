@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Scanner;
 
 
+
 /**
  * @author tanzeem.haque
  * Class to write all info outputs
@@ -146,12 +147,18 @@ public class RecordWriters {
 	    }
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(outFile))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 //			System.out.println("It should write the vcf!");
-			pw.write("#CHROM" + "\t" + "#POS" + "\t" 
-					+ "#ID" + "\t" + "#REF" + "\t" 
-					+ "#ALT" + "\t" + "#QUAL" + "\t"
-					+ "#FILTER" + "\t" + "#INFO" + "\t"
-					+ "#FORMAT" + "\t" + "#M" + "\t"
-					+ "#F" + "\t" + "#C" + "\n");
+			pw.write("#CHROM" + "\t" /*0*/
+					+ "#POS" + "\t" /*1*/
+					+ "#ID" + "\t" /*2*/
+					+ "#REF" + "\t" /*3*/
+					+ "#ALT" + "\t" /*4*/
+					+ "#QUAL" + "\t" /*5*/
+					+ "#FILTER" + "\t" /*6*/
+					+ "#INFO" + "\t" /*7*/
+					+ "#FORMAT" + "\t" /*8*/
+					+ "#M" + "\t" /*9*/
+					+ "#F" + "\t" /*10*/
+					+ "#C" + "\n"); /*11*/
 			
 			for (VCF_info v : this.vcf)
 				pw.write(v.getContent()+"\n");
@@ -172,6 +179,8 @@ public class RecordWriters {
 	        	String s = sc.nextLine();
 	        	s = s.replaceAll("\\|", "/");
 	    		s = s.replaceAll("1/0", "0/1");
+	    		s = s.replaceAll("2/1", "1/2");
+	    		s = s.replaceAll("2/0", "0/2");
 	    		data.add(s);
 //	        	System.out.println(s);
 	        	
@@ -212,22 +221,22 @@ public class RecordWriters {
 					 * saving the parental mutation to add to the denovo mut //record from parents file
 					 */
 					int c0 = (FrostRunner.parental_chromatids[1].equals("M0"))?
-							Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[4]/*mother genotype*/.split("/")[0])
-							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[4].split("/")[1]);
+							Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[9]/*mother genotype*/.split("\\|")[0])
+							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[9].split("\\|")[1]);
 		        	int c1 = (FrostRunner.parental_chromatids[0].equals("F0"))?
-		        			Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[5]/*father genotype*/.split("/")[0])
-							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[5].split("/")[1]);
+		        			Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[10]/*father genotype*/.split("\\|")[0])
+							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[10].split("\\|")[1]);
 		        	/**
 		             * denovo situation
 		             */
-		            String [] c = this.vcf.get(i).getContent().split("\t")[6].split("/"); //record from child file
-		            String denovo = this.vcf.get(i).getContent().split("\t")[3], parent_mut = this.vcf.get(i+1).getContent().split("\t")[3];
+		            String [] c = this.vcf.get(i).getContent().split("\t")[11].split("\\|"); //record from child file
+		            String denovo = this.vcf.get(i).getContent().split("\t")[4], parent_mut = this.vcf.get(i+1).getContent().split("\t")[4];
 
 		            /**
 		             * KEEP this system out block to check bug
 		             */
-		            FrostRunner.createLog("Child from parent: " + c0 + "/" + c1);
-		            FrostRunner.createLog("Denovo situation: " + c[0] + "/" + c[1]);
+		            FrostRunner.createLog("Child from parent: " + c0 + "|" + c1);
+		            FrostRunner.createLog("Denovo situation: " + c[0] + "|" + c[1]);
 		            FrostRunner.createLog("Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
 
 		            if(!(denovo.equals(parent_mut))
@@ -239,18 +248,37 @@ public class RecordWriters {
 		            	c0 += Integer.parseInt(c[0]);//m
 		            	c1 += Integer.parseInt(c[1]);//f
 		            }
+		            /**
+		             * col[0].replaceAll("^[0-9]_", "")//id
+	    	        			+"\t"+col[1]
+	    	    	        	+"\t"+"." //ID as in vcf format	
+	    	        			+"\t"+col[2]//ref allele
+	    	        			+"\t"+col[3]//alt allele
+	    	        			+"\t"+"0.0" //QUAL as in vcf format
+	    	    	        	+"\t"+"." // FILTER as in vcf format 
+	    	    	        	+"\t"+"AN=6" // INFO as in vcf format
+	    	    	        	+"\t"+"GT" // FORMAT as in vcf format 
+	    	        			+"\t"+col[4].replace("/", "|")//mother genotype
+	    	    	        	+"\t"+col[5].replace("/", "|")//father genotype
+	    	    	        	+"\t"+c0+"|"+c1//child genotype));
+		             */
 		            String new_content = this.vcf.get(i).getContent().split("\t")[0]+"\t"
     						+ this.vcf.get(i).getContent().split("\t")[1]+"\t"
     						+ this.vcf.get(i).getContent().split("\t")[2]+"\t"
-    						+ this.vcf.get(i).getContent().split("\t")[3]+"\t"/*mutated base of the child -> twice*/
+    						+ this.vcf.get(i).getContent().split("\t")[3]+"\t"
+    						+ this.vcf.get(i).getContent().split("\t")[4]+"\t"/*mutated base of the child -> twice*/
+    						+ this.vcf.get(i).getContent().split("\t")[5]+"\t"
+    	    				+ this.vcf.get(i).getContent().split("\t")[6]+"\t"
+    	    				+ this.vcf.get(i).getContent().split("\t")[7]+"\t"
+    	    				+ this.vcf.get(i).getContent().split("\t")[8]+"\t"
     						/**
     						 * BEWARE: STANDARDIZED M F C INSTEAD OF F M C 
     						 *(Already changed in the class Mutation (getParentString))
     						 * C always M/F
     						 */
-    						+ this.vcf.get(i+1).getContent().split("\t")[4]+"\t"/*mother genotype originally from parets file*/
-    						+ this.vcf.get(i+1).getContent().split("\t")[5]+"\t"/*father genotype originally from parets file*/
-    						+ c0 + "/" + c1;
+    						+ this.vcf.get(i+1).getContent().split("\t")[9]+"\t"/*mother genotype originally from parents file*/
+    						+ this.vcf.get(i+1).getContent().split("\t")[10]+"\t"/*father genotype originally from parents file*/
+    						+ c0 + "|" + c1;
 		            FrostRunner.createLog(new_content);
 		            this.vcf.set(i, new VCF_info(this.vcf.get(i).getPosition(), new_content));
 //    				System.out.println("Before removing: " + tmp.get(i).getContent());

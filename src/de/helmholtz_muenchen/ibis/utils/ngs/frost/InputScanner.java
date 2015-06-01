@@ -11,6 +11,7 @@ import java.util.Random;
 
 
 
+
 /**
  * @author tanzeem.haque
  *
@@ -67,7 +68,11 @@ public class InputScanner {
 	private String chrID;
 	private double mutRate;
 	private int recombination;
+	private int generation;
 	private int seed;
+	private boolean mutVary;
+	private boolean recVary;
+	private boolean deNovoVary;
 	private int chunk;
 	
 	/**
@@ -83,11 +88,16 @@ public class InputScanner {
 
 
 
-	public InputScanner(String chrID, double mutRate, int recombination, int seed, int chunk) {
+	public InputScanner(String chrID, double mutRate, int recombination, int generation, int seed, 
+			boolean mutVary, boolean recVary, boolean deNovoVary, int chunk) {
 		this.chrID = chrID;
 		this.mutRate = mutRate;
 		this.recombination = recombination;
+		this.generation = generation;
 		this.seed = seed;
+		this.mutVary = mutVary;
+		this.recVary = recVary;
+		this.deNovoVary = deNovoVary;
 		this.chunk = chunk;
 		this.iData_parents = new InputData("", new ArrayList<ArrayList<Integer>>());
 		this.iData_deNovo_child = new InputData("", new ArrayList<ArrayList<Integer>>(10));
@@ -173,7 +183,7 @@ public class InputScanner {
 		//5878.76+1=5879: chr21
 		//31019.84+1=31020: chr1
 		double a = length/Math.pow(10, 8);// * getMutRate());
-		double b = a * this.mutRate*5300;
+		double b = a * this.mutRate*this.generation;
 		int variants =  (int)(b/1);
 //		int variants = 10;
 //		System.out.println("Variants: " + variants);
@@ -189,7 +199,7 @@ public class InputScanner {
 //		System.out.println("Number of variants: " + getVariants(length));
 //		System.out.println("De Novo: " + (int)(getVariants(length)/5300));
 		
-		int denovo = (int)(getVariants(length)/5300);
+		int denovo = (int)(getVariants(length)/this.generation);
 		denovo = (denovo == 0)? 1: denovo;
 //		int denovo = 5;
 //		FrostRunner.createLog("denovo: " + denovo);
@@ -236,6 +246,14 @@ public class InputScanner {
 		 * SEED ENTRY 1
 		 */
 		Random rd = new Random(); //new Random();
+		/**
+		 * If mutVary == false 
+		 * => mutation will not vary
+		 * => mutation is fixed
+		 * => use of seed for the fixed positions
+		 */
+		if (!this.mutVary) 
+			rd = new Random(this.seed);
 		ArrayList<ArrayList<Integer>> m_List = new ArrayList<ArrayList<Integer>>(this.chunk);
 		ArrayList<Integer> m_tmpList = generatePosition(max, min, n, rd, false); //false means no recombination
 //		System.out.println("Parent size " +n + "\t" + m_tmpList.size());
@@ -266,6 +284,14 @@ public class InputScanner {
 		 * SEED ENTRY 2
 		 */
 		Random rd1 = new Random(); //new Random();
+		/**
+		 * If recVary == false 
+		 * => crossovers will not vary
+		 * => crossovers are fixed
+		 * => use of seed for the fixed positions
+		 */
+		if (!this.recVary) 
+			rd1 = new Random(this.seed);
 		r_tmpList = generatePosition(length, 1, m, rd1, true); // true coz recombination
 
 		ArrayList<Integer> d_tmpList = new ArrayList<Integer>(n);
@@ -273,6 +299,14 @@ public class InputScanner {
 		 * SEED ENTRY 3
 		 */
 		Random rd2 = new Random(); //new Random(getSeed());
+		/**
+		 * If deNovoVary == false 
+		 * => denovo positions will not vary
+		 * => denovos are fixed
+		 * => use of seed for the fixed positions
+		 */
+		if (!this.deNovoVary) 
+			rd2 = new Random(this.seed);
 		d_tmpList = generatePosition(length, 1, n, rd2, false); // false coz no recombination
 		/**
 		 * if the position for denovo is an N, it will be skipped and we might not get any denovo at all

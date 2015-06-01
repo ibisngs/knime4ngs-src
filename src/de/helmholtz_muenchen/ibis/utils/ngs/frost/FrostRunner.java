@@ -7,9 +7,7 @@ import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
+import java.util.Arrays;
 
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
@@ -43,7 +41,11 @@ public class FrostRunner {
 //			System.out.println((i+1) + "\t" + args[i]);
 //		}
 		
-		String tag_input = "-i", tag_mutRate = "-m", tag_recombination = "-r", tag_seed = "-s";
+		ArrayList<String> args_al = new ArrayList<>(Arrays.asList(args));
+
+		String tag_input = "-i", tag_mutRate = "-m", tag_recombination = "-r", 
+				tag_generation = "-g", tag_seed = "-s",
+				tag_mutVary = "--mut", tag_recVary = "--reco", tag_deNovoVary = "--denovo";
 
 		/**
 		 * Default values are already given in Knime
@@ -51,57 +53,122 @@ public class FrostRunner {
 		String input = "";
 		double mutRate = 2.36;
 		int recombination = 1000;
+		int generation = 5300;
 		int seed = 999;
+		boolean mutVary = false;
+		boolean recVary = false;
+		boolean deNovoVary = false;
 		
 		long startTime = System.currentTimeMillis();
 
-		if (args.length < 2) {
+		if (args.length < 3) {
 			print_help();
+			return;
 		}
+		
 
-		else if (args.length >= 2 && args.length <= 8) {
-			for (int i = 0; i < args.length; i++) {
-				//Input-> must
-				if (args[i].equals(tag_input)) {
-					input = args[i + 1];
-					continue;
-				}
-				//mutationrate -> if not there it will be 2.36e-8
-				else if (args[i].equals(tag_mutRate)) {
-					mutRate = Double.parseDouble(args[i + 1]);
-					if (mutRate < 0) {
-						print_help();
-						System.out.println("MUT WRONG");
-						break;
-					}
-					continue;
-				}
-				//recombination -> if not there it will be 1000
-				else if (args[i].equals(tag_recombination)) {
-					recombination = Integer.parseInt(args[i + 1]);
-					if (recombination < 0) {
-						print_help();
-						System.out.println("REC WRONG");
 
-						break;
-					}
-					continue;
-				}
-				else if (args[i].equals(tag_seed)) {
-					seed = Integer.parseInt(args[i + 1]);
-					continue;
-				}
+		if (args.length >= 3 && args.length <= 11) {
+			if (!(args_al.contains(tag_mutVary) /* no booleans*/
+					|| args_al.contains(tag_recVary) 
+					|| args_al.contains(tag_deNovoVary))) {
+					print_help();
+					System.out.println("I CAME IN NO BOOLEANS");
+					return;
 			}
+			if (args_al.contains(tag_mutVary)  /* all 3 booleans*/
+					&& args_al.contains(tag_recVary) 
+					&& args_al.contains(tag_deNovoVary)) {
+					print_help();
+					System.out.println("I CAME IN 3 BOOLEANS");
+					return;
+			}
+			if (args_al.contains(tag_mutVary) /* two booleans */
+					&& args_al.contains(tag_recVary)
+					&& !args_al.contains(tag_deNovoVary)) {
+					print_help();
+					System.out.println("I CAME IN 2 (mut rec) BOOLEANS");
+					return;
+			}
+			if (args_al.contains(tag_mutVary)  /* two booleans */
+					&& args_al.contains(tag_deNovoVary)
+					&& !args_al.contains(tag_recVary)) {
+					print_help();
+					System.out.println("I CAME IN 2 (mut denovo) BOOLEANS");
+					return;
+			}
+			if (args_al.contains(tag_recVary) /* two booleans */
+					&& args_al.contains(tag_deNovoVary)
+					&& !args_al.contains(tag_mutVary)) {
+					print_help();
+					System.out.println("I CAME IN 2 (rec denovo) BOOLEANS");
+					return;
+			}
+			else {
+				for (int i = 0; i < args.length; i++) {
+					//Input-> must
+					if (args[i].equals(tag_input)) {
+						input = args[i + 1];
+						continue;
+					}
+					//mutationrate -> if not there it will be 2.36e-8
+					else if (args[i].equals(tag_mutRate)) {
+						mutRate = Double.parseDouble(args[i + 1]);
+						if (mutRate < 0) {
+							print_help();
+							System.out.println("MUT WRONG");
+							break;
+						}
+						continue;
+					}
+					//recombination -> if not there it will be 1000
+					else if (args[i].equals(tag_recombination)) {
+						recombination = Integer.parseInt(args[i + 1]);
+						if (recombination < 0) {
+							print_help();
+							System.out.println("REC WRONG");
+
+							break;
+						}
+						continue;
+					}
+					//generation -> if not there it will be 5300
+					else if (args[i].equals(tag_generation)) {
+						generation = Integer.parseInt(args[i + 1]);
+						if (generation < 0) {
+							print_help();
+							System.out.println("GENERATION NEXT");
+
+							break;
+						}
+						continue;
+					}
+					else if (args[i].equals(tag_seed)) {
+						seed = Integer.parseInt(args[i + 1]);
+						continue;
+					}
+					else if (args[i].equals(tag_mutVary)) {
+						mutVary = true;
+						continue;
+					}
+					else if (args[i].equals(tag_recVary)) {
+						recVary = true;
+						continue;
+					}
+					else if (args[i].equals(tag_deNovoVary)) {
+						deNovoVary = true;
+						continue;
+					}
+				}			
+			}			
 		}
 		else {
 			System.out.println("I CAME IN ELSE");
-
 			print_help();
 		}
 
 		if (input.equals("")) {
 			System.out.println("INPUT WRONG");
-
 			print_help();
 		}
 
@@ -120,19 +187,20 @@ public class FrostRunner {
 			/**
 			 * Handling the existing files first
 			 */
-			FrostRunner.records = FrostNodeModel.recordFiles();
+//			FrostRunner.records = FrostNodeModel.recordFiles();
 			for (String s : records) {
 				File f = new File (s);
 				if (f.exists())
 					f.delete();
 			}
 
-			run(input, mutRate, recombination, seed, records);
+//			System.out.println("Mut: " + mutVary + "\t" + "Rec: " + recVary + "\t" + "Denovo: " + deNovoVary);
+			run(input, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary, records);
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
+		FrostRunner.createLog("Skipped N's: " + FrostRunner.skipped_N);
 		FrostRunner.createLog("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
-
 
 	}
 
@@ -144,8 +212,9 @@ public class FrostRunner {
 	 * @throws InterruptedException
 	 * @throws IOException 
 	 */
-	protected static void run(String input, double mutRate, int recombination, int seed, String[] recordFiles) throws InterruptedException, IOException {
-		// TODO Auto-generated method stub
+	protected static void run(String input, double mutRate, int recombination, int generation, int seed, 
+			boolean mutVary, boolean recVary, boolean deNovoVary, String[] recordFiles) throws InterruptedException, IOException {
+				// TODO Auto-generated method stub
 
 		/**
 		 * Checking input Fasta
@@ -204,7 +273,8 @@ public class FrostRunner {
 			 */	
 
 //			startTime = System.currentTimeMillis();
-			InputScanner in = new InputScanner(currentChr, mutRate, recombination, seed, chunk);
+			InputScanner in = new InputScanner(currentChr, mutRate, recombination, generation, seed, 
+					mutVary, recVary, deNovoVary, chunk);			
 			in.prepare(fr.getLength());//currentLength
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");
@@ -354,14 +424,16 @@ public class FrostRunner {
 	}
 	
 	public static void print_help() {
-		System.out.println("Usage:");
-		System.out.println("    -i <String> path to chromosome file in fasta format");
-		System.out.println("    -m <Double>  Mutation rate (e.g. 1.5) " + "\n" +
+		FrostRunner.createLog("Usage:");
+		FrostRunner.createLog("    -i <String> path to chromosome file in fasta format");
+		FrostRunner.createLog("    -m <Double>  Mutation rate (e.g. 1.5) " + "\n" +
 				                "default: 2.36 (*e-8 per bp per generation)");
-		System.out.println("    -r <Integer> number of switch positions for recombination"  + "\n" +
+		FrostRunner.createLog("    -r <Integer> number of switch positions for recombination"  + "\n" +
 								"default: 1000");
-		System.out.println("    -s <Integer>  random seed for same output");
-		System.out.println("Compulsory parameter is -i");
+		FrostRunner.createLog("    -g <Integer> number of generations since the first Homo sapiens"  + "\n" +
+								"default: 5300");
+		FrostRunner.createLog("    -s <Integer>  random seed for same output");
+		FrostRunner.createLog("Compulsory parameter is -i");
 
 		// -verbose:gc -Dsun.rmi.dgc.client.gcInterval=3600000
 
