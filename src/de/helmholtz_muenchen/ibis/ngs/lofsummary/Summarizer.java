@@ -110,6 +110,19 @@ public abstract class Summarizer {
 		return outfile;
 	}
 	
+	public String getTrioStatistic() {
+		if(lof_statistic.size()==0) {
+			this.getLoFStatistic();
+		}
+		String outfile = vcf_file.replace("vcf", "trio_summary.tsv");
+		try {
+			this.writeTrioSummary(outfile);
+		} catch (IOException e) {
+			logger.error(outfile+" could not be written!");
+		}
+		return outfile;
+	}
+	
 	/**
 	 * reads CDS file and fills transcript_id2gene_id and gene_id2transcript_ids
 	 * @throws IOException
@@ -536,6 +549,8 @@ public abstract class Summarizer {
 	
 	private void writeSampleStatistic(String outfile) throws IOException {
 		
+		HashSet<String> ko_genes = new HashSet<>();
+		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		bw.write("sample_id\tfull\tpartial\taffectedGenes\tknocked_out\tcompleteLOFgenes\taffectedLOFGenes");
 		bw.newLine();
@@ -550,12 +565,14 @@ public abstract class Summarizer {
 			
 			if(completes.size() >= 1) {
 				String gene = completes.get(0);
+				ko_genes.add(gene);
 				affectedGeneList = gene;
 				bw.write(gene +":"+gene_statistic.get(gene).getSymbol());
 			}
 			
 			for(int i = 1; i< completes.size(); i++) {
 				String u = completes.get(i);
+				ko_genes.add(u);
 				affectedGeneList += ","+u;
 				bw.write(","+u+":"+gene_statistic.get(u).getSymbol());
 			}
@@ -571,14 +588,17 @@ public abstract class Summarizer {
 			bw.newLine();
 		}
 		bw.close();
+		writeGeneList(ko_genes,outfile.replace("sample_summary.tsv", "ko_genes.tsv"));
 	}
 	
-	public void writeTrioSummary(String outfile) throws IOException {
-		
+	private void writeTrioSummary(String outfile) throws IOException {
 		
 		String header = "sample_id\tde_novo_LOF\tKOs_de_novo\tde_novo_KO";
 		ArrayList<String> lof_genes = new ArrayList<>();
 		ArrayList<String> ko_genes = new ArrayList<>();
+		
+		HashSet<String> de_novo_LOF_genes = new HashSet<>();
+		HashSet<String> de_novo_KO_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		bw.write(header);
@@ -608,28 +628,39 @@ public abstract class Summarizer {
 				ko_genes.removeAll(pat.complete_LOF_genes);
 			}
 			
-			String de_novo_LOF = "";
-			for(String d: lof_genes) {
-				de_novo_LOF += ","+d;
-			}
-			de_novo_LOF = de_novo_LOF.replaceFirst(",", "");
-			
-			String de_novo_KO = "";
-			for(String d: ko_genes) {
-				de_novo_KO += ","+d+":"+gene_statistic.get(d).getSymbol();
-				if(has_parents) {
-					System.out.println(gene_statistic.get(d).getSymbol());
-				}
-			}
-			de_novo_KO = de_novo_KO.replaceFirst(",","");
-			
 			if(has_parents) {
+			
+				String de_novo_LOF = "";
+				for(String d: lof_genes) {
+					de_novo_LOF_genes.add(d);
+					de_novo_LOF += ","+d;
+				}
+				de_novo_LOF = de_novo_LOF.replaceFirst(",", "");
+			
+				String de_novo_KO = "";
+				for(String d: ko_genes) {
+					de_novo_KO_genes.add(d);
+					de_novo_KO += ","+d+":"+gene_statistic.get(d).getSymbol();
+				}
+				de_novo_KO = de_novo_KO.replaceFirst(",","");
+			
 				bw.write(s);
 				bw.write("\t"+lof_genes.size());
 				bw.write("\t"+ko_genes.size());
 				bw.write("\t"+de_novo_KO);
 				bw.newLine();
 			}
+		}
+		bw.close();
+		writeGeneList(de_novo_LOF_genes,outfile.replace("trio_summary.tsv","de_novo_LOF_genes.tsv"));
+		writeGeneList(de_novo_KO_genes,outfile.replace("trio_summary.tsv","de_novo_KO_genes.tsv"));
+	}
+	
+	private void writeGeneList(HashSet<String> genes, String outfile) throws IOException {
+		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
+		for(String gene: genes) {
+			bw.write(gene+"\t"+gene_statistic.get(gene).getSymbol());
+			bw.newLine();
 		}
 		bw.close();
 	}

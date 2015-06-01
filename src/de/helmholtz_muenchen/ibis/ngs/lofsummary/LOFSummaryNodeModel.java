@@ -43,16 +43,19 @@ public class LOFSummaryNodeModel extends NodeModel {
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
 	final SettingsModelString m_cdsin = new SettingsModelString(CFGKEY_CDS_INFILE,"");
 	
+	static final String CFGKEY_PED_INFILE = "ped_infile";
+	final SettingsModelString m_pedin = new SettingsModelString(CFGKEY_PED_INFILE,"");
+	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
     static final String[] ANNOTATIONS_AVAILABLE={"VAT","VEP"};
     final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
 	
 	//output
-	public static final String OUT_COL1 = "Path2LOF_Statistics";
-	public static final String OUT_COL2 = "Path2Gene_Statistics";
-	public static final String OUT_COL3 = "Path2Sample_Statistics";
-	public static final String OUT_COL4 = "Path2Transcript_Statistics";
+	public static final String OUT_COL1 = "Path2LOF_Summary";
+	public static final String OUT_COL2 = "Path2Gene_Summary";
+	public static final String OUT_COL3 = "Path2Sample_Summary";
+	public static final String OUT_COL4 = "Path2Trio_Summary";
 	
 	public static boolean optionalPort=false;
 	
@@ -71,6 +74,8 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	boolean ped_given = false;
+    	
     	String vcf_infile;
     	
     	if(optionalPort){	//Input Table available
@@ -90,7 +95,13 @@ public class LOFSummaryNodeModel extends NodeModel {
     		logger.error("No CDS file specified! Variant effect (full or partial) cannot be calculated.");
     	}
     	
-    	String ped_file = "/home/ibis/tim.jeske/SCHIZOanalysis/allIlluminaSamples.ped";
+    	String ped_file = m_pedin.getStringValue();
+    	ped_given = true;
+    	
+    	if(ped_file.equals("") || Files.notExists(Paths.get(ped_file))) {
+    		logger.error("No PED file specified! Trio summary will not be written.");
+    		ped_given = false;
+    	}
     	
     	Summarizer summy = null;
     	String annotation = m_annotation.getStringValue();
@@ -100,16 +111,17 @@ public class LOFSummaryNodeModel extends NodeModel {
     		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file);
     	}
     	
-    	String LOF_Summary[] = new String[3];
+    	String LOF_Summary[] = new String[4];
     	LOF_Summary[0] = summy.getLoFStatistic();
     	LOF_Summary[1] = summy.getGeneStatistic();
     	LOF_Summary[2] = summy.getSampleStatistic();
-    	summy.writeTrioSummary(vcf_infile.replace(".vcf", ".trioSum.vcf"));
-//    	LOF_Summary[3] = summy.getTranscriptStatistic();
-    	//TODO add to output table
-//    	summy.getAnnotationStatistic();
-//    	summy.getKnockOutGenes();
-//    	summy.getSampleKOGeneMatrix();
+    	
+    	if(ped_given) {
+    		LOF_Summary[3] = summy.getTrioStatistic();
+    	} else {
+    		LOF_Summary[3] = "";
+    	}
+    	
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -117,12 +129,14 @@ public class LOFSummaryNodeModel extends NodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(LOF_Summary[0]),
     			(FileCell) FileCellFactory.create(LOF_Summary[1]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[2])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[2]),
+    			(FileCell) FileCellFactory.create(LOF_Summary[3])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -157,7 +171,8 @@ public class LOFSummaryNodeModel extends NodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -167,6 +182,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	m_vcfin.saveSettingsTo(settings);
     	m_cdsin.saveSettingsTo(settings);
+    	m_pedin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
     }
 
@@ -178,6 +194,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_vcfin.loadSettingsFrom(settings);
     	m_cdsin.loadSettingsFrom(settings);
+    	m_pedin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
     }
 
@@ -189,6 +206,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_vcfin.validateSettings(settings);
     	m_cdsin.validateSettings(settings);
+    	m_pedin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
     }
     
