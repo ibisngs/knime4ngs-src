@@ -5,6 +5,7 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -63,18 +64,27 @@ public class InputScanner {
 	/**
 	 * Attributes
 	 */
+	private String chrID;
 	private double mutRate;
 	private int recombination;
 	private int seed;
 	private int chunk;
+	
+	/**
+	 * Extra global variable for checking the chr length to correct the reco position
+	 */
+	private int chrLength;
 
 
 	private InputData iData_parents;
 	private InputData iData_recombination_child;
 	private InputData iData_deNovo_child;
+	private ArrayList<ArrayList<Integer>> nMap;
 
 
-	public InputScanner(double mutRate, int recombination, int seed, int chunk) {
+
+	public InputScanner(String chrID, double mutRate, int recombination, int seed, int chunk) {
+		this.chrID = chrID;
 		this.mutRate = mutRate;
 		this.recombination = recombination;
 		this.seed = seed;
@@ -82,7 +92,12 @@ public class InputScanner {
 		this.iData_parents = new InputData("", new ArrayList<ArrayList<Integer>>());
 		this.iData_deNovo_child = new InputData("", new ArrayList<ArrayList<Integer>>(10));
 		this.iData_recombination_child = new InputData("", new ArrayList<ArrayList<Integer>>(this.recombination));;
-
+		/**
+		 * get the N region map at first
+		 */
+		NMap nm = new NMap();
+		this.nMap = nm.getNMap().get(this.chrID);
+		
 	}
 
 /*
@@ -177,7 +192,7 @@ public class InputScanner {
 		int denovo = (int)(getVariants(length)/5300);
 		denovo = (denovo == 0)? 1: denovo;
 //		int denovo = 5;
-		FrostRunner.createLog("denovo: " + denovo);
+//		FrostRunner.createLog("denovo: " + denovo);
 		return denovo;
 	}
 
@@ -187,8 +202,9 @@ public class InputScanner {
 	 * @param recombination
 	 * @throws InterruptedException
 	 */
-	protected void prepare(String newId, int chr_length) throws InterruptedException {
+	protected void prepare(int chr_length) throws InterruptedException {
 		
+		this.chrLength = chr_length;
 		ArrayList<ArrayList<Integer>> parents;
 		ArrayList<ArrayList<ArrayList<Integer>>> child;
 
@@ -198,10 +214,10 @@ public class InputScanner {
 		//from this length we will prepare random positions.
 		//the number of positions is provided by variants
 		parents = prepare_parental_input(chr_length);
-		this.iData_parents = new InputData(newId, parents);
+		this.iData_parents = new InputData(this.chrID, parents);
 		child = prepare_child_input(chr_length);
-		this.iData_deNovo_child = new InputData(newId, child.get(0));
-		this.iData_recombination_child = new InputData(newId, child.get(1));
+		this.iData_deNovo_child = new InputData(this.chrID, child.get(0));
+		this.iData_recombination_child = new InputData(this.chrID, child.get(1));
 		
 	}
 
@@ -222,6 +238,8 @@ public class InputScanner {
 		Random rd = new Random(); //new Random();
 		ArrayList<ArrayList<Integer>> m_List = new ArrayList<ArrayList<Integer>>(this.chunk);
 		ArrayList<Integer> m_tmpList = generatePosition(max, min, n, rd, false); //false means no recombination
+//		System.out.println("Parent size " +n + "\t" + m_tmpList.size());
+
 		Collections.sort(m_tmpList);
 		
 		m_List = splitList(m_tmpList);
@@ -256,11 +274,32 @@ public class InputScanner {
 		 */
 		Random rd2 = new Random(); //new Random(getSeed());
 		d_tmpList = generatePosition(length, 1, n, rd2, false); // false coz no recombination
-
+		/**
+		 * if the position for denovo is an N, it will be skipped and we might not get any denovo at all
+		 * so we force the program to generate perfect denovos
+		 */
+//		System.out.println("Denovo size " +n + "\t" + d_tmpList.size());
+		while (d_tmpList.size() < n) {
+			d_tmpList = generatePosition(length, 1, n, rd2, false);
+//			System.out.println("denovo N " + d_tmpList.size() );
+		}
+//
+//		System.out.println("Denovos: " + "\t" + "actually " + n + "\t"+ "got " + d_tmpList.size());
+		/**
+		 * denovo pos
+		 */
 		Collections.sort(d_tmpList);
 		d_List = splitList(d_tmpList);
 		child.add(d_List);
+		/**
+		 * recombination pos
+		 */
 		Collections.sort(r_tmpList);
+		/**
+		 * check whether the rec pos are at least 
+		 * 18kbp away from each other or else correction
+		 */
+		checkRecoGap(r_tmpList);
 		r_List = splitList(r_tmpList);
 		child.add(r_List);
 
@@ -280,6 +319,38 @@ public class InputScanner {
 	}
 
 	/**
+	 * 
+	 * @param r_tmpList
+	 * check whether the rec pos are at least 
+	 * 18kbp away from each other or else correction
+	 */
+	private void checkRecoGap(ArrayList<Integer> r_tmpList) {
+		// TODO Auto-generated method stub
+//		int j = 0;
+		boolean cut = false;
+		for (int i = 0; i < r_tmpList.size()-1; i++) {
+//			System.out.println(i + ". " + r_tmpList.get(i));
+			if(r_tmpList.get(i+1)-r_tmpList.get(i) < 18000){
+//				j++;
+//				System.out.println("Before: " + (i+1) + ". " + r_tmpList.get(i+1) + "\t" + (r_tmpList.get(i+1)-r_tmpList.get(i)));
+				if (r_tmpList.get(i)+18000 <= this.chrLength) 
+					r_tmpList.set(i+1, r_tmpList.get(i)+18000);
+				else {
+					r_tmpList.remove(i+1);
+					cut = true;
+				}
+//				System.out.println("After: " + (i+1) + ". " + r_tmpList.get(i+1));
+			}
+		}
+		if (cut) {
+			FrostRunner.createLog("Total corrected number of recombination: " + r_tmpList.size());
+//			System.out.println("Total corrected number of recombination: " + r_tmpList.size());
+		}
+//		System.out.println(j);
+		
+	}
+
+	/**
 	 * @param arrList1 the base arraylist with the ordered position
 	 * @param i = # variants
 	 */
@@ -289,17 +360,11 @@ public class InputScanner {
 		HashSet<Integer> hs = new HashSet<Integer>();
 		//genereate i random positions
 		for (int i = 0; i < n; i++) {
-//			if (parent){
-////				System.out.println("max: " + ((i*max)+max) + " " + "min: " + ((i*max)+min));
-//
-//				generatePosition_help((i*max)+max, (i*max)+min, hs);
-//			}
-//			else
-				generatePosition_help(max, min, hs, rand);
+			generatePosition_help(max, min, hs, rand, rec);
 		}
 
 		shuffled = new ArrayList<Integer>(hs);
-
+//		System.out.println("shuffled: " + shuffled.size());
 		return shuffled;
 	}
 
@@ -308,7 +373,7 @@ public class InputScanner {
 	 * @param hs
 	 * @param rd
 	 */
-	protected void generatePosition_help(int max, int min, HashSet<Integer> hs, Random rand) {
+	protected void generatePosition_help(int max, int min, HashSet<Integer> hs, Random rand, boolean rec) {
 //		Random rand;
 //		if (getSeed() != 0) {
 //		rand = new Random(getSeed());
@@ -316,16 +381,29 @@ public class InputScanner {
 //		}
 //		else
 //			rand = new Random();
-		boolean unique = true;
-		int n = rand.nextInt((max+1)-min)+min;
-		boolean b = hs.add(n);
-		unique = b;
-		while (!unique) {
+		int n;// = rand.nextInt((max+1)-min)+min;
+		
+		do {
 			n = rand.nextInt((max+1)-min)+min;
-			b = hs.add(n);
-			unique = b;
-		}
+			if (!rec && skipN(n))
+				return;
+		} while (!hs.add(n));
 	}
+
+	private boolean skipN(int n) {
+		boolean a = false;		
+		for(int i = 0; i < this.nMap.size(); i++) {
+			if (n >= this.nMap.get(i).get(0) && n <= this.nMap.get(i).get(1)) {
+//				System.out.println("skipping");
+				a = true;
+				break;
+			}
+		}
+		if (a) 
+			FrostRunner.skipped_N++;
+		return a;
+	}
+
 
 	private String prettyPrint(final InputData inData) {
 		String s = "";

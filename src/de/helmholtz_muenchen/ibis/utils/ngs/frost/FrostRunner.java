@@ -24,12 +24,13 @@ public class FrostRunner {
 	public static ArrayList<String> id_list = new ArrayList<String> ();
 	public static int total_mutations;
 	public static int total_deNovo;
-	static String[] parental_chromatids = new String[2];
+	public static String[] parental_chromatids = new String[2];
 	public static String[] records = new String[6];
 
 //	static int mutation_index_parent = 0;
 //	static int denovo_index_child = 0;
 //	static int recombination_index = 0;
+	public static int skipped_N = 0;
 	public final static int chunk_length = 10000000;
 
 
@@ -203,8 +204,8 @@ public class FrostRunner {
 			 */	
 
 //			startTime = System.currentTimeMillis();
-			InputScanner in = new InputScanner(mutRate, recombination, seed, chunk);
-			in.prepare(currentChr, fr.getLength());//currentLength
+			InputScanner in = new InputScanner(currentChr, mutRate, recombination, seed, chunk);
+			in.prepare(fr.getLength());//currentLength
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");
 //			System.err.println("Execution time to prepare " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
@@ -274,6 +275,8 @@ public class FrostRunner {
 			 * trio_
 			 */
 			rw.write_vcf(recordFiles[5], recordFiles[0], recordFiles[1]);
+			rw.unphase(recordFiles[5]);
+
 
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");

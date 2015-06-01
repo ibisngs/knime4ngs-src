@@ -102,13 +102,18 @@ public class RecordWriters {
 	        	f = col[6];
 	        	m = col[7];
 	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]) /*position*/, 
-	        			col[0]/*id*/
+	        			col[0].replaceAll("^[0-9]_", "")/*id*/
 	        			+"\t"+col[1]
+	        			+"\t"+"." /*ID as in vcf format*/	
 	        			+"\t"+col[2]/*ref allele*/
 	        			+"\t"+col[3] /*alt allele*/
-	        			+"\t"+"0/0" /*mother genotype*/
-	        			+"\t"+"0/0" /*father genotype*/
-	        			+"\t"+col[4]/*child genotype*/));
+	        			+"\t"+"0.0" /*QUAL as in vcf format*/
+	        			+"\t"+"." /* FILTER as in vcf format */
+	        			+"\t"+"AN=6" /* INFO as in vcf format*/
+	        			+"\t"+"GT" /* FORMAT as in vcf format */
+	        			+"\t"+"0|0" /*mother genotype*/
+	        			+"\t"+"0|0" /*father genotype*/
+	        			+"\t"+col[4].replace("/", "|")/*child genotype*/));
 	        }
 	        
 	        sc = new Scanner(parents, "UTF-8");
@@ -118,13 +123,18 @@ public class RecordWriters {
 	        	c0 = (m.equals("M0"))?col[4]/*mother genotype*/.split("/")[0]:col[4].split("/")[1];
 	        	c1 = (f.equals("F0"))?col[5]/*father genotype*/.split("/")[0]:col[5].split("/")[1];
 	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]), 
-	        			col[0]/*id*/
+	        			col[0].replaceAll("^[0-9]_", "")/*id*/
 	    	        			+"\t"+col[1]
+	    	    	        	+"\t"+"." /*ID as in vcf format*/	
 	    	        			+"\t"+col[2]/*ref allele*/
 	    	        			+"\t"+col[3]/*alt allele*/
-	    	        			+"\t"+col[4]/*mother genotype*/
-	    	    	        	+"\t"+col[5]/*father genotype*/
-	    	    	        	+"\t"+c0+"/"+c1/*child genotype*/));
+	    	        			+"\t"+"0.0" /*QUAL as in vcf format*/
+	    	    	        	+"\t"+"." /* FILTER as in vcf format */
+	    	    	        	+"\t"+"AN=6" /* INFO as in vcf format*/
+	    	    	        	+"\t"+"GT" /* FORMAT as in vcf format */
+	    	        			+"\t"+col[4].replace("/", "|")/*mother genotype*/
+	    	    	        	+"\t"+col[5].replace("/", "|")/*father genotype*/
+	    	    	        	+"\t"+c0+"|"+c1/*child genotype*/));
 	        }
 	        Collections.sort(this.vcf);
 	        
@@ -136,6 +146,13 @@ public class RecordWriters {
 	    }
 		try (PrintWriter pw = new PrintWriter(new FileOutputStream(outFile))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 //			System.out.println("It should write the vcf!");
+			pw.write("#CHROM" + "\t" + "#POS" + "\t" 
+					+ "#ID" + "\t" + "#REF" + "\t" 
+					+ "#ALT" + "\t" + "#QUAL" + "\t"
+					+ "#FILTER" + "\t" + "#INFO" + "\t"
+					+ "#FORMAT" + "\t" + "#M" + "\t"
+					+ "#F" + "\t" + "#C" + "\n");
+			
 			for (VCF_info v : this.vcf)
 				pw.write(v.getContent()+"\n");
 		} catch (Exception e) {
@@ -144,6 +161,38 @@ public class RecordWriters {
 		}
 	}
 
+	protected void unphase (String vcfFile) {
+		ArrayList<String> data = new ArrayList<>();
+		File phased = new File (vcfFile);
+		File unphased = new File (vcfFile.replace("phased", "unphased"));
+		try {
+			Scanner sc = new Scanner(phased, "UTF-8");
+			
+	        while (sc.hasNextLine()) {
+	        	String s = sc.nextLine();
+	        	s = s.replaceAll("\\|", "/");
+	    		s = s.replaceAll("1/0", "0/1");
+	    		data.add(s);
+//	        	System.out.println(s);
+	        	
+	        }
+	          
+		}
+		catch (FileNotFoundException e) {
+	        e.printStackTrace();
+	    }
+		try (PrintWriter pw = new PrintWriter(new FileOutputStream(unphased))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+//			System.out.println("It should write the vcf!");
+    		for (String s : data) 
+    			pw.write(s+"\n");
+		
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace();
+		}
+		
+	}
+	
 	private void removeDuplicates(ArrayList<Integer> duplicates) {
 		// TODO Auto-generated method stub
 
