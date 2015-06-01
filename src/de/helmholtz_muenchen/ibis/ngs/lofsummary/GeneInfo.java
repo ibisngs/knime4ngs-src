@@ -48,12 +48,7 @@ public class GeneInfo {
 	}
 	
 	public void addProb(String pos, double prob) {
-		if(pos2af_prob.containsKey(pos)) {
-			double tmp_prob = pos2af_prob.get(pos);
-			pos2af_prob.put(pos, prob+tmp_prob);
-		} else {
-			pos2af_prob.put(pos, prob);
-		}
+		pos2af_prob.put(pos, prob);
 	}
 
 }

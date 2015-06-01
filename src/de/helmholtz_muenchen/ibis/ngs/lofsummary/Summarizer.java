@@ -659,7 +659,17 @@ public abstract class Summarizer {
 	private void writeGeneList(HashSet<String> genes, String outfile) throws IOException {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		for(String gene: genes) {
+			
 			bw.write(gene+"\t"+gene_statistic.get(gene).getSymbol());
+			
+			String samples = "";
+			for(String sample_id : my_sample_ids) {
+				if(sample_statistic.get(sample_id).getPart_LOF_genes().contains(gene) || sample_statistic.get(sample_id).getComplete_LOF_genes().contains(gene)) {
+					samples += ","+sample_id;
+				}
+			}
+			
+			bw.write("\t"+samples.replaceFirst(",", ""));
 			bw.newLine();
 		}
 		bw.close();
