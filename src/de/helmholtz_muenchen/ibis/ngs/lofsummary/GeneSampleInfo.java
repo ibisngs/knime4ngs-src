@@ -43,8 +43,6 @@ public class GeneSampleInfo {
 		this.transcripts_mat.addAll(transcript_ids);
 	}
 	
-
-	
 	public void calculate() {
 		HashSet<String> hom = new HashSet<>();
 		hom.addAll(transcripts_hom);

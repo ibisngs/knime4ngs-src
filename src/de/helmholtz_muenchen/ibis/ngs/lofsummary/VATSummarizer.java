@@ -8,8 +8,8 @@ public class VATSummarizer extends Summarizer{
 	//map VAT terms to SO terms
 	HashMap<String,String> VATtoSO;
 	
-	public VATSummarizer(String vcf_file, String cds_file, String ped_file) {
-		super(vcf_file, cds_file,ped_file);
+	public VATSummarizer(String vcf_file, String cds_file, String ped_file, String geneback_file) {
+		super(vcf_file, cds_file,ped_file, geneback_file);
 		VATtoSO = new HashMap<>();
 		VATtoSO.put("spliceOverlap", "splice_site_variant");
 		VATtoSO.put("synonymous", "synonymous_variant");
@@ -91,19 +91,14 @@ public class VATSummarizer extends Summarizer{
 		
 		if(genes.size()==0) return; //no LoF genes have been found
 		
-		ArrayList<String> adaptedGenotypes = new ArrayList<>();
 		char gt = String.valueOf(GT_index).charAt(0);
 		for(int i = 0; i<genotypes.size(); i++) {
 			String str = genotypes.get(i);
 			if(str.charAt(0)==str.charAt(2) && str.charAt(0)==gt) {
 				observed_homo++;
-				adaptedGenotypes.add(i,"1"+str.charAt(1)+"1");
 			} else if (str.charAt(0)==gt || str.charAt(2)==gt) {
 				observed_hetero++;
-				adaptedGenotypes.add(i,str.replace(gt, '1'));
-			} else {
-				adaptedGenotypes.add(i,str);
-			}
+			} 
 		}
 		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, observed_homo, observed_hetero, genes, genotypes));
 		

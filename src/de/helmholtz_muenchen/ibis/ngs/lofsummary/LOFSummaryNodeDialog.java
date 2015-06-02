@@ -25,6 +25,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString vcfin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_VCF_INFILE,"-");
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
+	private final SettingsModelString genebackin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENEBACK_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
 	
     protected LOFSummaryNodeDialog() {
@@ -38,6 +39,9 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	
     	createNewGroup("Path to PED file");
     	addDialogComponent(new DialogComponentFileChooser(pedin, "his_id_LOFStatistics_PEDIN", 0, ".ped"));
+    	
+    	createNewGroup("Path to genetic background file");
+    	addDialogComponent(new DialogComponentFileChooser(genebackin, "his_id_LOFStatistics_GENEBACKIN",0,".tsv"));
     	
     	//annotation selection
         createNewGroup("Used annotation tool");

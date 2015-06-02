@@ -46,17 +46,17 @@ public class LoFVariant {
 		double ac = 0.0;
 		double an = 0.0;
 		for(String gt: genotypes) {
-			if(gt.charAt(0)>'0') {
+			if(gt.charAt(0)>'0' || (gt.charAt(0)=='.' && gt.charAt(2)!='.')) {
 				ac++;
 				an++;
-			} else if (gt.charAt(0)!='.'){
+			} else if (gt.charAt(0)=='0'){
 				an++;
 			}
 			
-			if(gt.charAt(2)>'0') {
+			if(gt.charAt(2)>'0' || (gt.charAt(2)=='.' && gt.charAt(0)!='.')) {
 				ac++;
 				an++;
-			} else if (gt.charAt(2)!='.'){
+			} else if (gt.charAt(2)=='0'){
 				an++;
 			}
 		}
