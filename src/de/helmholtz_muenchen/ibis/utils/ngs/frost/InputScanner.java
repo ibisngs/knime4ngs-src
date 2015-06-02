@@ -135,6 +135,30 @@ public class InputScanner {
 		this.seed = seed;
 	}
 */
+	private Random [] getSeed() {
+		/**
+		 * 0: mut seed
+		 * 1: rec seed
+		 * 2: denovo seed
+		 */
+		Random[] seeds4all = new Random [3];
+		if(mutVary) {
+			seeds4all[0] = new Random();
+			seeds4all[1] = new Random(this.seed);
+			seeds4all[2] = new Random(this.seed+1);
+		}
+		else if(recVary) {
+			seeds4all[0] = new Random(this.seed);
+			seeds4all[1] = new Random();
+			seeds4all[2] = new Random(this.seed+1);
+		}
+		else if(deNovoVary) {
+			seeds4all[0] = new Random(this.seed);
+			seeds4all[1] = new Random(this.seed+1);
+			seeds4all[2] = new Random();
+		}
+		return seeds4all;
+	}
 	
 	public int getChunk() {
 		return this.chunk;
@@ -245,15 +269,15 @@ public class InputScanner {
 		/**
 		 * SEED ENTRY 1
 		 */
-		Random rd = new Random(); //new Random();
+		Random rd = getSeed()[0]; //new Random();
 		/**
 		 * If mutVary == false 
 		 * => mutation will not vary
 		 * => mutation is fixed
 		 * => use of seed for the fixed positions
 		 */
-		if (!this.mutVary) 
-			rd = new Random(this.seed);
+//		if (!this.mutVary) 
+//			rd = new Random(this.seed);
 		ArrayList<ArrayList<Integer>> m_List = new ArrayList<ArrayList<Integer>>(this.chunk);
 		ArrayList<Integer> m_tmpList = generatePosition(max, min, n, rd, false); //false means no recombination
 //		System.out.println("Parent size " +n + "\t" + m_tmpList.size());
@@ -283,30 +307,30 @@ public class InputScanner {
 		/**
 		 * SEED ENTRY 2
 		 */
-		Random rd1 = new Random(); //new Random();
+		Random rd1 = getSeed()[1]; //new Random();
 		/**
 		 * If recVary == false 
 		 * => crossovers will not vary
 		 * => crossovers are fixed
 		 * => use of seed for the fixed positions
 		 */
-		if (!this.recVary) 
-			rd1 = new Random(this.seed);
+//		if (!this.recVary) 
+//			rd1 = new Random(this.seed);
 		r_tmpList = generatePosition(length, 1, m, rd1, true); // true coz recombination
 
 		ArrayList<Integer> d_tmpList = new ArrayList<Integer>(n);
 		/**
 		 * SEED ENTRY 3
 		 */
-		Random rd2 = new Random(); //new Random(getSeed());
+		Random rd2 = getSeed()[2]; //new Random(getSeed());
 		/**
 		 * If deNovoVary == false 
 		 * => denovo positions will not vary
 		 * => denovos are fixed
 		 * => use of seed for the fixed positions
 		 */
-		if (!this.deNovoVary) 
-			rd2 = new Random(this.seed);
+//		if (!this.deNovoVary) 
+//			rd2 = new Random(this.seed);
 		d_tmpList = generatePosition(length, 1, n, rd2, false); // false coz no recombination
 		/**
 		 * if the position for denovo is an N, it will be skipped and we might not get any denovo at all

@@ -29,8 +29,11 @@ public class FrostRunner {
 //	static int denovo_index_child = 0;
 //	static int recombination_index = 0;
 	public static int skipped_N = 0;
-	public final static int chunk_length = 10000000;
+	public static int mutationCounter = 0;
 
+	public final static int chunk_length = 10000000;
+	public final static double insertion_rate = 0.15;
+	public final static double deletion_rate = 0.05;
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-
 /**
  * @author tanzeem.haque
  *
@@ -27,12 +26,13 @@ public class Mutation {
 	private ArrayList<Allelic_Change> child_ac_arrList = new ArrayList<Allelic_Change>();
 
 
-	private final double IN_RATE = 0.15;
-	private final double DEL_RATE = 0.05;
+	private final double IN_RATE = FrostRunner.insertion_rate;
+	private final double DEL_RATE = FrostRunner.deletion_rate;
 
-	public Mutation(char[] bases) {
+	public Mutation(char[] basesToMutate, char[] basesNotToMutate) {
 		// TODO Auto-generated constructor stub
-		setBases(bases);
+		setBases(basesToMutate);
+		setBases(basesNotToMutate);
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class Mutation {
 	/**
 	 * @return an arraylist of the 4 bases
 	 */
-	private static ArrayList<Character> base_list() {
+	private final ArrayList<Character> base_list() {
 		ArrayList<Character> arrList = new ArrayList<Character>();
 		arrList.add('A');
 		arrList.add('T');
@@ -93,7 +93,7 @@ public class Mutation {
 	/**
 	 * @return a random base from a list of bases
 	 */
-	private static char randomBase(ArrayList<Character> arrList) {
+	private char randomBase(ArrayList<Character> arrList) {
 		Random base = new Random();
 		return arrList.get(base.nextInt(arrList.size()));
 	}
@@ -104,7 +104,8 @@ public class Mutation {
 	 * @param m : true if mother : GM ; for child false
 	 * @return
 	 */
-	protected String[] mutationType(char[] toMutate, String s) {
+	protected String[] mutationType(char[] toMutate, char[] toDelete, String s) {
+
 		String[] allele = new String[2];
 		Random rand = new Random();
 		boolean insert , delete;
@@ -119,10 +120,13 @@ public class Mutation {
 		}
 		if (insert == true && delete == false) {
 			allele = insertion(toMutate, s);
+			FrostRunner.mutationCounter++;
 		}
 		if (delete == true && insert == false) {
-			allele = deletion(toMutate, s);
+			allele = deletion(toMutate, toDelete, s);
+			FrostRunner.mutationCounter--;
 		}
+		
 		this.individuum = s;
 		return allele;
 	}
@@ -170,28 +174,34 @@ public class Mutation {
 	}
 
 
-	private String[] deletion(char[] c, String s) {
+	private String[] deletion(char[] c, char[] d, String s) {
 		// TODO Auto-generated method stub
 		String[] allele = new String [2];
-		char[] chr = new char[2];
+		String[] chr = new String[2];
 		c = getBases();
 		
-		char chrd1_1 = 42;//*
-		char chrd2_1 = 42;//*
+//		char chrd1_1 = 42;//*
+//		char chrd2_1 = 42;//*
 
-		char[][] chr_combi = { { c[0], chrd2_1 },{ chrd1_1, c[1] } };
+//		char[][] chr_combi = { { c[0], chrd2_1 },{ chrd1_1, c[1] } };
+		String[][] chr_combi = { { (c[0]+"")+""+(d[0]+""), c[1]+"" },{ c[0]+"", (c[1]+"")+""+(d[1]+"") } };
 
 		Random rand = new Random();
 		int x = rand.nextInt(2); // either 1 or 2
 		chr[0] = chr_combi[x][0];
 		chr[1] = chr_combi[x][1];
-		allele[0] = chr[0]+"";
-		allele[1] = chr[1]+"";
+		allele[0] = chr[0];//+"";
+		allele[1] = chr[1];//+"";
+
 		//x=0: 0/1, x=1: 1/0
+//		if (x == 0) 		
+//			heterozygous_genotype(s, 0, c[1]+"", chr[1]+"");	
+//		else if (x == 1) 
+//			heterozygous_genotype(s, 1, c[0]+"", chr[0]+"");
 		if (x == 0) 		
-			heterozygous_genotype(s, 0, c[1]+"", chr[1]+"");	
-		else if (x == 1) 
-			heterozygous_genotype(s, 1, c[0]+"", chr[0]+"");	
+		heterozygous_genotype(s, 0, (c[1]+"")+""+(d[1]+""), c[1]+"");	
+	else if (x == 1) 
+		heterozygous_genotype(s, 1, (c[0]+"")+""+(d[0]+""), c[0]+"");	
 		this.type = "DEL";
 		return allele;
 
@@ -200,18 +210,9 @@ public class Mutation {
 	private String[] substitution(char[] c, String s) {
 		// TODO Auto-generated method stub
 		String[] allele = new String [2];
-		// 1st possibility one chromatid gets mutated
-	
-		char[] chr = new char[2];
 		c = getBases();
 		
 		char snp = getSnp(c[0]);
-		// The first chromatid gets mutated, the second one doesnt
-		char chrd1_1 = snp;
-		char chrd2_1 = c[1];
-		// The second chromatid get mutated and the first one doesnt
-		char chrd1_2 = c[0];
-		char chrd2_2 = snp;
 
 		// or set own probability for homozygous= rand.nextInt(50) == 0;
 		Random rand = new Random();
@@ -219,50 +220,26 @@ public class Mutation {
 
 		// homozygous substitution
 		if (homo) {
-			chr[0] = chrd1_1;
-			chr[1] = chrd2_2;
 			allele[0] = snp+"";
 			allele[1] = allele[0];
 			homozygous_genotype(s, c[0]+"", snp+"");//chr[0]=chr[1]
 			this.type = "HOMO";
 		} 
 		else {
-			char[][] chr_combi = { { chrd1_1, chrd2_1 }, { chrd1_2, chrd2_2 } };
-			// chrd1_1.charAt(check)
-			if (snp == chrd2_1) {
-				chr[0] = chrd1_2;
-				chr[1] = chrd2_2;
-				//"0/1"
-				allele[0] = c[1]+"";
-				allele[1] = snp+"";
+			int x = rand.nextInt(2);
+			if (x == 0) {
+				allele[0] = c[0]+"";
+				allele[1] = getSnp(c[0])+"";
 				heterozygous_genotype(s, 0, allele[0], allele[1]);
-			} 
-			else if (snp == chrd2_2) {
-				chr[0] = chrd1_1;
-				chr[1] = chrd2_1;
-				//"1/0";
-				allele[0] = snp+"";
-				allele[1] = c[0]+"";
-				heterozygous_genotype(s, 1, allele[1], allele[0]);
-			} 
-			else {
-				int x = rand.nextInt(2);
-				chr[0] = chr_combi[x][0];
-				chr[1] = chr_combi[x][1];
-				//x=0: 1/0, x=1: 0/1
-				if (x == 0) {
-					allele[0] = snp+"";
-					allele[1] = c[0]+"";
-					heterozygous_genotype(s, 1, allele[0], allele[1]);
-				}
-				else if (x == 1) {
-					allele[0] = c[1]+"";
-					allele[1] = snp+"";
-					heterozygous_genotype(s, 0, allele[0], allele[1]);
-				}
+			}
+			else if (x == 1) {
+				allele[0] = getSnp(c[1])+"";
+				allele[1] = c[1]+"";
+				heterozygous_genotype(s, 1, allele[0], allele[1]);
 			}
 			this.type = "HETERO";
 		}
+		
 		return allele;
 
 	}
