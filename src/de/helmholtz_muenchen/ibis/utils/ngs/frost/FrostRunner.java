@@ -8,6 +8,9 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
@@ -19,21 +22,25 @@ public class FrostRunner {
 
 
 	public static final String INTERNAL_PATH = FrostNodeModel.INTERNAL_OUTPUT_PATH;
+	public static String mapFile = "/home/ibis/tanzeem.haque/Documents/hg19/hg19_N_regions_tab.txt";
+//	 --bed /storageNGS/scratch/Sequenciator/secondary_files/UCSC_CodingExons.bed
+	public static boolean bedAvailable = false;
+
 	public static ArrayList<String> id_list = new ArrayList<String> ();
 	public static int total_mutations;
 	public static int total_deNovo;
 	public static String[] parental_chromatids = new String[2];
-	public static String[] records = new String[6];
+	public static String[] records = FrostNodeModel.recordFiles();/*new String[8];*/
 
 //	static int mutation_index_parent = 0;
 //	static int denovo_index_child = 0;
-//	static int recombination_index = 0;
 	public static int skipped_N = 0;
-	public static int mutationCounter = 0;
+	
 
 	public final static int chunk_length = 10000000;
-	public final static double insertion_rate = 0.15;
-	public final static double deletion_rate = 0.05;
+	public final static double insertion_rate = 0.5;
+	public final static double deletion_rate = 0.25;
+
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub
@@ -43,12 +50,11 @@ public class FrostRunner {
 //		for (int i = 0; i < args.length; i++) {
 //			System.out.println((i+1) + "\t" + args[i]);
 //		}
-		
 		ArrayList<String> args_al = new ArrayList<>(Arrays.asList(args));
 
 		String tag_input = "-i", tag_mutRate = "-m", tag_recombination = "-r", 
 				tag_generation = "-g", tag_seed = "-s",
-				tag_mutVary = "--mut", tag_recVary = "--reco", tag_deNovoVary = "--denovo";
+				tag_mutVary = "--mut", tag_recVary = "--reco", tag_deNovoVary = "--denovo", tag_bed = "--bed";
 
 		/**
 		 * Default values are already given in Knime
@@ -71,7 +77,7 @@ public class FrostRunner {
 		
 
 
-		if (args.length >= 3 && args.length <= 11) {
+		if (args.length >= 3 && args.length <= 13) {
 			if (!(args_al.contains(tag_mutVary) /* no booleans*/
 					|| args_al.contains(tag_recVary) 
 					|| args_al.contains(tag_deNovoVary))) {
@@ -162,6 +168,11 @@ public class FrostRunner {
 						deNovoVary = true;
 						continue;
 					}
+					else if (args[i].equals(tag_bed)) {
+						FrostRunner.bedAvailable = true;
+						FrostRunner.mapFile = args[i + 1];
+						continue;
+					}
 				}			
 			}			
 		}
@@ -198,12 +209,14 @@ public class FrostRunner {
 			}
 
 //			System.out.println("Mut: " + mutVary + "\t" + "Rec: " + recVary + "\t" + "Denovo: " + deNovoVary);
+			
 			run(input, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary, records);
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
-		FrostRunner.createLog("Skipped N's: " + FrostRunner.skipped_N);
+		FrostRunner.createLog("Skipped non-coding positions: " + FrostRunner.skipped_N);
 		FrostRunner.createLog("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+
 
 	}
 
@@ -217,7 +230,7 @@ public class FrostRunner {
 	 */
 	protected static void run(String input, double mutRate, int recombination, int generation, int seed, 
 			boolean mutVary, boolean recVary, boolean deNovoVary, String[] recordFiles) throws InterruptedException, IOException {
-				// TODO Auto-generated method stub
+		// TODO Auto-generated method stub
 
 		/**
 		 * Checking input Fasta
@@ -225,10 +238,25 @@ public class FrostRunner {
 //		long startTime = System.currentTimeMillis();
 		FastaCheck fc = new FastaCheck(input);
 		FrostRunner.parental_chromatids = fc.getParentalChromatids();
-		
 //		long endTime   = System.currentTimeMillis();
 //		NumberFormat formatter = new DecimalFormat("#0.00000");
-//		System.err.println("Execution time to check FASTA " + formatter.format((endTime - startTime) / 1000d) + " seconds" + "\n");
+//
+		/**
+		 * get the N region map or exons at first
+		 */
+//		long startTime = System.currentTimeMillis();
+
+		GenomeMap gm = new GenomeMap();
+//		gm.getGenomeMap();
+		
+//		for (String s : gm.getGenomeMap().keySet())
+//			for (int i = 0; i < gm.getGenomeMap().get(s).size(); i++)
+//			System.out.println(s + "\t" + gm.getGenomeMap().get(s).get(i).get(0) + "\t" + gm.getGenomeMap().get(s).get(i).get(1));
+	
+			
+//		long endTime   = System.currentTimeMillis();
+//		NumberFormat formatter = new DecimalFormat("#0.00000");
+//		System.err.println("Execution time to read exons " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 
 //		System.out.println(fc.input_chr_length.size());
 //		for (int i = 0; i < fc.input_chr_length.size(); i++)
@@ -273,12 +301,14 @@ public class FrostRunner {
 
 			/**
 			 * preparing the mutations and recombination positions
-			 */	
+			 * and also Creating the N Region maps
+			 */		
 
 //			startTime = System.currentTimeMillis();
 			InputScanner in = new InputScanner(currentChr, mutRate, recombination, generation, seed, 
-					mutVary, recVary, deNovoVary, chunk);			
+					mutVary, recVary, deNovoVary, chunk, gm);
 			in.prepare(fr.getLength());//currentLength
+			
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");
 //			System.err.println("Execution time to prepare " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
@@ -309,7 +339,9 @@ public class FrostRunner {
 //				System.out.println("recombination_index: " + recombination_index);
 
 				TrioSimulator trio = new TrioSimulator(fc, fr, in);
+			
 				trio.createTrio(j, currentChr);	
+
 				
 				/**
 				 * Appending into the record files
@@ -349,7 +381,6 @@ public class FrostRunner {
 			 */
 			rw.write_vcf(recordFiles[5], recordFiles[0], recordFiles[1]);
 			rw.unphase(recordFiles[5]);
-
 
 //			endTime   = System.currentTimeMillis();
 //			formatter = new DecimalFormat("#0.00000");
@@ -427,16 +458,24 @@ public class FrostRunner {
 	}
 	
 	public static void print_help() {
-		FrostRunner.createLog("Usage:");
-		FrostRunner.createLog("    -i <String> path to chromosome file in fasta format");
-		FrostRunner.createLog("    -m <Double>  Mutation rate (e.g. 1.5) " + "\n" +
+
+		System.out.println("Usage:");
+		System.out.println("    -i <String> path to chromosome file in fasta format");
+		System.out.println("    -m <Double>  Mutation rate (e.g. 1.5) " + "\n" +
 				                "default: 2.36 (*e-8 per bp per generation)");
-		FrostRunner.createLog("    -r <Integer> number of switch positions for recombination"  + "\n" +
+		System.out.println("    -r <Integer> number of switch positions for recombination"  + "\n" +
 								"default: 1000");
-		FrostRunner.createLog("    -g <Integer> number of generations since the first Homo sapiens"  + "\n" +
+		System.out.println("    -g <Integer> number of generations since the first Homo sapiens"  + "\n" +
 								"default: 5300");
-		FrostRunner.createLog("    -s <Integer>  random seed for same output");
-		FrostRunner.createLog("Compulsory parameter is -i");
+		System.out.println("    -s <Integer>  random seed for same output with two of the three paramters" + "\n" +
+								"(mut/reco/denovo) being fixed");
+		System.out.println("    --mut: mutation positions of parents will vary at each run");
+		System.out.println("    --reco: crossover positions of child will vary at each run ");
+		System.out.println("    --denovo: denovo positions of child will vary at each run ");
+
+		System.out.println("Compulsory parameters are -i AND (--mut OR --reco OR --donovo)");
+		System.out.println("Only --mut OR --reco OR --donovo at a time");
+
 
 		// -verbose:gc -Dsun.rmi.dgc.client.gcInterval=3600000
 

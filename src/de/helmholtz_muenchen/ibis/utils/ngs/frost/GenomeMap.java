@@ -2,44 +2,44 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class NMap {
+public class GenomeMap {
+	
+	private HashMap<String, ArrayList<ArrayList<Integer>>> genomeMap = new HashMap<>(24);
 
 	/**
 	 * @param args
 	 */
-	private final String file ="/home/ibis/tanzeem.haque/Documents/hg19/hg19_N_regions_tab.txt";
-	private HashMap<String, ArrayList<ArrayList<Integer>>> nMap = new HashMap<>(24);
+	public GenomeMap() {
+		createGenomeMap();
+	}
 	
-	public HashMap<String, ArrayList<ArrayList<Integer>>> getNMap() {
-	
-		createNMap();
-//		for (String s : this.nMap.keySet())
-//			for (int i = 0; i < this.nMap.get(s).size(); i++)
-//				System.out.println(s + "\t" + this.nMap.get(s).get(i).get(0) + "\t" + this.nMap.get(s).get(i).get(1));
-
-		return this.nMap;
+	protected String mapFile() {
+		return FrostRunner.mapFile;
+	}
+		
+	public HashMap<String, ArrayList<ArrayList<Integer>>> getGenomeMap() {
+		return this.genomeMap;
 	}
 	
 	
-	private void createNMap () {
+	private void createGenomeMap () {
 		for (int i = 1; i < 23; i++) 
-			this.nMap.put("chr"+i, new ArrayList<ArrayList<Integer>>());
-		this.nMap.put("chrX", new ArrayList<ArrayList<Integer>>());
-		this.nMap.put("chrY", new ArrayList<ArrayList<Integer>>());
+			this.genomeMap.put("chr"+i, new ArrayList<ArrayList<Integer>>());
+		this.genomeMap.put("chrX", new ArrayList<ArrayList<Integer>>());
+		this.genomeMap.put("chrY", new ArrayList<ArrayList<Integer>>());
 		
-		File input = new File (this.file);
+		File input = new File (mapFile());
 		
 		try {
 			Scanner sc = new Scanner(input, "UTF-8");
 			
 	        while (sc.hasNextLine()) {
 	        	String currentLine = sc.nextLine().trim();
-//	        	if(currentLine == null )
-//		            throw new IOException( this.file + " File is empty " );  
 	        	
 	        	String[] cols = currentLine.split("\t");
 	        	/**
@@ -53,9 +53,8 @@ public class NMap {
 	    		 * parsing the chromosome for key
 	    		 */
 	        	String chr = cols[0];
-	        	if (this.nMap.containsKey(chr)) {
-//	        		System.out.println(chr + "\t" + this.nMap.get(chr).size());
-	        		this.nMap.get(chr).add(range);
+	        	if (this.genomeMap.containsKey(chr)) {
+	        		this.genomeMap.get(chr).add(range);
 	        	}
 	        	
 	        }
@@ -70,16 +69,16 @@ public class NMap {
 	    }
 		
 	}
-	
 	/*
+	
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		NMap n = new NMap();
-		n.createNMap();
+		GenomeMap n = new GenomeMap();
+//		n.createNMap();
 		
-//		for (String s : n.nMap.keySet())
-//			for (int i = 0; i < n.nMap.get(s).size(); i++)
-//			System.out.println(s + "\t" + n.nMap.get(s).get(i).get(0) + "\t" + n.nMap.get(s).get(i).get(1));
+		for (String s : n.genomeMap.keySet())
+			for (int i = 0; i < n.genomeMap.get(s).size(); i++)
+			System.out.println(s + "\t" + n.genomeMap.get(s).get(i).get(0) + "\t" + n.genomeMap.get(s).get(i).get(1));
 	}
 */
 }

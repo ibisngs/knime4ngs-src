@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Random;
-
 
 
 
@@ -28,39 +28,39 @@ public class InputScanner {
 	 * although the positions for recombination were constant, 
 	 * the recombination event itself was not constant
 	 */
-	private static class Position_Action {
-		private int i;
-		private boolean b;
-		
-		@SuppressWarnings("unused")
-		/**
-		 * Not used yet, but soon!
-		 * @param i
-		 * @param b
-		 */
-		public Position_Action(int i , boolean b) {
-			// TODO Auto-generated constructor stub
-			setI(i);
-			setB(b);
-		}
-
-		public int getI() {
-			return i;
-		}
-
-		public void setI(int i) {
-			this.i = i;
-		}
-
-		public boolean isB() {
-			return b;
-		}
-
-		public void setB(boolean b) {
-			this.b = b;
-		}
-
-	}
+//	private static class Position_Action {
+//		private int i;
+//		private boolean b;
+//		
+//		@SuppressWarnings("unused")
+//		/**
+//		 * Not used yet, but soon!
+//		 * @param i
+//		 * @param b
+//		 */
+//		public Position_Action(int i , boolean b) {
+//			// TODO Auto-generated constructor stub
+//			setI(i);
+//			setB(b);
+//		}
+//
+//		public int getI() {
+//			return i;
+//		}
+//
+//		public void setI(int i) {
+//			this.i = i;
+//		}
+//
+//		public boolean isB() {
+//			return b;
+//		}
+//
+//		public void setB(boolean b) {
+//			this.b = b;
+//		}
+//
+//	}
 
 	/**
 	 * Attributes
@@ -75,6 +75,9 @@ public class InputScanner {
 	private boolean deNovoVary;
 	private int chunk;
 	
+	
+	public int inDelCounter_F = 0;
+	public int inDelCounter_M = 0;
 	/**
 	 * Extra global variable for checking the chr length to correct the reco position
 	 */
@@ -89,7 +92,7 @@ public class InputScanner {
 
 
 	public InputScanner(String chrID, double mutRate, int recombination, int generation, int seed, 
-			boolean mutVary, boolean recVary, boolean deNovoVary, int chunk) {
+			boolean mutVary, boolean recVary, boolean deNovoVary, int chunk, GenomeMap gm) {
 		this.chrID = chrID;
 		this.mutRate = mutRate;
 		this.recombination = recombination;
@@ -105,9 +108,10 @@ public class InputScanner {
 		/**
 		 * get the N region map at first
 		 */
-		NMap nm = new NMap();
-		this.nMap = nm.getNMap().get(this.chrID);
-		
+		this.nMap = gm.getGenomeMap().get(this.chrID);
+//		for (int i = 0; i < this.nMap.size(); i++)
+//			System.out.println(this.chrID + "\t" + this.nMap.get(i).get(0) + "\t" + this.nMap.get(i).get(1));
+	
 	}
 
 /*
@@ -224,7 +228,7 @@ public class InputScanner {
 //		System.out.println("De Novo: " + (int)(getVariants(length)/5300));
 		
 		int denovo = (int)(getVariants(length)/this.generation);
-		denovo = (denovo == 0)? 1: denovo;
+		denovo = 1000; //(denovo == 0)? 1: denovo;
 //		int denovo = 5;
 //		FrostRunner.createLog("denovo: " + denovo);
 		return denovo;
@@ -322,7 +326,7 @@ public class InputScanner {
 		/**
 		 * SEED ENTRY 3
 		 */
-		Random rd2 = getSeed()[2]; //new Random(getSeed());
+		Random rd2 = getSeed()[2]; //new Random(); //new Random(getSeed());
 		/**
 		 * If deNovoVary == false 
 		 * => denovo positions will not vary

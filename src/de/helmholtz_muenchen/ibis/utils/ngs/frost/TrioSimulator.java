@@ -32,6 +32,15 @@ public class TrioSimulator {
 	//there cannot be more than 8 deNovo mutation
 //	private final double recombination_rate = 0.01;
 
+	/**
+	 * No change in case of homozygous mutation, that can be only in case of a snp
+	 * heterozygous cases are: snp => no change, del => --, in => ++
+	 */
+	
+	private ArrayList<ArrayList<Integer>> sequenceAdjustment = new ArrayList<>();
+
+
+
 
 	int current_chunk;
 	/**
@@ -43,7 +52,6 @@ public class TrioSimulator {
 	/**
 	 * record for the adjustment of the sequence for denovo mutation later
 	 */
-	private ArrayList<ArrayList<Integer>> sequenceAdjustment = new ArrayList<>();
 	/**
 	 * ID_List is needed for Knime in order to submit the output files to art
 	 */	
@@ -61,6 +69,7 @@ public class TrioSimulator {
 		this.fc = fc;
 		this.fr = fr;
 		this.in = in;
+		
 	}
 /*
 	public FastaCheck getFc() {
@@ -152,7 +161,15 @@ public class TrioSimulator {
 //		long endTime = System.currentTimeMillis();
 //		NumberFormat formatter = new DecimalFormat("#0.00000");
 //		System.out.println("Execution time for MUTATION (parents) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
-		
+
+//		for (int i = 0; i < this.sequenceAdjustment.size(); i++)
+//		{
+//			if (this.sequenceAdjustment.get(i).get(1) > 0 || this.sequenceAdjustment.get(i).get(2) > 0) 
+//				System.out.println("Adjustment" + "\n" 
+//						+ this.sequenceAdjustment.get(i).get(0) + "\t" 
+//						+ this.sequenceAdjustment.get(i).get(1) + "\t"
+//						+ this.sequenceAdjustment.get(i).get(2));
+//		}
 //		startTime = System.currentTimeMillis();
 		generateChild(this.fc.choose_parentalChromatids(), iData_deNovo_child, iData_recombination_child, currentChr);
 //		endTime = System.currentTimeMillis();
@@ -160,6 +177,8 @@ public class TrioSimulator {
 //		System.out.println("Execution time for DENOVO+RECOMBINATION (child) "+ formatter.format((endTime - startTime) / 1000d) + " seconds");
 
 	}
+	
+	
 	/**
 	 * @param path
 	 * @param iData_parents
@@ -287,11 +306,11 @@ public class TrioSimulator {
 		if (seq2 == null)
 			parent = true;
 
-		appendFile(output00, ">"+id+"\n");
-		appendFile(output01, ">"+id+"\n");
+		appendFile(output00, ">"+id+"\n"); //F0 or C0
+		appendFile(output01, ">"+id+"\n"); //F1 or C1
 		if (parent) {
-			appendFile(output10, ">"+id+"\n");
-			appendFile(output11, ">"+id+"\n");
+			appendFile(output10, ">"+id+"\n"); //M0
+			appendFile(output11, ">"+id+"\n"); //M1
 		}
 
 
@@ -316,9 +335,9 @@ public class TrioSimulator {
 			int start = 0;
 			int stop = seq1.length();
 //			System.out.println("IS EMPTY: " + start + "\t" + stop);
-			unaltered_sequence(seq1, output00, output10, start, stop, parent, id+"_m_"+parent);
+			unaltered_sequence(seq1, output00, output10, start, stop, parent, id+"_m_"+parent); //father
 			if (parent)
-				unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);
+				unaltered_sequence(seq1,output01, output11, start, stop, parent, id+"_m_"+parent);//mother
 			else
 				unaltered_sequence(seq2,output01, output11, start,
 						seq2.length(), parent, id+"_m_"+parent);
@@ -549,7 +568,7 @@ public class TrioSimulator {
 			String output00, String output01, String output10, String output11, 
 			int stop, String id, boolean parent) {
 		// TODO Auto-generated method stub
-		ArrayList<Integer> adjust = new ArrayList<>(2);
+		ArrayList<Integer> adjust = new ArrayList<>(3);
 
 		//Now we invoke mutation
 		int tmp_idx = this.current_chunk*FrostRunner.chunk_length;
@@ -568,31 +587,57 @@ public class TrioSimulator {
 			toDelete[1] = seq1.charAt(stop+1);
 		}
 		else {
-			int stopAdjusted = adjustDeNovo(stop);
-			while (stopAdjusted >= tmp_idx) {
-				int diff = stopAdjusted-tmp_idx;
+			int stopAdjusted_F = adjustDeNovo(stop)[0], stopAdjusted_M = adjustDeNovo(stop)[1];
+//			System.out.println("stop: " + stop+ "\t"+ "stopAdjusted_F: "+ stopAdjusted_F+ "\t"+"stopAdjusted_M: "+ stopAdjusted_M);
+			while (stopAdjusted_F >= (this.current_chunk+1)*FrostRunner.chunk_length) {
+//				System.out.println("stopAdjusted_F came in here");
+				int diff = stopAdjusted_F-(this.current_chunk+1)*FrostRunner.chunk_length;
 				stop = stop-diff;
-				stopAdjusted = adjustDeNovo(stop);
+				stopAdjusted_F = adjustDeNovo(stop)[0];
 			}
-			if (seq1.charAt(stopAdjusted+1) > tmp_idx || (seq2.charAt(stopAdjusted+1) > tmp_idx)) 
-				stopAdjusted = stopAdjusted - 1;
-				
-			toMutate[0] = seq1.charAt(stopAdjusted);
-			toMutate[1] = seq2.charAt(stopAdjusted);
-			toDelete[0] = seq1.charAt(stopAdjusted+1);
-			toDelete[1] = seq2.charAt(stopAdjusted+1);
-		}
+			while (stopAdjusted_M >= (this.current_chunk+1)*FrostRunner.chunk_length) {
+//				System.out.println("stopAdjusted_M came in here");
+				int diff = stopAdjusted_M-(this.current_chunk+1)*FrostRunner.chunk_length;
+				stop = stop-diff;
+				stopAdjusted_M = adjustDeNovo(stop)[1];
+			}
+//			System.out.println("stop: " + stop+ "\t"+ "stopAdjusted_F: "+ stopAdjusted_F+ "\t"+"stopAdjusted_M: "+ stopAdjusted_M);
 
-		Mutation m = new Mutation(toMutate, toDelete);
+//			System.out.println(stopAdjusted_F+1 + /*"\t" + seq1.charAt(stopAdjusted_F+1) + */"\t" + tmp_idx);
+			if (seq1.charAt(stopAdjusted_F+1) > tmp_idx)  
+				stopAdjusted_F = stopAdjusted_F - 1;
+			if (seq2.charAt(stopAdjusted_M+1) > tmp_idx)
+				stopAdjusted_M = stopAdjusted_M - 1;
+
+//			if (seq1.charAt(stop+1) > tmp_idx || seq2.charAt(stop+1) > tmp_idx) 		
+//				stop = stop -1;
+			toMutate[0] = seq1.charAt(stopAdjusted_F); //pop
+			toMutate[1] = seq2.charAt(stopAdjusted_M); // mom
+			toDelete[0] = seq1.charAt(stopAdjusted_F+1);
+			toDelete[1] = seq2.charAt(stopAdjusted_M+1);
+//			System.out.println("CHILD");
+//			System.out.println("Previously: " +"\t" + stop + "\t"
+//											+ "F: " +seq1.charAt(stop) + "\t"
+//											+ "M: " +seq2.charAt(stop));
+//			System.out.println("Currently F: " +"\t" + stopAdjusted_F + "\t" +seq1.charAt(stopAdjusted_F));
+//			System.out.println("Currently M: " +"\t" + stopAdjusted_M + "\t" +seq2.charAt(stopAdjusted_M));
+
+			}
+
 
 		if (parent) {
-						
+			
+
+			Mutation m = new Mutation(toMutate, toDelete, in.inDelCounter_F, in.inDelCounter_M);
+			
+			
 			Random rand = new Random();
 			boolean mutate0 = rand.nextBoolean();
 			boolean mutate1 = rand.nextBoolean();
 			if (mutate0 == true && mutate1 == false) {
 				individuum = "F";
 				mutated = m.mutationType(toMutate, toDelete, individuum);
+				
 			} else if (mutate1 == true && mutate0 == false) {
 				individuum = "M";
 				mutated = m.mutationType(toMutate, toDelete, individuum);
@@ -601,6 +646,17 @@ public class TrioSimulator {
 				individuum = "FM";
 				mutated = m.mutationType(toMutate, toDelete, individuum);
 			}
+			in.inDelCounter_F = m.F;
+			in.inDelCounter_M = m.M;
+			
+//			System.out.println("indelcounter_F: " + in.inDelCounter_F);
+//			System.out.println("indelcounter_M: " + in.inDelCounter_M);
+			
+			adjust.add(stop);
+			adjust.add(in.inDelCounter_F);
+			adjust.add(in.inDelCounter_M);
+			this.sequenceAdjustment.add(adjust);
+			
 			getID1().add(id);
 			//because the real position was at the index of the array which is always x-1
 			getPOS1().add(stop+tmp_idx+1);
@@ -608,41 +664,72 @@ public class TrioSimulator {
 			/**
 			 * record for denovo adjustment
 			 */
-			adjust.add(stop);
-			adjust.add(FrostRunner.mutationCounter);
-			this.sequenceAdjustment.add(adjust);
+			
 		}
 		else {
+
+			Mutation m = new Mutation(toMutate, toDelete);
 
 			individuum = "C";
 			mutated = m.mutationType(toMutate, toDelete, individuum);
 			getID2().add(id);
 			getPOS2().add(stop+tmp_idx+1);
 			getPrettyMutation2().add(m.getChildString());
-		}		
+		}
+//		if (parent) {
+//			getID1().add(id);
+//			//because the real position was at the index of the array which is always x-1
+//			getPOS1().add(stop+tmp_idx+1);
+//			getPrettyMutation1().add(m.getParentString());
+//		}
+//		else {
+//			getID2().add(id);
+//			getPOS2().add(stop+tmp_idx+1);
+//			getPrettyMutation2().add(m.getChildString());
+//		}
+		
 		write_ref_alt(individuum, mutated, toMutate, output00, output01, output10, output11);
 	}
 //		else prettyMutation.add("NO MUTATION");
 
-	private int adjustDeNovo(int position) {
+	private int [] adjustDeNovo(int position) { // 0: pop, 1: mom
 		// TODO Auto-generated method stub
-		int p = 0;
+		int p[] = new int[2]; //0: F, 1: M
 		//+tmp_idx+1
+//		System.out.println(position);
+
 		for (int k = 0; k < this.sequenceAdjustment.size(); k++) {
 			if (this.sequenceAdjustment.get(k).get(0) == position) {
-				p = position + this.sequenceAdjustment.get(k).get(1);
+				p[0] = position + this.sequenceAdjustment.get(k).get(1);
+				p[1] = position + this.sequenceAdjustment.get(k).get(2);
+
+//				System.out.println(this.sequenceAdjustment.get(k).get(0) + "\t" + this.sequenceAdjustment.get(k).get(1));
+//				System.out.println(this.sequenceAdjustment.get(k).get(0) + "\t" + this.sequenceAdjustment.get(k).get(2));
+
 				break;
 			}
 			else if (this.sequenceAdjustment.get(k).get(0) > position) {
-				if (k > 0) 
-					p = position + this.sequenceAdjustment.get(k-1).get(1);
-				else 
-					p = position;
+				if (k > 0) {
+					p[0] = position + this.sequenceAdjustment.get(k-1).get(1);
+					p[1] = position + this.sequenceAdjustment.get(k-1).get(2);
+
+//					System.out.println(this.sequenceAdjustment.get(k-1).get(0) + "\t" + this.sequenceAdjustment.get(k-1).get(1));
+//					System.out.println(this.sequenceAdjustment.get(k-1).get(0) + "\t" + this.sequenceAdjustment.get(k-1).get(2));
+
+				}
+				else {
+					p[0] = position;
+					p[1] = position;
+				}
+
 				break;
 			}
 			else
-				continue;						
+				continue;
+						
 		}
+//		System.out.println(p);
+//		System.out.println();
 		return p;
 	}
 	/**
