@@ -10,7 +10,7 @@ public class VEPSummarizer extends Summarizer{
 	}
 
 	@Override
-	void getLoFVariant(String chr, String pos, String ref, String id, String alt, int GT_index, String[] infos, ArrayList<String> genotypes) {
+	void getLoFVariant(String chr, String pos, String ref, String id, String alt, double af, int GT_index, String[] infos, ArrayList<String> genotypes) {
 		HashMap<String,LoFGene> genes = new HashMap<String,LoFGene>();
 		
 		int nrOfTitles = additional_titles.size();
@@ -81,7 +81,6 @@ public class VEPSummarizer extends Summarizer{
 					gi.setSymbol(gene_symbol);
 					gene_statistic.put(gene_id, gi);
 				}
-				
 			}
 		}
 		
@@ -96,7 +95,7 @@ public class VEPSummarizer extends Summarizer{
 				observed_hetero++;
 			} 
 		}
-		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, observed_homo, observed_hetero, genes, genotypes));
+		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, af, observed_homo, observed_hetero, genes, genotypes));
 	}
 
 }

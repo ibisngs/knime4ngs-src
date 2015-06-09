@@ -227,7 +227,7 @@ public abstract class Summarizer {
 		br.close();
 	}
 	
-	abstract void getLoFVariant(String chr, String pos, String ref, String id, String alt, int GT_index,String[] infos, ArrayList<String> genotypes);
+	abstract void getLoFVariant(String chr, String pos, String ref, String id, String alt, double af, int GT_index,String[] infos, ArrayList<String> genotypes);
 	
 	private  ArrayList<String> getGenotypes(String [] fields) {
 		ArrayList<String> result = new ArrayList<String>();
@@ -246,7 +246,8 @@ public abstract class Summarizer {
 			String [] fields;
 			String chr, pos, ref;
 			String [] ids, alt_alleles, infos;
-			String [] afs = null;
+			String[] ac_adj = null;
+			String an_adj = null;
 			ArrayList<String> genotypes;
 			FileInputStream inputStream = null;
 			Scanner sc = null;
@@ -255,6 +256,7 @@ public abstract class Summarizer {
 			    sc = new Scanner(inputStream, "UTF-8");
 			    while (sc.hasNextLine()) {
 			        String line = sc.nextLine();
+			        
 			        if(line.startsWith("#"))  {
 			        	if(line.startsWith("##INFO=<ID=CSQ")) {
 			        		vep_header = new HashMap<String,Integer>();
@@ -314,9 +316,12 @@ public abstract class Summarizer {
 			        	infos = fields[7].split(";");
 			        	genotypes = getGenotypes(fields);
 			        	
+			        	an_adj = null;
 			        	for(String i: infos) {
-			        		if(i.startsWith("AF")) {
-			        			afs = i.split("=")[1].split(",");
+			        		if(i.startsWith("AC_Adj")) {
+			        			ac_adj = i.split("=")[1].split(",");
+			        		} else if (i.startsWith("AN_Adj")) {
+			        			an_adj = i.split("=")[1];
 			        		}
 			        	}
 			        	
@@ -325,10 +330,28 @@ public abstract class Summarizer {
 			        		if(ids.length>i) {
 			        			id = ids[i];
 			        		}
-			        		if(afs == null) {
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
+			        		double ac = 0.0;
+			        		double an = 0.0;
+			        		
+			        		if(an_adj == null) {
+			        			
+			        			for(String gt: genotypes) {
+			        				if(gt.charAt(0)==i+1+'0') {
+			        					ac = ac + 1.0;
+			        				}
+			        				
+			        				if(gt.charAt(2)==i+1+'0') {
+			        					ac = ac + 1.0;
+			        				}
+			        				
+			        				if(!(gt.charAt(0)=='.' && gt.charAt(2)=='.')) {
+			        					an = an + 2.0;
+			        				}
+			        			}
+			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i],ac/an, i+1,infos, genotypes);
 			        		} else {
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], i+1,infos, genotypes);
+			        			double af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
+			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
 			        		}
 			        	}
 			        }
@@ -598,10 +621,15 @@ public abstract class Summarizer {
 			GeneInfo gi = gene_statistic.get(gene);
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
-			bw.write("\t"+gi.getPartLoFs());
-//			bw.write("\t"+(1-gi.getProbUnaffected()));
+			bw.write("\t"+gi.getPartLoFs());			
 			
-			double p_lof = (double) gene2background.get(gene)[1]/(gene2background.get(gene)[0]+gene2background.get(gene)[1]);
+			double p_lof;
+			
+			if(gene2background.size()>0) {
+				p_lof = (double) gene2background.get(gene)[1]/(gene2background.get(gene)[0]+gene2background.get(gene)[1]);
+			} else {
+				p_lof = 1-gi.getProbUnaffected();
+			}
 			bw.write("\t"+p_lof);
 			
 			int unaffected = gi.getUnaffectedSamples().size();
@@ -612,6 +640,8 @@ public abstract class Summarizer {
 			//get P(LoF>=1) from genetic background file
 			double p_aff = new BinomialDistribution(affected+unaffected, p_lof).probability(affected);
 			bw.write("\t"+p_aff);
+			
+//			bw.write("\t"+(double)affected/((double)unaffected+affected));
 			
 			int ko = gi.getKOSamples().size();
 			bw.write("\t"+ko);
@@ -728,23 +758,27 @@ public abstract class Summarizer {
 	
 	private void writeGeneticBackground(String outfile) throws IOException{
 		
-		if(!geneback_header.contains(vcf_file)) {
-			//iterate over genes found in analyzed study and integrate numbers in read gene2background
-			for(String gene: gene_statistic.keySet()) {
-				GeneInfo gi = gene_statistic.get(gene);
-				Integer [] counts = gene2background.get(gene);
-				if(counts == null) {
-					counts = new Integer[3];
-					for(int i = 0; i<3; i++) {
-						counts[i] = 0;
-					}
-				}
-				counts[0] += gi.getUnaffectedSamples().size();
-				counts[1] += gi.getAffectedSamples().size();
-				counts[2] += gi.getKOSamples().size();
-				gene2background.put(gene, counts);
-			}
+		if(geneback_header.contains("#trained on:\t"+vcf_file)) {
+			logger.info("Genetic background file has yet been trained on: "+vcf_file);
+			return;
 		}
+		// iterate over genes found in analyzed study and integrate numbers in
+		// read gene2background
+		for (String gene : gene_statistic.keySet()) {
+			GeneInfo gi = gene_statistic.get(gene);
+			Integer[] counts = gene2background.get(gene);
+			if (counts == null) {
+				counts = new Integer[3];
+				for (int i = 0; i < 3; i++) {
+					counts[i] = 0;
+				}
+			}
+			counts[0] += gi.getUnaffectedSamples().size();
+			counts[1] += gi.getAffectedSamples().size();
+			counts[2] += gi.getKOSamples().size();
+			gene2background.put(gene, counts);
+		}
+
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		

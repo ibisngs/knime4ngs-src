@@ -5,17 +5,19 @@ import java.util.HashMap;
 
 public class LoFVariant {
 	
-	String chr, pos, ref_allele, alt_allele, rsId, af;
+	String chr, pos, ref_allele, alt_allele, rsId;
 	int observed_homo, observed_hetero;
 	HashMap<String, LoFGene> gene_id2lofgene_fields;
 	ArrayList<String> genotypes;
+	double af;
 	
-	public LoFVariant (String chr, String pos, String ref_allele, String alt_allele, String rsId, int observed_homo, int observed_hetero, HashMap<String, LoFGene> gene_id2lofgene_fields, ArrayList<String> genotypes) {
+	public LoFVariant (String chr, String pos, String ref_allele, String alt_allele, String rsId, double af, int observed_homo, int observed_hetero, HashMap<String, LoFGene> gene_id2lofgene_fields, ArrayList<String> genotypes) {
 		this.chr = chr.replaceAll("[chroCHRO]","");
 		this.pos = pos;
 		this.ref_allele = ref_allele;
 		this.alt_allele = alt_allele;
 		this.rsId = rsId;
+		this.af = af;
 		this.observed_homo = observed_homo;
 		this.observed_hetero = observed_hetero;
 		this.gene_id2lofgene_fields = gene_id2lofgene_fields;
@@ -43,24 +45,7 @@ public class LoFVariant {
 	}
 	
 	public double getAF() {
-		double ac = 0.0;
-		double an = 0.0;
-		for(String gt: genotypes) {
-			if(gt.charAt(0)>'0' || (gt.charAt(0)=='.' && gt.charAt(2)!='.')) {
-				ac++;
-				an++;
-			} else if (gt.charAt(0)=='0'){
-				an++;
-			}
-			
-			if(gt.charAt(2)>'0' || (gt.charAt(2)=='.' && gt.charAt(0)!='.')) {
-				ac++;
-				an++;
-			} else if (gt.charAt(2)=='0'){
-				an++;
-			}
-		}
-		return ac/an;
+		return this.af;
 	}
 
 	public int getObserved_homo() {
