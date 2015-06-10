@@ -247,7 +247,9 @@ public abstract class Summarizer {
 			String chr, pos, ref;
 			String [] ids, alt_alleles, infos;
 			String[] ac_adj = null;
+			String[] ac = null;
 			String an_adj = null;
+			String an = null;
 			ArrayList<String> genotypes;
 			FileInputStream inputStream = null;
 			Scanner sc = null;
@@ -316,12 +318,17 @@ public abstract class Summarizer {
 			        	infos = fields[7].split(";");
 			        	genotypes = getGenotypes(fields);
 			        	
-			        	an_adj = null;
+			        	boolean adj_not_found = true;
 			        	for(String i: infos) {
-			        		if(i.startsWith("AC_Adj")) {
+			        		if(i.startsWith("AC_Adj=")) {
+			        			adj_not_found = false;
 			        			ac_adj = i.split("=")[1].split(",");
-			        		} else if (i.startsWith("AN_Adj")) {
+			        		} else if (i.startsWith("AN_Adj=")) {
 			        			an_adj = i.split("=")[1];
+			        		} else if (i.startsWith("AN=")) {
+			        			an = i.split("=")[1];
+			        		} else if (i.startsWith("AC=")) {
+			        			ac = i.split("=")[1].split(",");
 			        		}
 			        	}
 			        	
@@ -330,29 +337,14 @@ public abstract class Summarizer {
 			        		if(ids.length>i) {
 			        			id = ids[i];
 			        		}
-			        		double ac = 0.0;
-			        		double an = 0.0;
 			        		
-			        		if(an_adj == null) {
-			        			
-			        			for(String gt: genotypes) {
-			        				if(gt.charAt(0)==i+1+'0') {
-			        					ac = ac + 1.0;
-			        				}
-			        				
-			        				if(gt.charAt(2)==i+1+'0') {
-			        					ac = ac + 1.0;
-			        				}
-			        				
-			        				if(!(gt.charAt(0)=='.' && gt.charAt(2)=='.')) {
-			        					an = an + 2.0;
-			        				}
-			        			}
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i],ac/an, i+1,infos, genotypes);
+			        		double af;
+			        		if(adj_not_found) {
+			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
 			        		} else {
-			        			double af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
-			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
+			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
 			        		}
+			        		getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
 			        	}
 			        }
 			    }
@@ -421,7 +413,7 @@ public abstract class Summarizer {
 						gene_sample_statistic.put(gene_id+"_"+my_sample_ids.get(i), gsi);
 					}
 					
-					if(gt.contains(".") || (gt.charAt(0)>'0' || gt.charAt(2)>'0')) {
+					if(!(gt.charAt(0)=='0' && gt.charAt(2)=='0')) {
 						gsi.setAffected();
 					}
 					
@@ -613,7 +605,7 @@ public abstract class Summarizer {
 	private void writeGeneStatistic(String outfile) throws IOException {
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 //		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP(LoF>=1)\tunaffected_samples\taffected_samples\tko_samples\tobserved_LoF_frequency");
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP_LoF\tunaffected_samples\taffected_samples\tP_aff\tko_samples");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP_LoF\tunaffected_samples\taffected_samples\tp-value\tko_samples");
 
 		bw.newLine();
 		for(String gene: gene_statistic.keySet()) {
@@ -637,9 +629,17 @@ public abstract class Summarizer {
 			int affected = gi.getAffectedSamples().size();
 			bw.write("\t"+affected);
 			
-			//get P(LoF>=1) from genetic background file
-			double p_aff = new BinomialDistribution(affected+unaffected, p_lof).probability(affected);
-			bw.write("\t"+p_aff);
+			int n = affected+unaffected;
+			int ex = (int)Math.round(p_lof*n);
+			int test_size = (int) Math.abs(affected - ex);
+			
+			double p_val;
+			if(test_size == 0) {
+				p_val = 1.0;
+			} else {
+				p_val = new BinomialDistribution(n, p_lof).cumulativeProbability(ex-test_size)+(1 - new BinomialDistribution(n, p_lof).cumulativeProbability(ex+test_size-1));
+			}
+			bw.write("\t"+p_val);
 			
 //			bw.write("\t"+(double)affected/((double)unaffected+affected));
 			
