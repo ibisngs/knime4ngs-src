@@ -40,6 +40,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
  */
 public class BWANodeModel extends HTExecutorNodeModel {
     
+	public static final String CFGKEY_USEPREFPAGE = "usePrefPage";
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
 	public static final String CFGKEY_BWAFILE = "bwafile";
 	public static final String CFGKEY_CHECKCOLORSPACED = "checkColorSpaced";
@@ -422,13 +423,11 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	//Check Tool Availability
-    	String ToolPath = BinaryHandler.checkToolAvailability("bwa");
-    	if(ToolPath!=null){
-    		m_bwafile.setStringValue(ToolPath);
+    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+    	if(toolPath == null) {
+    		toolPath = "";
     	}
-    	
-    	
+    	m_bwafile.setStringValue(toolPath);
     	
     	// Warning if there is a problem with readType
     	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();

@@ -209,6 +209,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		String dir = dlg.open();
 		System.out.println(dir);
 		TOOL_LOCATION=dir;
+		textField.setText(TOOL_LOCATION);
+		textField2.setText(TOOL_LOCATION);
 	}
 	
 }

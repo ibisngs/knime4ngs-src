@@ -14,7 +14,9 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.FilesHistoryPanel;
 
+import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -29,6 +31,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class BWANodeDialog extends HTExecutorNodeDialog {
 
+	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(BWANodeModel.CFGKEY_USEPREFPAGE,true);
+	private final SettingsModelString bwa = new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");
+	
+	
 	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
 	private final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
@@ -42,11 +48,25 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
      */
     protected BWANodeDialog() {
     	super();
-    	
+    	    	
     	readGroup.setEnabled(false);
     	
     	createNewGroup("BWA");
-    	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa"), "his_id_BWA", 0, ""));
+    	
+    	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use vales from KNIME4NGS preference page?"));
+    	
+    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+    	if(toolPath == null) {
+    		toolPath = "";
+    	}
+    	bwa.setStringValue(toolPath);
+    	
+    	
+    	DialogComponentString dcs = new DialogComponentString(bwa, "Path to bwa binary");
+    	dcs.setSizeComponents(400, 20);
+    	addDialogComponent(dcs);
+    	
+    	
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ""));
     	createNewGroup("Options");
@@ -90,10 +110,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 					}
 			}
 		});
-    	
-    	
-
-    	
     }
     
 			
