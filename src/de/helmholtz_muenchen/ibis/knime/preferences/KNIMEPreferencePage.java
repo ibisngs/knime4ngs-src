@@ -7,11 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 
 import org.apache.commons.io.FileUtils;
-//import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.FieldEditor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
-import org.eclipse.jface.preference.RadioGroupFieldEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,11 +18,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-//import org.eclipse.swt.widgets.Display;
-//import org.eclipse.swt.widgets.Event;
-//import org.eclipse.swt.widgets.Label;
-//import org.eclipse.swt.widgets.List;
-//import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
@@ -75,16 +67,16 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOL_LOCATION = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
 		
 		
-		Composite addRemoveGroup = new Composite(top, SWT.NONE);
-		addRemoveGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout addRemoveLayout = new GridLayout();
-		addRemoveLayout.numColumns = 2;
-		addRemoveLayout.marginHeight = 0;
-		addRemoveLayout.marginWidth = 0;
-		addRemoveGroup.setLayout(addRemoveLayout);
+		Composite DownloadGroup = new Composite(top, SWT.NONE);
+		DownloadGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout DownloadLayout = new GridLayout();
+		DownloadLayout.numColumns = 2;
+		DownloadLayout.marginHeight = 0;
+		DownloadLayout.marginWidth = 0;
+		DownloadGroup.setLayout(DownloadLayout);
 		
 		// Create a composite for the add and remove buttons.
-		Composite buttonGroup = new Composite(addRemoveGroup, SWT.NONE);
+		Composite buttonGroup = new Composite(DownloadGroup, SWT.NONE);
 		buttonGroup.setLayoutData(new GridData());
 		GridLayout buttonLayout = new GridLayout();
 		buttonLayout.marginHeight = 0;
@@ -101,7 +93,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		});
 		addTag.setSize(200, 20);
 		
-		textField = new Text(addRemoveGroup, SWT.BORDER);
+		textField = new Text(DownloadGroup, SWT.BORDER);
 		
 		GridData textData = new GridData(GridData.FILL_HORIZONTAL);
 		textData.verticalAlignment = GridData.BEGINNING;
@@ -111,18 +103,16 @@ public class KNIMEPreferencePage extends PreferencePage implements
 
 		
 		
-		
-		
-		Composite addRemoveGroup2 = new Composite(top, SWT.NONE);
-		addRemoveGroup2.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout addRemoveLayout2 = new GridLayout();
-		addRemoveLayout2.numColumns = 2;
-		addRemoveLayout2.marginHeight = 0;
-		addRemoveLayout2.marginWidth = 0;
-		addRemoveGroup2.setLayout(addRemoveLayout2);
+		Composite SelectExistingGroup = new Composite(top, SWT.NONE);
+		SelectExistingGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout SelectExistingLayout = new GridLayout();
+		SelectExistingLayout.numColumns = 2;
+		SelectExistingLayout.marginHeight = 0;
+		SelectExistingLayout.marginWidth = 0;
+		SelectExistingGroup.setLayout(SelectExistingLayout);
 		
 		// Create a composite for the add and remove buttons.
-		Composite buttonGroup2 = new Composite(addRemoveGroup2, SWT.NONE);
+		Composite buttonGroup2 = new Composite(SelectExistingGroup, SWT.NONE);
 		buttonGroup2.setLayoutData(new GridData());
 		GridLayout buttonLayout2 = new GridLayout();
 		buttonLayout2.marginHeight = 0;
@@ -139,7 +129,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		});
 		addTag2.setSize(200, 20);
 		
-		textField2 = new Text(addRemoveGroup2, SWT.BORDER);
+		textField2 = new Text(SelectExistingGroup, SWT.BORDER);
 		
 		GridData textData2 = new GridData(GridData.FILL_HORIZONTAL);
 		textData2.verticalAlignment = GridData.BEGINNING;
@@ -162,13 +152,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * Restore all default preferences.
 	 */
 	protected void performDefaults() {
-//		errors.loadDefault();
-//		exemptTagsList.setItems(
-//				IBISKNIMENodesPlugin.getDefault().
-//				getDefaultExemptTagsPreference());
-		// getDefaultExemptTagsPreference() is a convenience
-		// method which retrieves the default preference from
-		// the preference store.
 		super.performDefaults();
 	}
 	
@@ -177,30 +160,11 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * this page's values appropriately.
 	 */	
 	public boolean performOk() {
-//		errors.store();
-//		IBISKNIMENodesPlugin.getDefault().
-//			setExemptTagsPreference(exemptTagsList.getItems());
 		IBISKNIMENodesPlugin.getDefault().
 		setToolDirPreference(TOOL_LOCATION);
 		System.out.println("Seeting TOOL_LOCATION to: "+TOOL_LOCATION);
 		return super.performOk();
 	}
-	
-//	private void addTag() {
-//		String tag = textField.getText();
-//		if (tag != null && tag.length() > 0)
-//			exemptTagsList.add(tag);
-//		textField.setText("");
-//	}
-	
-	/*
-	 * Sets the enablement of the remove button depending
-	 * on the selection in the list.
-	 */
-//	private void selectionChanged() {
-//		int index = exemptTagsList.getSelectionIndex();
-//		removeTag.setEnabled(index >= 0);		
-//	}
 	
 	
 	private void downloadBinaries(Shell shell){
@@ -213,7 +177,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 
 		if(dir!=null){
 		try {
-//			URL url = new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/");
 			File bwa = new File(dir+"/bwa");
 			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/bwa"), bwa );
 			bwa.setExecutable(true,false);

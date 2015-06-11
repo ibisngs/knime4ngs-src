@@ -1,18 +1,12 @@
 
 package de.helmholtz_muenchen.ibis.knime;
 
-import java.util.StringTokenizer;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
-
-//import com.genericworkflownodes.util.FileStashFactory;
-
-//import de.helmholtz_muenchen.ibis.knime.preferences.PreferenceInitializer;
 
 /**
  * This is the OSGI bundle activator.
@@ -26,23 +20,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String COMMENT_COLOR_PREFERENCE = "commentColor";
 	public static final String ERROR_COLOR_PREFERENCE = "errorColor";
 	public static final String VALID_COLOR_PREFERENCE = "validColor";
-	public static final String FONT_PREFERENCE = "font";
-	public static final String BROWSER_PREFERENCE = "webBrowser";
-	
-//	public static final String EXEMPT_TAGS_PREFERENCE = "exemptTags";
-//	public static final String ERRORS_PREFERENCE = "errors";
 	
 	public static final String TOOL_DIR_PREFERENCE = "tooldir";
 	public static final String TOOL_DIR_DEFAULT = "~/";
-
-	
-	
-
-//	public static final String NO_ERRORS = "fieldEditors.noError";
-//	public static final String ERROR_FOR_MISSING_CLOSING_TAG = "fieldEditors.errorForMissingClosingTag";
-//
-//	public static final String EXEMPT_TAGS_DEFAULT = "<P>;<BR>;<IMG>;";
-	
 	
 	
 	/**
@@ -123,10 +103,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 
         log("starting IKN_PLUGIN: IBISKNIMENodesPlugin");
 
-        IPreferenceStore store = IBISKNIMENodesPlugin.getDefault()
-                .getPreferenceStore();
-//        FileStashFactory.setTempParentDirectory(new File(store
-//                .getString(PreferenceInitializer.PREF_FILE_STASH_LOCATION)));
+//        IPreferenceStore store = IBISKNIMENodesPlugin.getDefault()
+//                .getPreferenceStore();
+
     }
 
     /**
@@ -164,38 +143,15 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		PreferenceConverter.setDefault(store, COMMENT_COLOR_PREFERENCE,  new RGB(0, 200, 125));
 		PreferenceConverter.setDefault(store, ERROR_COLOR_PREFERENCE, new RGB(255, 0, 0));
 		PreferenceConverter.setDefault(store, VALID_COLOR_PREFERENCE,  new RGB(0, 0, 0));
-		
-		
-//		store.setDefault(EXEMPT_TAGS_PREFERENCE, EXEMPT_TAGS_DEFAULT);
-//		store.setDefault(ERRORS_PREFERENCE, NO_ERRORS);	
 
-		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
-
-		
-		
+		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);		
 	}
 	
-//	public String[] getDefaultExemptTagsPreference() {
-//		return convert(getPreferenceStore().getDefaultString(TOOL_DIR_PREFERENCE));
-//	}
-
+	
 	public String getToolDirPreference() {
 		return getPreferenceStore().getString(TOOL_DIR_PREFERENCE);
 	}
 	
-//	private String[] convert(String preferenceValue) {
-//		StringTokenizer tokenizer =
-//			new StringTokenizer(preferenceValue, ",");
-//		int tokenCount = tokenizer.countTokens();
-//		String[] elements = new String[tokenCount];
-//
-//		for (int i = 0; i < tokenCount; i++) {
-//			elements[i] = tokenizer.nextToken();
-//		}
-//
-//		return elements;
-//	}
-
 	public void setToolDirPreference(String path) {
 		getPreferenceStore().setValue(TOOL_DIR_PREFERENCE, path);
 	}
