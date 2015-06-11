@@ -214,9 +214,18 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		if(dir!=null){
 		try {
 //			URL url = new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/");
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/bwa"), new File(dir+"/bwa"));
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel"), new File(dir+"/pindel"));
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel2vcf"), new File(dir+"/pindel2vcf"));
+			File bwa = new File(dir+"/bwa");
+			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/bwa"), bwa );
+			bwa.setExecutable(true,false);
+			
+			File pindel = new File(dir+"/pindel");
+			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel"), pindel);
+			pindel.setExecutable(true,false);
+			
+			File pindel2vcf = new File(dir+"/pindel2vcf");
+			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel2vcf"), pindel2vcf);
+			pindel2vcf.setExecutable(true,false);
+			
 			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/GenomeAnalysisTK.jar"), new File(dir+"/GenomeAnalysisTK.jar"));
 
 			TOOL_LOCATION=dir;
