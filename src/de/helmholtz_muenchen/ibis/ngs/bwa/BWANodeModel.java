@@ -23,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -420,6 +421,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	
+    	//Check Tool Availability
+    	String ToolPath = BinaryHandler.checkToolAvailability("bwa");
+    	if(ToolPath!=null){
+    		m_bwafile.setStringValue(ToolPath);
+    	}
+    	
+    	
     	
     	// Warning if there is a problem with readType
     	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();

@@ -138,4 +138,11 @@
 		<category icon="/libs/icons/graphicalModels/network_sans.png" level-id="graphicalModels" name="Graphical Models" path="/ibis/"/>
 	</extension>
    
+   
+   
+      <extension point="org.eclipse.ui.preferencePages">
+      <page category="org.knime.workbench.ui.preferences" class="de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage" id="de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage" name="KNIME4NGS"/>
+   </extension>
+   
+   
 </plugin>

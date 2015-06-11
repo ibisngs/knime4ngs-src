@@ -2,7 +2,7 @@
  * $Revision$ $Date$ $Author$
  *
  */
-package de.helmholtz_muenchen.ibis.ngs.bwa;
+package de.helmholtz_muenchen.ibis.knime;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
