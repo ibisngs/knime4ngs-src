@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
@@ -31,12 +33,12 @@ import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
-
-
-
-	public static String TOOL_LOCATION = null;
-	private Text textField;
-	private Text textField2;
+	public static String TOOL_LOCATION;
+	public static boolean USE_HTE;
+	public static String THRESHOLD;
+	
+	private Text binsDirectory;
+	private Text thresholdText;
 
 
 	public KNIMEPreferencePage() {
@@ -53,91 +55,83 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		Composite top = new Composite(parent, SWT.LEFT);
-
-		// Sets the layout data for the top composite's 
-		// place in its parent's layout.
-		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		// Sets the layout for the top composite's 
-		// children to populate.
-		top.setLayout(new GridLayout());
-				
 		
+
 		TOOL_LOCATION = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
 		
+		Composite top = new Composite(parent, SWT.LEFT);
+		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		top.setLayout(new GridLayout());
 		
-		Composite DownloadGroup = new Composite(top, SWT.NONE);
-		DownloadGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout DownloadLayout = new GridLayout();
-		DownloadLayout.numColumns = 2;
-		DownloadLayout.marginHeight = 0;
-		DownloadLayout.marginWidth = 0;
-		DownloadGroup.setLayout(DownloadLayout);
-		
-		// Create a composite for the add and remove buttons.
-		Composite buttonGroup = new Composite(DownloadGroup, SWT.NONE);
-		buttonGroup.setLayoutData(new GridData());
-		GridLayout buttonLayout = new GridLayout();
-		buttonLayout.marginHeight = 0;
-		buttonLayout.marginWidth = 0;
-		buttonGroup.setLayout(buttonLayout);
+		//bin preferences
+		Group downloadBins = new Group(top, SWT.NONE);
+		downloadBins.setText("Binary preferences");
+		downloadBins.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout downloadLayout = new GridLayout();
+		downloadLayout.numColumns = 3;
+		downloadBins.setLayout(downloadLayout);
 
-		Button addTag = new Button(buttonGroup, SWT.NONE);
-		addTag.setText("Download Tool Binaries");
+		Label binsLabel = new Label(downloadBins, SWT.NONE);
+		binsLabel.setText("Directory for tool binaries:");
+		
+		binsDirectory = new Text(downloadBins, SWT.BORDER);
+		binsDirectory.setText(TOOL_LOCATION);
+		
+		
+		Button browseBinDir = new Button(downloadBins, SWT.NONE);
+		browseBinDir.setText("Browse");
 		final Shell shell = new Shell(parent.getDisplay());
-		addTag.addSelectionListener(new SelectionAdapter() {
+		browseBinDir.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				downloadBinaries(shell);
+				selectToolFolder(shell);
 			}
 		});
-		addTag.setSize(200, 20);
-		
-		textField = new Text(DownloadGroup, SWT.BORDER);
-		
-		GridData textData = new GridData(GridData.FILL_HORIZONTAL);
-		textData.verticalAlignment = GridData.BEGINNING;
-		textField.setLayoutData(textData);
-		textField.setText(TOOL_LOCATION);
-		
 
-		
-		
-		Composite SelectExistingGroup = new Composite(top, SWT.NONE);
-		SelectExistingGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout SelectExistingLayout = new GridLayout();
-		SelectExistingLayout.numColumns = 2;
-		SelectExistingLayout.marginHeight = 0;
-		SelectExistingLayout.marginWidth = 0;
-		SelectExistingGroup.setLayout(SelectExistingLayout);
-		
-		// Create a composite for the add and remove buttons.
-		Composite buttonGroup2 = new Composite(SelectExistingGroup, SWT.NONE);
-		buttonGroup2.setLayoutData(new GridData());
-		GridLayout buttonLayout2 = new GridLayout();
-		buttonLayout2.marginHeight = 0;
-		buttonLayout2.marginWidth = 0;
-		buttonGroup2.setLayout(buttonLayout2);
-
-		Button addTag2 = new Button(buttonGroup2, SWT.NONE);
-		addTag2.setText("Or select existing folder with binaries");
-		final Shell shell2 = new Shell(parent.getDisplay());
-		addTag2.addSelectionListener(new SelectionAdapter() {
+		Button downloader = new Button(downloadBins, SWT.NONE);
+		downloader.setText("Download missing binaries");
+		downloader.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				selectToolFolder(shell2);
+				downloadBinaries();
 			}
 		});
-		addTag2.setSize(200, 20);
 		
-		textField2 = new Text(SelectExistingGroup, SWT.BORDER);
+		//HTE preferences
+		Group htePrefs = new Group(top,SWT.NONE);
+		htePrefs.setText("High throughput execution preferences");
+		htePrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		htePrefs.setLayout(new GridLayout());
 		
-		GridData textData2 = new GridData(GridData.FILL_HORIZONTAL);
-		textData2.verticalAlignment = GridData.BEGINNING;
-		textField2.setLayoutData(textData2);
-		textField2.setText(TOOL_LOCATION);
+		Composite use_hte = new Composite(htePrefs,SWT.NONE);
+		use_hte.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout hteLayout = new GridLayout();
+		hteLayout.numColumns = 1;
+		use_hte.setLayout(hteLayout);
 		
+		USE_HTE = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
+		Button checkHTE = new Button(use_hte,SWT.CHECK);
+		checkHTE.setText("Use HTE?");
+		checkHTE.setSelection(USE_HTE);
+		checkHTE.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Button btn = (Button) e.getSource();
+				USE_HTE = btn.getSelection();
+			}
+		});
+		
+		Composite dbPrefs = new Composite(htePrefs,SWT.NONE);
+		dbPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout dbLayout = new GridLayout();
+		dbLayout.numColumns = 2;
+		dbPrefs.setLayout(dbLayout);
+		
+		Label thresholdLabel = new Label(dbPrefs,SWT.NONE);
+		thresholdLabel.setText("Global threshold:");
+		
+		THRESHOLD = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
 
-
+		thresholdText = new Text(dbPrefs, SWT.BORDER);
+		thresholdText.setText(THRESHOLD);
+		
 		return top;
 	}
 
@@ -160,19 +154,25 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * this page's values appropriately.
 	 */	
 	public boolean performOk() {
-		IBISKNIMENodesPlugin.getDefault().
-		setToolDirPreference(TOOL_LOCATION);
-		System.out.println("Seeting TOOL_LOCATION to: "+TOOL_LOCATION);
+		
+		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
+		
+		iknp.setToolDirPreference(TOOL_LOCATION);
+		System.out.println("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
+		
+		iknp.setHTEPreference(USE_HTE);
+		System.out.println("Setting USE_HTE to: "+USE_HTE);
+		
+		THRESHOLD = thresholdText.getText();
+		iknp.setThresholdPreference(THRESHOLD);
+		System.out.println("Setting THREHOLD to: "+THRESHOLD);
+		
 		return super.performOk();
 	}
 	
-	
-	private void downloadBinaries(Shell shell){
+	private void downloadBinaries(){
 		
-		DirectoryDialog dlg = new DirectoryDialog(shell);
-		dlg.setText("Choose directory in which tool binaries will be stored");
-		dlg.setFilterPath("~/");
-		String dir = dlg.open();
+		String dir = TOOL_LOCATION;
 		System.out.println(dir);
 
 		if(dir!=null){
@@ -191,10 +191,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			
 			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/GenomeAnalysisTK.jar"), new File(dir+"/GenomeAnalysisTK.jar"));
 
-			TOOL_LOCATION=dir;
-			textField.setText(TOOL_LOCATION);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		}
@@ -209,8 +206,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		String dir = dlg.open();
 		System.out.println(dir);
 		TOOL_LOCATION=dir;
-		textField.setText(TOOL_LOCATION);
-		textField2.setText(TOOL_LOCATION);
+		binsDirectory.setText(TOOL_LOCATION);
 	}
 	
 }

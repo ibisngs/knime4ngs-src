@@ -3,14 +3,12 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.io.File;
 import java.net.InetAddress;
 import java.sql.SQLException;
-import java.util.Map;
-
 
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.workflow.FlowVariable;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -38,7 +36,10 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	
 	static final String CFGKEY_DEFAULT_THRESHOLD = "threshold";
 	static final int DEFAULT_THRESHOLD = 1;
+	
+	static final String CFGKEY_USE_PREF = "use_pref";
 
+	
 	private final SettingsModelInteger threshold = new SettingsModelInteger(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, 1);
 
@@ -49,36 +50,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 
 	protected HTExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts) {
 		super(nrInDataPorts, nrOutDataPorts);
-	}
-
-	private void readFlowVariables(){
-		
-		Map<String, FlowVariable> map = this.getAvailableFlowVariables();
-
-		if (!map.containsKey("use_hte")) {
-			System.err
-			.println("No information about HTE usage found! Please add the HTETrigger, if you want to use HTE.");
-			use_hte=false;
-			return;
-		}
-		
-		if (map.get("use_hte").getIntValue() == 1) {
-			use_hte = true;
-		} else {
-			use_hte = false;
-		}
-		
-		boolean use_local_threshold = false;
-		
-		if (map.containsKey("local_threshold")) {
-			use_local_threshold = (map.get("local_threshold").getIntValue()==1);
-		}
-		
-		if(use_local_threshold) {
-			threshold_value = threshold.getIntValue();
-		} else {
-			threshold_value = map.get("threshold").getIntValue();
-		}
 	}
 	
 	private void recExecuteCommand(String[] command, ExecutionContext exec,
@@ -125,7 +96,8 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
 		
-		this.readFlowVariables();
+		use_hte = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
+		threshold_value = threshold.getIntValue();
 
 		this.count = 0;
 		//prepare klock

@@ -85,7 +85,9 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	
     }
 
-    
+    static SettingsModelString createSettingsModelSelection() {
+    	return new SettingsModelString("bwa-path","");
+    }
     
     /**
      * {@inheritDoc}
@@ -467,6 +469,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	/** added for HTE **/
     	super.saveSettingsTo(settings);
+    	
     	m_bwafile.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_bwtIndex.saveSettingsTo(settings);
@@ -487,6 +490,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	/** added for HTE **/
     	super.loadValidatedSettingsFrom(settings);
+    	
     	m_bwafile.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_bwtIndex.loadSettingsFrom(settings);
@@ -507,6 +511,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	/** added for HTE **/
     	super.validateSettings(settings);
+    	
     	m_bwafile.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_bwtIndex.validateSettings(settings);

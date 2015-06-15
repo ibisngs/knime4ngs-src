@@ -5,6 +5,7 @@ import java.io.File;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
@@ -31,9 +32,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class BWANodeDialog extends HTExecutorNodeDialog {
 
-	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(BWANodeModel.CFGKEY_USEPREFPAGE,true);
+	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(BWANodeModel.CFGKEY_USEPREFPAGE,true);	
 	private final SettingsModelString bwa = new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");
 	
+	private final DialogComponentFileChooser dcfc = new DialogComponentFileChooser(bwa,"his_id_BWAPATH", 0);
 	
 	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
@@ -55,18 +57,8 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	
     	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use vales from KNIME4NGS preference page?"));
     	
-    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
-    	if(toolPath == null) {
-    		toolPath = "";
-    	}
-    	bwa.setStringValue(toolPath);
-    	
-    	
-    	DialogComponentString dcs = new DialogComponentString(bwa, "Path to bwa binary");
-    	dcs.setSizeComponents(400, 20);
-    	addDialogComponent(dcs);
-    	
-    	
+    	addDialogComponent(dcfc);
+    	dcfc.setEnabled(false);
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ""));
     	createNewGroup("Options");
@@ -110,6 +102,31 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 					}
 			}
 		});
+    	
+    	usePrefPage.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				dcfc.setEnabled(!usePrefPage.getBooleanValue());
+				if(usePrefPage.getBooleanValue()) {
+					String toolPath = BinaryHandler.checkToolAvailability("bwa");
+			    	if(toolPath == null) {
+			    		toolPath = "";
+			    	}
+			    	bwa.setStringValue(toolPath);
+				}
+			}
+    	});
+    }
+    
+   
+    public void onOpen() {
+    	if(usePrefPage.getBooleanValue()){
+	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+	    	if(toolPath == null) {
+	    		toolPath = "";
+	    	}
+	    	bwa.setStringValue(toolPath);
+    	}
     }
     
 			

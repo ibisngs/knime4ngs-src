@@ -24,6 +24,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String TOOL_DIR_PREFERENCE = "tooldir";
 	public static final String TOOL_DIR_DEFAULT = "~/";
 	
+	public static final String USE_HTE = "hte";
+	public static final String THRESHOLD = "threshold";
 	
 	/**
      * The shared instance.
@@ -144,7 +146,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		PreferenceConverter.setDefault(store, ERROR_COLOR_PREFERENCE, new RGB(255, 0, 0));
 		PreferenceConverter.setDefault(store, VALID_COLOR_PREFERENCE,  new RGB(0, 0, 0));
 
-		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);		
+		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
+		store.setDefault(USE_HTE, false);
+		store.setDefault(THRESHOLD, "1");
 	}
 	
 	
@@ -154,6 +158,22 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
 	public void setToolDirPreference(String path) {
 		getPreferenceStore().setValue(TOOL_DIR_PREFERENCE, path);
+	}
+	
+	public boolean getHTEPreference() {
+		return getPreferenceStore().getBoolean(USE_HTE);
+	}
+	
+	public void setHTEPreference(boolean use) {
+		getPreferenceStore().setValue(USE_HTE, use);
+	}
+	
+	public String getThresholdPreference() {
+		return getPreferenceStore().getString(THRESHOLD);
+	}
+	
+	public void setThresholdPreference(String t) {
+		getPreferenceStore().setValue(THRESHOLD, t);
 	}
 
 }
