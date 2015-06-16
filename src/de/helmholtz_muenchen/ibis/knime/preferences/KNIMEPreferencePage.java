@@ -5,6 +5,9 @@ package de.helmholtz_muenchen.ibis.knime.preferences;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.SQLException;
+
+import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -18,6 +21,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -26,6 +30,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 
 /**
  * @author hastreiter
@@ -33,12 +38,17 @@ import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
+	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
+	private final String [] TOOLS = {"bwa","pindel","pindel2vcf","GenomeAnalysisTK.jar"};
+	
 	public static String TOOL_LOCATION;
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
+	public static String DB_FILE;
 	
 	private Text binsDirectory;
 	private Text thresholdText;
+	private Text dbFile;
 
 
 	public KNIMEPreferencePage() {
@@ -56,9 +66,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 */
 	protected Control createContents(Composite parent) {
 		
-
-		TOOL_LOCATION = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
-		
 		Composite top = new Composite(parent, SWT.LEFT);
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		top.setLayout(new GridLayout());
@@ -74,9 +81,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Label binsLabel = new Label(downloadBins, SWT.NONE);
 		binsLabel.setText("Directory for tool binaries:");
 		
+		TOOL_LOCATION = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
+		
 		binsDirectory = new Text(downloadBins, SWT.BORDER);
 		binsDirectory.setText(TOOL_LOCATION);
-		
 		
 		Button browseBinDir = new Button(downloadBins, SWT.NONE);
 		browseBinDir.setText("Browse");
@@ -101,10 +109,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		htePrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		htePrefs.setLayout(new GridLayout());
 		
-		Composite use_hte = new Composite(htePrefs,SWT.NONE);
+		Composite use_hte = new Composite(htePrefs,SWT.LEFT);
 		use_hte.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout hteLayout = new GridLayout();
-		hteLayout.numColumns = 1;
+		hteLayout.numColumns = 3;
 		use_hte.setLayout(hteLayout);
 		
 		USE_HTE = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
@@ -118,20 +126,41 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			}
 		});
 		
-		Composite dbPrefs = new Composite(htePrefs,SWT.NONE);
-		dbPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout dbLayout = new GridLayout();
-		dbLayout.numColumns = 2;
-		dbPrefs.setLayout(dbLayout);
-		
-		Label thresholdLabel = new Label(dbPrefs,SWT.NONE);
+		Label thresholdLabel = new Label(use_hte,SWT.RIGHT);
 		thresholdLabel.setText("Global threshold:");
 		
 		THRESHOLD = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
 
-		thresholdText = new Text(dbPrefs, SWT.BORDER);
+		thresholdText = new Text(use_hte, SWT.BORDER);
 		thresholdText.setText(THRESHOLD);
 		
+		Label dbFileLabel = new Label(use_hte, SWT.LEFT);
+		dbFileLabel.setText("Use existing db file:");
+		
+		DB_FILE = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
+		
+		dbFile = new Text(use_hte,SWT.BORDER);
+		dbFile.setText(DB_FILE);
+		dbFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
+		browseDBFile.setText("Browse");
+		final Shell shell2 = new Shell(parent.getDisplay());
+		browseDBFile.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				selectDBFile(shell2);
+			}
+		});
+		
+		Button createDBFile = new Button(use_hte, SWT.NONE);
+		createDBFile.setText("Create new db file");
+		final Shell shell3 = new Shell(parent.getDisplay());
+		createDBFile.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				createDBFile(shell3);
+			}
+		});
+
 		return top;
 	}
 
@@ -157,6 +186,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
+		if(TOOL_LOCATION.equals("")) {
+			JOptionPane.showMessageDialog(null,
+				    "Valid directory for binaries has to be specified.",
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		iknp.setToolDirPreference(TOOL_LOCATION);
 		System.out.println("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
 		
@@ -164,8 +200,30 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		System.out.println("Setting USE_HTE to: "+USE_HTE);
 		
 		THRESHOLD = thresholdText.getText();
+		try{
+			int n = Integer.parseInt(THRESHOLD);
+			if(n<0) {
+				throw(new NumberFormatException());
+			}
+		} catch (NumberFormatException e){
+			JOptionPane.showMessageDialog(null,
+				    "Threshold has to be a positive integer.",
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		iknp.setThresholdPreference(THRESHOLD);
 		System.out.println("Setting THREHOLD to: "+THRESHOLD);
+		
+		if(DB_FILE.equals("")) {
+			JOptionPane.showMessageDialog(null,
+				    "Select valid SQLite database or create new one.",
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
+		iknp.setDBFilePreference(DB_FILE);
+		System.out.println("Setting DB_FILE to: "+DB_FILE);
 		
 		return super.performOk();
 	}
@@ -175,25 +233,24 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		String dir = TOOL_LOCATION;
 		System.out.println(dir);
 
-		if(dir!=null){
-		try {
-			File bwa = new File(dir+"/bwa");
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/bwa"), bwa );
-			bwa.setExecutable(true,false);
-			
-			File pindel = new File(dir+"/pindel");
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel"), pindel);
-			pindel.setExecutable(true,false);
-			
-			File pindel2vcf = new File(dir+"/pindel2vcf");
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/pindel2vcf"), pindel2vcf);
-			pindel2vcf.setExecutable(true,false);
-			
-			FileUtils.copyURLToFile(new URL("ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/GenomeAnalysisTK.jar"), new File(dir+"/GenomeAnalysisTK.jar"));
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		if (dir != null) {
+			for(String t:TOOLS) {
+				try {
+					File f = new File(dir+"/"+t);
+					if(!f.exists()) {
+						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH+t), f);
+						f.setExecutable(true,false);
+					}
+				} catch (IOException e) {
+					JOptionPane.showMessageDialog(null,
+							"Downloading "+t +" failed!"+ System.getProperty("line.separator")+ "Error message: "+e.getMessage(),
+							"Error",
+							JOptionPane.ERROR_MESSAGE);
+					TOOL_LOCATION="";
+					binsDirectory.setText(TOOL_LOCATION);
+					break;
+				}
+			}
 		}
 	}
 	
@@ -204,9 +261,61 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dlg.setText("Choose directory in which tool binaries will be stored");
 		dlg.setFilterPath("~/");
 		String dir = dlg.open();
-		System.out.println(dir);
 		TOOL_LOCATION=dir;
 		binsDirectory.setText(TOOL_LOCATION);
+	}
+	
+	private void selectDBFile(Shell shell) {
+		FileDialog fdl = new FileDialog(shell);
+		fdl.setText("Selecte HTE database file");
+		fdl.setFilterExtensions(new String[]{"*.sql","*.db"});
+		fdl.setFilterPath("~/");
+		String path = fdl.open();
+		
+		HTEDBHandler htedb;
+		try {
+			htedb = new HTEDBHandler(path);
+			if(htedb.checkSchema()) {
+				DB_FILE = path;
+			} else {
+				JOptionPane.showMessageDialog(null,
+					    "Database schema of selected database is not valid.",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				DB_FILE = "";
+			}
+			htedb.closeConnection();
+			dbFile.setText(DB_FILE);
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,
+					"Connecting to DB failed!"+ System.getProperty("line.separator")+ "Error message: "+e.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			DB_FILE="";
+			dbFile.setText(DB_FILE);
+		}
+	}
+	
+	public void createDBFile(Shell shell) {
+		DirectoryDialog dlg = new DirectoryDialog(shell);
+		dlg.setText("Choose directory in which database file will be stored");
+		dlg.setFilterPath("~/");
+		String dir = dlg.open();
+		
+		try {
+			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db");
+			htedb.createDB();
+			htedb.closeConnection();
+			DB_FILE = dir+"/hte.db";
+		} catch (SQLException e) {
+			JOptionPane.showMessageDialog(null,
+					"Creating DB failed!"+ System.getProperty("line.separator")+ "Error message: "+e.getMessage(),
+					"Error",
+					JOptionPane.ERROR_MESSAGE);
+			DB_FILE="";
+			
+		}
+		dbFile.setText(DB_FILE);	
 	}
 	
 }

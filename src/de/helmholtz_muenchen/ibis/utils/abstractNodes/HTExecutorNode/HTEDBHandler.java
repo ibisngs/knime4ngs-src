@@ -1,25 +1,64 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
 import java.sql.*;
+import java.util.HashSet;
 
 public class HTEDBHandler {
 	
 	private Connection con;
-	private final String HOST = "ibisdb01";
-	private final String DBNAME = "ngs_HTE";
-	private final String USER = "ngs_hteuser";
-	private final String PW = "htepass";
 	
+	private final String HTEXECUTION = "CREATE TABLE HTExecution " +
+			"(exec_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+			"klock_string BLOB, " +
+			"node_name VARCHAR(255), " +
+			"host_name VARCHAR(255), " +
+			"node_time DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+			"node_successful_finished int DEFAULT 0, " +
+			"node_threshold int , "+
+			"node_count int DEFAULT 0)";
 	
-	public HTEDBHandler() throws SQLException {
+	private final String HTERROR = "CREATE TABLE HTError_History " +
+			"(err_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+			"exec_id int references HTExecution(exec_id), " +
+			"time DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+			"err_msg BLOB)";
+	
+	public HTEDBHandler(String file) throws SQLException {
 		try {
-			Class.forName("com.mysql.jdbc.Driver").newInstance();
-			this.con = DriverManager.getConnection("jdbc:mysql://"+HOST+"/"+DBNAME,USER,PW);
+			Class.forName("org.sqlite.JDBC").newInstance();
+			this.con = DriverManager.getConnection("jdbc:sqlite:"+file);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e) {
 			e.printStackTrace();
 			System.err.println("Failure while loading jdbc driver: "+e.getMessage());
 		}
+	}
+	
+	public boolean checkSchema() throws SQLException {
+		
+		HashSet<String> tables = new HashSet<>();
+		tables.add("HTExecution");
+		tables.add("HTError_History");
+		Statement stmt = con.createStatement();
+		String query = "SELECT name,sql FROM sqlite_master WHERE type = 'table'";
+		ResultSet rs = stmt.executeQuery(query);
+		while(rs.next()) {
+			String name = rs.getString("name");
+			String def = rs.getString("sql");
+			if(def.equals(HTERROR) || def.equals(HTEXECUTION)) {
+				tables.remove(name);
+			}
+		}
+		
+		return tables.isEmpty();
+	}
+	
+	public void createDB() throws SQLException {
+		Statement stmt = con.createStatement();
+		stmt.executeUpdate(HTEXECUTION);
+
+		stmt.executeUpdate(HTERROR);
+		stmt.close();
 	}
 	
 	public int insertNewHTExecution(String command, String name, String host, int node_threshold) {
@@ -86,7 +125,7 @@ public class HTEDBHandler {
 		try {
 			this.con.close();
 		} catch (SQLException e) {
-			System.err.println("Connection to "+DBNAME+" couldn't be closed correctly: "+e.getMessage());
+			System.err.println("Connection to database couldn't be closed correctly: "+e.getMessage());
 		}
 	}
 }

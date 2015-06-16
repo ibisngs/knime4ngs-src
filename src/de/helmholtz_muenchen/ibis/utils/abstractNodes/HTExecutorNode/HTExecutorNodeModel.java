@@ -30,6 +30,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private String defaultLockFile = "/home/share/tmp/"+node_name+SuccessfulRunChecker.LOCK_ENDING;
 	private int count = 0;
 	private int threshold_value = DEFAULT_THRESHOLD;
+	private String db_file = "";
 	
 	//internal flags
 	private boolean use_hte = false;
@@ -98,6 +99,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		
 		use_hte = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
 		threshold_value = threshold.getIntValue();
+		db_file = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
 
 		this.count = 0;
 		//prepare klock
@@ -130,7 +132,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		//try to establish connection to database
 		if (use_hte) {
 			try {
-				htedb = new HTEDBHandler();
+				htedb = new HTEDBHandler(db_file);
 			} catch (SQLException e) {
 				System.err.println("Connection to database could not be established: "+e.getMessage());
 				use_hte = false;

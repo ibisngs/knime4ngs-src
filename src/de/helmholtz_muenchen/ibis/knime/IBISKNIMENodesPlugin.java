@@ -26,6 +26,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
 	public static final String USE_HTE = "hte";
 	public static final String THRESHOLD = "threshold";
+	public static final String DB_FILE = "db_file";
 	
 	/**
      * The shared instance.
@@ -149,6 +150,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
 		store.setDefault(USE_HTE, false);
 		store.setDefault(THRESHOLD, "1");
+		store.setDefault(DB_FILE, "~/");
 	}
 	
 	
@@ -174,6 +176,14 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
 	public void setThresholdPreference(String t) {
 		getPreferenceStore().setValue(THRESHOLD, t);
+	}
+	
+	public String getDBFilePreference() {
+		return getPreferenceStore().getString(DB_FILE);
+	}
+	
+	public void setDBFilePreference(String s) {
+		getPreferenceStore().setValue(DB_FILE, s);
 	}
 
 }

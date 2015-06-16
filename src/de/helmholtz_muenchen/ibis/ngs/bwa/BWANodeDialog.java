@@ -120,6 +120,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     
    
     public void onOpen() {
+    	super.onOpen();
     	if(usePrefPage.getBooleanValue()){
 	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
 	    	if(toolPath == null) {
