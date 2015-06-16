@@ -268,7 +268,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	private void selectDBFile(Shell shell) {
 		FileDialog fdl = new FileDialog(shell);
 		fdl.setText("Selecte HTE database file");
-		fdl.setFilterExtensions(new String[]{"*.sql","*.db"});
+		fdl.setFilterExtensions(new String[]{"*.db","*.sql"});
 		fdl.setFilterPath("~/");
 		String path = fdl.open();
 		
