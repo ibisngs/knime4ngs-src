@@ -38,8 +38,8 @@ public abstract class Summarizer {
 	HashMap<String, GeneInfo> gene_statistic;
 	HashMap<String, HashSet<String>> gene2transcripts;
 	
-	//gene_id -> [unaffected samples, affected_samples, ko_samples]
-	HashMap<String, Integer[]> gene2background;
+	//gene_id -> [dev_aff, dev_in, called_samples]
+	HashMap<String, Double[]> gene2background;
 	
 	//save order of sample_ids
 	ArrayList<String> my_sample_ids;
@@ -217,9 +217,9 @@ public abstract class Summarizer {
 				continue;
 			}
 			fields = line.split("\t");
-			Integer[] counts = new Integer[3];
+			Double[] counts = new Double[3];
 			for(int i = 0; i < 3; i++) {
-				counts[i] = Integer.parseInt(fields[i+1]);
+				counts[i] = Double.parseDouble(fields[i+1]);
 			}
 			gene2background.put(fields[0], counts);
 			
@@ -603,9 +603,22 @@ public abstract class Summarizer {
 	}
 	
 	private void writeGeneStatistic(String outfile) throws IOException {
+		
+		//average genes per sample
+		double avg_aff = 0.0;
+		double avg_in = 0.0;
+				
+		for(String s: sample_statistic.keySet()) {
+			SampleInfo si = sample_statistic.get(s);
+			avg_aff += si.getPart_LOF_genes().size();
+			avg_in += si.getComplete_LOF_genes().size();
+		}
+				
+		avg_aff = avg_aff / sample_statistic.size();
+		avg_in = avg_in / sample_statistic.size();
+		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-//		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP(LoF>=1)\tunaffected_samples\taffected_samples\tko_samples\tobserved_LoF_frequency");
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP_LoF\tunaffected_samples\taffected_samples\tp-value\tko_samples");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP_LoF_aff\tunaffected_samples\taffected_samples\tp-value_aff\tP_LoF_ko\tko_samples\tp-value_in");
 
 		bw.newLine();
 		for(String gene: gene_statistic.keySet()) {
@@ -615,14 +628,15 @@ public abstract class Summarizer {
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());			
 			
-			double p_lof;
+			double p_lof_aff;
 			
-			if(gene2background.size()>0) {
-				p_lof = (double) gene2background.get(gene)[1]/(gene2background.get(gene)[0]+gene2background.get(gene)[1]);
+			if(gene2background.containsKey(gene)) {
+				//deviation factor * overall LoF probability
+				p_lof_aff = gene2background.get(gene)[0] * (avg_aff/gene2transcripts.size());
 			} else {
-				p_lof = 1-gi.getProbUnaffected();
+				p_lof_aff = 1-gi.getProbUnaffected();
 			}
-			bw.write("\t"+p_lof);
+			bw.write("\t"+p_lof_aff);
 			
 			int unaffected = gi.getUnaffectedSamples().size();
 			bw.write("\t"+unaffected);
@@ -630,21 +644,32 @@ public abstract class Summarizer {
 			bw.write("\t"+affected);
 			
 			int n = affected+unaffected;
-			int ex = (int)Math.round(p_lof*n);
-			int test_size = (int) Math.abs(affected - ex);
 			
-			double p_val;
-			if(test_size == 0) {
-				p_val = 1.0;
+			double p_val = 1.0;
+			if(p_lof_aff>1.0) {
+				System.err.println(gene+" "+avg_aff+" "+p_lof_aff);
 			} else {
-				p_val = new BinomialDistribution(n, p_lof).cumulativeProbability(ex-test_size)+(1 - new BinomialDistribution(n, p_lof).cumulativeProbability(ex+test_size-1));
+				p_val = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected-1);
 			}
 			bw.write("\t"+p_val);
 			
-//			bw.write("\t"+(double)affected/((double)unaffected+affected));
+			double p_lof_in = 0.0;
+			if(gene2background.containsKey(gene)) {
+				//deviation factor * overall LoF probability
+				p_lof_in = gene2background.get(gene)[1] * (avg_in/gene2transcripts.size());
+			}
+			bw.write("\t"+p_lof_in);
 			
 			int ko = gi.getKOSamples().size();
 			bw.write("\t"+ko);
+			
+			double p_val_in = 1.0;
+			if(p_lof_in >= 1.0) {
+				System.err.println(gene+" "+avg_aff+" "+p_lof_in);
+			} else {
+				p_val_in = 1 - new BinomialDistribution(n, p_lof_in).cumulativeProbability(gi.getKOSamples().size()-1);
+			}
+			bw.write("\t"+p_val_in);
 			
 //			double frequency = ((double) affected)/((double) (unaffected+affected));
 //			bw.write("\t"+frequency);
@@ -758,6 +783,24 @@ public abstract class Summarizer {
 	
 	private void writeGeneticBackground(String outfile) throws IOException{
 		
+		//average LoF/KO genes per sample
+		double avg_aff = 0.0;
+		double avg_in = 0.0;
+		
+		for(String s: sample_statistic.keySet()) {
+			SampleInfo si = sample_statistic.get(s);
+			avg_aff += si.getPart_LOF_genes().size();
+			avg_in += si.getComplete_LOF_genes().size();
+		}
+		
+		avg_aff = avg_aff / sample_statistic.size();
+		avg_in = avg_in / sample_statistic.size();
+		logger.info("Average number of affected genes per sample: " +avg_aff + "/" + avg_in + "(ko genes)");
+		
+		//all genes / average number of genes per sample
+		double norm_aff = (double)gene2transcripts.size()/avg_aff;
+		double norm_in = (double)gene2transcripts.size()/avg_in;
+		
 		if(geneback_header.contains("#trained on:\t"+vcf_file)) {
 			logger.info("Genetic background file has yet been trained on: "+vcf_file);
 			return;
@@ -765,17 +808,21 @@ public abstract class Summarizer {
 		// iterate over genes found in analyzed study and integrate numbers in
 		// read gene2background
 		for (String gene : gene_statistic.keySet()) {
+			
 			GeneInfo gi = gene_statistic.get(gene);
-			Integer[] counts = gene2background.get(gene);
+			Double[] counts = gene2background.get(gene);
 			if (counts == null) {
-				counts = new Integer[3];
+				counts = new Double[3];
 				for (int i = 0; i < 3; i++) {
-					counts[i] = 0;
+					counts[i] = 0.0;
 				}
-			}
-			counts[0] += gi.getUnaffectedSamples().size();
-			counts[1] += gi.getAffectedSamples().size();
-			counts[2] += gi.getKOSamples().size();
+			}			
+			double called_samples = (double)(gi.getAffectedSamples().size() + gi.getUnaffectedSamples().size());
+			
+			//counts[0] = deviation in background file + deviation in current study weighted by sample number
+			counts[0] = ((counts[0] * counts[2]) + (gi.getAffectedSamples().size() * norm_aff))/(called_samples+counts[2]);
+			counts[1] = ((counts[1] * counts[2]) + (gi.getKOSamples().size() * norm_in))/(called_samples+counts[2]);
+			counts[2] += called_samples;
 			gene2background.put(gene, counts);
 		}
 
@@ -790,12 +837,13 @@ public abstract class Summarizer {
 		
 		bw.write("#trained on:\t"+vcf_file);
 		bw.newLine();
-		bw.write("#gene_id\tunaffected_samples\taffected_samples\tko_samples");
+		bw.write("#gene_id\tdeviation_affected\tdeviation_ko\tcalled_samples");
 		bw.newLine();
 		
 		for(String gene:gene2background.keySet()) {
-			Integer[] counts = gene2background.get(gene);
+			Double[] counts = gene2background.get(gene);
 			bw.write(gene+"\t"+counts[0]+"\t"+counts[1]+"\t"+counts[2]);
+			
 			bw.newLine();
 		}
 		bw.close();
