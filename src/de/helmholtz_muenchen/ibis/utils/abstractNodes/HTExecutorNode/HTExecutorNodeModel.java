@@ -27,7 +27,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private String lockCommand = "";
 	private String host_name = "";
 	private String node_name = this.getClass().getCanonicalName();
-	private String defaultLockFile = System.getProperty("user.home")+node_name+SuccessfulRunChecker.LOCK_ENDING;
+	private String defaultLockFile = System.getProperty("user.home")+"/"+node_name+SuccessfulRunChecker.LOCK_ENDING;
 	private int count = 0;
 	private int threshold_value = DEFAULT_THRESHOLD;
 	private String db_file = "";
