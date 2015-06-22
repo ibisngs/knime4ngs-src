@@ -332,7 +332,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	logger.info("ENVIRONMENT: "+path_variable);
     	logger.info("PERL5LIB: "+perl5lib_variable);
     	
-    	super.executeCommand(new String[]{cmd}, exec, new String[]{path_variable, perl5lib_variable}, logger, lockFile, stdOutFile, stdErrFile, null, null, null);
+    	super.executeCommand(new String[]{cmd}, exec, new String[]{path_variable, perl5lib_variable}, lockFile, stdOutFile, stdErrFile, null, null, null);
     	
     	
     	//Create Output Table

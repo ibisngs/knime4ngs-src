@@ -27,6 +27,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String USE_HTE = "hte";
 	public static final String THRESHOLD = "threshold";
 	public static final String DB_FILE = "db_file";
+	public static final String NOTIFY = "notify";
+	public static final String EMAIL = "email";
 	
 	/**
      * The shared instance.
@@ -70,7 +72,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
      */
     public static void toggleDebug() {
         IBISKNIMENodesPlugin.DEBUG = !IBISKNIMENodesPlugin.DEBUG;
-        System.out.println("toggling Debug Mode");
+        log("toggling Debug Mode");
     }
 
     /**
@@ -81,7 +83,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
      */
     public static void setDebug(final boolean debugEnabled) {
         IBISKNIMENodesPlugin.DEBUG = debugEnabled;
-        System.out.println("setting Debug Mode :" + debugEnabled);
+        log("setting Debug Mode :" + debugEnabled);
     }
 
     /**
@@ -151,6 +153,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		store.setDefault(USE_HTE, false);
 		store.setDefault(THRESHOLD, "1");
 		store.setDefault(DB_FILE, "~/");
+		store.setDefault(NOTIFY, false);
+		store.setDefault(EMAIL, "");
 	}
 	
 	
@@ -186,4 +190,19 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		getPreferenceStore().setValue(DB_FILE, s);
 	}
 
+	public void setNotifyPreference(boolean b){
+		getPreferenceStore().setValue(NOTIFY, b);
+	}
+	
+	public boolean getNotifyPreference() {
+		return getPreferenceStore().getBoolean(NOTIFY);
+	}
+	
+	public String getEmailPreference() {
+		return getPreferenceStore().getString(EMAIL);
+	}
+	
+	public void setEmailPreference(String s) {
+		getPreferenceStore().setValue(EMAIL, s);
+	}
 }

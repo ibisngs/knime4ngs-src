@@ -3,6 +3,14 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.io.File;
 import java.net.InetAddress;
 import java.sql.SQLException;
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -22,6 +30,8 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  */
 public abstract class HTExecutorNodeModel extends NodeModel {
 	
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(HTExecutorNodeModel.class);
+	
 	//variables characterizing the HTExecution
 	private int exec_id = -1;
 	private String lockCommand = "";
@@ -31,6 +41,11 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private int count = 0;
 	private int threshold_value = DEFAULT_THRESHOLD;
 	private String db_file = "";
+	private String email = "";
+	
+	private final String EMAILSENDER = "ibis.knime@helmholtz-muenchen.de";
+	private final String EMAILHOST = "outmail.helmholtz-muenchen.de";
+	private final String HEADER = "IBIS KNIME Nodes Notification";
 	
 	//internal flags
 	private boolean use_hte = false;
@@ -54,7 +69,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	}
 	
 	private void recExecuteCommand(String[] command, ExecutionContext exec,
-			String[] environment, NodeLogger logger, String stdOutFile,
+			String[] environment, String stdOutFile,
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile, SuccessfulRunChecker checker, HTEDBHandler htedb) throws Exception {
 
@@ -64,7 +79,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			count++;
 			htedb.updateCount(exec_id, count);
 			exitcode = Executor.executeCommandWithExitCode(command, exec,
-					environment, logger, stdOutFile, stdErrFile, stdOut,
+					environment,LOGGER, stdOutFile, stdErrFile, stdOut,
 					stdErr, StdInFile);
 			if (exitcode == 0) {
 				htedb.writeSuccess(exec_id);
@@ -79,27 +94,46 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		}
 
 		if (count >= threshold_value) {
-			System.err.println("Email: Your command " + command[0]
-					+ " could not be completed successfully!");
+			String cmd = "";
+			if(command.length==1) {
+				cmd = " " +command[0];
+			} else {
+				for(String c : command) {
+					cmd = " "+ c;
+				}
+			}
+			if(email!=null) {
+				sendMail("Node " + node_name + " failed " + count
+						+ " time(s) on host " + host_name + "."
+						+ System.getProperty("line.separator") + "Command was:"
+						+ cmd);
+			}
 			
 			htedb.closeConnection();
 			throw (new UnsuccessfulExecutionException("Exit code was not 0: '"
 					+ exitcode + "' for " + ExecuteThread.getCommand(command)));
 
 		} else {
-			recExecuteCommand(command, exec, environment, logger, stdOutFile,
+			recExecuteCommand(command, exec, environment, stdOutFile,
 					stdErrFile, stdOut, stdErr, StdInFile, checker, htedb);
 		}
 	}
 
 	protected void executeCommand(String[] command, ExecutionContext exec,
-			String[] environment, NodeLogger logger,File lockFile, String stdOutFile,
+			String[] environment, File lockFile, String stdOutFile,
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
 		
 		use_hte = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
 		threshold_value = threshold.getIntValue();
 		db_file = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
+		boolean notify = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
+		if(notify) {
+			email = IBISKNIMENodesPlugin.getDefault().getEmailPreference();
+		} else {
+			email = null;
+		}
+		
 
 		this.count = 0;
 		//prepare klock
@@ -109,15 +143,15 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			lockCommand += s;
 		}
 
-		logger.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value);
+		LOGGER.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value);
 		
 		if(lockFile == null) {
 			lockFile = new File(defaultLockFile);
 		}
-		logger.info("klock file can be found in "+lockFile);
+		LOGGER.info("klock file can be found in "+lockFile);
 		boolean terminationState = SuccessfulRunChecker
 				.hasTerminatedSuccessfully(lockFile, lockCommand);
-		logger.info("Successful termination state: " + terminationState);
+		LOGGER.info("Successful termination state: " + terminationState);
 
 		//abort execution if node has been executed successfully
 		if (terminationState) {
@@ -132,26 +166,45 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		//try to establish connection to database
 		if (use_hte) {
 			try {
-				htedb = new HTEDBHandler(db_file);
+				htedb = new HTEDBHandler(db_file, LOGGER);
+				if(!htedb.checkSchema()) throw new SQLException();
 			} catch (SQLException e) {
-				System.err.println("Connection to database could not be established: "+e.getMessage());
+				LOGGER.error("Connection to database could not be established: "+e.getMessage());
 				use_hte = false;
 			}
 		}
 		
 		if (use_hte) {
 			exec_id = htedb.insertNewHTExecution(lockCommand, node_name, host_name, threshold_value);
-//			System.out.println("########################## this is the exec_id: "+exec_id);
-			recExecuteCommand(command, exec, environment, logger, stdOutFile,
+			recExecuteCommand(command, exec, environment, stdOutFile,
 					stdErrFile, stdOut, stdErr, StdInFile, checker, htedb);
 			htedb.closeConnection();
 		} else {
 			//HTE is not used
-			logger.info("HTE is not used");
-			Executor.executeCommand(command, exec, environment, logger,
+			LOGGER.info("HTE is not used");
+			Executor.executeCommand(command, exec, environment, LOGGER,
 					stdOutFile, stdErrFile, stdOut, stdErr, StdInFile);
 			checker.writeOK();
 			checker.finalize();
+		}
+	}
+	
+	private void sendMail(String content) {
+
+		Properties properties = System.getProperties();
+		properties.setProperty("mail.smtp.host", EMAILHOST);
+		Session session = Session.getDefaultInstance(properties);
+
+		try {
+			MimeMessage message = new MimeMessage(session);
+			message.setFrom(new InternetAddress(EMAILSENDER));
+			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
+					email));
+			message.setSubject(HEADER);
+			message.setText(content);
+			Transport.send(message);
+		} catch (MessagingException mex) {
+			mex.printStackTrace();
 		}
 	}
 

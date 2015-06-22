@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
@@ -45,10 +47,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
+	public static boolean NOTIFY;
+	public static String EMAIL;
 	
 	private Text binsDirectory;
 	private Text thresholdText;
 	private Text dbFile;
+	private Text email;
 
 
 	public KNIMEPreferencePage() {
@@ -119,12 +124,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Button checkHTE = new Button(use_hte,SWT.CHECK);
 		checkHTE.setText("Use HTE?");
 		checkHTE.setSelection(USE_HTE);
-		checkHTE.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				Button btn = (Button) e.getSource();
-				USE_HTE = btn.getSelection();
-			}
-		});
+		
 		
 		Label thresholdLabel = new Label(use_hte,SWT.RIGHT);
 		thresholdLabel.setText("Global threshold:");
@@ -133,6 +133,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 
 		thresholdText = new Text(use_hte, SWT.BORDER);
 		thresholdText.setText(THRESHOLD);
+		thresholdText.setEnabled(USE_HTE);
 		
 		Label dbFileLabel = new Label(use_hte, SWT.LEFT);
 		dbFileLabel.setText("Use existing db file:");
@@ -142,6 +143,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dbFile = new Text(use_hte,SWT.BORDER);
 		dbFile.setText(DB_FILE);
 		dbFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		dbFile.setEnabled(USE_HTE);
 		
 		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
 		browseDBFile.setText("Browse");
@@ -160,6 +162,49 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				createDBFile(shell3);
 			}
 		});
+		
+		checkHTE.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Button btn = (Button) e.getSource();
+				USE_HTE = btn.getSelection();
+				thresholdText.setEnabled(USE_HTE);
+				dbFile.setEnabled(USE_HTE);
+			}
+		});
+		
+		//Email preferences
+		Group emailPrefs = new Group(top,SWT.NONE);
+		emailPrefs.setText("Email notification preferences");
+		emailPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		emailPrefs.setLayout(new GridLayout());
+		
+		Composite address = new Composite(emailPrefs,SWT.LEFT);
+		address.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout emailLayout = new GridLayout();
+		emailLayout.numColumns = 1;
+		address.setLayout(emailLayout);
+		
+		NOTIFY = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
+		Button checkNotify = new Button(address,SWT.CHECK);
+		checkNotify.setText("Email notification?");
+		checkNotify.setSelection(NOTIFY);
+		checkNotify.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Button btn = (Button) e.getSource();
+				NOTIFY = btn.getSelection();
+				email.setEnabled(NOTIFY);
+			}
+		});
+		
+		Label emailLabel = new Label(address, SWT.LEFT);
+		emailLabel.setText("Email address:");
+		
+		EMAIL = IBISKNIMENodesPlugin.getDefault().getEmailPreference();
+		
+		email = new Text(address,SWT.BORDER);
+		email.setText(EMAIL);
+		email.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		email.setEnabled(NOTIFY);
 
 		return top;
 	}
@@ -225,6 +270,24 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		iknp.setDBFilePreference(DB_FILE);
 		System.out.println("Setting DB_FILE to: "+DB_FILE);
 		
+		iknp.setNotifyPreference(NOTIFY);
+		
+		EMAIL = email.getText();
+		iknp.setEmailPreference(EMAIL);
+		System.out.println("Setting EMAIL to: "+EMAIL);
+		
+		if(NOTIFY) {
+			try {
+				new InternetAddress(EMAIL).validate();
+			} catch (AddressException e) {
+				JOptionPane.showMessageDialog(null,
+						"Enter valid Email address.",
+						"Error",
+						JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+		}
+		
 		return super.performOk();
 	}
 	
@@ -254,7 +317,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	
 	private void selectToolFolder(Shell shell){
 		
 		DirectoryDialog dlg = new DirectoryDialog(shell);
@@ -274,7 +336,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		HTEDBHandler htedb;
 		try {
-			htedb = new HTEDBHandler(path);
+			htedb = new HTEDBHandler(path, null);
 			if(htedb.checkSchema()) {
 				DB_FILE = path;
 			} else {
@@ -303,7 +365,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		String dir = dlg.open();
 		
 		try {
-			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db");
+			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db",null);
 			htedb.createDB();
 			htedb.closeConnection();
 			DB_FILE = dir+"/hte.db";

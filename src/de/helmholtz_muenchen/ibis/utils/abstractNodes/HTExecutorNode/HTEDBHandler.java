@@ -3,16 +3,19 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.sql.*;
 import java.util.HashSet;
 
+import org.knime.core.node.NodeLogger;
+
 public class HTEDBHandler {
 	
 	private Connection con;
+	private NodeLogger logger;
 	
 	private final String HTEXECUTION = "CREATE TABLE HTExecution " +
 			"(exec_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			"klock_string BLOB, " +
 			"node_name VARCHAR(255), " +
 			"host_name VARCHAR(255), " +
-			"node_time DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+			"node_time VARCHAR(255) DEFAULT (datetime('now','localtime')), " +
 			"node_successful_finished int DEFAULT 0, " +
 			"node_threshold int , "+
 			"node_count int DEFAULT 0)";
@@ -20,17 +23,21 @@ public class HTEDBHandler {
 	private final String HTERROR = "CREATE TABLE HTError_History " +
 			"(err_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
 			"exec_id int references HTExecution(exec_id), " +
-			"time DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+			"time VARCHAR(255) DEFAULT (datetime('now','localtime')), " +
 			"err_msg BLOB)";
 	
-	public HTEDBHandler(String file) throws SQLException {
+	public HTEDBHandler(String file, NodeLogger logger) throws SQLException {
+		if(logger == null) {
+			logger = NodeLogger.getLogger(HTExecutorNodeModel.class);
+		}
+		this.logger = logger;
 		try {
 			Class.forName("org.sqlite.JDBC").newInstance();
 			this.con = DriverManager.getConnection("jdbc:sqlite:"+file);
 		} catch (InstantiationException | IllegalAccessException
 				| ClassNotFoundException e) {
 			e.printStackTrace();
-			System.err.println("Failure while loading jdbc driver: "+e.getMessage());
+			logger.error("Failure while loading jdbc driver: "+e.getMessage());
 		}
 	}
 	
@@ -78,7 +85,7 @@ public class HTEDBHandler {
 				id = rs.getInt(1);
 			}
 		} catch (SQLException e) {
-			System.err.println("New HTExecution could not be inserted: "+e.getMessage());
+			logger.error("New HTExecution could not be inserted: "+e.getMessage());
 		}
 		return id;
 	}
@@ -92,7 +99,7 @@ public class HTEDBHandler {
 			preStmt.setInt(2, exec_id);
 			preStmt.execute();
 		} catch (SQLException e) {
-			System.err.println("Count could not be updated for node execution with id "+exec_id+": "+e.getMessage());
+			logger.error("Count could not be updated for node execution with id "+exec_id+": "+e.getMessage());
 		}
 	}
 	
@@ -104,7 +111,7 @@ public class HTEDBHandler {
 			preStmt.setInt(1, exec_id);
 			preStmt.execute();
 		} catch (SQLException e) {
-			System.err.println("Successful could not be updated for node execution with id "+exec_id+": "+e.getMessage());
+			logger.error("Successful could not be updated for node execution with id "+exec_id+": "+e.getMessage());
 		}
 	}
 	
@@ -117,7 +124,7 @@ public class HTEDBHandler {
 			preStmt.setString(2, errmsg);
 			preStmt.execute();
 		} catch (SQLException e) {
-			System.err.println("Error message could not be inserted for node execution with id "+exec_id+": "+e.getMessage());
+			logger.error("Error message could not be inserted for node execution with id "+exec_id+": "+e.getMessage());
 		}
 	}
 	

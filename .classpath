@@ -18,5 +18,7 @@
 	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/commons-math3-3.5.jar"/>
 	<classpathentry kind="lib" path="libs/org.apache.commons.net_3.1.0.v201205071737.jar"/>
 	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/sqlite-jdbc-3.8.7.jar"/>
+	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/jaf-1.1.1/activation.jar"/>
+	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/javax.mail.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

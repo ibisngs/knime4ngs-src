@@ -253,7 +253,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	command.add(path2refFile);
 
 	    	/**Execute**/
-	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
 //	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 			
     	} else {
@@ -295,7 +295,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	command.add(path2readFile);
     	command.add("-f "+outfile);
     	/**Execute**/
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
 //    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
    
 		//If paired end, repeat previous step
@@ -310,7 +310,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
             	command.set(4, " -f "+ out12Name);
         	}
         	/**Execute**/
-        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, null, null, null, null, null, null);
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
 //        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
 		}
     }
@@ -405,11 +405,11 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	/**Execute**/
 	    	if(alnalgo.equals("BWA-MEM")) {
 //	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
-	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, lockFile, memOut, null, null, null, null);
+	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, memOut, null, null, null, null);
 
 	    	}else{
 //	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, LOGGER, lockFile, null, null, null, null, null);
+	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, null, null, null, null, null);
 
 	    	}
 //	    	checker.writeOK();
