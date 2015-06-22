@@ -18,17 +18,15 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 /**
  * This is the model implementation of RunFastQC.
  * 
  *
- * @author JMB
+ * @author hastreiter
  */
 public class RunFastQCNodeModel extends NodeModel {
 	
@@ -62,33 +60,18 @@ public class RunFastQCNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
-    	BinaryHandler.checkToolAvailability("bwa");
-    	
+    	  	
     	String readFile1 = m_readseqfile.getStringValue();
     	String readFile2 = "";
     	String readType = m_readType.getStringValue();
-    	
-    	/**Initialize logfile**/
-    	String logfile = readFile1.substring(0,readFile1.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("RunFastQC"));
-    	/**end initializing logfile**/
-    	
+    	  	
     	/**
     	 * Check Files
     	 */
-    	File file1 = new File(readFile1);
-    	File file3 = file1;
     	if(m_readseqfile2.isEnabled()) {
     		readFile2 = m_readseqfile2.getStringValue();
-    		file3 = new File(readFile2);
     	}
-		if(file1.exists() && file3.exists()){
-			logBuffer.append("Sequence file(s) found.\n");
-		}
-		
+	
 		/**
 		 * Create Output Table
 		 */
@@ -120,10 +103,7 @@ public class RunFastQCNodeModel extends NodeModel {
     	 */
     	pushFlowVariableString("isBAM", secFile);
     	pushFlowVariableString("readType", readType);
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
+    	 	
         return new BufferedDataTable[]{out};
     }
 
@@ -132,7 +112,6 @@ public class RunFastQCNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-    	//Nothing to do...
     }
 
     /**
@@ -160,7 +139,18 @@ public class RunFastQCNodeModel extends NodeModel {
     		}
     	}
     	
-        return new DataTableSpec[]{null};
+    	/**
+    	 * Out Specs
+    	 */
+    	DataColumnSpecCreator col1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE);
+        DataColumnSpecCreator col2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE);
+        DataTableSpec out_specs    = new DataTableSpec(
+    									new DataColumnSpec[]{
+    										col1.createSpec(),col2.createSpec()
+    									});
+    	
+    	
+        return new DataTableSpec[]{out_specs};
     }
 
     /**
