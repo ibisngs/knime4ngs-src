@@ -35,7 +35,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * This is the model implementation of FastQC.
  * 
  *
- * @author Maximilian Hastreiter
+ * @author hastreiter
  */
 public class FastQCNodeModel extends NodeModel {
     
@@ -68,8 +68,6 @@ public class FastQCNodeModel extends NodeModel {
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
     	  
-//    	System.out.println("HUIBOO "+readsFile1.substring(readsFile1.length()-2, readsFile1.length()));
-    	
     	
     	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
@@ -235,6 +233,12 @@ public class FastQCNodeModel extends NodeModel {
     	if(!cn[0].equals(RunFastQCNodeModel.OUT_COL1) && !cn[0].equals(RunFastQCNodeModel.OUT_COL2)) {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
     	}
+    	
+    	if(getAvailableFlowVariables().containsKey("readType")){
+    		throw new InvalidSettingsException("This node is incompatible with the previous node. Node has to be connected to RunFastQC");
+    	}
+    	
+
     	
         return new DataTableSpec[]{null};
     }

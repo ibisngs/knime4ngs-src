@@ -29,9 +29,5 @@
         <outPort index="0" name="Out-Port">Cell 0: Path2ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path2ReadFile2
         (fastQ or fastA).<br></br>Cell 2: Path2filterfile</outPort>
     </ports>    
-    
-    <views>
-        <view index="0" name=""></view>
-    </views>
-    
+
 </knimeNode>
