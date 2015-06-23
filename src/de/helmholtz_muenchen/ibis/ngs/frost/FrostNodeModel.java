@@ -24,6 +24,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
@@ -38,6 +39,8 @@ public class FrostNodeModel extends NodeModel {
 	// the logger instance
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
     private static int seed = 999;
+	public static String exome = "";
+
     
 	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/Frost/";
 //	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
@@ -49,12 +52,16 @@ public class FrostNodeModel extends NodeModel {
 	public static final String CFGKEY_GENERATION = "generation";
 	public static final String CFGKEY_SEED = "seed";
 	public static final String CFGKEY_VARY="parameter";
+	public static final String CFGKEY_BED_FILE="bedfile";
+
 
 	
 	public static final String CFGKEY_USE_MUT_RATE = "use_mutation";
 	public static final String CFGKEY_USE_RECOMB_NUM = "use_recombination";
 	public static final String CFGKEY_USE_GENERATION = "use_generation";
 	public static final String CFGKEY_USE_SEED = "use_seed";
+	public static final String CFGKEY_USE_BED_FILE = "use_bedfile";
+
 
 
 
@@ -63,13 +70,16 @@ public class FrostNodeModel extends NodeModel {
     static final int DEFAULT_RECOMNATION = 1000;
     static final int DEFAULT_GENERATION = 5300;
     static final int DEFAULT_SEED = 999;
+    public final static String DEFAULT_MAPFILE = "/home/ibis/tanzeem.haque/Documents/hg19/hg19_N_regions_tab.txt";
 
     private final SettingsModelString m_FASTA = new SettingsModelString(FrostNodeModel.CFGKEY_FASTA,""); // path to fasta file
     private final SettingsModelDoubleBounded m_MUT = new SettingsModelDoubleBounded(FrostNodeModel.CFGKEY_MUT_RATE,FrostNodeModel.DEFAULT_MUTATION_RATE,1.0, 3.0);
     private final SettingsModelIntegerBounded m_REC = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_RECOMB_NUM,FrostNodeModel.DEFAULT_RECOMNATION,0, Integer.MAX_VALUE);
     private final SettingsModelIntegerBounded m_GEN = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_GENERATION,FrostNodeModel.DEFAULT_GENERATION,0, Integer.MAX_VALUE);
     private final SettingsModelIntegerBounded m_SEED = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_SEED,FrostNodeModel.DEFAULT_SEED,Integer.MIN_VALUE, Integer.MAX_VALUE);
-    private final SettingsModelString m_VARY = new SettingsModelString(CFGKEY_VARY, "");
+    private final SettingsModelString m_VARY = new SettingsModelString(FrostNodeModel.CFGKEY_VARY, "--");
+    private final SettingsModelString m_BED_FILE = new SettingsModelString(FrostNodeModel.CFGKEY_BED_FILE,""); // path to fasta file
+
     /**
 	 * copy the booleans into dialog class to add component and check box config
 	 */
@@ -78,6 +88,8 @@ public class FrostNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_use_REC = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_RECOMB_NUM, false);
 	private final SettingsModelBoolean m_use_GEN = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_GENERATION, false);
 	private final SettingsModelBoolean m_use_SEED = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_SEED, false);
+	private final SettingsModelBoolean m_use_BED_FILE = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_BED_FILE, false);
+	
 
 	/**The Output Row Names */
 	public static final String OUT_COL = "fasta_output_";
@@ -89,10 +101,21 @@ public class FrostNodeModel extends NodeModel {
     
         // TODO: Specify the amount of input and output ports needed.
         super(0, 1);
+//        m_use_MUT.setEnabled(false);
         m_MUT.setEnabled(false);
+       
+//        m_use_REC.setEnabled(false);
         m_REC.setEnabled(false);
-        m_SEED.setEnabled(false);
+        
+//        m_use_GEN.setEnabled(false);
         m_GEN.setEnabled(false);
+        
+//        m_use_SEED.setEnabled(false);
+        m_SEED.setEnabled(false);
+        
+//        m_use_BED_FILE.setEnabled(false);
+        m_BED_FILE.setEnabled(false);
+
     }
 
     
@@ -111,11 +134,11 @@ public class FrostNodeModel extends NodeModel {
         double mutRate = 1.;
         int rec_num = -1;
         int gen_num = -1;
-        String param = m_VARY.getStringValue();
+//        String param = m_VARY.getStringValue();
         /**
          * the seed is set here and it runs the FrostRunner.main(args)
          */
-        executeInput(input, mutRate, rec_num, gen_num, param); 
+        executeInput(input, mutRate, rec_num, gen_num); 
     	/**
     	 * OUTPUT
     	 */
@@ -125,6 +148,11 @@ public class FrostNodeModel extends NodeModel {
         /**
          * Record files as flow variable
          */
+        /**
+         * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
+         */
+        FrostNodeModel.recordFiles()[0] = FrostNodeModel.recordFiles()[0].replace(".tmp", ".txt");
+        FrostNodeModel.recordFiles()[1] = FrostNodeModel.recordFiles()[1].replace(".tmp", ".txt");
         for(int i = 0; i < FrostNodeModel.recordFiles().length; i++) {
             pushFlowVariableString("record file " +(i+1), FrostNodeModel.recordFiles()[i]);
 		}
@@ -135,12 +163,12 @@ public class FrostNodeModel extends NodeModel {
         /**
          * create the column(s) for (multi)fasta output of a trio
          */ 
-		allColSpecs[0] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[1] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_1.fa", FileCell.TYPE).createSpec();
-		allColSpecs[2] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[3] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_1.fa", FileCell.TYPE).createSpec();
-		allColSpecs[4] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[5] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[0] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[1] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[2] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[3] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[4] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[5] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C1.fa", FileCell.TYPE).createSpec();
 		
 		
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
@@ -150,6 +178,7 @@ public class FrostNodeModel extends NodeModel {
          * i = 0,1, ... #IDS
          */  
 		FileCell[] cells = new FileCell[6];
+//		System.out.println("ID LIST now: " + FrostRunner.id_list.size());
 		for (int j = 0; j < FrostRunner.id_list.size(); j++) {
 			RowKey key = new RowKey("Row: " + FrostRunner.id_list.get(j));
 //			System.out.println(key.toString());
@@ -184,7 +213,10 @@ public class FrostNodeModel extends NodeModel {
 			DataRow row = new DefaultRow(key, cells);
             container.addRowToTable(row);
 
-		}    
+		}
+		FrostRunner.id_list.clear();
+//		System.out.println("ID LIST after : " + FrostRunner.id_list.size());
+
 		
 		/**
 		 * RowKey key = new RowKey("Row: " + FrostNodeModel.OUT_ROW_LAST);
@@ -204,25 +236,48 @@ public class FrostNodeModel extends NodeModel {
         
         
     }
-    
+//    private void createDirectory() {
+//		// TODO Auto-generated method stub
+//    	File theDir = new File("new folder");
+//
+//    	// if the directory does not exist, create it
+//    	if (!theDir.exists()) {
+//    	    System.out.println("creating directory: " + directoryName);
+//    	    boolean result = false;
+//
+//    	    try{
+//    	        theDir.mkdir();
+//    	        result = true;
+//    	    } 
+//    	    catch(SecurityException se){
+//    	        //handle it
+//    	    }        
+//    	    if(result) {    
+//    	        System.out.println("DIR created");  
+//    	    }
+//    	}
+//		
+//	}
+
     public static String[] recordFiles() {
     	
-    	String[] files = new String[8];
-    	files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
-    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
-    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
-    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
-    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
-    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_phased_" + FrostNodeModel.seed + ".vcf";
-    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";
-    	files[7] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
+
+    	String[] files = new String[7];
+		files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".tmp";
+    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".tmp";
+    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
+    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
+    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_phased_" + FrostNodeModel.seed + ".vcf";
+    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_unphased_" + FrostNodeModel.seed + ".vcf";
+    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
 
     	return files;
 
     }
         
-    private void executeInput(String input, double mutRate, int rec_num, int gen_num, String param) throws InterruptedException, IOException {
+    private void executeInput(String input, double mutRate, int rec_num, int gen_num) throws InterruptedException, IOException {
         
+    	String param = "";
         ArrayList<String> command = new ArrayList<String>();
     	command.add("-i");
     	command.add(input);
@@ -248,15 +303,23 @@ public class FrostNodeModel extends NodeModel {
     		command.add("-s");
         	command.add(seed+"");
     	}
-    	if(param.equals("Mutation")){
-    		command.add("--mut");
+    	if(m_use_BED_FILE.getBooleanValue()){
+			command.add("--bed");
+			command.add(m_BED_FILE.getStringValue());
     	}
-    	if(param.equals("Crossover")){
-    		command.add("--reco");
+    	if(m_VARY.getStringValue().equals("Mutation")){
+    		param = "--mut";
     	}
-    	if(param.equals("Denovo")){
-    		command.add("--denovo");
+    	if(m_VARY.getStringValue().equals("Crossover")){
+    		param = "--reco";
     	}
+    	if(m_VARY.getStringValue().equals("Denovo")){
+    		param = "--denovo";
+    	}
+    	command.add(param);
+    	
+//    	for (String s: command)
+//    		System.out.println(s);
     	
     	String[] args = new String[command.size()];
     	args = command.toArray(args);
@@ -318,11 +381,13 @@ public class FrostNodeModel extends NodeModel {
     	m_REC.saveSettingsTo(settings);
     	m_GEN.saveSettingsTo(settings);
     	m_SEED.saveSettingsTo(settings);
+    	m_BED_FILE.saveSettingsTo(settings);
     	m_VARY.saveSettingsTo(settings);
     	m_use_MUT.saveSettingsTo(settings);
     	m_use_REC.saveSettingsTo(settings);
     	m_use_GEN.saveSettingsTo(settings);
     	m_use_SEED.saveSettingsTo(settings);
+    	m_use_BED_FILE.saveSettingsTo(settings);
     }
 
     /**
@@ -337,11 +402,13 @@ public class FrostNodeModel extends NodeModel {
     	m_REC.loadSettingsFrom(settings);
     	m_GEN.loadSettingsFrom(settings);
     	m_SEED.loadSettingsFrom(settings);
+    	m_BED_FILE.loadSettingsFrom(settings);
     	m_VARY.loadSettingsFrom(settings);
     	m_use_MUT.loadSettingsFrom(settings);
     	m_use_REC.loadSettingsFrom(settings);
     	m_use_GEN.loadSettingsFrom(settings);
     	m_use_SEED.loadSettingsFrom(settings);
+    	m_use_BED_FILE.loadSettingsFrom(settings);
     }
 
     /**
@@ -356,11 +423,13 @@ public class FrostNodeModel extends NodeModel {
     	m_REC.validateSettings(settings);
     	m_GEN.validateSettings(settings);
     	m_SEED.validateSettings(settings);
+    	m_BED_FILE.validateSettings(settings);
     	m_VARY.validateSettings(settings);
     	m_use_MUT.validateSettings(settings);
     	m_use_REC.validateSettings(settings);
     	m_use_GEN.validateSettings(settings);
     	m_use_SEED.validateSettings(settings);
+    	m_use_BED_FILE.validateSettings(settings);
     }
     
     /**
