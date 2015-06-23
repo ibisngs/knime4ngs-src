@@ -487,5 +487,11 @@ public class FrostRunner {
 
 //		System.exit(0);
 	}
+	
+	public static void getChunks(String file) throws IOException {
+		FrostRunner.id_list = new ArrayList<String> ();
+		Chunker chunker = new Chunker (file);
+		chunker.createChunk();
+	}
 
 }

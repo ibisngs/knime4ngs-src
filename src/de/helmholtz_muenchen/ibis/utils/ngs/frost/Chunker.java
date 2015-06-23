@@ -41,7 +41,7 @@ public class Chunker {
 //		System.out.println(chunk);
 		
 		for (int i = 0; i < chunk; i++) {
-			
+			FrostRunner.id_list.add(i + "_" + id);
 			int begin = i*FrostslilheplerNodeModel.chunk_length;
 			int end = begin + FrostslilheplerNodeModel.chunk_length;
 			if (end > seqLength)
@@ -90,11 +90,11 @@ public class Chunker {
 		return id;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		// TODO Auto-generated method stub
-		Chunker chunker = new Chunker("/home/ibis/tanzeem.haque/Documents/Frost_outputs/chr21_C0.fa");
-		chunker.createChunk();
-
-	}
+//	public static void main(String[] args) throws IOException {
+//		// TODO Auto-generated method stub
+//		Chunker chunker = new Chunker("/home/ibis/tanzeem.haque/Documents/Frost_outputs/chr21_C0.fa");
+//		chunker.createChunk();
+//
+//	}
 
 }
