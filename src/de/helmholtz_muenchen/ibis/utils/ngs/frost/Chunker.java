@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import de.helmholtz_muenchen.ibis.ngs.FrostslilheplerNodeModel;
+import de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeModel;
 
 
 public class Chunker {
@@ -37,13 +37,13 @@ public class Chunker {
 		fr.readSequenceFromFile(this.file, id);
 		int seqLength = fr.getLength();
 //		System.out.println(seqLength);
-		int chunk = (seqLength/FrostslilheplerNodeModel.chunk_length) +1;
+		int chunk = (seqLength/FrostsLilHelperNodeModel.chunk_length) +1;
 //		System.out.println(chunk);
 		
 		for (int i = 0; i < chunk; i++) {
 			FrostRunner.id_list.add(i + "_" + id);
-			int begin = i*FrostslilheplerNodeModel.chunk_length;
-			int end = begin + FrostslilheplerNodeModel.chunk_length;
+			int begin = i*FrostsLilHelperNodeModel.chunk_length;
+			int end = begin + FrostsLilHelperNodeModel.chunk_length;
 			if (end > seqLength)
 				end = seqLength;
 			
@@ -54,6 +54,8 @@ public class Chunker {
 			BufferedWriter bw= new BufferedWriter(new FileWriter(newFile), 10000000);
 			try { 
 //				System.out.println(newFile);
+				bw.write(">"+i + "_" + id);
+				bw.write("\n");
 				bw.write(fr.getSequence().substring(begin, end));
 			} catch (Exception e) {
 				System.err.println("Error: " + e.getMessage());

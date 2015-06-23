@@ -23,10 +23,9 @@ public class FrostRunner {
 	public static final String INTERNAL_PATH = FrostNodeModel.INTERNAL_OUTPUT_PATH;
 //	 --bed /storageNGS/scratch/Sequenciator/secondary_files/UCSC_CodingExons.bed
 
-	public static ArrayList<String> id_list = new ArrayList<String> ();;
+	public static ArrayList<String> id_list = new ArrayList<String> ();
 	public static String[] parental_chromatids = new String[2];
 	public static String varyParameter = "";
-	public static String[] records = FrostNodeModel.recordFiles();
 	public static int skipped_N;
 	public final static int reco_gap = 18000;
 	public final static double insertion_rate = 0.15;
@@ -186,20 +185,24 @@ public class FrostRunner {
 
 		else {
 			
-			/**
-			 * Handling the existing files first
-			 */
-			deleteExistingFiles();
-
+//			for (String s : records)
+//				System.out.println(s);
+			
 			String using_command = "";
 			for (String s : args)
 				using_command += s+" ";
 			
-			FrostRunner.bw6 = new BufferedWriter(new FileWriter(FrostRunner.records[6], true), 10000000);
+			String [] records = FrostNodeModel.recordFiles();
+			/**
+			 * Handling the existing files first
+			 */
+			deleteExistingFiles(records);
+			
+			FrostRunner.bw6 = new BufferedWriter(new FileWriter(records[6], true), 10000000);
 			
 			FrostRunner.createLog(FrostRunner.bw6, "Using command: " + "\n" + using_command);
 
-			run(input, mapFile, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary);
+			run(input, mapFile, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary, records);
 			
 		}
 		long endTime   = System.currentTimeMillis();
@@ -211,16 +214,16 @@ public class FrostRunner {
 
 
 	}
-	private static void deleteExistingFiles() {
-		for (String s : FrostRunner.records) {
+	private static void deleteExistingFiles(String[] records) {
+		for (String s : records) {
 			File f = new File (s);
 			if (f.exists())
 				f.delete();
 		}
-		File f = new File (FrostRunner.records[0].replace(".tmp", ".txt"));
+		File f = new File (records[0].replace(".tmp", ".txt"));
 		if (f.exists())
 			f.delete();
-		f = new File (FrostRunner.records[1].replace(".tmp", ".txt"));
+		f = new File (records[1].replace(".tmp", ".txt"));
 		if (f.exists())
 			f.delete();
 	}
@@ -233,7 +236,7 @@ public class FrostRunner {
 	 * @throws IOException 
 	 */
 	protected static void run(String input, String mapFile, double mutRate, int recombination, int generation, int seed, 
-			boolean mutVary, boolean recVary, boolean deNovoVary) throws InterruptedException, IOException {
+			boolean mutVary, boolean recVary, boolean deNovoVary, String[] records) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub
 
 		FrostRunner.createLog(FrostRunner.bw6,"Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
@@ -263,7 +266,7 @@ public class FrostRunner {
 		/**
 		 * Staring the vcf file
 		 */
-		BufferedWriter bw4 = new BufferedWriter(new FileWriter(FrostRunner.records[4], true), 10000000);
+		BufferedWriter bw4 = new BufferedWriter(new FileWriter(records[4], true), 10000000);
 		rw.write_simple_string(bw4, 
 				"#CHROM" + "\t" /*0*/
 				+ "#POS" + "\t" /*1*/
@@ -290,11 +293,11 @@ public class FrostRunner {
 		 * 
 		 */
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
-			BufferedWriter bw0 = new BufferedWriter(new FileWriter(FrostRunner.records[0], true), 10000000);
-			BufferedWriter bw1 = new BufferedWriter(new FileWriter(FrostRunner.records[1], true), 10000000);
-			BufferedWriter bw2 = new BufferedWriter(new FileWriter(FrostRunner.records[2], true), 10000000);
-			BufferedWriter bw3 = new BufferedWriter(new FileWriter(FrostRunner.records[3], true), 10000000);
-			bw4 = new BufferedWriter(new FileWriter(FrostRunner.records[4], true), 10000000);
+			BufferedWriter bw0 = new BufferedWriter(new FileWriter(records[0], true), 10000000);
+			BufferedWriter bw1 = new BufferedWriter(new FileWriter(records[1], true), 10000000);
+			BufferedWriter bw2 = new BufferedWriter(new FileWriter(records[2], true), 10000000);
+			BufferedWriter bw3 = new BufferedWriter(new FileWriter(records[3], true), 10000000);
+			bw4 = new BufferedWriter(new FileWriter(records[4], true), 10000000);
 
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
 			int currentLength = Integer.parseInt(fc.input_chr_length.get(i).split("\t")[1]);
@@ -392,7 +395,7 @@ public class FrostRunner {
 			/**
 			 * trio_phased_
 			 */
-			rw.write_vcf(bw4, FrostRunner.records[0], FrostRunner.records[1]);
+			rw.write_vcf(bw4, records[0], records[1]);
 			bw4.close();
 
 		}
@@ -409,8 +412,8 @@ public class FrostRunner {
 		/**
 		 * trio_unpahsed_
 		 */
-		BufferedWriter bw5 = new BufferedWriter(new FileWriter(FrostRunner.records[5], true), 10000000);
-		rw.unphase(bw5, FrostRunner.records[4]); //recordfile[5]
+		BufferedWriter bw5 = new BufferedWriter(new FileWriter(records[5], true), 10000000);
+		rw.unphase(bw5, records[4]); //recordfile[5]
 		bw5.close();
 
 
@@ -423,7 +426,7 @@ public class FrostRunner {
 		 * which are .tmp s
 		 */
 		for (int i = 0; i <= 1; i++) {
-			File f = new File (FrostRunner.records[i]);
+			File f = new File (records[i]);
 			if (f.exists())
 			f.delete();
 		}
@@ -489,9 +492,10 @@ public class FrostRunner {
 	}
 	
 	public static void getChunks(String file) throws IOException {
-		FrostRunner.id_list = new ArrayList<String> ();
 		Chunker chunker = new Chunker (file);
 		chunker.createChunk();
+//		for (String s: id_list)
+//			System.out.println(s);
 	}
 
 }
