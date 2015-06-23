@@ -36,8 +36,8 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
+import de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeModel;
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
-import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 
 
 /**
@@ -165,12 +165,12 @@ public class ArtNodeModel extends NodeModel {
         		 */
     			
     			String[] trio = {
-    					row.getCell(0).toString(), //F_0
-    					row.getCell(1).toString(), //F_1
-    					row.getCell(2).toString(), //M_0
-    					row.getCell(3).toString(), //M_1
-    					row.getCell(4).toString(), //C_0
-    					row.getCell(5).toString() // C_1
+    					row.getCell(0).toString(), //M0
+    					row.getCell(1).toString(), //M1
+    					row.getCell(2).toString(), //F0
+    					row.getCell(3).toString(), //F1
+    					row.getCell(4).toString(), //C0
+    					row.getCell(5).toString() // C1
     					};
 //    			for (String s: trio)
 //    				System.out.println("inData 0: "+s);
@@ -236,18 +236,18 @@ public class ArtNodeModel extends NodeModel {
     		for (int j = 0; j < 3; j++) {
     	        switch (j) {
     			case 0:
-    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_F");
+    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_M");
 //    	            System.out.println("key 0: "+ key.toString());
-    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_fwd.fq");
-    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_rev.fq");
+    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_fwd.fq");
+    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_rev.fq");
     				DataRow row = new DefaultRow(key, cells);
     	    	    container.addRowToTable(row);
     				break;
     			case 1:
-    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_M");
+    	            key = new RowKey("Row " + (row_idx++) + ". " + chr + "_F");
 //    	            System.out.println("key 1: "+ key.toString());
-    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_fwd.fq");
-    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_M_rev.fq");
+    				cells[0] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_fwd.fq");
+    				cells[1] = (FileCell) FileCellFactory.create(ArtNodeModel.INTERNAL_OUTPUT_PATH + chr + "_F_rev.fq");
     				row = new DefaultRow(key, cells);
     	    	    container.addRowToTable(row);
     				break;
@@ -386,7 +386,7 @@ public class ArtNodeModel extends NodeModel {
 			while ((currentLine = in.readLine()) != null) {
 				if (!currentLine.trim().equals("")) {
 					String [] info = currentLine.split("\t");
-					int chunks = (Integer.parseInt(info[1])/FrostRunner.chunk_length)+1;
+					int chunks = (Integer.parseInt(info[1])/FrostsLilHelperNodeModel.chunk_length)+1;
 					for (int i = 0; i < chunks; i++)
 						ids.add(i + "_" + info[0]);
 				}
@@ -423,12 +423,12 @@ public class ArtNodeModel extends NodeModel {
 			for (String fileEntry: folder.list()) {
 //				System.out.println(fileEntry.substring(0, fileEntry.length()-8));
 				if (fileEntry.endsWith(".fa") && fileEntry.startsWith(id)) {
-					trios[0] = directory + "/" + id + "_F_0.fa";
-					trios[1] = directory + "/" + id + "_F_1.fa";
-					trios[2] = directory + "/" + id + "_M_0.fa";
-					trios[3] = directory + "/" + id + "_M_1.fa";
-					trios[4] = directory + "/" + id + "_C_0.fa";
-					trios[5] = directory + "/" + id + "_C_1.fa";
+					trios[0] = directory + "/" + id + "_M0.fa";
+					trios[1] = directory + "/" + id + "_M1.fa";
+					trios[2] = directory + "/" + id + "_F0.fa";
+					trios[3] = directory + "/" + id + "_F1.fa";
+					trios[4] = directory + "/" + id + "_C0.fa";
+					trios[5] = directory + "/" + id + "_C1.fa";
 
 				}
 			}
@@ -461,10 +461,10 @@ public class ArtNodeModel extends NodeModel {
 			String indiv = "";
 			switch(i) {
 			case 0:
-				indiv = "F";
+				indiv = "M";
 				break;
 			case 1:
-				indiv = "M";
+				indiv = "F";
 				break;			
 			case 2:
 				indiv = "C";
@@ -542,8 +542,8 @@ public class ArtNodeModel extends NodeModel {
 			
 //			for (String s : colNames)
 
-			if (colNames.length==6 && colNames[0].equals(FrostNodeModel.OUT_COL + "F_0.fa") &&
-					colNames[5].equals(FrostNodeModel.OUT_COL + "C_1.fa")) 
+			if (colNames.length==6 && colNames[0].equals(FrostNodeModel.OUT_COL + "M0.fa") &&
+					colNames[5].equals(FrostNodeModel.OUT_COL + "C1.fa")) 
 				m_ID_PATH.setEnabled(false);
 			else
 				throw new InvalidSettingsException("The in-port is invalid! Don't use an in-port or connect the right node.");
