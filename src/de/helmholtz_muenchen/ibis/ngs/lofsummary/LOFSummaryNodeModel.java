@@ -59,7 +59,6 @@ public class LOFSummaryNodeModel extends NodeModel {
 	public static final String OUT_COL2 = "Path2Gene_Summary";
 	public static final String OUT_COL3 = "Path2Sample_Summary";
 	public static final String OUT_COL4 = "Path2Trio_Summary";
-	public static final String OUT_COL5 = "Path2Genetic_Background";
 	
 	public static boolean optionalPort=false;
 	
@@ -128,15 +127,13 @@ public class LOFSummaryNodeModel extends NodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL5, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(LOF_Summary[0]),
     			(FileCell) FileCellFactory.create(LOF_Summary[1]),
     			(FileCell) FileCellFactory.create(LOF_Summary[2]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[3]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[4])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[3])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -172,8 +169,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL5, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()})};
     }
 
     /**

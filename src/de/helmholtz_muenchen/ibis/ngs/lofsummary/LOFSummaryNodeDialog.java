@@ -40,7 +40,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to PED file");
     	addDialogComponent(new DialogComponentFileChooser(pedin, "his_id_LOFStatistics_PEDIN", 0, ".ped"));
     	
-    	createNewGroup("Path to genetic background file");
+    	createNewGroup("Path to ExAC background file");
     	addDialogComponent(new DialogComponentFileChooser(genebackin, "his_id_LOFStatistics_GENEBACKIN",0,".tsv"));
     	
     	//annotation selection
