@@ -36,7 +36,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 
 		createNewGroup("HTE");
 		
-		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use vales from KNIME4NGS preference page?"));
+		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
 		
 		DialogComponentNumber dcn = new DialogComponentNumber(threshold, "Threshold", HTExecutorNodeModel.DEFAULT_THRESHOLD);
 		addDialogComponent(dcn);

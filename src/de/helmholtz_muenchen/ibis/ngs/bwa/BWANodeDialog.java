@@ -55,7 +55,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	
     	createNewGroup("BWA");
     	
-    	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use vales from KNIME4NGS preference page?"));
+    	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
     	
     	addDialogComponent(dcfc);
     	dcfc.setEnabled(false);
