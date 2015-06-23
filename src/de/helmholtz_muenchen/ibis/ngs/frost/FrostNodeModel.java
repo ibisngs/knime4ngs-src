@@ -38,7 +38,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 public class FrostNodeModel extends NodeModel {
 	// the logger instance
 //    private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostNodeModel.class); //not used yet
-    private static int seed = 999;
+    private static int seed;
 	public static String exome = "";
 
     
@@ -145,17 +145,6 @@ public class FrostNodeModel extends NodeModel {
     	 // the data table spec of the single output table, 
         // the table will have six columns:
         
-        /**
-         * Record files as flow variable
-         */
-        /**
-         * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
-         */
-        FrostNodeModel.recordFiles()[0] = FrostNodeModel.recordFiles()[0].replace(".tmp", ".txt");
-        FrostNodeModel.recordFiles()[1] = FrostNodeModel.recordFiles()[1].replace(".tmp", ".txt");
-        for(int i = 0; i < FrostNodeModel.recordFiles().length; i++) {
-            pushFlowVariableString("record file " +(i+1), FrostNodeModel.recordFiles()[i]);
-		}
         
         int col_num = 6; // 6 fastas
         DataColumnSpec[] allColSpecs = new DataColumnSpec[col_num];
@@ -190,22 +179,22 @@ public class FrostNodeModel extends NodeModel {
 
 				switch (i) {
 					case 0:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M0.fa");
 						break;
 					case 1:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M1.fa");
 						break;
 					case 2:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F0.fa");
 						break;
 					case 3:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F1.fa");
 						break;
 					case 4:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C_0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C0.fa");
 						break;
 					case 5:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C_1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C1.fa");
 						break;
 				}
 					
@@ -215,6 +204,20 @@ public class FrostNodeModel extends NodeModel {
 
 		}
 		FrostRunner.id_list.clear();
+		/**
+         * Record files as flow variable
+         */
+        /**
+         * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
+         */
+		String[] fs = FrostNodeModel.recordFiles();
+		
+		fs[0] = fs[0].replace(".tmp", ".txt");
+		fs[1] = fs[1].replace(".tmp", ".txt");
+        for(int i = 0; i < fs.length; i++) {
+            pushFlowVariableString("record file " +(i+1), fs[i]);
+		}
+        
 //		System.out.println("ID LIST after : " + FrostRunner.id_list.size());
 
 		
@@ -356,12 +359,12 @@ public class FrostNodeModel extends NodeModel {
         /**
          * create the column(s) for (multi)fasta output of a trio
          */ 
-		allColSpecs[0] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[1] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F_1.fa", FileCell.TYPE).createSpec();
-		allColSpecs[2] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[3] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M_1.fa", FileCell.TYPE).createSpec();
-		allColSpecs[4] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_0.fa", FileCell.TYPE).createSpec();
-		allColSpecs[5] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C_1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[0] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[1] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "M1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[2] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[3] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "F1.fa", FileCell.TYPE).createSpec();
+		allColSpecs[4] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C0.fa", FileCell.TYPE).createSpec();
+		allColSpecs[5] = new DataColumnSpecCreator(FrostNodeModel.OUT_COL + "C1.fa", FileCell.TYPE).createSpec();
 		
 		
         DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
