@@ -52,20 +52,6 @@ public final class FastaReader{
 				        String currentLine = "";
 
 	        StringBuffer buffer = new StringBuffer();
-	        /*
-	        if((currentLine = in.readLine()) == null )
-	            throw new IOException( file + " File is empty " );
-	     
-	        if(currentLine.charAt(0) != '>')
-	            throw new IOException("Header of the file " + file + " must be '>'");
-	        else {
-	        	if (currentChr.equals(currentLine.substring(1).trim()))//.replaceAll("\\s+", "_"))) 
-	        		{
-	        		id=currentChr;
-	        		}
-//	        	System.err.println(currentLine.substring(1).trim());}
-	        }
-	        */
 
         	boolean read = false;
 	        for(currentLine = in.readLine().trim(); currentLine != null; currentLine = in.readLine()) {
@@ -117,51 +103,7 @@ public final class FastaReader{
 		sequence = (String) seq;
 		
 	}
-	
-//    void readSequenceFromFile(String file) {
-    	//
-//    			String id = "";
-//    			String seq = "";
-//    	    	try { 
-//    	    		BufferedReader in = new BufferedReader(new FileReader(file));
-//    	    	    StringBuffer buffer = new StringBuffer();
-//    	    	    String currentLine = "";
-//    	    	    if((currentLine = in.readLine()) == null )
-//    	    	        throw new IOException( file + " File is empty " );
-//    	    	 
-////    	    	    if(currentLine.charAt(0) != '>')
-////    	    	        throw new IOException("Header of the file " + file + " must be '>'");
-////    	    	    else
-//    	    	        id = currentLine.substring(1).trim(); //.replaceAll("\\s+", "_");
-//    	    	    
-    	//
-//    	    	    for(currentLine = in.readLine().trim(); currentLine != null; currentLine = in.readLine()) {
-//    	    	    	if(currentLine.length() > 0 && currentLine.charAt(0) == '>'){
-//    	    	    		seq = buffer.toString();
-//    	    	    		buffer = new StringBuffer();
-//    	    	    		id = currentLine.substring(1).trim(); //.replaceAll("\\s+", "_");
-//    	    	    		
-//    	    	    	} 
-//    	    	    	else {
-//    	    	    		buffer.append(currentLine.trim());
-//    	    	    	}
-//    	    	    	
-//    	    	    }
-    	//
-//    	    	    if( buffer.length() != 0 ){
-//    	    			seq = buffer.toString();     		
-//    	    	    }
-    	//
-//    	    	}
-//    	    	catch(IOException e){ 
-//    	    		System.out.println("Error when reading "+file);
-//    	    	    e.printStackTrace();
-//    	    	    
-//    	    	}
-//    	    	identifier = (String) id;
-//    			sequence = (String) seq;
-//    	    	
-//    	    }
+
     /**
 	 * @return first sequence as a char linked list
 	 */

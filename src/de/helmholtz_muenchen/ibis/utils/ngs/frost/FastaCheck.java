@@ -77,10 +77,15 @@ public class FastaCheck {
 	 */
 	private String[] parentalChromatids;
 	
+	FastaCheck() {
+		
+	}
+
 	FastaCheck(String file) throws IOException {
 		calculate_length(file);
 		choose_parentalChromatids();
 	}
+	
 	
 	/**
 	 * @throws IOException 
