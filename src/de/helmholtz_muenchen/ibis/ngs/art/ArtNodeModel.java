@@ -482,8 +482,8 @@ public class ArtNodeModel extends NodeModel {
 					num = 2;
 					break;
 				}
-				String[] input_fqs = {ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_0_" + num + ".fq",
-						ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_1_" + num + ".fq"};
+				String[] input_fqs = {ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "0_" + num + ".fq",
+						ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "1_" + num + ".fq"};
 				String output_fq = ArtNodeModel.INTERNAL_OUTPUT_PATH + id + "_" + indiv + "_" + read + ".fq";
 				
 				ArrayList<String> merge_command = new ArrayList<String>(5);
