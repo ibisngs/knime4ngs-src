@@ -7,28 +7,16 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
  */
 public class ParentalGenotype {
 
-	private Genotype father;
 	private Genotype mother;
+	private Genotype father;
+
 	
-	public ParentalGenotype(Genotype father, Genotype mother) {
+	public ParentalGenotype(Genotype mother, Genotype father) {
 		// TODO Auto-generated constructor stub
-		setFather(father);
 		setMother(mother);
+		setFather(father);
 	}
 
-	/**
-	 * @return the father
-	 */
-	public Genotype getFather() {
-		return father;
-	}
-
-	/**
-	 * @param father the father to set
-	 */
-	public void setFather(Genotype father) {
-		this.father = father;
-	}
 
 	/**
 	 * @return the mother
@@ -42,6 +30,19 @@ public class ParentalGenotype {
 	 */
 	public void setMother(Genotype mother) {
 		this.mother = mother;
+	}
+	/**
+	 * @return the father
+	 */
+	public Genotype getFather() {
+		return father;
+	}
+
+	/**
+	 * @param father the father to set
+	 */
+	public void setFather(Genotype father) {
+		this.father = father;
 	}
 
 }

@@ -11,9 +11,9 @@ public class InputData {
 
 	private String id;
 //	private ArrayList<Position_Type> position_arrList;
-	private ArrayList<ArrayList<Integer>> positions;
+	private ArrayList/*<ArrayList*/<Integer>/*>*/ positions;
 	
-	public InputData(String id, ArrayList<ArrayList<Integer>> positions) {
+	public InputData(String id, ArrayList/*<ArrayList*/<Integer>/*>*/ positions) {
 		// TODO Auto-generated constructor stub
 		setId(id);
 		setPositions(positions);
@@ -55,14 +55,14 @@ public class InputData {
 	/**
 	 * @return the positions
 	 */
-	protected ArrayList<ArrayList<Integer>> getPositions() {
+	protected ArrayList/*<ArrayList*/<Integer>/*>*/ getPositions() {
 		return positions;
 	}
 
 	/**
 	 * @param positions the positions to set
 	 */
-	protected void setPositions(ArrayList<ArrayList<Integer>> positions) {
+	protected void setPositions(ArrayList/*<ArrayList*/<Integer>/*>*/ positions) {
 		this.positions = positions;
 	}
 
@@ -75,9 +75,9 @@ public class InputData {
 		// TODO Auto-generated method stub
 		String data = "";
 		for (int i = 0; i < getPositions().size(); i++) {
-			for (int j = 0; j < getPositions().get(i).size(); j++) {
-				data += getId() + "\t" + getPositions().get(i).get(j) + "\n";
-			}
+//			for (int j = 0; j < getPositions().get(i).size(); j++) {
+				data += getId() + "\t" + getPositions().get(i)/*.get(j)*/ + "\n";
+//			}
 		}
 		return data;
 	}

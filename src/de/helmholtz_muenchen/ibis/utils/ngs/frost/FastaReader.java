@@ -48,7 +48,7 @@ public final class FastaReader{
 			/**File input = new File(file);
 			Scanner sc = new Scanner(input, "UTF-8");**/
 
-			BufferedReader in = new BufferedReader(new FileReader(file));
+			BufferedReader in = new BufferedReader(new FileReader(file), 10000000);
 				        String currentLine = "";
 
 	        StringBuffer buffer = new StringBuffer();

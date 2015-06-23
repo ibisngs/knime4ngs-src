@@ -1,16 +1,15 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
@@ -22,24 +21,18 @@ public class FrostRunner {
 
 
 	public static final String INTERNAL_PATH = FrostNodeModel.INTERNAL_OUTPUT_PATH;
-	public static String mapFile = "/home/ibis/tanzeem.haque/Documents/hg19/hg19_N_regions_tab.txt";
 //	 --bed /storageNGS/scratch/Sequenciator/secondary_files/UCSC_CodingExons.bed
-	public static boolean bedAvailable = false;
 
-	public static ArrayList<String> id_list = new ArrayList<String> ();
-	public static int total_mutations;
-	public static int total_deNovo;
+	public static ArrayList<String> id_list = new ArrayList<String> ();;
 	public static String[] parental_chromatids = new String[2];
-	public static String[] records = FrostNodeModel.recordFiles();/*new String[8];*/
-
-//	static int mutation_index_parent = 0;
-//	static int denovo_index_child = 0;
-	public static int skipped_N = 0;
-	
-
-	public final static int chunk_length = 10000000;
-	public final static double insertion_rate = 0.5;
-	public final static double deletion_rate = 0.25;
+	public static String varyParameter = "";
+	public static String[] records = FrostNodeModel.recordFiles();
+	public static int skipped_N;
+	public final static int reco_gap = 18000;
+	public final static double insertion_rate = 0.15;
+	public final static double deletion_rate = 0.05;
+	public static BufferedWriter bw6;
+;
 
 
 	public static void main(String[] args) throws InterruptedException, IOException {
@@ -52,6 +45,8 @@ public class FrostRunner {
 //		}
 		ArrayList<String> args_al = new ArrayList<>(Arrays.asList(args));
 
+//		for (String s: args)
+//			System.out.println("Runner: " + s);
 		String tag_input = "-i", tag_mutRate = "-m", tag_recombination = "-r", 
 				tag_generation = "-g", tag_seed = "-s",
 				tag_mutVary = "--mut", tag_recVary = "--reco", tag_deNovoVary = "--denovo", tag_bed = "--bed";
@@ -60,6 +55,7 @@ public class FrostRunner {
 		 * Default values are already given in Knime
 		 */
 		String input = "";
+		String mapFile = FrostNodeModel.DEFAULT_MAPFILE;
 		double mutRate = 2.36;
 		int recombination = 1000;
 		int generation = 5300;
@@ -158,19 +154,21 @@ public class FrostRunner {
 					}
 					else if (args[i].equals(tag_mutVary)) {
 						mutVary = true;
+						FrostRunner.varyParameter = "Mutation";
 						continue;
 					}
 					else if (args[i].equals(tag_recVary)) {
 						recVary = true;
+						FrostRunner.varyParameter = "Crossover points";
 						continue;
 					}
 					else if (args[i].equals(tag_deNovoVary)) {
 						deNovoVary = true;
+						FrostRunner.varyParameter = "de novo";
 						continue;
 					}
 					else if (args[i].equals(tag_bed)) {
-						FrostRunner.bedAvailable = true;
-						FrostRunner.mapFile = args[i + 1];
+						mapFile = args[i + 1];
 						continue;
 					}
 				}			
@@ -187,39 +185,45 @@ public class FrostRunner {
 		}
 
 		else {
-			/**
-			 *
-			 * files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".txt";
-    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".txt";
-    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "deNovo_" + FrostNodeModel.seed + ".txt";
-    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
-    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
-		files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_" + FrostNodeModel.seed + ".vcf";
-    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "ids_chunks.txt";    	
-    	
-			 */
+			
 			/**
 			 * Handling the existing files first
 			 */
-//			FrostRunner.records = FrostNodeModel.recordFiles();
-			for (String s : records) {
-				File f = new File (s);
-				if (f.exists())
-					f.delete();
-			}
+			deleteExistingFiles();
 
-//			System.out.println("Mut: " + mutVary + "\t" + "Rec: " + recVary + "\t" + "Denovo: " + deNovoVary);
+			String using_command = "";
+			for (String s : args)
+				using_command += s+" ";
 			
-			run(input, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary, records);
+			FrostRunner.bw6 = new BufferedWriter(new FileWriter(FrostRunner.records[6], true), 10000000);
+			
+			FrostRunner.createLog(FrostRunner.bw6, "Using command: " + "\n" + using_command);
+
+			run(input, mapFile, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary);
+			
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
-		FrostRunner.createLog("Skipped non-coding positions: " + FrostRunner.skipped_N);
-		FrostRunner.createLog("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		FrostRunner.createLog(FrostRunner.bw6, "Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		FrostRunner.createLog(FrostRunner.bw6,"\n");
+		FrostRunner.bw6.close();
+		System.out.println("done");
 
 
 	}
-
+	private static void deleteExistingFiles() {
+		for (String s : FrostRunner.records) {
+			File f = new File (s);
+			if (f.exists())
+				f.delete();
+		}
+		File f = new File (FrostRunner.records[0].replace(".tmp", ".txt"));
+		if (f.exists())
+			f.delete();
+		f = new File (FrostRunner.records[1].replace(".tmp", ".txt"));
+		if (f.exists())
+			f.delete();
+	}
 	/**
 	 * @param input
 	 * @param mutRate
@@ -228,39 +232,26 @@ public class FrostRunner {
 	 * @throws InterruptedException
 	 * @throws IOException 
 	 */
-	protected static void run(String input, double mutRate, int recombination, int generation, int seed, 
-			boolean mutVary, boolean recVary, boolean deNovoVary, String[] recordFiles) throws InterruptedException, IOException {
+	protected static void run(String input, String mapFile, double mutRate, int recombination, int generation, int seed, 
+			boolean mutVary, boolean recVary, boolean deNovoVary) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub
+
+		FrostRunner.createLog(FrostRunner.bw6,"Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
 
 		/**
 		 * Checking input Fasta
 		 */	
-//		long startTime = System.currentTimeMillis();
 		FastaCheck fc = new FastaCheck(input);
 		FrostRunner.parental_chromatids = fc.getParentalChromatids();
-//		long endTime   = System.currentTimeMillis();
-//		NumberFormat formatter = new DecimalFormat("#0.00000");
-//
+		FrostRunner.createLog(FrostRunner.bw6,"Parental chromatids: " + FrostRunner.parental_chromatids[0] 
+				+ " and " + FrostRunner.parental_chromatids[1]);
 		/**
 		 * get the N region map or exons at first
 		 */
-//		long startTime = System.currentTimeMillis();
-
-		GenomeMap gm = new GenomeMap();
-//		gm.getGenomeMap();
 		
-//		for (String s : gm.getGenomeMap().keySet())
-//			for (int i = 0; i < gm.getGenomeMap().get(s).size(); i++)
-//			System.out.println(s + "\t" + gm.getGenomeMap().get(s).get(i).get(0) + "\t" + gm.getGenomeMap().get(s).get(i).get(1));
-	
-			
-//		long endTime   = System.currentTimeMillis();
-//		NumberFormat formatter = new DecimalFormat("#0.00000");
-//		System.err.println("Execution time to read exons " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		GenomeMap gm = new GenomeMap(mapFile);
 
-//		System.out.println(fc.input_chr_length.size());
-//		for (int i = 0; i < fc.input_chr_length.size(); i++)
-//			System.out.println((i+1) +". " + fc.input_chr_length.get(i));
+		FrostRunner.createLog(FrostRunner.bw6,"File used for positions: " + mapFile);
 		
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
@@ -269,169 +260,184 @@ public class FrostRunner {
 		System.gc();
 //		memory();
 
+		/**
+		 * Staring the vcf file
+		 */
+		BufferedWriter bw4 = new BufferedWriter(new FileWriter(FrostRunner.records[4], true), 10000000);
+		rw.write_simple_string(bw4, 
+				"#CHROM" + "\t" /*0*/
+				+ "#POS" + "\t" /*1*/
+				+ "#ID" + "\t" /*2*/
+				+ "#REF" + "\t" /*3*/
+				+ "#ALT" + "\t" /*4*/
+				+ "#QUAL" + "\t" /*5*/
+				+ "#FILTER" + "\t" /*6*/
+				+ "#INFO" + "\t" /*7*/
+				+ "#FORMAT" + "\t" /*8*/
+				+ "#M" + "\t" /*9*/
+				+ "#F" + "\t" /*10*/
+				+ "#C" + "\n"); /*11*/
+		bw4.close();
+
+		/**
+		 * 
+		 * 
+		 * 
+		 * START OF A CHROMOSOME
+		 * 
+		 * 
+		 * 
+		 * 
+		 */
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
+			BufferedWriter bw0 = new BufferedWriter(new FileWriter(FrostRunner.records[0], true), 10000000);
+			BufferedWriter bw1 = new BufferedWriter(new FileWriter(FrostRunner.records[1], true), 10000000);
+			BufferedWriter bw2 = new BufferedWriter(new FileWriter(FrostRunner.records[2], true), 10000000);
+			BufferedWriter bw3 = new BufferedWriter(new FileWriter(FrostRunner.records[3], true), 10000000);
+			bw4 = new BufferedWriter(new FileWriter(FrostRunner.records[4], true), 10000000);
+
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
 			int currentLength = Integer.parseInt(fc.input_chr_length.get(i).split("\t")[1]);
 			/**
 			 * Some info printing
 			 */
-			FrostRunner.createLog("\n");
-			FrostRunner.createLog((i+1) + ". "+ currentChr + " " + currentLength);
-			FrostRunner.total_mutations = (int)((currentLength/Math.pow(10, 8) * mutRate * 5300)/(1));
-			FrostRunner.total_deNovo = (int)(FrostRunner.total_mutations/5300);
-			FrostRunner.createLog("Number of total mutations: " + FrostRunner.total_mutations);
-			FrostRunner.createLog("Number of total de novo: " + FrostRunner.total_deNovo);
-			
-			int chunk = (currentLength/FrostRunner.chunk_length)+1;
+			FrostRunner.createLog(FrostRunner.bw6, (i+1) + ". "+ currentChr + " " + currentLength);
+						
+//			int chunk = (currentLength/FrostRunner.chunk_length)+1;
 			
 			ids += fc.input_chr_length.get(i) + "\n";
 
 			/**
 			 * Reading reference Fasta
 			 */	
-//			startTime = System.currentTimeMillis();
 			FastaReader fr = new FastaReader();
 			fr.readSequenceFromFile(input, currentChr);	
-//			System.out.println("Actual length of " + currentChr + " from file: " + fr.getLength());
 
-//			endTime   = System.currentTimeMillis();
-//			formatter = new DecimalFormat("#0.00000");
-//			System.err.println("Execution time to read " + currentChr + " FASTA: " + formatter.format((endTime - startTime) / 1000d) + " seconds");
-		
+
 
 			/**
 			 * preparing the mutations and recombination positions
 			 * and also Creating the N Region maps
 			 */		
 
-//			startTime = System.currentTimeMillis();
-			InputScanner in = new InputScanner(currentChr, mutRate, recombination, generation, seed, 
-					mutVary, recVary, deNovoVary, chunk, gm);
-			in.prepare(fr.getLength());//currentLength
-			
-//			endTime   = System.currentTimeMillis();
-//			formatter = new DecimalFormat("#0.00000");
-//			System.err.println("Execution time to prepare " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
-
-				/**
-				 * Creating the trio: invoke parental mutation, denovo for child,
-				 * recombination for child
-				 */	
-			
-			FrostRunner.createLog("CHUNK SIZE: " + chunk + "\t" + currentChr);
-//			startTime = System.currentTimeMillis();
-		
-			
-			for (int j = 0; j < chunk; j++) {
-
-//				System.err.println("P1: " + FrostRunner.parental_chromatids[0] + "\t" + "P2: " + FrostRunner.parental_chromatids[1]);
-
-				/**
-				 * ID_List will be called in the main method to write the output files.
-				 */
-				FrostRunner.id_list.add(j + "_" + currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
-
-//				startTime = System.currentTimeMillis();
-				FrostRunner.createLog("CHUNKY #"+j);
-				
-//				System.out.println("mutation_index_parents: " + mutation_index_parent);
-//				System.out.println("denovo_index_child: " + denovo_index_child);
-//				System.out.println("recombination_index: " + recombination_index);
-
-				TrioSimulator trio = new TrioSimulator(fc, fr, in);
-			
-				trio.createTrio(j, currentChr);	
-
-				
-				/**
-				 * Appending into the record files
-				 */
-				rw = new RecordWriters(fr, in, trio);
-				/**
-				 * parents_run_
-				 */
-				rw.write_simple_string(recordFiles[0], trio.getParentInfo());
-				/**
-				 * child_run_
-				 */
-				rw.write_simple_string(recordFiles[1], trio.getChildInfo());
-				/**
-				 * deNovo_
-				 */
-				rw.write_InputData(recordFiles[2],in.getiData_deNovo_child(), j);
-				/**
-				 * recombination_
-				 */
-				rw.write_InputData(recordFiles[3],in.getiData_recombination_child(), j);
-				//writing the recombined file
-				String rec = "";
-				for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
-					rec += rw.getTrio().getRecombined().get(k) + "\n";
-				}
-				/**
-				 * recombined_seq_
-				 */
-				rw.write_simple_string(recordFiles[4], rec);
-
-
+			if (recombination > currentLength) {
+				FrostRunner.createLog(FrostRunner.bw6, "Check the number of crossover points. Currently it is greater than the sequence length itself.");
+				System.exit(0);
 			}
-			
-			/**
-			 * trio_
-			 */
-			rw.write_vcf(recordFiles[5], recordFiles[0], recordFiles[1]);
-			rw.unphase(recordFiles[5]);
+			InputScanner in = new InputScanner(currentChr, mutRate, recombination, generation, seed, 
+					mutVary, recVary, deNovoVary, gm);
+			in.prepare(fr.getLength());//currentLength
 
-//			endTime   = System.currentTimeMillis();
-//			formatter = new DecimalFormat("#0.00000");
-//			System.err.println("Execution time to create trio of " + currentChr + ": " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+			/**
+			 * Creating the trio: invoke parental mutation, denovo for child,
+			 * recombination for child
+			 */	
 			
-//			rw.write_InputData(INTERNAL_PATH + "deNovo_" + seed + ".txt",in.getiData_deNovo_child());			
-//			mutation_index_parent = 0;
-//			denovo_index_child = 0;
-//			recombination_index = 0;
+			
+//			for (int j = 0; j < chunk; j++) {
+
+			/**
+			 * ID_List will be called in the main method to write the output files.
+			 */
+			FrostRunner.id_list.add(/*j + "_" + */currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
+
+			TrioSimulator trio = new TrioSimulator(/*fc, */fr, in);
+			trio.createTrio(/*j, */currentChr);	
+
+				
+			/**
+			 * Appending into the record files
+			 */
+			rw = new RecordWriters(fr, in, trio);
+			/**
+			 * 	
+ 			 * parents_run_
+			 */
+			rw.write_simple_string(bw0, trio.getParentInfo());
+			/**
+			 * child_run_
+			 */
+			rw.write_simple_string(bw1, trio.getChildInfo());
+//			/**
+//			 * deNovo_
+//			 */
+//			rw.write_InputData(recordFiles[2],in.getiData_deNovo_child()/*, j*/);
+			/**
+			 * recombination_
+			 */
+			rw.write_InputData(bw2,in.getiData_recombination_child()/*, j*/);
+			//writing the recombined file
+			String rec = "";
+			for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
+				rec += rw.getTrio().getRecombined().get(k) + "\n";
+			}
+			/**
+			 * recombined_seq_
+			 */
+			rw.write_simple_string(bw3, rec);
+
+//			}
+			
+			bw0.flush();
+			bw1.flush();
+			bw2.flush();
+			bw3.flush();
+			FrostRunner.bw6.flush();
 			System.gc();		
 //			memory();
-//			System.out.println();
+			bw0.close();
+			bw1.close();
+			bw2.close();
+			bw3.close();
+			/**
+			 * trio_phased_
+			 */
+			rw.write_vcf(bw4, FrostRunner.records[0], FrostRunner.records[1]);
+			bw4.close();
 
 		}
+
 		/**
-		 * ids_chunks.txt
+		 * 
+		 * 
+		 * 
+		 * END OF A CHROMOSOME!
+		 * 
+		 * 
+		 * 
 		 */
-		rw.write_simple_string(recordFiles[6], ids);
+		/**
+		 * trio_unpahsed_
+		 */
+		BufferedWriter bw5 = new BufferedWriter(new FileWriter(FrostRunner.records[5], true), 10000000);
+		rw.unphase(bw5, FrostRunner.records[4]); //recordfile[5]
+		bw5.close();
+
+
+//		/**
+//		 * ids_chunks.txt
+//		 */
+//		rw.write_simple_string(recordFiles[7], ids);
+		/**
+		 * delete the recordfile[0] (child_run_) and recordfile[1](parents_run_)
+		 * which are .tmp s
+		 */
+		for (int i = 0; i <= 1; i++) {
+			File f = new File (FrostRunner.records[i]);
+			if (f.exists())
+			f.delete();
+		}
 		
-
-
 	}
 
-	static void createLog(String logInfo) {
+	static void createLog(BufferedWriter bw, String logInfo) {
 		
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(FrostRunner.records[7], true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
-			pw.write(logInfo + "\n");
+		try { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			bw.write(logInfo + "\n");
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
-		}
-//		Logger logger = Logger.getLogger("SimulatorLog");  
-//	    FileHandler fh;  
-//
-//	    try {  
-//
-//	        // This block configure the logger with handler and formatter  
-//	        fh = new FileHandler(INTERNAL_PATH + "MyLogFile.log");  
-//	        logger.addHandler(fh);
-//	        logger.setUseParentHandlers(false);
-//	        SimpleFormatter formatter = new SimpleFormatter();  
-//	        fh.setFormatter(formatter);  
-//
-//	        // the following statement is used to log any messages  
-//	        logger.info(logInfo);  
-//
-//	    } catch (SecurityException e) {  
-//	        e.printStackTrace();  
-//	    } catch (IOException e) {  
-//	        e.printStackTrace();  
-//	    }  
+		} 
 
 	}
 	static void memory() {
@@ -441,19 +447,19 @@ public class FrostRunner {
         //Getting the runtime reference from system
         Runtime runtime = Runtime.getRuntime();
          
-        FrostRunner.createLog("##### Heap utilization statistics [MB] #####");
+        FrostRunner.createLog(FrostRunner.bw6,"##### Heap utilization statistics [MB] #####");
          
         //Print used memory
-        FrostRunner.createLog("Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb);
+        FrostRunner.createLog(FrostRunner.bw6,"Used Memory:" + (runtime.totalMemory() - runtime.freeMemory()) / mb);
  
         //Print free memory
-        FrostRunner.createLog("Free Memory:" + runtime.freeMemory() / mb);
+        FrostRunner.createLog(FrostRunner.bw6,"Free Memory:" + runtime.freeMemory() / mb);
          
         //Print total available memory
-        FrostRunner.createLog("Total Memory:" + runtime.totalMemory() / mb);
+        FrostRunner.createLog(FrostRunner.bw6,"Total Memory:" + runtime.totalMemory() / mb);
  
         //Print Maximum available memory
-        FrostRunner.createLog("Max Memory:" + runtime.maxMemory() / mb);
+        FrostRunner.createLog(FrostRunner.bw6,"Max Memory:" + runtime.maxMemory() / mb);
 		
 	}
 	

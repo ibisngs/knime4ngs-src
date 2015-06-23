@@ -6,8 +6,8 @@ public class TrioGenotype extends ParentalGenotype {
 	
 	private Genotype child;
 	
-	public TrioGenotype (Genotype father, Genotype mother, Genotype child) {
-		super(father, mother);
+	public TrioGenotype (Genotype mother, Genotype father, Genotype child) {
+		super(mother, father);
 		setChild(child);
 	}
 

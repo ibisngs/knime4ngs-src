@@ -58,7 +58,7 @@ public class FastaCheck {
 			 new HG_19("chr9",141213431), new HG_19("chr10",135534747), new HG_19("chr11",135006516), new HG_19("chr12",133851895), 
 			 new HG_19("chr13",115169878), new HG_19("chr14",107349540), new HG_19("chr15",102531392), new HG_19("chr16",90354753), 
 			 new HG_19("chr17",81195210), new HG_19("chr18",78077248), new HG_19("chr19",59128983), new HG_19("chr20",63025520), 
-			 new HG_19("chr21",48129895), new HG_19("chr22",51304566), new HG_19("chrX",155270560), new HG_19("chrY",59373566)};
+			 new HG_19("chr21",/*50*/48129895), new HG_19("chr22",/*50*/51304566), new HG_19("chrX",155270560), new HG_19("chrY",59373566)};
 //	
 //	final HG_19[] chr_length = {new HG_19("seq1", 447)};// {new HG_19("seq1",10263), new HG_19("seq2",3056)};
 	
@@ -144,24 +144,24 @@ public class FastaCheck {
 		switch(calc_prob) {
 
 		case 0: //F0M0
-			setParentalChromatids("F0", "M0");
-			readFile_for_child[0]="_F_0.fa";
-			readFile_for_child[1]="_M_0.fa";
+			setParentalChromatids("M0", "F0");
+			readFile_for_child[0]="_M_0.fa";
+			readFile_for_child[1]="_F_0.fa";
 			break;
 		case 1:  //F0M1
-			setParentalChromatids("F0", "M1");
-			readFile_for_child[0]="_F_0.fa";
-			readFile_for_child[1]="_M_1.fa";
+			setParentalChromatids("M0", "F1");
+			readFile_for_child[0]="_M_0.fa";
+			readFile_for_child[1]="_F_1.fa";
 			break;
 		case 2: //F1M0
-			setParentalChromatids("F1", "M0");
-			readFile_for_child[0]="_F_1.fa";
-			readFile_for_child[1]="_M_0.fa";
+			setParentalChromatids("M1", "F0");
+			readFile_for_child[0]="_M_1.fa";
+			readFile_for_child[1]="_F_0.fa";
 			break;
 		case 3: //F1M1
-			setParentalChromatids("F1", "M1");
-			readFile_for_child[0]="_F_1.fa";
-			readFile_for_child[1]="_M_1.fa";
+			setParentalChromatids("M1", "F1");
+			readFile_for_child[0]="_M_1.fa";
+			readFile_for_child[1]="_F_1.fa";
 			break;
 
 		}

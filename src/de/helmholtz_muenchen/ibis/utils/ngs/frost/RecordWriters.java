@@ -1,9 +1,13 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -41,11 +45,11 @@ public class RecordWriters {
 		
 	}
 	
-	protected void write_simple_string(String fileName, String s) {
+	protected void write_simple_string(BufferedWriter bw, String s) {
 		// TODO Auto-generated method stub
 		
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
-			pw.write(s);
+		try { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			bw.write(s);
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
@@ -61,12 +65,12 @@ public class RecordWriters {
 //		}		
 	}
 	
-	protected void write_InputData(String fileName, InputData iData, int n) {
+	protected void write_InputData(BufferedWriter bw, InputData iData/*, int n*/) {
 		// TODO Auto-generated method stub
 		
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
-			for (int i = 0; i < iData.getPositions().get(n).size(); i++) {
-				pw.write(iData.getId() + "\t" + iData.getPositions().get(n).get(i) + "\n");
+		try { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+			for (int i = 0; i < iData.getPositions()./*get(n).*/size(); i++) {
+				bw.write(iData.getId() + "\t" + iData.getPositions()./*get(n).*/get(i) + "\n");
 				
 			}
 			
@@ -90,20 +94,20 @@ public class RecordWriters {
 //		}		
 //	}
 	
-	protected void write_vcf(String outFile, String parentFile, String childFile) {
-		File child = new File (childFile), parents = new File (parentFile);
-		String f = "", m = ""; // father allele(F0/F1), mother allele (M0/M1)
+	protected void write_vcf(BufferedWriter bw_vcf, String parentFile, String childFile) {
+		File child_tmp = new File (childFile), parents_tmp = new File (parentFile);
+		String m = "", f = ""; // father allele(F0/F1), mother allele (M0/M1)
 		try {
-			Scanner sc = new Scanner(child, "UTF-8");
+			Scanner sc = new Scanner(child_tmp, "UTF-8");
 			
 	        while (sc.hasNextLine()) {
 	        	String s = sc.nextLine();
 //	        	System.out.println(s);
 	        	String [] col = s.trim().split("\t");
-	        	f = col[6];
-	        	m = col[7];
+	        	m = col[6];
+	        	f = col[7];
 	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]) /*position*/, 
-	        			col[0].replaceAll("^[0-9]_", "")/*id*/
+	        			col[0]/*.replaceAll("^[0-9]_", "")/*id*/
 	        			+"\t"+col[1]
 	        			+"\t"+"." /*ID as in vcf format*/	
 	        			+"\t"+col[2]/*ref allele*/
@@ -116,15 +120,16 @@ public class RecordWriters {
 	        			+"\t"+"0|0" /*father genotype*/
 	        			+"\t"+col[4].replace("/", "|")/*child genotype*/));
 	        }
-	        
-	        sc = new Scanner(parents, "UTF-8");
+			truncateFiles(child_tmp);
+
+	        sc = new Scanner(parents_tmp, "UTF-8");
 	        while(sc.hasNextLine()) {
 	        	String [] col = sc.nextLine().trim().split("\t");
 	        	String c0 = "", c1 ="";
 	        	c0 = (m.equals("M0"))?col[4]/*mother genotype*/.split("/")[0]:col[4].split("/")[1];
 	        	c1 = (f.equals("F0"))?col[5]/*father genotype*/.split("/")[0]:col[5].split("/")[1];
 	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]), 
-	        			col[0].replaceAll("^[0-9]_", "")/*id*/
+	        			col[0]/*.replaceAll("^[0-9]_", "")/*id*/
 	    	        			+"\t"+col[1]
 	    	    	        	+"\t"+"." /*ID as in vcf format*/	
 	    	        			+"\t"+col[2]/*ref allele*/
@@ -137,6 +142,8 @@ public class RecordWriters {
 	    	    	        	+"\t"+col[5].replace("/", "|")/*father genotype*/
 	    	    	        	+"\t"+c0+"|"+c1/*child genotype*/));
 	        }
+			truncateFiles(parents_tmp);
+
 	        Collections.sort(this.vcf);
 	        
 	        removeDuplicates(this.duplicates);
@@ -145,33 +152,70 @@ public class RecordWriters {
 		catch (FileNotFoundException e) {
 	        e.printStackTrace();
 	    }
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(outFile))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+		try  { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 //			System.out.println("It should write the vcf!");
-			pw.write("#CHROM" + "\t" /*0*/
-					+ "#POS" + "\t" /*1*/
-					+ "#ID" + "\t" /*2*/
-					+ "#REF" + "\t" /*3*/
-					+ "#ALT" + "\t" /*4*/
-					+ "#QUAL" + "\t" /*5*/
-					+ "#FILTER" + "\t" /*6*/
-					+ "#INFO" + "\t" /*7*/
-					+ "#FORMAT" + "\t" /*8*/
-					+ "#M" + "\t" /*9*/
-					+ "#F" + "\t" /*10*/
-					+ "#C" + "\n"); /*11*/
 			
-			for (VCF_info v : this.vcf)
-				pw.write(v.getContent()+"\n");
+			for (VCF_info v : this.vcf) {
+//				System.out.println(v.getContent());
+				bw_vcf.write(v.getContent()+"\n");
+			}
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 			e.printStackTrace();
 		}
+		
 	}
 
-	protected void unphase (String vcfFile) {
+	private void truncateFiles(File tmpFile) {
+	// TODO Auto-generated method stub
+		File txtFile = new File (tmpFile.toString().replace(".tmp", ".txt"));
+		ArrayList<String> data = new ArrayList<>();
+		
+		/**
+		 * save the info from the recordfiles (.tmp) in another file
+		 */
+		try {
+			Scanner sc = new Scanner(tmpFile, "UTF-8");		
+	        while (sc.hasNextLine()) {
+	        	String s = sc.nextLine();
+	        	data.add(s);
+	        }
+		}
+	    catch (FileNotFoundException e) {
+		       e.printStackTrace();
+		}
+		/**
+		 * truncate .tmp
+		 */
+	    try {
+			FileChannel outChan = new FileOutputStream(tmpFile, true).getChannel();
+			outChan.truncate(0);
+		    outChan.close();
+
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		/**
+		 * write the saved data from the .tmps to .txt
+		 */
+		try /*(BufferedWriter pw = new BufferedWriter(new FileWriter(txtFile, true), 10000000)) {*/(PrintWriter pw = new PrintWriter(new FileOutputStream(txtFile, true)))
+		{
+			for (String s : data) {
+				pw.write(s + "\n");
+				
+			}			
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
+			e.printStackTrace();
+		}	
+		
+	}
+
+	protected void unphase (BufferedWriter bw, String vcfFile) {
 		ArrayList<String> data = new ArrayList<>();
 		File phased = new File (vcfFile);
-		File unphased = new File (vcfFile.replace("phased", "unphased"));
+//		File unphased = new File (vcfFile.replace("phased", "unphased"));
 		try {
 			Scanner sc = new Scanner(phased, "UTF-8");
 			
@@ -190,10 +234,10 @@ public class RecordWriters {
 		catch (FileNotFoundException e) {
 	        e.printStackTrace();
 	    }
-		try (PrintWriter pw = new PrintWriter(new FileOutputStream(unphased))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
+		try { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
 //			System.out.println("It should write the vcf!");
     		for (String s : data) 
-    			pw.write(s+"\n");
+    			bw.write(s+"\n");
 		
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
@@ -207,9 +251,9 @@ public class RecordWriters {
 
 		String s = (duplicates.size() > 0)? "Found double mutation in child =>"
 				:"No double mutation in child";		
-		FrostRunner.createLog(s);
+		FrostRunner.createLog(FrostRunner.bw6 , s);
 //		for (int i : duplicates)
-//			FrostRunner.createLog(i + "");
+//			System.out.println(i + "");
 
 		for (int dup_position : duplicates) {
 			for (int i = 0; i < this.vcf.size(); i++) {
@@ -220,10 +264,10 @@ public class RecordWriters {
 					/**
 					 * saving the parental mutation to add to the denovo mut //record from parents file
 					 */
-					int c0 = (FrostRunner.parental_chromatids[1].equals("M0"))?
+					int c0 = (FrostRunner.parental_chromatids[0].equals("M0"))?
 							Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[9]/*mother genotype*/.split("\\|")[0])
 							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[9].split("\\|")[1]);
-		        	int c1 = (FrostRunner.parental_chromatids[0].equals("F0"))?
+		        	int c1 = (FrostRunner.parental_chromatids[1].equals("F0"))?
 		        			Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[10]/*father genotype*/.split("\\|")[0])
 							:Integer.parseInt(this.vcf.get(i+1).getContent().split("\t")[10].split("\\|")[1]);
 		        	/**
@@ -235,9 +279,9 @@ public class RecordWriters {
 		            /**
 		             * KEEP this system out block to check bug
 		             */
-		            FrostRunner.createLog("Child from parent: " + c0 + "|" + c1);
-		            FrostRunner.createLog("Denovo situation: " + c[0] + "|" + c[1]);
-		            FrostRunner.createLog("Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
+		            FrostRunner.createLog(FrostRunner.bw6,"Child from parent: " + c0 + "|" + c1);
+		            FrostRunner.createLog(FrostRunner.bw6,"Denovo situation: " + c[0] + "|" + c[1]);
+		            FrostRunner.createLog(FrostRunner.bw6,"Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
 
 		            if(!(denovo.equals(parent_mut))
 		            		|| (denovo.equals(parent_mut) && (c0 == 0 || c1 == 0))) { 
@@ -265,7 +309,7 @@ public class RecordWriters {
 		            String new_content = this.vcf.get(i).getContent().split("\t")[0]+"\t"
     						+ this.vcf.get(i).getContent().split("\t")[1]+"\t"
     						+ this.vcf.get(i).getContent().split("\t")[2]+"\t"
-    						+ this.vcf.get(i).getContent().split("\t")[3]+"\t"
+    						+ this.vcf.get(i+1).getContent().split("\t")[3]+"\t"
     						+ this.vcf.get(i).getContent().split("\t")[4]+"\t"/*mutated base of the child -> twice*/
     						+ this.vcf.get(i).getContent().split("\t")[5]+"\t"
     	    				+ this.vcf.get(i).getContent().split("\t")[6]+"\t"
@@ -279,7 +323,7 @@ public class RecordWriters {
     						+ this.vcf.get(i+1).getContent().split("\t")[9]+"\t"/*mother genotype originally from parents file*/
     						+ this.vcf.get(i+1).getContent().split("\t")[10]+"\t"/*father genotype originally from parents file*/
     						+ c0 + "|" + c1;
-		            FrostRunner.createLog(new_content);
+		            FrostRunner.createLog(FrostRunner.bw6, new_content);
 		            this.vcf.set(i, new VCF_info(this.vcf.get(i).getPosition(), new_content));
 //    				System.out.println("Before removing: " + tmp.get(i).getContent());
 		            this.vcf.remove(i+1);
@@ -365,7 +409,7 @@ public class RecordWriters {
 		public int compareTo(VCF_info o) {
 			// TODO Auto-generated method stub
 			int comp = this.getPosition()-o.getPosition();
-			if (comp==0){
+			if (comp==0 && this.getContent().split("\t")[0].equals(o.getContent().split("\t")[0])){
 				duplicates.add(o.getPosition());
 //				System.out.println("SAME");
 

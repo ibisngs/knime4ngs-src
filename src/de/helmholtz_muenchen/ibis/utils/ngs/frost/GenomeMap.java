@@ -14,12 +14,19 @@ public class GenomeMap {
 	/**
 	 * @param args
 	 */
-	public GenomeMap() {
+	private String mapFile;
+	
+	public GenomeMap(String mapFile) {
+		setMapFile(mapFile);
 		createGenomeMap();
 	}
 	
-	protected String mapFile() {
-		return FrostRunner.mapFile;
+	public String getMapFile() {
+		return mapFile;
+	}
+
+	public void setMapFile(String mapFile) {
+		this.mapFile = mapFile;
 	}
 		
 	public HashMap<String, ArrayList<ArrayList<Integer>>> getGenomeMap() {
@@ -33,7 +40,7 @@ public class GenomeMap {
 		this.genomeMap.put("chrX", new ArrayList<ArrayList<Integer>>());
 		this.genomeMap.put("chrY", new ArrayList<ArrayList<Integer>>());
 		
-		File input = new File (mapFile());
+		File input = new File (this.mapFile);
 		
 		try {
 			Scanner sc = new Scanner(input, "UTF-8");
