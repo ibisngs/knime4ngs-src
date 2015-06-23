@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.ngs.frostslilhelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import org.knime.core.data.DataColumnSpec;
@@ -38,6 +39,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 public class FrostsLilHelperNodeModel extends NodeModel {
     
 	public final static int chunk_length = 10000000;
+	private static ArrayList<String> row_count = new ArrayList<>();
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostsLilHelperNodeModel.class); //not used yet
 
     
@@ -60,21 +62,27 @@ public class FrostsLilHelperNodeModel extends NodeModel {
 
     	CloseableRowIterator it = inData[0].iterator();
     	int row_count = inData[0].getRowCount()-1;
+		
 		while (it.hasNext()) {
 			DataRow row = it.next();
 			String id = row.getKey().toString().substring("Row: ".length());
 			String[] trio = {
-					row.getCell(0).toString(), //F_0
-					row.getCell(1).toString(), //F_1
-					row.getCell(2).toString(), //M_0
-					row.getCell(3).toString(), //M_1
-					row.getCell(4).toString(), //C_0
-					row.getCell(5).toString() // C_1
+					row.getCell(0).toString(), //M0
+					row.getCell(1).toString(), //M1
+					row.getCell(2).toString(), //F0
+					row.getCell(3).toString(), //F1
+					row.getCell(4).toString(), //C0
+					row.getCell(5).toString() // C1
 					};
-			
+
 			for (int i = 0; i < trio.length; i++) {
+		    	FrostRunner.id_list = new ArrayList<String> ();
 				FrostRunner.getChunks(trio[i]);
 			}
+			for (String s : FrostRunner.id_list)
+				FrostsLilHelperNodeModel.row_count.add(s);
+			FrostRunner.id_list.clear();
+
 		}
 
 		return output(exec);
@@ -105,9 +113,9 @@ public class FrostsLilHelperNodeModel extends NodeModel {
          * i = 0,1, ... #IDS
          */  
 		FileCell[] cells = new FileCell[6];
-//		System.out.println("ID LIST now: " + FrostRunner.id_list.size());
-		for (int j = 0; j < FrostRunner.id_list.size(); j++) {
-			RowKey key = new RowKey("Row: " + FrostRunner.id_list.get(j));
+		System.out.println("ID LIST now: " + FrostsLilHelperNodeModel.row_count.size());
+		for (int j = 0; j < FrostsLilHelperNodeModel.row_count.size(); j++) {
+			RowKey key = new RowKey("Row: " + FrostsLilHelperNodeModel.row_count.get(j));
 //			System.out.println(key.toString());
 			
 			for (int i = 0; i < 6 ; i++) {
@@ -117,22 +125,22 @@ public class FrostsLilHelperNodeModel extends NodeModel {
 
 				switch (i) {
 					case 0:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_M0.fa");
 						break;
 					case 1:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_M1.fa");
 						break;
 					case 2:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_F0.fa");
 						break;
 					case 3:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_F1.fa");
 						break;
 					case 4:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C0.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_C0.fa");
 						break;
 					case 5:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C1.fa");
+						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_C1.fa");
 						break;
 				}
 					
@@ -140,7 +148,8 @@ public class FrostsLilHelperNodeModel extends NodeModel {
 			DataRow row = new DefaultRow(key, cells);
             container.addRowToTable(row);
 		}
-		FrostRunner.id_list.clear();
+		FrostsLilHelperNodeModel.row_count.clear();
+
 		// check if the execution monitor was canceled
         exec.checkCanceled();
 		// once we are done, we close the container and return its table
