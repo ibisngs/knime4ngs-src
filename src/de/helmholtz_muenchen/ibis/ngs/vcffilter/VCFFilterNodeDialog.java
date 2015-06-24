@@ -65,7 +65,7 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     protected VCFFilterNodeDialog() {
 
     	createNewGroup("Select input file");
-    	addDialogComponent(new DialogComponentFileChooser(vcf_in, "his_id_vcfin", 0, ".vcf"));
+    	addDialogComponent(new DialogComponentFileChooser(vcf_in, "his_id_vcfin", 0, ".vcf|.vcf.gz"));
     	addDialogComponent(new DialogComponentStringSelection(annotation,"Annotations from",VCFFilterNodeModel.ANNOTATIONS_AVAILABLE));
     	
     	createNewGroup("Path to filter_vep.pl (only VEP)");

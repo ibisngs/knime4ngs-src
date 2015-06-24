@@ -22,7 +22,6 @@ public abstract class Summarizer {
 	String cds_file;
 	String ped_file;
 	String geneback_file;
-	ArrayList<String> geneback_header= new ArrayList<>();
 	
 	//summaries
 	
@@ -91,7 +90,7 @@ public abstract class Summarizer {
 		if(geneback_file != null) {
 			try {
 				logger.info("Reading genetic background file...");
-				this.readGeneBackFile();
+				this.readGeneSummary();
 				logger.info("Genetic background file read.");
 			} catch (IOException e) {
 				logger.warn("Reading genetic background file failed.");
@@ -201,18 +200,15 @@ public abstract class Summarizer {
 		br.close();
 	}
 	
-	private void readGeneBackFile() throws IOException {
+	private void readGeneSummary() throws IOException {
 		
 		BufferedReader br = new BufferedReader(new FileReader(this.geneback_file));
-		String line;
+		//ignore headline
+		String line = br.readLine();
 		String[] fields;
 		while((line = br.readLine())!=null) {
-			if(line.startsWith("#")) {
-				geneback_header.add(line);
-				continue;
-			}
 			fields = line.split("\t");
-			gene2background.put(fields[0], Double.parseDouble(fields[1]));
+			gene2background.put(fields[0], Double.parseDouble(fields[4]));
 			
 		}
 		br.close();

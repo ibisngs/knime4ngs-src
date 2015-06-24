@@ -99,7 +99,13 @@ public class VCFFilterNodeModel extends NodeModel {
     		}
     	}
     	
-    	String outfile = infile.replace("vcf", "filtered.vcf");
+    	String outfile;
+    	if(infile.endsWith(".gz")) {
+    		outfile = infile.replace("vcf.gz", "filtered.vcf");
+    	} else {
+    		outfile = infile.replace("vcf", "filtered.vcf");
+    	}
+    	
     	
     	LOGGER.debug("CHOSEN TERMS: "+TERMS);
     	LOGGER.debug("FILTER: "+m_filter.getStringValue());
