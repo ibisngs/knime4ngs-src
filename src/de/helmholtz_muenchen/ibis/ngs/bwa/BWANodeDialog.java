@@ -64,7 +64,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("Options");
     	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
     	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW"),"Algorithm for constructing BWT index:","BWT-SW","IS"));
-    	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-backtrack"),"Algorithm for mapping:","BWA-backtrack","BWA-SW","BWA-MEM"));
+    	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-MEM"),"Algorithm for mapping:","BWA-MEM","BWA-backtrack","BWA-SW"));
     	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false), "Build color-space index."));
     	addDialogComponent(new DialogComponentStringSelection(readType,"Type of reads/ mapping:","auto-detect","single-end","paired-end"));
     	setHorizontalPlacement(true);
