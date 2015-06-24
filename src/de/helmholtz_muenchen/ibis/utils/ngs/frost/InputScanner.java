@@ -477,11 +477,13 @@ public class InputScanner {
 	private boolean skipN(int n) {
 		boolean a = false;		
 		for(int i = 0; i < this.nMap.size(); i++) {
-			if (n >= this.nMap.get(i).get(0) && n <= this.nMap.get(i).get(1)) {
+			int end = (i == 0) ? 0 : this.nMap.get(i-1).get(1);
+			if (n >= end && n <= this.nMap.get(i).get(0)) {
 //				System.out.println("skipping");
 				a = true;
 				break;
 			}
+			
 		}
 //		if (a) 
 //			FrostRunner.skipped_N++;
