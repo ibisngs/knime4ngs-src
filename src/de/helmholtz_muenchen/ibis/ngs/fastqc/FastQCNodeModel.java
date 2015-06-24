@@ -234,7 +234,7 @@ public class FastQCNodeModel extends NodeModel {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
     	}
     	
-    	if(getAvailableFlowVariables().containsKey("readType")){
+    	if(!getAvailableInputFlowVariables().containsKey("readType")){
     		throw new InvalidSettingsException("This node is incompatible with the previous node. Node has to be connected to RunFastQC");
     	}
     	
