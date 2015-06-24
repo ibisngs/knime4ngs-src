@@ -70,7 +70,7 @@ public class FrostNodeModel extends NodeModel {
     static final int DEFAULT_RECOMNATION = 1000;
     static final int DEFAULT_GENERATION = 5300;
     static final int DEFAULT_SEED = 999;
-    public final static String DEFAULT_MAPFILE = "/home/ibis/tanzeem.haque/Documents/hg19/hg19_N_regions_tab.txt";
+    public final static String DEFAULT_MAPFILE = "/storageNGS/scratch/Sequenciator/secondary_files/UCSC_CodingExons.bed";
 
     private final SettingsModelString m_FASTA = new SettingsModelString(FrostNodeModel.CFGKEY_FASTA,""); // path to fasta file
     private final SettingsModelDoubleBounded m_MUT = new SettingsModelDoubleBounded(FrostNodeModel.CFGKEY_MUT_RATE,FrostNodeModel.DEFAULT_MUTATION_RATE,1.0, 3.0);
