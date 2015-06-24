@@ -494,6 +494,7 @@ public class FrostRunner {
 	public static void getChunks(String file) throws IOException {
 		Chunker chunker = new Chunker (file);
 		chunker.createChunk();
+		System.gc();
 //		for (String s: id_list)
 //			System.out.println(s);
 	}
