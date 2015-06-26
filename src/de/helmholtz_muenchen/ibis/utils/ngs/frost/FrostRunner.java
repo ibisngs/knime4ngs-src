@@ -31,7 +31,6 @@ public class FrostRunner {
 	public final static double insertion_rate = 0.15;
 	public final static double deletion_rate = 0.05;
 	public static BufferedWriter bw6;
-;
 
 
 	public static void main(String[] args) throws InterruptedException, IOException {
@@ -293,10 +292,11 @@ public class FrostRunner {
 		 * 
 		 */
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
-			BufferedWriter bw0 = new BufferedWriter(new FileWriter(records[0], true), 10000000);
-			BufferedWriter bw1 = new BufferedWriter(new FileWriter(records[1], true), 10000000);
-			BufferedWriter bw2 = new BufferedWriter(new FileWriter(records[2], true), 10000000);
-			BufferedWriter bw3 = new BufferedWriter(new FileWriter(records[3], true), 10000000);
+			BufferedWriter bw0 = new BufferedWriter(new FileWriter(records[0], true), 10000000),
+			bw1 = new BufferedWriter(new FileWriter(records[1], true), 10000000),
+			bw2 = new BufferedWriter(new FileWriter(records[2], true), 10000000),
+			bw3 = new BufferedWriter(new FileWriter(records[3], true), 10000000),
+			bw7 = new BufferedWriter(new FileWriter(records[7], true), 10000000);
 			bw4 = new BufferedWriter(new FileWriter(records[4], true), 10000000);
 
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
@@ -378,6 +378,14 @@ public class FrostRunner {
 			 * recombined_seq_
 			 */
 			rw.write_simple_string(bw3, rec);
+			/**
+			 * strand file
+			 */
+			String strand = "";
+			for(int k = 0; k < in.getStrandMap().size(); k++) {
+				strand += currentChr + "\t" + in.getStrandMap().get(k) + "\n"; 
+			}
+			rw.write_simple_string(bw7, strand);
 
 //			}
 			
@@ -385,6 +393,7 @@ public class FrostRunner {
 			bw1.flush();
 			bw2.flush();
 			bw3.flush();
+			bw7.flush();
 			FrostRunner.bw6.flush();
 			System.gc();		
 //			memory();
@@ -392,6 +401,7 @@ public class FrostRunner {
 			bw1.close();
 			bw2.close();
 			bw3.close();
+			bw7.close();
 			/**
 			 * trio_phased_
 			 */

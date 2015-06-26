@@ -9,7 +9,8 @@ import java.util.Scanner;
 
 public class GenomeMap {
 	
-	private HashMap<String, ArrayList<ArrayList<Integer>>> genomeMap = new HashMap<>(24);
+	private HashMap<String, ArrayList<Strand>> genomeMap = new HashMap<>(24);
+	
 
 	/**
 	 * @param args
@@ -29,16 +30,15 @@ public class GenomeMap {
 		this.mapFile = mapFile;
 	}
 		
-	public HashMap<String, ArrayList<ArrayList<Integer>>> getGenomeMap() {
+	public HashMap<String, ArrayList<Strand>> getGenomeMap() {
 		return this.genomeMap;
 	}
 	
-	
 	private void createGenomeMap () {
 		for (int i = 1; i < 23; i++) 
-			this.genomeMap.put("chr"+i, new ArrayList<ArrayList<Integer>>());
-		this.genomeMap.put("chrX", new ArrayList<ArrayList<Integer>>());
-		this.genomeMap.put("chrY", new ArrayList<ArrayList<Integer>>());
+			this.genomeMap.put("chr"+i, new ArrayList<Strand>());
+		this.genomeMap.put("chrX", new ArrayList<Strand>());
+		this.genomeMap.put("chrY", new ArrayList<Strand>());
 		
 		File input = new File (this.mapFile);
 		
@@ -52,18 +52,20 @@ public class GenomeMap {
 	        	/**
 	        	 * Parsing the start and stop range for an N region
 	        	 */
-	        	int start = Integer.parseInt(cols[1]), stop = Integer.parseInt(cols[2]);
-	    		ArrayList<Integer> range = new ArrayList<>(2);
-	    		range.add(start);
-	    		range.add(stop);
-	    		/**
-	    		 * parsing the chromosome for key
-	    		 */
+	        	String stream = "";
+	        	int start = Integer.parseInt(cols[1]), end = Integer.parseInt(cols[2]);
+	        	if (currentLine.endsWith("+") || currentLine.endsWith("-")) //its a bed file with strand info as in reference bed we are using
+	        		stream = cols[cols.length-1];
+	        		
+	        	Strand strand = new Strand(start, end, stream);
+	        	/**
+	        	* parsing the chromosome for key
+	        	*/
 	        	String chr = cols[0];
 	        	if (this.genomeMap.containsKey(chr)) {
-	        		this.genomeMap.get(chr).add(range);
+	        		this.genomeMap.get(chr).add(strand);
+	        		
 	        	}
-	        	
 	        }
 //	        System.out.println(this.nMap.size());
 //	        for (String s : this.nMap.keySet()) {
@@ -76,6 +78,7 @@ public class GenomeMap {
 	    }
 		
 	}
+	
 	/*
 	
 	public static void main(String[] args) throws IOException {

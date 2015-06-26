@@ -631,7 +631,8 @@ public class TrioSimulator {
 		if (parent) {
 			toMutate[0] = seq1.charAt(stop);
 			toMutate[1] = seq1.charAt(stop);
-			
+//			System.out.println(toMutate[0] + "\t" + toMutate[1]);
+
 			Mutation m = new Mutation(toMutate, in.inDelCounter_M, in.inDelCounter_F);
 
 			Random rand = new Random();

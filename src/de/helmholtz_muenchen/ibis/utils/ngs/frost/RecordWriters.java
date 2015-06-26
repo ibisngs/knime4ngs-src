@@ -104,11 +104,18 @@ public class RecordWriters {
 	        	String s = sc.nextLine();
 //	        	System.out.println(s);
 	        	String [] col = s.trim().split("\t");
+	        	int pos = Integer.parseInt(col[1]);
 	        	m = col[6];
 	        	f = col[7];
-	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]) /*position*/, 
+	        	if (col[3].equals("*")) {
+//	        		System.out.println("*************************");
+	        		col[3] = col[3].replace("*", "");
+	        		pos = pos - 1;
+	        		
+	        	}
+	        	this.vcf.add(new VCF_info(pos /*position*/, 
 	        			col[0]/*.replaceAll("^[0-9]_", "")/*id*/
-	        			+"\t"+col[1]
+	        			+"\t"+pos
 	        			+"\t"+"." /*ID as in vcf format*/	
 	        			+"\t"+col[2]/*ref allele*/
 	        			+"\t"+col[3] /*alt allele*/
@@ -128,7 +135,14 @@ public class RecordWriters {
 	        	String c0 = "", c1 ="";
 	        	c0 = (m.equals("M0"))?col[4]/*mother genotype*/.split("/")[0]:col[4].split("/")[1];
 	        	c1 = (f.equals("F0"))?col[5]/*father genotype*/.split("/")[0]:col[5].split("/")[1];
-	        	this.vcf.add(new VCF_info(Integer.parseInt(col[1]), 
+	        	int pos = Integer.parseInt(col[1]);
+	        	if (col[3].equals("*")) {
+//	        		System.out.println("*************************");
+	        		col[3] = col[3].replace("*", "");
+	        		pos = pos - 1;
+	        		
+	        	}
+	        	this.vcf.add(new VCF_info(pos, 
 	        			col[0]/*.replaceAll("^[0-9]_", "")/*id*/
 	    	        			+"\t"+col[1]
 	    	    	        	+"\t"+"." /*ID as in vcf format*/	

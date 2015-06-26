@@ -87,7 +87,8 @@ public class InputScanner {
 	private InputData iData_parents;
 	private InputData iData_recombination_child;
 	private InputData iData_deNovo_child;
-	private ArrayList<ArrayList<Integer>> nMap;
+	private ArrayList<Strand> nMap;
+	private ArrayList<String> strandMap = new ArrayList<>();
 
 
 
@@ -114,7 +115,12 @@ public class InputScanner {
 	
 	}
 
-/*
+	public ArrayList<String> getStrandMap() {
+		return strandMap;
+	}
+
+
+	/*
 	protected double getMutRate() {
 		return mutRate;
 	}
@@ -258,7 +264,30 @@ public class InputScanner {
 		child = prepare_child_input(chr_length);
 		this.iData_deNovo_child = new InputData(this.chrID, child.get(0));
 		this.iData_recombination_child = new InputData(this.chrID, child.get(1));
+		prepareStrandFile(parents, child.get(0));
 		
+	}
+
+	private void prepareStrandFile(ArrayList<Integer> parents,
+			ArrayList<Integer> deNovoChild){
+		// TODO Auto-generated method stub
+		ArrayList<Integer> allMutations = new ArrayList<>(parents.size()+deNovoChild.size());
+		for (int i : parents)
+			allMutations.add(i);
+		for (int i : deNovoChild)
+			allMutations.add(i);
+		
+		Collections.sort(allMutations);
+		
+		for (int n : allMutations) {
+			for(int i = 0; i < this.nMap.size(); i++) {
+				if (n >= this.nMap.get(i).getStart() && n <= this.nMap.get(i).getEnd()){
+					String strand = (n+1) + "\t" + this.nMap.get(i).getStream();
+					this.strandMap.add(strand);
+					break;
+				}			
+			}
+		}
 	}
 
 	/**
@@ -477,12 +506,14 @@ public class InputScanner {
 	private boolean skipN(int n) {
 		boolean a = false;		
 		for(int i = 0; i < this.nMap.size(); i++) {
-			int end = (i == 0) ? 0 : this.nMap.get(i-1).get(1);
-			if (n >= end && n <= this.nMap.get(i).get(0)) {
+			int prevEnd = (i == 0) ? 0 : this.nMap.get(i-1).getEnd();
+			if ((n >= prevEnd && n <= this.nMap.get(i).getStart()) || 
+			(i == this.nMap.size()-1 && n > this.nMap.get(i).getEnd())){
 //				System.out.println("skipping");
 				a = true;
 				break;
 			}
+		
 			
 		}
 //		if (a) 
