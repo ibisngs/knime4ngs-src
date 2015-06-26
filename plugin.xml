@@ -37,6 +37,7 @@
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqSplitter.FastqSplitterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqSplitter.FastqSplitterNodeFactory"/>
 		
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.beagle.BeagleNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.beagle.BeagleNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastSam2Bam.FastSam2BamNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCounts.FeatureCountsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samSelector.SamSelectorNodeFactory"/>
