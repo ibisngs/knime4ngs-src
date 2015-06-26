@@ -83,7 +83,7 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	
     	
     	
-    	createNewTab("View In/Out Options");
+    	createNewTab("Call In/Out Options");
     	createNewGroup("Input/Output Options");
 //    	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
 //    			BcftoolsNodeModel.CFGKEY_INISVCF, false), "Input is VCF"));
@@ -122,7 +122,7 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     			BcftoolsNodeModel.CFGKEY_OUTQCALL, false), "Output the QCALL likelihood format"));
 
 
-    	createNewTab("View Calling Options");
+    	createNewTab("Call Calling Options");
     	createNewGroup("Consensus/variant calling options");
     	//createNewGroup("Consensus/variant calling options:");
     	setHorizontalPlacement(true);
@@ -183,12 +183,12 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	//Main method chooser
     	bcfmethod.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if(bcfmethod.getStringValue().equals("view")){
-					setEnabled(true,"View In/Out Options");
-			    	setEnabled(true,"View Calling Options");
+				if(bcfmethod.getStringValue().equals("call")){
+					setEnabled(true,"Call In/Out Options");
+			    	setEnabled(true,"Call Calling Options");
 				}else{
-					setEnabled(false,"View In/Out Options");
-			    	setEnabled(false,"View Calling Options");
+					setEnabled(false,"Call In/Out Options");
+			    	setEnabled(false,"Call Calling Options");
 				}
 				if(bcfmethod.getStringValue().equals("cat")){
 					catinfile.setEnabled(true);

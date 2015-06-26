@@ -347,9 +347,9 @@ Contrast calling and association test options:
     	command.add(m_infile.getStringValue());
 
     	if(m_outbcf.getBooleanValue() || m_outuncompressedbcf.getBooleanValue()){
-    		outfile+="_view.bcf";
+    		outfile+="_call.bcf";
     	}else{
-    		outfile+="_view.vcf";
+    		outfile+="_call.vcf";
     	}
 
     	}else if(m_bcfmethod.getStringValue().equals("cat")){
@@ -445,7 +445,7 @@ Contrast calling and association test options:
 //    				throw new InvalidSettingsException("Column name of second column should be 'Path2MpileupOutfile' but it is" +inSpecs[0].getColumnNames()[1]);
 //    			}
             	String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
-    			if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("view")&&!(m_ifseqdic.getBooleanValue())){
+    			if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("call")&&!(m_ifseqdic.getBooleanValue())){
     				throw new InvalidSettingsException("Input is VCF. Output is BCF. Please specify the sequence dictionary.");
     			}
     			if(!m_ifsamplelist.getBooleanValue()&&(m_constrainedcalling.getStringValue().equals("trioauto")||m_constrainedcalling.getStringValue().equals("trioxd")||m_constrainedcalling.getStringValue().equals("trioxs"))){
@@ -462,7 +462,7 @@ Contrast calling and association test options:
     				m_path2bcftools.setEnabled(true);
     				m_infile.setEnabled(true);
     	        	String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
-    				if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("view")&&!(m_ifseqdic.getBooleanValue())){
+    				if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("call")&&!(m_ifseqdic.getBooleanValue())){
     					throw new InvalidSettingsException("Input is VCF. Output is BCF. Please specify the sequence dictionary.");
     				}
     				if(!m_ifsamplelist.getBooleanValue()&&(m_constrainedcalling.getStringValue().equals("trioauto")||m_constrainedcalling.getStringValue().equals("trioxd")||m_constrainedcalling.getStringValue().equals("trioxs"))){
