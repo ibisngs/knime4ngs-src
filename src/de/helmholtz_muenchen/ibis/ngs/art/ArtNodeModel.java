@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -34,6 +36,7 @@ import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
+import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 import de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeModel;
@@ -203,7 +206,14 @@ public class ArtNodeModel extends NodeModel {
 		/**
     	 * here we go...
     	 */
+		long startTime = System.currentTimeMillis();
+
     	execute_help(exec, art_arrList);
+    	
+    	long endTime   = System.currentTimeMillis();
+		NumberFormat formatter = new DecimalFormat("#0.00000");
+		System.out.println("Execution time is (art) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		
 //    	System.out.println("REAL SIZE: " + art_arrList.size());
 
 		int col_num = 2; //ArtNodeModel.IDS.size();
@@ -349,6 +359,9 @@ public class ArtNodeModel extends NodeModel {
 
 		    	command.add("-s");
 		    	command.add(m_SD.getIntValue() + "");
+		    	
+		    	command.add("-qs 10");
+		    	command.add("-qs2 10");
 		    	
 //		    	for (String s : command) {
 //		    		System.out.print(s + " ");
