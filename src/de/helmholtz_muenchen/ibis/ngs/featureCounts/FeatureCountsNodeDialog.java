@@ -36,7 +36,10 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
     private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, FeatureCountsNodeModel.DEAFULT_COUNT_MULTI_OVERLAPING);
     private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_FRAGMENTS);
     private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
+    private final SettingsModelBoolean SET_FEATURE_LEVEL			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_ON_FEATURE_LVL, FeatureCountsNodeModel.DEFAULT_COUNT_ON_FEATURE_LVL);
+    private final SettingsModelString SET_GROUP_FEATURE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_GROUP_FEATURE, FeatureCountsNodeModel.DEFAULT_GROUP_FEATURE);
 
+    
     protected FeatureCountsNodeDialog() {
         super();
        
@@ -49,7 +52,9 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
      	DialogComponentBoolean dcCountOverlapping 	= new DialogComponentBoolean(SET_COUNT_OVERLAPPING_MULTI, "count reads that overlapp multiple features");
      	DialogComponentBoolean dcCountFragments 	= new DialogComponentBoolean(SET_COUNT_FRAGMENTS, "count fragments instead of reads");
      	DialogComponentBoolean dcCountChimeric	 	= new DialogComponentBoolean(SET_CHIMERIC_FRAGMENTS, "count chimeric (paired reads)");
-       	
+     	DialogComponentBoolean dcCountOnFeatureLvl	= new DialogComponentBoolean(SET_FEATURE_LEVEL, "perform read summarization at the feature level (eg. exon level) ");
+       	DialogComponentString dcGroupFeature		= new DialogComponentString(SET_GROUP_FEATURE, "feature type used for grouping results:"); 
+     	
        	// create string selection component
        	DialogComponentStringSelection dcAnnotationType 	= new DialogComponentStringSelection(SET_ANNOTATION_TYPE, "file type:", FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE, FeatureCountsNodeModel.ALTERNATIVE_ANNOTATION_TYPE);
        	
@@ -70,6 +75,8 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         addDialogComponent(dcCountMultimapped);
         addDialogComponent(dcCountOverlapping);
         addDialogComponent(dcThreadNumber);
+        addDialogComponent(dcCountOnFeatureLvl);
+        addDialogComponent(dcGroupFeature);
         
         createNewGroup("paired read options");
         addDialogComponent(dcCountFragments);

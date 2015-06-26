@@ -49,6 +49,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected static final String CFGKEY_COUNT_OVERLAPPING_MULTI	= "MultiOverlapping";
     protected static final String CFGKEY_COUNT_FRAGMENTS			= "Fragments";
     protected static final String CFGKEY_COUNT_CHIMERIC_FRAGMENTS	= "ChimericFragments";
+    protected static final String CFGKEY_COUNT_ON_FEATURE_LVL		= "CountOnFeatureLvl";
+    protected static final String CFGKEY_GROUP_FEATURE				= "GroupFeature";
     
     // initial default values for SettingsModels
     protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
@@ -61,6 +63,9 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected static final boolean DEAFULT_COUNT_MULTI_OVERLAPING	= false;			// do not count multi overlapping reads by default
     protected static final boolean DEAFULT_COUNT_FRAGMENTS			= false;			// only for paired reads
     protected static final boolean DEAFULT_COUNT_CHIMERIC_FRAGMENTS = false;			// do not count chimeric fragments
+    protected static final boolean DEFAULT_COUNT_ON_FEATURE_LVL		= false;			// read summarization will be performed at the feature level (eg. exon level)
+    protected static final String DEFAULT_GROUP_FEATURE				= "gene_id";		// group results using id
+
     
     // name of parameters which are defined in the featureCounts binary
     private final static String NAME_OF_OUTPUT_FILE 		= "-o";		// output file
@@ -72,6 +77,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_ASSIGN_MULTI		= "-O";		// enables counting for more than one fragment
     private final static String NAME_OF_COUNT_FRAGMENTS		= "-p";		// enables count of fragments
     private final static String NAME_OF_COUNT_CHIMERIC		= "-C";		// disables count of chimeric fragments
+    private final static String NAME_OF_COUNT_ON_FEATURE_LVL= "-f";		// enables count on feature level
+    private final static String NAME_OF_GROUP_FEATURE		= "-g";		// sets the group id for output file
     				
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(CFGKEY_ANNOTATION_FEATURE, DEFAULT_ANNOTATION_FEATURE);
@@ -83,7 +90,9 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI, DEAFULT_COUNT_MULTI_OVERLAPING);
     private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(CFGKEY_COUNT_FRAGMENTS, DEAFULT_COUNT_FRAGMENTS);
     private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(CFGKEY_COUNT_CHIMERIC_FRAGMENTS, DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
-
+    private final SettingsModelBoolean SET_FEATURE_LEVEL			= new SettingsModelBoolean(CFGKEY_COUNT_ON_FEATURE_LVL, DEFAULT_COUNT_ON_FEATURE_LVL);
+    private final SettingsModelString SET_GROUP_FEATURE				= new SettingsModelString(CFGKEY_GROUP_FEATURE, DEFAULT_GROUP_FEATURE);
+    
     protected final static int MIN_THREADS = 1;
     protected final static int MAX_THREADS = 16;
     
@@ -115,6 +124,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	addSetting(SET_COUNT_OVERLAPPING_MULTI);
     	addSetting(SET_COUNT_FRAGMENTS);
     	addSetting(SET_CHIMERIC_FRAGMENTS);
+    	addSetting(SET_FEATURE_LEVEL);
+    	addSetting(SET_GROUP_FEATURE);
     }
     
     /**
@@ -144,12 +155,15 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 			pars.put(NAME_OF_COUNT_FRAGMENTS, "");
 		if(!SET_CHIMERIC_FRAGMENTS.getBooleanValue())
 			pars.put(NAME_OF_COUNT_CHIMERIC, "");
+		if(SET_FEATURE_LEVEL.getBooleanValue())
+			pars.put(NAME_OF_COUNT_ON_FEATURE_LVL, "");
 		if(SET_THREAD_NUMBER.getIntValue() > 1)
 			pars.put(NAME_OF_THREAD_NUMBER, Integer.toString(SET_THREAD_NUMBER.getIntValue()));
 		
 		pars.put(NAME_OF_ANNOTATION_TYPE, SET_ANNOTATION_TYPE.getStringValue());
 		pars.put(NAME_OF_FEATURE_TYPE, SET_FEATURE_TYPE.getStringValue());
 		pars.put(NAME_OF_ANNOTATION_FILE, SET_ANNOTATION_FILE.getStringValue());
+		pars.put(NAME_OF_GROUP_FEATURE, SET_GROUP_FEATURE.getStringValue());
 		
 		/********************* OUTPUT ****************************/
 		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false);

@@ -22,6 +22,8 @@
         	<option name="file type">GTF or SAF annotation files are supported.</option>
         	<option name="feature type used for counting">Feature type which is used for counting when GTF file is used. Default: exon</option>
         	<option name="count multimapped reads">Counts also reads, which do not map uniquely</option>
+        	<option name="perform read summarization at the feature level">If specified, read summarization will be performed at the feature level (eg. exon level). Otherwise, it is performed at meta-feature level (eg. gene level)</option>
+        	<option name="feature type used for grouping results">Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided. `gene_id' by default. This attribute type is usually the gene identifier. This argument is useful for the meta-feature level summarization.</option>
         	<option name="thread number">Number of threads which are used for counting. [1-16]</option>
         </tab>
     </fullDescription>
