@@ -66,6 +66,7 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller.GATKHaplotypeCallerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller.GATKHaplotypeCallerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs.CombineGVCFsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.ArtNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre/ngs_seq" factory-class="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.art.artslilhelper.ArtsLilHelperNodeFactory"/>
 
