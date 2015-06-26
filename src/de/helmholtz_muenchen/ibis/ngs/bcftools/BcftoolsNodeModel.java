@@ -35,6 +35,9 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * 
  *
  * @author Maximilian Hastreiter
+ * @editor tanzeem.haque :-D
+ * 
+ * The only change i made here was changing "view" into "call" 
  */
 public class BcftoolsNodeModel extends NodeModel {
     /**
@@ -292,8 +295,8 @@ Contrast calling and association test options:
     	String outfile=m_infile.getStringValue();
     	command.add(path2bcftools+" "+method);
     	
-    	if(m_bcfmethod.getStringValue().equals("view")){
-        logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools view "));
+    	if(m_bcfmethod.getStringValue().equals("call")){
+        logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools call "));
     	//Bcftools View !
     	/**
     	 *    Input/output options

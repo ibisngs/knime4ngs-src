@@ -71,7 +71,7 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
 //    	addDialogComponent(new DialogComponentFileChooser(use_FILE, "Testing", 0, true));
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, ""),"his_bcft_ID5",""));
     	createNewGroup("");
-    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","view","index", "cat", "ld","ldpair","reheader"));
+    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","call","index", "cat (Not available)", "ld (Not available)","ldpair (Not available)","reheader (Not available)"));
     	createNewGroup("Select Inputfile for selected method");
     	addDialogComponent(new DialogComponentFileChooser(infile,"his_bcft_ID3",".bcf",".vcf"));
     	createNewGroup("Select second BCF file (cat only)");
