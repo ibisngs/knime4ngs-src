@@ -265,7 +265,7 @@ public class FrostNodeModel extends NodeModel {
     public static String[] recordFiles() {
     	
 
-    	String[] files = new String[7];
+    	String[] files = new String[8];
 		files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".tmp";
     	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".tmp";
     	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
@@ -273,6 +273,8 @@ public class FrostNodeModel extends NodeModel {
     	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_phased_" + FrostNodeModel.seed + ".vcf";
     	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_unphased_" + FrostNodeModel.seed + ".vcf";
     	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
+    	files[7] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyStrandFile_" + FrostNodeModel.seed + ".strand";
+
 
     	return files;
 
