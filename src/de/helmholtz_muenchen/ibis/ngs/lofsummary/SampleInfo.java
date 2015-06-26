@@ -8,6 +8,7 @@ public class SampleInfo {
 	int fullLOFs, partLOFs;
 	ArrayList<String> complete_LOF_genes;
 	ArrayList<String> part_LOF_genes;
+	ArrayList<String> hom_LOF_genes;
 	
 	public SampleInfo() {
 		this.fam_id = "unknown";
@@ -19,6 +20,7 @@ public class SampleInfo {
 		partLOFs = 0;
 		complete_LOF_genes = new ArrayList<>();
 		part_LOF_genes = new ArrayList<>();
+		hom_LOF_genes = new ArrayList<>();
 	}
 	
 	public SampleInfo(String fam_id, String pat_id, String mat_id, String sex, String phenotype) {
@@ -31,6 +33,7 @@ public class SampleInfo {
 		partLOFs = 0;
 		complete_LOF_genes = new ArrayList<>();
 		part_LOF_genes = new ArrayList<>();
+		hom_LOF_genes = new ArrayList<>();
 	}
 	
 	public String getPatId() {
@@ -65,6 +68,10 @@ public class SampleInfo {
 		part_LOF_genes.add(gene_id);
 	}
 	
+	public void addHomLoFGene(String gene_id) {
+		hom_LOF_genes.add(gene_id);
+	}
+	
 	public ArrayList<String> getComplete_LOF_genes() {
 		return complete_LOF_genes;
 	}
@@ -72,11 +79,8 @@ public class SampleInfo {
 	public ArrayList<String> getPart_LOF_genes() {
 		return part_LOF_genes;
 	}
-
-	public SampleInfo(int fullLOFs, int partLOFs,ArrayList<String> complete_LOF_genes, ArrayList<String> part_LOF_genes) {
-		this.fullLOFs = fullLOFs;
-		this.partLOFs = partLOFs;
-		this.complete_LOF_genes = complete_LOF_genes;
-		this.part_LOF_genes = part_LOF_genes;
+	
+	public ArrayList<String> getHom_LOF_genes() {
+		return this.hom_LOF_genes;
 	}
 }

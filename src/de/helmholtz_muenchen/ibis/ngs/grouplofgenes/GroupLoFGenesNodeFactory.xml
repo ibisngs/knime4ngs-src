@@ -3,16 +3,15 @@
     <name>GroupLoFGenes</name>
     
     <shortDescription>
-        Takes a gene summary as input and groups genes as never observed, LoF in-/tolerant.
+        Takes a gene summary as input and groups genes in genes never affected by LoF, genes less often affected than expected and genes more often affected than expected
     </shortDescription>
     
     <fullDescription>
         <intro>
         	This node takes a gene summary of the LOFSummary node as input and groups the genes using the average LoF probability.
         	All genes that can be found in the CDS file but not in the gene summary file are written to the never observed genes list.
-        	The average LoF probability is used to calculate whether a gene is affected more often than expected.
-        	Those genes are called LoF tolerant genes. 
-        	Genes that are affected less often than expected are assigned to the group of LoF intolerant genes.	
+        	The average LoF probability is used to calculate whether a gene is affected more often than expected (written to high_freq_genes).
+        	Genes that are affected less often than expected are assigned to the group of low_freq_genes.	
         </intro>
         
         

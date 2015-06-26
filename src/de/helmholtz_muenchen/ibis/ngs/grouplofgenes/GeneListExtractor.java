@@ -42,8 +42,8 @@ public class GeneListExtractor {
 		String [] outfiles = new String[3];
 		
 		HashSet<String> never_observed = new HashSet<>();
-		HashSet<String> lof_intolerant = new HashSet<>();
-		HashSet<String> lof_tolerant = new HashSet<>();
+		HashSet<String> low_freq = new HashSet<>();
+		HashSet<String> high_freq = new HashSet<>();
 		
 		double avg_prob = 0.0;
 		for(String s:gene_prob.keySet()) {
@@ -72,12 +72,12 @@ public class GeneListExtractor {
 				if(prob > avg_prob) {
 					p_value = 1 - bd.cumulativeProbability(observed-1);
 					if(p_value < 0.05) {
-						lof_tolerant.add(s);
+						high_freq.add(s);
 					}
 				} else if (prob < avg_prob) {
 					p_value = bd.cumulativeProbability(observed);
 					if(p_value < 0.05) {
-						lof_intolerant.add(s);
+						low_freq.add(s);
 					}
 				}
 				
@@ -94,17 +94,17 @@ public class GeneListExtractor {
 		}
 		outfiles[0] = never_obs;
 		
-		String lof_tol = gene_summary.replace("gene_summary", "lof_tolerant_genes");
+		String lof_tol = gene_summary.replace("gene_summary", "low_freq_genes");
 		try {
-			this.writeGeneList(lof_tolerant, lof_tol);
+			this.writeGeneList(high_freq, lof_tol);
 		} catch (IOException e) {
 			logger.error(lof_tol+" could not be written: "+e.getMessage());
 		}
 		outfiles[1] = lof_tol;
 		
-		String lof_in = gene_summary.replace("gene_summary", "lof_intolerant_genes");
+		String lof_in = gene_summary.replace("gene_summary", "high_freq_genes");
 		try {
-			this.writeGeneList(lof_intolerant, lof_in);
+			this.writeGeneList(low_freq, lof_in);
 		} catch (IOException e) {
 			logger.error(lof_in+" could not be written: "+e.getMessage());
 		}

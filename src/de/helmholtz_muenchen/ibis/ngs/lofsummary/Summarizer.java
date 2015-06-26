@@ -488,16 +488,21 @@ public abstract class Summarizer {
 	private void extendSampleStatistic() {
 		//get complete LOF genes
 		for(Entry<String,GeneSampleInfo> e: gene_sample_statistic.entrySet()) {
-			int all_trans = gene2transcripts.get(e.getKey().split("_")[0]).size();
+			String gene_id = e.getKey().split("_")[0];
+			int all_trans = gene2transcripts.get(gene_id).size();
 			int lof_hom = e.getValue().getHomTrans();
 			int lof_het = e.getValue().getHetTrans();
 			
 			SampleInfo si = sample_statistic.get(e.getKey().split("_")[1]);
 			if(all_trans == lof_hom) {//all transcripts are affected by LoF variants
-				si.addCompleteLoFGene(e.getKey().split("_")[0]);
-				si.addPartLoFGene(e.getKey().split("_")[0]);
+				si.addCompleteLoFGene(gene_id);
+				si.addPartLoFGene(gene_id);
+				si.addHomLoFGene(gene_id);
 			} else if((lof_hom>0) ||(lof_het>0)){
-				si.addPartLoFGene(e.getKey().split("_")[0]);
+				si.addPartLoFGene(gene_id);
+				if(lof_hom>0) {
+					si.addHomLoFGene(gene_id);
+				}
 			}
 		}
 	}
@@ -640,14 +645,14 @@ public abstract class Summarizer {
 		HashSet<String> ko_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\taffectedGenes\tknocked_out\tcompleteLOFgenes\taffectedLOFGenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFgenes\tknocked_out\tcompleteLOFgenes\taffectedLOFGenes");
 		bw.newLine();
 		for(String s: sample_statistic.keySet()) {
 			SampleInfo stat = sample_statistic.get(s);
 			ArrayList<String> completes = stat.getComplete_LOF_genes();
 			Collections.sort(completes);
 			int affected = stat.getPart_LOF_genes().size();
-			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+completes.size()+"\t");
+			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+stat.getHom_LOF_genes().size()+"\t"+completes.size()+"\t");
 			
 			if(completes.size() >= 1) {
 				String gene = completes.get(0);
