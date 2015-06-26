@@ -145,9 +145,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		store.setDefault(FORMAT_PREFERENCE, true);
 		store.setDefault(INDENT_PREFERENCE, 5);
-		PreferenceConverter.setDefault(store, COMMENT_COLOR_PREFERENCE,  new RGB(0, 200, 125));
-		PreferenceConverter.setDefault(store, ERROR_COLOR_PREFERENCE, new RGB(255, 0, 0));
-		PreferenceConverter.setDefault(store, VALID_COLOR_PREFERENCE,  new RGB(0, 0, 0));
+//		PreferenceConverter.setDefault(store, COMMENT_COLOR_PREFERENCE,  new RGB(0, 200, 125));
+//		PreferenceConverter.setDefault(store, ERROR_COLOR_PREFERENCE, new RGB(255, 0, 0));
+//		PreferenceConverter.setDefault(store, VALID_COLOR_PREFERENCE,  new RGB(0, 0, 0));
 
 		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
 		store.setDefault(USE_HTE, false);
