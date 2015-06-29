@@ -18,47 +18,9 @@ public class InputScanner {
 
 	/**
 	 * @author tanzeem.haque
-	 * This nested class is just an object for (int, boolean) type
-	 * int: saving the position for mutation/recombination
-	 * boolean: if true recombine, if false unaltered
-	 * in case of de novos and mutations, the boolean will always be false
-	 * this step was necessary because of the random seed =>
-	 * although the positions for recombination were constant, 
-	 * the recombination event itself was not constant
+	 * 
 	 */
-//	private static class Position_Action {
-//		private int i;
-//		private boolean b;
-//		
-//		@SuppressWarnings("unused")
-//		/**
-//		 * Not used yet, but soon!
-//		 * @param i
-//		 * @param b
-//		 */
-//		public Position_Action(int i , boolean b) {
-//			// TODO Auto-generated constructor stub
-//			setI(i);
-//			setB(b);
-//		}
-//
-//		public int getI() {
-//			return i;
-//		}
-//
-//		public void setI(int i) {
-//			this.i = i;
-//		}
-//
-//		public boolean isB() {
-//			return b;
-//		}
-//
-//		public void setB(boolean b) {
-//			this.b = b;
-//		}
-//
-//	}
+
 
 	/**
 	 * Attributes
@@ -88,7 +50,7 @@ public class InputScanner {
 	private InputData iData_recombination_child;
 	private InputData iData_deNovo_child;
 	private ArrayList<Strand> nMap;
-	private ArrayList<String> strandMap = new ArrayList<>();
+//	private ArrayList<String> strandMap = new ArrayList<>();
 
 
 
@@ -115,36 +77,10 @@ public class InputScanner {
 	
 	}
 
-	public ArrayList<String> getStrandMap() {
-		return strandMap;
+	public ArrayList<Strand> getStrandMap() {
+		return this.nMap;
 	}
 
-
-	/*
-	protected double getMutRate() {
-		return mutRate;
-	}
-
-	protected void setMutRate(double mutRate) {
-		this.mutRate = mutRate;
-	}
-
-	protected int getRecombination() {
-		return recombination;
-	}
-
-	protected void setRecombination(int recombination) {
-		this.recombination = recombination;
-	}
-
-	protected int getSeed() {
-		return seed;
-	}
-
-	protected void setSeed(int seed) {
-		this.seed = seed;
-	}
-*/
 	private Random [] getSeed() {
 		/**
 		 * 0: mut seed
@@ -170,15 +106,6 @@ public class InputScanner {
 		return seeds4all;
 	}
 	
-//	public int getChunk() {
-//		return this.chunk;
-//	}
-
-	/*
-	public void setChunk(int chunk) {
-		this.chunk = chunk;
-	}
-	*/
 
 	/**
 	 * @return the iData_arrList_parents
@@ -229,11 +156,7 @@ public class InputScanner {
 	private int getDeNovo(int length) {
 		// TODO Auto-generated method stub
 		//5878/5300=1: chr21
-		//31020/5300=5.85=5: chr1
-//		System.out.println("Length of chr: " + length);
-//		System.out.println("Number of variants: " + getVariants(length));
-//		System.out.println("De Novo: " + (int)(getVariants(length)/5300));
-		
+		//31020/5300=5.85=5: chr1	
 		int deNovo = (int)(getVariants(length)/this.generation);
 		deNovo = (deNovo == 0)? 1: deNovo;
 //		deNovo = 5;
@@ -264,31 +187,31 @@ public class InputScanner {
 		child = prepare_child_input(chr_length);
 		this.iData_deNovo_child = new InputData(this.chrID, child.get(0));
 		this.iData_recombination_child = new InputData(this.chrID, child.get(1));
-		prepareStrandFile(parents, child.get(0));
+//		prepareStrandFile(parents, child.get(0));
 		
 	}
 
-	private void prepareStrandFile(ArrayList<Integer> parents,
-			ArrayList<Integer> deNovoChild){
-		// TODO Auto-generated method stub
-		ArrayList<Integer> allMutations = new ArrayList<>(parents.size()+deNovoChild.size());
-		for (int i : parents)
-			allMutations.add(i);
-		for (int i : deNovoChild)
-			allMutations.add(i);
-		
-		Collections.sort(allMutations);
-		
-		for (int n : allMutations) {
-			for(int i = 0; i < this.nMap.size(); i++) {
-				if (n >= this.nMap.get(i).getStart() && n <= this.nMap.get(i).getEnd()){
-					String strand = (n+1) + "\t" + this.nMap.get(i).getStream();
-					this.strandMap.add(strand);
-					break;
-				}			
-			}
-		}
-	}
+//	private void prepareStrandFile(ArrayList<Integer> parents,
+//			ArrayList<Integer> deNovoChild){
+//		// TODO Auto-generated method stub
+//		ArrayList<Integer> allMutations = new ArrayList<>(parents.size()+deNovoChild.size());
+//		for (int i : parents)
+//			allMutations.add(i);
+//		for (int i : deNovoChild)
+//			allMutations.add(i);
+//		
+//		Collections.sort(allMutations);
+//		
+//		for (int n : allMutations) {
+//			for(int i = 0; i < this.nMap.size(); i++) {
+//				if (n >= this.nMap.get(i).getStart() && n <= this.nMap.get(i).getEnd()){
+//					String strand = (n+1) + "\t" + this.nMap.get(i).getStream();
+//					this.strandMap.add(strand);
+//					break;
+//				}			
+//			}
+//		}
+//	}
 
 	/**
 	 * @param range: Length of the sequence
@@ -302,10 +225,10 @@ public class InputScanner {
 
 		int max = length-1, min = 0, n = getVariants(length);
 		if (n == 0) {
-			FrostRunner.createLog(FrostRunner.bw6,"Check the mutation rate. Number of mutations: " + n);
+			FrostRunner.createLog(FrostRunner.bw_log,"Check the mutation rate. Number of mutations: " + n);
 			System.exit(0);
 		}
-		FrostRunner.createLog(FrostRunner.bw6, "Number of initial mutations: " + n);
+		FrostRunner.createLog(FrostRunner.bw_log, "Number of initial mutations: " + n);
 
 		/**
 		 * SEED ENTRY 1
@@ -325,8 +248,8 @@ public class InputScanner {
 		ArrayList<Integer> m_tmpList = generatePosition(max, min, n, rd, false); //false means no recombination
 //		System.out.println("Parent size " +n + "\t" + m_tmpList.size());
 		if(FrostRunner.skipped_N > 0) {
-			FrostRunner.createLog(FrostRunner.bw6, "Number of skipped positions (N's) for mutation in parents: " + FrostRunner.skipped_N);
-			FrostRunner.createLog(FrostRunner.bw6, "Number of total mutations: " + (n-FrostRunner.skipped_N));
+			FrostRunner.createLog(FrostRunner.bw_log, "Number of skipped positions (N's) for mutation in parents: " + FrostRunner.skipped_N);
+			FrostRunner.createLog(FrostRunner.bw_log, "Number of total mutations: " + (n-FrostRunner.skipped_N));
 
 		}
 		Collections.sort(m_tmpList);
@@ -378,7 +301,7 @@ public class InputScanner {
 //			rd2 = new Random(this.seed);
 //		FrostRunner.skipped_N = 0;
 		
-		FrostRunner.createLog(FrostRunner.bw6, "Number of total de novo: " + n);
+		FrostRunner.createLog(FrostRunner.bw_log, "Number of total de novo: " + n);
 		d_tmpList = generatePosition(length-1, 0, n, rd2, false); // false coz no recombination
 //		if(FrostRunner.skipped_N > 0)
 //			FrostRunner.createLog(FrostRunner.bw6, "Number of skipped positions (N's) for deNovo: " + FrostRunner.skipped_N);
@@ -452,7 +375,7 @@ public class InputScanner {
 			}
 		}
 		if (cut) {
-			FrostRunner.createLog(FrostRunner.bw6,"Total corrected number of recombination: " + r_tmpList.size());
+			FrostRunner.createLog(FrostRunner.bw_log,"Total corrected number of recombination: " + r_tmpList.size());
 //			System.out.println("Total corrected number of recombination: " + r_tmpList.size());
 		}
 //		System.out.println(j);

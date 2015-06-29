@@ -80,19 +80,48 @@ public class RecordWriters {
 		}		
 	}
 	
-//	protected void write_vcf(String fileName, ArrayList<String> ID, 
-//			ArrayList<Integer> POS, ArrayList<String> prettyMutation) {
-//		
-//		// TODO Auto-generated method stub
-//		try (PrintWriter pw = new PrintWriter(new FileOutputStream(fileName, true))) { // new PrintWriter(new BufferedWriter(new FileWriter(fileName, true))))
-//			for (int i = 0; i < prettyMutation.size(); i++) {
-//				pw.write(ID.get(i) + "\t" + POS.get(i) + "\t" + prettyMutation.get(i) + "\n");
-//			}
-//		} catch (Exception e) {
-//			System.err.println("Error: " + e.getMessage());
-//			e.printStackTrace();
-//		}		
-//	}
+	protected void write_strand(BufferedWriter bw_strand, String vcf_File) {
+		// TODO Auto-generated method stub
+		ArrayList<Integer> mutations = new ArrayList<>();
+		File vcf = new File (vcf_File);
+		try {
+			Scanner sc = new Scanner(vcf, "UTF-8");
+			while (sc.hasNextLine()) {
+				String s = sc.nextLine();
+				if (s.startsWith("#"))
+					continue;
+				String[] col = s.split("\t");
+				int pos = Integer.parseInt(col[1]);
+				mutations.add(pos);
+			}
+		}
+		catch (FileNotFoundException e) {
+	        e.printStackTrace();
+	    }
+		ArrayList<String> strandMap = prepareStrandFile(mutations);
+		
+		String strand = "";
+		for(int i = 0; i < strandMap.size(); i++) {
+			strand += strandMap.get(i) + "\n"; 
+		}
+		write_simple_string(bw_strand, strand);
+		
+	}
+	private ArrayList<String> prepareStrandFile(ArrayList<Integer> mutations){
+		// TODO Auto-generated method stub
+		ArrayList<String> strandMap = new ArrayList<>(mutations.size());
+		
+		for (int n : mutations) {
+			for(int i = 0; i < in.getStrandMap().size(); i++) {
+				if (n >= in.getStrandMap().get(i).getStart() && n <= in.getStrandMap().get(i).getEnd()){
+					String strand = (n) + "\t" + in.getStrandMap().get(i).getStream();
+					strandMap.add(strand);
+					break;
+				}			
+			}
+		}
+		return strandMap;
+	}
 	
 	protected void write_vcf(BufferedWriter bw_vcf, String parentFile, String childFile) {
 		File child_tmp = new File (childFile), parents_tmp = new File (parentFile);
@@ -265,7 +294,7 @@ public class RecordWriters {
 
 		String s = (duplicates.size() > 0)? "Found double mutation in child =>"
 				:"No double mutation in child";		
-		FrostRunner.createLog(FrostRunner.bw6 , s);
+		FrostRunner.createLog(FrostRunner.bw_log , s);
 //		for (int i : duplicates)
 //			System.out.println(i + "");
 
@@ -293,9 +322,9 @@ public class RecordWriters {
 		            /**
 		             * KEEP this system out block to check bug
 		             */
-		            FrostRunner.createLog(FrostRunner.bw6,"Child from parent: " + c0 + "|" + c1);
-		            FrostRunner.createLog(FrostRunner.bw6,"Denovo situation: " + c[0] + "|" + c[1]);
-		            FrostRunner.createLog(FrostRunner.bw6,"Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
+		            FrostRunner.createLog(FrostRunner.bw_log,"Child from parent: " + c0 + "|" + c1);
+		            FrostRunner.createLog(FrostRunner.bw_log,"Denovo situation: " + c[0] + "|" + c[1]);
+		            FrostRunner.createLog(FrostRunner.bw_log,"Child allele: " + denovo + ";" + "\t" + "Parent allele: " + parent_mut);
 
 		            if(!(denovo.equals(parent_mut))
 		            		|| (denovo.equals(parent_mut) && (c0 == 0 || c1 == 0))) { 
@@ -337,7 +366,7 @@ public class RecordWriters {
     						+ this.vcf.get(i+1).getContent().split("\t")[9]+"\t"/*mother genotype originally from parents file*/
     						+ this.vcf.get(i+1).getContent().split("\t")[10]+"\t"/*father genotype originally from parents file*/
     						+ c0 + "|" + c1;
-		            FrostRunner.createLog(FrostRunner.bw6, new_content);
+		            FrostRunner.createLog(FrostRunner.bw_log, new_content);
 		            this.vcf.set(i, new VCF_info(this.vcf.get(i).getPosition(), new_content));
 //    				System.out.println("Before removing: " + tmp.get(i).getContent());
 		            this.vcf.remove(i+1);
@@ -432,4 +461,6 @@ public class RecordWriters {
 			return comp;
 		}
 	}
+
+	
 }
