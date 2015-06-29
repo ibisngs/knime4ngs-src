@@ -5,7 +5,6 @@ import java.io.File;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
@@ -15,7 +14,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.FilesHistoryPanel;
 
 import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
@@ -48,7 +46,8 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the BWA node.
      */
-    protected BWANodeDialog() {
+    @SuppressWarnings("deprecation")
+	protected BWANodeDialog() {
     	super();
     	    	
     	readGroup.setEnabled(false);
@@ -110,7 +109,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 				if(usePrefPage.getBooleanValue()) {
 					String toolPath = BinaryHandler.checkToolAvailability("bwa");
 			    	if(toolPath == null) {
-			    		toolPath = "";
+			    		toolPath = "bwa binary not found!";
 			    	}
 			    	bwa.setStringValue(toolPath);
 				}
@@ -124,7 +123,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	if(usePrefPage.getBooleanValue()){
 	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
 	    	if(toolPath == null) {
-	    		toolPath = "";
+	    		toolPath = "bwa binary not found!";
 	    	}
 	    	bwa.setStringValue(toolPath);
     	}

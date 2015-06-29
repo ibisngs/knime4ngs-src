@@ -56,6 +56,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     // definition of SettingsModel
 	private final SettingsModelString m_refseqfile = new SettingsModelString(CFGKEY_REFSEQFILE,"");
 	private final SettingsModelString m_bwafile = new SettingsModelString(CFGKEY_BWAFILE,"");
+	private final SettingsModelBoolean m_usePrefPage = new SettingsModelBoolean(CFGKEY_USEPREFPAGE,true);
 	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
 	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
 	private final SettingsModelString m_bwtIndex = new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
@@ -425,11 +426,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
-    	if(toolPath == null) {
-    		toolPath = "";
+    	if(m_usePrefPage.getBooleanValue()) {
+	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+	    	if(toolPath == null) {
+	    		toolPath = "";
+	    	}
+	    	m_bwafile.setStringValue(toolPath);
     	}
-    	m_bwafile.setStringValue(toolPath);
     	
     	// Warning if there is a problem with readType
     	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
@@ -471,6 +474,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.saveSettingsTo(settings);
     	
     	m_bwafile.saveSettingsTo(settings);
+    	m_usePrefPage.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_bwtIndex.saveSettingsTo(settings);
     	m_readType.saveSettingsTo(settings);
@@ -492,6 +496,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.loadValidatedSettingsFrom(settings);
     	
     	m_bwafile.loadSettingsFrom(settings);
+    	m_usePrefPage.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_bwtIndex.loadSettingsFrom(settings);
     	m_readType.loadSettingsFrom(settings);
@@ -513,6 +518,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.validateSettings(settings);
     	
     	m_bwafile.validateSettings(settings);
+    	m_usePrefPage.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_bwtIndex.validateSettings(settings);
     	m_readType.validateSettings(settings);

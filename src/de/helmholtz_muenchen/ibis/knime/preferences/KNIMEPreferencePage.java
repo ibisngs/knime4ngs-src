@@ -54,6 +54,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	private Text thresholdText;
 	private Text dbFile;
 	private Text email;
+	
+	private Button checkHTE;
+	private Button checkNotify;
 
 
 	public KNIMEPreferencePage() {
@@ -90,6 +93,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		binsDirectory = new Text(downloadBins, SWT.BORDER);
 		binsDirectory.setText(TOOL_LOCATION);
+		binsDirectory.setEditable(false);
 		
 		Button browseBinDir = new Button(downloadBins, SWT.NONE);
 		browseBinDir.setText("Browse");
@@ -121,7 +125,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		use_hte.setLayout(hteLayout);
 		
 		USE_HTE = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
-		Button checkHTE = new Button(use_hte,SWT.CHECK);
+		checkHTE = new Button(use_hte,SWT.CHECK);
 		checkHTE.setText("Use HTE?");
 		checkHTE.setSelection(USE_HTE);
 		
@@ -144,6 +148,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dbFile.setText(DB_FILE);
 		dbFile.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		dbFile.setEnabled(USE_HTE);
+		dbFile.setEditable(false);
 		
 		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
 		browseDBFile.setText("Browse");
@@ -172,20 +177,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			}
 		});
 		
-		//Email preferences
-		Group emailPrefs = new Group(top,SWT.NONE);
-		emailPrefs.setText("Email notification preferences");
-		emailPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		emailPrefs.setLayout(new GridLayout());
-		
-		Composite address = new Composite(emailPrefs,SWT.LEFT);
+		Composite address = new Composite(htePrefs,SWT.LEFT);
 		address.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout emailLayout = new GridLayout();
 		emailLayout.numColumns = 1;
 		address.setLayout(emailLayout);
 		
 		NOTIFY = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
-		Button checkNotify = new Button(address,SWT.CHECK);
+		checkNotify = new Button(address,SWT.CHECK);
 		checkNotify.setText("Email notification?");
 		checkNotify.setSelection(NOTIFY);
 		checkNotify.addSelectionListener(new SelectionAdapter() {
@@ -221,6 +220,33 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 */
 	protected void performDefaults() {
 		super.performDefaults();
+		
+		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
+		
+		TOOL_LOCATION = IBISKNIMENodesPlugin.TOOL_DIR_DEFAULT;
+		binsDirectory.setText(TOOL_LOCATION);
+		iknp.setToolDirPreference(TOOL_LOCATION);
+		
+		USE_HTE = IBISKNIMENodesPlugin.HTE_DEFAULT;
+		checkHTE.setSelection(USE_HTE);
+		iknp.setHTEPreference(USE_HTE);
+		
+		THRESHOLD = IBISKNIMENodesPlugin.THRESHOLD_DEFAULT+"";
+		thresholdText.setText(THRESHOLD);
+		iknp.setThresholdPreference(THRESHOLD);
+		
+		DB_FILE = IBISKNIMENodesPlugin.DB_FILE_DEFAULT;
+		dbFile.setText(DB_FILE);
+		iknp.setDBFilePreference(DB_FILE);
+		
+		NOTIFY = IBISKNIMENodesPlugin.NOTIFY_DEFAULT;
+		checkNotify.setSelection(NOTIFY);
+		iknp.setNotifyPreference(NOTIFY);
+		
+		EMAIL = IBISKNIMENodesPlugin.EMAIL_DEFAULT;
+		email.setText(EMAIL);
+		iknp.setEmailPreference(EMAIL);
+		
 	}
 	
 	/*
@@ -231,18 +257,15 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
-		if(TOOL_LOCATION.equals("")) {
-			JOptionPane.showMessageDialog(null,
-				    "Valid directory for binaries has to be specified.",
-				    "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
 		iknp.setToolDirPreference(TOOL_LOCATION);
 		System.out.println("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
 		
 		iknp.setHTEPreference(USE_HTE);
 		System.out.println("Setting USE_HTE to: "+USE_HTE);
+		
+		if(!USE_HTE) {
+			return super.performOk();
+		}
 		
 		THRESHOLD = thresholdText.getText();
 		try{

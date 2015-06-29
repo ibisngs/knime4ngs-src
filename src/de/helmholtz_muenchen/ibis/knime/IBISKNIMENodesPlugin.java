@@ -2,8 +2,6 @@
 package de.helmholtz_muenchen.ibis.knime;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.swt.graphics.RGB;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
@@ -14,21 +12,24 @@ import org.osgi.framework.BundleContext;
  * @author hastreiter
  */
 public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
-    
-	public static final String FORMAT_PREFERENCE = "formatOnSave";
-	public static final String INDENT_PREFERENCE = "indentSpaces";
-	public static final String COMMENT_COLOR_PREFERENCE = "commentColor";
-	public static final String ERROR_COLOR_PREFERENCE = "errorColor";
-	public static final String VALID_COLOR_PREFERENCE = "validColor";
 	
 	public static final String TOOL_DIR_PREFERENCE = "tooldir";
-	public static final String TOOL_DIR_DEFAULT = "~/";
+	public static final String TOOL_DIR_DEFAULT = System.getProperty("user.home")+System.getProperty("file.separator")+"Downloads";
 	
 	public static final String USE_HTE = "hte";
+	public static final boolean HTE_DEFAULT = false;
+	
 	public static final String THRESHOLD = "threshold";
+	public static final int THRESHOLD_DEFAULT = 1;
+	
 	public static final String DB_FILE = "db_file";
+	public static final String DB_FILE_DEFAULT = "";
+	
 	public static final String NOTIFY = "notify";
+	public static final boolean NOTIFY_DEFAULT = false;
+	
 	public static final String EMAIL = "email";
+	public static final String EMAIL_DEFAULT = "";
 	
 	/**
      * The shared instance.
@@ -143,18 +144,12 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	 * @param store the preference store to fill
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(FORMAT_PREFERENCE, true);
-		store.setDefault(INDENT_PREFERENCE, 5);
-//		PreferenceConverter.setDefault(store, COMMENT_COLOR_PREFERENCE,  new RGB(0, 200, 125));
-//		PreferenceConverter.setDefault(store, ERROR_COLOR_PREFERENCE, new RGB(255, 0, 0));
-//		PreferenceConverter.setDefault(store, VALID_COLOR_PREFERENCE,  new RGB(0, 0, 0));
-
 		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
-		store.setDefault(USE_HTE, false);
-		store.setDefault(THRESHOLD, "1");
-		store.setDefault(DB_FILE, "~/");
-		store.setDefault(NOTIFY, false);
-		store.setDefault(EMAIL, "");
+		store.setDefault(USE_HTE, HTE_DEFAULT);
+		store.setDefault(THRESHOLD, THRESHOLD_DEFAULT);
+		store.setDefault(DB_FILE, DB_FILE_DEFAULT);
+		store.setDefault(NOTIFY, NOTIFY_DEFAULT);
+		store.setDefault(EMAIL, EMAIL_DEFAULT);
 	}
 	
 	
