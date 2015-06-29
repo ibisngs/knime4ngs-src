@@ -16,16 +16,22 @@ public class SuccessfulRunChecker {
 	public static final String LOCK_ENDING = ".klock";
 	private static final String OK = "Terminated successfully!";
 	
-	/*public static void main(String args[]) throws IOException {
+	/*examplary integration in execute method
+	
+	File lockFile = new File(...);
+	String lockCommand = ...;
+	boolean b = hasTerminatedSuccessfully(lockFile, lockCommand);
 		
-		boolean b = hasTerminatedSuccessfully(new File("/tmp/lock.test"), "test -r");
-		System.out.println("termination state:" + b);
-		
-		if(!b) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(new File("/tmp/lock.test"), "test -r");
+	if(!b) {
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(new File("/tmp/lock.test"), "test -r");
+		int exitCode = Executor.executeCommandWithExitCode(...);
+		if(exitCode==0) {
 			checker.writeOK();
+			checker.finalize();
 		}
-	}*/
+		
+	}
+	*/
 	
 	
 	public SuccessfulRunChecker(File lock, String command) throws IOException {

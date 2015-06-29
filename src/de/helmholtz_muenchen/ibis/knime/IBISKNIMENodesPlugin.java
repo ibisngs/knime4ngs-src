@@ -92,6 +92,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
      */
     public IBISKNIMENodesPlugin() {
         super();
+		System.out.println("lala");
     }
 
     /**

@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
@@ -58,6 +59,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	private Button checkHTE;
 	private Button checkNotify;
 
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(KNIMEPreferencePage.class);
 
 	public KNIMEPreferencePage() {
 		super();
@@ -258,10 +260,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		iknp.setToolDirPreference(TOOL_LOCATION);
-		System.out.println("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
+		LOGGER.debug("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
 		
 		iknp.setHTEPreference(USE_HTE);
-		System.out.println("Setting USE_HTE to: "+USE_HTE);
+		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
 		
 		if(!USE_HTE) {
 			return super.performOk();
@@ -281,7 +283,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return false;
 		}
 		iknp.setThresholdPreference(THRESHOLD);
-		System.out.println("Setting THREHOLD to: "+THRESHOLD);
+		LOGGER.debug("Setting THREHOLD to: "+THRESHOLD);
 		
 		if(DB_FILE.equals("")) {
 			JOptionPane.showMessageDialog(null,
@@ -291,13 +293,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return false;
 		}
 		iknp.setDBFilePreference(DB_FILE);
-		System.out.println("Setting DB_FILE to: "+DB_FILE);
+		LOGGER.debug("Setting DB_FILE to: "+DB_FILE);
 		
 		iknp.setNotifyPreference(NOTIFY);
 		
 		EMAIL = email.getText();
 		iknp.setEmailPreference(EMAIL);
-		System.out.println("Setting EMAIL to: "+EMAIL);
+		LOGGER.debug("Setting EMAIL to: "+EMAIL);
 		
 		if(NOTIFY) {
 			try {
