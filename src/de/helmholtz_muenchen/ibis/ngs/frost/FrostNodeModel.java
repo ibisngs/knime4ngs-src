@@ -210,12 +210,12 @@ public class FrostNodeModel extends NodeModel {
         /**
          * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
          */
-		String[] fs = FrostNodeModel.recordFiles();
+		ArrayList<String> fs = FrostRunner.recordFiles;
 		
-		fs[0] = fs[0].replace(".tmp", ".txt");
-		fs[1] = fs[1].replace(".tmp", ".txt");
-        for(int i = 0; i < fs.length; i++) {
-            pushFlowVariableString("record file " +(i+1), fs[i]);
+		fs.set(1, fs.get(1).replace(".tmp", ".txt"));
+		fs.set(2, fs.get(2).replace(".tmp", ".txt"));
+        for(int i = 0; i < fs.size(); i++) {
+            pushFlowVariableString("record file " +(i+1), fs.get(i));
 		}
         
 //		System.out.println("ID LIST after : " + FrostRunner.id_list.size());
@@ -262,23 +262,23 @@ public class FrostNodeModel extends NodeModel {
 //		
 //	}
 
-    public static String[] recordFiles() {
-    	
-
-    	String[] files = new String[8];
-		files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".tmp";
-    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".tmp";
-    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
-    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
-    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_phased_" + FrostNodeModel.seed + ".vcf";
-    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_unphased_" + FrostNodeModel.seed + ".vcf";
-    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
-    	files[7] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyStrandFile_" + FrostNodeModel.seed + ".strand";
-
-
-    	return files;
-
-    }
+//    public static String[] recordFiles() {
+//    	
+//
+//    	String[] files = new String[8];
+//		files[0] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "parents_run_" + FrostNodeModel.seed + ".tmp";
+//    	files[1] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "child_run_" + FrostNodeModel.seed + ".tmp";
+//    	files[2] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombination_" + FrostNodeModel.seed + ".txt";
+//    	files[3] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "recombined_seq_" + FrostNodeModel.seed + ".txt";
+//    	files[4] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_phased_" + FrostNodeModel.seed + ".vcf";
+//    	files[5] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "trio_unphased_" + FrostNodeModel.seed + ".vcf";
+//    	files[6] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyLogFile_" + FrostNodeModel.seed + ".log";
+//    	files[7] = FrostNodeModel.INTERNAL_OUTPUT_PATH + "MyStrandFile_" + FrostNodeModel.seed + ".strand";
+//
+//
+//    	return files;
+//
+//    }
         
     private void executeInput(String input, double mutRate, int rec_num, int gen_num) throws InterruptedException, IOException {
         
