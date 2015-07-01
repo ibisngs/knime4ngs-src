@@ -276,6 +276,9 @@ public abstract class Summarizer {
 			        			} else if (part.contains("LoF")) {
 			        				additional_titles.add("confidence");
 			        				vep_header.put("confidence",i);
+			        			} else if (part.contains("ENSP")) {
+			        				additional_titles.add("protein_id");
+			        				vep_header.put("protein_id", i);
 			        			}
 			        		}
 			        	} else if(line.startsWith("#CHR")) {
