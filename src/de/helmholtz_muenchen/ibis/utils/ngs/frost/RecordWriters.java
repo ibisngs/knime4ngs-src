@@ -139,7 +139,7 @@ public class RecordWriters {
 	        	if (col[3].equals("*")) {
 //	        		System.out.println("*************************");
 	        		col[3] = col[3].replace("*", "");
-	        		pos = pos - 1;
+	        		pos =(int)(pos-1);
 	        		
 	        	}
 	        	this.vcf.add(new VCF_info(pos /*position*/, 
@@ -168,12 +168,12 @@ public class RecordWriters {
 	        	if (col[3].equals("*")) {
 //	        		System.out.println("*************************");
 	        		col[3] = col[3].replace("*", "");
-	        		pos = pos - 1;
+	        		pos =(int)(pos-1);
 	        		
 	        	}
 	        	this.vcf.add(new VCF_info(pos, 
 	        			col[0]/*.replaceAll("^[0-9]_", "")/*id*/
-	    	        			+"\t"+col[1]
+	    	        			+"\t"+pos
 	    	    	        	+"\t"+"." /*ID as in vcf format*/	
 	    	        			+"\t"+col[2]/*ref allele*/
 	    	        			+"\t"+col[3]/*alt allele*/
