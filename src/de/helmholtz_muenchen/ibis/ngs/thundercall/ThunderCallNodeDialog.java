@@ -1,8 +1,15 @@
 package de.helmholtz_muenchen.ibis.ngs.thundercall;
 
+import javax.swing.JFileChooser;
+
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 
 /**
  * <code>NodeDialog</code> for the "ThunderCall" Node.
@@ -17,20 +24,38 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
  */
 public class ThunderCallNodeDialog extends DefaultNodeSettingsPane {
 
-    /**
-     * New pane for configuring ThunderCall node dialog.
-     * This is just a suggestion to demonstrate possible default dialog
-     * components.
-     */
+	private final SettingsModelString SAMTOOLS_HYBRID = new SettingsModelString(ThunderCallNodeModel.CFGKEY_SAMTOOLS_HYBRID_PATH, "");
+	private final SettingsModelString THUNDER = new SettingsModelString(ThunderCallNodeModel.CFGKEY_THUNDER_PATH, "");
+	private final SettingsModelString REF_GENOME = new SettingsModelString(ThunderCallNodeModel.CFGKEY_REF_GENOME, "");
+	private final SettingsModelString BASE_NAME = new SettingsModelString(ThunderCallNodeModel.CFGKEY_BASE_NAME, "");
+	private final SettingsModelDoubleBounded POST_PROB = new SettingsModelDoubleBounded(ThunderCallNodeModel.CFGKEY_POST_PROB, ThunderCallNodeModel.DEFAULT_POST_PROB, 0.1, 1.0);
+
     protected ThunderCallNodeDialog() {
         super();
         
-        addDialogComponent(new DialogComponentNumber(
-                new SettingsModelIntegerBounded(
-                    ThunderCallNodeModel.CFGKEY_COUNT,
-                    ThunderCallNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE),
-                    "Counter:", /*step*/ 1, /*componentwidth*/ 5));
+        createNewGroup("Path to samtools-hybrid file");
+        String samHybridPath = BinaryHandler.checkToolAvailability("samtools-hybrid");
+    	if(samHybridPath == null) {
+    		samHybridPath = "samtools-hybrid binary not found!";
+    	}
+    	SAMTOOLS_HYBRID.setStringValue(samHybridPath);
+    	
+    	createNewGroup("Path to thunder file");
+        String thunderPath = BinaryHandler.checkToolAvailability("GPT_Freq");
+    	if(thunderPath == null) {
+    		thunderPath = "thunder GPT_Freq binary not found!";
+    	}
+    	THUNDER.setStringValue(thunderPath);
+    	
+    	createNewGroup("Reference Genome");
+    	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
+    	ref_genome.setBorderTitle("Choose the reference genome");
+    	addDialogComponent(ref_genome);
+    	
+    	addDialogComponent(new DialogComponentString(BASE_NAME, "Outfile Suffix"));
+
+      	addDialogComponent(new DialogComponentNumber(POST_PROB,"Posterior probability:", /*step*/ 0.1, /*componentwidth*/ 5));
+
                     
     }
 }
