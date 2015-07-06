@@ -144,7 +144,6 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 			terms.add(t);
 		}
 		DC_TERM_DISPLAY.replaceListItems(terms, NO_SELECTION_MADE);
-		addDialogComponent(DC_TERM_DISPLAY);
     }
     
     public void loadAdditionalSettingsFrom(NodeSettingsRO settings, DataTableSpec[] specs) throws NotConfigurableException {
