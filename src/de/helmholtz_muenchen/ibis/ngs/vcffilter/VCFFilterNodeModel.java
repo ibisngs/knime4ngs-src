@@ -69,7 +69,7 @@ public class VCFFilterNodeModel extends NodeModel {
 	//output col names
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
-	public static boolean optionalPort=false;
+	public boolean optionalPort=false;
 	
     protected VCFFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));

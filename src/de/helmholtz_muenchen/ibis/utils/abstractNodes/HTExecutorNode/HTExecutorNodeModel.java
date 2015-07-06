@@ -74,6 +74,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			String StdInFile, SuccessfulRunChecker checker, HTEDBHandler htedb) throws Exception {
 
 		int exitcode = 0;
+		String err_msg = "";
 		
 		if (count < threshold_value) {
 			count++;
@@ -81,15 +82,15 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			exitcode = Executor.executeCommandWithExitCode(command, exec,
 					environment,LOGGER, stdOutFile, stdErrFile, stdOut,
 					stdErr, StdInFile);
+			err_msg = stdErr.toString();
+			stdErr = new StringBuffer();
 			if (exitcode == 0) {
 				htedb.writeSuccess(exec_id);
 				checker.writeOK();
 				checker.finalize();
 				return;
-			} else if (exitcode == 139) {
-				htedb.writeError(exec_id, "segmentation fault");
 			} else {
-				htedb.writeError(exec_id, "exitcode: " + exitcode);
+				htedb.writeError(exec_id, err_msg);
 			}
 		}
 
@@ -102,11 +103,22 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 					cmd = " "+ c;
 				}
 			}
+			
+			String newLine = System.getProperty("line.separator");
+			
 			if(email!=null) {
-				sendMail("Node " + node_name + " failed " + count
+				sendMail("Hello " + email.split("@")[0] + ", "
+						+ newLine
+						+ "unfortunately the node " + node_name + " failed " + count
 						+ " time(s) on host " + host_name + "."
-						+ System.getProperty("line.separator") + "Command was:"
-						+ cmd);
+						+ newLine + newLine 
+						+ "Your command was: "
+						+ newLine
+						+ cmd 
+						+ newLine + newLine
+						+ "The error message was: "
+						+ newLine
+						+ err_msg);
 			}
 			
 			htedb.closeConnection();
@@ -176,6 +188,9 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		
 		if (use_hte) {
 			exec_id = htedb.insertNewHTExecution(lockCommand, node_name, host_name, threshold_value);
+			if(stdErr == null) {
+				stdErr = new StringBuffer();
+			}
 			recExecuteCommand(command, exec, environment, stdOutFile,
 					stdErrFile, stdOut, stdErr, StdInFile, checker, htedb);
 			htedb.closeConnection();

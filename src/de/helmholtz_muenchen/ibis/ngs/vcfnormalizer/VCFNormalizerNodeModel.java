@@ -38,7 +38,7 @@ public class VCFNormalizerNodeModel extends NodeModel {
 	// the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(VEPNodeModel.class);
     
-    public static boolean optionalPort=false;
+    public boolean optionalPort=false;
     
     static final String CFGKEY_VT = "vt_path";
     final SettingsModelString m_vt_path = new SettingsModelString(CFGKEY_VT,"");

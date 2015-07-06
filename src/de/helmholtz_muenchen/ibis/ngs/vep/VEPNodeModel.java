@@ -116,7 +116,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
 	public static final String OUT_COL2 = "Path2VEP_StatsFile";
 	
-	public static boolean optionalPort=false;
+	public boolean optionalPort=false;
 	
     /**
      * Constructor for the node model.

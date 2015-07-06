@@ -60,7 +60,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 	public static final String OUT_COL3 = "Path2Sample_Summary";
 	public static final String OUT_COL4 = "Path2Trio_Summary";
 	
-	public static boolean optionalPort=false;
+	public boolean optionalPort=false;
 	
     /**
      * Constructor for the node model.
@@ -78,6 +78,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	String vcf_infile;
+    	System.out.println(optionalPort);
     	
     	if(optionalPort){	//Input Table available
     		//Get File via Table
@@ -157,13 +158,11 @@ public class LOFSummaryNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
 			
 		}catch(NullPointerException e){}
-
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
