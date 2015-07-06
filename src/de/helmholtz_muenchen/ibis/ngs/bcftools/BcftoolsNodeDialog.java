@@ -122,7 +122,7 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     			BcftoolsNodeModel.CFGKEY_OUTQCALL, false), "Output the QCALL likelihood format"));
 
 
-    	createNewTab("Call Calling Options");
+    	createNewTab("Calling Options");
     	createNewGroup("Consensus/variant calling options");
     	//createNewGroup("Consensus/variant calling options:");
     	setHorizontalPlacement(true);

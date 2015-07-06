@@ -294,52 +294,107 @@ Contrast calling and association test options:
     	String method = m_bcfmethod.getStringValue();
     	String outfile=m_infile.getStringValue();
     	command.add(path2bcftools+" "+method);
-    	
+    	/**
+    	 * About:   SNP/indel variant calling from VCF/BCF. To be used in conjunction with samtools mpileup.
+         This command replaces the former "bcftools view" caller. Some of the original
+         functionality has been temporarily lost in the process of transition to htslib,
+         but will be added back on popular demand. The original calling model can be
+         invoked with the -c option.
+Usage:   bcftools call [options] <in.vcf.gz>
+
+File format options:
+   -o, --output <file>             write output to a file [standard output]
+   -O, --output-type <b|u|z|v>     output type: 'b' compressed BCF; 'u' uncompressed BCF; 'z' compressed VCF; 'v' uncompressed VCF [v]
+   -r, --regions <region>          restrict to comma-separated list of regions
+   -R, --regions-file <file>       restrict to regions listed in a file
+   -s, --samples <list>            list of samples to include [all samples]
+   -S, --samples-file <file>       PED file or a file with optional second column for ploidy (0, 1 or 2) [all samples]
+   -t, --targets <region>          similar to -r but streams rather than index-jumps
+   -T, --targets-file <file>       similar to -R but streams rather than index-jumps
+
+
+    	 */
     	if(m_bcfmethod.getStringValue().equals("call")){
         logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools call "));
     	//Bcftools View !
     	/**
     	 *    Input/output options
+    	 *    Input/output options:
+   -A, --keep-alts                 keep all possible alternate alleles at variant sites
+   -f, --format-fields <list>      output format fields: GQ,GP (lowercase allowed) []
+   -g, --gvcf <minDP>              output gVCF blocks of homozygous REF calls
+   -i, --insert-missed             output also sites missed by mpileup but present in -T
+   -M, --keep-masked-ref           keep sites with masked reference allele (REF=N)
+   -V, --skip-variants <type>      skip indels/snps
+   -v, --variants-only             output variant sites only
+
     	 */
-    	if(m_keepallel.getBooleanValue()){command.add("-A");}
-    	if(m_outbcf.getBooleanValue()){command.add("-b");}
-    	if(m_seqdic.isEnabled()){command.add("-D "+m_seqdic.getStringValue());}
-    	if(m_plgenerate.getBooleanValue()){command.add(" -F");}
-    	if(m_surpressgenotype.getBooleanValue()){command.add(" -G");}
-    	if(m_bedfile.isEnabled()){command.add("-l "+m_bedfile.getStringValue());}
-    	if(m_calcld.getBooleanValue()){command.add("-L");}
-    	if(m_skipref.getBooleanValue()){command.add("-N");}
-    	if(m_outqcall.getBooleanValue()){command.add("-Q");}
-    	if(m_samplelist.isEnabled()){command.add("-s "+m_samplelist.getStringValue());}
+    	if(m_keepallel.getBooleanValue()){
+    		command.add("-A");
+    	}
+    
+//    	if(m_seqdic.isEnabled()){command.add("-D "+m_seqdic.getStringValue());}
+//    	if(m_plgenerate.getBooleanValue()){command.add(" -F");}
+//    	if(m_surpressgenotype.getBooleanValue()){command.add(" -G");}
+    	if(m_bedfile.isEnabled()){
+    		command.add("-R "+m_bedfile.getStringValue());
+    	}
+//    	if(m_calcld.getBooleanValue()){command.add("-L");}
+//    	if(m_skipref.getBooleanValue()){command.add("-N");}
+//    	if(m_outqcall.getBooleanValue()){command.add("-Q");}
+    	if(m_samplelist.isEnabled()){
+    		command.add("-s "+m_samplelist.getStringValue());
+    	}
     	
     	String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
     	
-    	if(fileformat.equals("vcf")){command.add("-S");}
-    	if(m_outuncompressedbcf.getBooleanValue()){command.add("-u");}
+    	if(fileformat.equals("vcf")){
+    		command.add("-O v");
+    	}
+    	if(m_outbcf.getBooleanValue()){
+    		command.add("-O b");
+    	}
+    	if(m_outuncompressedbcf.getBooleanValue()){
+    		command.add("-O u");
+    	}
     	
     	/**
     	 *  Bcftools view Consensus/variant calling options models
+    	 *  Consensus/variant calling options:
+   -c, --consensus-caller          the original calling method (conflicts with -m)
+   -C, --constrain <str>           one of: alleles, trio (see manual)
+   -m, --multiallelic-caller       alternative model for multiallelic and rare-variant calling (conflicts with -c)
+   -n, --novel-rate <float>,[...]  likelihood of novel mutation for constrained trio calling, see man page for details [1e-8,1e-9,1e-9]
+   -p, --pval-threshold <float>    variant if P(ref|D)<FLOAT with -c [0.5]
+   -P, --prior <float>             mutation rate (use bigger for greater sensitivity) [1.1e-3]
+   -X, --chromosome-X              haploid output for male samples (requires PED file with -s)
+   -Y, --chromosome-Y              haploid output for males and skips females (requires PED file with -s)
+
     	 */
-    	if(m_snpcalling.getBooleanValue()){command.add("-c");}
-    	if(m_samplecoverage.isEnabled()){command.add("-d "+m_samplecoverage.getDoubleValue());}
-    	if(m_lielihoodana.getBooleanValue()){command.add("-e");}
-    	if(m_callgenotype.getBooleanValue()){command.add("-g");}
-    	if(m_indelsubratio.isEnabled()){command.add("-i "+m_indelsubratio.getDoubleValue());}
-    	if(m_skipindel.getBooleanValue()){command.add("-I");}
-    	command.add("-p "+m_variantif.getDoubleValue());
-    	command.add("-P "+m_typeofprior.getStringValue());
-    	command.add("-t "+m_mutationrate.getDoubleValue());
-    	if(!m_constrainedcalling.getStringValue().equals("No constrains")){
-    		command.add("-T "+m_constrainedcalling.getStringValue());
+    	if(m_snpcalling.getBooleanValue()){
+    		command.add("-c");
     	}
-    	if(m_outvariantspnly.getBooleanValue()){command.add("-v");}
+//    	if(m_samplecoverage.isEnabled()){command.add("-d "+m_samplecoverage.getDoubleValue());}
+//    	if(m_lielihoodana.getBooleanValue()){command.add("-e");}
+//    	if(m_callgenotype.getBooleanValue()){command.add("-g");}
+//    	if(m_indelsubratio.isEnabled()){command.add("-i "+m_indelsubratio.getDoubleValue());}
+//    	if(m_skipindel.getBooleanValue()){command.add("-I");}
+//    	command.add("-p "+m_variantif.getDoubleValue());
+//    	command.add("-P "+m_typeofprior.getStringValue());
+//    	command.add("-t "+m_mutationrate.getDoubleValue());
+    	if(!m_constrainedcalling.getStringValue().equals("No constrains")){
+    		command.add("-C "+m_constrainedcalling.getStringValue());
+    	}
+    	if(m_outvariantspnly.getBooleanValue()){
+    		command.add("-v");
+    	}
     	/**
     	 * Contrast calling and association test models
     	 */
 //    	command.add("-1 "+m_numberofgrpsamples.getIntValue()); // this tag doesn't exist as of 28.4.15
-    	command.add("-C "+m_posterioricon.getDoubleValue());
-    	command.add("-U "+m_numberofpermuations.getIntValue());
-    	command.add("-X "+m_onlypermutations.getDoubleValue());
+//    	command.add("-C "+m_posterioricon.getDoubleValue());
+//    	command.add("-U "+m_numberofpermuations.getIntValue());
+//    	command.add("-X "+m_onlypermutations.getDoubleValue());
     	
     	/**
     	 * Infile & Outfile
@@ -351,27 +406,33 @@ Contrast calling and association test options:
     	}else{
     		outfile+="_call.vcf";
     	}
+    	command.add("-o outfile");
 
-    	}else if(m_bcfmethod.getStringValue().equals("cat")){
+    	}
+    	else if(m_bcfmethod.getStringValue().equals("cat")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools cat "));
             command.add(m_infile.getStringValue());
             command.add(m_catinfile.getStringValue());
         	String secfile =m_catinfile.getStringValue().substring(m_catinfile.getStringValue().lastIndexOf("/")+1,m_catinfile.getStringValue().length());
         	secfile=secfile.substring(0,secfile.lastIndexOf("."));
         	outfile+="_"+secfile+"_cat.bcf";
-    	}else if(m_bcfmethod.getStringValue().equals("ldpair")){
+    	}
+    	else if(m_bcfmethod.getStringValue().equals("ldpair")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ldpair "));
             command.add(m_infile.getStringValue());
             command.add(m_ldpairinfile.getStringValue());
         	outfile+="_ldpair.out";
-    	}else if(m_bcfmethod.getStringValue().equals("index")){
+    	}
+    	else if(m_bcfmethod.getStringValue().equals("index")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools index "));
             command.add(m_infile.getStringValue());
-    	}else if(m_bcfmethod.getStringValue().equals("ld")){
+    	}
+    	else if(m_bcfmethod.getStringValue().equals("ld")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ld "));
             command.add(m_infile.getStringValue());
     		outfile+="_ld.out";
-    	}else if(m_bcfmethod.getStringValue().equals("reheader")){
+    	}
+    	else if(m_bcfmethod.getStringValue().equals("reheader")){
             logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools reheader "));
             command.add("-s "+m_vcfsampleheader.getStringValue());
             command.add(m_infile.getStringValue());
