@@ -51,8 +51,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
 	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
-	public static final String [] TOOLS = {"bwa","pindel","pindel2vcf","GenomeAnalysisTK.jar"};
-
+	public static final String [] TOOLS = {"bfast","bowtie2","bwa","featureCounts","pindel","pindel2vcf","samtools","segemehl.x","STAR","GenomeAnalysisTK.jar"};
+	private final int[] DOWNLOADABLE = {0,1,2,3,4,5,6,7,8};
 	
 	public static String BWA_PATH;
 	public static boolean USE_HTE;
@@ -386,17 +386,17 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		
 			
-		for (String t : TOOLS) {
-			if (iknp.getToolPathPreference(t).equals("")) {
+		for (int i : DOWNLOADABLE) {
+			if (iknp.getToolPathPreference(TOOLS[i]).equals("")) {
 				try {
-					File f = new File(dir + "/" + t);
+					File f = new File(dir + "/" + TOOLS[i]);
 					if (!f.exists()) {
-						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + t), f);
+						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + TOOLS[i]), f);
 						f.setExecutable(true, false);
-						iknp.setToolPathPreference(t, dir + "/" + t);
+						iknp.setToolPathPreference(TOOLS[i], dir + "/" + TOOLS[i]);
 					}
 				} catch (IOException e) {
-					LOGGER.error("Downloading " + t + " failed! Message: "
+					LOGGER.error("Downloading " + TOOLS[i] + " failed! Message: "
 							+ e.getMessage());
 				}
 			}
