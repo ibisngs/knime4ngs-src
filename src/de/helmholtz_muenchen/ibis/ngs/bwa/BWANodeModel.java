@@ -22,8 +22,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
-import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -427,7 +427,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	if(m_usePrefPage.getBooleanValue()) {
-	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 	    	if(toolPath == null) {
 	    		toolPath = "";
 	    	}

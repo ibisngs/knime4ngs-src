@@ -15,7 +15,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -107,8 +107,8 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 			public void stateChanged(ChangeEvent arg0) {
 				dcfc.setEnabled(!usePrefPage.getBooleanValue());
 				if(usePrefPage.getBooleanValue()) {
-					String toolPath = BinaryHandler.checkToolAvailability("bwa");
-			    	if(toolPath == null) {
+					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
+			    	if(toolPath.equals("")) {
 			    		toolPath = "bwa binary not found!";
 			    	}
 			    	bwa.setStringValue(toolPath);
@@ -121,7 +121,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     public void onOpen() {
     	super.onOpen();
     	if(usePrefPage.getBooleanValue()){
-	    	String toolPath = BinaryHandler.checkToolAvailability("bwa");
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 	    	if(toolPath == null) {
 	    		toolPath = "bwa binary not found!";
 	    	}

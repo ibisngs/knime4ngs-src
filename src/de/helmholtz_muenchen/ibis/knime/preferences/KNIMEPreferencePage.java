@@ -2,6 +2,7 @@
 package de.helmholtz_muenchen.ibis.knime.preferences;
 
 
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -23,16 +24,24 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 
 /**
@@ -42,22 +51,24 @@ public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
 	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
-	private final String [] TOOLS = {"bwa","pindel","pindel2vcf","GenomeAnalysisTK.jar"};
+	public static final String [] TOOLS = {"bwa","pindel","pindel2vcf","GenomeAnalysisTK.jar"};
+
 	
-	public static String TOOL_LOCATION;
+	public static String BWA_PATH;
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
 	public static String EMAIL;
 	
-	private Text binsDirectory;
 	private Text thresholdText;
 	private Text dbFile;
 	private Text email;
 	
 	private Button checkHTE;
 	private Button checkNotify;
+	
+	private Table table;
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(KNIMEPreferencePage.class);
 
@@ -68,6 +79,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		IPreferenceStore store =
 				IBISKNIMENodesPlugin.getDefault().getPreferenceStore();
 		setPreferenceStore(store);
+		
+		
 	}
 
 	/**
@@ -76,41 +89,77 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 */
 	protected Control createContents(Composite parent) {
 		
+		
 		Composite top = new Composite(parent, SWT.LEFT);
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		top.setLayout(new GridLayout());
 		
 		//bin preferences
-		Group downloadBins = new Group(top, SWT.NONE);
-		downloadBins.setText("Binary preferences");
-		downloadBins.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Group binPrefs = new Group(top, SWT.NONE);
+		binPrefs.setText("Binary preferences");
+		binPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		binPrefs.setLayout(new GridLayout());
+		
+		Composite tableComp = new Composite(binPrefs,SWT.CENTER);
+		tableComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout tableLayout = new GridLayout();
+		tableLayout.numColumns = 3;
+		tableComp.setLayout(tableLayout);
+
+		table = new Table(binPrefs, SWT.BORDER | SWT.V_SCROLL);
+		table.setHeaderVisible(true);
+		String [] titles = {"Tool", "Path to binary"};
+		
+		for(int i = 0; i < titles.length; i++) {
+			TableColumn col = new TableColumn(table, SWT.NULL);
+			col.setText(titles[i]);
+		}
+		
+		for(int i = 0; i< TOOLS.length; i++) {
+			TableItem item = new TableItem(table, SWT.NULL);
+			item.setText(0,TOOLS[i]);
+			item.setText(1,IBISKNIMENodesPlugin.getDefault().getToolPathPreference(TOOLS[i]));
+		}
+		
+		for(int i = 0; i < titles.length; i++) {
+			table.getColumn(i).pack();
+		}
+		
+		table.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				LOGGER.debug("You selected " + event.item);
+				}
+		});
+		
+		Composite searchDownloadEdit = new Composite(binPrefs, SWT.NONE);
 		GridLayout downloadLayout = new GridLayout();
 		downloadLayout.numColumns = 3;
-		downloadBins.setLayout(downloadLayout);
-
-		Label binsLabel = new Label(downloadBins, SWT.NONE);
-		binsLabel.setText("Directory for tool binaries:");
+		searchDownloadEdit.setLayout(downloadLayout);
 		
-		TOOL_LOCATION = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
-		
-		binsDirectory = new Text(downloadBins, SWT.BORDER);
-		binsDirectory.setText(TOOL_LOCATION);
-		binsDirectory.setEditable(false);
-		
-		Button browseBinDir = new Button(downloadBins, SWT.NONE);
-		browseBinDir.setText("Browse");
+		Button browseSearchDir = new Button(searchDownloadEdit, SWT.NONE);
+		browseSearchDir.setText("Search in directory");
 		final Shell shell = new Shell(parent.getDisplay());
-		browseBinDir.addSelectionListener(new SelectionAdapter() {
+		browseSearchDir.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				selectToolFolder(shell);
+				selectSearchDir(shell);
 			}
 		});
-
-		Button downloader = new Button(downloadBins, SWT.NONE);
+		
+		Button downloader = new Button(searchDownloadEdit, SWT.NONE);
 		downloader.setText("Download missing binaries");
+		final Shell shell1 = new Shell(parent.getDisplay());
 		downloader.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				downloadBinaries();
+				downloadBinaries(shell1);
+			}
+		});
+		
+		Button edit = new Button(searchDownloadEdit, SWT.NONE);
+		edit.setText("Edit binary");
+		final Shell shell2 = new Shell(parent.getDisplay());
+		edit.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				editBinary(shell2);
 			}
 		});
 		
@@ -154,19 +203,19 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
 		browseDBFile.setText("Browse");
-		final Shell shell2 = new Shell(parent.getDisplay());
+		final Shell shell3 = new Shell(parent.getDisplay());
 		browseDBFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				selectDBFile(shell2);
+				selectDBFile(shell3);
 			}
 		});
 		
 		Button createDBFile = new Button(use_hte, SWT.NONE);
 		createDBFile.setText("Create new db file");
-		final Shell shell3 = new Shell(parent.getDisplay());
+		final Shell shell4 = new Shell(parent.getDisplay());
 		createDBFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				createDBFile(shell3);
+				createDBFile(shell4);
 			}
 		});
 		
@@ -225,9 +274,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
-		TOOL_LOCATION = IBISKNIMENodesPlugin.TOOL_DIR_DEFAULT;
-		binsDirectory.setText(TOOL_LOCATION);
-		iknp.setToolDirPreference(TOOL_LOCATION);
+		for(String s: TOOLS) {
+			iknp.setToolPathPreference(s, "");
+		}
+		
+		for(TableItem i: table.getItems()) {
+			i.setText(1,"");
+		}
 		
 		USE_HTE = IBISKNIMENodesPlugin.HTE_DEFAULT;
 		checkHTE.setSelection(USE_HTE);
@@ -258,9 +311,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	public boolean performOk() {
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
-		
-		iknp.setToolDirPreference(TOOL_LOCATION);
-		LOGGER.debug("Setting TOOL_LOCATION to: "+TOOL_LOCATION);
 		
 		iknp.setHTEPreference(USE_HTE);
 		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
@@ -316,40 +366,104 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		return super.performOk();
 	}
 	
-	private void downloadBinaries(){
+	private void downloadBinaries(Shell shell){
 		
-		String dir = TOOL_LOCATION;
-		System.out.println(dir);
-
-		if (dir != null) {
-			for(String t:TOOLS) {
-				try {
-					File f = new File(dir+"/"+t);
-					if(!f.exists()) {
-						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH+t), f);
-						f.setExecutable(true,false);
-					}
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(null,
-							"Downloading "+t +" failed!"+ System.getProperty("line.separator")+ "Error message: "+e.getMessage(),
-							"Error",
-							JOptionPane.ERROR_MESSAGE);
-					TOOL_LOCATION="";
-					binsDirectory.setText(TOOL_LOCATION);
-					break;
-				}
-			}
-		}
-	}
-	
-	private void selectToolFolder(Shell shell){
+		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		DirectoryDialog dlg = new DirectoryDialog(shell);
 		dlg.setText("Choose directory in which tool binaries will be stored");
 		dlg.setFilterPath("~/");
 		String dir = dlg.open();
-		TOOL_LOCATION=dir;
-		binsDirectory.setText(TOOL_LOCATION);
+		
+		try {
+			CheckUtils.checkDestinationDirectory(dir);
+		} catch (InvalidSettingsException e1) {
+			JOptionPane.showMessageDialog(null,
+				    "This directory cannot be used: "+e1.getMessage(),
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+			
+		for (String t : TOOLS) {
+			if (iknp.getToolPathPreference(t).equals("")) {
+				try {
+					File f = new File(dir + "/" + t);
+					if (!f.exists()) {
+						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + t), f);
+						f.setExecutable(true, false);
+						iknp.setToolPathPreference(t, dir + "/" + t);
+					}
+				} catch (IOException e) {
+					LOGGER.error("Downloading " + t + " failed! Message: "
+							+ e.getMessage());
+				}
+			}
+		}
+		
+		for(TableItem i: table.getItems()) {
+			i.setText(1,iknp.getToolPathPreference(i.getText(0)));
+		}
+	}
+	
+	private void selectSearchDir(Shell shell){
+		
+		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
+		
+		DirectoryDialog dlg = new DirectoryDialog(shell);
+		dlg.setText("Choose directory in which tool binaries shall be searched");
+		dlg.setFilterPath("~/");
+		String dir = dlg.open();
+		
+		for(String s: TOOLS) {
+			if(iknp.getToolPathPreference(s).equals("")) {
+				String path = BinaryHandler.checkToolAvailability(s, dir);
+				if(path != null) {
+					try {
+						CheckUtils.checkSourceFile(path);
+						iknp.setToolPathPreference(s, path);
+					} catch (InvalidSettingsException e) {
+						iknp.setToolPathPreference(s, "");
+					}
+					
+				}
+			}
+		}
+		
+		for(TableItem i: table.getItems()) {
+			i.setText(1,iknp.getToolPathPreference(i.getText(0)));
+		}
+	}
+	
+	private void editBinary(Shell shell) {
+		
+		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
+		
+		if(table.getSelectionCount()==0) {
+			return;
+		}
+		TableItem item = table.getSelection()[0];
+		
+		FileDialog dlg = new FileDialog(shell);
+		dlg.setText("Select directory path to "+item.getText(0));
+		String path = System.getProperty("user.home");
+		dlg.setFilterPath(path);
+		String file = dlg.open();
+		
+		try {
+			CheckUtils.checkSourceFile(file);
+			iknp.setToolPathPreference(item.getText(0), file);
+			item.setText(1,file);
+		} catch (InvalidSettingsException e) {
+			JOptionPane.showMessageDialog(null,
+				    "This file cannot be used: "+e.getMessage(),
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		
+		
 	}
 	
 	private void selectDBFile(Shell shell) {

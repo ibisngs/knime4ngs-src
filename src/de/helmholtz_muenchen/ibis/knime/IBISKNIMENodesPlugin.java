@@ -1,10 +1,15 @@
 
 package de.helmholtz_muenchen.ibis.knime;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.core.node.NodeLogger;
 import org.osgi.framework.BundleContext;
+
+import de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage;
 
 /**
  * This is the OSGI bundle activator.
@@ -12,9 +17,6 @@ import org.osgi.framework.BundleContext;
  * @author hastreiter
  */
 public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
-	
-	public static final String TOOL_DIR_PREFERENCE = "tooldir";
-	public static final String TOOL_DIR_DEFAULT = System.getProperty("user.home")+System.getProperty("file.separator")+"Downloads";
 	
 	public static final String USE_HTE = "hte";
 	public static final boolean HTE_DEFAULT = false;
@@ -92,7 +94,6 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
      */
     public IBISKNIMENodesPlugin() {
         super();
-		System.out.println("lala");
     }
 
     /**
@@ -110,6 +111,12 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 
         log("starting IKN_PLUGIN: IBISKNIMENodesPlugin");
 
+        for(String s: KNIMEPreferencePage.TOOLS) {
+			String path = this.getToolPathPreference(s);
+			if(Files.notExists(Paths.get(path))) {
+				this.setToolPathPreference(s, "");
+			}
+		}
 //        IPreferenceStore store = IBISKNIMENodesPlugin.getDefault()
 //                .getPreferenceStore();
 
@@ -145,7 +152,6 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	 * @param store the preference store to fill
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
-		store.setDefault(TOOL_DIR_PREFERENCE, TOOL_DIR_DEFAULT);
 		store.setDefault(USE_HTE, HTE_DEFAULT);
 		store.setDefault(THRESHOLD, THRESHOLD_DEFAULT);
 		store.setDefault(DB_FILE, DB_FILE_DEFAULT);
@@ -153,13 +159,12 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		store.setDefault(EMAIL, EMAIL_DEFAULT);
 	}
 	
-	
-	public String getToolDirPreference() {
-		return getPreferenceStore().getString(TOOL_DIR_PREFERENCE);
+	public String getToolPathPreference(String tool) {
+		return getPreferenceStore().getString(tool);
 	}
 	
-	public void setToolDirPreference(String path) {
-		getPreferenceStore().setValue(TOOL_DIR_PREFERENCE, path);
+	public void setToolPathPreference(String tool, String path) {
+		getPreferenceStore().setValue(tool, path);
 	}
 	
 	public boolean getHTEPreference() {

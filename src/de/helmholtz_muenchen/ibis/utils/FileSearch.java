@@ -10,7 +10,7 @@ public class FileSearch {
   private List<String> result = new ArrayList<String>();
  
   public String getFileNameToSearch() {
-	return fileNameToSearch;
+	return fileNameToSearch.toLowerCase();
   }
  
   public void setFileNameToSearch(String fileNameToSearch) {

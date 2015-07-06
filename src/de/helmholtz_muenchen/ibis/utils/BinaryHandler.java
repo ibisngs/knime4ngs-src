@@ -2,17 +2,13 @@ package de.helmholtz_muenchen.ibis.utils;
 
 import java.io.File;
 
-import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-
 public class BinaryHandler {
 
 	
-	public static String checkToolAvailability(String BinaryName){
-		
-		String TOOL_DIR = IBISKNIMENodesPlugin.getDefault().getToolDirPreference();
+	public static String checkToolAvailability(String BinaryName, String dir){
 		
 		FileSearch f = new FileSearch();
-		f.searchDirectory(new File(TOOL_DIR), BinaryName);
+		f.searchDirectory(new File(dir), BinaryName);
 		f.getResult();
 
 		String ToolPath = null;
