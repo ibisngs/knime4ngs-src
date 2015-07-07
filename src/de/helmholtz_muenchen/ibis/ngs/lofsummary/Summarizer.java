@@ -222,6 +222,9 @@ public abstract class Summarizer {
 		
 		for(int i=9;i<fields.length;i++) {
 			gt = fields[i].split(":")[0];
+			if(gt.equals(".")) {
+				gt = "./.";
+			}
 			result.add(gt);
 		}
 		return result;
@@ -623,9 +626,6 @@ public abstract class Summarizer {
 			bw.write("\t"+affected);
 			
 			int n = affected+unaffected;
-			
-//			double frequency = ((double) affected)/((double) (unaffected+affected));
-//			bw.write("\t"+frequency);
 			
 			double p_val = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected-1);
 			bw.write("\t"+p_val);
