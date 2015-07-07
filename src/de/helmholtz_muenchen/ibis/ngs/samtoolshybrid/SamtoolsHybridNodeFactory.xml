@@ -3,11 +3,11 @@
     <name>SamtoolsHybrid</name>
     
     <shortDescription>
-        
+        The newer version of samtools does not provide the command "pileup". Samtools Hybrid includes "pileup".
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>In order to run Thunder for genotype calling and phasing, the .bam files need to be converted to .glf format which is executed by the pileup -g command </intro>
         
         
         <option name="short name of first option (like in the dialog)">description of first option</option>
@@ -25,9 +25,9 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
+        <inPort index="0" name="bam files">Bam files: If more than one provided then please combine this node with parallel chunk.</inPort>
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
+        <outPort index="0" name="glf files">The bam files are converted to glf files</outPort>
         <!-- possibly more output ports here-->
     </ports>    
     <views>
