@@ -3,11 +3,11 @@
     <name>ThunderCall</name>
     
     <shortDescription>
-        
+        Genotype caller.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>Thunder is a tool for genotype calling and haplotype phasing. This is the part which executes genotype calling. Input must be in glf format. Please use Samtools Hybrid node if you have only bam files. Samtools Hybrid will convert them into glf format.</intro>
         
         
         <option name="short name of first option (like in the dialog)">description of first option</option>
@@ -25,9 +25,9 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
+        <inPort index="0" name="glf files">Can be multiple samples</inPort>
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
+        <outPort index="0" name="vcf output">The output is in vcf format. The original output of Thunder Call is saved as a flow variable in case Thunder Phase is employed later.</outPort>
         <!-- possibly more output ports here-->
     </ports>    
     <views>

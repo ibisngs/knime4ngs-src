@@ -53,27 +53,31 @@ public class ThunderCallNodeModel extends NodeModel {
     /**
 	 * Config Keys
 	 */
-	public static final String CFGKEY_SAMTOOLS_HYBRID_PATH = "Samtools-Hybrid path";
 	public static final String CFGKEY_THUNDER_PATH = "Thunder path";
-	public static final String CFGKEY_REF_GENOME = "Reference";
 	public static final String CFGKEY_BASE_NAME = "Base name";
 	public static final String CFGKEY_POST_PROB ="Posterior probabilty";
+	public static final String CFGKEY_MIN_DEPTH = "Mininum depth";
+	public static final String CFGKEY_MAX_DEPTH = "Maximum depth";
+
 	private String OUTPUT_PATH;
 	
 	/**
 	 * Initial default values
 	 */
 	static final double DEFAULT_POST_PROB = 0.9;
+	static final int DEFAULT_MIN_DEPTH = 10;
+	static final int DEFAULT_MAX_DEPTH = 1000;
+
 	/**
 	 * The SettingsModels
 	 */
 	
-    private final SettingsModelString m_SAMTOOLS_HYBRID = new SettingsModelString(CFGKEY_SAMTOOLS_HYBRID_PATH, "");
     private final SettingsModelString m_THUNDER = new SettingsModelString(CFGKEY_THUNDER_PATH, "");
-    private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     private final SettingsModelString m_BASE_NAME = new SettingsModelString(CFGKEY_BASE_NAME, "");
     private final SettingsModelDoubleBounded m_POST_PROB = new SettingsModelDoubleBounded(CFGKEY_POST_PROB, DEFAULT_POST_PROB, 0.0, 1.0);
-   
+    private final SettingsModelIntegerBounded m_MIN_DEPTH = new SettingsModelIntegerBounded(CFGKEY_MIN_DEPTH, DEFAULT_MIN_DEPTH, 1, 100);
+    private final SettingsModelIntegerBounded m_MAX_DEPTH = new SettingsModelIntegerBounded(CFGKEY_POST_PROB, DEFAULT_MAX_DEPTH, 100, 10000);
+
   //The Output Col Names
   	public static final String OUT_COL1_TABLE1 = "OUTFILE";
     /**
@@ -94,45 +98,48 @@ public class ThunderCallNodeModel extends NodeModel {
 
         // TODO do something here
         
-        String samHybrid = m_SAMTOOLS_HYBRID.getStringValue();
         String thunder = m_THUNDER.getStringValue();
-        String refFile = m_REF_GENOME.getStringValue();
         String baseName = m_BASE_NAME.getStringValue();
         double postProb = m_POST_PROB.getDoubleValue();
+        int minDepth = m_MIN_DEPTH.getIntValue();
+        int maxDepth = m_MAX_DEPTH.getIntValue();
         String outFile = "";
 
-    	ArrayList<String> BAM_arrList = new ArrayList<>();
+        /**
+         * Connect with parallel chunk and set the number of chunks accordingly
+         * Will always work with a trio
+         * chr21_m
+         * chr21_f
+         * chr21_c
+         * 
+         * then the next chunk would be
+         * chr22_m
+         * chr22_f
+         * chr22_c
+         */
+    	ArrayList<String> glf_arrList = new ArrayList<>(3);
 
         CloseableRowIterator it = inData[0].iterator();
 		while (it.hasNext()) {
 			DataRow row = it.next();
-			BAM_arrList.add(row.getCell(0).toString());
+			glf_arrList.add(row.getCell(0).toString());
 		}
 		
-		this.OUTPUT_PATH = BAM_arrList.get(0).substring(0, BAM_arrList.get(0).lastIndexOf("/"))+"/";
+		this.OUTPUT_PATH = glf_arrList.get(0).substring(0, glf_arrList.get(0).lastIndexOf("/"))+"/";
 
-		//Check if the input files , paths to ref and sam ok!
-		checkParameters(samHybrid, thunder, refFile, BAM_arrList);
+		// path to thunder should not be null
+        if(thunder.equals("")){
+        	throw new Exception("Please provide the path to thunder_GPT_Freq tool");
+        }
         
-		//create directory for the glf files
-		String glfDir = this.OUTPUT_PATH + "glf";
-		createDirectory(glfDir);
-		        
-		for (int i = 0; i < BAM_arrList.size(); i++) {
-	    	ArrayList<String> command = new ArrayList<String>();
-	    	command.add(samHybrid);
-	    	command.add("pileup");
-	    	command.add("-g "+ BAM_arrList.get(i));
-	    	command.add("-f " + refFile);
-	    	command.add("> " + 	IO.replaceFileExtension(BAM_arrList.get(i), ".glf"));
-	    	
-	    	System.out.println(StringUtils.join(command, " "));
-	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger);
-	     	
-		}
+        // check path to thunder path
+        if(!Files.exists(Paths.get(thunder))){
+        	throw new Exception("Thunder_GPT_Freq binary: "+thunder+" does not exist");
+        }        
 		
 		//create directoty for the Thunder Outputs
 		String thunderDir = this.OUTPUT_PATH + "ThunderCall";
+		String glfDir = thunderDir.replace("ThunderCall", "glf");
 		createDirectory(thunderDir);
 		/**
 		 * /home/ibis/tanzeem.haque/Documents/3rd_party_tools/thunder/GPT_Freq_V011/GPT_Freq 
@@ -144,18 +151,20 @@ public class ThunderCallNodeModel extends NodeModel {
 		 * > /home/ibis/tanzeem.haque/Documents/3rd_party_tools/thunder/thunder_011/examples/testTZ/tin/GPT.Q12.log
 		 */
 
+		String chr = glf_arrList.get(0).split("_")[0];
 		ArrayList<String> command = new ArrayList<String>();
     	command.add(thunder);
     	command.add("-b "+ thunderDir + "/" + baseName);
     	command.add("-p " + postProb);
-    	command.add("--minDepth " + BAM_arrList.size()/2);
-    	command.add("--maxDepth " + BAM_arrList.size()*10);
-    	command.add(glfDir + "/*.glf");
+    	command.add("--minDepth " + minDepth);
+    	command.add("--maxDepth " + maxDepth);
+    	command.add(glfDir + "/" + chr + "*.glf");
     	command.add("> " + 	thunderDir + "/" + "GPT."+baseName+".log");
     	
     	System.out.println(StringUtils.join(command, " "));
     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger);
      	
+    	outFile = thunderDir + "/" + baseName + "." + chr;
 		/**
     	 * OUTPUT
     	 */
@@ -194,55 +203,6 @@ public class ThunderCallNodeModel extends NodeModel {
 		}
 	}
 
-	private void checkParameters(String samHybrid, String thunder, String refFile,
-			ArrayList<String> BAM_arrList) throws Exception {
-		// check if path is null
-        if(BAM_arrList.size()==0){
-        	throw new Exception("No bam file available, something went wrong with the previous node!");
-        }
-        
-        // check path to bam file
-        if(!Files.exists(Paths.get(BAM_arrList.get(0)))){
-        	throw new Exception("Path to input bam file: "+BAM_arrList.get(0)+" does not exist");
-        }
-        
-        String fileextension = PathProcessor.getExt(BAM_arrList.get(0));
-       
-        // check bam format
-        if(!fileextension.equals("bam")){
-        	throw new Exception("Input file is not in bam format!");
-        }
-        
-        // path to sam hybrid should not be null
-        if(samHybrid.equals("")){
-        	throw new Exception("Please provide the path to samtools-hybrid");
-        }
-        
-        // check path to samtools-hybrid path
-        if(!Files.exists(Paths.get(samHybrid))){
-        	throw new Exception("Samtools-hybrid binary: "+samHybrid+" does not exist");
-        }
-        
-        // path to thunder should not be null
-        if(thunder.equals("")){
-        	throw new Exception("Please provide the path to thunder_GPT_Freq tool");
-        }
-        
-        // check path to thunder path
-        if(!Files.exists(Paths.get(thunder))){
-        	throw new Exception("Thunder_GPT_Freq binary: "+thunder+" does not exist");
-        }
-        
-        // path to reffile should not be null
-        if(refFile.equals("")){
-        	throw new Exception("Please provide a reference file");
-        }
-        
-        // check path to reference path
-        if(!Files.exists(Paths.get(refFile))){
-        	throw new Exception("Reference sequence file: "+refFile+" does not exist");
-        }
-	}
 
     /**
      * {@inheritDoc}
@@ -277,11 +237,11 @@ public class ThunderCallNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
         // TODO save user settings to the config object.
-        m_SAMTOOLS_HYBRID.saveSettingsTo(settings);
         m_THUNDER.saveSettingsTo(settings);
-        m_REF_GENOME.saveSettingsTo(settings);
         m_POST_PROB.saveSettingsTo(settings);
         m_BASE_NAME.saveSettingsTo(settings);
+        m_MIN_DEPTH.saveSettingsTo(settings);
+        m_MAX_DEPTH.saveSettingsTo(settings);
 
     }
 
@@ -296,11 +256,11 @@ public class ThunderCallNodeModel extends NodeModel {
         // It can be safely assumed that the settings are valided by the 
         // method below.
         
-        m_SAMTOOLS_HYBRID.loadSettingsFrom(settings);
         m_THUNDER.loadSettingsFrom(settings);
-        m_REF_GENOME.loadSettingsFrom(settings);
         m_POST_PROB.loadSettingsFrom(settings);
         m_BASE_NAME.loadSettingsFrom(settings);
+        m_MIN_DEPTH.loadSettingsFrom(settings);
+        m_MAX_DEPTH.loadSettingsFrom(settings);
 
 
     }
@@ -317,11 +277,11 @@ public class ThunderCallNodeModel extends NodeModel {
         // SettingsModel).
         // Do not actually set any values of any member variables.
 
-        m_SAMTOOLS_HYBRID.validateSettings(settings);
         m_THUNDER.validateSettings(settings);
-        m_REF_GENOME.validateSettings(settings);
         m_POST_PROB.validateSettings(settings);
         m_BASE_NAME.validateSettings(settings);
+        m_MIN_DEPTH.validateSettings(settings);
+        m_MAX_DEPTH.validateSettings(settings);
 
 
     }

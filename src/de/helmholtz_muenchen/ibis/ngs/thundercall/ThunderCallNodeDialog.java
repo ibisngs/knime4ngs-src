@@ -7,6 +7,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
@@ -24,37 +25,31 @@ import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
  */
 public class ThunderCallNodeDialog extends DefaultNodeSettingsPane {
 
-	private final SettingsModelString SAMTOOLS_HYBRID = new SettingsModelString(ThunderCallNodeModel.CFGKEY_SAMTOOLS_HYBRID_PATH, "");
 	private final SettingsModelString THUNDER = new SettingsModelString(ThunderCallNodeModel.CFGKEY_THUNDER_PATH, "");
-	private final SettingsModelString REF_GENOME = new SettingsModelString(ThunderCallNodeModel.CFGKEY_REF_GENOME, "");
 	private final SettingsModelString BASE_NAME = new SettingsModelString(ThunderCallNodeModel.CFGKEY_BASE_NAME, "");
 	private final SettingsModelDoubleBounded POST_PROB = new SettingsModelDoubleBounded(ThunderCallNodeModel.CFGKEY_POST_PROB, ThunderCallNodeModel.DEFAULT_POST_PROB, 0.1, 1.0);
+	private final SettingsModelIntegerBounded MIN_DEPTH = new SettingsModelIntegerBounded(ThunderCallNodeModel.CFGKEY_MIN_DEPTH, ThunderCallNodeModel.DEFAULT_MIN_DEPTH, 1, 100);
+    private final SettingsModelIntegerBounded MAX_DEPTH = new SettingsModelIntegerBounded(ThunderCallNodeModel.CFGKEY_POST_PROB, ThunderCallNodeModel.DEFAULT_MAX_DEPTH, 100, 10000);
 
     protected ThunderCallNodeDialog() {
         super();
         
-        createNewGroup("Path to samtools-hybrid file");
-        String samHybridPath = BinaryHandler.checkToolAvailability("samtools-hybrid");
-    	if(samHybridPath == null) {
-    		samHybridPath = "samtools-hybrid binary not found!";
-    	}
-    	SAMTOOLS_HYBRID.setStringValue(samHybridPath);
-    	
-    	createNewGroup("Path to thunder file");
+        createNewGroup("Path to thunder file");
+    	DialogComponentFileChooser thunder= new DialogComponentFileChooser(THUNDER, "thunder", "");
+    	addDialogComponent(thunder);
         String thunderPath = BinaryHandler.checkToolAvailability("GPT_Freq");
     	if(thunderPath == null) {
     		thunderPath = "thunder GPT_Freq binary not found!";
     	}
     	THUNDER.setStringValue(thunderPath);
     	
-    	createNewGroup("Reference Genome");
-    	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
-    	ref_genome.setBorderTitle("Choose the reference genome");
-    	addDialogComponent(ref_genome);
-    	
-    	addDialogComponent(new DialogComponentString(BASE_NAME, "Outfile Suffix"));
+    	addDialogComponent(new DialogComponentString(BASE_NAME, "Outfile Suffix (e.g. thunder10)"));
 
       	addDialogComponent(new DialogComponentNumber(POST_PROB,"Posterior probability:", /*step*/ 0.1, /*componentwidth*/ 5));
+
+      	addDialogComponent(new DialogComponentNumber(MIN_DEPTH,"Minimum depth:", /*step*/ 10, /*componentwidth*/ 5));
+
+      	addDialogComponent(new DialogComponentNumber(MAX_DEPTH,"Maximum depth:", /*step*/ 10, /*componentwidth*/ 5));
 
                     
     }
