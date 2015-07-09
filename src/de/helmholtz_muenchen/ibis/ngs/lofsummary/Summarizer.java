@@ -325,15 +325,15 @@ public abstract class Summarizer {
 			        			id = ids[i];
 			        		}
 			        		
-			        		double af;
-			        		if(adj_not_found) {
-			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
-			        		} else {
-			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
-			        		}
-			        		if(!Double.isNaN(af) && af > 0.0) {
+			        		double af =0.0;
+//			        		if(adj_not_found) {
+//			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
+//			        		} else {
+//			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
+//			        		}
+//			        		if(!Double.isNaN(af) && af > 0.0) {
 			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
-			        		}
+//			        		}
 			        	}
 			        }
 			    }
@@ -616,7 +616,8 @@ public abstract class Summarizer {
 			if(gene2background.containsKey(gene)) {
 				p_lof_aff = gene2background.get(gene);
 			} else {
-				p_lof_aff = 1-gi.getProbUnaffected();
+				p_lof_aff = 0.0;
+//				p_lof_aff = 1-gi.getProbUnaffected();
 			}
 			bw.write("\t"+p_lof_aff);
 			
