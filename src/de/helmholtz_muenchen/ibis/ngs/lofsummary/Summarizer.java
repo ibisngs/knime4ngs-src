@@ -18,12 +18,16 @@ import org.knime.core.node.NodeLogger;
 
 public abstract class Summarizer {
 	
+	//input files
 	String vcf_file;
 	String cds_file;
 	String ped_file;
 	String geneback_file;
 	
 	//summaries
+	
+	//contig_id -> length
+	HashMap<String, Integer> contig_length;
 	
 	//variant summary
 	ArrayList<LoFVariant> lof_statistic;
@@ -34,10 +38,12 @@ public abstract class Summarizer {
 	//gene_id+sample_id as key
 	HashMap<String, GeneSampleInfo> gene_sample_statistic;
 	
+	//gene_id as key
 	HashMap<String, GeneInfo> gene_statistic;
+	HashMap<String, Integer[]> gene_start_end;
 	HashMap<String, HashSet<String>> gene2transcripts;
 	
-	//gene_id -> P(LoF>=1) from ExAC
+	//gene_id -> P(LoF>=1) from ExAC or any gene_summary
 	HashMap<String, Double> gene2background;
 	
 	//save order of sample_ids
@@ -59,8 +65,10 @@ public abstract class Summarizer {
 		this.ped_file = ped_file;
 		this.geneback_file = geneback_file;
 		
+		contig_length = new HashMap<>();
 		sample_statistic = new HashMap<>();
 		gene_statistic = new HashMap<>();
+		gene_start_end = new HashMap<>();
 		gene_sample_statistic = new HashMap<>();
 		gene2transcripts = new HashMap<>();
 		gene2background = new HashMap<>();
@@ -108,7 +116,7 @@ public abstract class Summarizer {
 			logger.info("Writing variant summary...");
 			String outfile1 = vcf_file.replace("vcf", "variant_summary.tsv");
 			result[0] = outfile1;
-			this.writeLOFStatistics(outfile1);
+			this.writeVariantSummary(outfile1);
 			
 			this.generateSampleStatistic();
 			
@@ -146,6 +154,7 @@ public abstract class Summarizer {
 	private void readCDSFile() throws IOException {
 		String [] fields;
 		String transcript_id, gene_id;
+		int start, end;
 		
 		FileInputStream inputStream = null;
 		Scanner sc = null;
@@ -154,17 +163,31 @@ public abstract class Summarizer {
 		    sc = new Scanner(inputStream, "UTF-8");
 		    while (sc.hasNextLine()) {
 		        String line = sc.nextLine();
-		        if(line.startsWith(">")) {
+		        if(line.startsWith(">") && line.contains("transcript_biotype:protein_coding")) {
 		        	fields = line.split("\\s");
 		        	transcript_id = fields[0].replaceFirst(">","");
 		        	gene_id = fields[3].split(":")[1];
+		        	start = Integer.parseInt(fields[2].split(":")[3]);
+		        	end = Integer.parseInt(fields[2].split(":")[4]);
 		        	
 		        	if(gene2transcripts.containsKey(gene_id)) {
 		        		gene2transcripts.get(gene_id).add(transcript_id);
+		        		Integer[] sten = gene_start_end.get(gene_id);
+		        		
+		        		if(start<sten[0]) {
+		        			sten[0] = start;
+		        		}
+		        		
+		        		if(end>sten[1]) {
+		        			sten[1] = end;
+		        		}
 		        	} else {
 		        		HashSet<String> tmp = new HashSet<>();
 		        		tmp.add(transcript_id);
 		        		gene2transcripts.put(gene_id,tmp);
+		        		
+		        		Integer[] sten = new Integer[]{start,end};
+		        		gene_start_end.put(gene_id, sten);
 		        	}
 		        }
 		    }
@@ -208,7 +231,7 @@ public abstract class Summarizer {
 		String[] fields;
 		while((line = br.readLine())!=null) {
 			fields = line.split("\t");
-			gene2background.put(fields[0], Double.parseDouble(fields[4]));
+			gene2background.put(fields[0], Double.parseDouble(fields[5]));
 			
 		}
 		br.close();
@@ -250,7 +273,20 @@ public abstract class Summarizer {
 			        String line = sc.nextLine();
 			        
 			        if(line.startsWith("#"))  {
-			        	if(line.startsWith("##INFO=<ID=CSQ")) {
+			        	if(line.startsWith("##contig=<ID")) {
+			        		line = line.replaceFirst("##contig=<", "");
+			        		fields = line.split(",");
+			        		String id = ""; 
+			        		int length = -1;
+			        		for(String f: fields) {
+			        			if(f.startsWith("ID=")) {
+			        				id = f.split("ID=")[1];
+			        			} else if(f.startsWith("length=")) {
+			        				length = Integer.parseInt(f.split("length=")[1].replaceAll(">",""));
+			        			}
+			        		}
+			        		contig_length.put(id, length);
+			        	} else if(line.startsWith("##INFO=<ID=CSQ")) {
 			        		vep_header = new HashMap<String,Integer>();
 			        		String [] tmp = line.split("\\|");
 			        		nrOfVEPfields = tmp.length;
@@ -305,10 +341,12 @@ public abstract class Summarizer {
 			        	infos = fields[7].split(";");
 			        	genotypes = getGenotypes(fields);
 			        	
-			        	boolean adj_not_found = true;
+			        	ac_adj = null;
+			        	an_adj = null;
+			        	an = null;
+			        	ac = null;
 			        	for(String i: infos) {
 			        		if(i.startsWith("AC_Adj=")) {
-			        			adj_not_found = false;
 			        			ac_adj = i.split("=")[1].split(",");
 			        		} else if (i.startsWith("AN_Adj=")) {
 			        			an_adj = i.split("=")[1];
@@ -325,15 +363,15 @@ public abstract class Summarizer {
 			        			id = ids[i];
 			        		}
 			        		
-			        		double af =0.0;
-//			        		if(adj_not_found) {
-//			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
-//			        		} else {
-//			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
-//			        		}
-//			        		if(!Double.isNaN(af) && af > 0.0) {
+			        		double af =-1.0;
+			        		if(ac_adj!=null && an_adj!=null) {
+			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
+			        		} else if(ac!=null && an!=null) {
+			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
+			        		}
+			        		if(!Double.isNaN(af) && Double.compare(af,0.0)!=0) {
 			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
-//			        		}
+			        		}
 			        	}
 			        }
 			    }
@@ -513,7 +551,7 @@ public abstract class Summarizer {
 		}
 	}
 	
-	private void writeLOFStatistics(String outfile) throws IOException{
+	private void writeVariantSummary(String outfile) throws IOException{
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		String [] header = {"chr", "pos", "rsId", "ref_allele", "alt_allele", "AF", "gene_id", "gene_symbol", "effect", "consequence", "lof_trans", "all_trans", "obs_hom", "obs_het"};
@@ -583,12 +621,15 @@ public abstract class Summarizer {
 			lof_trans = lof_trans.replaceFirst(",","");
 			all_trans = all_trans.replaceFirst(",","");
 			
-			bw.write(l.getChr()+"\t"+l.getPos()+"\t"+l.getRsId()+"\t"+l.getRef_allele()+"\t"+l.getAlt_allele()+"\t"+l.getAF()+"\t"+gene_ids+"\t"+genes+"\t"+effects+"\t"+consequences+"\t"+lof_trans+"\t"+all_trans+"\t"+l.getObserved_homo()+"\t"+l.getObserved_hetero()+"\t");
+//			/**test**/
+//			double relPos = Double.parseDouble(l.getPos())/(double)contig_length.get(l.getChr());
+//			bw.write(l.getChr()+"\t"+relPos+"\t"+l.getRsId()+"\t"+l.getRef_allele()+"\t"+l.getAlt_allele()+"\t"+l.getAF()+"\t"+gene_ids+"\t"+genes+"\t"+effects+"\t"+consequences+"\t"+lof_trans+"\t"+all_trans+"\t"+l.getObserved_homo()+"\t"+l.getObserved_hetero());
+			bw.write(l.getChr()+"\t"+l.getPos()+"\t"+l.getRsId()+"\t"+l.getRef_allele()+"\t"+l.getAlt_allele()+"\t"+l.getAF()+"\t"+gene_ids+"\t"+genes+"\t"+effects+"\t"+consequences+"\t"+lof_trans+"\t"+all_trans+"\t"+l.getObserved_homo()+"\t"+l.getObserved_hetero());
 			
 			//write additional fields
 			for(String s: add_infos) {
 				s = s.replaceFirst(",","");
-				bw.write(s+"\t");
+				bw.write("\t"+s);
 			}
 			bw.newLine();
 		}
@@ -601,42 +642,46 @@ public abstract class Summarizer {
 		HashSet<String> significant_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tP_LoF_aff\tunaffected_samples\taffected_samples\tp-value_aff\tko_samples");
-
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tstd_dev_afs\tP_LOF_aff\tunaffected_samples\taffected_samples\texpected_samples\tp-value\tko_samples\trel_pos_in_contig");
 		bw.newLine();
+		
 		for(String gene: gene_statistic.keySet()) {
 
-			GeneInfo gi = gene_statistic.get(gene);
-			bw.write(gene+"\t"+gi.getSymbol());
-			bw.write("\t"+gi.getFullLoFs());
-			bw.write("\t"+gi.getPartLoFs());			
+			GeneInfo gi = gene_statistic.get(gene);			
 			
-			double p_lof_aff;
-			
+			double p_lof_aff = 0.0;
 			if(gene2background.containsKey(gene)) {
 				p_lof_aff = gene2background.get(gene);
-			} else {
-				p_lof_aff = 0.0;
-//				p_lof_aff = 1-gi.getProbUnaffected();
+			} else if(geneback_file==null) {
+				p_lof_aff = 1 - gi.getProbUnaffected();
 			}
-			bw.write("\t"+p_lof_aff);
 			
 			int unaffected = gi.getUnaffectedSamples().size();
-			bw.write("\t"+unaffected);
 			int affected = gi.getAffectedSamples().size();
-			bw.write("\t"+affected);
-			
 			int n = affected+unaffected;
 			
+			double expected = p_lof_aff * (double) n;
+			
 			double p_val = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected-1);
-			bw.write("\t"+p_val);
+			
 			if(p_val < 0.05/gene_statistic.size()) {
 				significant_genes.add(gene);
 			}
 			
-			int ko = gi.getKOSamples().size();
-			bw.write("\t"+ko);
+			Integer[] sten = gene_start_end.get(gene);
+			double pos_in_contig = ((double)(sten[0]+sten[1])/2.0)/contig_length.get(gi.getContig());
 			
+			bw.write(gene+"\t"+gi.getSymbol());
+			bw.write("\t"+gi.getFullLoFs());
+			bw.write("\t"+gi.getPartLoFs());
+			bw.write("\t"+gi.getStdDev());
+			bw.write("\t"+p_lof_aff);
+			bw.write("\t"+unaffected);
+			bw.write("\t"+affected);
+			bw.write("\t"+expected);
+			bw.write("\t"+p_val);
+			bw.write("\t"+gi.getKOSamples().size());
+			bw.write("\t"+pos_in_contig);
 			bw.newLine();
 		}
 		

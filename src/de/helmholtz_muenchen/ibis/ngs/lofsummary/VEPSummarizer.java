@@ -79,6 +79,7 @@ public class VEPSummarizer extends Summarizer{
 				} else {
 					GeneInfo gi = new GeneInfo();
 					gi.setSymbol(gene_symbol);
+					gi.setContig(chr);
 					gene_statistic.put(gene_id, gi);
 				}
 			}
