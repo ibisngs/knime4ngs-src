@@ -365,9 +365,9 @@ public abstract class Summarizer {
 			        		
 			        		double af =-1.0;
 			        		if(ac_adj!=null && an_adj!=null) {
-			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
-			        		} else if(ac!=null && an!=null) {
 			        			af = Double.valueOf(ac_adj[i])/Double.valueOf(an_adj);
+			        		} else if(ac!=null && an!=null) {
+			        			af = Double.valueOf(ac[i])/Double.valueOf(an);
 			        		}
 			        		if(!Double.isNaN(af) && Double.compare(af,0.0)!=0) {
 			        			getLoFVariant(chr, pos, ref, id, alt_alleles[i], af,i+1,infos, genotypes);
