@@ -15,7 +15,7 @@ public class SampleInfo {
 		this.pat_id = "unknown";
 		this.mat_id = "unknown";
 		this.sex = "unknown";
-		this.phenotype = "unknown";
+		this.phenotype = "-9";
 		fullLOFs = 0;
 		partLOFs = 0;
 		complete_LOF_genes = new ArrayList<>();
@@ -50,6 +50,13 @@ public class SampleInfo {
 
 	public int getPartLOFs() {
 		return partLOFs;
+	}
+	
+	public boolean is_affected() {
+		if(Integer.parseInt(phenotype)==2) {
+			return true;
+		}
+		return false;
 	}
 
 	public void incrementFullLOFs () {

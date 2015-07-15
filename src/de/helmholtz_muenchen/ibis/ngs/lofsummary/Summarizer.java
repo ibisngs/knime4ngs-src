@@ -231,7 +231,7 @@ public abstract class Summarizer {
 		String[] fields;
 		while((line = br.readLine())!=null) {
 			fields = line.split("\t");
-			gene2background.put(fields[0], Double.parseDouble(fields[5]));
+			gene2background.put(fields[0], Double.parseDouble(fields[7]));
 			
 		}
 		br.close();
@@ -637,17 +637,75 @@ public abstract class Summarizer {
 		bw.close();
 	}
 	
+	private boolean isCaseSignificant(String gene) {
+		int un_un = 0;
+		int un_aff = 0;
+		int case_un = 0;
+		int case_aff = 0;
+		
+		GeneInfo gi = gene_statistic.get(gene);
+		
+		double p_lof_aff = 0.0;
+		if(gene2background.containsKey(gene)) {
+			p_lof_aff = gene2background.get(gene);
+		} else if(geneback_file==null) {
+			p_lof_aff = 1 - gi.getProbUnaffected();
+		}
+		
+		for(String sample: gi.getUnaffectedSamples()) {
+			SampleInfo si = sample_statistic.get(sample);
+			if(si.is_affected()) {
+				case_un++;
+			} else {
+				un_un++;
+			}
+		}
+		
+		for(String sample: gi.getAffectedSamples()) {
+			SampleInfo si = sample_statistic.get(sample);
+			if(si.is_affected()) {
+				case_aff++;
+			} else {
+				un_aff++;
+			}
+		}
+		
+		int n_un = un_un + un_aff;
+		int n_case = case_un + case_aff;
+		
+		boolean is_un_sig = false;
+		boolean is_case_sig = false;
+		
+		double p_val = 1 - new BinomialDistribution(n_un, p_lof_aff).cumulativeProbability(un_aff-1);
+		
+		if(p_val < 0.05/gene_statistic.size()) {
+			is_un_sig = true;
+		}
+		
+		p_val = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff-1);
+		if(p_val < 0.05/gene_statistic.size()) {
+			is_case_sig = true;
+		}
+		
+		if(is_case_sig && !is_un_sig) {
+			return true;
+		}
+		return false;
+	}
+	
 	private void writeGeneStatistic(String outfile) throws IOException {
 		
 		HashSet<String> significant_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tstd_dev_afs\tP_LOF_aff\tunaffected_samples\taffected_samples\texpected_samples\tp-value\tko_samples\trel_pos_in_contig");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tis_ko_gene\tis_significant\tis_case_significant\tlof_freq\tunaffected_samples\taffected_samples\texpected_samples\tp-value\tko_samples\trel_pos_in_contig");
 		bw.newLine();
 		
 		for(String gene: gene_statistic.keySet()) {
 
 			GeneInfo gi = gene_statistic.get(gene);			
+			
+			boolean is_ko_gene = (gi.getKOSamples().size()>0);
 			
 			double p_lof_aff = 0.0;
 			if(gene2background.containsKey(gene)) {
@@ -664,9 +722,12 @@ public abstract class Summarizer {
 			
 			double p_val = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected-1);
 			
+			boolean is_significant = false;
 			if(p_val < 0.05/gene_statistic.size()) {
 				significant_genes.add(gene);
+				is_significant = true;
 			}
+			
 			
 			Integer[] sten = gene_start_end.get(gene);
 			double pos_in_contig = ((double)(sten[0]+sten[1])/2.0)/contig_length.get(gi.getContig());
@@ -674,7 +735,9 @@ public abstract class Summarizer {
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
-			bw.write("\t"+gi.getStdDev());
+			bw.write("\t"+is_ko_gene);
+			bw.write("\t"+is_significant);
+			bw.write("\t"+isCaseSignificant(gene));
 			bw.write("\t"+p_lof_aff);
 			bw.write("\t"+unaffected);
 			bw.write("\t"+affected);
