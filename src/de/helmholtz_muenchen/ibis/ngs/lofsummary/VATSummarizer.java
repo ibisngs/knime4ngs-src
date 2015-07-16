@@ -91,6 +91,7 @@ public class VATSummarizer extends Summarizer{
 		
 		if(genes.size()==0) return; //no LoF genes have been found
 		
+		ArrayList<String> repl_genotypes = new ArrayList<>();
 		char gt = String.valueOf(GT_index).charAt(0);
 		for(int i = 0; i<genotypes.size(); i++) {
 			String str = genotypes.get(i);
@@ -99,6 +100,29 @@ public class VATSummarizer extends Summarizer{
 			} else if (str.charAt(0)==gt || str.charAt(2)==gt) {
 				observed_hetero++;
 			} 
+			
+			String replaced = "";
+			if(str.charAt(0)!='.') {
+				if(str.charAt(0)!=gt) {
+					replaced = "0";
+				} else {
+					replaced = "1";
+				}
+			} else {
+				replaced = ".";
+			}
+			replaced += str.charAt(1);
+
+			if(str.charAt(2)!='.') {
+				if(str.charAt(2)!=gt) {
+					replaced += "0";
+				} else {
+					replaced += "1";
+				}
+			} else {
+				replaced += ".";
+			}
+			repl_genotypes.add(replaced);
 		}
 		lof_statistic.add(new LoFVariant(chr, pos, ref, alt, id, af, observed_homo, observed_hetero, genes, genotypes));
 		
