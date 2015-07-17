@@ -83,6 +83,7 @@ public class VCFNormalizerNodeModel extends NodeModel {
     	}
     	
     	cmd += " | sed 's/ID=AD,Number=./ID=AD,Number=R/'";
+    	cmd += " | sed 's/ID=AC,Number=./ID=AC,Number=A/'";
     	
     	if(vt.equals("") || Files.notExists(Paths.get(vt))) {
     		logger.error("vt directory not correctly specified!");
