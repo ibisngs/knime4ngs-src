@@ -66,11 +66,11 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false), "Build color-space index."));
     	addDialogComponent(new DialogComponentStringSelection(readType,"Type of reads/ mapping:","auto-detect","single-end","paired-end"));
     	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify Read Group Header:"));
+    	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify read group header:"));
     	addDialogComponent(new DialogComponentString(readGroup,""));
     	setHorizontalPlacement(false);
     	
-    	addDialogComponent(new DialogComponentNumber(ALN_THREADS, "Number of Threads for BWA aln", 1));
+    	addDialogComponent(new DialogComponentNumber(ALN_THREADS, "Number of threads", 1));
     	
     	readType.setEnabled(false);
     	refseq.addChangeListener(new ChangeListener() {
@@ -122,7 +122,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	if(usePrefPage.getBooleanValue()){
 	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 	    	if(toolPath == null) {
-	    		toolPath = "bwa binary not found!";
+	    		toolPath = "BWA binary not found!";
 	    	}
 	    	bwa.setStringValue(toolPath);
     	}

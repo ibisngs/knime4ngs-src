@@ -9,12 +9,17 @@
     
     <fullDescription>
         <intro>
-        	BWA is a fast light-weighted tool that aligns relatively short sequences (queries) to a sequence database (targe), such as the human reference genome. 
-        	It implements two different algorithms, both based on Burrows-Wheeler Transform (BWT). The first algorithm is designed for short queries up to ~200bp 
-        	with low error rate (&lt;3%). It does gapped global alignment w.r.t. queries, supports paired-end reads, and is one of the fastest short read alignment 
-        	algorithms to date while also visiting suboptimal hits. The second algorithm, BWA-SW, is designed for long reads with more errors. It performs heuristic 
-        	Smith-Waterman-like alignment to find high-scoring local hits (and thus chimera). On low-error short queries, BWA-SW is slower and less accurate than 
-        	the first algorithm, but on long queries, it is better.<br></br>
+        	BWA is a fast light-weighted tool that aligns relatively short sequences (queries) to a sequence database (target), such as the human reference genome. 
+        	It implements three different algorithms, all based on Burrows-Wheeler Transform (BWT).
+        	The first algorithm BWA-backtrack is designed for short queries up to ~200bp with low error rate (&lt;3%).
+        	It does gapped global alignment w.r.t. queries, supports paired-end reads, and is one of the fastest short read alignment algorithms to date while also visiting suboptimal hits.
+        	The second algorithm BWA-SW is designed for long reads (ranging from 70bp to 1Mbp) with more errors.
+        	It performs heuristic Smith-Waterman-like alignment to find high-scoring local hits (and thus chimera).
+        	On low-error short queries, BWA-SW is slower and less accurate than the first algorithm, but on long queries, it is better.
+        	The latest algorithm BWA-MEM is similar to BWA-SW. 
+        	It is generally recommended for high-quality queries as it is faster and more accurate than BWA-SW.
+        	BWA-MEM also has better performance than BWA-backtrack for 70-100bp Illumina reads.
+        	<br></br>
         	Source: <a href="http://bio-bwa.sourceforge.net/bwa.shtml">http://bio-bwa.sourceforge.net/bwa.shtml</a>
 		</intro>
         
@@ -27,10 +32,20 @@
         		The current codes for IS algorithm are reimplemented by Yuta Mori.</li>
         		<li>BWT-SW: Algorithm implemented in BWT-SW. This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually 
         		slower than IS.</li></ul></option>
+        <option name="Algorithm for mapping">See description above.</option>
         <option name="Build color-space index">Build color-space index. The input fast should be in nucleotide space.</option>
-        <option name="Type of reads/ mapping">Choose between single-end and paired-end read mapping.</option>
-        <option name="Do not keep temporary files">If this option is checked all temporarily stored files, such as the index of the reference sequence or the SA
-        		coordinates, will be deleted as soon as possible during the run of BWA.</option>
+        <option name="Specify read group header">
+        	GATK requires a read group identifier (ID) and sample information (SM), e.g. specified by ’@RG\tID:foo\tSM:bar’.
+        	All reads within a read group are assumed to come from the same instrument run and to therefore share the same error model.
+        	SM defines the name of the sample sequenced in a read group.
+        	Read group header will not be added if BWA-SW is used.
+        </option>
+        <option name="Type of reads/mapping">Choose between single-end and paired-end read mapping.</option>
+        <option name="Number of threads">
+        	BWA aln (sub-command of BWA-backtrack), BWA-SW and BWA-MEM can be run in multi-threading mode.
+        </option>
+        <!--<option name="Do not keep temporary files">If this option is checked all temporarily stored files, such as the index of the reference sequence or the SA
+        		coordinates, will be deleted as soon as possible during the run of BWA.</option>-->
     
     </fullDescription>
     

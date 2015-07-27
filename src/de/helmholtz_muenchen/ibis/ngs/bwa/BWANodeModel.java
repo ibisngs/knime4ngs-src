@@ -171,7 +171,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	/**
     	 * Map Reads
     	 */
-    	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut);
+    	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut,threads);
     	
     	/**
     	 * OUTPUT
@@ -301,7 +301,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     }
     
     
-  private void bwa_map(ExecutionContext exec, String readType, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String memOut) throws Exception{ 	
+  private void bwa_map(ExecutionContext exec, String readType, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String memOut, int threads) throws Exception{ 	
     	
   		ArrayList<String> command = new ArrayList<String>();
   		String alnalgo = m_alnalgo.getStringValue(); 	
@@ -349,6 +349,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	LOGGER.info("Generate alignments in the SAM format.\n");
 
         	command.add(path2bwa+" bwasw");
+        	command.add("-t "+threads);
         	
     		/**In and Outfiles**/
         	command.add("-f "+out2Name);
@@ -362,7 +363,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	LOGGER.info("Generate alignments in the SAM format.\n");
 
         	command.add(path2bwa+" mem");
-        	command.add("-t "+m_ALN_THREADS.getIntValue());
+        	command.add("-t "+threads);
     		if(m_readGroupBoolean.getBooleanValue()){
     			command.add("-R "+m_readGroup.getStringValue());
     		}

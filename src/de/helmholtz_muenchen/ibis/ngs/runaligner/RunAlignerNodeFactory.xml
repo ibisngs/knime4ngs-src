@@ -10,8 +10,7 @@
     <fullDescription>
     
         <intro>
-        	RunAligner Reads a BAM or up to two fastQ or fastA files and passes them forward to one of the included aligner, eg. 
-        	Bfast, Bowtie2, BWA, or Segemehl.
+        	RunAligner Reads a BAM or up to two fastQ or fastA files and passes them forward to one of the included aligner (e.g. BWA).
         </intro>
         
         <option name="Read sequences">FastQ, FastA, or BAM file. The second file (FastQ or FastA) is optional (paired-end mapping).</option>
