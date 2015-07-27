@@ -44,7 +44,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_BWAFILE = "bwafile";
 	public static final String CFGKEY_CHECKCOLORSPACED = "checkColorSpaced";
 	public static final String CFGKEY_BWTINDEX = "bwtIndex";
-	public static final String CFGKEY_READTYPE = "readType";
 	public static final String CFGKEY_CHECKINDEX = "checkIndexRefSeq";
 	public static final String CFGKEY_READGROUP = "readgroup";
 	public static final String CFGKEY_READGROUPBOOLEAN = "readgroupboolean";
@@ -60,7 +59,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
 	private final SettingsModelString m_bwtIndex = new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
 	private final SettingsModelString m_alnalgo = new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
-	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
 	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
@@ -77,10 +75,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
      */
     protected BWANodeModel() {
     	
-    	super(1, 1);
-    	
-    	m_readType.setEnabled(false);
-    	
+    	super(1, 1);    	
     }
 
     static SettingsModelString createSettingsModelSelection() {
@@ -100,8 +95,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	String path2refFile = m_refseqfile.getStringValue();
     	String path2readFile = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
+    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
     	String basePath = path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
     	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
@@ -126,7 +120,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	Boolean isBam = false;
     	    	
     	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {isBam = true;}
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {readType = readTypePrevious;}
     	if(isBam) {path2readFile2 = path2readFile;}
     	
     	String path2bwa = m_bwafile.getStringValue();
@@ -144,11 +137,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {
     		isBam = true;
     	}
-    	
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
-    		readType = readTypePrevious;
-    	}
-    	LOGGER.info("Read Type: " + readType + "\n");
     	/*******************************************************************************************/   	
     	
     	/**
@@ -403,13 +391,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	m_bwafile.setStringValue(toolPath);
     	}
     	
-    	// Warning if there is a problem with readType
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType) && !readType.equals("auto-detect")) {
-    		setWarningMessage("The previous node indicates that you have " + readTypePrevious + " reads, but you have chosen " + readType + ". BWA will use " + readTypePrevious + " mapping.");
-    	}
-    	
         //Version control
         if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
         	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
@@ -449,7 +430,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	m_usePrefPage.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_bwtIndex.saveSettingsTo(settings);
-    	m_readType.saveSettingsTo(settings);
     	m_checkColorSpaced.saveSettingsTo(settings);
     	m_checkIndexRefSeq.saveSettingsTo(settings);
     	m_readGroup.saveSettingsTo(settings);
@@ -471,7 +451,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	m_usePrefPage.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_bwtIndex.loadSettingsFrom(settings);
-    	m_readType.loadSettingsFrom(settings);
     	m_checkColorSpaced.loadSettingsFrom(settings);
     	m_checkIndexRefSeq.loadSettingsFrom(settings);
     	m_readGroup.loadSettingsFrom(settings);
@@ -493,7 +472,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	m_usePrefPage.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_bwtIndex.validateSettings(settings);
-    	m_readType.validateSettings(settings);
     	m_checkColorSpaced.validateSettings(settings);
     	m_checkIndexRefSeq.validateSettings(settings);
     	m_readGroup.validateSettings(settings);

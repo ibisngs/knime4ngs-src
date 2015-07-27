@@ -23,7 +23,7 @@ public class SuccessfulRunChecker {
 	boolean b = hasTerminatedSuccessfully(lockFile, lockCommand);
 		
 	if(!b) {
-		SuccessfulRunChecker checker = new SuccessfulRunChecker(new File("/tmp/lock.test"), "test -r");
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		int exitCode = Executor.executeCommandWithExitCode(...);
 		if(exitCode==0) {
 			checker.writeOK();

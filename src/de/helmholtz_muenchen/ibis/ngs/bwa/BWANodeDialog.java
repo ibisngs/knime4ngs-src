@@ -35,7 +35,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 	
 	private final DialogComponentFileChooser dcfc = new DialogComponentFileChooser(bwa,"his_id_BWAPATH", 0);
 	
-	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
 	private final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
 	private final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
@@ -64,7 +63,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW"),"Algorithm for constructing BWT index:","BWT-SW","IS"));
     	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-MEM"),"Algorithm for mapping:","BWA-MEM","BWA-backtrack","BWA-SW"));
     	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false), "Build color-space index."));
-    	addDialogComponent(new DialogComponentStringSelection(readType,"Type of reads/ mapping:","auto-detect","single-end","paired-end"));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify read group header:"));
     	addDialogComponent(new DialogComponentString(readGroup,""));
@@ -72,7 +70,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	
     	addDialogComponent(new DialogComponentNumber(ALN_THREADS, "Number of threads", 1));
     	
-    	readType.setEnabled(false);
     	refseq.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
     	    	String path2refSeq = refseq.getStringValue();

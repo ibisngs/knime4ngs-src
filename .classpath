@@ -11,13 +11,13 @@
 	<classpathentry kind="lib" path="libs/commons-lang3-3.1/commons-lang3-3.1.jar"/>
 	<classpathentry kind="lib" path="libs/FastQC.jar"/>
 	<classpathentry kind="lib" path="libs/FastQReadFiltering.jar"/>
-	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/picard-tools-1.136/picard.jar"/>
 	<classpathentry kind="lib" path="libs/org.apache.commons.net_3.1.0.v201205071737.jar"/>
 	<classpathentry kind="lib" path="libs/jaf-1.1.1/activation.jar"/>
 	<classpathentry kind="lib" path="libs/commons-math3-3.5.jar"/>
 	<classpathentry kind="lib" path="libs/javax.mail.jar"/>
 	<classpathentry kind="lib" path="libs/sqlite-jdbc-3.8.7.jar"/>
 	<classpathentry kind="lib" path="libs/jbzip2-0.9.jar"/>
-	<classpathentry kind="lib" path="/home/ibis/tim.jeske/workspace/KnimeNodes/libs/picard-tools-1.136/htsjdk-1.136.jar"/>
+	<classpathentry kind="lib" path="libs/picard-tools-1.136/picard.jar"/>
+	<classpathentry kind="lib" path="libs/picard-tools-1.136/htsjdk-1.136.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

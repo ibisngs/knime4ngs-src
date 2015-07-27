@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Paths;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
+
 import picard.analysis.CollectInsertSizeMetrics;
 import picard.sam.AddOrReplaceReadGroups;
 import picard.sam.markduplicates.MarkDuplicates;
@@ -43,7 +46,18 @@ public class RunPicard {
 		args[9]="ASSUME_SORTED="+sorted;
 		args[10]="TMP_DIR="+Paths.get(input).getParent().toString();
 		
-		PicardToolsNodeModel.logger.info("Running CollectInsertSizeMetrics "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9]);
+		File lockFile = new File(PathProcessor.getBase(outputm)+SuccessfulRunChecker.LOCK_ENDING);
+		String lockCommand = "Running CollectInsertSizeMetrics "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
+		PicardToolsNodeModel.logger.info(lockCommand);
+		
+		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		
+		if(b) {
+			PicardToolsNodeModel.logger.info("According to klock CollectInsertSizeMetrics has been finished successfully!");
+			return;
+		}
+			
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		
 		//redirect error stream
 		redirecterr(outputm);
@@ -75,6 +89,8 @@ public class RunPicard {
 			throw new Exception("Something went wrong while executing CollectInsertSizeMetrics, please check out the log file");
 		}
 		
+		checker.writeOK();
+		checker.finalize();
 		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
 	}
 	
@@ -93,6 +109,29 @@ public class RunPicard {
 		 * RGSM sample
 		 */
 		
+		if(id.equals("")) {
+			id = "id";
+			PicardToolsNodeModel.logger.warn("ID has to be specified (now set to 'id')");
+		}
+		if(library.equals("")) {
+			library = "library";
+			PicardToolsNodeModel.logger.warn("Library has to be specified (now set to 'library')");
+		}
+		if(sample.equals("")) {
+			sample="sample";
+			PicardToolsNodeModel.logger.warn("Sample has to be specified (now set to 'sample')");
+		}
+		if(unit.equals("")) {
+			unit="unit";
+			PicardToolsNodeModel.logger.warn("Platform unit has to be specified (now set to 'unit')");
+		}
+		if(platform.equals("")) {
+			platform = "platform";
+			PicardToolsNodeModel.logger.warn("Platform has to be specified (now set to 'platform')");
+		}
+		
+		File lockFile = new File(PathProcessor.getBase(output)+SuccessfulRunChecker.LOCK_ENDING);
+		
 		String [] args = new String[10];
 		args[0]="INPUT="+input;
 		args[1]="OUTPUT="+output;
@@ -105,8 +144,18 @@ public class RunPicard {
 		args[8]="RGPL="+platform;
 		args[9]="TMP_DIR="+Paths.get(input).getParent().toString();
 		
-		PicardToolsNodeModel.logger.info("Running AddOrReplaceReadGroups "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]);
+		String lockCommand = "Running AddOrReplaceReadGroups "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8];
+		PicardToolsNodeModel.logger.info(lockCommand);
 		
+		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+			
+		if(b) {
+			PicardToolsNodeModel.logger.info("According to klock AddOrReplaceReadGroups has been finished successfully!");
+			return;
+		}
+			
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+			
 		//redirect error stream
 		redirecterr(output);
 		System.err.println("Output of AddOrReplaceReadGroups:");
@@ -136,6 +185,9 @@ public class RunPicard {
 			throw new Exception("Something went wrong while executing MarkDuplicates, please check out the log file");
 		}
 		
+		checker.writeOK();
+		checker.finalize();
+		
 		PicardToolsNodeModel.logger.info("AddOrReplaceReadGroups finished successfully");
 	}
 
@@ -163,7 +215,18 @@ public class RunPicard {
 		args[6]="ASSUME_SORTED="+ass_sort;
 		args[7]="TMP_DIR="+Paths.get(input).getParent().toString();
 		
-		PicardToolsNodeModel.logger.info("Running MarkDuplicates "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]);
+		File lockFile = new File(PathProcessor.getBase(output)+SuccessfulRunChecker.LOCK_ENDING);
+		String lockCommand = "Running MarkDuplicates "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6];
+		PicardToolsNodeModel.logger.info(lockCommand);
+		
+		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		
+		if(b) {
+			PicardToolsNodeModel.logger.info("According to klock MarkDuplicates has been finished successfully!");
+			return;
+		}
+			
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		
 		//redirect error stream
 		redirecterr(output);
@@ -196,6 +259,8 @@ public class RunPicard {
 		
 		PicardToolsNodeModel.logger.info("MarkDupplicates finished successfully");
 		
+		checker.writeOK();
+		checker.finalize();
 	}
 	
 	//run SortSam
@@ -218,8 +283,18 @@ public class RunPicard {
 		args[4]="SORT_ORDER="+order;
 		args[5]="TMP_DIR="+Paths.get(input).getParent().toString();
 		
-		PicardToolsNodeModel.logger.info("Running SortSam "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]);
+		File lockFile = new File(PathProcessor.getBase(output)+SuccessfulRunChecker.LOCK_ENDING);
+		String lockCommand = "Running SortSam "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4];
+		PicardToolsNodeModel.logger.info(lockCommand);
 		
+		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		
+		if(b) {
+			PicardToolsNodeModel.logger.info("According to klock SortSam has been finished successfully!");
+			return;
+		}
+			
+		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
 		
 		//redirect error stream
 		redirecterr(output);
@@ -250,7 +325,8 @@ public class RunPicard {
 		}
 		
 		PicardToolsNodeModel.logger.info("SortSam finished successfully");
-
+		checker.writeOK();
+		checker.finalize();
 	}
 	
 	

@@ -342,9 +342,31 @@ public class PicardToolsNodeModel extends NodeModel {
 					posRef=i;
 				}
 			}
-    	
+			
+			boolean add_col = m_ptool.getStringValue().equals(TOOLS_AVAILABLE[1]);
+			
+			
+			DataColumnSpec[] colspec;
+			if(add_col) {
+				colspec = new DataColumnSpec[3];
+			} else {
+				colspec = new DataColumnSpec[2];
+			} 
+			
+		    if(m_bsformat.getStringValue().equals("bam")){
+		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+		    }
+		    else{
+		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE).createSpec();
+		    }
+		    
+		    //create column specifications for table
+		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
+		    if(add_col) {
+		    	colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", StringCell.TYPE).createSpec();
+		    }
 
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(colspec)};
     }
 
     /**

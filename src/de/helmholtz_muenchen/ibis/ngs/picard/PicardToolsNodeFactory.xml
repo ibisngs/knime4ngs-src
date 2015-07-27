@@ -9,26 +9,25 @@
     <fullDescription>
         <intro>
         	This is a wrapper node for PicardTools. 
-        	It comes along with version 1.102 of PicardTools. 
+        	It comes along with version 1.136 of PicardTools. 
         	PicardTools is a popular java tool suite for modifying files in SAM/BAM format (Format specification at <a href="http://samtools.github.io/hts-specs/SAMv1.pdf"> http://samtools.github.io/hts-specs/SAMv1.pdf </a>).
-			Currently, the PicardTools node implements four tools: AddOrReplaceReadGroups, CollectInsertSizeMetrics, MarkDuplicates and SortSam.
-			<br />
-			AddOrReplaceReadGroups overwrites read group information in the BAM/SAM file header and adds all reads to the new read group.
-			<br />
-			CollectInsertSizeMetric calculates the statistical distribution of the insert size for paired-end reads (distance between leftmost mapping position of a read and rightmost mapping position of its mate).
-			<br />
-			MarkDuplicates tries to identify reads that are PCR duplicates. 
-			It either removes them from the file or marks them using the FLAG attribute.
-			<br />
-			SortSam sorts a SAM or BAM file by mapping position or by read name.
-			<br />
-			Further information about PicardTools can be found at <a href="http://picard.sourceforge.net/command-line-overview.shtml"> http://picard.sourceforge.net/command-line-overview.shtml </a>
-			<br />
-			Predecessor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseRecalibration
-			<br />
-			Predecessor NGS nodes: BAMLoader, SAMLoader, BWA
-			<br />
-			Successor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseRecalibration, GATKUnifiedGenotyper
+			Currently, the PicardTools node implements four tools: 
+			<ul>
+				<li>
+				AddOrReplaceReadGroups overwrites read group information in the BAM/SAM file header and adds all reads to the new read group.
+				</li>
+				<li>
+				CollectInsertSizeMetric calculates the statistical distribution of the insert size for paired-end reads (distance between leftmost mapping position of a read and rightmost mapping position of its mate).
+				</li>
+				<li>
+				MarkDuplicates tries to identify reads that are PCR duplicates. 
+				It either removes them from the file or marks them using the FLAG attribute.
+				</li>
+				<li>
+				SortSam sorts a SAM or BAM file by mapping position or by read name.
+				</li>
+			</ul>
+			Further information about PicardTools can be found at <a href="http://broadinstitute.github.io/picard/"> http://broadinstitute.github.io/picard/ </a>
     	</intro>
         
 
@@ -119,8 +118,5 @@
 			Cell 2 (optional): Path2ISMetrics (file with information about insert size distribution produced by CollectInsertSizeMetrics)
     	</outPort>
     </ports>  
-      
-    <views>
-        <view index="0" name=""></view>
-    </views>
+  
 </knimeNode>
