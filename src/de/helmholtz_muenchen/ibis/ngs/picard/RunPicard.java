@@ -5,11 +5,11 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.file.Paths;
 
-import net.sf.picard.analysis.CollectInsertSizeMetrics;
-import net.sf.picard.sam.AddOrReplaceReadGroups;
-import net.sf.picard.sam.MarkDuplicates;
-import net.sf.picard.sam.SortSam;
-import net.sf.samtools.SAMFileWriterFactory;
+import picard.analysis.CollectInsertSizeMetrics;
+import picard.sam.AddOrReplaceReadGroups;
+import picard.sam.markduplicates.MarkDuplicates;
+import picard.sam.SortSam;
+import htsjdk.samtools.SAMFileWriterFactory;
 
 public class RunPicard {
 	
@@ -28,7 +28,8 @@ public class RunPicard {
 		 * OUTPUT
 		 * REFERENCE_SEQUENCE
 		 */
-		
+
+
 		String[] args = new String[11];
 		args[0]="INPUT="+input;
 		args[1]="OUTPUT="+outputm;
