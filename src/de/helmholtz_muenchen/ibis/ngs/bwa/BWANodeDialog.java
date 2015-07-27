@@ -36,11 +36,11 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 	private final DialogComponentFileChooser dcfc = new DialogComponentFileChooser(bwa,"his_id_BWAPATH", 0);
 	
 	private final SettingsModelString readType = new SettingsModelString(BWANodeModel.CFGKEY_READTYPE,"auto-detect");
-	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,null);
+	private final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
 	private final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
 	private final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
 	private final SettingsModelBoolean readGroupBoolean = new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
-	private final SettingsModelIntegerBounded ALN_THREADS = new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
+	private final SettingsModelIntegerBounded ALN_THREADS = new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
 
 	
     /**
@@ -59,7 +59,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(dcfc);
     	dcfc.setEnabled(false);
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
-    	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ""));
+    	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ".fa|.fasta"));
     	createNewGroup("Options");
     	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
     	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW"),"Algorithm for constructing BWT index:","BWT-SW","IS"));
@@ -109,7 +109,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 				if(usePrefPage.getBooleanValue()) {
 					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 			    	if(toolPath.equals("")) {
-			    		toolPath = "bwa binary not found!";
+			    		toolPath = "BWA binary not found!";
 			    	}
 			    	bwa.setStringValue(toolPath);
 				}

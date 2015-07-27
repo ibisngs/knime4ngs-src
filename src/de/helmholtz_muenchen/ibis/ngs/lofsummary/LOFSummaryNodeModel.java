@@ -78,7 +78,6 @@ public class LOFSummaryNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	String vcf_infile;
-    	System.out.println(optionalPort);
     	
     	if(optionalPort){	//Input Table available
     		//Get File via Table

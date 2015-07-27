@@ -131,6 +131,14 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		}
 	}
 
+	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile) throws Exception {
+		this.executeCommand(command, exec, null, lockFile, null, null, null, null, null);
+	}
+	
+	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile, String stdOutFile) throws Exception {
+		this.executeCommand(command, exec, null, lockFile, stdOutFile, null, null, null, null);
+	}
+	
 	protected void executeCommand(String[] command, ExecutionContext exec,
 			String[] environment, File lockFile, String stdOutFile,
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,

@@ -28,7 +28,6 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 
 
@@ -64,16 +63,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"auto-detect");
 	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar");
 	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
-	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
+	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
 	public static final String OUT_COL2 = "Path2RefFile";
-	
 
-	
 	
     /**
      * Constructor for the node model.
@@ -96,14 +93,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	    
-    	/**Initialize logfile**/
-    	String fle = inData[0].iterator().next().getCell(0).toString();
-    	String logfile = fle.substring(0,fle.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("BWA"));
-    	/**end initializing logfile**/
     	
     	/**
 		 * Get the Parameters
@@ -166,7 +155,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	 * Create Index for Read Files
     	 */
 
-    	bwa_index(exec,logBuffer, colorSpaced, path2bwa, path2refFile, path2readFile2);
+    	bwa_index(exec, colorSpaced, path2bwa, path2refFile, path2readFile2);
 
     	/**
     	 * Run bwa aln
@@ -175,17 +164,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	
     	if(!m_alnalgo.getStringValue().equals("BWA-MEM")){
         	LOGGER.info("Find the SA coordinates of the input reads.\n");
-        	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, logBuffer, path2readFile2, isBam,threads);
+        	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, path2readFile2, isBam,threads);
         	LOGGER.info("Finished BWA aln...");
     	}
-
-    	
     	
     	/**
     	 * Map Reads
     	 */
-    	bwa_map(exec,readType,logBuffer,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut);
-    	//TODO CHECK bwa_map method for errors !!!! TODO
+    	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut);
     	
     	/**
     	 * OUTPUT
@@ -222,14 +208,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
 
     /**
      * Runs bwa index
-     * @param logBuffer
+     * @param lockFile
      * @param colorSpaced
      * @param path2bwa
      * @param path2refFile
      * @param path2readFile
      * @throws Exception 
      */
-    private void bwa_index(ExecutionContext exec,StringBuffer logBuffer, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws Exception{
+    private void bwa_index(ExecutionContext exec, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws Exception{
     	/**Only execute if Index needs to be created**/
     	if(m_checkIndexRefSeq.getBooleanValue()) {
     		
@@ -254,16 +240,15 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	command.add(path2refFile);
 
 	    	/**Execute**/
-	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
-//	    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+	    	String lockFile = path2refFile + SuccessfulRunChecker.LOCK_ENDING;
+	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
 			
     	} else {
     		LOGGER.info("Indexing reference sequence SKIPPED.\n");
     	}
     }
     
-    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, StringBuffer logBuffer, String path2readFile2, boolean isBam, int Threads) throws Exception{
-    	
+    private void bwa_aln(ExecutionContext exec, String readType, String basePath, String outBaseName, String outBaseName1, String outBaseName2, String path2refFile, String path2bwa, String path2readFile, String path2readFile2, boolean isBam, int Threads) throws Exception{
     	
     	ArrayList<String> command = new ArrayList<String>();
     	// Constant values
@@ -289,15 +274,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
     		}
 		}
     	
-
-    	
     	//Perform aln for forward reads OR single end reads
     	command.add(path2refFile);
     	command.add(path2readFile);
     	command.add("-f "+outfile);
+    	
+    	String lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     	/**Execute**/
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
-//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
    
 		//If paired end, repeat previous step
     	if(readType.equals("paired-end")) {
@@ -311,13 +295,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
             	command.set(4, " -f "+ out12Name);
         	}
         	/**Execute**/
-        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, null, null, null, null, null, null);
-//        	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+        	lockFile = out12Name + SuccessfulRunChecker.LOCK_ENDING;
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
 		}
     }
     
     
-  private void bwa_map(ExecutionContext exec,String readType, StringBuffer logBuffer, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String memOut) throws Exception{ 	
+  private void bwa_map(ExecutionContext exec, String readType, String path2bwa, String path2refFile, String path2readFile, String out1Name, String out2Name, String out11Name, String out12Name, String path2readFile2, String memOut) throws Exception{ 	
     	
   		ArrayList<String> command = new ArrayList<String>();
   		String alnalgo = m_alnalgo.getStringValue(); 	
@@ -391,31 +375,15 @@ public class BWANodeModel extends HTExecutorNodeModel {
     		} 
     	}
 		
-    	
-    	/** check if run was already sucessful **/
-//    	String[] com = command.toArray(new String[command.size()]);
-    	File lockFile = new File(path2readFile.substring(0,path2readFile.lastIndexOf(".")) + ".BWA" +  SuccessfulRunChecker.LOCK_ENDING);
-//    	String lockCommand = ExecuteThread.getCommand(com);
-//    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-//		LOGGER.info("Successful termination state: " + terminationState);
-    	
-		// do not execute if termination state is true
-//		if(!terminationState) {
-//			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-		
-	    	/**Execute**/
-	    	if(alnalgo.equals("BWA-MEM")) {
-//	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,memOut);
-	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, memOut, null, null, null, null);
-
-	    	}else{
-//	    		Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-	        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, null, null, null, null, null);
-
-	    	}
-//	    	checker.writeOK();
+    	String lockFile = out2Name + SuccessfulRunChecker.LOCK_ENDING;
+		/** Execute **/
+		if (alnalgo.equals("BWA-MEM")) {
+			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec,new File(lockFile), memOut);
+		} else {
+			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec,new File(lockFile));
 		}
-//	}
+	}
+
     
     
     
@@ -429,7 +397,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	if(m_usePrefPage.getBooleanValue()) {
 	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 	    	if(toolPath == null) {
-	    		toolPath = "";
+	    		toolPath = "BWA binary not found!";
 	    	}
 	    	m_bwafile.setStringValue(toolPath);
     	}
@@ -443,11 +411,11 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	
         //Version control
         if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
-        	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems");
+        	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
         }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==2){
-        	throw new InvalidSettingsException("You are using a outdated version of BWA! Please update your version");
+        	setWarningMessage("WARNING: You are using an older BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
         }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==-1){
-        	System.out.println("Something wrong here");
+        	LOGGER.warn("Your BWA version could not be determined! Correct behaviour can only be ensured for BWA version "+FileValidator.BWA_VERSION+".");
         }
     	
     	if(m_refseqfile.getStringValue().length() > 1) {
@@ -462,7 +430,10 @@ public class BWANodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
     	}
 
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**
