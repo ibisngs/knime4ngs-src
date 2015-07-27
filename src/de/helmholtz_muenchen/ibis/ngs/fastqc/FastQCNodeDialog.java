@@ -2,6 +2,8 @@ package de.helmholtz_muenchen.ibis.ngs.fastqc;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 
 /**
  * <code>NodeDialog</code> for the "FastQC" Node.
@@ -14,7 +16,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
  * 
  * @author Max
  */
-public class FastQCNodeDialog extends DefaultNodeSettingsPane {
+public class FastQCNodeDialog extends HTExecutorNodeDialog {
 
     /**
      * New pane for configuring the FastQC node.

@@ -23,6 +23,7 @@ import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
@@ -35,9 +36,9 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * This is the model implementation of FastQC.
  * 
  *
- * @author hastreiter
+ * @author Maximilian Hastreiter
  */
-public class FastQCNodeModel extends NodeModel {
+public class FastQCNodeModel extends HTExecutorNodeModel {
     
 	
     // the logger instance
@@ -60,7 +61,6 @@ public class FastQCNodeModel extends NodeModel {
     /**
      * {@inheritDoc}
      */
-    @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	   	
@@ -81,8 +81,8 @@ public class FastQCNodeModel extends NodeModel {
     	{
         	outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
     	}
+        
         String outFileSettings = outfile1;
-    	
     	String outfileMerged = outfile1;
     	String readFile2Name;
     	  	
@@ -92,66 +92,41 @@ public class FastQCNodeModel extends NodeModel {
     		readFile2Name = new File(readsFile2).getName();
         	outFileSettings = outfileMerged; // override this path
         	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
-//        	if (readsFile1.substring(readsFile1.length()-2, readsFile1.length()).equals("fq"))
-//        	{
-//            	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
-//        	}
     	}
     	
     	File lockFile = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
-    	String lockCommand = readsFile1 + "\t" + readsFile2 + "\t" + readType;
-    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-		LOGGER.info("Successful termination state: " + terminationState);
-    	StringBuffer logBuffer = new StringBuffer(50);
 
-    	
-		// do not execute if termination state is true
-		if(!terminationState) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-	
-	    	/**Initialize logfile**/
-	    	String logfile = readsFile1.substring(0,readsFile1.lastIndexOf("/")+1)+"logfile.txt";
-	    	ShowOutput.setLogFile(logfile);
-	    	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
-	    	/**end initializing logfile**/
-	
-	    	
+	  	
 	    	/**Prepare Command**/
 	    	ArrayList<String> command = new ArrayList<String>();
-	    	String path = FastQCNodeModel.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-	    	String sub_path =path.substring(path.lastIndexOf("/")+1, path.length());
-	    	
 	    	command.add("java");
-	    	String jarCall = "";
-	    	String path2mergeScript = "";
-	    	//Path to Jar
-	    	if(sub_path.equals("")){
-	    		jarCall = "-jar "+path+"libs/FastQC.jar ";
-	    		
-	    	}else{//From Jar
-	    		String tmpfolder = path.substring(0, path.lastIndexOf("/")+1); 
-	    		jarCall = "-jar "+tmpfolder+"libs/FastQC.jar ";
-	    	}	
-			path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
+	    	String jarCall 			= "-jar "+IO.getScriptPath()+"libs/FastQC.jar ";
+	    	String path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
 	    	command.add(jarCall + readsFile1);
 	
 	    	
 	    	/**Execute for first file**/
 	    	String[] com = command.toArray(new String[command.size()]);
 	    	StringBuffer sysErr = new StringBuffer(50);
-	    	Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr);
+	    	
+	    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
+	    	
 	    	//Show FastQC Output
 	    	LOGGER.info(sysErr);
 
 	    	/**If Paired-End data**/
 	    	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
+	    		
+	    		//Set new lock file for reverse read
+	    		lockFile = new File(readsFile2.substring(0,readsFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
+	    		
 	    		//Replace readsFile1 with readsFile2 and execute again
 	    		com[com.length-1] = jarCall + readsFile2;
 	    		//Clear StringBuffer
 	    		sysErr.setLength(0);
 	    		sysErr.append("\n");
-	    		Executor.executeCommand(new String[]{StringUtils.join(com, " ")},exec,LOGGER,null,sysErr);
-	    		//Show FastQC Output
+		    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
+//	    		//Show FastQC Output
 	        	LOGGER.info(sysErr);
 	        	//Clear StringBuffer
 	    		sysErr.setLength(0);
@@ -170,15 +145,14 @@ public class FastQCNodeModel extends NodeModel {
 	        	commandMerge.add(outfile1);
 	        	commandMerge.add(outfile2);
 	        	commandMerge.add(outfileMerged);
+	        	        
+	        	//No HTE, Merge is performed each time
 	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr);
-	        	//Show FastQC Output
+	        	
+//	        	//Show FastQC Output
 	        	LOGGER.info(sysErr);
-	        	logBuffer.append(sysErr);
 			}
-	    	// node was executed successfully
-	    	checker.writeOK();
-		}
-    	
+
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
@@ -206,9 +180,7 @@ public class FastQCNodeModel extends NodeModel {
     	
     	/**Delete FastQC zip files**/
     	deleteZipFiles(readsFile1, readsFile2);
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
+
     	
         return new BufferedDataTable[]{outTable};
     }
@@ -238,9 +210,11 @@ public class FastQCNodeModel extends NodeModel {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. Node has to be connected to RunFastQC");
     	}
     	
-
-    	
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
     }
 
     /**
