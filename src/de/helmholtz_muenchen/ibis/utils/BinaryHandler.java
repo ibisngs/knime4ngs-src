@@ -4,6 +4,12 @@ import java.io.File;
 
 public class BinaryHandler {
 
+	public final static String TOOL_PATH = "/home/software/bin";
+	
+	@Deprecated
+	public static String checkToolAvailability(String BinaryName) {
+		return checkToolAvailability(BinaryName, TOOL_PATH);
+	}
 	
 	public static String checkToolAvailability(String BinaryName, String dir){
 		
