@@ -15,7 +15,6 @@
         </intro>
         
         <option name="Read sequences">FastQ, FastA, or BAM file. The second file (FastQ or FastA) is optional (paired-end mapping).</option>
-        <option name="*************** Parameter ***************"></option>
         <option name="Type of reads/ mapping">Please choose if single-end, or paired-end mapping should be used.</option>
         
     </fullDescription>
@@ -24,9 +23,5 @@
         <outPort index="0" name="Out-Port">Cell 0: Path to read file (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to second read file
         (fastQ or fastA).</outPort>
     </ports>    
-    
-    <views>
-        <view index="0" name=""></view>
-    </views>
     
 </knimeNode>

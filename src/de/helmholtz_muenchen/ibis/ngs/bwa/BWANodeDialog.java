@@ -46,7 +46,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the BWA node.
      */
-    @SuppressWarnings("deprecation")
 	protected BWANodeDialog() {
     	super();
     	    	
@@ -57,7 +56,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
     	
     	addDialogComponent(dcfc);
-    	dcfc.setEnabled(false);
+    	bwa.setEnabled(false);
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ".fa|.fasta"));
     	createNewGroup("Options");
@@ -105,7 +104,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	usePrefPage.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
-				dcfc.setEnabled(!usePrefPage.getBooleanValue());
+				bwa.setEnabled(!usePrefPage.getBooleanValue());
 				if(usePrefPage.getBooleanValue()) {
 					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
 			    	if(toolPath.equals("")) {
@@ -127,8 +126,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 	    	}
 	    	bwa.setStringValue(toolPath);
     	}
-    }
-    
-			
+    }		
 }
 

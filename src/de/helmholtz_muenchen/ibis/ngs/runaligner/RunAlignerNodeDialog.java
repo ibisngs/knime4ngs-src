@@ -31,9 +31,9 @@ public class RunAlignerNodeDialog extends DefaultNodeSettingsPane {
     	reads2.setEnabled(false);
 
     	createNewGroup("Read sequences (FastQ or FastA file)");
-    	addDialogComponent(new DialogComponentFileChooser(reads1, "his0_runali_id", 0, ""));
+    	addDialogComponent(new DialogComponentFileChooser(reads1, "his0_runali_id", 0, ".fa|.fasta|.fq|.fastq|.bam"));
     	createNewGroup("Second file (FastQ or FastA) is optional (paired-end mapping)");
-    	addDialogComponent(new DialogComponentFileChooser(reads2, "his01_runali_id", 0, ""));
+    	addDialogComponent(new DialogComponentFileChooser(reads2, "his01_runali_id", 0, ".fa|.fasta|.fq|.fastq"));
     	createNewGroup("Parameter");
     	addDialogComponent(new DialogComponentStringSelection(readType,"Type of reads/ mapping:","single-end","paired-end"));
     	

@@ -23,7 +23,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 /**
  * This is the model implementation of RunAligner.
@@ -73,13 +72,6 @@ public class RunAlignerNodeModel extends NodeModel {
     	if(m_readseqfile2.isEnabled() && readType.equals("paired-end")) {
     		readFile2 = m_readseqfile2.getStringValue();
     	}
-    		
-    	/**Initialize logfile**/
-    	String logfile = readFile1.substring(0,readFile1.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("RunAligner"));
-    	/**end initializing logfile**/
     	
     	LOGGER.info("Reads File 1: " + readFile1);
     	LOGGER.info("Reads File 2: " + readFile2);
@@ -90,7 +82,6 @@ public class RunAlignerNodeModel extends NodeModel {
 		}else{
 			throw new IOException("One or both sequence files cannot be found!");
 		}
-	
     	
     	/**Push FlowVariables**/
     	String isBAM = "";
@@ -117,9 +108,6 @@ public class RunAlignerNodeModel extends NodeModel {
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
     
         return new BufferedDataTable[]{outTable};
     	
@@ -158,7 +146,10 @@ public class RunAlignerNodeModel extends NodeModel {
     		}
     	}
     	
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),})};
     }
 
     /**
