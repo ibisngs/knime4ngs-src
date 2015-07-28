@@ -16,7 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
@@ -26,7 +25,6 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -250,7 +248,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
+    	super.saveSettingsTo(settings);
     }
 
     /**
@@ -259,7 +257,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	
+    	super.loadValidatedSettingsFrom(settings);
     }
 
     /**
@@ -268,7 +266,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	
+    	super.validateSettings(settings);
     }
     
     /**

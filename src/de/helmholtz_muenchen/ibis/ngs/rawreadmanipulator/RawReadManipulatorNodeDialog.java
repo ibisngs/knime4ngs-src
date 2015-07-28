@@ -15,6 +15,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 
 /**
  * <code>NodeDialog</code> for the "RawReadManipulator" Node.
@@ -27,7 +29,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author 
  */
-public class RawReadManipulatorNodeDialog extends DefaultNodeSettingsPane {
+public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
 
     /**
      * New pane for configuring the RawReadManipulator node.

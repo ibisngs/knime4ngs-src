@@ -44,8 +44,4 @@
         <outPort index="0" name="Out-Port">Cell 0: Path2ReadFile1<br></br>Cell 1: Path2ReadFile2 (if given)</outPort>
     </ports>    
 
-	<views>
-		<view index="0" name=""></view>
-	</views>
-
 </knimeNode>
