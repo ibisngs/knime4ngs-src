@@ -52,7 +52,7 @@ public class SampleInfo {
 		return partLOFs;
 	}
 	
-	public boolean is_affected() {
+	public boolean is_case() {
 		if(Integer.parseInt(phenotype)==2) {
 			return true;
 		}

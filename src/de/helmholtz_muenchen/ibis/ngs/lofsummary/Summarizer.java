@@ -517,12 +517,6 @@ public abstract class Summarizer {
 			GeneInfo gi = gene_statistic.get(gene);			
 			
 			/**initialize significance calculations**/
-			double p_lof_aff = 0.0;
-			if(gene2background.containsKey(gene)) {
-				p_lof_aff = gene2background.get(gene);
-			} else if(geneback_file==null) {
-				p_lof_aff = 1 - gi.getProbUnaffected();
-			}
 			
 			int unaffected = gi.getUnaffectedSamples().size();
 			int affected = gi.getAffectedSamples().size();
@@ -535,7 +529,7 @@ public abstract class Summarizer {
 			
 			for(String sample: gi.getUnaffectedSamples()) {
 				SampleInfo si = sample_statistic.get(sample);
-				if(si.is_affected()) {
+				if(si.is_case()) {
 					case_un++;
 				} else {
 					control_un++;
@@ -544,7 +538,7 @@ public abstract class Summarizer {
 			
 			for(String sample: gi.getAffectedSamples()) {
 				SampleInfo si = sample_statistic.get(sample);
-				if(si.is_affected()) {
+				if(si.is_case()) {
 					case_aff++;
 				} else {
 					control_aff++;
@@ -554,22 +548,36 @@ public abstract class Summarizer {
 			int n_control = control_un + control_aff;
 			int n_case = case_un + case_aff;
 			
+			//get relevant p_lof_aff from background
+			double p_lof_aff = 0.0;
+			if(gene2background.containsKey(gene)) {
+				p_lof_aff = gene2background.get(gene);
+			} else if(geneback_file==null || !gene2background.containsKey(gene)){
+				if(ped_file==null) {
+					p_lof_aff = 1 - gi.getProbUnaffected();
+				} else {
+					p_lof_aff = (double)control_aff / (double)(control_un+control_aff);
+				}
+			}
+			gi.setP_lof_aff(p_lof_aff);
+			
+			
 			/**do significance calculations**/
 			NormalDistribution nd = new NormalDistribution();
 			
-			double p_val_vs_exac = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
-			gi.setP_val_vs_exac(p_val_vs_exac);
+			double p_val_vs_bg = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
+			gi.setP_val_vs_bg(p_val_vs_bg);
 			
-			if(n_case>0) {
-				double p_val_case_vs_exac = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
+			if(ped_file!=null) {
+				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
 
-				double z_score_case_vs_exac = nd.inverseCumulativeProbability(p_val_case_vs_exac);
+				double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
 
-				double p_val_control_vs_exac = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
+				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
 
-				double z_score_control_vs_exac = nd.inverseCumulativeProbability(p_val_control_vs_exac);
+				double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
 
-				double z_score_diff = z_score_case_vs_exac - z_score_control_vs_exac;
+				double z_score_diff = z_score_case_vs_bg - z_score_control_vs_bg;
 
 				double p_val_case_vs_control = nd.cumulativeProbability(z_score_diff);
 				gi.setP_val_case_vs_control(p_val_case_vs_control);
@@ -773,14 +781,6 @@ public abstract class Summarizer {
 
 			GeneInfo gi = gene_statistic.get(gene);			
 			
-
-			double p_lof_aff = 0.0;
-			if(gene2background.containsKey(gene)) {
-				p_lof_aff = gene2background.get(gene);
-			} else if(geneback_file==null) {
-				p_lof_aff = 1 - gi.getProbUnaffected();
-			}
-			
 			int unaffected = gi.getUnaffectedSamples().size();
 			int affected = gi.getAffectedSamples().size();
 			int n = affected+unaffected;
@@ -789,11 +789,12 @@ public abstract class Summarizer {
 	
 			for(String sample: gi.getAffectedSamples()) {
 				SampleInfo si = sample_statistic.get(sample);
-				if(si.is_affected()) {
+				if(si.is_case()) {
 					case_aff++;
 				}
 			}
-			double expected = p_lof_aff * (double) n;
+			
+			double expected = gi.getP_lof_aff() * (double) n;
 			
 			double z_score_diff = Double.NaN;
 			if(gi.getP_val_case_vs_control()>-1.0) {
@@ -813,7 +814,7 @@ public abstract class Summarizer {
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
-			bw.write("\t"+p_lof_aff);
+			bw.write("\t"+gi.getP_lof_aff());
 			bw.write("\t"+unaffected);
 			bw.write("\t"+affected);
 			bw.write("\t"+expected);
