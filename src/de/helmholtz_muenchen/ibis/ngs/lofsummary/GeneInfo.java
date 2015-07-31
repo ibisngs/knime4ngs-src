@@ -11,6 +11,7 @@ public class GeneInfo implements Comparable<GeneInfo> {
 	int fullLoFs;
 	int partLoFs;
 	double p_lof_aff;
+	String p_lof_origin;
 	HashMap<String, Double> pos2af_prob;
 	
 	HashSet<String> unaffected_samples;
@@ -26,6 +27,7 @@ public class GeneInfo implements Comparable<GeneInfo> {
 		p_val_case_vs_control = -1.0;
 		p_val_vs_exac = -1.0;
 		p_lof_aff = -1.0;
+		p_lof_origin = "";
 		contig = "";
 		pos2af_prob = new HashMap<>();
 		affected_samples = new HashSet<>();
@@ -34,6 +36,14 @@ public class GeneInfo implements Comparable<GeneInfo> {
 		unaffected_samples = new HashSet<>();
 	}
 	
+	public String getP_lof_origin() {
+		return p_lof_origin;
+	}
+
+	public void setP_lof_origin(String p_lof_origin) {
+		this.p_lof_origin = p_lof_origin;
+	}
+
 	public double getP_lof_aff() {
 		return p_lof_aff;
 	}

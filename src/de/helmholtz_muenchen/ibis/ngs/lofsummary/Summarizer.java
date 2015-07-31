@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -550,30 +551,40 @@ public abstract class Summarizer {
 			
 			//get relevant p_lof_aff from background
 			double p_lof_aff = 0.0;
+			String origin = "";
 			if(gene2background.containsKey(gene)) {
 				p_lof_aff = gene2background.get(gene);
+				origin = "background";
 			} else if(geneback_file==null || !gene2background.containsKey(gene)){
 				if(ped_file==null) {
 					p_lof_aff = 1 - gi.getProbUnaffected();
+					origin = "all_samples";
 				} else {
 					p_lof_aff = (double)control_aff / (double)(control_un+control_aff);
+					origin = "control_samples";
+					if(Double.compare(p_lof_aff, 0.0)==0) {
+						p_lof_aff = 1 - gi.getProbUnaffected();
+						origin = "all_samples";
+					}
 				}
 			}
 			gi.setP_lof_aff(p_lof_aff);
+			gi.setP_lof_origin(origin);
 			
 			
 			/**do significance calculations**/
 			NormalDistribution nd = new NormalDistribution();
 			
-			double p_val_vs_bg = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
+			double p_val_vs_bg = 1 - new BinomialDistribution(n+1, p_lof_aff).cumulativeProbability(affected);
+
 			gi.setP_val_vs_bg(p_val_vs_bg);
 			
 			if(ped_file!=null) {
-				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
+				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case+1, p_lof_aff).cumulativeProbability(case_aff);
 
 				double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
 
-				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
+				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control+1, p_lof_aff).cumulativeProbability(control_aff);
 
 				double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
 
@@ -752,7 +763,7 @@ public abstract class Summarizer {
 		HashSet<String> significant_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\tunaffected_samples\taffected_samples\texpected_samples\tp-value\taffected_in_cases\tis_significant\tz-score\tp-value_case_control\tbenjamini_hochberg\tko_samples\trel_pos_in_contig");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\torigin\tunaffected_samples\taffected_samples\texpected_samples\tp-value\taffected_in_cases\tis_significant\tz-score\tp-value_case_control\tbenjamini_hochberg\tko_samples\trel_pos_in_contig");
 		bw.newLine();
 		
 		ValueComparator vc = new ValueComparator(gene_statistic);
@@ -815,6 +826,7 @@ public abstract class Summarizer {
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
 			bw.write("\t"+gi.getP_lof_aff());
+			bw.write("\t"+gi.getP_lof_origin());
 			bw.write("\t"+unaffected);
 			bw.write("\t"+affected);
 			bw.write("\t"+expected);
