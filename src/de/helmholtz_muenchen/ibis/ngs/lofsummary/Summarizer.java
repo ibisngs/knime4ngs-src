@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -546,30 +545,18 @@ public abstract class Summarizer {
 				}
 			}
 			
+			gi.calcFisher(case_aff, control_aff, case_un, control_un);
 			int n_control = control_un + control_aff;
 			int n_case = case_un + case_aff;
 			
 			//get relevant p_lof_aff from background
 			double p_lof_aff = 0.0;
-			String origin = "";
 			if(gene2background.containsKey(gene)) {
 				p_lof_aff = gene2background.get(gene);
-				origin = "background";
-			} else if(geneback_file==null || !gene2background.containsKey(gene)){
-				if(ped_file==null) {
-					p_lof_aff = 1 - gi.getProbUnaffected();
-					origin = "all_samples";
-				} else {
-					p_lof_aff = (double)control_aff / (double)(control_un+control_aff);
-					origin = "control_samples";
-					if(Double.compare(p_lof_aff, 0.0)==0) {
-						p_lof_aff = 1 - gi.getProbUnaffected();
-						origin = "all_samples";
-					}
-				}
+			} else if(geneback_file==null){
+				p_lof_aff = 1 - gi.getProbUnaffected();
 			}
 			gi.setP_lof_aff(p_lof_aff);
-			gi.setP_lof_origin(origin);
 			
 			
 			/**do significance calculations**/
@@ -593,16 +580,7 @@ public abstract class Summarizer {
 				double p_val_case_vs_control = nd.cumulativeProbability(z_score_diff);
 				gi.setP_val_case_vs_control(p_val_case_vs_control);
 			}
-			
-//			if(gene.equals("ENSG00000161681")) {
-//			System.out.println("--");
-//			System.out.println(case_aff + "\t"+ control_aff);
-//			System.out.println(z_score_case_vs_exac +"\t"+z_score_control_vs_exac+"\t"+z_score_diff);
-//			System.out.println(p_val_case_vs_exac + "\t" + p_val_control_vs_exac +"\t"+p_val_case_vs_control);
-//			}	
 		}
-
-			
 	}
 	
 	
@@ -759,11 +737,9 @@ public abstract class Summarizer {
 
 	
 	private void writeGeneStatistic(String outfile) throws IOException {
-		
-		HashSet<String> significant_genes = new HashSet<>();
-		
+				
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\torigin\tunaffected_samples\taffected_samples\texpected_samples\tp-value\taffected_in_cases\tis_significant\tz-score\tp-value_case_control\tbenjamini_hochberg\tko_samples\trel_pos_in_contig");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\taff_exp\taff_case\taff_ctrl\tun_case\tun_ctrl\tp-value_fisher\tp-value_bg\tp-value_case_control_bg\trel_pos_in_contig");
 		bw.newLine();
 		
 		ValueComparator vc = new ValueComparator(gene_statistic);
@@ -771,23 +747,7 @@ public abstract class Summarizer {
 		TreeMap<String,GeneInfo> sorted_gene_statistic = new TreeMap<String, GeneInfo>(vc);
 
 		sorted_gene_statistic.putAll(gene_statistic);
-		
-		int i = 1;
-		int k = 0;
-		for(String gene: sorted_gene_statistic.keySet()) {
-
-			GeneInfo gi = gene_statistic.get(gene);
-			
-			double benjamini = (double)i/gene_statistic.size()*0.05;
-			if((gi.getP_val_case_vs_control()> -1) && (gi.getP_val_case_vs_control() < benjamini)) {
-				k = i;
-			} else if ((gi.getP_val_case_vs_control()<0.0) && (gi.getP_val_vs_exac() < benjamini)) {
-				k=i;
-			}
-			i++;
-		}
-		
-		i = 1;
+	
 		for(String gene: sorted_gene_statistic.keySet()) {
 
 			GeneInfo gi = gene_statistic.get(gene);			
@@ -795,56 +755,30 @@ public abstract class Summarizer {
 			int unaffected = gi.getUnaffectedSamples().size();
 			int affected = gi.getAffectedSamples().size();
 			int n = affected+unaffected;
-
-			int case_aff = 0;
-	
-			for(String sample: gi.getAffectedSamples()) {
-				SampleInfo si = sample_statistic.get(sample);
-				if(si.is_case()) {
-					case_aff++;
-				}
-			}
 			
-			double expected = gi.getP_lof_aff() * (double) n;
-			
-			double z_score_diff = Double.NaN;
-			if(gi.getP_val_case_vs_control()>-1.0) {
-				z_score_diff =  new NormalDistribution().inverseCumulativeProbability(gi.p_val_case_vs_control);
-			}
+			double expected = gi.getP_lof_aff() * (double)n;
 			
 			Integer[] sten = gene_start_end.get(gene);
 			double pos_in_contig = ((double)(sten[0]+sten[1])/2.0)/contig_length.get(gi.getContig());
-			
-			double benjamini = (double)i/gene_statistic.size()*0.05;
-			
-			boolean significant = (i<=k);
-			if(significant) {
-				significant_genes.add(gene);
-			}
 			
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
 			bw.write("\t"+gi.getP_lof_aff());
-			bw.write("\t"+gi.getP_lof_origin());
-			bw.write("\t"+unaffected);
-			bw.write("\t"+affected);
 			bw.write("\t"+expected);
+			bw.write("\t"+gi.getAff_case());
+			bw.write("\t"+gi.getAff_ctrl());
+			bw.write("\t"+gi.getUn_case());
+			bw.write("\t"+gi.getUn_ctrl());
+			bw.write("\t"+gi.getP_val_Fisher());
 			bw.write("\t"+gi.getP_val_vs_exac());
-			bw.write("\t"+case_aff);
-			bw.write("\t"+significant);
-			bw.write("\t"+z_score_diff);
 			bw.write("\t"+gi.getP_val_case_vs_control());
-			bw.write("\t"+benjamini);
-			bw.write("\t"+gi.getKOSamples().size());
 			bw.write("\t"+pos_in_contig);
 			bw.newLine();
-			i++;
 			
 		}
 		
 		bw.close();
-		this.writeGeneList(significant_genes, outfile.replace("gene_summary", "significant_genes"));
 	}
 	
 	private void writeSampleStatistic(String outfile) throws IOException {
