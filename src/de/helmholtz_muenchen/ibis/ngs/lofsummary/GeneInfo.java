@@ -59,7 +59,7 @@ public class GeneInfo implements Comparable<GeneInfo> {
 		this.aff_ctrl = aff_ctrl;
 		this.un_case = un_case;
 		this.un_ctrl = un_ctrl;
-		p_val_fisher = new FisherExact(aff_case+aff_ctrl+un_case+un_ctrl).getP(aff_case, aff_ctrl, un_case, un_ctrl);
+		p_val_fisher = FisherExact.oneTailedGreater(aff_case, aff_ctrl, un_case, un_ctrl);
 	}
 	
 	public double getP_val_Fisher() {

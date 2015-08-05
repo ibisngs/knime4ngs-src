@@ -12,11 +12,15 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButton;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
@@ -35,26 +39,35 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 
     /**
-     * New pane for configuring the LOFFilter node.
+     * New pane for configuring the VCFFilter node.
      */
 	
 	private final SettingsModelString vcf_in = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VCFIN,"-");
-	private final SettingsModelString annotation = new SettingsModelString(VCFFilterNodeModel.CFGKEY_ANNOTATION,"");
 	private final SettingsModelString vep_script = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
+	private final SettingsModelString vcf_tools = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VCFTOOLS,"-");
 	
-	//LOF definition
+	//genotype filter
+	private final SettingsModelBoolean filter_by_DP = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_DP,false);
+	private final SettingsModelInteger DP_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_DP_THRESHOLD,8);
+	
+	private final SettingsModelBoolean filter_by_GQ = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_GQ,false);
+	private final SettingsModelInteger GQ_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_GQ_THRESHOLD,20);
+	
+	private final SettingsModelBoolean filter_by_GQ_mean = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_GQ_MEAN,false);
+	private final SettingsModelInteger GQ_MEAN_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_GQ_MEAN_THRESHOLD,35);
+	
+	//annotation filter
+	private final SettingsModelBoolean filter_annotation = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_ANNOTATIONS,false);
+	private final SettingsModelString annotation = new SettingsModelString(VCFFilterNodeModel.CFGKEY_ANNOTATION,"");
 	private final SettingsModelString so_term = new SettingsModelString(VCFFilterNodeModel.CFGKEY_SO_TERM,"");
 	private final SettingsModelStringArray chosen_terms = new SettingsModelStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, VCFFilterNodeModel.DEFAULT_TERMS);
 	
-	private final DialogComponentButton ADD_TERM_BUTTON = new DialogComponentButton("Add selected term");
-	
 	private static final String NO_SELECTION_MADE = VCFFilterNodeModel.DEFAULT_TERMS[0];
 	private final DialogComponentStringListSelection DC_TERM_DISPLAY = new DialogComponentStringListSelection(chosen_terms, "Chosen terms:",NO_SELECTION_MADE);
-	
+	private final DialogComponentButton ADD_TERM_BUTTON = new DialogComponentButton("Add selected term");
 	private final DialogComponentButton REMOVE_TERM_BUTTON = new DialogComponentButton("Remove selected term");
 	private final DialogComponentButton RESTORE_DEFAULTS_BUTTON = new DialogComponentButton("Restore default");
 	
-	//filter
 	private final SettingsModelString filter = new SettingsModelString(VCFFilterNodeModel.CFGKEY_FILTER,"");
 	private final DialogComponentString DC_FILTER = new DialogComponentString(filter,"Conditions");
 	
@@ -66,10 +79,36 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 
     	createNewGroup("Select input file");
     	addDialogComponent(new DialogComponentFileChooser(vcf_in, "his_id_vcfin", 0, ".vcf|.vcf.gz"));
-    	addDialogComponent(new DialogComponentStringSelection(annotation,"Annotations from",VCFFilterNodeModel.ANNOTATIONS_AVAILABLE));
     	
-    	createNewGroup("Path to filter_vep.pl (only VEP)");
+    	createNewGroup("Path to filter_vep.pl");
     	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
+    	
+    	createNewGroup("Path to VCFtools binaries");
+    	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, ""));
+    	
+    	//genotype filter
+    	createNewTab("Genotype Filter");
+		addDialogComponent(new DialogComponentBoolean(filter_by_DP, "Filter genotypes by DP?"));
+		setHorizontalPlacement(true);
+		addDialogComponent(new DialogComponentNumber(DP_threshold, "DP threshold",8));
+		setHorizontalPlacement(false);
+		
+		addDialogComponent(new DialogComponentBoolean(filter_by_GQ, "Filter genotypes by GQ?"));
+		setHorizontalPlacement(true);
+		addDialogComponent(new DialogComponentNumber(GQ_threshold, "GQ threshold",20));
+		setHorizontalPlacement(false);
+		
+		//variant filter
+		createNewTab("Variant Filter");
+		addDialogComponent(new DialogComponentBoolean(filter_by_GQ_mean, "Filter genotypes by mean GQ?"));
+		setHorizontalPlacement(true);
+		addDialogComponent(new DialogComponentNumber(GQ_MEAN_threshold, "Mean GQ threshold",35));
+		setHorizontalPlacement(false);
+    	
+    	//annotation filter
+    	createNewTab("Annotation Filter");
+    	addDialogComponent(new DialogComponentBoolean(filter_annotation, "Filter annotations?"));
+    	addDialogComponent(new DialogComponentStringSelection(annotation,"Annotations from",VCFFilterNodeModel.ANNOTATIONS_AVAILABLE));
     	
     	createNewGroup("Select variants");
 		addDialogComponent(new DialogComponentStringSelection(so_term,
@@ -96,7 +135,7 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 		ADD_TERM_BUTTON.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				addTerm(so_term.getStringValue());
+				addSOTerm(so_term.getStringValue());
 			}
 		});
 		
@@ -111,12 +150,12 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 		RESTORE_DEFAULTS_BUTTON.addActionListener(new ActionListener () {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				restoreDefault();
+				restoreTermDefaults();
 			}
 		});
     }
     
-    public void addTerm(String t) {
+    public void addSOTerm(String t) {
     	
     	if(terms.contains(t)) return;
     	
@@ -138,7 +177,7 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     	}
     }
     
-    public void restoreDefault() {
+    public void restoreTermDefaults() {
     	terms.clear();
     	for(String t: VCFFilterNodeModel.DEFAULT_TERMS) {
 			terms.add(t);
@@ -154,7 +193,7 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
         	try {
         		// add the values
 				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST))
-					this.addTerm(s);
+					this.addSOTerm(s);
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());
 			}

@@ -235,7 +235,7 @@ public abstract class Summarizer {
 		String[] fields;
 		while((line = br.readLine())!=null) {
 			fields = line.split("\t");
-			gene2background.put(fields[0], Double.parseDouble(fields[7]));
+			gene2background.put(fields[0], Double.parseDouble(fields[4]));
 			
 		}
 		br.close();
@@ -329,6 +329,8 @@ public abstract class Summarizer {
 			        		for(int i = 9; i< header.length; i++) {
 			        			my_sample_ids.add(header[i]);
 			        			if(!sample_statistic.containsKey(header[i])) {
+			        				logger.warn("No phenotype information found for "+header[i]+". " +
+			        						"The sample is further handled as belonging to the control group.");
 			        				sample_statistic.put(header[i], new SampleInfo());
 			        			}
 			        		}
@@ -562,16 +564,16 @@ public abstract class Summarizer {
 			/**do significance calculations**/
 			NormalDistribution nd = new NormalDistribution();
 			
-			double p_val_vs_bg = 1 - new BinomialDistribution(n+1, p_lof_aff).cumulativeProbability(affected);
+			double p_val_vs_bg = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
 
 			gi.setP_val_vs_bg(p_val_vs_bg);
 			
 			if(ped_file!=null) {
-				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case+1, p_lof_aff).cumulativeProbability(case_aff);
+				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
 
 				double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
 
-				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control+1, p_lof_aff).cumulativeProbability(control_aff);
+				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
 
 				double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
 
