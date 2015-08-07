@@ -84,7 +84,7 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
     	
     	createNewGroup("Path to VCFtools binaries");
-    	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, ""));
+    	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, true));
     	
     	//genotype filter
     	createNewTab("Genotype Filter");

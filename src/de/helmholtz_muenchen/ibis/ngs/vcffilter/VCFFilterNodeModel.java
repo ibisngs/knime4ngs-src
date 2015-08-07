@@ -2,8 +2,6 @@ package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -122,12 +120,13 @@ public class VCFFilterNodeModel extends NodeModel {
     	}else{
     		//Get File via FileSelector
     		infile = m_vcfin.getStringValue();
-    		if(infile.equals("") || Files.notExists(Paths.get(infile))) {
-    			LOGGER.error("No input vcf file specified!");
-    		}
+    	}
+    	String infile_warning = CheckUtils.checkSourceFile(infile);
+    	if(infile_warning != null) {
+    		setWarningMessage(infile_warning);
     	}
     	
-    	String outfile = "";
+    	String outfile = infile;
     	if(m_filter_by_DP.getBooleanValue() || m_filter_by_GQ.getBooleanValue()) {
     		outfile = filterGenotypes(infile, exec);
     		infile = outfile;
@@ -254,25 +253,16 @@ public class VCFFilterNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	String infile_warning = CheckUtils.checkSourceFile(m_vcfin.getStringValue());
-    	if(infile_warning != null) {
-    		setWarningMessage(infile_warning);
-    	}
     	
     	String vep_warning = CheckUtils.checkSourceFile(m_vepscript.getStringValue());
     	if(vep_warning != null) {
     		setWarningMessage(vep_warning);
     	}
     	
-    	String vcftools_warning = CheckUtils.checkSourceFile(m_vcf_tools.getStringValue());
-    	if(vcftools_warning != null) {
-    		setWarningMessage(vcftools_warning);
-    	}
-    	
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			
+			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
     	
         return new DataTableSpec[]{new DataTableSpec(
