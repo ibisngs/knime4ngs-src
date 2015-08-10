@@ -29,7 +29,7 @@ public class ThunderCallNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString BASE_NAME = new SettingsModelString(ThunderCallNodeModel.CFGKEY_BASE_NAME, "");
 	private final SettingsModelDoubleBounded POST_PROB = new SettingsModelDoubleBounded(ThunderCallNodeModel.CFGKEY_POST_PROB, ThunderCallNodeModel.DEFAULT_POST_PROB, 0.1, 1.0);
 	private final SettingsModelIntegerBounded MIN_DEPTH = new SettingsModelIntegerBounded(ThunderCallNodeModel.CFGKEY_MIN_DEPTH, ThunderCallNodeModel.DEFAULT_MIN_DEPTH, 1, 100);
-    private final SettingsModelIntegerBounded MAX_DEPTH = new SettingsModelIntegerBounded(ThunderCallNodeModel.CFGKEY_POST_PROB, ThunderCallNodeModel.DEFAULT_MAX_DEPTH, 100, 10000);
+    private final SettingsModelIntegerBounded MAX_DEPTH = new SettingsModelIntegerBounded(ThunderCallNodeModel.CFGKEY_MAX_DEPTH, ThunderCallNodeModel.DEFAULT_MAX_DEPTH, 100, 10000);
 
     protected ThunderCallNodeDialog() {
         super();
@@ -51,6 +51,11 @@ public class ThunderCallNodeDialog extends DefaultNodeSettingsPane {
 
       	addDialogComponent(new DialogComponentNumber(MAX_DEPTH,"Maximum depth:", /*step*/ 10, /*componentwidth*/ 5));
 
+      	THUNDER.setEnabled(true);
+        BASE_NAME.setEnabled(true);
+        POST_PROB.setEnabled(true);
+        MIN_DEPTH.setEnabled(true);
+        MAX_DEPTH.setEnabled(true);
                     
     }
 }

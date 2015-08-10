@@ -1,23 +1,20 @@
 package de.helmholtz_muenchen.ibis.ngs.thundercall;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
 import org.knime.core.data.container.CloseableRowIterator;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -32,10 +29,8 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
@@ -74,9 +69,9 @@ public class ThunderCallNodeModel extends NodeModel {
 	
     private final SettingsModelString m_THUNDER = new SettingsModelString(CFGKEY_THUNDER_PATH, "");
     private final SettingsModelString m_BASE_NAME = new SettingsModelString(CFGKEY_BASE_NAME, "");
-    private final SettingsModelDoubleBounded m_POST_PROB = new SettingsModelDoubleBounded(CFGKEY_POST_PROB, DEFAULT_POST_PROB, 0.0, 1.0);
+    private final SettingsModelDoubleBounded m_POST_PROB = new SettingsModelDoubleBounded(CFGKEY_POST_PROB, DEFAULT_POST_PROB, 0.1, 1.0);
     private final SettingsModelIntegerBounded m_MIN_DEPTH = new SettingsModelIntegerBounded(CFGKEY_MIN_DEPTH, DEFAULT_MIN_DEPTH, 1, 100);
-    private final SettingsModelIntegerBounded m_MAX_DEPTH = new SettingsModelIntegerBounded(CFGKEY_POST_PROB, DEFAULT_MAX_DEPTH, 100, 10000);
+    private final SettingsModelIntegerBounded m_MAX_DEPTH = new SettingsModelIntegerBounded(CFGKEY_MAX_DEPTH, DEFAULT_MAX_DEPTH, 100, 10000);
 
   //The Output Col Names
   	public static final String OUT_COL1_TABLE1 = "OUTFILE";
@@ -87,6 +82,11 @@ public class ThunderCallNodeModel extends NodeModel {
     
         // TODO one incoming port and one outgoing port is assumed
         super(1, 1);
+        m_THUNDER.setEnabled(true);
+        m_BASE_NAME.setEnabled(true);
+        m_POST_PROB.setEnabled(true);
+        m_MIN_DEPTH.setEnabled(true);
+        m_MAX_DEPTH.setEnabled(true);
     }
 
     /**
@@ -103,7 +103,7 @@ public class ThunderCallNodeModel extends NodeModel {
         double postProb = m_POST_PROB.getDoubleValue();
         int minDepth = m_MIN_DEPTH.getIntValue();
         int maxDepth = m_MAX_DEPTH.getIntValue();
-        String outFile = "";
+        String thunderOutFile = "";
 
         /**
          * Connect with parallel chunk and set the number of chunks accordingly
@@ -138,9 +138,9 @@ public class ThunderCallNodeModel extends NodeModel {
         }        
 		
 		//create directoty for the Thunder Outputs
-		String thunderDir = this.OUTPUT_PATH + "ThunderCall";
-		String glfDir = thunderDir.replace("ThunderCall", "glf");
-		createDirectory(thunderDir);
+//		String thunderDir = this.OUTPUT_PATH + "ThunderCall";
+//		String glfDir = thunderDir.replace("ThunderCall", "glf");
+//		createDirectory(thunderDir);
 		/**
 		 * /home/ibis/tanzeem.haque/Documents/3rd_party_tools/thunder/GPT_Freq_V011/GPT_Freq 
 		 * -b /home/ibis/tanzeem.haque/Documents/3rd_party_tools/thunder/thunder_011/examples/testTZ/tin/Q12 
@@ -151,20 +151,38 @@ public class ThunderCallNodeModel extends NodeModel {
 		 * > /home/ibis/tanzeem.haque/Documents/3rd_party_tools/thunder/thunder_011/examples/testTZ/tin/GPT.Q12.log
 		 */
 
-		String chr = glf_arrList.get(0).split("_")[0];
+        String[] tmp = glf_arrList.get(0).split("/");
+		String chr = tmp[tmp.length-1].split("_")[0];
 		ArrayList<String> command = new ArrayList<String>();
     	command.add(thunder);
-    	command.add("-b "+ thunderDir + "/" + baseName);
+    	command.add("-b "+ this.OUTPUT_PATH + baseName);
     	command.add("-p " + postProb);
     	command.add("--minDepth " + minDepth);
     	command.add("--maxDepth " + maxDepth);
-    	command.add(glfDir + "/" + chr + "*.glf");
-    	command.add("> " + 	thunderDir + "/" + "GPT."+baseName+".log");
+    	command.add(glf_arrList.get(0));
+    	command.add(glf_arrList.get(1));
+    	command.add(glf_arrList.get(2));
+
+//    	command.add("> " + 	this.OUTPUT_PATH + "GPT."+baseName+".log");
     	
     	System.out.println(StringUtils.join(command, " "));
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger);
-     	
-    	outFile = thunderDir + "/" + baseName + "." + chr;
+    	
+    	thunderOutFile = this.OUTPUT_PATH + baseName + "." + chr;
+    	String thunder2VCFOutFile = thunderOutFile + ".vcf";
+    	File f = new File(thunderOutFile);
+    	if(f.exists())
+    		f.delete();
+    	
+    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger, this.OUTPUT_PATH + baseName + "." + chr + ".log");
+     		
+    	pushFlowVariableString("Thunder Output", thunderOutFile);
+    	
+    	/**
+    	 * Converting thunder to vcf
+    	 */
+    	ThunderToVCF t2vcf = new ThunderToVCF();
+		t2vcf.convertThunder2VCF(thunderOutFile, thunder2VCFOutFile);
+    	
 		/**
     	 * OUTPUT
     	 */
@@ -175,7 +193,7 @@ public class ThunderCallNodeModel extends NodeModel {
     					new DataColumnSpecCreator(OUT_COL1_TABLE1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outFile)};
+    			(FileCell) FileCellFactory.create(thunder2VCFOutFile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
