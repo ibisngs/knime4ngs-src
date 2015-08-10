@@ -7,7 +7,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>In order to run Thunder for genotype calling and phasing, the .bam files need to be converted to .glf format which is executed by the pileup -g command </intro>
+        <intro>In order to run Thunder for genotype calling and phasing, the .bam files need to be converted to .glf format which is executed by the pileup -g command. A reference file is necessary. But the option is obsolete if reference file is provided at Cell 1 from the previous node (Ideally PicardTool)</intro>
         
         
         <option name="short name of first option (like in the dialog)">description of first option</option>

@@ -65,7 +65,7 @@ public class SamtoolsHybridNodeModel extends NodeModel {
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
 
   //The Output Col Names
-  	public static final String OUT_COL1_TABLE1 = "OUTFILE";
+  	public static final String OUT_COL1_TABLE1 = "Path2GLFfile";
     /**
      * Constructor for the node model.
      */
@@ -83,7 +83,7 @@ public class SamtoolsHybridNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
 
         String samHybrid = m_SAMTOOLS_HYBRID.getStringValue();
-        String refFile = m_REF_GENOME.getStringValue();
+        String refFile = "";//m_REF_GENOME.getStringValue();
         String outFile = "";
 
     	String bamFile = "";
@@ -92,6 +92,7 @@ public class SamtoolsHybridNodeModel extends NodeModel {
 		while (it.hasNext()) {
 			DataRow row = it.next();
 			bamFile = row.getCell(0).toString();
+			refFile = (row.getCell(1).toString().equals(""))? m_REF_GENOME.getStringValue(): row.getCell(1).toString();
 		}
 		
 		this.OUTPUT_PATH = bamFile.substring(0, bamFile.lastIndexOf("/"))+"/";
@@ -100,41 +101,47 @@ public class SamtoolsHybridNodeModel extends NodeModel {
 		checkParameters(samHybrid, refFile, bamFile);
 		
 		//create directory for the glf files
-		String glfDir = this.OUTPUT_PATH + "glf";
-		createDirectory(glfDir);
+//		String glfDir = this.OUTPUT_PATH + "glf";
+//		createDirectory(glfDir);
 		
-		outFile = glfDir+"/" + IO.replaceFileExtension(bamFile.substring(bamFile.lastIndexOf("/")+1, 
+		outFile = this.OUTPUT_PATH + IO.replaceFileExtension(bamFile.substring(bamFile.lastIndexOf("/")+1, 
 						bamFile.length()), ".glf");
 		
+		File f = new File (outFile);
+		if (f.exists())
+			f.delete();
+		
 	    ArrayList<String> command = new ArrayList<String>();
+//	    command.add("sh /home/ibis/tanzeem.haque/Documents/Scripts/Sequenciator/pileup.sh");
 	    command.add(samHybrid);
 	    command.add("pileup");
 	    command.add("-g "+ bamFile);
 	    command.add("-f " + refFile);
-	    command.add("> " + 	outFile);
+//	    command.add(/*"> " + 	*/outFile);
 	    	
 	    System.out.println(StringUtils.join(command, " "));
-	    Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger);
-	     		
+	    Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,logger, outFile);	     		
 		
 		/**
     	 * OUTPUT
     	 */
      	//Table1
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1_TABLE1, FileCell.TYPE).createSpec()}));
+	    DataColumnSpec[] colspec= new DataColumnSpec[2];
+	    colspec[0] = new DataColumnSpecCreator(OUT_COL1_TABLE1, StringCell.TYPE).createSpec();
+	    colspec[1] = new DataColumnSpecCreator("Path2REFfile", StringCell.TYPE).createSpec();
+	    DataTableSpec outspec=new DataTableSpec(colspec);
+
+
+    	BufferedDataContainer cont = exec.createDataContainer(outspec);
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outFile)};
+    	StringCell c1 = new StringCell(outFile), c2 = new StringCell(refFile);
     	
-    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.addRowToTable(new DefaultRow("Row0",new DataCell[]{c1,c2}));
     	cont.close();
-    	BufferedDataTable outTable1 = cont.getTable();
+    	BufferedDataTable outTable = cont.getTable();
 
 
-        return new BufferedDataTable[]{outTable1};
+        return new BufferedDataTable[]{outTable};
 		        
     }
 
@@ -177,7 +184,8 @@ public class SamtoolsHybridNodeModel extends NodeModel {
         }
 	}
     
-    private void createDirectory(String directory) {
+    @SuppressWarnings("unused")
+	private void createDirectory(String directory) {
 		File dir = new File(directory);
 
 		if (dir.exists())
