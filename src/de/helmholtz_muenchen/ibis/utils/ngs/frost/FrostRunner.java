@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
 
+
 /**
  * @author tanzeem.haque
  *
@@ -26,7 +27,7 @@ public class FrostRunner {
 	public static ArrayList<String> id_list = new ArrayList<String> ();
 	public static String[] parental_chromatids = new String[2];
 	public static String varyParameter = "";
-	public static int skipped_N;
+//	public static int skipped_N;
 	public final static int reco_gap = 18000;
 	public final static double insertion_rate = 0.15;
 	public final static double deletion_rate = 0.05;
@@ -46,8 +47,8 @@ public class FrostRunner {
 
 //		for (String s: args)
 //			System.out.println("Runner: " + s);
-		String tag_input = "-i", tag_mutRate = "-m", tag_recombination = "-r", 
-				tag_generation = "-g", tag_seed = "-s",
+		String tag_input = "-i", tag_mutRate = "-m", /*tag_recombination = "-r", 
+				tag_generation = "-g", */tag_seed = "-s",
 				tag_mutVary = "--mut", tag_recVary = "--reco", tag_deNovoVary = "--denovo", tag_bed = "--bed";
 
 		/**
@@ -56,8 +57,8 @@ public class FrostRunner {
 		String input = "";
 		String mapFile = FrostNodeModel.DEFAULT_MAPFILE;
 		double mutRate = 2.36;
-		int recombination = 1000;
-		int generation = 5300;
+		/*int recombination = 1000;
+		int generation = 5300;*/
 		int seed = 999;
 		boolean mutVary = false;
 		boolean recVary = false;
@@ -72,7 +73,7 @@ public class FrostRunner {
 		
 
 
-		if (args.length >= 3 && args.length <= 13) {
+		if (args.length >= 3 && args.length <= 9) {
 			if (!(args_al.contains(tag_mutVary) /* no booleans*/
 					|| args_al.contains(tag_recVary) 
 					|| args_al.contains(tag_deNovoVary))) {
@@ -125,6 +126,7 @@ public class FrostRunner {
 						}
 						continue;
 					}
+					/*
 					//recombination -> if not there it will be 1000
 					else if (args[i].equals(tag_recombination)) {
 						recombination = Integer.parseInt(args[i + 1]);
@@ -146,7 +148,7 @@ public class FrostRunner {
 							break;
 						}
 						continue;
-					}
+					}*/
 					else if (args[i].equals(tag_seed)) {
 						seed = Integer.parseInt(args[i + 1]);
 						continue;
@@ -202,14 +204,16 @@ public class FrostRunner {
 			
 			
 			FrostRunner.createLog(FrostRunner.bw_log, "Using command: " + "\n" + using_command);
-
-			run(input, mapFile, mutRate, recombination, generation, seed, mutVary, recVary, deNovoVary, records);
+			System.out.println("Using command: " + "\n" + using_command);
+			run(input, mapFile, mutRate, /*recombination, generation, */ seed, mutVary, recVary, deNovoVary, records);
 			
 		}
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
 		FrostRunner.createLog(FrostRunner.bw_log, "Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+		System.out.println("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 		FrostRunner.createLog(FrostRunner.bw_log,"\n");
+		System.out.println();
 		FrostRunner.bw_log.close();
 		System.out.println("done");
 
@@ -263,18 +267,21 @@ public class FrostRunner {
 	 * @throws InterruptedException
 	 * @throws IOException 
 	 */
-	protected static void run(String input, String mapFile, double mutRate, int recombination, int generation, int seed, 
+	protected static void run(String input, String mapFile, double mutRate, /*int recombination, int generation,*/ int seed, 
 			boolean mutVary, boolean recVary, boolean deNovoVary, String[] records) throws InterruptedException, IOException {
 		// TODO Auto-generated method stub
 
 		FrostRunner.createLog(FrostRunner.bw_log,"Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
-
+		System.out.println("Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
 		/**
 		 * Checking input Fasta
 		 */	
 		FastaCheck fc = new FastaCheck(input);
 		FrostRunner.parental_chromatids = fc.getParentalChromatids();
 		FrostRunner.createLog(FrostRunner.bw_log,"Parental chromatids: " + FrostRunner.parental_chromatids[0] 
+				+ " and " + FrostRunner.parental_chromatids[1]);
+		
+		System.out.println("Parental chromatids: " + FrostRunner.parental_chromatids[0] 
 				+ " and " + FrostRunner.parental_chromatids[1]);
 		/**
 		 * get the N region map or exons at first
@@ -283,7 +290,7 @@ public class FrostRunner {
 		GenomeMap gm = new GenomeMap(mapFile);
 
 		FrostRunner.createLog(FrostRunner.bw_log,"File used for positions: " + mapFile);
-		
+		System.out.println("File used for positions: " + mapFile);
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
 		String ids = "";
@@ -345,7 +352,7 @@ public class FrostRunner {
 			 * Some info printing
 			 */
 			FrostRunner.createLog(FrostRunner.bw_log, (i+1) + ". "+ currentChr + " " + currentLength);
-						
+			System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
 //			int chunk = (currentLength/FrostRunner.chunk_length)+1;
 			
 			ids += fc.input_chr_length.get(i) + "\n";
@@ -355,6 +362,7 @@ public class FrostRunner {
 			 */	
 			FastaReader fr = new FastaReader();
 			fr.readSequenceFromFile(input, currentChr);	
+			System.out.println("READ FASTA");
 
 
 
@@ -362,14 +370,15 @@ public class FrostRunner {
 			 * preparing the mutations and recombination positions
 			 * and also Creating the N Region maps
 			 */		
-
+			/*
 			if (recombination > currentLength) {
 				FrostRunner.createLog(FrostRunner.bw_log, "Check the number of crossover points. Currently it is greater than the sequence length itself.");
 				System.exit(0);
-			}
-			InputScanner in = new InputScanner(currentChr, mutRate, recombination, generation, seed, 
+			}*/
+			InputScanner in = new InputScanner(currentChr, mutRate, /*recombination, generation,*/ seed, 
 					mutVary, recVary, deNovoVary, gm);
 			in.prepare(fr.getLength());//currentLength
+			System.out.println("PREPARED INPUT");
 
 			/**
 			 * Creating the trio: invoke parental mutation, denovo for child,
@@ -386,6 +395,7 @@ public class FrostRunner {
 
 			TrioSimulator trio = new TrioSimulator(/*fc, */fr, in);
 			trio.createTrio(/*j, */currentChr);	
+			System.out.println("SIMULATED TRIO");
 
 				
 			/**
