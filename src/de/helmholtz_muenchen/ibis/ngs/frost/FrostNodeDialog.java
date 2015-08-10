@@ -31,14 +31,22 @@ public class FrostNodeDialog extends DefaultNodeSettingsPane {
 	
 	final SettingsModelString parameter = new SettingsModelString(FrostNodeModel.CFGKEY_VARY,"");
 	final SettingsModelDoubleBounded mutation = new SettingsModelDoubleBounded(FrostNodeModel.CFGKEY_MUT_RATE,FrostNodeModel.DEFAULT_MUTATION_RATE,1.0, 3.0);
-    final SettingsModelIntegerBounded recombination = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_RECOMB_NUM,FrostNodeModel.DEFAULT_RECOMNATION,0, Integer.MAX_VALUE);
-    final SettingsModelIntegerBounded generation = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_GENERATION,FrostNodeModel.DEFAULT_GENERATION,0, Integer.MAX_VALUE);
+    /**
+     * final SettingsModelIntegerBounded recombination = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_RECOMB_NUM,FrostNodeModel.DEFAULT_RECOMNATION,0, Integer.MAX_VALUE);
+     */
+    /**
+     * final SettingsModelIntegerBounded generation = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_GENERATION,FrostNodeModel.DEFAULT_GENERATION,0, Integer.MAX_VALUE);
+     */
     final SettingsModelIntegerBounded seed = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_SEED,FrostNodeModel.DEFAULT_SEED,Integer.MIN_VALUE, Integer.MAX_VALUE);
 	final SettingsModelString bedFile = new SettingsModelString(FrostNodeModel.CFGKEY_BED_FILE, "");
 
 	final SettingsModelBoolean use_MUT = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_MUT_RATE, false);
-	final SettingsModelBoolean use_REC = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_RECOMB_NUM, false);
-	final SettingsModelBoolean use_GEN = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_GENERATION, false);
+	/**
+	 * final SettingsModelBoolean use_REC = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_RECOMB_NUM, false);
+	 */
+	/**
+	 * final SettingsModelBoolean use_GEN = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_GENERATION, false);
+	 */
 	final SettingsModelBoolean use_SEED = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_SEED, false);
     final SettingsModelBoolean use_BED_FILE	= new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_BED_FILE, false);
 
@@ -69,19 +77,24 @@ public class FrostNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentBoolean(use_MUT, "Mutation Rate (*e-08):"/*"Mutation rate"*/));
       	addDialogComponent(new DialogComponentNumber(mutation,"", /*step*/ 0.01, /*componentwidth*/ 5));
 		setHorizontalPlacement(false);
-
-//    	createNewGroup("Recombination");
-    	setHorizontalPlacement(true);
-      	addDialogComponent(new DialogComponentBoolean(use_REC, "#Crossover-points:"/*"Number of crossovers"*/));
-      	addDialogComponent(new DialogComponentNumber(recombination,"", /*step*/ 1, /*componentwidth*/ 5));
-		setHorizontalPlacement(false);
-
-//    	createNewGroup("Generation");
-    	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentBoolean(use_GEN, "#Generation:"/*"Generations since first Homo sapiens"*/));
-      	addDialogComponent(new DialogComponentNumber(generation,"", /*step*/ 500, /*componentwidth*/ 5));
-		setHorizontalPlacement(false);
-
+		/**
+		 * 
+		 */
+//
+////    	createNewGroup("Recombination");
+//    	setHorizontalPlacement(true);
+//      	addDialogComponent(new DialogComponentBoolean(use_REC, "#Crossover-points:"/*"Number of crossovers"*/));
+//      	addDialogComponent(new DialogComponentNumber(recombination,"", /*step*/ 1, /*componentwidth*/ 5));
+//		setHorizontalPlacement(false);
+//		
+////    	createNewGroup("Generation");
+//    	setHorizontalPlacement(true);
+//    	addDialogComponent(new DialogComponentBoolean(use_GEN, "#Generation:"/*"Generations since first Homo sapiens"*/));
+//      	addDialogComponent(new DialogComponentNumber(generation,"", /*step*/ 500, /*componentwidth*/ 5));
+//		setHorizontalPlacement(false);
+		/**
+		 * 
+		 */
 //    	createNewGroup("Seed");
     	setHorizontalPlacement(true);
       	addDialogComponent(new DialogComponentBoolean(use_SEED, "Random seed:"/*"Seed to produce same positions for the other two fixed parameters"*/));
@@ -106,6 +119,7 @@ public class FrostNodeDialog extends DefaultNodeSettingsPane {
 				mutation.setEnabled(use_MUT.getBooleanValue());
 			}
     	});
+    	/**
     	use_REC.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				recombination.setEnabled(use_REC.getBooleanValue());
@@ -115,7 +129,7 @@ public class FrostNodeDialog extends DefaultNodeSettingsPane {
 			public void stateChanged(ChangeEvent e) {
 				generation.setEnabled(use_GEN.getBooleanValue());
 			}
-    	});
+    	});**/
     	use_SEED.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				seed.setEnabled(use_SEED.getBooleanValue());

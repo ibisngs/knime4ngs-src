@@ -41,15 +41,23 @@ public class FrostNodeModel extends NodeModel {
     private static int seed;
 	public static String exome = "";
 
+	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/hg19/";
+	public final static int chunk_length = 10000000;
+
+//	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/chr21/";
     
-	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/Frost/";
+//	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/Frost/";
 //	public static final String INTERNAL_OUTPUT_PATH = "/home/ibis/tanzeem.haque/Documents/Frost_outputs/";
 
 
 	public static final String CFGKEY_FASTA = "fasta";
 	public static final String CFGKEY_MUT_RATE = "mutation";
-	public static final String CFGKEY_RECOMB_NUM = "recombination";
-	public static final String CFGKEY_GENERATION = "generation";
+	/**
+	 * public static final String CFGKEY_RECOMB_NUM = "recombination";
+	 */
+	/**
+	 * 	public static final String CFGKEY_GENERATION = "generation";
+	 */
 	public static final String CFGKEY_SEED = "seed";
 	public static final String CFGKEY_VARY="parameter";
 	public static final String CFGKEY_BED_FILE="bedfile";
@@ -57,8 +65,12 @@ public class FrostNodeModel extends NodeModel {
 
 	
 	public static final String CFGKEY_USE_MUT_RATE = "use_mutation";
-	public static final String CFGKEY_USE_RECOMB_NUM = "use_recombination";
-	public static final String CFGKEY_USE_GENERATION = "use_generation";
+	/**
+	 * public static final String CFGKEY_USE_RECOMB_NUM = "use_recombination";
+	 */
+	/**
+	 * public static final String CFGKEY_USE_GENERATION = "use_generation";
+	 */
 	public static final String CFGKEY_USE_SEED = "use_seed";
 	public static final String CFGKEY_USE_BED_FILE = "use_bedfile";
 
@@ -67,15 +79,23 @@ public class FrostNodeModel extends NodeModel {
 
     /** initial default count value. */
     static final double DEFAULT_MUTATION_RATE = 2.36;
-    static final int DEFAULT_RECOMNATION = 1000;
-    static final int DEFAULT_GENERATION = 5300;
+    /**
+     * static final int DEFAULT_RECOMNATION = 1000;
+     */
+    /**
+     * static final int DEFAULT_GENERATION = 5300;
+     */
     static final int DEFAULT_SEED = 999;
     public final static String DEFAULT_MAPFILE = "/storageNGS/scratch/Sequenciator/secondary_files/UCSC_CodingExons.bed";
 
     private final SettingsModelString m_FASTA = new SettingsModelString(FrostNodeModel.CFGKEY_FASTA,""); // path to fasta file
     private final SettingsModelDoubleBounded m_MUT = new SettingsModelDoubleBounded(FrostNodeModel.CFGKEY_MUT_RATE,FrostNodeModel.DEFAULT_MUTATION_RATE,1.0, 3.0);
-    private final SettingsModelIntegerBounded m_REC = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_RECOMB_NUM,FrostNodeModel.DEFAULT_RECOMNATION,0, Integer.MAX_VALUE);
-    private final SettingsModelIntegerBounded m_GEN = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_GENERATION,FrostNodeModel.DEFAULT_GENERATION,0, Integer.MAX_VALUE);
+    /**
+     * private final SettingsModelIntegerBounded m_REC = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_RECOMB_NUM,FrostNodeModel.DEFAULT_RECOMNATION,0, Integer.MAX_VALUE);
+     */
+    /**
+     * private final SettingsModelIntegerBounded m_GEN = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_GENERATION,FrostNodeModel.DEFAULT_GENERATION,0, Integer.MAX_VALUE);
+     */
     private final SettingsModelIntegerBounded m_SEED = new SettingsModelIntegerBounded(FrostNodeModel.CFGKEY_SEED,FrostNodeModel.DEFAULT_SEED,Integer.MIN_VALUE, Integer.MAX_VALUE);
     private final SettingsModelString m_VARY = new SettingsModelString(FrostNodeModel.CFGKEY_VARY, "--");
     private final SettingsModelString m_BED_FILE = new SettingsModelString(FrostNodeModel.CFGKEY_BED_FILE,""); // path to fasta file
@@ -85,8 +105,12 @@ public class FrostNodeModel extends NodeModel {
 	 */
     
     private final SettingsModelBoolean m_use_MUT = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_MUT_RATE, false);
-	private final SettingsModelBoolean m_use_REC = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_RECOMB_NUM, false);
-	private final SettingsModelBoolean m_use_GEN = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_GENERATION, false);
+	/**
+	 * private final SettingsModelBoolean m_use_REC = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_RECOMB_NUM, false);
+	 */
+	/**
+	 * private final SettingsModelBoolean m_use_GEN = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_GENERATION, false);
+	 */
 	private final SettingsModelBoolean m_use_SEED = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_SEED, false);
 	private final SettingsModelBoolean m_use_BED_FILE = new SettingsModelBoolean(FrostNodeModel.CFGKEY_USE_BED_FILE, false);
 	
@@ -104,11 +128,13 @@ public class FrostNodeModel extends NodeModel {
 //        m_use_MUT.setEnabled(false);
         m_MUT.setEnabled(false);
        
-//        m_use_REC.setEnabled(false);
-        m_REC.setEnabled(false);
+        /**
+         * m_REC.setEnabled(false);
+         */
         
-//        m_use_GEN.setEnabled(false);
-        m_GEN.setEnabled(false);
+        /**
+         * m_GEN.setEnabled(false);
+         */
         
 //        m_use_SEED.setEnabled(false);
         m_SEED.setEnabled(false);
@@ -211,9 +237,14 @@ public class FrostNodeModel extends NodeModel {
          * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
          */
 		ArrayList<String> fs = FrostRunner.recordFiles;
-		
-		fs.set(1, fs.get(1).replace(".tmp", ".txt"));
-		fs.set(2, fs.get(2).replace(".tmp", ".txt"));
+		String tmp1 = fs.get(1).replace(".tmp", ".txt");
+		String tmp2 = fs.get(2).replace(".tmp", ".txt");
+		fs.remove(1);
+		fs.remove(2);
+		fs.add(tmp1);
+		fs.add(tmp2);
+//		fs.set(1, fs.get(1).replace(".tmp", ".txt"));
+//		fs.set(2, fs.get(2).replace(".tmp", ".txt"));
         for(int i = 0; i < fs.size(); i++) {
             pushFlowVariableString("record file " +(i+1), fs.get(i));
 		}
@@ -292,7 +323,7 @@ public class FrostNodeModel extends NodeModel {
     		command.add("-m");
         	command.add(mutRate+"");
     	}
-    	
+    	/*
     	if(m_use_REC.getBooleanValue()) {
     		rec_num = m_REC.getIntValue();
     		command.add("-r");
@@ -302,7 +333,7 @@ public class FrostNodeModel extends NodeModel {
     		gen_num = m_GEN.getIntValue();
     		command.add("-g");
         	command.add(gen_num+"");
-    	}
+    	}*/
     	if(m_use_SEED.getBooleanValue()){
     		FrostNodeModel.seed = m_SEED.getIntValue();
     		command.add("-s");
@@ -383,14 +414,14 @@ public class FrostNodeModel extends NodeModel {
          // TODO: generated method stub
     	m_FASTA.saveSettingsTo(settings);
     	m_MUT.saveSettingsTo(settings);
-    	m_REC.saveSettingsTo(settings);
-    	m_GEN.saveSettingsTo(settings);
+//    	m_REC.saveSettingsTo(settings);
+//    	m_GEN.saveSettingsTo(settings);
     	m_SEED.saveSettingsTo(settings);
     	m_BED_FILE.saveSettingsTo(settings);
     	m_VARY.saveSettingsTo(settings);
     	m_use_MUT.saveSettingsTo(settings);
-    	m_use_REC.saveSettingsTo(settings);
-    	m_use_GEN.saveSettingsTo(settings);
+//    	m_use_REC.saveSettingsTo(settings);
+//    	m_use_GEN.saveSettingsTo(settings);
     	m_use_SEED.saveSettingsTo(settings);
     	m_use_BED_FILE.saveSettingsTo(settings);
     }
@@ -404,14 +435,14 @@ public class FrostNodeModel extends NodeModel {
         // TODO: generated method stub
     	m_FASTA.loadSettingsFrom(settings);
     	m_MUT.loadSettingsFrom(settings);
-    	m_REC.loadSettingsFrom(settings);
-    	m_GEN.loadSettingsFrom(settings);
+//    	m_REC.loadSettingsFrom(settings);
+//    	m_GEN.loadSettingsFrom(settings);
     	m_SEED.loadSettingsFrom(settings);
     	m_BED_FILE.loadSettingsFrom(settings);
     	m_VARY.loadSettingsFrom(settings);
     	m_use_MUT.loadSettingsFrom(settings);
-    	m_use_REC.loadSettingsFrom(settings);
-    	m_use_GEN.loadSettingsFrom(settings);
+//    	m_use_REC.loadSettingsFrom(settings);
+//    	m_use_GEN.loadSettingsFrom(settings);
     	m_use_SEED.loadSettingsFrom(settings);
     	m_use_BED_FILE.loadSettingsFrom(settings);
     }
@@ -425,14 +456,14 @@ public class FrostNodeModel extends NodeModel {
         // TODO: generated method stub
     	m_FASTA.validateSettings(settings);
     	m_MUT.validateSettings(settings);
-    	m_REC.validateSettings(settings);
-    	m_GEN.validateSettings(settings);
+//    	m_REC.validateSettings(settings);
+//    	m_GEN.validateSettings(settings);
     	m_SEED.validateSettings(settings);
     	m_BED_FILE.validateSettings(settings);
     	m_VARY.validateSettings(settings);
     	m_use_MUT.validateSettings(settings);
-    	m_use_REC.validateSettings(settings);
-    	m_use_GEN.validateSettings(settings);
+//    	m_use_REC.validateSettings(settings);
+//    	m_use_GEN.validateSettings(settings);
     	m_use_SEED.validateSettings(settings);
     	m_use_BED_FILE.validateSettings(settings);
     }
