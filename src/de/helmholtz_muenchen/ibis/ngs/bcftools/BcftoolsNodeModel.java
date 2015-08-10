@@ -221,7 +221,7 @@ Contrast calling and association test options:
 			CFGKEY_MUTATIONRATE,DEFAULT_MUTATIONRATE,0,Double.MAX_VALUE);
 	private final SettingsModelString m_constrainedcalling = new SettingsModelString(
 			BcftoolsNodeModel.CFGKEY_CONSTRAINEDCALLING,"");
-	private final SettingsModelBoolean m_outvariantspnly = new SettingsModelBoolean(
+	private final SettingsModelBoolean m_outvariantsonly = new SettingsModelBoolean(
 			CFGKEY_OUTVARIANTSONLY, false);
 	/**
 	 * Contrast calling and association test models
@@ -385,7 +385,7 @@ File format options:
     	if(!m_constrainedcalling.getStringValue().equals("No constrains")){
     		command.add("-C "+m_constrainedcalling.getStringValue());
     	}
-    	if(m_outvariantspnly.getBooleanValue()){
+    	if(m_outvariantsonly.getBooleanValue()){
     		command.add("-v");
     	}
     	/**
@@ -406,7 +406,7 @@ File format options:
     	}else{
     		outfile+="_call.vcf";
     	}
-    	command.add("-o outfile");
+    	command.add("-o " +outfile);
 
     	}
     	else if(m_bcfmethod.getStringValue().equals("cat")){
@@ -563,7 +563,7 @@ File format options:
          m_outbcf.saveSettingsTo(settings);
          m_outqcall.saveSettingsTo(settings);
          m_outuncompressedbcf.saveSettingsTo(settings);
-         m_outvariantspnly.saveSettingsTo(settings);
+         m_outvariantsonly.saveSettingsTo(settings);
          m_plgenerate.saveSettingsTo(settings);
          m_posterioricon.saveSettingsTo(settings);
          m_samplecoverage.saveSettingsTo(settings);
@@ -610,7 +610,7 @@ File format options:
         m_outbcf.loadSettingsFrom(settings);
         m_outqcall.loadSettingsFrom(settings);
         m_outuncompressedbcf.loadSettingsFrom(settings);
-        m_outvariantspnly.loadSettingsFrom(settings);
+        m_outvariantsonly.loadSettingsFrom(settings);
         m_plgenerate.loadSettingsFrom(settings);
         m_posterioricon.loadSettingsFrom(settings);
         m_samplecoverage.loadSettingsFrom(settings);
@@ -654,7 +654,7 @@ File format options:
         m_outbcf.validateSettings(settings);
         m_outqcall.validateSettings(settings);
         m_outuncompressedbcf.validateSettings(settings);
-        m_outvariantspnly.validateSettings(settings);
+        m_outvariantsonly.validateSettings(settings);
         m_plgenerate.validateSettings(settings);
         m_posterioricon.validateSettings(settings);
         m_samplecoverage.validateSettings(settings);
