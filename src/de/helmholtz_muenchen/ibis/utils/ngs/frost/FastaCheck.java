@@ -16,7 +16,7 @@ import java.util.Scanner;
  */
 public class FastaCheck {
 	
-	private final static class HG_19 {
+	public final static class HG_19 {
 		
 		private String id;
 		private int length
@@ -53,7 +53,7 @@ public class FastaCheck {
 	 * chr_length stores the length of the respective chromosome
 	 * samtools faidx Homo_sapiens_assembly18.fasta 
 	 */
-	final HG_19[] chr_length = {new HG_19("chr1",249250621), new HG_19("chr2",243199373), new HG_19("chr3",198022430), new HG_19("chr4",191154276),
+	public final HG_19[] chr_length = {new HG_19("chr1",249250621), new HG_19("chr2",243199373), new HG_19("chr3",198022430), new HG_19("chr4",191154276),
 			 new HG_19("chr5",180915260), new HG_19("chr6",171115067), new HG_19("chr7",159138663), new HG_19("chr8",146364022), 
 			 new HG_19("chr9",141213431), new HG_19("chr10",135534747), new HG_19("chr11",135006516), new HG_19("chr12",133851895), 
 			 new HG_19("chr13",115169878), new HG_19("chr14",107349540), new HG_19("chr15",102531392), new HG_19("chr16",90354753), 
@@ -77,7 +77,7 @@ public class FastaCheck {
 	 */
 	private String[] parentalChromatids;
 	
-	FastaCheck() {
+	public FastaCheck() {
 		
 	}
 

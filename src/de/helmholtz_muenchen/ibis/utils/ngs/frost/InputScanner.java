@@ -143,10 +143,11 @@ public class InputScanner {
 		// TODO Auto-generated method stub
 		//5878.76+1=5879: chr21
 		//31019.84+1=31020: chr1
-		double a = length/Math.pow(10, 8);// * getMutRate());
-		double b = a * this.mutRate*this.generation;
-		int variants = (int)(b/1);
-//		variants = 10;
+//		double a = length/Math.pow(10, 8);// * getMutRate());
+//		double b = a * this.mutRate*this.generation;
+//		int variants = (int)(b/1);
+//		variants = 240650;
+		int variants = this.chrLength/200;// (this.chrLength is calculated at prepare_parental_input method)
 //		System.out.println("Variants: " + variants);
 		this.variants = variants;
 		return variants;
@@ -157,7 +158,11 @@ public class InputScanner {
 		// TODO Auto-generated method stub
 		//5878/5300=1: chr21
 		//31020/5300=5.85=5: chr1	
-		int deNovo = (int)(getVariants(length)/this.generation);
+//		int deNovo = (int)(getVariants(length)/this.generation);
+
+		double a = length/Math.pow(10, 8);// * getMutRate());
+		double b = a * this.mutRate*1; //this.generation;
+		int deNovo = (int)(b/1);
 		deNovo = (deNovo == 0)? 1: deNovo;
 //		deNovo = 5;
 //		System.out.println("DeNovo: " + deNovo);
