@@ -229,6 +229,10 @@ public class Executor {
 		}
 	}
 	
+	public static int executeCommandWithExitCode(String [] command, ExecutionContext exec, NodeLogger logger) throws CanceledExecutionException, InterruptedException, ExecutionException {
+		return executeCommandWithExitCode(command, exec, null, logger, null, null, null, null,null);
+	}
+	
 	/**
 	 * duplicate method returning exit code
 	 * @param command

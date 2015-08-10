@@ -20,7 +20,9 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
@@ -45,16 +47,24 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString vcf_in = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VCFIN,"-");
 	private final SettingsModelString vep_script = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
 	private final SettingsModelString vcf_tools = new SettingsModelString(VCFFilterNodeModel.CFGKEY_VCFTOOLS,"-");
+	private final SettingsModelBoolean fill_an_ac = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILL_AN_AC,false);
+
 	
 	//genotype filter
 	private final SettingsModelBoolean filter_by_DP = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_DP,false);
 	private final SettingsModelInteger DP_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_DP_THRESHOLD,8);
 	
 	private final SettingsModelBoolean filter_by_GQ = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_GQ,false);
-	private final SettingsModelInteger GQ_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_GQ_THRESHOLD,20);
+	private final SettingsModelIntegerBounded GQ_threshold = new SettingsModelIntegerBounded(VCFFilterNodeModel.CFGKEY_GQ_THRESHOLD,20,0,99);
 	
+	//variant filter
 	private final SettingsModelBoolean filter_by_GQ_mean = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_BY_GQ_MEAN,false);
-	private final SettingsModelInteger GQ_MEAN_threshold = new SettingsModelInteger(VCFFilterNodeModel.CFGKEY_GQ_MEAN_THRESHOLD,35);
+	private final SettingsModelIntegerBounded GQ_MEAN_threshold = new SettingsModelIntegerBounded(VCFFilterNodeModel.CFGKEY_GQ_MEAN_THRESHOLD,35,0,99);
+	
+	private final SettingsModelBoolean filter_pass = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_PASS,false);
+	
+	private final SettingsModelBoolean filter_by_callRate = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_CALL_RATE,false);
+	private final SettingsModelDoubleBounded callRate_threshold = new SettingsModelDoubleBounded(VCFFilterNodeModel.CFGKEY_CALL_RATE_THRESHOLD,0.88,0.0,1.0);
 	
 	//annotation filter
 	private final SettingsModelBoolean filter_annotation = new SettingsModelBoolean(VCFFilterNodeModel.CFGKEY_FILTER_ANNOTATIONS,false);
@@ -86,23 +96,34 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to VCFtools binaries");
     	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, true));
     	
+    	createNewGroup("Further options");
+    	addDialogComponent(new DialogComponentBoolean(fill_an_ac,"Restore allele counts?"));
+
+    	
     	//genotype filter
     	createNewTab("Genotype Filter");
 		addDialogComponent(new DialogComponentBoolean(filter_by_DP, "Filter genotypes by DP?"));
 		setHorizontalPlacement(true);
-		addDialogComponent(new DialogComponentNumber(DP_threshold, "DP threshold",8));
+		addDialogComponent(new DialogComponentNumber(DP_threshold, "DP threshold",1));
 		setHorizontalPlacement(false);
 		
 		addDialogComponent(new DialogComponentBoolean(filter_by_GQ, "Filter genotypes by GQ?"));
 		setHorizontalPlacement(true);
-		addDialogComponent(new DialogComponentNumber(GQ_threshold, "GQ threshold",20));
+		addDialogComponent(new DialogComponentNumber(GQ_threshold, "GQ threshold",1));
 		setHorizontalPlacement(false);
 		
 		//variant filter
 		createNewTab("Variant Filter");
+		addDialogComponent(new DialogComponentBoolean(filter_pass,"Filter by FILTER is PASS?"));
+	
+		addDialogComponent(new DialogComponentBoolean(filter_by_callRate,"Filter by call rate?"));
+		setHorizontalPlacement(true);
+		addDialogComponent(new DialogComponentNumber(callRate_threshold,"Call rate threshold",0.01));
+		setHorizontalPlacement(false);
+		
 		addDialogComponent(new DialogComponentBoolean(filter_by_GQ_mean, "Filter genotypes by mean GQ?"));
 		setHorizontalPlacement(true);
-		addDialogComponent(new DialogComponentNumber(GQ_MEAN_threshold, "Mean GQ threshold",35));
+		addDialogComponent(new DialogComponentNumber(GQ_MEAN_threshold, "Mean GQ threshold",1));
 		setHorizontalPlacement(false);
     	
     	//annotation filter
