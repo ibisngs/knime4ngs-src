@@ -96,7 +96,7 @@ public class ArtNodeModel extends NodeModel {
     /** initial default count value. */
     static final int DEFAULT_LENGTH = 50;
     static final int DEFAULT_MEAN_SIZE = 200;
-    static final int DEFAULT_FOLD = 20;
+    static final int DEFAULT_FOLD = 10;
     static final int DEFAULT_SD = 10;
 
     private final SettingsModelString m_ID_PATH = new SettingsModelString(ArtNodeModel.CFGKEY_ID_PATH,""); // path to fasta files
