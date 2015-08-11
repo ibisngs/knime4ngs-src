@@ -236,7 +236,8 @@ public class FrostNodeModel extends NodeModel {
         /**
          * remember to change the names of parents_run: recordfile[0] and child_run: recordfile[1] to .txt
          */
-		ArrayList<String> fs = FrostRunner.recordFiles;
+		ArrayList<String> fs = new ArrayList<>();
+		fs = FrostRunner.recordFiles;
 		String tmp1 = fs.get(1).replace(".tmp", ".txt");
 		String tmp2 = fs.get(2).replace(".tmp", ".txt");
 		fs.remove(1);
@@ -248,7 +249,7 @@ public class FrostNodeModel extends NodeModel {
         for(int i = 0; i < fs.size(); i++) {
             pushFlowVariableString("record file " +(i+1), fs.get(i));
 		}
-        
+        fs.clear();
 //		System.out.println("ID LIST after : " + FrostRunner.id_list.size());
 
 		
