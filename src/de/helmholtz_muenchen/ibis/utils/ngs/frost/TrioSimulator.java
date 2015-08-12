@@ -39,6 +39,7 @@ public class TrioSimulator {
 	 * Attribute
 	 */
 //	private FastaCheck fc;
+	private int it;
 	private FastaReader fr;
 	private InputScanner in;
 	/**
@@ -53,66 +54,13 @@ public class TrioSimulator {
 	private ArrayList<String> recombined = new ArrayList<String>();
 
 
-	public TrioSimulator(/*FastaCheck fc,*/ FastaReader fr, InputScanner in) {
+	public TrioSimulator(/*FastaCheck fc,*/int it, FastaReader fr, InputScanner in) {
 		// TODO Auto-generated constructor stub
 //		this.fc = fc;
+		this.it = it;
 		this.fr = fr;
 		this.in = in;
 	}
-/*
-	public FastaCheck getFc() {
-		return fc;
-	}
-
-	protected FastaReader getFr() {
-		return fr;
-	}
-
-	protected InputScanner getIn() {
-		return in;
-	}
-
-	protected int getCurrentLength() {
-		return currentLength;
-	}
-*/
-	/**
-	 * @return the iD
-	 */
-//	protected ArrayList<String> getID1() {
-//		return ID1;
-//	}
-	/**
-	 * @return the pOS
-	 */
-//	protected ArrayList<Integer> getPOS1() {
-//		return POS1;
-//	}
-	/**
-	 * @return the prettyMutation
-	 */
-//	protected ArrayList<String> getPrettyMutation1() {
-//		return prettyMutation1;
-//	}
-
-	/**
-	 * @return the iD
-	 */
-//	protected ArrayList<String> getID2() {
-//		return ID2;
-//	}
-	/**
-	 * @return the pOS
-	 */
-//	protected ArrayList<Integer> getPOS2() {
-//		return POS2;
-//	}
-	/**
-	 * @return the prettyMutation
-	 */
-//	protected ArrayList<String> getPrettyMutation2() {
-//		return prettyMutation2;
-//	}
 
 	/**
 	 * @return the recombines
@@ -134,7 +82,7 @@ public class TrioSimulator {
 	 * @throws InterruptedException
 	 * @throws IOException 
 	 */
-	protected void createTrio (/*int chunk_index, */String currentChr) throws InterruptedException, IOException {
+	protected void createTrio (String currentChr) throws InterruptedException, IOException {
 
 		InputData iData_parents = this.in.getiData_parents();
 		InputData iData_deNovo_child = this.in.getiData_deNovo_child();
@@ -178,9 +126,9 @@ public class TrioSimulator {
 //			System.out.println("FILE: "+ id);
 
 
-			String[] parent_file = { path + id + "_M0.fa",
-					path + id + "_M1.fa", path + id + "_F0.fa",
-					path + id + "_F1.fa" };
+			String[] parent_file = { path + id + "_M0_" + this.it + ".fa",
+					path + id + "_M1_" + this.it + ".fa", path + id + "_F0_" + this.it + ".fa",
+					path + id + "_F1_" + this.it + ".fa" };
 			/**
 			 * check if file exist, else carry on
 			 */
@@ -217,10 +165,10 @@ public class TrioSimulator {
 		if (iData_deNovo_child.getPositions().size() != 0) {
 
 			id = /*this.current_chunk + "_" + */iData_deNovo_child.getId();
-			String[] parent_file = {path + id + "_"+parental_chromatids[0]+".fa", 
-					path+id+"_"+parental_chromatids[1]+".fa"};
-			String[] child_file = { path + id + "_C0_no_rec.fa",
-					path + id + "_C1_no_rec.fa", "", "" };
+			String[] parent_file = {path + id + "_"+parental_chromatids[0]+"_" + this.it + ".fa", 
+					path+id+"_"+parental_chromatids[1]+"_" + this.it + ".fa"};
+			String[] child_file = { path + id + "_C0_" + this.it + "_no_rec.fa",
+					path + id + "_C1_" + this.it + "_no_rec.fa", "", "" };
 
 			delete_existing(child_file);
 
@@ -250,8 +198,8 @@ public class TrioSimulator {
 			fr.readSequenceFromFile(child_file[1], id);
 			String child_1 = fr.getSequence();
 			
-			String[] child_file_fin = { path + id + "_C0.fa",
-					path + id + "_C1.fa"};
+			String[] child_file_fin = { path + id + "_C0_" + this.it + ".fa",
+					path + id + "_C1_" + this.it + ".fa"};
 
 //			System.out.println("FASTA LENGTH CHILD (nr1): " + child_0.length());
 //			System.out.println("FASTA LENGTH CHILD (nr2): " + child_1.length());
@@ -699,6 +647,7 @@ public class TrioSimulator {
 			this.ID2.add(id);
 			this.POS2.add(stop/*+tmp_idx*/+1);
 			this.prettyMutation2.add(m.getChildString());
+
 
 		}
 		write_ref_alt(individuum, mutated, toMutate, output00, output01, output10, output11);

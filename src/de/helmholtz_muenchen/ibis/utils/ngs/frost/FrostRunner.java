@@ -18,6 +18,7 @@ import de.helmholtz_muenchen.ibis.ngs.frost.FrostNodeModel;
  * @author tanzeem.haque
  *
  */
+
 public class FrostRunner {
 
 
@@ -32,7 +33,11 @@ public class FrostRunner {
 	public final static double insertion_rate = 0.15;
 	public final static double deletion_rate = 0.05;
 	public static BufferedWriter bw_log;
-	public static ArrayList<String> recordFiles = new ArrayList<String>(8);
+	public static final int iterations = FrostNodeModel.iterations;
+	/**
+	 * Only one log file for complete run and only one strand file/chr
+	 */
+	public static ArrayList<String> recordFiles = new ArrayList<String>(/*1 + 7*FrostRunner.iterations*/);
 
 
 	public static void main(String[] args) throws InterruptedException, IOException {
@@ -198,13 +203,16 @@ public class FrostRunner {
 			 * Handling the existing files first
 			 */
 			deleteExistingFiles(seed);
-			String[] records = getRecordFiles(seed);
 			
-			FrostRunner.bw_log = new BufferedWriter(new FileWriter(records[0], true), 10000000);
+			/**
+			 * Only one log file and only one strand file
+			 */
+			String[] records = getRecordFiles(seed, FrostRunner.iterations);
 			
-			
+			FrostRunner.bw_log = new BufferedWriter(new FileWriter(FrostRunner.recordFiles.get(0), true), 10000000);					
 			FrostRunner.createLog(FrostRunner.bw_log, "Using command: " + "\n" + using_command);
 			System.out.println("Using command: " + "\n" + using_command);
+				
 			run(input, mapFile, mutRate, /*recombination, generation, */ seed, mutVary, recVary, deNovoVary, records);
 			
 		}
@@ -219,17 +227,22 @@ public class FrostRunner {
 
 
 	}
-	private static String[] getRecordFiles(int seed) {
-		String[] files = new String[7];
-    	files[0] = INTERNAL_PATH + "MyLogFile_" + seed + ".log";
-    	files[1] = INTERNAL_PATH + "parents_run_" + seed + ".tmp";
-    	files[2] = INTERNAL_PATH + "child_run_" + seed + ".tmp";
-    	files[3] = INTERNAL_PATH + "recombination_" + seed + ".txt";
-    	files[4] = INTERNAL_PATH + "recombined_seq_" + seed + ".txt";
-    	files[5] = INTERNAL_PATH + "trio_phased_" + seed + ".vcf";
-    	files[6] = INTERNAL_PATH + "trio_unphased_" + seed + ".vcf";
-    	for (String s : files)
-    		FrostRunner.recordFiles.add(s); // the main 7 recordfiles
+	private static String[] getRecordFiles(int seed, int iterations) { //iteration never 0
+		String[] files = new String[7*iterations];
+		FrostRunner.recordFiles.add(INTERNAL_PATH + "MyLogFile_" + seed + ".log");
+		for (int i = 0; i < iterations; i++) {
+//			files[0+7*i] = INTERNAL_PATH + "MyLogFile_" + (i+1) + "_" + seed + ".log";
+			files[0+7*i] = INTERNAL_PATH + "parents_run_" + (i+1) + "_" + seed + ".tmp";
+			files[1+7*i] = INTERNAL_PATH + "child_run_" + (i+1) + "_" + seed + ".tmp";
+			files[2+7*i] = INTERNAL_PATH + "recombination_" + (i+1) + "_" + seed + ".txt";
+			files[3+7*i] = INTERNAL_PATH + "recombined_seq_" + (i+1) + "_" + seed + ".txt";
+			files[4+7*i] = INTERNAL_PATH + "trio_phased_" + (i+1) + "_" + seed + ".vcf";
+			files[5+7*i] = INTERNAL_PATH + "trio_unphased_" + (i+1) + "_" + seed + ".vcf";
+			files[6+7*i] = "";
+
+			for (String s : files)
+				FrostRunner.recordFiles.add(s); // the main 7 recordfiles
+		}
     	return files;
 
 	}
@@ -252,12 +265,14 @@ public class FrostRunner {
 //		if (f.exists())
 //			f.delete();
 
-		File f = new File (FrostRunner.INTERNAL_PATH + "parents_run_" + seed + ".tmp".replace(".tmp", ".txt"));
-		if (f.exists())
-			f.delete();
-		f = new File (FrostRunner.INTERNAL_PATH + "child_run_" + seed + ".tmp".replace(".tmp", ".txt"));
-		if (f.exists())
-			f.delete();
+		for (int i = 0; i < FrostRunner.iterations; i++) {
+			File f = new File (FrostRunner.INTERNAL_PATH + "parents_run_" + (i+1) + "_" + seed + ".tmp".replace(".tmp", ".txt"));
+			if (f.exists())
+				f.delete();
+			f = new File (FrostRunner.INTERNAL_PATH + "child_run_" + (i+1) + "_" + seed + ".tmp".replace(".tmp", ".txt"));
+			if (f.exists())
+				f.delete();
+			}
 	}
 	/**
 	 * @param input
@@ -301,21 +316,23 @@ public class FrostRunner {
 		/**
 		 * Staring the vcf file
 		 */
-		BufferedWriter bw_vcfPhased = new BufferedWriter(new FileWriter(records[5], true), 10000000);
-		rw.write_simple_string(bw_vcfPhased, 
+		for (int i = 0; i < FrostRunner.iterations; i++) {
+			BufferedWriter bw_vcfPhased = new BufferedWriter(new FileWriter(records[4+7*i], true), 10000000);
+			rw.write_simple_string(bw_vcfPhased, 
 				"#CHROM" + "\t" /*0*/
-				+ "#POS" + "\t" /*1*/
-				+ "#ID" + "\t" /*2*/
-				+ "#REF" + "\t" /*3*/
-				+ "#ALT" + "\t" /*4*/
-				+ "#QUAL" + "\t" /*5*/
-				+ "#FILTER" + "\t" /*6*/
-				+ "#INFO" + "\t" /*7*/
-				+ "#FORMAT" + "\t" /*8*/
-				+ "#M" + "\t" /*9*/
-				+ "#F" + "\t" /*10*/
-				+ "#C" + "\n"); /*11*/
-		bw_vcfPhased.close();
+				+ "POS" + "\t" /*1*/
+				+ "ID" + "\t" /*2*/
+				+ "REF" + "\t" /*3*/
+				+ "ALT" + "\t" /*4*/
+				+ "QUAL" + "\t" /*5*/
+				+ "FILTER" + "\t" /*6*/
+				+ "INFO" + "\t" /*7*/
+				+ "FORMAT" + "\t" /*8*/
+				+ "M" + "\t" /*9*/
+				+ "F" + "\t" /*10*/
+				+ "C" + "\n"); /*11*/
+			bw_vcfPhased.close();
+		}
 
 		/**
 		 * 
@@ -330,130 +347,111 @@ public class FrostRunner {
 		for (int i = 0; i < fc.input_chr_length.size(); i++) {
 			String currentChr = fc.input_chr_length.get(i).split("\t")[0];
 			int currentLength = Integer.parseInt(fc.input_chr_length.get(i).split("\t")[1]);
-			String strandFile= FrostRunner.INTERNAL_PATH + currentChr + "_" + seed + ".strand";
-
-			BufferedWriter bw_parent = new BufferedWriter(new FileWriter(records[1], true), 10000000),
-			bw_child = new BufferedWriter(new FileWriter(records[2], true), 10000000),
-			bw_recombination = new BufferedWriter(new FileWriter(records[3], true), 10000000),
-			bw_recombinedSeq = new BufferedWriter(new FileWriter(records[4], true), 10000000),
-			/**
-			 * the strand files are individual for each chromosome
-			 */
-			bw_strand = new BufferedWriter(new FileWriter(strandFile, false), 10000000);
-			FrostRunner.recordFiles.add(strandFile);
-//			bw_map = new BufferedWriter(new FileWriter(FrostRunner.INTERNAL_PATH + currentChr + "_" + seed + ".map", false), 10000000);
-
-			bw_vcfPhased = new BufferedWriter(new FileWriter(records[5], true), 10000000);
-
 			
-
-
-			/**
-			 * Some info printing
-			 */
-			FrostRunner.createLog(FrostRunner.bw_log, (i+1) + ". "+ currentChr + " " + currentLength);
-			System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
-//			int chunk = (currentLength/FrostRunner.chunk_length)+1;
-			
-			ids += fc.input_chr_length.get(i) + "\n";
-
 			/**
 			 * Reading reference Fasta
 			 */	
 			FastaReader fr = new FastaReader();
 			fr.readSequenceFromFile(input, currentChr);	
 			System.out.println("READ FASTA");
+			
+			for (int iter = 0; iter < FrostRunner.iterations; iter++) {
+				records[6+7*iter]= FrostRunner.INTERNAL_PATH + currentChr + "_" + (iter+1) + "_" + seed + ".strand";
+				
+				BufferedWriter bw_parent = new BufferedWriter(new FileWriter(records[0+7*iter], true), 10000000),
+						bw_child = new BufferedWriter(new FileWriter(records[1+7*iter], true), 10000000),
+						bw_recombination = new BufferedWriter(new FileWriter(records[2+7*iter], true), 10000000),
+						bw_recombinedSeq = new BufferedWriter(new FileWriter(records[3+7*iter], true), 10000000),
+						bw_vcfPhased = new BufferedWriter(new FileWriter(records[4+7*iter], true), 10000000),
+						bw_strand = new BufferedWriter(new FileWriter(records[6+7*iter], false), 10000000);
 
+				/**
+				 * Some info printing
+				 */
+				FrostRunner.createLog(FrostRunner.bw_log, (i+1) + ". "+ currentChr + " " + currentLength);
+				System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
+//				int chunk = (currentLength/FrostRunner.chunk_length)+1;
+			
+				ids += fc.input_chr_length.get(i) + "\n";
 
-
-			/**
-			 * preparing the mutations and recombination positions
-			 * and also Creating the N Region maps
-			 */		
-			/*
-			if (recombination > currentLength) {
-				FrostRunner.createLog(FrostRunner.bw_log, "Check the number of crossover points. Currently it is greater than the sequence length itself.");
-				System.exit(0);
-			}*/
-			InputScanner in = new InputScanner(currentChr, mutRate, /*recombination, generation,*/ seed, 
+				/**
+				 * preparing the mutations and recombination positions
+				 * and also Creating the N Region maps
+				 */		
+			
+				InputScanner in = new InputScanner(currentChr, mutRate, /*recombination, generation,*/ seed, 
 					mutVary, recVary, deNovoVary, gm);
-			in.prepare(fr.getLength());//currentLength
-			System.out.println("PREPARED INPUT");
+				in.prepare(fr.getLength());//currentLength
+				System.out.println("PREPARED INPUT");
 
-			/**
-			 * Creating the trio: invoke parental mutation, denovo for child,
-			 * recombination for child
-			 */	
-			
-			
-//			for (int j = 0; j < chunk; j++) {
+				/**
+				 * Creating the trio: invoke parental mutation, denovo for child,
+				 * recombination for child
+				 */	
+				/**
+				 * ID_List will be called in the main method to write the output files.
+				 */
+				FrostRunner.id_list.add(/*j + "_" + */currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
 
-			/**
-			 * ID_List will be called in the main method to write the output files.
-			 */
-			FrostRunner.id_list.add(/*j + "_" + */currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
-
-			TrioSimulator trio = new TrioSimulator(/*fc, */fr, in);
-			trio.createTrio(/*j, */currentChr);	
-			System.out.println("SIMULATED TRIO");
+				TrioSimulator trio = new TrioSimulator(/*fc, */(iter+1), fr, in);
+				trio.createTrio(currentChr);	
+				System.out.println("SIMULATED TRIO");
 
 				
-			/**
-			 * Appending into the record files
-			 */
-			rw = new RecordWriters(fr, in, trio);
-			/**
-			 * 	
- 			 * parents_run_
-			 */
-			rw.write_simple_string(bw_parent, trio.getParentInfo());
-			/**
-			 * child_run_
-			 */
-			rw.write_simple_string(bw_child, trio.getChildInfo());
+				/**
+				 * Appending into the record files
+				 */
+				rw = new RecordWriters(fr, in, trio);
+				/**
+				 * 	
+				 * parents_run_
+				 */
+				rw.write_simple_string(bw_parent, trio.getParentInfo());
+				/**
+				 * child_run_
+				 */
+				rw.write_simple_string(bw_child, trio.getChildInfo());
 //			/**
 //			 * deNovo_
 //			 */
 //			rw.write_InputData(recordFiles[2],in.getiData_deNovo_child()/*, j*/);
-			/**
-			 * recombination_
-			 */
-			rw.write_InputData(bw_recombination,in.getiData_recombination_child()/*, j*/);
-			//writing the recombined file
-			String rec = "";
-			for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
-				rec += rw.getTrio().getRecombined().get(k) + "\n";
-			}
-			/**
-			 * recombined_seq_
-			 */
-			rw.write_simple_string(bw_recombinedSeq, rec);
-			
-
-//			}
-			
-			bw_parent.flush();
-			bw_child.flush();
-			bw_recombination.flush();
-			bw_recombinedSeq.flush();
-			FrostRunner.bw_log.flush();
-			System.gc();		
+				/**
+				 * recombination_
+				 */
+				rw.write_InputData(bw_recombination,in.getiData_recombination_child()/*, j*/);
+				//writing the recombined file
+				String rec = "";
+				for (int k = 0; k < rw.getTrio().getRecombined().size(); k++) {
+					rec += rw.getTrio().getRecombined().get(k) + "\n";
+				}
+				/**
+				 * recombined_seq_
+				 */
+				rw.write_simple_string(bw_recombinedSeq, rec);
+						
+				bw_parent.flush();
+				bw_child.flush();
+				bw_recombination.flush();
+				bw_recombinedSeq.flush();
+				FrostRunner.bw_log.flush();
+				System.gc();		
 //			memory();
-			bw_parent.close();
-			bw_child.close();
-			bw_recombination.close();
-			bw_recombinedSeq.close();
-			/**
-			 * trio_phased_
-			 */
-			rw.write_vcf(bw_vcfPhased, records[1], records[2]);
-			bw_vcfPhased.close();
-			/**
-			 * strand file from the trio_phased file
-			 */
-			rw.write_strand(bw_strand, records[5]);
-			bw_strand.close();
-
+				bw_parent.close();
+				bw_child.close();
+				bw_recombination.close();
+				bw_recombinedSeq.close();
+				/**
+				 * trio_phased_
+				 */
+				rw.write_vcf(bw_vcfPhased, records[0+7*iter], records[1+7*iter]);
+				bw_vcfPhased.close();
+				/**
+				 * strand file from the trio_phased file
+				 */
+				rw.write_strand(bw_strand, records[4+7*iter]);
+				bw_strand.close();
+			}
+			
 		}
 
 		/**
@@ -468,9 +466,11 @@ public class FrostRunner {
 		/**
 		 * trio_unpahsed_
 		 */
-		BufferedWriter bw_vcfUnphased = new BufferedWriter(new FileWriter(records[6], true), 10000000);
-		rw.unphase(bw_vcfUnphased, records[5]); //recordfile[5]
-		bw_vcfUnphased.close();
+		for (int iter = 0; iter < FrostRunner.iterations; iter ++) {
+			BufferedWriter bw_vcfUnphased = new BufferedWriter(new FileWriter(records[5+7*iter], true), 10000000);
+			rw.unphase(bw_vcfUnphased, records[4+7*iter]); //recordfile[5]
+			bw_vcfUnphased.close();
+		}
 
 
 //		/**
@@ -478,13 +478,16 @@ public class FrostRunner {
 //		 */
 //		rw.write_simple_string(recordFiles[7], ids);
 		/**
-		 * delete the recordfile[1] (child_run_) and recordfile[2](parents_run_)
+		 * delete the recordfile[0] (child_run_) and recordfile[1](parents_run_)
 		 * which are .tmp s
 		 */
-		for(int i = 1; i < 3; i++) {
-			File f = new File (records[i]);
-				if (f.exists())
-					f.delete();
+		for(int i = 0; i < FrostRunner.iterations; i++) {
+			File f1 = new File (records[0+7*i]), f2 = new File(records[1+7*i]);
+				if (f1.exists())
+					f1.delete();
+				if (f2.exists())
+					f2.delete();
+				
 		}
 		
 	}
@@ -528,12 +531,13 @@ public class FrostRunner {
 		System.out.println("    -i <String> path to chromosome file in fasta format");
 		System.out.println("    -m <Double>  Mutation rate (e.g. 1.5) " + "\n" +
 				                "default: 2.36 (*e-8 per bp per generation)");
-		System.out.println("    -r <Integer> number of switch positions for recombination"  + "\n" +
-								"default: 1000");
-		System.out.println("    -g <Integer> number of generations since the first Homo sapiens"  + "\n" +
-								"default: 5300");
+//		System.out.println("    -r <Integer> number of switch positions for recombination"  + "\n" +
+//								"default: 1000");
+//		System.out.println("    -g <Integer> number of generations since the first Homo sapiens"  + "\n" +
+//								"default: 5300");
 		System.out.println("    -s <Integer>  random seed for same output with two of the three paramters" + "\n" +
 								"(mut/reco/denovo) being fixed");
+		System.out.println("    --bed <String>  Exome positions or bed file");
 		System.out.println("    --mut: mutation positions of parents will vary at each run");
 		System.out.println("    --reco: crossover positions of child will vary at each run ");
 		System.out.println("    --denovo: denovo positions of child will vary at each run ");

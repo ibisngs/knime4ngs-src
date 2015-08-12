@@ -135,6 +135,7 @@ public class InputScanner {
 		return range;
 	}
 
+	@SuppressWarnings("unused")
 	private int getVariants(int length) {
 		// TODO Auto-generated method stub
 		//5878.76+1=5879: chr21
@@ -229,6 +230,12 @@ public class InputScanner {
 		int max = 0, min = 0, n = 0;
 		ArrayList<Integer> m_tmpList = new ArrayList<>();
 		
+		/**
+		 * TEST MODULE for less SNPs
+		 */
+//		m_tmpList = generatePosition(length-1, 0, (int)((length/Math.pow(10, 8)*this.mutRate*5300)/1),getSeed()[0], true);
+
+		
 		for (int i = 0; i < this.nMap.size(); i++) {
 			Random rand = new Random();
 			min = this.nMap.get(i).getStart();
@@ -237,8 +244,7 @@ public class InputScanner {
 			 * one can vary this n!!! just by changing 100 and 300
 			 */
 			int range = rand.nextInt((300-100)+1)+100;
-			n = (max - min)/range; //one SNP every 100-300th base
-//			System.out.println("#Mut: " + range);
+			n = (max - min)/range; 
 			if (n == 0)
 				continue;
 			Random rd = getSeed()[0];
