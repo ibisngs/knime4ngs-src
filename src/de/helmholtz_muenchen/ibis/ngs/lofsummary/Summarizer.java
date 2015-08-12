@@ -29,9 +29,6 @@ public abstract class Summarizer {
 	
 	//summaries
 	
-	//contig_id -> length
-	HashMap<String, Integer> contig_length;
-	
 	//variant summary
 	ArrayList<LoFVariant> lof_statistic;
 	ArrayList<String> additional_titles;
@@ -43,7 +40,7 @@ public abstract class Summarizer {
 	
 	//gene_id as key
 	HashMap<String, GeneInfo> gene_statistic;
-	HashMap<String, Integer[]> gene_start_end;
+	
 	HashMap<String, HashSet<String>> gene2transcripts;
 	
 	//gene_id -> P(LoF>=1) from ExAC or any gene_summary
@@ -68,10 +65,8 @@ public abstract class Summarizer {
 		this.ped_file = ped_file;
 		this.geneback_file = geneback_file;
 		
-		contig_length = new HashMap<>();
 		sample_statistic = new HashMap<>();
 		gene_statistic = new HashMap<>();
-		gene_start_end = new HashMap<>();
 		gene_sample_statistic = new HashMap<>();
 		gene2transcripts = new HashMap<>();
 		gene2background = new HashMap<>();
@@ -158,7 +153,6 @@ public abstract class Summarizer {
 	private void readCDSFile() throws IOException {
 		String [] fields;
 		String transcript_id, gene_id;
-		int start, end;
 		
 		FileInputStream inputStream = null;
 		Scanner sc = null;
@@ -171,27 +165,13 @@ public abstract class Summarizer {
 		        	fields = line.split("\\s");
 		        	transcript_id = fields[0].replaceFirst(">","");
 		        	gene_id = fields[3].split(":")[1];
-		        	start = Integer.parseInt(fields[2].split(":")[3]);
-		        	end = Integer.parseInt(fields[2].split(":")[4]);
 		        	
 		        	if(gene2transcripts.containsKey(gene_id)) {
 		        		gene2transcripts.get(gene_id).add(transcript_id);
-		        		Integer[] sten = gene_start_end.get(gene_id);
-		        		
-		        		if(start<sten[0]) {
-		        			sten[0] = start;
-		        		}
-		        		
-		        		if(end>sten[1]) {
-		        			sten[1] = end;
-		        		}
 		        	} else {
 		        		HashSet<String> tmp = new HashSet<>();
 		        		tmp.add(transcript_id);
 		        		gene2transcripts.put(gene_id,tmp);
-		        		
-		        		Integer[] sten = new Integer[]{start,end};
-		        		gene_start_end.put(gene_id, sten);
 		        	}
 		        }
 		    }
@@ -276,20 +256,7 @@ public abstract class Summarizer {
 			    while (sc.hasNextLine()) {
 			        String line = sc.nextLine();
 			        if(line.startsWith("#"))  {
-			        	if(line.startsWith("##contig=<ID")) {
-			        		line = line.replaceFirst("##contig=<", "");
-			        		fields = line.split(",");
-			        		String id = ""; 
-			        		int length = -1;
-			        		for(String f: fields) {
-			        			if(f.startsWith("ID=")) {
-			        				id = f.split("ID=")[1];
-			        			} else if(f.startsWith("length=")) {
-			        				length = Integer.parseInt(f.split("length=")[1].replaceAll(">",""));
-			        			}
-			        		}
-			        		contig_length.put(id, length);
-			        	} else if(line.startsWith("##INFO=<ID=CSQ")) {
+			        	if(line.startsWith("##INFO=<ID=CSQ")) {
 			        		vep_header = new HashMap<String,Integer>();
 			        		String [] tmp = line.split("\\|");
 			        		nrOfVEPfields = tmp.length;
@@ -741,7 +708,7 @@ public abstract class Summarizer {
 	private void writeGeneStatistic(String outfile) throws IOException {
 				
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\taff_exp\taff_case\taff_ctrl\tun_case\tun_ctrl\tp-value_fisher\tp-value_bg\tp-value_case_control_bg\trel_pos_in_contig");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\taff_exp\taff_case\taff_ctrl\tun_case\tun_ctrl\tp-value_fisher\tp-value_bg\tp-value_case_control_bg");
 		bw.newLine();
 		
 		ValueComparator vc = new ValueComparator(gene_statistic);
@@ -760,8 +727,7 @@ public abstract class Summarizer {
 			
 			double expected = gi.getP_lof_aff() * (double)n;
 			
-			Integer[] sten = gene_start_end.get(gene);
-			double pos_in_contig = ((double)(sten[0]+sten[1])/2.0)/contig_length.get(gi.getContig());
+			
 			
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
@@ -775,7 +741,6 @@ public abstract class Summarizer {
 			bw.write("\t"+gi.getP_val_Fisher());
 			bw.write("\t"+gi.getP_val_vs_exac());
 			bw.write("\t"+gi.getP_val_case_vs_control());
-			bw.write("\t"+pos_in_contig);
 			bw.newLine();
 			
 		}
