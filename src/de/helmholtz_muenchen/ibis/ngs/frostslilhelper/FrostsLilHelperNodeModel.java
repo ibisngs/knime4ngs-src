@@ -79,9 +79,11 @@ public class FrostsLilHelperNodeModel extends NodeModel {
 		    	FrostRunner.id_list = new ArrayList<String> ();
 				FrostRunner.getChunks(trio[i]);
 			}
-			for (String s : FrostRunner.id_list)
+			for (String s : FrostRunner.id_list) {
+//				System.out.println(s);
 				FrostsLilHelperNodeModel.row_count.add(s);
-			FrostRunner.id_list.clear();
+			}
+//			FrostRunner.id_list.clear();
 
 		}
 
@@ -112,42 +114,55 @@ public class FrostsLilHelperNodeModel extends NodeModel {
          * creating the rows
          * i = 0,1, ... #IDS
          */  
+//        int iter_count = 1;
 		FileCell[] cells = new FileCell[6];
-		System.out.println("ID LIST now: " + FrostsLilHelperNodeModel.row_count.size());
-		for (int j = 0; j < FrostsLilHelperNodeModel.row_count.size(); j++) {
-			RowKey key = new RowKey("Row: " + FrostsLilHelperNodeModel.row_count.get(j));
-//			System.out.println(key.toString());
-			
-			for (int i = 0; i < 6 ; i++) {
-			// the cells of the current row, the types of the cells must match
-			// number of cells = col_num
-			// the column spec (see above)
+//		System.out.println("ID LIST now: " + FrostsLilHelperNodeModel.row_count.size());
+//		for (int iter = 0; iter < FrostNodeModel.iterations; iter++) {
+//    	    RowKey key = new RowKey("Row row row your boat");
+//    	    key = new RowKey("Row " + iter_count);
+			for (int j = 0; j < FrostsLilHelperNodeModel.row_count.size(); j++) {
+//				for (int iter = 0; iter < FrostNodeModel.iterations; iter++) {
+		    	RowKey key = new RowKey("Row row row your boat");
+	    	    key = new RowKey("Row: " + FrostsLilHelperNodeModel.row_count.get(j));
 
-				switch (i) {
-					case 0:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_M0.fa");
-						break;
-					case 1:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_M1.fa");
-						break;
-					case 2:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_F0.fa");
-						break;
-					case 3:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_F1.fa");
-						break;
-					case 4:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_C0.fa");
-						break;
-					case 5:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostsLilHelperNodeModel.row_count.get(j) + "_C1.fa");
-						break;
-				}
+//				iter_count++;
+
+//				System.out.println(FrostsLilHelperNodeModel.row_count.get(j));
+//				System.out.println(key.toString());
+				for (int i = 0; i < 6 ; i++) {
+					// the cells of the current row, the types of the cells must match
+					// number of cells = col_num
+					// the column spec (see above)
+					String chunk = FrostsLilHelperNodeModel.row_count.get(j).split("_")[0];
+					String chr = FrostsLilHelperNodeModel.row_count.get(j).split("_")[1];
+					String iter = FrostsLilHelperNodeModel.row_count.get(j).split("_")[2];
+					switch (i) {
+						case 0:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_M0_" + iter + ".fa");
+							break;
+						case 1:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_M1_" + iter + ".fa");
+							break;
+						case 2:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_F0_" + iter + ".fa");
+							break;
+						case 3:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_F1_" + iter + ".fa");
+							break;
+						case 4:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_C0_" + iter + ".fa");
+							break;
+						case 5:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + chunk + "_" + chr + "_C1_" + iter + ".fa");
+							break;
+					}
 					
-			}
-			DataRow row = new DefaultRow(key, cells);
-            container.addRowToTable(row);
+				}
+				DataRow row = new DefaultRow(key, cells);
+	            container.addRowToTable(row);			
 		}
+//		FrostRunner.id_list.clear();
+
 		FrostsLilHelperNodeModel.row_count.clear();
 
 		// check if the execution monitor was canceled
