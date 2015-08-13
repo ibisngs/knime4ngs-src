@@ -43,6 +43,7 @@ public class FrostNodeModel extends NodeModel {
 
 	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/hg19/";
 	public final static int chunk_length = 10000000;
+	public static final int iterations = 10;
 
 //	public static final String INTERNAL_OUTPUT_PATH = "/storageNGS/scratch/Sequenciator/chr21/";
     
@@ -194,36 +195,46 @@ public class FrostNodeModel extends NodeModel {
          */  
 		FileCell[] cells = new FileCell[6];
 //		System.out.println("ID LIST now: " + FrostRunner.id_list.size());
-		for (int j = 0; j < FrostRunner.id_list.size(); j++) {
-			RowKey key = new RowKey("Row: " + FrostRunner.id_list.get(j));
-//			System.out.println(key.toString());
-			
-			for (int i = 0; i < 6 ; i++) {
-			// the cells of the current row, the types of the cells must match
-			// number of cells = col_num
-			// the column spec (see above)
+		int iter_count = 1;
+		for (int iter = 0; iter < FrostNodeModel.iterations; iter++) {
+//			RowKey key = new RowKey("Row: " + iter_count);
+    	    RowKey key = new RowKey("Row row row your boat");
+    	    key = new RowKey("Row: " + iter_count);
+			iter_count++;
+			for (int j = 0; j < FrostRunner.id_list.size(); j++) {
+				
 
-				switch (i) {
-					case 0:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M0.fa");
-						break;
-					case 1:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M1.fa");
-						break;
-					case 2:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F0.fa");
-						break;
-					case 3:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F1.fa");
-						break;
-					case 4:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C0.fa");
-						break;
-					case 5:
-						cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C1.fa");
-						break;
-				}
+//				System.out.println(key.toString());
+			
+				for (int i = 0; i < 6 ; i++) {
+				
+					// the cells of the current row, the types of the cells must match
+					// number of cells = col_num
+					// the column spec (see above)
+
+					switch (i) {
+						case 0:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M0_" + (iter+1) + ".fa");
+							break;
+						case 1:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_M1_" + (iter+1) + ".fa");
+							break;
+						case 2:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F0_" + (iter+1) + ".fa");
+							break;
+						case 3:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_F1_" + (iter+1) + ".fa");
+							break;
+						case 4:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C0_" + (iter+1) + ".fa");
+							break;
+						case 5:
+							cells[i] = (FileCell) FileCellFactory.create(FrostNodeModel.INTERNAL_OUTPUT_PATH + FrostRunner.id_list.get(j) + "_C1_" + (iter+1) + ".fa");
+							break;
+					}
 					
+				}
+
 			}
 			DataRow row = new DefaultRow(key, cells);
             container.addRowToTable(row);
@@ -238,10 +249,10 @@ public class FrostNodeModel extends NodeModel {
          */
 		ArrayList<String> fs = new ArrayList<>();
 		fs = FrostRunner.recordFiles;
-		String tmp1 = fs.get(1).replace(".tmp", ".txt");
-		String tmp2 = fs.get(2).replace(".tmp", ".txt");
+		String tmp1 = fs.get(0).replace(".tmp", ".txt");
+		String tmp2 = fs.get(1).replace(".tmp", ".txt");
+		fs.remove(0);
 		fs.remove(1);
-		fs.remove(2);
 		fs.add(tmp1);
 		fs.add(tmp2);
 //		fs.set(1, fs.get(1).replace(".tmp", ".txt"));
