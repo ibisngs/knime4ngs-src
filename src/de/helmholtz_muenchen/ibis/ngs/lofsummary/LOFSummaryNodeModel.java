@@ -20,6 +20,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -55,10 +56,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
 	
 	//output
-	public static final String OUT_COL1 = "Path2LOF_Summary";
+	public static final String OUT_COL1 = "Path2Variant_Summary";
 	public static final String OUT_COL2 = "Path2Gene_Summary";
 	public static final String OUT_COL3 = "Path2Sample_Summary";
-	public static final String OUT_COL4 = "Path2Trio_Summary";
 	
 	public boolean optionalPort=false;
 	
@@ -80,16 +80,14 @@ public class LOFSummaryNodeModel extends NodeModel {
     	String vcf_infile;
     	
     	if(optionalPort){	//Input Table available
-    		//Get File via Table
     		vcf_infile = inData[0].iterator().next().getCell(0).toString();
     	}else{
-    		//Get File via FileSelector
     		vcf_infile = m_vcfin.getStringValue();
-    		if(vcf_infile.equals("") || Files.notExists(Paths.get(vcf_infile))) {
-    			logger.error("No input vcf file specified!");
-    		}
     	}
-    	logger.info("Infile: "+vcf_infile);
+    	String infile_warning = CheckUtils.checkSourceFile(vcf_infile);
+    	if(infile_warning != null) {
+    		setWarningMessage(infile_warning);
+    	}
 
     	String cds_file = m_cdsin.getStringValue();
     	if(cds_file.equals("") || Files.notExists(Paths.get(cds_file))) {
@@ -126,14 +124,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(LOF_Summary[0]),
     			(FileCell) FileCellFactory.create(LOF_Summary[1]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[2]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[3])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[2])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -160,14 +156,13 @@ public class LOFSummaryNodeModel extends NodeModel {
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			
+			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
     }
 
     /**

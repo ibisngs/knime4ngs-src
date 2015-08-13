@@ -3,46 +3,62 @@
     <name>LOFSummary</name>
     
     <shortDescription>
-        This node generates summary files for annotated LoF variants.
+        This node generates summary files for annotated variants.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	This node generates four tab separated summary files for annotated variants.
-        	Furthermore, it generates a list of completely inactivated (KO) genes.
-        	If all transcripts of a gene are homozygously affected by a LoF variant the gene is called KO gene.
-        	If a PED file is given, two further gene lists are generated. 
-        	The de_novo_KO_genes file contains genes that are completely inactivated in the child but not in the parents.
-        	The de_novo_LOF_genes file contains genes that are affected by at least one LoF in the child and that are unaffected in the parents.
+        	This node generates tab separated summary files for annotated variants.
+        	All variants in the input VCF file are considered as LOF variants.
+        	The set of consequences considered as causing a LOF event can be defined by applying the VCFFilter node.
         	<ul>
         		<li>
-        			The variant_summary comprises the following fields: chr, pos, rsId (if available), ref_allele, AF, alt_allele, gene_id, gene_symbol, effect (full or partial), consequence, lof_trans, all_trans, obs_hom, obs_het. 
-        			The allele frequency (AF) is calculated according to the given genotypes and thus adjusted to genotypes that were set to "no call" as a consequence of preceding filtering.
+        			The variant_summary comprises the following fields: chr, pos, rsId (if available), ref_allele, alt_allele, AF, gene_id, gene_symbol, effect (full or partial), consequence, lof_trans, all_trans, obs_hom, obs_het.
+        			<br />
         			The effect can only be calculated if a CDS file is given.
-        			"Full" indicates that all transcripts of a gene are affected by a LoF variant.
+        			"Full" indicates that all transcripts of a gene are affected by a variant.
         			Consequences of LoF variants are expressed using Sequence Ontology terms.
-        			lof_trans contains the number of transcripts that are affected by the LoF variant.
-        			all_trans contains the number of all transcripts of the gene (requires a CDS file).
+        			The number of transcripts affected by a variant is given by lof_trans, the number of all protein-coding transcripts by all_trans.
         			obs_hom and obs_het indicate how often each variant is observed in a homozygous/heterozygous state.
         		</li>
         		<li>
-        			The gene_summary comprises the following fields: gene_id, gene_symbol, full (LoF variants), partial (LoF variants), affected_samples and ko_samples.
-        			The last both values indicate in how many samples the gene is affected or completely inactivated.
+        			The gene_summary comprises the following fields: gene_id, gene_symbol, full (LOF variants), partial (LOF variants), lof_freq, aff_exp, aff_case, aff_ctrl, un_case, un_ctrl, p-value_fisher, p-value_bg, p-value_case_control_bg.
+        			<br />
+        			The number of full/partial variants affecting a gene are given by the corresponding columns.
+        			lof_freq indicates the computed LOF frequency based on the given background gene_summary.
+        			If no gene_summary is given, the LOF frequency is based on the allele frequencies of the input VCF file.
+        			Based on the LOF frequency, the expected number of affected samples is given by aff_exp.
+        			The following four columns comprise a contingency table for cases/controls (given by PED) and LOF affected/unaffected samples.
+        			The one-tailed p-value of Fisher's Exact test is computed using this numbers.
+        			If no PED file is given all samples are considered as controls.
+        			p-value_bg indicates the probability that more than the observed samples are affected by a variant in this gene.
+        			p-value_case_control_bg is computed by comparing the number of affected samples in cases and controls to the background and between the groups.
         		</li>
         		<li>
-        			The sample_summary comprises the following fields: sample_id, full (LoF variants), partial (LoFs variants), affectedGenes, knocked_out (all transcripts are affected by at least one LoF variant), completeLOFgenes [list id:symbol].
+        			The sample_summary comprises the following fields: sample_id, full (LOF variants), partial (LOF variants), affectedGenes, homLOFGenes, knockedOut, completeLOFGenes, affectedLOFGenes.
+        			<br />
+        			The number of genes affected by at least one variant is given by affectedGenes.
+        			The number of genes homozygously affected by at least one variant is given by homLOFGenes.
+        			If all transcripts are homozygously disrupted, the gene is considered as a knock-out (KO). 
+        			This number of KO genes per sample is given in the corresponding column.
+        			Further, a list of the KO genes is given in the column completeLOFGenes.
+        			A list of all affected genes is given in the column affectedLOFGenes.
+        			Moreover, the KO genes are summarized in the ko_genes file.
         		</li>
         		<li>
+        			Additional files are written if a PED file is given:
         			The trio_summary comprises the following fields for each child: sample_id, de_novo_LOF, KOs_de_novo, de_novo_KO [list id:symbol].
         			The second and the third column contain numbers of de novo LOF and KO genes.
         			The last column contains a list of de novo KO genes for each child.
+        			The de_novo_KO_genes file contains genes that are completely inactivated in the child but not in the parents.
+        			The de_novo_LOF_genes file contains genes that are affected by at least one LoF in the child and that are unaffected in the parents.
         		</li>
         	</ul>
-        	Predecessor nodes (not required): VCFFilter or any node that outputs a VCF file.
         </intro>
         
         <option name="Path to VCF file">
         	Select annotated VCF file.
+        	Consider that all variants in the file are interpreted as LOF variants.
         </option>
         <option name="Path to CDS files">
         	Select CDS file which can be downloaded here:
@@ -52,12 +68,13 @@
         	If this file is not provided, the effect of LoF variants (full or partial) cannot be calculated.
         </option>
         <option name="Path to PED file">
-        	Select PED file. If this file ist not provided, neither a trio summary will be calculated nor de_novo_KO/LOF_genes will be written.
+        	Select PED file.
+        	The p-value for the Fisher's Exact test can only be calculated properly if it's known which samples belong to the case/control group.
+        	If this file is not provided, neither a trio summary will be calculated nor de_novo_KO/LOF_genes will be written.
         </option>
         <option name="Annotation Selection">
         	Select the tool that was used to annotate the VCF file.
-        	If LOFTEE was used, it is possible to restrict the statistics to high confidence LoF variants.
-        	Moreover, the standard statistic additionally contains the fields confidence, failed_filters, lof_flags and lof_info.
+        	If LOFTEE was used, the variant_summary file additionally contains the fields confidence, failed_filters, lof_flags and lof_info.
         	Further information can be found here:
         	<br />
         	<a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
@@ -73,11 +90,6 @@
         	Cell 1: Path to gene summary file.
         	<br />
         	Cell 2: Path to sample summary file.
-        	<br />
-        	Cell 3: Path to transcript summary file.
         </outPort>
     </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
 </knimeNode>

@@ -30,16 +30,11 @@
         	ExAC is a VEP plugin that retrieves that retrieves ExAC (Exome Aggregation Consortium Data Set) allele frequencies
         	<br />
         	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm</a>
-        	<br />
-        	<br />
-        	Predecessor nodes (not required): Any node that outputs a VCF file.
-        	<br />
-        	Successor nodes: e.g. LOFStatistics
         </intro>
         
-        <tab name="Standard Options">
-            <option name="HTE Threshold">
-            	Set an individual threshold for high throughput execution (requires the node HTETrigger in the workflow).
+        <tab name="Options">
+            <option name="HTE">
+            	Use HTE settings from preference page or set an individual threshold.
             </option>
             <option name="Path to variant_effect_predictor.pl">
             	Select the VEP perl script which can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
@@ -48,7 +43,8 @@
             	Select an input file in vcf format.
             </option>
             <option name="Folder for output files">
-            	Select a folder to store the output files. If "Overwrite" is checked, existing files will be overwritten.
+            	Select a folder to store the output files.
+            	If "Overwrite" is checked, existing files will be overwritten.
             </option>
             <option name="Use cache?">
             	It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
@@ -64,7 +60,7 @@
             	If this checkbox is checked, VEP will only return consequences that fall in the coding regions of transcripts.
             </option>
             <option name="Choose transcript set">
-            	VEP uses Ensembl transcripts by default.
+            	VEP uses Ensembl transcripts (=GENCODE Comprehensive) by default.
             	By choosing GENCODE basic your analysis is limited to transcripts belonging to the GENCODE basic set.
             	This set has fragmented or problematic transcripts removed.
             	Alternatively, you can choose the RefSeq transcript set.
@@ -89,6 +85,7 @@
         <tab name="LOFTEE">
             <option name="Use LOFTEE?">
             	Check this box if you want to use LOFTEE.
+            	Requires the plugin file in the plugin directory.
             </option>
             <option name="Path to human_ancestor.fa.gz">
             	You can find a download link for this file following the LOFTEE link above.
@@ -103,7 +100,8 @@
         </tab>
         <tab name="CADD">
         	<option name="Use CADD?">
-        		Check this box if you want to use CADD.
+        		Check this box if you want to annotate CADD scores.
+        		Requires the plugin file in the plugin directory.
         	</option>
         	<option name="Path to CADD file(s)">
         		You can specify two CADD files, e.g. one containing scores for SNVs and the other for InDels.
@@ -112,7 +110,8 @@
         </tab>
         <tab name="ExAC">
         	<option name="Use ExAC?">
-        		Check this box if you want to use ExAC.
+        		Check this box if you want to annotate ExAC allele frequencies.
+        		Requires the plugin file in the plugin directory.
         	</option>
         	<option name="Path to ExAC file">
         		ExAC files can be downloaded from <a href="ftp://ftp.broadinstitute.org/pub/ExAC_release/current">ftp://ftp.broadinstitute.org/pub/ExAC_release/current</a>
@@ -121,14 +120,11 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="">Cell 0: Path to VCF file.</inPort>
+        <inPort index="0" name="">
+        	Cell 0: Path to VCF file.
+        </inPort>
         <outPort index="0" name="">
         	Cell 0: Path2VEP_AnnotationVCF
-        	<br />
-        	Cell 1: Path2VEP_StatsFile
         </outPort>
     </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
 </knimeNode>

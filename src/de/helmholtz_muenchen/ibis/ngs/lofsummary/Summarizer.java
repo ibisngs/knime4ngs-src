@@ -106,7 +106,7 @@ public abstract class Summarizer {
 	
 	public String [] getSummaries() {
 
-		String [] result = new String[4];
+		String [] result = new String[3];
 		try {
 			logger.info("Reading VCF file...");
 			this.extract_LOFs();
@@ -134,11 +134,10 @@ public abstract class Summarizer {
 			
 			String outfile4 = "";
 			if(ped_file!=null) {
-				logger.info("Writing trio summary...");
 				outfile4 = vcf_file.replace("vcf", "trio_summary.tsv");
+				logger.info("Writing trio summary to "+outfile4);
 				this.writeTrioSummary(outfile4);
 			}
-			result[3]=outfile4;
 			
 		} catch (IOException e) {
 			logger.error(e.getMessage());
@@ -727,8 +726,6 @@ public abstract class Summarizer {
 			
 			double expected = gi.getP_lof_aff() * (double)n;
 			
-			
-			
 			bw.write(gene+"\t"+gi.getSymbol());
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
@@ -753,7 +750,7 @@ public abstract class Summarizer {
 		HashSet<String> ko_genes = new HashSet<>();
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFgenes\tknocked_out\tcompleteLOFgenes\taffectedLOFGenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\tcompleteLOFGenes\taffectedLOFGenes");
 		bw.newLine();
 		for(String s: sample_statistic.keySet()) {
 			SampleInfo stat = sample_statistic.get(s);

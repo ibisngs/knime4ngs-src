@@ -21,6 +21,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -114,7 +115,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	final SettingsModelString m_exac_file = new SettingsModelString(CFGKEY_EXAC_FILE,"");
 	
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
-	public static final String OUT_COL2 = "Path2VEP_StatsFile";
 	
 	public boolean optionalPort=false;
 	
@@ -132,57 +132,39 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-    	String cmd;
-    	boolean is_zip = false;
-    	
     	//perl script
     	String script = m_veppl.getStringValue();
-    	if(script.equals("") || Files.notExists(Paths.get(script))) {
-    		logger.error("Path to variant_effect_predictor.pl was not specified!");
-    	}
-    	cmd = "perl "+script;
     	
     	//input file
     	String vcf_infile;
-    	if(optionalPort){	//Input Table available
-    		//Get File via Table
+    	if(optionalPort){
     		vcf_infile = inData[0].iterator().next().getCell(0).toString();
     	}else{
-    		//Get File via FileSelector
     		vcf_infile = m_vcfin.getStringValue();
-    		if(vcf_infile.equals("") || Files.notExists(Paths.get(vcf_infile))) {
-    			logger.error("No input vcf file specified!");
-    		}
+    	}
+    	String infile_warning = CheckUtils.checkSourceFile(vcf_infile);
+    	if(infile_warning != null) {
+    		setWarningMessage(infile_warning);
     	}
     	
-    	is_zip = vcf_infile.endsWith(".gz");
-    	cmd += " -i " + vcf_infile;
-    	
     	String outfileBase = m_outfolder.getStringValue()+ System.getProperty("file.separator")+ new File(vcf_infile).getName();
+    	outfileBase = outfileBase.split("\\.vcf")[0];
     	
     	//output file + stats file
     	String res_file,stats_file,stats_type;
-    	if(is_zip) {
-    		res_file = outfileBase.replace("vcf.gz", "vep.vcf");
-    	} else {
-    		res_file = outfileBase.replace("vcf", "vep.vcf");
-    	}
+    	res_file = outfileBase + ".vep.vcf";
+    	
+    	
+    	String cmd = "perl "+script;
+    	cmd += " -i " + vcf_infile;
     	cmd += " -o " + res_file;
     		
     	stats_type = m_stats_type.getStringValue();
     	if(stats_type.equals("html")) {
-    		if(is_zip) {
-    			stats_file = outfileBase.replace("vcf.gz", "vep_stats.html");
-    		} else {
-    			stats_file = outfileBase.replace("vcf", "vep_stats.html");
-    		}
+    		stats_file = outfileBase + ".vep_stats.html";
     		cmd += " --stats_file " + stats_file;
     	} else if(stats_type.equals("plain text")) {
-    		if(is_zip) {
-    			stats_file = outfileBase.replace("vcf.gz", "vep_stats.txt");
-    		} else {
-    			stats_file = outfileBase.replace("vcf", "vep_stats.txt");
-    		}
+    		stats_file = outfileBase + ".vep_stats.txt";
     		cmd += " --stats_text " + stats_file;
     	} else {
     		stats_file = "";
@@ -280,7 +262,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//CADD parameters
     	String first_cadd_file = m_first_cadd_file.getStringValue();
     	String sec_cadd_file = m_sec_cadd_file.getStringValue();
-    	if(first_cadd_file.equals("") && sec_cadd_file.equals("")) {
+    	if(m_use_cadd.getBooleanValue() && (first_cadd_file.equals("") && sec_cadd_file.equals(""))) {
     		logger.error("No CADD file specified!");
     	}
     	if(m_use_cadd.getBooleanValue()) {
@@ -298,33 +280,18 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	if(m_use_exac.getBooleanValue()) {
     		cmd += " --plugin ExAC";
     	}
-    	if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
+    	if(m_use_exac.getBooleanValue() && (exac_file.equals("")|| Files.notExists(Paths.get(exac_file)))) {
 			logger.error("No ExAC file specified!");
 		} else {
 			cmd += ","+exac_file;
 		}
     	
     	
-    	String stdOutFile;
-    	if(is_zip) {
-    		stdOutFile = outfileBase.replace("vcf.gz", "vep.stdout");
-    	} else {
-    		stdOutFile = outfileBase.replace("vcf", "vep.stdout");
-    	}
+    	String stdOutFile = outfileBase + ".vep.stdout";
     	
-    	String stdErrFile;
-    	if(is_zip) {
-    		stdErrFile = outfileBase.replace("vcf.gz", "vep.stderr");
-    	} else {
-    		stdErrFile = outfileBase.replace("vcf", "vep.stderr");
-    	}
+    	String stdErrFile = outfileBase + ".vep.stderr";
     	
-    	File lockFile;
-    	if(is_zip) {
-    		lockFile = new File(outfileBase.replace("vcf.gz", "vep" + SuccessfulRunChecker.LOCK_ENDING));
-    	} else {
-    		lockFile = new File(outfileBase.replace("vcf", "vep" + SuccessfulRunChecker.LOCK_ENDING));
-    	}
+    	File lockFile = new File(outfileBase + ".vep" + SuccessfulRunChecker.LOCK_ENDING);
     	
     	String perl5lib_variable = "PERL5LIB="+System.getenv("PERL5LIB");
 
@@ -339,12 +306,10 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(res_file),
-    			(FileCell) FileCellFactory.create(stats_file)};
+    			(FileCell) FileCellFactory.create(res_file)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -369,16 +334,20 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	String script_warning = CheckUtils.checkSourceFile(m_veppl.getStringValue());
+    	if(script_warning != null) {
+    		setWarningMessage(script_warning);
+    	}
+    	
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			
+			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
 
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
     /**
