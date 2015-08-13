@@ -41,7 +41,7 @@ public class Chunker {
 //		System.out.println(chunk);
 		
 		for (int i = 0; i < chunk; i++) {
-			FrostRunner.id_list.add(i + "_" + id);
+			FrostRunner.id_list.add(i + "_" + id + "_" +/*the iteration*/ s[s.length-1].substring(0, s[s.length-1].length()-3).split("_")[2]);
 			int begin = i*FrostsLilHelperNodeModel.chunk_length;
 			int end = begin + FrostsLilHelperNodeModel.chunk_length;
 			if (end > seqLength)

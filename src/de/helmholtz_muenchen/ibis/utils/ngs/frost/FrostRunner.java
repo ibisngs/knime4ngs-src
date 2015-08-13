@@ -211,7 +211,7 @@ public class FrostRunner {
 			
 			FrostRunner.bw_log = new BufferedWriter(new FileWriter(FrostRunner.recordFiles.get(0), true), 10000000);					
 			FrostRunner.createLog(FrostRunner.bw_log, "Using command: " + "\n" + using_command);
-			System.out.println("Using command: " + "\n" + using_command);
+//			System.out.println("Using command: " + "\n" + using_command);
 				
 			run(input, mapFile, mutRate, /*recombination, generation, */ seed, mutVary, recVary, deNovoVary, records);
 			
@@ -219,11 +219,11 @@ public class FrostRunner {
 		long endTime   = System.currentTimeMillis();
 		NumberFormat formatter = new DecimalFormat("#0.00000");
 		FrostRunner.createLog(FrostRunner.bw_log, "Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
-		System.out.println("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
+//		System.out.println("Execution time is (main) " + formatter.format((endTime - startTime) / 1000d) + " seconds");
 		FrostRunner.createLog(FrostRunner.bw_log,"\n");
-		System.out.println();
+//		System.out.println();
 		FrostRunner.bw_log.close();
-		System.out.println("done");
+//		System.out.println("done");
 
 
 	}
@@ -287,7 +287,7 @@ public class FrostRunner {
 		// TODO Auto-generated method stub
 
 		FrostRunner.createLog(FrostRunner.bw_log,"Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
-		System.out.println("Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
+//		System.out.println("Positions to vary: " + FrostRunner.varyParameter + ", using seed: " + seed);
 		/**
 		 * Checking input Fasta
 		 */	
@@ -296,8 +296,8 @@ public class FrostRunner {
 		FrostRunner.createLog(FrostRunner.bw_log,"Parental chromatids: " + FrostRunner.parental_chromatids[0] 
 				+ " and " + FrostRunner.parental_chromatids[1]);
 		
-		System.out.println("Parental chromatids: " + FrostRunner.parental_chromatids[0] 
-				+ " and " + FrostRunner.parental_chromatids[1]);
+//		System.out.println("Parental chromatids: " + FrostRunner.parental_chromatids[0] 
+//				+ " and " + FrostRunner.parental_chromatids[1]);
 		/**
 		 * get the N region map or exons at first
 		 */
@@ -305,7 +305,7 @@ public class FrostRunner {
 		GenomeMap gm = new GenomeMap(mapFile);
 
 		FrostRunner.createLog(FrostRunner.bw_log,"File used for positions: " + mapFile);
-		System.out.println("File used for positions: " + mapFile);
+//		System.out.println("File used for positions: " + mapFile);
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
 		String ids = "";
@@ -353,7 +353,7 @@ public class FrostRunner {
 			 */	
 			FastaReader fr = new FastaReader();
 			fr.readSequenceFromFile(input, currentChr);	
-			System.out.println("READ FASTA");
+//			System.out.println("READ FASTA");
 			
 			for (int iter = 0; iter < FrostRunner.iterations; iter++) {
 				records[6+7*iter]= FrostRunner.INTERNAL_PATH + currentChr + "_" + (iter+1) + "_" + seed + ".strand";
@@ -369,7 +369,7 @@ public class FrostRunner {
 				 * Some info printing
 				 */
 				FrostRunner.createLog(FrostRunner.bw_log, (i+1) + ". "+ currentChr + " " + currentLength);
-				System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
+//				System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
 //				int chunk = (currentLength/FrostRunner.chunk_length)+1;
 			
 				ids += fc.input_chr_length.get(i) + "\n";
@@ -382,7 +382,7 @@ public class FrostRunner {
 				InputScanner in = new InputScanner(currentChr, mutRate, /*recombination, generation,*/ seed, 
 					mutVary, recVary, deNovoVary, gm);
 				in.prepare(fr.getLength());//currentLength
-				System.out.println("PREPARED INPUT");
+//				System.out.println("PREPARED INPUT");
 
 				/**
 				 * Creating the trio: invoke parental mutation, denovo for child,
@@ -391,11 +391,11 @@ public class FrostRunner {
 				/**
 				 * ID_List will be called in the main method to write the output files.
 				 */
-				FrostRunner.id_list.add(/*j + "_" + */currentChr); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
+				FrostRunner.id_list.add(/*j + "_" + */currentChr + "_" + (iter +1)); //fc.input_chr_length.get(i).split("\t")[0] is the ID itself
 
 				TrioSimulator trio = new TrioSimulator(/*fc, */(iter+1), fr, in);
 				trio.createTrio(currentChr);	
-				System.out.println("SIMULATED TRIO");
+//				System.out.println("SIMULATED TRIO");
 
 				
 				/**
