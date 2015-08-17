@@ -42,6 +42,11 @@
             <option name="Path to VCF file">
             	Select an input file in vcf format.
             </option>
+            <option name="Path to fasta file">
+            	The selected fasta file used for looking up reference sequence.
+            	The plugin LOFTEE won't work properly if no fasta file is given.
+            	In general, the fasta file is downloaded while the installation of VEP and can be found in the cache directory.
+            </option>
             <option name="Folder for output files">
             	Select a folder to store the output files.
             	If "Overwrite" is checked, existing files will be overwritten.

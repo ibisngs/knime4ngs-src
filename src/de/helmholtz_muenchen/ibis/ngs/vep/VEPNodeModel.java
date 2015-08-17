@@ -47,6 +47,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     static final String CFGKEY_VCF_INFILE = "vcf_infile";
 	final SettingsModelString m_vcfin = new SettingsModelString(CFGKEY_VCF_INFILE,"");
 	
+	static final String CFGKEY_FASTA_FILE = "fasta_file";
+	final SettingsModelString m_fasta = new SettingsModelString(CFGKEY_FASTA_FILE,"");
+	
 	static final String CFGKEY_OUTFOLDER = "outfolder";
 	final SettingsModelString m_outfolder = new SettingsModelString(CFGKEY_OUTFOLDER,"");
 	
@@ -203,6 +206,14 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		cmd += " --database";
     	}
     	
+    	//fasta file
+    	String fasta_file = m_fasta.getStringValue();
+    	if(fasta_file.equals("")|| Files.notExists(Paths.get(fasta_file))) {
+			logger.warn("No fasta file specified for looking up reference sequence!");
+		} else {
+			cmd += " --fasta "+fasta_file;
+		}
+    	
     	//default VEP parameters
     	cmd += " --no_progress";
     	cmd += " --vcf";
@@ -279,12 +290,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String exac_file = m_exac_file.getStringValue();
     	if(m_use_exac.getBooleanValue()) {
     		cmd += " --plugin ExAC";
+    		if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
+    			logger.error("No ExAC file specified!");
+    		} else {
+    			cmd += ","+exac_file;
+    		}
     	}
-    	if(m_use_exac.getBooleanValue() && (exac_file.equals("")|| Files.notExists(Paths.get(exac_file)))) {
-			logger.error("No ExAC file specified!");
-		} else {
-			cmd += ","+exac_file;
-		}
     	
     	
     	String stdOutFile = outfileBase + ".vep.stdout";
@@ -298,7 +309,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	logger.info("COMMAND: "+cmd);
     	logger.info("ENVIRONMENT: "+path_variable);
     	logger.info("PERL5LIB: "+perl5lib_variable);
-    	
     	super.executeCommand(new String[]{cmd}, exec, new String[]{path_variable, perl5lib_variable}, lockFile, stdOutFile, stdErrFile, null, null, null);
     	
     	
@@ -358,6 +368,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	super.saveSettingsTo(settings);
         m_veppl.saveSettingsTo(settings);
         m_vcfin.saveSettingsTo(settings);
+        m_fasta.saveSettingsTo(settings);
         m_outfolder.saveSettingsTo(settings);
         m_stats_type.saveSettingsTo(settings);
         m_coding_only.saveSettingsTo(settings);
@@ -388,6 +399,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	super.loadValidatedSettingsFrom(settings);
         m_veppl.loadSettingsFrom(settings);
         m_vcfin.loadSettingsFrom(settings);
+        m_fasta.loadSettingsFrom(settings);
         m_outfolder.loadSettingsFrom(settings);
         m_stats_type.loadSettingsFrom(settings);
         m_coding_only.loadSettingsFrom(settings);
@@ -418,6 +430,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	super.validateSettings(settings);
         m_veppl.validateSettings(settings);
         m_vcfin.validateSettings(settings);
+        m_fasta.validateSettings(settings);
         m_outfolder.validateSettings(settings);
         m_stats_type.validateSettings(settings);
         m_coding_only.validateSettings(settings);
