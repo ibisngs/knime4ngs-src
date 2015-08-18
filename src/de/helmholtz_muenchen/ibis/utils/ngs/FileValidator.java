@@ -92,7 +92,6 @@ public class FileValidator {
 					sCurrentLine = br.readLine();
 					boolean qual = (Pattern.matches("^[\\S]+$", sCurrentLine));
 					if(header && seqname && seq && qual){
-						System.out.println("Inputfile IS in fastq format");
 						return true;
 					}else{
 						System.out.println("Header is correct: "+header);

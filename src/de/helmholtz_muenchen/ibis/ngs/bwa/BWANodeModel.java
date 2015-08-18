@@ -391,6 +391,17 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	m_bwafile.setStringValue(toolPath);
     	}
     	
+    	//FlowVariable Control
+    	if(!getAvailableFlowVariables().containsKey("readType")){
+            throw new InvalidSettingsException("FlowVariable 'readType' is missing as input! Please add the FlowVariable or use the 'RunAligner' node.");
+    	}else{
+    		String value = getAvailableInputFlowVariables().get("readType").getStringValue();
+    		if(!value.equals("single-end") & !value.equals("paired-end") ){
+                throw new InvalidSettingsException("FlowVariable 'readType' has a wrong value: '"+value+"' . Allowed values: 'single-end' or 'paired-end'");
+    		}
+    	}
+    	
+    	
         //Version control
         if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
         	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
