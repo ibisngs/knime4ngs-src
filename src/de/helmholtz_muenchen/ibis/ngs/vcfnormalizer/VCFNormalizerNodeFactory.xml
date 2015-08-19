@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
     <name>VCFNormalizer</name>
     
     <shortDescription>
@@ -19,8 +19,8 @@
         </intro>
         
         
-        <option name="Path to vt directory">
-        	Select the installation directory of vt.
+        <option name="Path to vt binary">
+        	Set path to the vt executable.
         </option>
         <option name="Path to input VCF file">
         	Select an input file in vcf or vcf.gz format.
@@ -35,8 +35,5 @@
         <outPort index="0" name="">
         	Cell 0: Path2normalizedVCF.
         </outPort>
-    </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+    </ports>   
 </knimeNode>

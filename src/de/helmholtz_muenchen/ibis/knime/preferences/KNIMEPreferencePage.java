@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -51,10 +52,25 @@ public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
 	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
-	public static final String [] TOOLS = {"bfast","bowtie2","bwa","featureCounts","pindel","pindel2vcf","samtools","segemehl.x","STAR","GenomeAnalysisTK.jar"};
-	private final int[] DOWNLOADABLE = {0,1,2,3,4,5,6,7,8};
+	public static final HashMap<String, Boolean> TOOLS;
+	static {
+		TOOLS = new HashMap<>();
+		TOOLS.put("bfast",true);
+		TOOLS.put("bowtie2",true);
+		TOOLS.put("bwa",true);
+		TOOLS.put("featureCounts",true);
+		TOOLS.put("pindel",true);
+		TOOLS.put("pindel2vcf",true);
+		TOOLS.put("samtools",true);
+		TOOLS.put("segemehl.x",true);
+		TOOLS.put("STAR",true);
+		TOOLS.put("GenomeAnalysisTK.jar",false);
+		TOOLS.put("variant_effect_predictor.pl",false);
+		TOOLS.put("filter_vep.pl", false);
+		TOOLS.put("vt",false);
+		TOOLS.put("vcftools",false);
+	}
 	
-	public static String BWA_PATH;
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
@@ -115,10 +131,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			col.setText(titles[i]);
 		}
 		
-		for(int i = 0; i< TOOLS.length; i++) {
+		for(String key: TOOLS.keySet()) {
 			TableItem item = new TableItem(table, SWT.NULL);
-			item.setText(0,TOOLS[i]);
-			item.setText(1,IBISKNIMENodesPlugin.getDefault().getToolPathPreference(TOOLS[i]));
+			item.setText(0,key);
+			item.setText(1,IBISKNIMENodesPlugin.getDefault().getToolPathPreference(key));
 		}
 		
 		for(int i = 0; i < titles.length; i++) {
@@ -274,7 +290,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
-		for(String s: TOOLS) {
+		for(String s: TOOLS.keySet()) {
 			iknp.setToolPathPreference(s, "");
 		}
 		
@@ -386,18 +402,19 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		
 			
-		for (int i : DOWNLOADABLE) {
-			if (iknp.getToolPathPreference(TOOLS[i]).equals("")) {
-				try {
-					File f = new File(dir + "/" + TOOLS[i]);
-					if (!f.exists()) {
-						FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + TOOLS[i]), f);
-						f.setExecutable(true, false);
-						iknp.setToolPathPreference(TOOLS[i], dir + "/" + TOOLS[i]);
+		for (String tool : TOOLS.keySet()) {
+			if (TOOLS.get(tool)) {
+				if (iknp.getToolPathPreference(tool).equals("")) {
+					try {
+						File f = new File(dir + "/" + tool);
+						if (!f.exists()) {
+							FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + tool), f);
+							f.setExecutable(true, false);
+							iknp.setToolPathPreference(tool, dir + "/"+ tool);
+						}
+					} catch (IOException e) {
+						LOGGER.error("Downloading " + tool+ " failed! Message: " + e.getMessage());
 					}
-				} catch (IOException e) {
-					LOGGER.error("Downloading " + TOOLS[i] + " failed! Message: "
-							+ e.getMessage());
 				}
 			}
 		}
@@ -416,7 +433,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dlg.setFilterPath("~/");
 		String dir = dlg.open();
 		
-		for(String s: TOOLS) {
+		for(String s: TOOLS.keySet()) {
 			if(iknp.getToolPathPreference(s).equals("")) {
 				String path = BinaryHandler.checkToolAvailability(s, dir);
 				if(path != null) {

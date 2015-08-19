@@ -28,7 +28,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	 * New pane for configuring the HTExecutorNode node.
 	*/
 	
-	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
+	protected final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
 	private final SettingsModelInteger threshold = new SettingsModelInteger(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD);
 	
 	protected HTExecutorNodeDialog() {

@@ -11,15 +11,17 @@
         	This node is a wrapper for the Variant Effect Predictor from Ensembl.
         	By default VEP annotates SIFT and PolyPhen scores.
         	The format of the output file is vcf.
-        	The node allows to use the plugins LOFTEE, CADD and ExAC.
+        	The node allows to use the plugin LOFTEE for the annotation of LOF alleles.
         	<br />
         	Source: <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
         	<br />
         	<br />
-        	LOFTEE is a VEP plugin to identify LoF (loss-of-function) variation.
-        	It implements a set of filters to deem stop-gained, splice site disrupting and frameshift variants as low-confidence LoFs.
+        	LOFTEE is a VEP plugin to identify LOF (loss-of-function) variation.
+        	It implements a set of filters to deem stop-gained, splice site disrupting and frameshift variants as low-confidence LOFs.
         	<br />
         	Source: <a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
+        	
+        	<!--
         	<br />
         	<br />
         	CADD is a VEP plugin that retrieves CADD (Combined Annotation Dependent Depletion) scores for variants from one or two tabix-indexed CADD data files.
@@ -30,6 +32,7 @@
         	ExAC is a VEP plugin that retrieves that retrieves ExAC (Exome Aggregation Consortium Data Set) allele frequencies
         	<br />
         	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm</a>
+        	-->
         </intro>
         
         <tab name="Options">
@@ -82,10 +85,10 @@
             <option name="Plugin directory">
             	Set the plugin directory. Default = "$HOME/.vep/Plugins".
             </option>
-            <option name="Tabix PATH">
+            <!--<option name="Tabix PATH">
             	Tabix is required by the plugins CADD and ExAC.
             	The path can be found by typing "which tabix" in terminal.
-            </option>
+            </option>-->
         </tab>
         <tab name="LOFTEE">
             <option name="Use LOFTEE?">
@@ -100,10 +103,10 @@
             	The conservation file will be ignored, if forking is enabled.
             </option>
             <option name="Samtools PATH">
-            	If Samtools are not installed, install it and select the installation directory (can be found by typing "which samtools" in terminal).
+            	Set the path to the SAMTOOLS executable.
             </option>
         </tab>
-        <tab name="CADD">
+        <!--<tab name="CADD">
         	<option name="Use CADD?">
         		Check this box if you want to annotate CADD scores.
         		Requires the plugin file in the plugin directory.
@@ -121,7 +124,7 @@
         	<option name="Path to ExAC file">
         		ExAC files can be downloaded from <a href="ftp://ftp.broadinstitute.org/pub/ExAC_release/current">ftp://ftp.broadinstitute.org/pub/ExAC_release/current</a>
         	</option>
-        </tab>
+        </tab>-->
     </fullDescription>
     
     <ports>

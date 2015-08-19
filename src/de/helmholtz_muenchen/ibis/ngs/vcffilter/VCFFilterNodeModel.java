@@ -2,8 +2,9 @@ package de.helmholtz_muenchen.ibis.ngs.vcffilter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
@@ -17,7 +18,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -29,17 +29,17 @@ import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 /**
  * This is the model implementation of LOFFilter.
  * 
  *
  * @author tim.jeske
  */
-public class VCFFilterNodeModel extends NodeModel {
+public class VCFFilterNodeModel extends HTExecutorNodeModel {
     
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFFilterNodeModel.class);
 	
@@ -128,14 +128,12 @@ public class VCFFilterNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	//input file
+
     	String infile;
     	
-    	if(optionalPort){	//Input Table available
-    		//Get File via Table
+    	if(optionalPort){
     		infile = inData[0].iterator().next().getCell(0).toString();
     	}else{
-    		//Get File via FileSelector
     		infile = m_vcfin.getStringValue();
     	}
     	String infile_warning = CheckUtils.checkSourceFile(infile);
@@ -189,10 +187,6 @@ public class VCFFilterNodeModel extends NodeModel {
     	if(m_filter_by_GQ.getBooleanValue() || m_filter_by_DP.getBooleanValue()) {
     		ArrayList<String> cmd = new ArrayList<>();
     		String vcftools = m_vcf_tools.getStringValue();
-    		if(!vcftools.endsWith(System.getProperty("file.separator"))) {
-    			vcftools += System.getProperty("file.separator");
-    		}
-    		vcftools+="vcftools";
     		cmd.add(vcftools);
     		if(is_gz) {
     			cmd.add("--gzvcf");
@@ -215,8 +209,7 @@ public class VCFFilterNodeModel extends NodeModel {
     		
     		outfile = outfile+".recode.vcf";
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
-    		
-    		klockExecute(cmd_array,lockFile,exec);
+    		super.executeCommand(cmd_array, exec, lockFile);
     	}
     	return outfile;
     }
@@ -234,10 +227,6 @@ public class VCFFilterNodeModel extends NodeModel {
     		
     		ArrayList<String> cmd = new ArrayList<>();
     		String vcftools = m_vcf_tools.getStringValue();
-    		if(!vcftools.endsWith(System.getProperty("file.separator"))) {
-    			vcftools += System.getProperty("file.separator");
-    		}
-    		vcftools+="vcftools";
     		cmd.add(vcftools);
     		if(is_gz) {
     			cmd.add("--gzvcf");
@@ -265,7 +254,7 @@ public class VCFFilterNodeModel extends NodeModel {
     		outfile = outfile+".recode.vcf";
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
     		
-    		klockExecute(cmd_array,lockFile,exec);
+    		super.executeCommand(cmd_array, exec, lockFile);
     		infile = outfile;
     	}
     	
@@ -292,7 +281,7 @@ public class VCFFilterNodeModel extends NodeModel {
 
 			File lockFile = new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
 
-			klockExecute(cmd_array,lockFile,exec);
+			super.executeCommand(cmd_array, exec, lockFile);
     	}
     	return outfile;
     }
@@ -352,7 +341,7 @@ public class VCFFilterNodeModel extends NodeModel {
     		}
     		
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
-    		klockExecute(cmd_array,lockFile,exec);
+    		super.executeCommand(cmd_array, exec, lockFile);
     	}
     	return outfile;
     }
@@ -378,37 +367,35 @@ public class VCFFilterNodeModel extends NodeModel {
     	if(m_fill_an_ac.getBooleanValue()) {
     		
     		String vcftools = m_vcf_tools.getStringValue();
-    		if(!vcftools.endsWith(System.getProperty("file.separator"))) {
-    			vcftools += System.getProperty("file.separator");
-    		}
-    		vcftools+="fill-an-ac";
+    		int pos = vcftools.lastIndexOf(System.getProperty("file.separator"));
+    		vcftools = vcftools.substring(0,pos)+ System.getProperty("file.separator")+"fill-an-ac";
 
     		cmd += " | " + vcftools;
     	}
 
     	File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);	
     	cmd += " > " + outfile;
-    	klockExecute(new String[]{"/usr/bin/bash","-c",cmd},lockFile,exec);
+    	super.executeCommand(new String[]{"/usr/bin/bash","-c",cmd},exec,lockFile);
     	
     	return outfile;
     }
     
-    private void klockExecute (String [] cmd_array, File lockFile, ExecutionContext exec) throws Exception {
-    	String command = Arrays.toString(cmd_array);
-    	
-    	boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, command);
-		
-		if(!b) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, command);
-			int exitCode = Executor.executeCommandWithExitCode(cmd_array, exec, LOGGER);
-			if(exitCode==0) {
-				checker.writeOK();
-				checker.finalize();
-			}
-		} else {
-			LOGGER.info(command+ " has been successfully executed according to klock");
-		}
-    }
+//    private void klockExecute (String [] cmd_array, File lockFile, ExecutionContext exec) throws Exception {
+//    	String command = Arrays.toString(cmd_array);
+//    	
+//    	boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, command);
+//		
+//		if(!b) {
+//			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, command);
+//			int exitCode = Executor.executeCommandWithExitCode(cmd_array, exec, LOGGER);
+//			if(exitCode==0) {
+//				checker.writeOK();
+//				checker.finalize();
+//			}
+//		} else {
+//			LOGGER.info(command+ " has been successfully executed according to klock");
+//		}
+//    }
     
     /**
      * {@inheritDoc}
@@ -429,10 +416,24 @@ public class VCFFilterNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	if(m_filter_annos.getBooleanValue()) {
+    		String vep_warning = CheckUtils.checkSourceFile(m_vepscript.getStringValue());
+    		if(vep_warning != null) {
+    			setWarningMessage(vep_warning);
+    		}
+    	}
     	
-    	String vep_warning = CheckUtils.checkSourceFile(m_vepscript.getStringValue());
-    	if(vep_warning != null) {
-    		setWarningMessage(vep_warning);
+    	boolean a = m_filter_by_DP.getBooleanValue();
+    	boolean b = m_filter_by_GQ.getBooleanValue();
+    	boolean c = m_filter_by_callRate.getBooleanValue();
+    	boolean d = m_fill_an_ac.getBooleanValue();
+    	boolean f = m_filter_pass.getBooleanValue();
+    	
+    	if(a || b || c || d || f) {
+    		String vcftools = m_vcf_tools.getStringValue();
+    		if(vcftools.equals("") || Files.notExists(Paths.get(vcftools))) {
+    			throw new InvalidSettingsException("Path to VCFtools not specified!");
+    		}
     	}
     	
     	try{
@@ -451,6 +452,7 @@ public class VCFFilterNodeModel extends NodeModel {
      */
     @Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	super.saveSettingsTo(settings);
     	m_filter_by_DP.saveSettingsTo(settings);
     	m_DP_threshold.saveSettingsTo(settings);
     	m_filter_by_GQ.saveSettingsTo(settings);
@@ -477,6 +479,7 @@ public class VCFFilterNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	super.loadValidatedSettingsFrom(settings);
     	m_filter_by_DP.loadSettingsFrom(settings);
     	m_DP_threshold.loadSettingsFrom(settings);
     	m_filter_by_GQ.loadSettingsFrom(settings);
@@ -514,6 +517,7 @@ public class VCFFilterNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	super.validateSettings(settings);
     	m_filter_by_DP.validateSettings(settings);
     	m_DP_threshold.validateSettings(settings);
     	m_filter_by_GQ.validateSettings(settings);

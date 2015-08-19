@@ -120,14 +120,20 @@ public class BAMLoaderNodeModel extends NodeModel {
     	}	
     	//Version control
     	if(m_samtools.getStringValue().length()>0){
-            if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==1){
-            	setWarningMessage("WARNING: You are using a newer SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems.");
-            }else if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==2){
-            	throw new InvalidSettingsException("You are using a outdated version of SAMTOOLS! Please update your version");
-            }else if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==-1){
-            	System.out.println("Something is wrong with SamTools!");
-            }
+    		try {
+	    		 //Version control
+	            if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==1){
+	            	setWarningMessage("WARNING: You are using a newer SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
+	            }else if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==2){
+	            	setWarningMessage("WARNING: You are using an older SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
+	            }else if(FileValidator.versionControl(m_samtools.getStringValue(),"SAMTOOLS")==-1){
+	            	setWarningMessage("Your samtools version could not be determined! Correct behaviour can only be ensured for samtools version "+FileValidator.SAMTOOLS_VERSION+".");
+	            }
+    		} catch (Exception e) {
+    			throw new InvalidSettingsException("Specify a valid SAMTOOLS version!");
+    		}
     	}
+    		
         return new DataTableSpec[]{null};
     }
 

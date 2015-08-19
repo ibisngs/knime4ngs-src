@@ -92,20 +92,20 @@ public class LOFSummaryNodeModel extends NodeModel {
     	String cds_file = m_cdsin.getStringValue();
     	if(cds_file.equals("") || Files.notExists(Paths.get(cds_file))) {
     		cds_file = null;
-    		logger.warn("No CDS file specified! Variant effect (full or partial) cannot be calculated.");
+    		setWarningMessage("No CDS file specified! Variant effect (full or partial) cannot be calculated.");
     	}
     	
     	String ped_file = m_pedin.getStringValue();
     	
     	if(ped_file.equals("") || Files.notExists(Paths.get(ped_file))) {
-    		logger.warn("No PED file specified! Trio summary will not be written.");
+    		setWarningMessage("No PED file specified! Trio summary will not be written.");
     		ped_file = null;
     	}
     	
     	String geneback_file = m_genebackin.getStringValue();
     	if(geneback_file.equals("") || Files.notExists(Paths.get(geneback_file))) {
     		geneback_file = null;
-    		logger.warn("No genetic background file specified!");
+    		setWarningMessage("No genetic background file specified!");
     	}
     	
     	Summarizer summy = null;

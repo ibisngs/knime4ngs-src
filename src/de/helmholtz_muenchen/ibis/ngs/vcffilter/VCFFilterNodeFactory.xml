@@ -22,8 +22,8 @@
         		This script is used to filter VEP annotations.
         		It can be found in the VEP installation in ensembl-tools-release../scripts/variant_effect_predictor.
        	 	</option>
-       	 	<option name="Path to VCFtools binaries">
-        		Select path where the vcftools and find-ac-an binaries are located.
+       	 	<option name="Path to VCFTool binary">
+        		Select vcftools executable.
         	</option>
         	<option name="Further options">
         		VCFTools removes INFO fiels from VCF files. 

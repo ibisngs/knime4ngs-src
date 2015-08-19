@@ -23,10 +23,12 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
+
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
@@ -95,27 +97,28 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	static final String CFGKEY_SAMTOOLS_PATH = "samtools_path";
 	final SettingsModelString m_samtools_path = new SettingsModelString(CFGKEY_SAMTOOLS_PATH,"");
 	
+//	plugins CADD and ExAC not supported any more
+//	tabix path
+//	static final String CFGKEY_TABIX_PATH = "tabix_path";
+//	final SettingsModelString m_tabix_path = new SettingsModelString(CFGKEY_TABIX_PATH,"");
+//	
+//	CADD
+//	static final String CFGKEY_USE_CADD = "use_cadd";
+//	final SettingsModelBoolean m_use_cadd = new SettingsModelBoolean(CFGKEY_USE_CADD,false);
+//	
+//	static final String CFGKEY_FIRST_CADD_FILE = "first_cadd_file";
+//	final SettingsModelString m_first_cadd_file = new SettingsModelString(CFGKEY_FIRST_CADD_FILE,"");
+//	
+//	static final String CFGKEY_SEC_CADD_FILE = "sec_cadd_file";
+//	final SettingsModelString m_sec_cadd_file = new SettingsModelString(CFGKEY_SEC_CADD_FILE,"");
+//	
+//	ExAC
+//	static final String CFGKEY_USE_EXAC = "use_exac";
+//	final SettingsModelBoolean m_use_exac = new SettingsModelBoolean(CFGKEY_USE_EXAC,false);
+//	
+//	static final String CFGKEY_EXAC_FILE = "exac_file";
+//	final SettingsModelString m_exac_file = new SettingsModelString(CFGKEY_EXAC_FILE,"");
 	
-	//tabix path
-	static final String CFGKEY_TABIX_PATH = "tabix_path";
-	final SettingsModelString m_tabix_path = new SettingsModelString(CFGKEY_TABIX_PATH,"");
-	
-	//CADD
-	static final String CFGKEY_USE_CADD = "use_cadd";
-	final SettingsModelBoolean m_use_cadd = new SettingsModelBoolean(CFGKEY_USE_CADD,false);
-	
-	static final String CFGKEY_FIRST_CADD_FILE = "first_cadd_file";
-	final SettingsModelString m_first_cadd_file = new SettingsModelString(CFGKEY_FIRST_CADD_FILE,"");
-	
-	static final String CFGKEY_SEC_CADD_FILE = "sec_cadd_file";
-	final SettingsModelString m_sec_cadd_file = new SettingsModelString(CFGKEY_SEC_CADD_FILE,"");
-	
-	//ExAC
-	static final String CFGKEY_USE_EXAC = "use_exac";
-	final SettingsModelBoolean m_use_exac = new SettingsModelBoolean(CFGKEY_USE_EXAC,false);
-	
-	static final String CFGKEY_EXAC_FILE = "exac_file";
-	final SettingsModelString m_exac_file = new SettingsModelString(CFGKEY_EXAC_FILE,"");
 	
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
 	
@@ -197,7 +200,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String cache_dir = m_cache_dir.getStringValue();
     	if(m_use_cache.getBooleanValue()) {
     		if(cache_dir.equals("") || Files.notExists(Paths.get(cache_dir))) {
-    			logger.warn("Cache directory was not specified!");
+    			setWarningMessage("Cache directory was not specified!");
     		} else {
     			cmd += " --dir_cache " + cache_dir; 
     		}
@@ -209,7 +212,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//fasta file
     	String fasta_file = m_fasta.getStringValue();
     	if(fasta_file.equals("")|| Files.notExists(Paths.get(fasta_file))) {
-			logger.warn("No fasta file specified for looking up reference sequence!");
+			setWarningMessage("No fasta file specified for looking up reference sequence!");
 		} else {
 			cmd += " --fasta "+fasta_file;
 		}
@@ -232,7 +235,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();
     	if(plugin_dir.equals("")|| Files.notExists(Paths.get(plugin_dir))) {
-    		logger.warn("Plugin directory was not specified!");
+    		setWarningMessage("Plugin directory was not specified!");
     	} else {
     		cmd += " --dir_plugins " + plugin_dir;
     	}
@@ -240,62 +243,65 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String path_variable = "PATH="+System.getenv("PATH") ;
     	String samtools_path = m_samtools_path.getStringValue();
     	if(samtools_path.equals("")|| Files.notExists(Paths.get(samtools_path))) {
-    		logger.warn("Samtools PATH was not specified!");
+    		setWarningMessage("Samtools PATH was not specified!");
     	} else {
-    		path_variable +=":"+samtools_path;
+    		//remove samtools
+    		int pos = samtools_path.lastIndexOf(System.getProperty("file.separator"));
+    		path_variable +=":"+samtools_path.substring(0,pos);
     	}
-    	String tabix_path = m_tabix_path.getStringValue();
-    	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
-    		logger.warn("Tabix path was not specified!");
-    	} else {
-    		path_variable += ":"+tabix_path;
-    	}
+//    	String tabix_path = m_tabix_path.getStringValue();
+//    	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
+//    		setWarningMessage("Tabix path was not specified!");
+//    	} else {
+//    		path_variable += ":"+tabix_path;
+//    	}
+    	
     	//LOFTEE parameters
 
     	if(m_use_loftee.getBooleanValue()) {
     		cmd += " --plugin LoF";
     		String human_ancestor = m_human_ancestor.getStringValue();
     		if(human_ancestor.equals("")|| Files.notExists(Paths.get(human_ancestor))) {
-    			logger.error("Human ancestor file was not specified!");
+    			setWarningMessage("Human ancestor file was not specified!");
     		} else {
     			cmd += ",human_ancestor_fa:"+human_ancestor;
     		}
     		if(m_forks.getIntValue()<=1) {
     			String conservation_file = m_conservation_file.getStringValue();
     			if(conservation_file.equals("")|| Files.notExists(Paths.get(conservation_file))) {
-    				logger.warn("Phylocsf.sql was not specified!");
+    				setWarningMessage("Phylocsf.sql was not specified!");
     			} else {
     				cmd += ",conservation_file:"+conservation_file;
     			}
     		}
     	}
     	
-    	//CADD parameters
-    	String first_cadd_file = m_first_cadd_file.getStringValue();
-    	String sec_cadd_file = m_sec_cadd_file.getStringValue();
-    	if(m_use_cadd.getBooleanValue() && (first_cadd_file.equals("") && sec_cadd_file.equals(""))) {
-    		logger.error("No CADD file specified!");
-    	}
-    	if(m_use_cadd.getBooleanValue()) {
-    		cmd += " --plugin CADD";
-    		if(!first_cadd_file.equals("") && Files.exists(Paths.get(first_cadd_file))) {
-    			cmd += ","+first_cadd_file;
-    		}
-    		if(!sec_cadd_file.equals("") && Files.exists(Paths.get(sec_cadd_file))) {
-    			cmd += ","+sec_cadd_file;
-    		}
-    	}
-    	
-    	//ExAC parameters
-    	String exac_file = m_exac_file.getStringValue();
-    	if(m_use_exac.getBooleanValue()) {
-    		cmd += " --plugin ExAC";
-    		if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
-    			logger.error("No ExAC file specified!");
-    		} else {
-    			cmd += ","+exac_file;
-    		}
-    	}
+//    	CADD parameters
+//    	String first_cadd_file = m_first_cadd_file.getStringValue();
+//    	String sec_cadd_file = m_sec_cadd_file.getStringValue();
+//    	if(m_use_cadd.getBooleanValue() && (first_cadd_file.equals("") && sec_cadd_file.equals(""))) {
+//    		throw new InvalidSettingsException("No CADD file specified!");
+//    	}
+//    	if(m_use_cadd.getBooleanValue()) {
+//    		cmd += " --plugin CADD";
+//    		if(!first_cadd_file.equals("") && Files.exists(Paths.get(first_cadd_file))) {
+//    			cmd += ","+first_cadd_file;
+//    		}
+//    		if(!sec_cadd_file.equals("") && Files.exists(Paths.get(sec_cadd_file))) {
+//    			cmd += ","+sec_cadd_file;
+//    		}
+//    	}
+//    	
+//    	ExAC parameters
+//    	String exac_file = m_exac_file.getStringValue();
+//    	if(m_use_exac.getBooleanValue()) {
+//    		cmd += " --plugin ExAC";
+//    		if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
+//    			throw new InvalidSettingsException("No ExAC file specified!");
+//    		} else {
+//    			cmd += ","+exac_file;
+//    		}
+//    	}
     	
     	
     	String stdOutFile = outfileBase + ".vep.stdout";
@@ -344,9 +350,31 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	
     	String script_warning = CheckUtils.checkSourceFile(m_veppl.getStringValue());
     	if(script_warning != null) {
     		setWarningMessage(script_warning);
+    	}
+    	
+    	String outfolder_warning = CheckUtils.checkDestinationDirectory(m_outfolder.getStringValue());
+    	if(outfolder_warning!=null) {
+    		setWarningMessage(outfolder_warning);
+    	}
+    	
+    	
+    	if(m_use_loftee.getBooleanValue()) {
+    		try {
+	    		 //Version control
+	            if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==1){
+	            	setWarningMessage("WARNING: You are using a newer SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
+	            }else if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==2){
+	            	setWarningMessage("WARNING: You are using an older SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
+	            }else if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==-1){
+	            	setWarningMessage("Your samtools version could not be determined! Correct behaviour can only be ensured for samtools version "+FileValidator.SAMTOOLS_VERSION+".");
+	            }
+    		} catch (Exception e) {
+    			throw new InvalidSettingsException("Specify a valid SAMTOOLS version!");
+    		}
     	}
     	
     	try{
@@ -382,12 +410,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.saveSettingsTo(settings);
         m_transcript_set.saveSettingsTo(settings);
         m_overwrite.saveSettingsTo(settings);
-        m_tabix_path.saveSettingsTo(settings);
-        m_use_cadd.saveSettingsTo(settings);
-        m_first_cadd_file.saveSettingsTo(settings);
-        m_sec_cadd_file.saveSettingsTo(settings);
-        m_use_exac.saveSettingsTo(settings);
-        m_exac_file.saveSettingsTo(settings);
+//        m_tabix_path.saveSettingsTo(settings);
+//        m_use_cadd.saveSettingsTo(settings);
+//        m_first_cadd_file.saveSettingsTo(settings);
+//        m_sec_cadd_file.saveSettingsTo(settings);
+//        m_use_exac.saveSettingsTo(settings);
+//        m_exac_file.saveSettingsTo(settings);
     }
 
     /**
@@ -413,12 +441,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.loadSettingsFrom(settings);
         m_transcript_set.loadSettingsFrom(settings);
         m_overwrite.loadSettingsFrom(settings);
-        m_tabix_path.loadSettingsFrom(settings);
-        m_use_cadd.loadSettingsFrom(settings);
-        m_first_cadd_file.loadSettingsFrom(settings);
-        m_sec_cadd_file.loadSettingsFrom(settings);
-        m_use_exac.loadSettingsFrom(settings);
-        m_exac_file.loadSettingsFrom(settings);
+//        m_tabix_path.loadSettingsFrom(settings);
+//        m_use_cadd.loadSettingsFrom(settings);
+//        m_first_cadd_file.loadSettingsFrom(settings);
+//        m_sec_cadd_file.loadSettingsFrom(settings);
+//        m_use_exac.loadSettingsFrom(settings);
+//        m_exac_file.loadSettingsFrom(settings);
     }
 
     /**
@@ -444,12 +472,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.validateSettings(settings);
         m_transcript_set.validateSettings(settings);
         m_overwrite.validateSettings(settings);
-        m_tabix_path.validateSettings(settings);
-        m_use_cadd.validateSettings(settings);
-        m_first_cadd_file.validateSettings(settings);
-        m_sec_cadd_file.validateSettings(settings);
-        m_use_exac.validateSettings(settings);
-        m_exac_file.validateSettings(settings);
+//        m_tabix_path.validateSettings(settings);
+//        m_use_cadd.validateSettings(settings);
+//        m_first_cadd_file.validateSettings(settings);
+//        m_sec_cadd_file.validateSettings(settings);
+//        m_use_exac.validateSettings(settings);
+//        m_exac_file.validateSettings(settings);
     }
     
     /**

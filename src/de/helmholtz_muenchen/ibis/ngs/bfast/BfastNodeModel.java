@@ -576,13 +576,17 @@ public class BfastNodeModel extends NodeModel {
      	}
         //Version control
      	if(m_bfast.getStringValue().length()>0){
-            if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==1){
-            	setWarningMessage("WARNING: You are using a newer BFAST version than "+FileValidator.BFAST_VERSION +"! This may cause problems");
-            }else if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==2){
-            	throw new InvalidSettingsException("You are using a outdated version of BFAST! Please update your version");
-            }else if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==-1){
-            	System.out.println("Something wrong here");
-            }
+     		try {
+     			if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==1){
+     				setWarningMessage("WARNING: You are using a newer BFAST version than "+FileValidator.BFAST_VERSION +"! This may cause problems");
+     			}else if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==2){
+     				throw new InvalidSettingsException("You are using a outdated version of BFAST! Please update your version");
+     			}else if(FileValidator.versionControl(m_bfast.getStringValue(),"BFAST")==-1){
+     				System.out.println("Something wrong here");
+     			}
+     		} catch (Exception e) {
+     			throw new InvalidSettingsException("Specify a valid BFAST version!");
+     		}
      	}
      	
      	// Check input ports

@@ -30,7 +30,6 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class BWANodeDialog extends HTExecutorNodeDialog {
 
-	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(BWANodeModel.CFGKEY_USEPREFPAGE,true);	
 	private final SettingsModelString bwa = new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");
 	
 	private final DialogComponentFileChooser dcfc = new DialogComponentFileChooser(bwa,"his_id_BWAPATH", 0);

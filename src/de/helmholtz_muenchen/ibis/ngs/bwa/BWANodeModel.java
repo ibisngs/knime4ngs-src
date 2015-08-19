@@ -22,7 +22,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -39,7 +38,6 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
  */
 public class BWANodeModel extends HTExecutorNodeModel {
     
-	public static final String CFGKEY_USEPREFPAGE = "usePrefPage";
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
 	public static final String CFGKEY_BWAFILE = "bwafile";
 	public static final String CFGKEY_CHECKCOLORSPACED = "checkColorSpaced";
@@ -54,7 +52,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     // definition of SettingsModel
 	private final SettingsModelString m_refseqfile = new SettingsModelString(CFGKEY_REFSEQFILE,"");
 	private final SettingsModelString m_bwafile = new SettingsModelString(CFGKEY_BWAFILE,"");
-	private final SettingsModelBoolean m_usePrefPage = new SettingsModelBoolean(CFGKEY_USEPREFPAGE,true);
 	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
 	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
 	private final SettingsModelString m_bwtIndex = new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
@@ -78,9 +75,9 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super(1, 1);    	
     }
 
-    static SettingsModelString createSettingsModelSelection() {
-    	return new SettingsModelString("bwa-path","");
-    }
+//    static SettingsModelString createSettingsModelSelection() {
+//    	return new SettingsModelString("bwa-path","");
+//    }
     
     /**
      * {@inheritDoc}
@@ -383,13 +380,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	if(m_usePrefPage.getBooleanValue()) {
-	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
-	    	if(toolPath == null) {
-	    		toolPath = "BWA binary not found!";
-	    	}
-	    	m_bwafile.setStringValue(toolPath);
-    	}
+//    	if(m_usePrefPage.getBooleanValue()) {
+//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
+//	    	if(toolPath == null) {
+//	    		toolPath = "BWA binary not found!";
+//	    	}
+//	    	m_bwafile.setStringValue(toolPath);
+//    	}
     	
     	//FlowVariable Control
     	if(!getAvailableFlowVariables().containsKey("readType")){
@@ -401,15 +398,19 @@ public class BWANodeModel extends HTExecutorNodeModel {
     		}
     	}
     	
-    	
         //Version control
-        if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
-        	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
-        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==2){
-        	setWarningMessage("WARNING: You are using an older BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
-        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==-1){
-        	LOGGER.warn("Your BWA version could not be determined! Correct behaviour can only be ensured for BWA version "+FileValidator.BWA_VERSION+".");
-        }
+    	try {
+	        if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
+	        	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
+	        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==2){
+	        	setWarningMessage("WARNING: You are using an older BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
+	        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==-1){
+	        	setWarningMessage("Your BWA version could not be determined! Correct behaviour can only be ensured for BWA version "+FileValidator.BWA_VERSION+".");
+	        }
+    	} catch (Exception e) {
+    		throw new InvalidSettingsException("Specify a valid BWA version!");
+    	}
+   
     	
     	if(m_refseqfile.getStringValue().length() > 1) {
 	    	if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
@@ -438,7 +439,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.saveSettingsTo(settings);
     	
     	m_bwafile.saveSettingsTo(settings);
-    	m_usePrefPage.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_bwtIndex.saveSettingsTo(settings);
     	m_checkColorSpaced.saveSettingsTo(settings);
@@ -459,7 +459,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.loadValidatedSettingsFrom(settings);
     	
     	m_bwafile.loadSettingsFrom(settings);
-    	m_usePrefPage.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_bwtIndex.loadSettingsFrom(settings);
     	m_checkColorSpaced.loadSettingsFrom(settings);
@@ -480,7 +479,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	super.validateSettings(settings);
     	
     	m_bwafile.validateSettings(settings);
-    	m_usePrefPage.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_bwtIndex.validateSettings(settings);
     	m_checkColorSpaced.validateSettings(settings);

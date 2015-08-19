@@ -111,7 +111,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 
         log("starting IKN_PLUGIN: IBISKNIMENodesPlugin");
 
-        for(String s: KNIMEPreferencePage.TOOLS) {
+        for(String s: KNIMEPreferencePage.TOOLS.keySet()) {
 			String path = this.getToolPathPreference(s);
 			if(Files.notExists(Paths.get(path))) {
 				this.setToolPathPreference(s, "");

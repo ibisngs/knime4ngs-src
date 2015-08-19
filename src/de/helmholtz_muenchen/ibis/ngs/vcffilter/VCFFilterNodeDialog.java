@@ -5,6 +5,9 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -26,6 +29,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 
 /**
  * <code>NodeDialog</code> for the "VEPFilter" Node.
@@ -38,7 +44,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
  * 
  * @author tim.jeske
  */
-public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
+public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
 
     /**
      * New pane for configuring the VCFFilter node.
@@ -93,8 +99,8 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to filter_vep.pl");
     	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
     	
-    	createNewGroup("Path to VCFtools binaries");
-    	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, true));
+    	createNewGroup("Path to VCFtools binary");
+    	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, ""));
     	
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentBoolean(fill_an_ac,"Restore allele counts?"));
@@ -174,6 +180,30 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
 				restoreTermDefaults();
 			}
 		});
+		
+		usePrefPage.addChangeListener(new ChangeListener (){
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				vcf_tools.setEnabled(!usePrefPage.getBooleanValue());
+				vep_script.setEnabled(!usePrefPage.getBooleanValue());
+				if(!usePrefPage.getBooleanValue()) return;
+		    	
+		    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
+				if(vcftoolsPath == null) {
+					vcftoolsPath = "VCFtools executable not found!";
+				}
+				vcf_tools.setStringValue(vcftoolsPath);
+				
+				String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
+				if(filterVep == null) {
+					filterVep = "filter_vep.pl not found!";
+				}
+				vep_script.setStringValue(filterVep);
+			}
+			
+		});
+		
     }
     
     public void addSOTerm(String t) {
@@ -224,6 +254,25 @@ public class VCFFilterNodeDialog extends DefaultNodeSettingsPane {
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
     	// save the hash to the key FastaSelectorNodeModel.CFGKEY_FILE_LIST
     	settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
+    }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	vcf_tools.setEnabled(!usePrefPage.getBooleanValue());
+    	vep_script.setEnabled(!usePrefPage.getBooleanValue());
+    	if(!usePrefPage.getBooleanValue()) return;
+    	
+    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
+		if(vcftoolsPath == null) {
+			vcftoolsPath = "VCFtools executable not found!";
+		}
+		vcf_tools.setStringValue(vcftoolsPath);
+		
+		String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
+		if(filterVep == null) {
+			filterVep = "filter_vep.pl not found!";
+		}
+		vep_script.setStringValue(filterVep);
     }
 }
 
