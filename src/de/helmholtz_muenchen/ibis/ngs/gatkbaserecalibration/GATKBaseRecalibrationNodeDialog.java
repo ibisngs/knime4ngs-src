@@ -9,10 +9,12 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 
@@ -111,7 +113,8 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString proxyuser = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYUSER, null);
 	final SettingsModelString proxypassword = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
-	
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKBaseRecalibrationNodeModel.CFGKEY_OPT_FLAGS,"",false);
+
 	
     protected GATKBaseRecalibrationNodeDialog() {
         super();
@@ -270,6 +273,9 @@ public class GATKBaseRecalibrationNodeDialog extends DefaultNodeSettingsPane {
 				rep_unit_cov.setEnabled(!create_plots.getBooleanValue());
 			}
 		});
+        
+        createNewGroup("Further options");
+        addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
     }
     
     private void generateProxyOptions(){

@@ -1,5 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance;
 
+import java.io.File;
+
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -9,6 +11,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.workflow.FlowVariable;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of GATKGenotypeConcordance.
@@ -28,7 +31,7 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 	private final SettingsModelBoolean m_UNSAFE = new SettingsModelBoolean(GATKGenotypeConcordanceNodeModel.CFGKEY_UNSAFE,false);
     
 	protected GATKGenotypeConcordanceNodeModel(int INPORTS, int OUTPORTS) {
-		super(INPORTS, OUTPORTS);
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
 	}
 
 	@Override
@@ -84,6 +87,10 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 		
 	}
 
-
+	@Override
+	protected File getLockFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 

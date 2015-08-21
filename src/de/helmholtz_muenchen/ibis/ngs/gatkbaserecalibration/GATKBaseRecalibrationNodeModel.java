@@ -18,6 +18,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -159,6 +160,10 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
 	static final String CFGKEY_SIMPLIFY_OUT="simplify_out";
 	static final boolean DEF_SIMPLIY_OUT=false;
 	private final SettingsModelBoolean m_simplify_out=new SettingsModelBoolean(CFGKEY_SIMPLIFY_OUT, DEF_SIMPLIY_OUT);
+	
+	
+	static final String CFGKEY_OPT_FLAGS = "opt_flags";
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 	
 	private int posBam;
 	private int posRef;
@@ -461,7 +466,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
         
 		int GATK_MEMORY_USAGE = m_GATK_JAVA_MEMORY.getIntValue();
 		
-    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
     	
     	if(m_create_plots.getBooleanValue()){
     		
@@ -470,7 +475,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     		String recalplots=PathProcessor.createOutputFile(base, "pdf", "recal_plots");
     		String recalintermediate=PathProcessor.createOutputFile(base, "csv", "recal_plots_intermediateData");
     		
-    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
     		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE,recalintermediate);
     		
     	}
@@ -682,6 +687,8 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_proxyuser.saveSettingsTo(settings);
     	m_proxypassword.saveSettingsTo(settings);
     	
+    	m_opt_flags.saveSettingsTo(settings);
+    	
     }
 
     /**
@@ -727,6 +734,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_proxyuser.loadSettingsFrom(settings);
     	m_proxypassword.loadSettingsFrom(settings);
 
+    	m_opt_flags.loadSettingsFrom(settings);
     }
 
     /**
@@ -771,6 +779,8 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     	m_useproxyauth.validateSettings(settings);
     	m_proxyuser.validateSettings(settings);
     	m_proxypassword.validateSettings(settings);
+    	
+    	m_opt_flags.validateSettings(settings);
     	
     	// check if at least one set of polymorphisms is used
     	if(!settings.getBoolean(CFGKEY_USE_PHASE1_1000G) && !settings.getBoolean(CFGKEY_USE_MILLS_1000G) && !settings.getBoolean(CFGKEY_USE_DBSNP)){

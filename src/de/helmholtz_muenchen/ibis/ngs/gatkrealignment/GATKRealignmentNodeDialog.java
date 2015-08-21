@@ -8,12 +8,15 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
 
 
 /**
@@ -103,6 +106,8 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString proxyuser = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYUSER, null);
 	final SettingsModelString proxypassword = new SettingsModelString(GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKRealignmentNodeModel.CFGKEY_OPT_FLAGS,"",false);
+
 
     protected GATKRealignmentNodeDialog() {
         super();
@@ -238,6 +243,10 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
         
         createNewGroup("Output");
         addDialogComponent(new DialogComponentBoolean(alignment_tag, "Do not output original cigar string"));
+    
+        createNewGroup("Further options");
+        addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
+
     }
     
     private void createProxyOptions(){

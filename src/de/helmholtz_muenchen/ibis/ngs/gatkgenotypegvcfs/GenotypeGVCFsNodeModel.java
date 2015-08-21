@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -12,6 +13,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of GenotypeGVCFs.
@@ -29,7 +31,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	private String OUTFILE; 
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
-		super(1, 1);
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
    	}
 	/**
      * {@inheritDoc}
@@ -93,6 +95,11 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			throws InvalidSettingsException {
 		m_NT.validateSettings(settings);
 		
+	}
+	@Override
+	protected File getLockFile() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }
 

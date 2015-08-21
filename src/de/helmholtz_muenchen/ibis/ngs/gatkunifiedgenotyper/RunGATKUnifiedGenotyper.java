@@ -8,7 +8,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 public class RunGATKUnifiedGenotyper {
 	
-protected static void CallVariants(ExecutionContext exec, String gatk, String[] bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+protected static void CallVariants(ExecutionContext exec, String gatk, String[] bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
 		
 		//for each thread 2G
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G " + proxyOptions + gatk;
@@ -48,6 +48,10 @@ protected static void CallVariants(ExecutionContext exec, String gatk, String[] 
 		
 		if(filter){
 			cmd+=" --filter_mismatching_base_and_quals ";
+		}
+		
+		if(!opt_flags.equals("")) {
+			cmd += " "+opt_flags;
 		}
 		
 		// run command

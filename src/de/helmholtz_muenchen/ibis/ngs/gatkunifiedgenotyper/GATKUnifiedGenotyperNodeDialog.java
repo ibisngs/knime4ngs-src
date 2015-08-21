@@ -10,11 +10,13 @@ import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 
@@ -99,6 +101,8 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString proxyuser = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER, null);
 	final SettingsModelString proxypassword = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKUnifiedGenotyperNodeModel.CFGKEY_OPT_FLAGS,"",false);
+
     /**
      * New pane for configuring GATKUnifiedGenotyper node dialog.
      * This is just a suggestion to demonstrate possible default dialog
@@ -148,6 +152,8 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Malformed read filter");
         addDialogComponent(new DialogComponentBoolean(mbq, "Filter reads with mismatching number of bases and base qualities"));
 		
+        createNewGroup("Further options");
+        addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
 	}
 
 	private void generalOptions(){
@@ -208,6 +214,7 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         //#Memory
         createNewGroup("Java Memory");
         addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB) per thread", 1));
+        
     }
 	
 	

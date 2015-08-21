@@ -37,7 +37,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 			LOGGER.error("HAVING " + this.getNrInPorts() + " INPUT FILES BUT "+ input_file_arguments.length + " NAMES!");
 		}
 		if(output_file_arguments.length != this.getNrOutPorts()){
-			LOGGER.error("HAVING " + this.getNrOutPorts() + " INPUT FILES BUT "+ output_file_arguments.length + " NAMES!");
+			LOGGER.error("HAVING " + this.getNrOutPorts() + " OUTPUT FILES BUT "+ output_file_arguments.length + " NAMES!");
 		}
 		this.INPUT_FILE_ARGUMENTS = input_file_arguments;
 		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;
@@ -52,7 +52,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 			LOGGER.error("HAVING " + this.getNrInPorts() + " INPUT FILES BUT "+ input_file_arguments.length + " NAMES!");
 		}
 		if(output_file_arguments.length > outPortTypes.length){
-			LOGGER.error("HAVING " + this.getNrOutPorts() + " INPUT FILES BUT "+ output_file_arguments.length + " NAMES!");
+			LOGGER.error("HAVING " + this.getNrOutPorts() + " OUTPUT FILES BUT "+ output_file_arguments.length + " NAMES!");
 		}
 		this.INPUT_FILE_ARGUMENTS = input_file_arguments;
 		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;

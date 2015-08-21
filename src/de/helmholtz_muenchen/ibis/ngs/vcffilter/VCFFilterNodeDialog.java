@@ -19,13 +19,14 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButton;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
@@ -84,8 +85,8 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
 	private final DialogComponentButton REMOVE_TERM_BUTTON = new DialogComponentButton("Remove selected term");
 	private final DialogComponentButton RESTORE_DEFAULTS_BUTTON = new DialogComponentButton("Restore default");
 	
-	private final SettingsModelString filter = new SettingsModelString(VCFFilterNodeModel.CFGKEY_FILTER,"");
-	private final DialogComponentString DC_FILTER = new DialogComponentString(filter,"Conditions");
+	private final SettingsModelOptionalString filter = new SettingsModelOptionalString(VCFFilterNodeModel.CFGKEY_FILTER,"",false);
+	private final DialogComponentOptionalString DC_FILTER = new DialogComponentOptionalString(filter,"Conditions");
 	
 	HashSet<String> terms = new HashSet<>();
 	
@@ -156,7 +157,7 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
 		
 		createNewGroup("Filter");
 		DC_FILTER.setToolTipText("Define additional comma separated filters,e.g.\"LoF is HC,ExAC_AF>0.05");
-		DC_FILTER.setSizeComponents(400, 20);
+//		DC_FILTER.setSizeComponents(400, 20);
 		addDialogComponent(DC_FILTER);
 
 		ADD_TERM_BUTTON.addActionListener(new ActionListener() {

@@ -19,6 +19,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -196,6 +197,9 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
 			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER,"");
 	private final SettingsModelString m_proxypassword = new SettingsModelString(
 			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD,"");
+	
+	static final String CFGKEY_OPT_FLAGS = "opt_flags";
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 	
     /**
      * Constructor for the node model.
@@ -420,17 +424,17 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         
         // call snps
         if(!snpout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
         // call indels
         if(!indelout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
         // call both
         if(!glmBothout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
     	//determine number of output columns
@@ -651,6 +655,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_proxyuser.saveSettingsTo(settings);
     	m_proxypassword.saveSettingsTo(settings);
 
+    	m_opt_flags.saveSettingsTo(settings);
     }
 
     /**
@@ -691,7 +696,8 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_useproxyauth.loadSettingsFrom(settings);
     	m_proxyuser.loadSettingsFrom(settings);
     	m_proxypassword.loadSettingsFrom(settings);
-        
+     
+    	m_opt_flags.loadSettingsFrom(settings);
     }
 
     /**
@@ -733,6 +739,7 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     	m_proxyuser.validateSettings(settings);
     	m_proxypassword.validateSettings(settings);
 
+    	m_opt_flags.validateSettings(settings);
     }
     
     /**

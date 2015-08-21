@@ -35,7 +35,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  * This is the model implementation of VEP.
  * 
  *
- * @author tim.jeske
+ * @author Tim Jeske
  */
 public class VEPNodeModel extends HTExecutorNodeModel {
 	
@@ -380,7 +380,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
 
         return new DataTableSpec[]{new DataTableSpec(

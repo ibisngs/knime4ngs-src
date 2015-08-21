@@ -16,17 +16,19 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.port.PortType;
+import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
-public abstract class GATKNodeModel extends NodeModel{
+public abstract class GATKNodeModel extends HTExecutorNodeModel{
 
 	/**
 	 * Config Keys
@@ -34,6 +36,7 @@ public abstract class GATKNodeModel extends NodeModel{
 	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
 	public static final String CFGKEY_REF_GENOME = "REFGENOME";
 	public static final String CFGKEY_GATK_MEM = "GATK_MEM";
+	public static final String CFGKEY_OPT_FLAGS ="OPT_FLAGS";
 	
 	/**
 	 * The SettingsModels
@@ -42,7 +45,7 @@ public abstract class GATKNodeModel extends NodeModel{
     private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
-
+    private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 
 	/**
 	 * Logger
@@ -51,12 +54,17 @@ public abstract class GATKNodeModel extends NodeModel{
     
 	//The Output Col Names
 	public static final String OUT_COL1_TABLE1 = "OUTFILE";
+	
+	private boolean outtable = true;
     
     /**
      * Constructor for the node model.
      */
-    protected GATKNodeModel(int INPORTS, int OUTPORTS) {
+    protected GATKNodeModel(PortType[] INPORTS, PortType[] OUTPORTS) {
         super(INPORTS, OUTPORTS);
+        if(OUTPORTS.length==0) {
+        	outtable = false;
+        }
     }
     /**
      * {@inheritDoc}
@@ -76,15 +84,19 @@ public abstract class GATKNodeModel extends NodeModel{
    
     	String OUTFILE = getOutfile(); 	
     	command.add("-o "+OUTFILE);
+    	command.add(" "+m_OPT_FLAGS.getStringValue());
     	
-    	System.out.println(StringUtils.join(command, " "));
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,OUTFILE+".stdOut",OUTFILE+".stdErr");
+    	LOGGER.info(StringUtils.join(command, " "));
+     	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null, getLockFile(),OUTFILE+".stdOut",OUTFILE+".stdErr", null,null,null);
      	
-    	
      	
     	/**
     	 * OUTPUT
     	 */
+     	if(!outtable) {
+     		return null;
+     	}
+     	
      	//Table1
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
@@ -121,10 +133,24 @@ public abstract class GATKNodeModel extends NodeModel{
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    		DataTableSpec outSpecTable1 = new DataTableSpec(
-    										new DataColumnSpec[]{
-    										new DataColumnSpecCreator(OUT_COL1_TABLE1, FileCell.TYPE).createSpec()});    		
-        return new DataTableSpec[]{outSpecTable1};
+    	String gatk_warning = CheckUtils.checkSourceFile(m_GATK.getStringValue());
+    	if(gatk_warning != null) {
+    		setWarningMessage(gatk_warning);
+    	}
+    	
+    	String ref_warning = CheckUtils.checkSourceFile(m_REF_GENOME.getStringValue());
+    	if(ref_warning != null) {
+    		setWarningMessage(ref_warning);
+    	}
+    	
+		if (!outtable) {
+			return null;
+		}
+
+		DataTableSpec outSpecTable1 = new DataTableSpec(
+				new DataColumnSpec[] { new DataColumnSpecCreator(
+						OUT_COL1_TABLE1, FileCell.TYPE).createSpec() });
+		return new DataTableSpec[] { outSpecTable1 };
     }
 
     /**
@@ -132,9 +158,11 @@ public abstract class GATKNodeModel extends NodeModel{
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	super.saveSettingsTo(settings);
    	 	m_GATK.saveSettingsTo(settings);
    	 	m_REF_GENOME.saveSettingsTo(settings);
    	 	m_GATK_MEM.saveSettingsTo(settings);
+   	 	m_OPT_FLAGS.saveSettingsTo(settings);
    	 	saveExtraSettingsTo(settings);
     }
 
@@ -144,10 +172,12 @@ public abstract class GATKNodeModel extends NodeModel{
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-      	 m_GATK.loadSettingsFrom(settings);
-       	 m_REF_GENOME.loadSettingsFrom(settings);
-       	 m_GATK_MEM.loadSettingsFrom(settings);
-       	 loadExtraValidatedSettingsFrom(settings);
+    	super.loadValidatedSettingsFrom(settings);
+		m_GATK.loadSettingsFrom(settings);
+		m_REF_GENOME.loadSettingsFrom(settings);
+		m_GATK_MEM.loadSettingsFrom(settings);
+		m_OPT_FLAGS.loadSettingsFrom(settings);
+		loadExtraValidatedSettingsFrom(settings);
 
     }
 
@@ -157,10 +187,12 @@ public abstract class GATKNodeModel extends NodeModel{
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-      	 m_GATK.validateSettings(settings);
-       	 m_REF_GENOME.validateSettings(settings);
-       	 m_GATK_MEM.validateSettings(settings);
-       	 validateExtraSettings(settings);
+    	super.validateSettings(settings);
+		m_GATK.validateSettings(settings);
+		m_REF_GENOME.validateSettings(settings);
+		m_GATK_MEM.validateSettings(settings);
+		m_OPT_FLAGS.validateSettings(settings);
+		validateExtraSettings(settings);
     }
     
     /**
@@ -186,14 +218,14 @@ public abstract class GATKNodeModel extends NodeModel{
      * Provides the node specific filter settings
      * @return
      */
-    protected abstract String getCommandParameters(final BufferedDataTable[] inData);
+    protected abstract String getCommandParameters(final BufferedDataTable[] inData) throws InvalidSettingsException;
     	
     /**
      * Provides the GATK Walker
      * @return
      */
     protected abstract String getCommandWalker();
-    
+    protected abstract File getLockFile();
     protected abstract String getOutfile();
     
     protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.8 http://knime.org/node/v2.8.xsd">
     <name>DepthOfCoverage</name>
     
     <shortDescription>
-        Assess sequence coverage by a wide array of metrics, partitioned by sample, read group, or library
+        Assess sequence coverage by a wide array of metrics, partitioned by sample, read group, or library.
     </shortDescription>
     
     <fullDescription>
-        <intro>This tool processes a set of bam files to determine coverage at different levels of partitioning and aggregation. Coverage can be analyzed per locus, per interval, per gene, or in total</intro>
+        <intro>
+        	This tool processes a set of bam files to determine coverage at different levels of partitioning and aggregation.
+        	Coverage can be analyzed per locus, per interval, per gene, or in total</intro>
         
         
         <option name="Outfile suffix"> Suffix that will be appended to the outfiles</option>
@@ -16,13 +18,8 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="Input BAM">
+        	Input BAM.
+        </inPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
 </knimeNode>

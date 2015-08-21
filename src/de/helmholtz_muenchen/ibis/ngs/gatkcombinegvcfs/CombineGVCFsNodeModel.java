@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -14,6 +15,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of CombineGVCFs.
@@ -42,7 +44,7 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
     protected CombineGVCFsNodeModel() {
     
         // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
    
@@ -108,7 +110,13 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 //		m_NT.validateSettings(settings);
 		
 	}
-    
+
+
+	@Override
+	protected File getLockFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
 

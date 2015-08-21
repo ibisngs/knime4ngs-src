@@ -18,6 +18,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -197,6 +198,8 @@ public class GATKRealignmentNodeModel extends NodeModel {
 	private final SettingsModelString m_proxypassword = new SettingsModelString(
 			GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD,"");
 		
+	static final String CFGKEY_OPT_FLAGS = "opt_flags";
+	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 	
     /**
      * Constructor for the node model.
@@ -413,7 +416,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	//run realignment
-    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE);
+    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
     	
     	// write output table
     	/*
@@ -616,6 +619,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_proxyuser.saveSettingsTo(settings);
     	m_proxypassword.saveSettingsTo(settings);
 
+    	m_opt_flags.saveSettingsTo(settings);
     }
 
     /**
@@ -661,6 +665,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_proxyuser.loadSettingsFrom(settings);
     	m_proxypassword.loadSettingsFrom(settings);
 
+    	m_opt_flags.loadSettingsFrom(settings);
     }
 
     /**
@@ -707,6 +712,7 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	m_proxyuser.validateSettings(settings);
     	m_proxypassword.validateSettings(settings);
     	
+    	m_opt_flags.validateSettings(settings);
     }
     
     /**

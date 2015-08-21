@@ -30,7 +30,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  * This is the model implementation of LOFSummarizer.
  * 
  *
- * @author tim.jeske
+ * @author Tim Jeske
  */
 public class LOFSummaryNodeModel extends NodeModel {
     
@@ -156,7 +156,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{

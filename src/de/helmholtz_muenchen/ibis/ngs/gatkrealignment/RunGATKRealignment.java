@@ -49,7 +49,7 @@ public class RunGATKRealignment {
 	}
 	
 	//calls gatk indel realigner
-	protected static void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception{
+	protected static void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception{
     	
 		//create command string
 
@@ -84,6 +84,11 @@ public class RunGATKRealignment {
 		if(notag){
 			cmd+=" -noTags ";
 		}
+		
+		if(!opt_flags.equals("")) {
+			cmd+= " " + opt_flags;
+		}
+		
 		
 		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".out.log and "+outputbam+".err.log");

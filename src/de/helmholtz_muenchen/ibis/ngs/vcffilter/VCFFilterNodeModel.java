@@ -24,6 +24,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -37,7 +38,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  * This is the model implementation of LOFFilter.
  * 
  *
- * @author tim.jeske
+ * @author Tim Jeske
  */
 public class VCFFilterNodeModel extends HTExecutorNodeModel {
     
@@ -106,7 +107,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     private final HashSet<String> TERMS	= new HashSet<String>();
 
     static final String CFGKEY_FILTER = "filter";
-    private final SettingsModelString m_filter = new SettingsModelString(CFGKEY_FILTER,"");
+    private final SettingsModelOptionalString m_filter = new SettingsModelOptionalString(CFGKEY_FILTER,"",false);
     
     
 	//output col names
@@ -439,7 +440,6 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			m_vcfin.setEnabled(false);
 		}catch(NullPointerException e){}
     	
         return new DataTableSpec[]{new DataTableSpec(

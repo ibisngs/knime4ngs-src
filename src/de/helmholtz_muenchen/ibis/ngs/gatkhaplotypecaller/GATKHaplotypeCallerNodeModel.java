@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller;
 
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of GATKHaplotypeCaller.
@@ -35,7 +37,7 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
     private String OUTFILE; 
 	
 	protected GATKHaplotypeCallerNodeModel(int INPORTS, int OUTPORTS) {
-		super(INPORTS, OUTPORTS);
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
 	}
 
 	@Override
@@ -118,8 +120,11 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		m_BED_FILE_CHECKBOX.validateSettings(settings);
 		
 	}
-    
 
-
+	@Override
+	protected File getLockFile() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
 

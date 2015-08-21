@@ -10,7 +10,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 public class RunGATKBaseRecalibration {
 	
 	// first call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
 		
 		//create command string
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
@@ -67,6 +67,10 @@ public class RunGATKBaseRecalibration {
 		
 		cmd+=" -nct "+cputhreads;
 		
+		if(!opt_flags.equals("")) {
+			cmd+=" "+opt_flags;
+		}
+		
 		// run command
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK BaseRecalibrator...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outtable+".out.log and "+outtable+".err.log");
@@ -78,7 +82,7 @@ public class RunGATKBaseRecalibration {
 	
 	
 	// second call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
 		
 		//create command string
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
@@ -136,7 +140,7 @@ public class RunGATKBaseRecalibration {
 		
 		cmd+=" -nct "+cputhreads;
 		
-		
+		cmd+= " " + opt_flags;
 		// run command
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK BaseRecalibrator...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outtable+".out.log and "+outtable+".err.log");

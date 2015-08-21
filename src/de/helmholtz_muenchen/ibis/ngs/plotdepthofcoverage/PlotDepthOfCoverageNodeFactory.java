@@ -37,7 +37,7 @@ public class PlotDepthOfCoverageNodeFactory
     @Override
     public NodeView<PlotDepthOfCoverageNodeModel> createNodeView(final int viewIndex,
             final PlotDepthOfCoverageNodeModel nodeModel) {
-        return new RNodeView(nodeModel);
+        return new RNodeView<PlotDepthOfCoverageNodeModel>(nodeModel);
     }
 
     /**
