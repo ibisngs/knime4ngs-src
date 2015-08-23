@@ -24,7 +24,8 @@ public class FisherExact {
     
     public static double oneTailedGreater(int a, int b, int c, int d) {
     	double p = 0.0;
-    	for(int i = 0; i <= b; i++) {
+    	int z = Math.min(b, c);
+    	for(int i = 0; i <= z; i++) {
     		p += getP(a+i, b-i, c-i, d+i);
     	}
     	return p;
@@ -32,7 +33,7 @@ public class FisherExact {
     public static void main (String [] args) {
     	System.out.println(getP(1,9,11,3));
     	System.out.println(oneTailedGreater(1,9,11,3));
-    	System.out.println(getP(9,1,3,11));
-    	System.out.println(oneTailedGreater(9,1,3,11));
+    	System.out.println(getP(104,105,0,0));
+    	System.out.println(oneTailedGreater(104,105,0,0));
     }
 }

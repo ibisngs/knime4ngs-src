@@ -530,16 +530,16 @@ public abstract class Summarizer {
 			/**do significance calculations**/
 			NormalDistribution nd = new NormalDistribution();
 			
-			double p_val_vs_bg = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
+			double p_val_vs_bg = 1 - new BinomialDistribution(n+1, p_lof_aff).cumulativeProbability(affected);
 
 			gi.setP_val_vs_bg(p_val_vs_bg);
 			
 			if(ped_file!=null) {
-				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
+				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case+1, p_lof_aff).cumulativeProbability(case_aff);
 
 				double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
 
-				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
+				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control+1, p_lof_aff).cumulativeProbability(control_aff);
 
 				double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
 
@@ -707,7 +707,7 @@ public abstract class Summarizer {
 	private void writeGeneStatistic(String outfile) throws IOException {
 				
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\taff_exp\taff_case\taff_ctrl\tun_case\tun_ctrl\tp-value_fisher\tp-value_bg\tp-value_case_control_bg");
+		bw.write("gene_id\tgene_symbol\tfull\tpartial\tlof_freq\tko\thom\taff_exp\taff_case\taff_ctrl\tun_case\tun_ctrl\tp-value_fisher\tp-value_bg\tp-value_case_control_bg");
 		bw.newLine();
 		
 		ValueComparator vc = new ValueComparator(gene_statistic);
@@ -730,7 +730,9 @@ public abstract class Summarizer {
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
 			bw.write("\t"+gi.getP_lof_aff());
-			bw.write("\t"+expected);
+			bw.write("\t"+gi.getKOSamples());
+			bw.write("\t"+gi.getHom_samples());
+			bw.write("\t"+expected);	
 			bw.write("\t"+gi.getAff_case());
 			bw.write("\t"+gi.getAff_ctrl());
 			bw.write("\t"+gi.getUn_case());
