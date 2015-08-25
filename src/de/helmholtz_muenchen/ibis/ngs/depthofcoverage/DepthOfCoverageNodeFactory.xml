@@ -8,18 +8,51 @@
     
     <fullDescription>
         <intro>
-        	This tool processes a set of bam files to determine coverage at different levels of partitioning and aggregation.
-        	Coverage can be analyzed per locus, per interval, per gene, or in total</intro>
+        	This GATK tool processes an input bam file to determine coverage at different levels of partitioning and aggregation.
+        	Coverage can be analyzed per locus, per interval, per gene, or in total.
+        	Several output tables contain different coverage summaries
+        	(see <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_coverage_DepthOfCoverage.php">GATK documentation</a>).
+        </intro>
         
+        <tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        </tab>
         
-        <option name="Outfile suffix"> Suffix that will be appended to the outfiles</option>
-        <option name="GATK Filter Terms"> Additional GATK Read Filters that shall be used for processing. All Filters can be found at https://www.broadinstitute.org/gatk/guide/tooldocs/</option>
-
+        <tab name="DoC options">
+        	<option name="Path to Infile">
+        		Select input file, if no file is given by the preceding node.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Outfile suffix">
+        		Suffix that will be appended to the outfiles.
+        	</option>
+        	<option name="GATK Filter Terms">
+        		Additional GATK Read Filters that shall be used for processing.
+        		All Filters can be found in the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/">GATK online documentation</a>.
+        	</option>
+		</tab>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="Input BAM">
         	Input BAM.
         </inPort>
+        <outPort index="0" name="Output file">
+        	File containing per locus coverage.
+        </outPort>
     </ports>    
 </knimeNode>

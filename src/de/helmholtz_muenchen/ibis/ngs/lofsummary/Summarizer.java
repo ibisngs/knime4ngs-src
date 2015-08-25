@@ -730,8 +730,8 @@ public abstract class Summarizer {
 			bw.write("\t"+gi.getFullLoFs());
 			bw.write("\t"+gi.getPartLoFs());
 			bw.write("\t"+gi.getP_lof_aff());
-			bw.write("\t"+gi.getKOSamples());
-			bw.write("\t"+gi.getHom_samples());
+			bw.write("\t"+gi.getKOSamples().size());
+			bw.write("\t"+gi.getHom_samples().size());
 			bw.write("\t"+expected);	
 			bw.write("\t"+gi.getAff_case());
 			bw.write("\t"+gi.getAff_ctrl());
@@ -750,7 +750,7 @@ public abstract class Summarizer {
 	private void writeSampleStatistic(String outfile) throws IOException {
 		
 		HashSet<String> ko_genes = new HashSet<>();
-		
+		HashSet<String> hom_genes = new HashSet<>();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
 		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\tcompleteLOFGenes\taffectedLOFGenes");
 		bw.newLine();
@@ -760,7 +760,7 @@ public abstract class Summarizer {
 			Collections.sort(completes);
 			int affected = stat.getPart_LOF_genes().size();
 			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+stat.getHom_LOF_genes().size()+"\t"+completes.size()+"\t");
-			
+			hom_genes.addAll(stat.getHom_LOF_genes());
 			if(completes.size() >= 1) {
 				String gene = completes.get(0);
 				ko_genes.add(gene);
@@ -787,6 +787,7 @@ public abstract class Summarizer {
 		}
 		bw.close();
 		writeGeneList(ko_genes,outfile.replace("sample_summary.tsv", "ko_genes.tsv"));
+		writeGeneList(hom_genes,outfile.replace("sample_summary.tsv","hom_genes.tsv"));
 	}
 	
 	private void writeTrioSummary(String outfile) throws IOException {
