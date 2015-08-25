@@ -524,22 +524,27 @@ public abstract class Summarizer {
 			} else if(geneback_file==null){
 				p_lof_aff = 1 - gi.getProbUnaffected();
 			}
+			
+			//test
+//			if(p_lof_aff < 3.0/60706.0) {
+//				p_lof_aff = 3.0/60706.0;
+//			}
 			gi.setP_lof_aff(p_lof_aff);
 			
 			
 			/**do significance calculations**/
 			NormalDistribution nd = new NormalDistribution();
 			
-			double p_val_vs_bg = 1 - new BinomialDistribution(n+1, p_lof_aff).cumulativeProbability(affected);
+			double p_val_vs_bg = 1 - new BinomialDistribution(n, p_lof_aff).cumulativeProbability(affected);
 
 			gi.setP_val_vs_bg(p_val_vs_bg);
 			
 			if(ped_file!=null) {
-				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case+1, p_lof_aff).cumulativeProbability(case_aff);
+				double p_val_case_vs_bg = 1 - new BinomialDistribution(n_case, p_lof_aff).cumulativeProbability(case_aff);
 
 				double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
 
-				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control+1, p_lof_aff).cumulativeProbability(control_aff);
+				double p_val_control_vs_bg = 1 - new BinomialDistribution(n_control, p_lof_aff).cumulativeProbability(control_aff);
 
 				double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
 
@@ -550,6 +555,7 @@ public abstract class Summarizer {
 			}
 		}
 	}
+	
 	
 	
 	
