@@ -1,16 +1,20 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration;
 
 
+import java.io.File;
 import java.util.Map;
 
 import org.knime.core.node.ExecutionContext;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
-public class RunGATKBaseRecalibration {
+public class RunGATKBaseRecalibration extends GATKBaseRecalibrationNodeModel  {
 	
 	// first call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
+	protected void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
+		
+		String lockFile = outtable + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
@@ -77,12 +81,15 @@ public class RunGATKBaseRecalibration {
 		
 		GATKBaseRecalibrationNodeModel.logger.info(cmd);
 		
-		Executor.executeCommand(new String [] {cmd} ,exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
+//		Executor.executeCommand(new String [] {cmd} ,exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outtable+".out.log", outtable+".err.log");
 	}
 	
 	
 	// second call of base recalibrator
-	protected static void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
+	protected void BaseRecalibrator(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outtable, String pphase1, String pmills, String pdbsnp, String pint, boolean [] cov, int tailqual, double go, int maxcycle, int [] indelmis, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
+		
+		String lockFile = outtable + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
@@ -145,10 +152,13 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK BaseRecalibrator...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outtable+".out.log and "+outtable+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd},exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
+//		Executor.executeCommand(new String[]{cmd},exec, null, GATKBaseRecalibrationNodeModel.logger, outtable+".out.log", outtable+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outtable+".out.log", outtable+".err.log");
 	}
 	
-	protected static void PrintReads(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outbam, boolean outsimple, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+	protected void PrintReads(ExecutionContext exec, String gatk, String inputbam, String inputref, String inputtable, String outbam, boolean outsimple, int cputhreads, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception {
+		
+		String lockFile = outbam + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
@@ -168,10 +178,13 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK PrintReads...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outbam+".out.log and "+outbam+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null);
+//		Executor.executeCommand(new String[]{cmd}, exec, null, GATKBaseRecalibrationNodeModel.logger, outbam+".out.log", outbam+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outbam+".out.log", outbam+".err.log");
 	}
 	
-	protected static void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE,String recalintermediate) throws Exception {
+	protected void AnalyzeCovariates(ExecutionContext exec, String gatk, String inputref, String beforetable, String aftertable, String pplots, String pint, String proxyOptions, int GATK_MEMORY_USAGE,String recalintermediate) throws Exception {
+		
+		String lockFile = pplots + SuccessfulRunChecker.LOCK_ENDING;
 		
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G "+ proxyOptions + gatk;
 		cmd+=" -T AnalyzeCovariates";
@@ -194,6 +207,7 @@ public class RunGATKBaseRecalibration {
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK AnalyzeCovariates...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+pplots+".out.log and "+pplots+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null);
+//		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),pplots+".out.log", pplots+".err.log");
 	}
 }

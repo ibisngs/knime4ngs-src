@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -28,7 +29,10 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
+import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 /**
@@ -37,7 +41,7 @@ import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
  *
  * @author 
  */
-public class GATKRealignmentNodeModel extends NodeModel {
+public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     
     protected static final NodeLogger logger = NodeLogger.getLogger(GATKRealignmentNodeModel.class);
     
@@ -413,10 +417,10 @@ public class GATKRealignmentNodeModel extends NodeModel {
     	logger.info("Start GATK Realignment");
     	
     	// run target creator
-    	RunGATKRealignment.targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+    	 new RunGATKRealignment().targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(), m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	//run realignment
-    	RunGATKRealignment.realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+    	 new RunGATKRealignment().realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile, intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(), m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(), m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(), m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
     	
     	// write output table
     	/*
@@ -736,5 +740,8 @@ public class GATKRealignmentNodeModel extends NodeModel {
 
     }
 
+    
+
+    
 }
 

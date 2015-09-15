@@ -29,6 +29,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -38,7 +39,7 @@ import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
  *
  * @author 
  */
-public class GATKBaseRecalibrationNodeModel extends NodeModel {
+public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     
     protected static final NodeLogger logger = NodeLogger.getLogger(GATKBaseRecalibrationNodeModel.class);
     
@@ -466,7 +467,7 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
         
 		int GATK_MEMORY_USAGE = m_GATK_JAVA_MEMORY.getIntValue();
 		
-    	RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+    	new RunGATKBaseRecalibration().BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, phase1file, millsfile, dbsnpfile, intfile, covariates, m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
     	
     	if(m_create_plots.getBooleanValue()){
     		
@@ -475,12 +476,12 @@ public class GATKBaseRecalibrationNodeModel extends NodeModel {
     		String recalplots=PathProcessor.createOutputFile(base, "pdf", "recal_plots");
     		String recalintermediate=PathProcessor.createOutputFile(base, "csv", "recal_plots_intermediateData");
     		
-    		RunGATKBaseRecalibration.BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
-    		RunGATKBaseRecalibration.AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE,recalintermediate);
+    		new RunGATKBaseRecalibration().BaseRecalibrator(exec, gatkfile, inputfile, reffile, recaltable, recalaftertable, phase1file, millsfile, dbsnpfile, intfile, covariates,m_low_qual_tail.getIntValue(), m_gap_open.getDoubleValue(), m_max_cycles.getIntValue(), indelmis, m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+    		new RunGATKBaseRecalibration().AnalyzeCovariates(exec, gatkfile, reffile, recaltable, recalaftertable, recalplots, intfile, proxyOptions, GATK_MEMORY_USAGE,recalintermediate);
     		
     	}
     	
-    	RunGATKBaseRecalibration.PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+    	new RunGATKBaseRecalibration().PrintReads(exec, gatkfile, inputfile, reffile, recaltable, recalbam, m_simplify_out.getBooleanValue(), m_cpu_threads.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
     	
     	/*
     	 * output table

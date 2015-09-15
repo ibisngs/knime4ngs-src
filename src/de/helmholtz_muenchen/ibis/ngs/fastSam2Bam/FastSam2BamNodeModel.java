@@ -74,8 +74,9 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 	private final static String PICTOOLS_JAR_NAME = "MergeSamFiles.jar";
 	
 	// name of the output variables
-	public static final String OUT_COL1 = "Path2Bam";
+	public static final String OUT_COL1 = "Path2BAMFile";
 	public static final String OUT_COL2 = "Path2Bai";
+	public static final String OUT_COL3 = "Path2SEQFile";
        
 	// definition of SettingsModel (all prefixed with SET)
 	private final SettingsModelString SET_GENOME 			= new SettingsModelString(CFGKEY_GENOME_FILE, DEFAULT_GENOME_FILE);
@@ -284,7 +285,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	
     	// write output
     	BufferedDataContainer cont= exec.createDataContainer(getDataOutSpec1());
-    	DataCell[] c = new DataCell[]{ new StringCell(nameOfBamFile), new StringCell(nameOfBaiFile) };
+    	DataCell[] c = new DataCell[]{ new StringCell(nameOfBamFile), new StringCell(nameOfBaiFile), new StringCell(SET_GENOME.getStringValue()) };
     	cont.addRowToTable(new DefaultRow("Row0", c));
     	cont.close();
         return new BufferedDataTable[]{cont.getTable()};
@@ -318,7 +319,8 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	return new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec()});
+    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()});
     }
 
 	@Override

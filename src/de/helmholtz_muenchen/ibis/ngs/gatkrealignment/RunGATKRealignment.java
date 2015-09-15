@@ -1,16 +1,22 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkrealignment;
 
 
+import java.io.File;
 import org.knime.core.node.ExecutionContext;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
-
-public class RunGATKRealignment {
+public class RunGATKRealignment extends GATKRealignmentNodeModel {
+	
+	public RunGATKRealignment(){
+		
+	}
 	
 	
 	//calls gatk targetcreator
-	protected static void targetcreator(ExecutionContext exec, String outputint, String inputbam, String ref, String gatk, String phase1, String mills, String interval, int threads, int maxint, int minreads, double mismatch, int window, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception{
+	public void targetcreator(ExecutionContext exec, String outputint, String inputbam, String ref, String gatk, String phase1, String mills, String interval, int threads, int maxint, int minreads, double mismatch, int window, String proxyOptions, int GATK_MEMORY_USAGE) throws Exception{
+		
+		String lockFile = outputint + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
 		
@@ -45,12 +51,15 @@ public class RunGATKRealignment {
 		GATKRealignmentNodeModel.logger.info("Running GATK TargetCreator...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".out.log and "+outputint+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKRealignmentNodeModel.logger, outputint+".out.log", outputint+".err.log", null);
+//		Executor.executeCommand(new String[]{cmd}, exec, null, GATKRealignmentNodeModel.logger, outputint+".out.log", outputint+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputint+".out.log", outputint+".err.log");
 	}
 	
 	//calls gatk indel realigner
-	protected static void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception{
+	protected void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam, String ref, String gatk, String phase1, String mills, String interval, String consmode, double lod, double entropy, int maxcons, int maxisize, int maxposmove, int maxreadscons, int maxreadsaln, boolean notag, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception{
     	
+		String lockFile = outputbam + SuccessfulRunChecker.LOCK_ENDING;
+		
 		//create command string
 
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G " + proxyOptions + gatk;
@@ -93,8 +102,8 @@ public class RunGATKRealignment {
 		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".out.log and "+outputbam+".err.log");
 		
-		Executor.executeCommand(new String[] {cmd}, exec, null, GATKRealignmentNodeModel.logger, outputbam+".out.log", outputbam+".err.log", null);
-	
+//		Executor.executeCommand(new String[] {cmd}, exec, null, GATKRealignmentNodeModel.logger, outputbam+".out.log", outputbam+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputbam+".out.log", outputbam+".err.log");
 		
 	}
 
