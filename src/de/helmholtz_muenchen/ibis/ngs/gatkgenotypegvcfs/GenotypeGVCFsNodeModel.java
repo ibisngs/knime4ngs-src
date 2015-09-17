@@ -12,6 +12,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
@@ -24,11 +25,10 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 public class GenotypeGVCFsNodeModel extends GATKNodeModel {
     
 	public static final String CFGKEY_NT_FILE = "NT";
-//	private static final String REFERENCE = "Reference";
 
 	private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
 	
-	private String OUTFILE; 
+	private String OUTFILE, LOCKFILE; 
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
 		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
@@ -45,8 +45,6 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData) {
 		
-//		String refGenome = getAvailableFlowVariables().get(REFERENCE).getStringValue();
-
 		Iterator <DataRow> it = inData[0].iterator();
 		ArrayList<String> command 	= new ArrayList<String>();
 		boolean first = true;
@@ -56,13 +54,13 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			
 			if(first){
 				this.OUTFILE = IO.replaceFileExtension(INFILE, ".GenotypedVariants.vcf");
+				this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 				first=false;
 			}
 
 			command.add("--variant "+INFILE);
 
 		}
-//    	command.add("-R "+refGenome);
 		command.add("-nt "+m_NT.getIntValue());
 		return StringUtils.join(command, " ");
 	}
@@ -98,8 +96,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	}
 	@Override
 	protected File getLockFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return new File(this.LOCKFILE);
 	}
 }
 

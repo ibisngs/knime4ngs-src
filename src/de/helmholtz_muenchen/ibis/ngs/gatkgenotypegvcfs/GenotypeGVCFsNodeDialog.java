@@ -28,7 +28,8 @@ public class GenotypeGVCFsNodeDialog extends GATKNodeDialog {
 		
 		final SettingsModelIntegerBounded NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
 		
-		addDialogComponent(new DialogComponentNumber(NT, "Threads", 1));
+		
+		addDialogComponent(new DialogComponentNumber(NT, "Number of threads", 1));
 		
 		
 	}

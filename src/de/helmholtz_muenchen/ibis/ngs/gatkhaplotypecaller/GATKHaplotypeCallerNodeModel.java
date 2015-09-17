@@ -11,10 +11,9 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
@@ -26,14 +25,9 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 
-	
-	public static final String CFGKEY_BED_FILE 			= "BED_FILE";
-	public static final String CFGKEY_BED_FILE_CHECKBOX = "BED_FILE_CHECKBOX";
-	
-	private final SettingsModelString m_BED_FILE = new SettingsModelString(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE, "");
-    private final SettingsModelBoolean m_BED_FILE_CHECKBOX = new SettingsModelBoolean(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
 	private String INFILE; 
-    private String OUTFILE; 
+    private String OUTFILE;
+    private String LOCKFILE;
 	
 	protected GATKHaplotypeCallerNodeModel(int INPORTS, int OUTPORTS) {
 		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
@@ -54,12 +48,8 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
 		
-		if(m_BED_FILE_CHECKBOX.getBooleanValue()){
-			command.add("-L "+m_BED_FILE.getStringValue());
-		}
-		
 		this.OUTFILE = IO.replaceFileExtension(INFILE/*_arrList.get(0)*/, ".gvcf");
-
+		this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 		String commandLine = StringUtils.join(command, " ");
 		
 		String reffile = "";
@@ -93,31 +83,27 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_BED_FILE.saveSettingsTo(settings);
-		m_BED_FILE_CHECKBOX.saveSettingsTo(settings);
+		
 		
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		m_BED_FILE.loadSettingsFrom(settings);
-		m_BED_FILE_CHECKBOX.loadSettingsFrom(settings);
+	
 		
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-		m_BED_FILE.validateSettings(settings);
-		m_BED_FILE_CHECKBOX.validateSettings(settings);
+		
 		
 	}
 
 	@Override
 	protected File getLockFile() {
-		// TODO Auto-generated method stub
-		return null;
+		return new File(LOCKFILE);
 	}
 }
 

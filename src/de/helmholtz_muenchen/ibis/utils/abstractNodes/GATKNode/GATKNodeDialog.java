@@ -42,7 +42,7 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	addDialogComponent(ref_genome);
     	
     	createNewGroup("Path to BED file");
-    	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use bed file?"));
+    	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use BED file?"));
     	addDialogComponent(new DialogComponentFileChooser(m_path2bed, "his_id_GATK_DoC", 0, ".bed"));
     	
     	createNewGroup("Further options");

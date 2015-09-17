@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
     <name>GenotypeGVCFs</name>
     
     <shortDescription>
-        
+        Perform joint genotyping on gVCF files produced by HaplotypeCaller.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	GenotypeGVCFs merges gVCF records that were produced by the HaplotypeCaller, or result from combining such gVCF files using CombineGVCFs.
+        	This tool performs the multi-sample joint aggregation step and merges the records together in a sophisticated manner:
+        	at each position of the input gVCFs, this tool will combine all spanning records, produce correct genotype likelihoods, re-genotype the newly merged record, and then re-annotate it.
+        	For further information, see <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantutils_GenotypeGVCFs.php">GATK documentation of GenotypeGVCFs</a>.
+        </intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        	<option name="Number of threads">
+        		Set number of threads.
+        	</option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+        <inPort index="0" name="GVCF inport">
+        	Input GVCF file.
+        </inPort>
+        <outPort index="0" name="VCF file">
+        	Genotyped VCF.
+        </outPort>
+    </ports>
 </knimeNode>
