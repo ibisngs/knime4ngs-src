@@ -1,8 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.thundercall;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -207,19 +205,19 @@ public class ThunderCallNodeModel extends NodeModel {
 	/**
 	 * 
 	 */
-	private void createDirectory(String directory) {
-		File dir = new File(directory);
-
-		if (dir.exists())
-			dir.delete();
-		// if the directory does not exist, create it
-		else {
-			System.out.println("creating directory: " + dir.toString());
-			if (dir.mkdir()) {    
-				System.out.println(directory.substring(directory.lastIndexOf("/")+1, directory.length()) + " directory created");  
-			}
-		}
-	}
+//	private void createDirectory(String directory) {
+//		File dir = new File(directory);
+//
+//		if (dir.exists())
+//			dir.delete();
+//		// if the directory does not exist, create it
+//		else {
+//			System.out.println("creating directory: " + dir.toString());
+//			if (dir.mkdir()) {    
+//				System.out.println(directory.substring(directory.lastIndexOf("/")+1, directory.length()) + " directory created");  
+//			}
+//		}
+//	}
 
 
     /**

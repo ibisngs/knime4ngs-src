@@ -2,10 +2,8 @@ package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -308,7 +306,7 @@ public class FrostRunner {
 //		System.out.println("File used for positions: " + mapFile);
 		//Writing the IDs and Chunks as file
 		RecordWriters rw = new RecordWriters();
-		String ids = "";
+//		String ids = "";
 		
 		System.gc();
 //		memory();
@@ -372,7 +370,7 @@ public class FrostRunner {
 //				System.out.println((i+1) + ". "+ currentChr + " " + currentLength);
 //				int chunk = (currentLength/FrostRunner.chunk_length)+1;
 			
-				ids += fc.input_chr_length.get(i) + "\n";
+//				ids += fc.input_chr_length.get(i) + "\n";
 
 				/**
 				 * preparing the mutations and recombination positions

@@ -17,7 +17,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
+//import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -38,7 +38,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 public class FrostslilheplerNodeModel extends NodeModel {
     
 	public final static int chunk_length = 10000000;
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostslilheplerNodeModel.class); //not used yet
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostslilheplerNodeModel.class); //not used yet
 
     
 
@@ -59,10 +59,10 @@ public class FrostslilheplerNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
 
     	CloseableRowIterator it = inData[0].iterator();
-    	int row_count = inData[0].getRowCount()-1;
+//    	int row_count = inData[0].getRowCount()-1;
 		while (it.hasNext()) {
 			DataRow row = it.next();
-			String id = row.getKey().toString().substring("Row: ".length());
+//			String id = row.getKey().toString().substring("Row: ".length());
 			String[] trio = {
 					row.getCell(0).toString(), //F_0
 					row.getCell(1).toString(), //F_1

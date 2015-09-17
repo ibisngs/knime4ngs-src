@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.utils.ngs.frost;
 
-import java.util.ArrayList;
 
 public class Strand {
 	

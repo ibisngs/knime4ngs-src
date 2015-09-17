@@ -52,8 +52,8 @@ public class ArtNodeDialog extends DefaultNodeSettingsPane {
         
     	setHorizontalPlacement(false);
     	
-    	String s = "";
-    	s = (ArtNodeModel.optionalPort)? "enabled": "diasbled";
+//    	String s = "";
+//    	s = (ArtNodeModel.optionalPort)? "enabled": "diasbled";
     	addDialogComponent(new DialogComponentFileChooser(use_FILE, "Testing", 0, true));
 
 //    	addDialogComponent(new DialogComponentFileChooser(use_FILE,"Testing", 0, ".txt"));

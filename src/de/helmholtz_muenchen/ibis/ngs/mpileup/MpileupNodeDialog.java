@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.mpileup;
 
-import javax.swing.JFileChooser;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -14,9 +13,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-
-import de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeModel;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 
 /**
  * <code>NodeDialog</code> for the "Mpileup" Node.

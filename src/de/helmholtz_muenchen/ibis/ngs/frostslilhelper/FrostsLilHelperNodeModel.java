@@ -18,7 +18,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
+//import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
@@ -40,7 +40,7 @@ public class FrostsLilHelperNodeModel extends NodeModel {
     
 	public final static int chunk_length = 10000000;
 	private static ArrayList<String> row_count = new ArrayList<>();
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostsLilHelperNodeModel.class); //not used yet
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(FrostsLilHelperNodeModel.class); //not used yet
 
     
 
@@ -61,11 +61,11 @@ public class FrostsLilHelperNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
 
     	CloseableRowIterator it = inData[0].iterator();
-    	int row_count = inData[0].getRowCount()-1;
+//    	int row_count = inData[0].getRowCount()-1;
 		
 		while (it.hasNext()) {
 			DataRow row = it.next();
-			String id = row.getKey().toString().substring("Row: ".length());
+//			String id = row.getKey().toString().substring("Row: ".length());
 			String[] trio = {
 					row.getCell(0).toString(), //M0
 					row.getCell(1).toString(), //M1

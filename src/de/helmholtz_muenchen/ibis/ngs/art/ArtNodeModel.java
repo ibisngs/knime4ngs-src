@@ -36,7 +36,6 @@ import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.frost.FrostRunner;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 import de.helmholtz_muenchen.ibis.ngs.frostslilhelper.FrostsLilHelperNodeModel;

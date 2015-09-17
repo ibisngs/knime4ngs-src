@@ -4,12 +4,8 @@ import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.thundercall.ThunderCallNodeModel;
 import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 
 /**
@@ -36,7 +32,8 @@ public class SamtoolsHybridNodeDialog extends DefaultNodeSettingsPane {
 	    	DialogComponentFileChooser sam= new DialogComponentFileChooser(SAMTOOLS_HYBRID, "samtools-hybrid", "");
 	    	addDialogComponent(sam);
 
-	        String samHybridPath = BinaryHandler.checkToolAvailability("samtools-hybrid");
+	        @SuppressWarnings("deprecation")
+			String samHybridPath = BinaryHandler.checkToolAvailability("samtools-hybrid");
 	    	if(samHybridPath == null) {
 	    		samHybridPath = "samtools-hybrid binary not found!";
 	    	}

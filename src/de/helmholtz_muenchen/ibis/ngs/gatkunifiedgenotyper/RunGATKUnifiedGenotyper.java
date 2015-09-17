@@ -6,7 +6,6 @@ import java.io.File;
 import org.knime.core.node.ExecutionContext;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 public class RunGATKUnifiedGenotyper extends GATKUnifiedGenotyperNodeModel{

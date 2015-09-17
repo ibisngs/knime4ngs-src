@@ -2,7 +2,6 @@ package de.helmholtz_muenchen.ibis.ngs.filterLowExpressed;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
-import org.knime.core.node.NodeView;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
 

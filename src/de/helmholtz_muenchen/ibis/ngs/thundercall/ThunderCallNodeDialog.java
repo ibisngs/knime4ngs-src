@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.thundercall;
 
-import javax.swing.JFileChooser;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
@@ -37,7 +36,8 @@ public class ThunderCallNodeDialog extends DefaultNodeSettingsPane {
         createNewGroup("Path to thunder file");
     	DialogComponentFileChooser thunder= new DialogComponentFileChooser(THUNDER, "thunder", "");
     	addDialogComponent(thunder);
-        String thunderPath = BinaryHandler.checkToolAvailability("GPT_Freq");
+        @SuppressWarnings("deprecation")
+		String thunderPath = BinaryHandler.checkToolAvailability("GPT_Freq");
     	if(thunderPath == null) {
     		thunderPath = "thunder GPT_Freq binary not found!";
     	}

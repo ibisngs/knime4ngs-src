@@ -7,7 +7,6 @@ import java.util.Map;
 import org.knime.core.node.ExecutionContext;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 public class RunGATKBaseRecalibration extends GATKBaseRecalibrationNodeModel  {
 	
@@ -209,5 +208,6 @@ public class RunGATKBaseRecalibration extends GATKBaseRecalibrationNodeModel  {
 		
 //		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null);
 		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),pplots+".out.log", pplots+".err.log");
+		super.executeCommand(new String[]{cmd}, exec, env, new File(lockFile), pplots+".out.log", pplots+".err.log", null, null, null);
 	}
 }
