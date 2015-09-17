@@ -7,9 +7,7 @@ import javax.swing.event.ChangeListener;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
@@ -32,17 +30,10 @@ public class CombineGVCFsNodeDialog extends GATKNodeDialog {
 		
 		final SettingsModelString BED_FILE 				= new SettingsModelString(CombineGVCFsNodeModel.CFGKEY_BED_FILE, "");
 	    final SettingsModelBoolean BED_FILE_CHECKBOX 	= new SettingsModelBoolean(CombineGVCFsNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
-		
-	    
-//		final SettingsModelIntegerBounded NT = new SettingsModelIntegerBounded(CombineGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
-		
-//		addDialogComponent(new DialogComponentNumber(NT, "Threads", 1));
-	    
+			    
     	createNewGroup("BED File");
-    	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentBoolean(BED_FILE_CHECKBOX, "BED_FILE_CHECKBOX"));
+    	addDialogComponent(new DialogComponentBoolean(BED_FILE_CHECKBOX, "Use BED file?"));
     	addDialogComponent(new DialogComponentFileChooser(BED_FILE, "BED_FILE", JFileChooser.OPEN_DIALOG, false, ".bed"));
-		setHorizontalPlacement(false);
 		
 		BED_FILE_CHECKBOX.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {

@@ -2,6 +2,8 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +20,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -36,6 +39,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
 	public static final String CFGKEY_REF_GENOME = "REFGENOME";
 	public static final String CFGKEY_GATK_MEM = "GATK_MEM";
+	public static final String CFGKEY_PATH2BED = "bed";
+	public static final String CFGKEY_BED_FILE_CHECKBOX = "BED_FILE_CHECKBOX";
 	public static final String CFGKEY_OPT_FLAGS ="OPT_FLAGS";
 	
 	/**
@@ -45,6 +50,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
+    private final SettingsModelString m_path2bed = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_PATH2BED,"",true);
+    private final SettingsModelBoolean m_bed_file_checkbox = new SettingsModelBoolean(GATKNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
     private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 
 	/**
@@ -84,6 +91,15 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
    
     	String OUTFILE = getOutfile(); 	
     	command.add("-o "+OUTFILE);
+    	
+    	if(m_bed_file_checkbox.getBooleanValue()){
+			if(m_path2bed.getStringValue().equals("") || Files.notExists(Paths.get(m_path2bed.getStringValue()))) {
+				setWarningMessage("Specify valid bed file!");
+			} else {
+				command.add("-L "+m_path2bed.getStringValue());
+			}
+    	}
+    	
     	command.add(" "+m_OPT_FLAGS.getStringValue());
     	
     	LOGGER.info(StringUtils.join(command, " "));
@@ -162,6 +178,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
    	 	m_GATK.saveSettingsTo(settings);
    	 	m_REF_GENOME.saveSettingsTo(settings);
    	 	m_GATK_MEM.saveSettingsTo(settings);
+   	 	m_path2bed.saveSettingsTo(settings);
+   	 	m_bed_file_checkbox.saveSettingsTo(settings);
    	 	m_OPT_FLAGS.saveSettingsTo(settings);
    	 	saveExtraSettingsTo(settings);
     }
@@ -176,6 +194,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 		m_GATK.loadSettingsFrom(settings);
 		m_REF_GENOME.loadSettingsFrom(settings);
 		m_GATK_MEM.loadSettingsFrom(settings);
+		m_path2bed.loadSettingsFrom(settings);
+		m_bed_file_checkbox.loadSettingsFrom(settings);
 		m_OPT_FLAGS.loadSettingsFrom(settings);
 		loadExtraValidatedSettingsFrom(settings);
 
@@ -191,6 +211,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 		m_GATK.validateSettings(settings);
 		m_REF_GENOME.validateSettings(settings);
 		m_GATK_MEM.validateSettings(settings);
+		m_path2bed.validateSettings(settings);
+		m_bed_file_checkbox.validateSettings(settings);
 		m_OPT_FLAGS.validateSettings(settings);
 		validateExtraSettings(settings);
     }

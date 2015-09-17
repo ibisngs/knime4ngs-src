@@ -3,21 +3,38 @@
     <name>CombineGVCFs</name>
     
     <shortDescription>
-        Combines any number of gVCF files that were produced by the Haplotype Caller into a single joint gVCF file
+        Combines any number of gVCF files that were produced by the Haplotype Caller into a single joint gVCF file.
     </shortDescription>
     
     <fullDescription>
-        <intro>CombineGVCFs is meant to be used for hierarchical merging of gVCFs that will eventually be input into GenotypeGVCFs. One would use this tool when needing to genotype too large a number of individual gVCFs; instead of passing them all in to GenotypeGVCFs, one would first use CombineGVCFs on smaller batches of samples and then pass these combined gVCFs to GenotypeGVCFs. Note that this tool cannot work with just any gVCF files - they must have been produced with the Haplotype Caller as part of the "single sample discovery" pipeline using the '-ERC GVCF' mode, which uses a sophisticated reference model to produce accurate genotype likelihoods for every position in the target. </intro>
-        
-        
-
+        <intro>
+        	CombineGVCFs is meant to be used for hierarchical merging of gVCFs that will eventually be input into GenotypeGVCFs.
+        	One would use this tool when needing to genotype a too large number of individual gVCFs;
+        	instead of passing them all in to GenotypeGVCFs, one would first use CombineGVCFs on smaller batches of samples and then pass these combined gVCFs to GenotypeGVCFs.
+        	Note that this tool cannot work with just any gVCF files - they must have been produced with the Haplotype Caller as part of the "single sample discovery" pipeline using the '-ERC GVCF' mode,
+        	which uses a sophisticated reference model to produce accurate genotype likelihoods for every position in the target.
+        </intro>
+    
+    	<option name="HTE">
+        	Set threshold for repeated execution.
+        	Only used if HTE is enabled in the preference page.
+    	</option>
+    	<option name="Path to GATK jar file">
+       		Set path GenomeAnalysisTK.jar and memory usage.
+    	</option>
+    	<option name="Reference Genome">
+        	Set path to reference genome.
+    	</option>
+    	<option name="Further options">
+        	Commit further options to GATK.
+    	</option>
+    	<option name="BED File">
+    		Select a BED file to define one or more genomic intervals over which to operate.
+    	</option>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="GVCF Inport">GVCF Files in first column</inPort>
         <outPort index="0" name="Out-Port">Merged VCF in first column</outPort>
-    </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+    </ports>
 </knimeNode>

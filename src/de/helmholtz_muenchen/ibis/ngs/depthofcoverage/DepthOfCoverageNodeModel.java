@@ -11,7 +11,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -37,8 +36,7 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	 * Config Keys
 	 */
 	
-	public static final String CFGKEY_PATH2BED = "bed";
-	public static final String CFGKEY_BED_FILE_CHECKBOX = "BED_FILE_CHECKBOX";
+
 	public static final String CFGKEY_INFILE = "infile";
 	public static final String CFGKEY_EXTRAFILTERS = "extrafilters";
 	public static final String CFGKEY_FILESUFFIX = "suffix";
@@ -46,8 +44,7 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	/**
 	 * Node Models
 	 */
-	private final SettingsModelString m_path2bed = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_PATH2BED,"",true);
-    private final SettingsModelBoolean m_bed_file_checkbox = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
+	
 	private final SettingsModelOptionalString m_extrafilters = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_EXTRAFILTERS,"",false);
 	private final SettingsModelString m_filesuffix = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"DoC");
 	private final SettingsModelString m_infile = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_INFILE,"");
@@ -86,13 +83,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		this.LOCKFILE = IO.replaceFileExtension(infile, SuccessfulRunChecker.LOCK_ENDING);
 		command.add("-I "+infile);
 
-		if(m_bed_file_checkbox.getBooleanValue()){
-			if(m_path2bed.getStringValue().equals("") || Files.notExists(Paths.get(m_path2bed.getStringValue()))) {
-				setWarningMessage("Specify valid bed file!");
-			} else {
-				command.add("-L "+m_path2bed.getStringValue());
-			}
-    	}
 		
 		if(!m_extrafilters.getStringValue().equals("")){
         	String[] filters = m_extrafilters.getStringValue().split(",");
@@ -167,8 +157,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		m_extrafilters.saveSettingsTo(settings);
         m_filesuffix.saveSettingsTo(settings);
         m_infile.saveSettingsTo(settings);
-        m_path2bed.saveSettingsTo(settings);
-        m_bed_file_checkbox.saveSettingsTo(settings);
 	}
 
 	@Override
@@ -177,8 +165,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		m_extrafilters.loadSettingsFrom(settings);
         m_filesuffix.loadSettingsFrom(settings);
         m_infile.loadSettingsFrom(settings);
-        m_path2bed.loadSettingsFrom(settings);
-        m_bed_file_checkbox.loadSettingsFrom(settings);
 	}
 
 	@Override
@@ -187,8 +173,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		m_extrafilters.validateSettings(settings);
         m_filesuffix.validateSettings(settings);
         m_infile.validateSettings(settings);
-        m_path2bed.validateSettings(settings);
-        m_bed_file_checkbox.validateSettings(settings);
 	}
 }
 

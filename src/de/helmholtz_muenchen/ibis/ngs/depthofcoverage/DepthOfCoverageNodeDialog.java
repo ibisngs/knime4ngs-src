@@ -1,11 +1,9 @@
 package de.helmholtz_muenchen.ibis.ngs.depthofcoverage;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -60,8 +58,7 @@ public class DepthOfCoverageNodeDialog extends GATKNodeDialog {
 	@Override
 	protected void addDialogComponent() {
 
-		final SettingsModelString m_path2bed = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_PATH2BED,"",true);
-		final SettingsModelBoolean m_bed_file_check = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX,false);
+	
 		final SettingsModelOptionalString m_extrafilters = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_EXTRAFILTERS,"",false);
 		final SettingsModelString m_filesuffix = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"");
 		final SettingsModelString m_infile = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_INFILE,"");
@@ -70,9 +67,7 @@ public class DepthOfCoverageNodeDialog extends GATKNodeDialog {
     	createNewGroup("Path to Infile");
     	addDialogComponent(new DialogComponentFileChooser(m_infile, "his_id_GATK_DoC", 0, ".bam"));
 
-    	createNewGroup("Path to BED file");
-    	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use bed file?"));
-    	addDialogComponent(new DialogComponentFileChooser(m_path2bed, "his_id_GATK_DoC", 0, ".bed"));
+    	
     	
     	addDialogComponent(new DialogComponentString(m_filesuffix, "Outfile Suffix"));
     	addDialogComponent(new DialogComponentOptionalString(m_extrafilters, "GATK Filter Terms (separated by ',')"));
