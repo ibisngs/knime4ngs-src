@@ -22,9 +22,6 @@ public class BAMLoaderNodeDialog extends DefaultNodeSettingsPane {
      */
     protected BAMLoaderNodeDialog() {
     	
-    	createNewGroup("SamTools.");
-    	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BAMLoaderNodeModel.CFGKEY_SAMTOOLS,null), "his_baml_id", 0, ""));
-    	createNewGroup("Reference (e.g. genome) sequence: FastA file.");
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BAMLoaderNodeModel.CFGKEY_SEQFILE,null), "his0_baml_id", 0, ""));
     	createNewGroup("Alignment/ BAM file (sorted, indexed, binary).");
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BAMLoaderNodeModel.CFGKEY_BAMFILE,null), "his1_baml_id", 0, "bam"));

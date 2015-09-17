@@ -30,12 +30,6 @@
 			Manual page of AnalyzeCovariates at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_AnalyzeCovariates"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_AnalyzeCovariates </a>
 			<br />
 			Manual page of PrintReads at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_readutils_PrintReads"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_readutils_PrintReads </a>
-			<br />
-			Predecessor Loss-of-Function nodes: PicardTools, GATKRealignment
-			<br />
-			Predecessor NGS nodes: BAMLoader
-			<br />
-			Successor Loss-of-Function nodes: GATKUnifiedGenotyper, PicardTools
     	</intro>
         
         <tab name="Options">

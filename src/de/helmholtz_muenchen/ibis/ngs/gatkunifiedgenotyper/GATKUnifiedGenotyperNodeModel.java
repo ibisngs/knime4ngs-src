@@ -29,6 +29,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -38,7 +39,7 @@ import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
  *
  * @author 
  */
-public class GATKUnifiedGenotyperNodeModel extends NodeModel {
+public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     
 
     protected static final NodeLogger logger = NodeLogger.getLogger(GATKUnifiedGenotyperNodeModel.class);
@@ -424,17 +425,17 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
         
         // call snps
         if(!snpout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+        	new RunGATKUnifiedGenotyper().CallVariants(exec, gatkfile, inputfiles, reffile, snpout, intfile, dbsnpfile, "SNP", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
         // call indels
         if(!indelout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+        	new RunGATKUnifiedGenotyper().CallVariants(exec, gatkfile, inputfiles, reffile, indelout, intfile, dbsnpfile, "INDEL", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
         // call both
         if(!glmBothout.equals("")){
-        	RunGATKUnifiedGenotyper.CallVariants(exec, gatkfile, inputfiles, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+        	new RunGATKUnifiedGenotyper().CallVariants(exec, gatkfile, inputfiles, reffile, glmBothout, intfile, dbsnpfile, "BOTH", m_num_threads.getIntValue(), param, m_baq.getStringValue(), m_mbq.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
         }
         
     	//determine number of output columns
@@ -623,6 +624,9 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
+    	
         m_gatk.saveSettingsTo(settings);
         m_use_dbsnp.saveSettingsTo(settings);
         m_dbsnp_file.saveSettingsTo(settings);
@@ -664,7 +668,9 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	m_gatk.loadSettingsFrom(settings);
     	m_use_dbsnp.loadSettingsFrom(settings);
     	m_dbsnp_file.loadSettingsFrom(settings);
@@ -707,6 +713,9 @@ public class GATKUnifiedGenotyperNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
+    	/** added for HTE **/
+    	super.validateSettings(settings);
+    	
     	m_gatk.validateSettings(settings);
     	m_use_dbsnp.validateSettings(settings);
     	m_dbsnp_file.validateSettings(settings);

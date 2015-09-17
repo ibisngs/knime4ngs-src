@@ -1,15 +1,20 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper;
 
 
+import java.io.File;
+
 import org.knime.core.node.ExecutionContext;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
-public class RunGATKUnifiedGenotyper {
+public class RunGATKUnifiedGenotyper extends GATKUnifiedGenotyperNodeModel{
 	
-protected static void CallVariants(ExecutionContext exec, String gatk, String[] bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
+protected void CallVariants(ExecutionContext exec, String gatk, String[] bam, String ref, String out, String intf, String dbsnpf, String snpIndel, int threads, double [] param, String baq, boolean filter, String proxyOptions, int GATK_MEMORY_USAGE, String opt_flags) throws Exception {
 		
+		String lockFile = out + SuccessfulRunChecker.LOCK_ENDING;
+	
 		//for each thread 2G
 		String cmd="java -jar -Xmx"+GATK_MEMORY_USAGE+"G " + proxyOptions + gatk;
 		cmd+=" -T UnifiedGenotyper";
@@ -58,8 +63,8 @@ protected static void CallVariants(ExecutionContext exec, String gatk, String[] 
 		GATKUnifiedGenotyperNodeModel.logger.info("Running GATK UnifiedGenotyper...");
 		GATKUnifiedGenotyperNodeModel.logger.info("Log files can be found in "+out+".out.log and "+out+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, GATKUnifiedGenotyperNodeModel.logger, out+".out.log", out+".err.log", null);
-		
+//		Executor.executeCommand(new String[]{cmd}, exec, null, GATKUnifiedGenotyperNodeModel.logger, out+".out.log", out+".err.log", null);
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),out+".out.log", out+".err.log");
 	}
 
 }

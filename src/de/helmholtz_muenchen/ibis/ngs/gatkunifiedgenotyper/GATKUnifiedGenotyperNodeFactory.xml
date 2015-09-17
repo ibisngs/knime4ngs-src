@@ -16,12 +16,6 @@
 			The UnifiedGenotyper manual page can be found at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html </a>
 			<br />
 			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
-			<br />
-			Predecessor Loss-of-Function nodes: PicardTools, GATKRealignment, GATKBaseReaclibrator
-			<br />
-			Predecessor NGS nodes: BAMLoader
-			<br />
-			Successor Loss-of-Function nodes: VAT
     	</intro>
         
         <tab name="Options">

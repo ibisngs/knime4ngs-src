@@ -586,7 +586,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
         //general options
     	m_gatk.saveSettingsTo(settings);
     	m_use_phase1_1000G.saveSettingsTo(settings);
@@ -632,7 +633,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);    
     	// general options
     	m_gatk.loadSettingsFrom(settings);
     	m_use_phase1_1000G.loadSettingsFrom(settings);
@@ -678,7 +680,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	
+    	/** added for HTE **/
+    	super.validateSettings(settings);
     	//general options
     	
     	m_gatk.validateSettings(settings);

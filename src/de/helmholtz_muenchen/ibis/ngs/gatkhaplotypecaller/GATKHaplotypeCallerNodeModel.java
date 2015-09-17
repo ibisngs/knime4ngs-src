@@ -30,7 +30,6 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 	public static final String CFGKEY_BED_FILE 			= "BED_FILE";
 	public static final String CFGKEY_BED_FILE_CHECKBOX = "BED_FILE_CHECKBOX";
 	
-//	private ArrayList<String> INFILE_arrList = new ArrayList<>(3);
 	private final SettingsModelString m_BED_FILE = new SettingsModelString(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE, "");
     private final SettingsModelBoolean m_BED_FILE_CHECKBOX = new SettingsModelBoolean(GATKHaplotypeCallerNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
 	private String INFILE; 
@@ -46,23 +45,18 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		CloseableRowIterator it = inData[0].iterator();
 		while (it.hasNext()) {
 			DataRow row = it.next();
-//			INFILE_arrList.add(row.getCell(0).toString());
 			INFILE = row.getCell(0).toString();
 		}
-//		String INFILE				= inData[0].iterator().next().getCell(0).toString();
 		ArrayList<String> command 	= new ArrayList<String>();
-//		for(String s : INFILE_arrList) {
-//    		command.add("-I "+s);
-//
-//		}
+
 		command.add("-I "+INFILE);
-//		if (INFILE_arrList.size()==1) {
 		command.add("--emitRefConfidence GVCF");
-//		}
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
-		if(m_BED_FILE_CHECKBOX.isEnabled())
+		
+		if(m_BED_FILE_CHECKBOX.getBooleanValue()){
 			command.add("-L "+m_BED_FILE.getStringValue());
+		}
 		
 		this.OUTFILE = IO.replaceFileExtension(INFILE/*_arrList.get(0)*/, ".gvcf");
 
@@ -73,7 +67,6 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		for (int i = 0; i < lines.length-1; i++) {
 			if (lines[i] == "-R") {
 				reffile = lines[i+1];
-//				System.out.println(reffile);
 				break;
 			}
 		}

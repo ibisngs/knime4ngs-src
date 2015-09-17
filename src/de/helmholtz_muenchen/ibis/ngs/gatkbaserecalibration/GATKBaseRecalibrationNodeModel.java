@@ -650,7 +650,8 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
 
         // general options
     	m_gatk.saveSettingsTo(settings);
@@ -698,7 +699,8 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
             
     	m_gatk.loadSettingsFrom(settings);
     	m_use_phase1_1000G.loadSettingsFrom(settings);
@@ -745,6 +747,8 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     
+    	/** added for HTE **/
+    	super.validateSettings(settings);
     	
     	m_gatk.validateSettings(settings);
     	m_use_phase1_1000G.validateSettings(settings);

@@ -17,6 +17,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 
 
 /**
@@ -30,7 +33,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author 
  */
-public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
+public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 	
 	//options tab
 	/*
@@ -289,7 +292,32 @@ public class GATKRealignmentNodeDialog extends DefaultNodeSettingsPane {
 				}
 			});
 	  	
+    	usePrefPage.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				gatk.setEnabled(!usePrefPage.getBooleanValue());
+				if(usePrefPage.getBooleanValue()) {
+					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+			    	if(toolPath.equals("")) {
+			    		toolPath = "GATK Jar File not found!";
+			    	}
+			    	gatk.setStringValue(toolPath);
+				}
+			}
+    	});
+	  	
   }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	if(usePrefPage.getBooleanValue()){
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+	    	if(toolPath == null) {
+	    		toolPath = "GATK Jar File not found!";
+	    	}
+	    	gatk.setStringValue(toolPath);
+    	}
+    }	
     
 }
 

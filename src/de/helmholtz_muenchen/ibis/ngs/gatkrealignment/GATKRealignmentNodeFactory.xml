@@ -19,12 +19,6 @@
 			Manual page of IndelRealigner at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_IndelRealigner"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_IndelRealigner </a>
 			<br />
 			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
-			<br />
-			Predecessor Loss-of-Function nodes: PicardTools
-			<br />
-			Predecessor NGS nodes: BAMLoader
-			<br />
-			Successor Loss-of-Function nodes: GATKBaseReaclibrator, GATKUnifiedGenotyper, PicardTools
     	</intro>
         
         <tab name="Options">

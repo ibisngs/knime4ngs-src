@@ -19,6 +19,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 
 /**
  * <code>NodeDialog</code> for the "GATKUnifiedGenotyper" Node.
@@ -31,7 +34,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author 
  */
-public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
+public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 	
 	
 	/* main options
@@ -202,6 +205,20 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
         	
         });
         
+    	usePrefPage.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				gatk.setEnabled(!usePrefPage.getBooleanValue());
+				if(usePrefPage.getBooleanValue()) {
+					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+			    	if(toolPath.equals("")) {
+			    		toolPath = "GATK Jar File not found!";
+			    	}
+			    	gatk.setStringValue(toolPath);
+				}
+			}
+    	});
+        
         // variant types
         createNewGroup("Variants");
         addDialogComponent(new DialogComponentLabel("Choose the variant types to be called"));
@@ -258,5 +275,17 @@ public class GATKUnifiedGenotyperNodeDialog extends DefaultNodeSettingsPane {
 				}
 			});
   }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	if(usePrefPage.getBooleanValue()){
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+	    	if(toolPath == null) {
+	    		toolPath = "GATK Jar File not found!";
+	    	}
+	    	gatk.setStringValue(toolPath);
+    	}
+    }	
+    
 }
 
