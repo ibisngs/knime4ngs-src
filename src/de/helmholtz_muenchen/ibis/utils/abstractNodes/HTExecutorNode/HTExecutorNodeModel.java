@@ -13,6 +13,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.knime.core.node.*;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.port.PortType;
 
@@ -54,7 +55,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	static final int DEFAULT_THRESHOLD = 1;
 	
 	static final String CFGKEY_USE_PREF = "use_pref";
-
+	private final SettingsModelBoolean m_use_pref = new SettingsModelBoolean(CFGKEY_USE_PREF, true);
 	
 	private final SettingsModelInteger threshold = new SettingsModelInteger(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, 1);
@@ -241,6 +242,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	@Override
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
 		threshold.saveSettingsTo(settings);
+		m_use_pref.saveSettingsTo(settings);
 	}
 
 	/**
@@ -250,6 +252,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		threshold.loadSettingsFrom(settings);
+		m_use_pref.loadSettingsFrom(settings);
 	}
 
 	/**
@@ -259,5 +262,6 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	protected void validateSettings(final NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		threshold.validateSettings(settings);
+		m_use_pref.validateSettings(settings);
 	}
 }
