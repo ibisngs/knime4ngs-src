@@ -15,6 +15,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "Segemehl" Node.
  * 
@@ -25,8 +28,12 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * {@link org.knime.core.node.NodeDialogPane}.
  * 
  */
-public class SegemehlNodeDialog extends DefaultNodeSettingsPane {
+public class SegemehlNodeDialog extends HTExecutorNodeDialog {
 
+	private final SettingsModelString segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
+	
+	
+	
     /**
      * New pane for configuring the Segemehl node.
      */
@@ -57,7 +64,7 @@ public class SegemehlNodeDialog extends DefaultNodeSettingsPane {
     	readType.setStringValue("single-end");
     	
     	createNewGroup("Segemehl");
-    	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"bwa"), "his_id_Segemehl", 0, ""));
+    	addDialogComponent(new DialogComponentFileChooser(segemehlfile, "his_id_Segemehl", 0, ""));
     	createNewGroup("Reference (e.g. genome) sequence: FastA file.");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_Segemehl", 0, ""));
     	createNewGroup("General");
@@ -138,7 +145,31 @@ public class SegemehlNodeDialog extends DefaultNodeSettingsPane {
 			}
 		});
     	
-    	
+    	usePrefPage.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent arg0) {
+				segemehlfile.setEnabled(!usePrefPage.getBooleanValue());
+				if(usePrefPage.getBooleanValue()) {
+					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
+			    	if(toolPath.equals("")) {
+			    		toolPath = "Segemehl binary not found!";
+			    	}
+			    	segemehlfile.setStringValue(toolPath);
+				}
+			}
+    	});
     }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	if(usePrefPage.getBooleanValue()){
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
+	    	if(toolPath == null) {
+	    		toolPath = "Segemehl binary not found!";
+	    	}
+	    	segemehlfile.setStringValue(toolPath);
+    	}
+    }	
+    
 }
 

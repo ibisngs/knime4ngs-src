@@ -16,13 +16,13 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
@@ -34,7 +34,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
  * This is the model implementation of Segemehl.
  * 
  */
-public class SegemehlNodeModel extends NodeModel {
+public class SegemehlNodeModel extends HTExecutorNodeModel {
 	
 	public static final String CFGKEY_SEGEMEHLFILE = "segemehlfile";
 	public static final String CFGKEY_ACCURACY= "segemehAccuracy";
@@ -107,13 +107,6 @@ public class SegemehlNodeModel extends NodeModel {
     	
     	String path2reads1 = inData[0].iterator().next().getCell(0).toString();
     	
-    	/**Initialize logfile**/
-    	String logfile = path2reads1.substring(0,path2reads1.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("Segemehl"));
-    	/**end initializing logfile**/
-    	
     	String path2segemehl = m_segemehlfile.getStringValue();
     	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
     	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
@@ -148,8 +141,6 @@ public class SegemehlNodeModel extends NodeModel {
 	     	 * Execute
 	     	 */
 	     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-	     	logBuffer.append(ShowOutput.getNodeEndTime());
-	     	ShowOutput.writeLogFile(logBuffer);
 	     	command = new ArrayList<String>();	//Clear Array
 	    	
     	} else {
@@ -212,25 +203,13 @@ public class SegemehlNodeModel extends NodeModel {
      	/**
      	 * Execute
      	 */
-    	String joinedCommand = StringUtils.join(command, " ");
     	File lockFile = new File(outName + ".klock");
-    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, joinedCommand);
-    	
-    	// do not execute if termination state is true
-		if(!terminationState) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, joinedCommand);
-			
-			// execute the command
-			Executor.executeCommand(new String[]{joinedCommand},exec,LOGGER);
-			checker.writeOK();
-		}
-		else {
-			LOGGER.info("Successful termination state: " + terminationState);
-			logBuffer.append("Successful termination state was found.");
-		}
+	
+		// execute the command
+//		Executor.executeCommand(new String[]{joinedCommand},exec,LOGGER);
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, lockFile);
 
-     	logBuffer.append(ShowOutput.getNodeEndTime());
-     	ShowOutput.writeLogFile(logBuffer);
+
      	command = new ArrayList<String>();	//Clear Array
      	
     	/**
@@ -251,9 +230,6 @@ public class SegemehlNodeModel extends NodeModel {
     	BufferedDataTable outTable = cont.getTable();
     	
     	pushFlowVariableString("BAMSAMINFILE",outName);
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
     	
         return new BufferedDataTable[]{outTable};
     }
@@ -317,6 +293,9 @@ public class SegemehlNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
+    	
     	m_segemehlfile.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
     	m_adapter3seq.saveSettingsTo(settings);
@@ -342,6 +321,9 @@ public class SegemehlNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	m_segemehlfile.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
     	m_adapter3seq.loadSettingsFrom(settings);
@@ -367,6 +349,9 @@ public class SegemehlNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	/** added for HTE **/
+    	super.validateSettings(settings);
+    	
     	m_segemehlfile.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
     	m_adapter3seq.validateSettings(settings);
