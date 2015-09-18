@@ -207,7 +207,7 @@ public class RunGATKBaseRecalibration extends GATKBaseRecalibrationNodeModel  {
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+pplots+".out.log and "+pplots+".err.log");
 		
 //		Executor.executeCommand(new String[]{cmd}, exec, env, GATKBaseRecalibrationNodeModel.logger, pplots+".out.log", pplots+".err.log", null);
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),pplots+".out.log", pplots+".err.log");
+//		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),pplots+".out.log", pplots+".err.log");
 		super.executeCommand(new String[]{cmd}, exec, env, new File(lockFile), pplots+".out.log", pplots+".err.log", null, null, null);
 	}
 }
