@@ -5,14 +5,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -21,7 +23,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of KGGSeq.
@@ -29,16 +35,9 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Maximilian Hastreiter
  */
-public class KGGSeqNodeModel extends NodeModel {
+public class KGGSeqNodeModel extends HTExecutorNodeModel {
     
-	
-	/**
-	 * Logger
-	 */
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(KGGSeqNodeModel.class);
-	
-	
-	
+		
 	/**
 	 * Config Keys
 	 */
@@ -124,13 +123,14 @@ public class KGGSeqNodeModel extends NodeModel {
     private final SettingsModelOptionalString m_PUBMED = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_PUBMED,"",false);
 
 	
+	//The Output Col Names
+	public static final String OUT_COL1 = "Path2OutFile";
+    
     /**
      * Constructor for the node model.
      */
     protected KGGSeqNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
+        super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(1));
     }
 
     /**
@@ -140,12 +140,29 @@ public class KGGSeqNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	StringBuffer stdErr = new StringBuffer();
-    	StringBuffer stdOut = new StringBuffer();
+    	String BasePath 	= m_INFILE.getStringValue().substring(0,m_INFILE.getStringValue().lastIndexOf("/")+1);
+    	String lockFile 	= BasePath+m_OUTPREFIX.getStringValue() + SuccessfulRunChecker.LOCK_ENDING;
+    	String StdErrFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdErr.log";
+    	String StdOutFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdOut.log";
     	
-    	Executor.executeCommand(createCommand(),exec,LOGGER,stdOut,stdErr);
     	
-        return inData;
+    	super.executeCommand(createCommand(BasePath), exec, new File(lockFile),StdOutFile, StdErrFile);
+    	
+    	
+    	
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(BasePath+m_OUTPREFIX.getStringValue())};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+		return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -153,7 +170,6 @@ public class KGGSeqNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        // TODO: generated method stub
     }
 
     
@@ -161,7 +177,7 @@ public class KGGSeqNodeModel extends NodeModel {
      * Creates the execution command of the KGGSeq Node
      * @return
      */
-    private String[] createCommand(){
+    private String[] createCommand(String BasePath){
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
@@ -175,8 +191,8 @@ public class KGGSeqNodeModel extends NodeModel {
     	if(m_COMPOSITESUBJECTID.getBooleanValue()){
     		command.add("--composite-subject-id");
     	}
-    	
-    	command.add("--out "+m_OUTPREFIX.getStringValue());
+    		
+    	command.add("--out "+BasePath+m_OUTPREFIX.getStringValue());
     	command.add("--"+m_OUTFORMAT.getStringValue());
     	command.add("--seq-qual "+m_SEQ_QUAL.getDoubleValue());
     	command.add("--seq-mq "+m_SEQ_MQ.getDoubleValue());
@@ -213,7 +229,10 @@ public class KGGSeqNodeModel extends NodeModel {
     	}
     	
     	if(m_CANDIDATE_GENES.isEnabled()){
-    		command.add("--candi-file "+m_CANDIDATE_GENES.getStringValue());
+    		if(!m_CANDIDATE_GENES.getStringValue().equals("")){
+    			command.add("--candi-file "+m_CANDIDATE_GENES.getStringValue());
+    		}
+    		
     	}
     	
     	if(m_CANDIDATE_PPI.getBooleanValue()){
@@ -230,8 +249,6 @@ public class KGGSeqNodeModel extends NodeModel {
     	
     	command.add("--no-resource-check");
     	
-    	System.out.println(StringUtils.join(command, " "));
-    	
     	return new String[]{StringUtils.join(command, " ")};
     }
     
@@ -241,9 +258,9 @@ public class KGGSeqNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-
-        // TODO: generated method stub
-        return inSpecs;
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
     /**

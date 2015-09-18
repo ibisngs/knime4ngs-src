@@ -1,5 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.kggseq;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
@@ -80,7 +82,7 @@ public class KGGSeqNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentBoolean(m_COMPOSITESUBJECTID, "Composite Subject IDs"));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentString(m_OUTPREFIX, "Outfile Prefix"));
-    	addDialogComponent(new DialogComponentStringSelection(m_OUTFORMAT, "Output Format","csv","excel"));
+    	addDialogComponent(new DialogComponentStringSelection(m_OUTFORMAT, "Output Format","excel"));
     	setHorizontalPlacement(false);
     	
     	createNewGroup("Quality Cutoffs");
@@ -109,10 +111,34 @@ public class KGGSeqNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentBoolean(m_FILTER_COMMON, "Filter by Common variants")); 
     	addDialogComponent(new DialogComponentBoolean(m_DISEASE_CAUSING_PRED, "Prioritize sequence variants by disease-causing prediction")); 
     	addDialogComponent(new DialogComponentBoolean(m_OMIM_ANNO, "Prioritize sequence variants by other genomic and OMIM annotation")); 
+    	addDialogComponent(new DialogComponentOptionalString(m_PUBMED, "Prioritize sequence variants by PubMed"));
     	addDialogComponent(new DialogComponentBoolean(m_CANDIDATE_PPI, "Prioritize sequence variants by candidate genes with  protein interaction information")); 
-    	addDialogComponent(new DialogComponentFileChooser(m_CANDIDATE_GENES, "kggseq_candidate_genes", 0, ""));  
     	addDialogComponent(new DialogComponentBoolean(m_CANDIDATE_PATHWAYS, "Prioritize sequence variants by candidate genes with pathway information")); 
-    	addDialogComponent(new DialogComponentOptionalString(m_PUBMED, "Prioritize sequence variants by PubMed"));    	
+
+    	createNewGroup("Candidate Genes File");
+    	addDialogComponent(new DialogComponentFileChooser(m_CANDIDATE_GENES, "kggseq_candidate_genes", 0, ""));  
+    	
+    	
+    	
+    	m_CANDIDATE_PPI.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+					if(m_CANDIDATE_PPI.getBooleanValue() || m_CANDIDATE_PATHWAYS.getBooleanValue()){
+						m_CANDIDATE_GENES.setEnabled(true);
+					}else{
+						m_CANDIDATE_GENES.setEnabled(false);
+					}
+			}
+		});
+    	m_CANDIDATE_PATHWAYS.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+					if(m_CANDIDATE_PPI.getBooleanValue() || m_CANDIDATE_PATHWAYS.getBooleanValue()){
+						m_CANDIDATE_GENES.setEnabled(true);
+					}else{
+						m_CANDIDATE_GENES.setEnabled(false);
+					}
+			}
+		});
+    	
     }
 }
 
