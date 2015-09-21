@@ -270,7 +270,7 @@ public abstract class Summarizer {
 			        				vep_header.put("gene_symbol",i);
 			        			} else if (part.contains("Gene")) {
 			        				vep_header.put("gene_id", i);
-			        			} else if (part.contains("Feature")) {
+			        			} else if (part.equals("Feature")) {
 			        				vep_header.put("transcript_id",i);
 			        			} else if (part.contains("LoF_filter")) {
 			        				additional_titles.add("lof_filter");
