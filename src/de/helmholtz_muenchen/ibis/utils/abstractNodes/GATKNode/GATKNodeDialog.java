@@ -43,6 +43,7 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	
     	createNewGroup("Path to BED file");
     	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use BED file?"));
+    	m_path2bed.setEnabled(false);
     	addDialogComponent(new DialogComponentFileChooser(m_path2bed, "his_id_GATK_DoC", 0, ".bed"));
     	
     	createNewGroup("Further options");
@@ -62,6 +63,14 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
 		    	GATK.setStringValue(gatkPath);
 			}
     		
+    	});
+    	
+    	m_bed_file_check.addChangeListener(new ChangeListener () {
+    		
+    		@Override
+			public void stateChanged(ChangeEvent e) {
+				m_path2bed.setEnabled(m_bed_file_check.getBooleanValue());
+			}
     	});
 
     }
