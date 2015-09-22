@@ -403,10 +403,10 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected void reset() {
-        this.TERMS.clear();
-        for(String t: DEFAULT_TERMS) {
-        	this.TERMS.add(t);
-        }
+//        this.TERMS.clear();
+//        for(String t: DEFAULT_TERMS) {
+//        	this.TERMS.add(t);
+//        }
         optionalPort = false;
     }
 

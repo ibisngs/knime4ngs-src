@@ -244,8 +244,14 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
         if (settings.containsKey(VCFFilterNodeModel.CFGKEY_TERM_LIST)) {
         	try {
         		// add the values
-				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST))
+				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST)) {
 					this.addSOTerm(s);
+				}
+				if(this.terms.size()==0) {
+					ArrayList<String> empty = new ArrayList<String>();
+					empty.add("--no term selected--");
+					DC_TERM_DISPLAY.replaceListItems(empty, "--no term selected--");
+				}
 			} catch (InvalidSettingsException e) {
 				LOGGER.error(e.getStackTrace());
 			}
@@ -253,7 +259,6 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
     }
     
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
-    	// save the hash to the key FastaSelectorNodeModel.CFGKEY_FILE_LIST
     	settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
     }
     
