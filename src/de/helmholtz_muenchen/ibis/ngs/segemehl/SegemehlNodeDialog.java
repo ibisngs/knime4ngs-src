@@ -134,7 +134,8 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     	refseq.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
     	    	String path2refSeq = refseq.getStringValue();
-    			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx");    	        
+    			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx"); 
+    			
     			if(file.exists()){
     				indexrefseq.setBooleanValue(false);
     				indexrefseq.setEnabled(true);

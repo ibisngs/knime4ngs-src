@@ -26,9 +26,6 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 
 /**
  * This is the model implementation of Segemehl.
@@ -140,7 +137,8 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	     	/**
 	     	 * Execute
 	     	 */
-	     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+//	     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+			super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(path2indexedRefSeq));
 	     	command = new ArrayList<String>();	//Clear Array
 	    	
     	} else {
@@ -285,7 +283,10 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
     	}
     	
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**
