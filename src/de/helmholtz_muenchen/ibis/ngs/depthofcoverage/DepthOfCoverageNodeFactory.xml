@@ -52,7 +52,7 @@
         	Input BAM.
         </inPort>
         <outPort index="0" name="Output file">
-        	File containing per locus coverage.
+        	Cell 0: File containing per locus coverage.
         </outPort>
     </ports>    
 </knimeNode>

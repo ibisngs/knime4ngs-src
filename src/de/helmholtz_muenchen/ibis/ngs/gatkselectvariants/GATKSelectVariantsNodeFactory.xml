@@ -3,44 +3,51 @@
     <name>GATKSelectVariants</name>
     
     <shortDescription>
-        Creates a SNP and Indel Subset of a given VCF File
+        Creates a SNP and Indel subset of a given VCF file.
     </shortDescription>
     
     <fullDescription>
-        <intro>Creates a SNP and Indel Subset of a given VCF File using the GATK SelectVariants walker</intro>
+        <intro>
+        	Creates a SNP or Indel subset of a given VCF file using the GATK SelectVariants walker.
+        </intro>
         
+        <tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        </tab>
         
-            <option name="Path to GATK jar file">
-            	Set the path to the GATK executable. 
+        <tab name = "SelectVariants">
+        	<option name="Column of input VCF file">
+        		Select column of input table in which path to input VCF file is specified.
         	</option>
-        	
-        	<option name="Path to Reference Genome">
-            	Set the path to the Reference Genome. 
+        	<option name="Select Variant Type">
+        		Variant type in the resulting subset file.
         	</option>
-        	
-        	<option name="VCF Column">
-            	Select the column (of Output Table of the previous node) in which the VCF Input file is defined.. 
-        	</option>
-        	
+        </tab>
         	
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">
-        Cell [1..x]: Path to VCF infile. Exact column can be selected by using the node parameters
-        <br />
+        <inPort index="0" name="Input VCF">
+        	Cell [1..x]: Path to VCF infile.
+        	Exact column can be selected by using the node parameters.
 		</inPort>
-        <outPort index="0" name="SNPs">
-		        Cell [0]: Path to SNP VCF File
-        <br />
-        </outPort>
-       
-        <outPort index="1" name="INDELs">
-		        Cell [0]: Path to INDEL VCF File
-        <br />
+        <outPort index="0" name="Subset VCF">
+		        Cell 0: Path to subset VCF file containing SNPs or Indels.
         </outPort>
     </ports>    
-    <views>
-    <view index="0" name=""></view>
-    </views>
 </knimeNode>
