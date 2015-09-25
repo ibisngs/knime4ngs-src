@@ -21,7 +21,6 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 
 /**
  * This is the model implementation of SAMLoader.
@@ -53,20 +52,7 @@ public class SAMLoaderNodeModel extends NodeModel {
     	
     	String path2samFile = m_samfile.getStringValue();
     	String path2seqFile = m_seqfile.getStringValue();
-    	
-    	/**Initialize logfile**/
-    	String logfile = path2seqFile.substring(0,path2seqFile.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("SAMLoader"));
-    	/**end initializing logfile**/
-    	
-    	File file1 = new File(path2samFile);
-    	File file2 = new File(path2seqFile);
-		if(file1.exists() && file2.exists()){
-			logBuffer.append("Sequence file and SAM file found.\n");
-		}
-    	
+   	
     	DataColumnSpecCreator col = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
     	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Sequence file", StringCell.TYPE);
         DataColumnSpec[] cols = new DataColumnSpec[]{col.createSpec(),col1.createSpec()};
@@ -81,9 +67,6 @@ public class SAMLoaderNodeModel extends NodeModel {
     	BufferedDataTable out = cont.getTable();
     	
     	pushFlowVariableString("BAMSAMINFILE",path2samFile);
-    	
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
     	
         return new BufferedDataTable[]{out};
     }
@@ -107,7 +90,13 @@ public class SAMLoaderNodeModel extends NodeModel {
                 throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
         	}
     	}	
-        return new DataTableSpec[]{null};
+    	
+    	DataColumnSpecCreator col = new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE);
+    	DataColumnSpecCreator col1 = new DataColumnSpecCreator("Sequence file", StringCell.TYPE);
+        DataColumnSpec[] cols = new DataColumnSpec[]{col.createSpec(),col1.createSpec()};
+    	DataTableSpec table = new DataTableSpec(cols);
+    	
+        return new DataTableSpec[]{table};
     }
 
     /**
