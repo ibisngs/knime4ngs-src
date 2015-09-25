@@ -18,7 +18,7 @@ public class GATKGenotypeConcordanceNodeFactory
      */
     @Override
     public GATKGenotypeConcordanceNodeModel createNodeModel() {
-        return new GATKGenotypeConcordanceNodeModel(1,1);
+        return new GATKGenotypeConcordanceNodeModel();
     }
 
     /**

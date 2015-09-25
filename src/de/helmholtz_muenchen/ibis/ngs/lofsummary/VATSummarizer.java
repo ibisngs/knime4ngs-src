@@ -66,7 +66,14 @@ public class VATSummarizer extends Summarizer{
 					gene_id = gene_id.split("\\.")[0];
 				}
 				gene_symbol = annotation_fields[1];
-				gene_statistic.get(gene_id).setSymbol(gene_symbol);
+				if(gene_statistic.containsKey(gene_id)) {
+					gene_statistic.get(gene_id).setSymbol(gene_symbol);
+				} else {
+					GeneInfo gi = new GeneInfo();
+					gi.setSymbol(gene_symbol);
+					gi.setContig(chr);
+					gene_statistic.put(gene_id, gi);
+				}
 				
 				LoFGene g;
 				if(genes.containsKey(gene_id)) {

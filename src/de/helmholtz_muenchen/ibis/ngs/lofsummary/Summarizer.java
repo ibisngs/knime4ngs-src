@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -396,7 +395,11 @@ public abstract class Summarizer {
 					transcripts.add(t);
 				}
 				//is variant full LOF
-				if(transcripts.size() == gene2transcripts.get(gene_id).size()) {
+				int all_trans = 0;
+				if(gene2transcripts.containsKey(gene_id)) {
+					all_trans = gene2transcripts.get(gene_id).size();
+				}
+				if(transcripts.size() == all_trans) {
 					gene_info.incrementFullLoFs();
 				} else {
 					gene_info.incrementPartLoFs();
@@ -572,7 +575,10 @@ public abstract class Summarizer {
 			isFull = false;
 			//check whether variant effect is full or partial
 			for(Entry<String, LoFGene> gene:lof_genes.entrySet()) {
-				int all_trans = gene2transcripts.get(gene.getKey()).size();
+				int all_trans = 0;
+				if(gene2transcripts.containsKey(gene.getKey())) {
+					all_trans = gene2transcripts.get(gene.getKey()).size();
+				}
 				int lof_trans = gene.getValue().getNrOfTranscripts();
 				if(all_trans == lof_trans) {
 					isFull = true;
@@ -604,7 +610,10 @@ public abstract class Summarizer {
 		//get complete LOF genes
 		for(Entry<String,GeneSampleInfo> e: gene_sample_statistic.entrySet()) {
 			String gene_id = e.getKey().split("_")[0];
-			int all_trans = gene2transcripts.get(gene_id).size();
+			int all_trans = 0;
+			if(gene2transcripts.containsKey(gene_id)) {
+				all_trans = gene2transcripts.get(gene_id).size();
+			}
 			int lof_hom = e.getValue().getHomTrans();
 			int lof_het = e.getValue().getHetTrans();
 			
@@ -758,37 +767,47 @@ public abstract class Summarizer {
 		HashSet<String> ko_genes = new HashSet<>();
 		HashSet<String> hom_genes = new HashSet<>();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\tcompleteLOFGenes\taffectedLOFGenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\taffectedLOFGenes\thomozygousLOFGenes\tkoGenes");
 		bw.newLine();
+		
 		for(String s: sample_statistic.keySet()) {
 			SampleInfo stat = sample_statistic.get(s);
-			ArrayList<String> completes = stat.getComplete_LOF_genes();
-			Collections.sort(completes);
-			int affected = stat.getPart_LOF_genes().size();
-			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+affected+"\t"+stat.getHom_LOF_genes().size()+"\t"+completes.size()+"\t");
-			hom_genes.addAll(stat.getHom_LOF_genes());
-			if(completes.size() >= 1) {
-				String gene = completes.get(0);
-				ko_genes.add(gene);
-				bw.write(gene +":"+gene_statistic.get(gene).getSymbol());
-			}
 			
-			for(int i = 1; i< completes.size(); i++) {
-				String u = completes.get(i);
-				ko_genes.add(u);
-				bw.write(","+u+":"+gene_statistic.get(u).getSymbol());
-			}
+			
+			hom_genes.addAll(stat.getHom_LOF_genes());
+			ko_genes.addAll(stat.getComplete_LOF_genes());
 			
 			String affectedGeneList = "";
 			
 			for(String affGene: stat.getPart_LOF_genes()) {
 				if(affectedGeneList.equals("")) {
-					affectedGeneList += affGene;
+					affectedGeneList += gene_statistic.get(affGene).getSymbol();
 				}
-				affectedGeneList += ","+affGene;
+				affectedGeneList += ","+gene_statistic.get(affGene).getSymbol();
 			}
 			
+			String homozygousGeneList = "";
+			
+			for(String homGene: stat.getHom_LOF_genes()) {
+				if(homozygousGeneList.equals("")) {
+					homozygousGeneList += gene_statistic.get(homGene).getSymbol();
+				}
+				homozygousGeneList += ","+gene_statistic.get(homGene).getSymbol();
+			}
+			
+			String koGeneList = "";
+			
+			for(String koGene: stat.getComplete_LOF_genes()) {
+				if(koGeneList.equals("")) {
+					koGeneList += gene_statistic.get(koGene).getSymbol();
+				}
+				koGeneList += ","+gene_statistic.get(koGene).getSymbol();
+			}
+			
+			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+stat.getPart_LOF_genes().size()+"\t"+stat.getHom_LOF_genes().size()+"\t"+stat.getComplete_LOF_genes().size());
 			bw.write("\t"+affectedGeneList);
+			bw.write("\t"+homozygousGeneList);
+			bw.write("\t"+koGeneList);
 			bw.newLine();
 		}
 		bw.close();
