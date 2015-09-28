@@ -1,31 +1,20 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 
 /**
@@ -34,211 +23,57 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Maximilian Hastreiter
  */
-public class GATKVariantFiltrationNodeModel extends NodeModel {
+public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     
 	
 	/**
 	 * Config Keys
 	 */
-	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
-//	public static final String CFGKEY_INFILE = "INFILE";
-	public static final String CFGKEY_REF_GENOME = "REFGENOME";
 	public static final String CFGKEY_QUAL = "Quality score";
-	public static final String CFGKEY_DP = "depth of reads ";
-	public static final String CFGKEY_AD = "allele depth ";
 	public static final String CFGKEY_QD = "QualByDepth";
 	public static final String CFGKEY_FS = "Fisherstrand";
 	public static final String CFGKEY_MQ = "MappingQuality";
 	public static final String CFGKEY_HS = "HaplotypeScore";
 	public static final String CFGKEY_MQR = "MappingQualityRankSum";
 	public static final String CFGKEY_RPR = "ReadPosRankSum";
-	public static final String CFGKEY_FilterString = "FilterString";
-	public static final String CFGKEY_FilterName = "FilterName";
-    public static final String CFGKEY_JAVAMEMORY = "gatkmemory";
+	public static final String CFGKEY_INFOFilterString = "INFOFilterString";
+	public static final String CFGKEY_INFOFilterName = "INFOFilterName";
+	
+	public static final String CFGKEY_DP = "DepthOfReads";
+	public static final String CFGKEY_GQ = "GenotypeQuality";
+	public static final String CFGKEY_NOCALL = "NoCall";
+	public static final String CFGKEY_FORMATFilterString = "FORMATFilterString";
+	public static final String CFGKEY_FORMATFilterName = "FORMATFilterName";
 	
 	/**
 	 * The SettingsModels
 	 */
-	
-    private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
-//    private final SettingsModelString m_INFILE = new SettingsModelString(CFGKEY_INFILE, "");
-    private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
-    
 	private final SettingsModelOptionalString m_QUAL= new SettingsModelOptionalString(CFGKEY_QUAL, "<50.0",true);
-	private final SettingsModelOptionalString m_DP= new SettingsModelOptionalString(CFGKEY_DP, "<20.0",true);
-	private final SettingsModelOptionalString m_AD= new SettingsModelOptionalString(CFGKEY_AD, "<5.0",false);
 	private final SettingsModelOptionalString m_QD= new SettingsModelOptionalString(CFGKEY_QD, "<2.0",false);
 	private final SettingsModelOptionalString m_FS= new SettingsModelOptionalString(CFGKEY_FS, ">60.0",false);
 	private final SettingsModelOptionalString m_MQ= new SettingsModelOptionalString(CFGKEY_MQ, "<40.0",false);
 	private final SettingsModelOptionalString m_HS= new SettingsModelOptionalString(CFGKEY_HS, ">13.0",false);
 	private final SettingsModelOptionalString m_MQR= new SettingsModelOptionalString(CFGKEY_MQR, "<-12.5",false);
 	private final SettingsModelOptionalString m_RPR= new SettingsModelOptionalString(CFGKEY_RPR, "<-8.0",false);
-	private final SettingsModelOptionalString m_FilterString = new SettingsModelOptionalString(CFGKEY_FilterString, "Value1<X||Value2>Y||...",false);
-	private final SettingsModelOptionalString m_FilterName = new SettingsModelOptionalString(CFGKEY_FilterName, "---",false);
+	private final SettingsModelOptionalString m_INFOFilterString = new SettingsModelOptionalString(CFGKEY_INFOFilterString, "Value1<X||Value2>Y||...",false);
+	private final SettingsModelOptionalString m_INFOFilterName = new SettingsModelOptionalString(CFGKEY_INFOFilterName, "GATKVariantFiltration",false);
 	
-	 // memory usage
-    public static final int DEF_NUM_JAVAMEMORY=4;
-    public static final int MIN_NUM_JAVAMEMORY=1;
-    public static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
-    private final SettingsModelIntegerBounded m_GATK_JAVA_MEMORY = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
-    
+	private final SettingsModelOptionalString m_DP= new SettingsModelOptionalString(CFGKEY_DP, "<8.0",true);
+	private final SettingsModelOptionalString m_GQ= new SettingsModelOptionalString(CFGKEY_GQ, "<20.0",true);
+	private final SettingsModelBoolean m_NOCALL = new SettingsModelBoolean(CFGKEY_NOCALL, true);
+	private final SettingsModelOptionalString m_FORMATFilterString = new SettingsModelOptionalString(CFGKEY_FORMATFilterString, "Value1<X||Value2>Y||...",false);
+	private final SettingsModelOptionalString m_FORMATFilterName = new SettingsModelOptionalString(CFGKEY_FORMATFilterName, "GATKVariantFiltration",false);
 	
 	//The Output Col Names
-	public static final String OUT_COL1 = "FILTERED VARIANTS";
+	public static final String OUT_COL1 = "FILTERED_VARIANTS";
 	
-	/**
-	 * Logger
-	 */
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(GATKVariantFiltrationNodeModel.class);
-	
-
+	private String OUTFILE, LOCKFILE;
 	
     /**
      * Constructor for the node model.
      */
     protected GATKVariantFiltrationNodeModel() {
-    
-    	
-    	
-    	
-        // TODO: Specify the amount of input and output ports needed.
-        super(1, 1);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
-
-    	/**
-    	 * Check INFILE
-    	 */
-    	String INFILE;
-    	try{
-    		INFILE = inData[0].iterator().next().getCell(0).toString();
-    		if(!INFILE.endsWith(".vcf")){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
-    		}
-    	}catch(IndexOutOfBoundsException e){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
-    	}
-    	
-    	
-    	/**
-    	 * String that holds the complete filter options
-    	 */
-    	StringBuffer filterStringINFOFIELD = new StringBuffer();
-    	StringBuffer filterStringFORMATFIELD = new StringBuffer();
-    	
-    	
-    	ArrayList<String> command = new ArrayList<String>();
-    	
-    	command.add("java");
-    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
-    	command.add("-T VariantFiltration");
-    	
-    	command.add("-R "+m_REF_GENOME.getStringValue());
-    	command.add("-V "+INFILE);
-    	
-//    	String OUTFILE = INFILE.replaceAll(".vcf", "_GATK.vcf");
-    	String OUTFILE = INFILE.substring(0, INFILE.lastIndexOf('.'))+"_GATK.vcf";
-    	command.add("-o "+OUTFILE);
-    	
-  
-    	/**
-    	 * Create Filter String for INFO Field
-    	 */
-    	filterStringINFOFIELD = addToFilterString(m_QUAL,"QUAL",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_AD,"AD",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_QD,"QD",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_FS,"FS",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_MQ,"MQ",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_HS,"HaplotypeScore",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_MQR,"MappingQualityRankSum",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_RPR,"ReadPosRankSum",filterStringINFOFIELD);
-    	filterStringINFOFIELD = addToFilterString(m_FilterString,"FilterString",filterStringINFOFIELD);
-		if(filterStringINFOFIELD.length()!=0){
-			command.add("--filterExpression");
-			command.add(filterStringINFOFIELD.toString());
-		}
-    	
-		/**
-		 * Create Filter String for FORMAT Field
-		 */
-		filterStringFORMATFIELD = addToFilterString(m_DP,"DP",filterStringFORMATFIELD);
-		if(filterStringFORMATFIELD.length()!=0){
-			command.add("--genotypeFilterExpression");    	
-    		command.add(filterStringFORMATFIELD.toString());
-    	}
-    	
-    	
-    	
-    	if(m_FilterName.isActive()){
-    		if(filterStringINFOFIELD.length()!=0){
-        		command.add("--filterName");
-        		command.add(m_FilterName.getStringValue());
-    		}
-    		if(filterStringFORMATFIELD.length()!=0){
-    			command.add("--genotypeFilterName");
-        		command.add(m_FilterName.getStringValue());
-    		}
-    		
-    	}else{
-    		if(filterStringINFOFIELD.length()!=0){
-        		command.add("--filterName");
-        		command.add("GATKVariantFiltration");
-    		}
-    		if(filterStringFORMATFIELD.length()!=0){
-        		command.add("--genotypeFilterName");
-        		command.add("GATKVariantFiltration");
-    		}
-
-    	}
-    	System.out.println(StringUtils.join(command, " "));
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-    	
-     	
-     	/**
-     	 * Remove filtered variants
-     	 */
-    	command = new ArrayList<String>();
-    	
-    	command.add("java");
-    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
-    	command.add("-T SelectVariants");
-    	
-    	command.add("-R "+m_REF_GENOME.getStringValue());
-    	command.add("-V "+OUTFILE);
-    	
-//    	String OUTFILE_FILTERED = OUTFILE.replaceAll(".vcf", "filtered.vcf");
-    	String OUTFILE_FILTERED = OUTFILE.substring(0, OUTFILE.lastIndexOf('.'))+"filtered.vcf";
-    	
-    	command.add("-o "+OUTFILE_FILTERED);
-    	command.add("-ef");
-    	command.add("--excludeNonVariants");
-     	
-    	System.out.println(StringUtils.join(command, " "));
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,OUTFILE_FILTERED+".stdOut",OUTFILE_FILTERED+".stdErr");
-     	
-     	
-    	/**
-    	 * OUTPUT
-    	 */
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
-    	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(OUTFILE_FILTERED)};
-    	
-    	cont.addRowToTable(new DefaultRow("Row0",c));
-    	cont.close();
-    	BufferedDataTable outTable = cont.getTable();
-
-        return new BufferedDataTable[]{outTable};
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
     /**
@@ -258,37 +93,100 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
     	return filterString;
     }
     
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO: generated method stub
-    }
+
+
+	@Override
+	protected String getCommandParameters(BufferedDataTable[] inData)
+			throws InvalidSettingsException {
+		/**
+    	 * Check INFILE
+    	 */
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		if(!INFILE.endsWith(".vcf")){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
+    	}
+    	
+    	ArrayList<String> command = new ArrayList<String>();
+
+    	
+    	command.add("-V "+INFILE);
+    	
+    	OUTFILE = IO.replaceFileExtension(INFILE, ".VariantFiltration.vcf");
+    	LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
+    	
+    	/**
+    	 * String that holds the complete filter options
+    	 */
+    	StringBuffer filterStringINFOFIELD = new StringBuffer();
+    	StringBuffer filterStringFORMATFIELD = new StringBuffer();
+    	
+    	/**
+    	 * Create Filter String for INFO Field
+    	 */
+    	filterStringINFOFIELD = addToFilterString(m_QUAL,"QUAL",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_QD,"QD",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_FS,"FS",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_MQ,"MQ",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_HS,"HaplotypeScore",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_MQR,"MappingQualityRankSum",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_RPR,"ReadPosRankSum",filterStringINFOFIELD);
+    	filterStringINFOFIELD = addToFilterString(m_INFOFilterString,"",filterStringINFOFIELD);
+		
+    	if(filterStringINFOFIELD.length()!=0){
+			command.add("--filterExpression");
+			command.add(filterStringINFOFIELD.toString());
+		}
+    	
+		/**
+		 * Create Filter String for FORMAT Field
+		 */
+		filterStringFORMATFIELD = addToFilterString(m_DP,"DP",filterStringFORMATFIELD);
+		filterStringFORMATFIELD = addToFilterString(m_GQ,"GQ",filterStringFORMATFIELD);
+    	filterStringFORMATFIELD = addToFilterString(m_FORMATFilterString,"",filterStringFORMATFIELD);
+
+		if(filterStringFORMATFIELD.length()!=0){
+			command.add("--genotypeFilterExpression");    	
+    		command.add(filterStringFORMATFIELD.toString());
+    	}
+    	
+    	
+    	if(filterStringINFOFIELD.length()!=0){
+        	command.add("--filterName");
+        	if(m_INFOFilterName.isActive()){
+        		command.add(m_INFOFilterName.getStringValue());
+        	} else {
+        		command.add("GATKVariantFiltration");
+        	}
+    	}
+    	
+    	if(filterStringFORMATFIELD.length()!=0){
+    		command.add("--genotypeFilterName");
+    		if(m_FORMATFilterName.isActive()) {
+        		command.add(m_FORMATFilterName.getStringValue());
+    		} else {
+    			command.add("GATKVariantFiltration");
+    		}
+    		
+    		if(m_NOCALL.getBooleanValue()) {
+        		command.add("--setFilteredGtToNocall");
+        	}
+    	}
+    	
+    	return StringUtils.join(command, " ");
+	}
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-
-        return new DataTableSpec[]{new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	 m_GATK.saveSettingsTo(settings);
-//    	 m_INFILE.saveSettingsTo(settings);
-    	 m_REF_GENOME.saveSettingsTo(settings);
-         m_AD.saveSettingsTo(settings);
+    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
          m_DP.saveSettingsTo(settings);
+         m_GQ.saveSettingsTo(settings);
          m_FS.saveSettingsTo(settings);
          m_HS.saveSettingsTo(settings);
          m_MQ.saveSettingsTo(settings);
@@ -296,22 +194,21 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
          m_QD.saveSettingsTo(settings);
          m_QUAL.saveSettingsTo(settings);
          m_RPR.saveSettingsTo(settings);
-         m_FilterString.saveSettingsTo(settings);
-         m_FilterName.saveSettingsTo(settings);
-         m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
+         m_INFOFilterString.saveSettingsTo(settings);
+         m_INFOFilterName.saveSettingsTo(settings);
+         m_FORMATFilterString.saveSettingsTo(settings);
+         m_FORMATFilterName.saveSettingsTo(settings);
+         m_NOCALL.saveSettingsTo(settings);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_GATK.loadSettingsFrom(settings);
-//   	 	m_INFILE.loadSettingsFrom(settings);
-   	 	m_REF_GENOME.loadSettingsFrom(settings);
-    	m_AD.loadSettingsFrom(settings);
         m_DP.loadSettingsFrom(settings);
+        m_GQ.loadSettingsFrom(settings);
         m_FS.loadSettingsFrom(settings);
         m_HS.loadSettingsFrom(settings);
         m_MQ.loadSettingsFrom(settings);
@@ -319,22 +216,21 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
         m_QD.loadSettingsFrom(settings);
         m_QUAL.loadSettingsFrom(settings);
         m_RPR.loadSettingsFrom(settings);
-        m_FilterString.loadSettingsFrom(settings);
-        m_FilterName.loadSettingsFrom(settings);
-        m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
+        m_INFOFilterString.loadSettingsFrom(settings);
+        m_INFOFilterName.loadSettingsFrom(settings);
+        m_FORMATFilterString.loadSettingsFrom(settings);
+        m_FORMATFilterName.loadSettingsFrom(settings);
+        m_NOCALL.loadSettingsFrom(settings);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateExtraSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_GATK.validateSettings(settings);
-//    	m_INFILE.validateSettings(settings);
-    	m_REF_GENOME.validateSettings(settings);
-    	m_AD.validateSettings(settings);
         m_DP.validateSettings(settings);
+        m_GQ.validateSettings(settings);
         m_FS.validateSettings(settings);
         m_HS.validateSettings(settings);
         m_MQ.validateSettings(settings);
@@ -342,30 +238,28 @@ public class GATKVariantFiltrationNodeModel extends NodeModel {
         m_QD.validateSettings(settings);
         m_QUAL.validateSettings(settings);
         m_RPR.validateSettings(settings);
-        m_FilterString.validateSettings(settings);
-        m_FilterName.validateSettings(settings);
-        m_GATK_JAVA_MEMORY.validateSettings(settings);
+        m_INFOFilterString.validateSettings(settings);
+        m_INFOFilterName.validateSettings(settings);
+        m_FORMATFilterString.validateSettings(settings);
+        m_FORMATFilterName.validateSettings(settings);
+        m_NOCALL.validateSettings(settings);
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
 
+
+	@Override
+	protected String getCommandWalker() {
+		return "VariantFiltration";
+	}
+
+	@Override
+	protected File getLockFile() {
+		return new File(LOCKFILE);
+	}
+
+	@Override
+	protected String getOutfile() {
+		return OUTFILE;
+	}
 }
 

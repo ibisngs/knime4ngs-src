@@ -3,23 +3,59 @@
     <name>GATKVariantFiltration</name>
     
     <shortDescription>
-        Filters variant calls using a number of user-selectable, parameterizable criteria.
+        Filter variant calls based on INFO and FORMAT annotations.
     </shortDescription>
     
     <fullDescription>
-        <intro>VariantFiltration is a GATK tool for hard-filtering variant calls based on certain criteria. Records are hard-filtered by changing the value in the FILTER field to something other than PASS. More info: https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php</intro>
+        <intro>
+        	This node is based on the VariantFiltration tool of GATK which enables hard-filtering variant calls based on certain criteria.
+        	Records are hard-filtered by changing the value in the FILTER field to something other than PASS.
+        	Use the GATK ExcludeVariants node to remove the filtered variants.
+        	For further information, see the GATK documentation of the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">VariantFiltration</a> walker.
+        </intro>
         
+ 		<tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        </tab>
         
-
+        <tab name="VariantFiltration">
+        	<option name="Filter INFO fields">
+        		Filter variants the according to values of the INFO fields. 
+				Variants that match any one of the given conditions will be tagged with the 'Filter Name' in the FILTER field.
+				Further conditions can be defined in the 'Additional Filter Options' field.
+        	</option>
+        	<option name="Filter FORMAT fields">
+        		Filter genotypes the according to values of the FORMAT fields. 
+				Genotypes that match any one of the given conditions will be tagged with the 'Filter Name' in the FT field of the FORMAT fields.
+				Further conditions can be defined in the 'Additional Filter Options' field.
+				If the box is checked, filtered genotypes are set to no-call.
+				Note, that allele counts are not recomputed after filtering.
+        	</option>
+		</tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+        <inPort index="0" name="Input VCF">
+        	Input VCF file.
+        </inPort>
+        <outPort index="0" name="Filtered VCF">
+        	Cell 0: VCF file with adjusted FILTER fields.
+        	Note, that filtered variants can be removed using the GATK ExcludeVariants node.
+        </outPort>
+    </ports>   
 </knimeNode>

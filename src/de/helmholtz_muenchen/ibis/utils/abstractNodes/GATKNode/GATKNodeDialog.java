@@ -78,11 +78,13 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     public void onOpen() {
     	super.onOpen();
     	GATK.setEnabled(!usePrefPage.getBooleanValue());
-		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-    	if(gatkPath == null) {
-    		gatkPath = "GATK jar not found!";
+    	if(usePrefPage.getBooleanValue()) {
+    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+    		if(gatkPath == null) {
+    			gatkPath = "GATK jar not found!";
+    		}
+    		GATK.setStringValue(gatkPath);
     	}
-    	GATK.setStringValue(gatkPath);
     }
 	
     protected abstract void addDialogComponent();
