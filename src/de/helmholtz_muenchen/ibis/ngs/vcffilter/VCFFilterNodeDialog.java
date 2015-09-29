@@ -5,9 +5,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -181,30 +178,6 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
 				restoreTermDefaults();
 			}
 		});
-		
-		usePrefPage.addChangeListener(new ChangeListener (){
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				vcf_tools.setEnabled(!usePrefPage.getBooleanValue());
-				vep_script.setEnabled(!usePrefPage.getBooleanValue());
-				if(!usePrefPage.getBooleanValue()) return;
-		    	
-		    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
-				if(vcftoolsPath == null) {
-					vcftoolsPath = "VCFtools executable not found!";
-				}
-				vcf_tools.setStringValue(vcftoolsPath);
-				
-				String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
-				if(filterVep == null) {
-					filterVep = "filter_vep.pl not found!";
-				}
-				vep_script.setStringValue(filterVep);
-			}
-			
-		});
-		
     }
     
     public void addSOTerm(String t) {
@@ -262,23 +235,27 @@ public class VCFFilterNodeDialog extends HTExecutorNodeDialog {
     	settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
     }
     
-    public void onOpen() {
-    	super.onOpen();
-    	vcf_tools.setEnabled(!usePrefPage.getBooleanValue());
-    	vep_script.setEnabled(!usePrefPage.getBooleanValue());
-    	if(!usePrefPage.getBooleanValue()) return;
-    	
-    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
-		if(vcftoolsPath == null) {
-			vcftoolsPath = "VCFtools executable not found!";
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
+	    	if(vcftoolsPath != null && !vcftoolsPath.equals("")) {
+	    		vcf_tools.setStringValue(vcftoolsPath);
+	    		vcf_tools.setEnabled(false);
+	    	} else {
+	    		vcf_tools.setEnabled(true);
+	    	}
+	    	
+			String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
+			if(filterVep != null && !filterVep.equals("")) {
+				vep_script.setStringValue(filterVep);
+				vep_script.setEnabled(false);
+			} else {
+				vep_script.setEnabled(true);
+			}
+		} else {
+			vcf_tools.setEnabled(true);
+			vep_script.setEnabled(true);
 		}
-		vcf_tools.setStringValue(vcftoolsPath);
-		
-		String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
-		if(filterVep == null) {
-			filterVep = "filter_vep.pl not found!";
-		}
-		vep_script.setStringValue(filterVep);
-    }
+	}
 }
-

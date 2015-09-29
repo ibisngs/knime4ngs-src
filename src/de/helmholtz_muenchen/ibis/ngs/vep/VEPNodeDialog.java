@@ -48,22 +48,12 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
 	private final SettingsModelString stats_type = new SettingsModelString(VEPNodeModel.CFGKEY_STATS_TYPE,"html");
 	private final SettingsModelString cache_dir = new SettingsModelString(VEPNodeModel.CFGKEY_CACHE_DIR, VEPNodeModel.DEF_CACHE_DIR);
 	private final SettingsModelString plugin_dir = new SettingsModelString(VEPNodeModel.CFGKEY_PLUGIN_DIR, VEPNodeModel.DEF_PLUGIN_DIR);
-//	private final SettingsModelString tabix_path = new SettingsModelString(VEPNodeModel.CFGKEY_TABIX_PATH,"");
 	
 	//LOFTEE tab
 	private final SettingsModelBoolean use_loftee = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_LOFTEE,false);
 	private final SettingsModelString human_ancestor = new SettingsModelString(VEPNodeModel.CFGKEY_HUMAN_ANCESTOR,"-");
 	private final SettingsModelString conservation_file = new SettingsModelString(VEPNodeModel.CFGKEY_CONSERVATION_FILE,"-");
 	private final SettingsModelString samtools_path = new SettingsModelString(VEPNodeModel.CFGKEY_SAMTOOLS_PATH, "-");
-	
-//	CADD tab
-//	private final SettingsModelBoolean use_cadd = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_CADD,false);
-//	private final SettingsModelString first_cadd_file = new SettingsModelString(VEPNodeModel.CFGKEY_FIRST_CADD_FILE,"");
-//	private final SettingsModelString sec_cadd_file = new SettingsModelString(VEPNodeModel.CFGKEY_SEC_CADD_FILE,"");
-	
-//	ExAC tab
-//	private final SettingsModelBoolean use_exac = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_EXAC,false);
-//	private final SettingsModelString exac_file = new SettingsModelString(VEPNodeModel.CFGKEY_EXAC_FILE,"");
 	
     protected VEPNodeDialog() {
 
@@ -97,9 +87,6 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("Plugin directory");
     	addDialogComponent(new DialogComponentFileChooser(plugin_dir, "his_id_VEP_PLUGINDIR", 0, true));
     	
-//    	createNewGroup("Tabix PATH (required by CADD and ExAC");
-//    	addDialogComponent(new DialogComponentFileChooser(tabix_path, "his_id_TABIX_PATH",0,true));
-    	
     	createNewTab("LOFTEE");
     	addDialogComponent(new DialogComponentBoolean(use_loftee, "Use LOFTEE?"));
     	
@@ -111,70 +98,41 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	
     	createNewGroup("Samtools PATH");
     	addDialogComponent(new DialogComponentFileChooser(samtools_path, "his_id_VEP_SAMTOOLSPATH", 0, ""));
-    	
-    	ChangeListener cl = new ChangeListener() {
+  
+    	use_loftee.addChangeListener(new ChangeListener () {
+
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				veppl.setEnabled(!usePrefPage.getBooleanValue());
-				samtools_path.setEnabled(!usePrefPage.getBooleanValue());
+				updatePrefs();
 				
-				if(!usePrefPage.getBooleanValue()) return;
-				
-				String vep_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("variant_effect_predictor.pl");
-				if(vep_path == null) {
-					vep_path = "VEP script not found!";
-				}
-				veppl.setStringValue(vep_path);
-				
-				if(use_loftee.getBooleanValue()){
-			    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-			    	if(toolPath == null) {
-			    		toolPath = "samtools binary not found!";
-			    	}
-			    	samtools_path.setStringValue(toolPath);
-		    	}
 			}
     		
-    	};
-  
-    	use_loftee.addChangeListener(cl);
-    	usePrefPage.addChangeListener(cl);
-    	
-//    	createNewTab("CADD");
-//    	addDialogComponent(new DialogComponentBoolean(use_cadd,"Use CADD?"));
-//    	
-//    	createNewGroup("Path to a CADD file");
-//    	addDialogComponent(new DialogComponentFileChooser(first_cadd_file,"his_id_FIRST_CADD_FILE",0,".tsv.gz"));
-//    	
-//    	createNewGroup("Path to another CADD file");
-//    	addDialogComponent(new DialogComponentFileChooser(sec_cadd_file,"his_id_SEC_CADD_FILE",0,".tsv.gz"));
-//    	
-//    	createNewTab("ExAC");
-//    	addDialogComponent(new DialogComponentBoolean(use_exac,"Use ExAC?"));
-//    	
-//    	createNewGroup("Path to ExAC file");
-//    	addDialogComponent(new DialogComponentFileChooser(exac_file, "his_id_EXAC_FILE",0, ".vcf.gz"));
+    	});
     }
-    
-    public void onOpen() {
-    	super.onOpen();
-    	veppl.setEnabled(!usePrefPage.getBooleanValue());
-		samtools_path.setEnabled(!usePrefPage.getBooleanValue());
-    	if(!usePrefPage.getBooleanValue()) return;
-    	
-    	String vep_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("variant_effect_predictor.pl");
-		if(vep_path == null) {
-			vep_path = "VEP script not found!";
-		}
-		veppl.setStringValue(vep_path);
-    	
-    	if(use_loftee.getBooleanValue()){
-	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-	    	if(toolPath == null) {
-	    		toolPath = "samtools binary not found!";
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String vep_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("variant_effect_predictor.pl");
+	    	if(vep_path != null && !vep_path.equals("")) {
+	    		veppl.setStringValue(vep_path);
+	    		veppl.setEnabled(false);
+			} else {
+				veppl.setEnabled(true);
+			}
+	    	if(use_loftee.getBooleanValue()){
+		    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+		    	if(toolPath != null && !toolPath.equals("")) {
+		    		samtools_path.setStringValue(toolPath);
+		    		samtools_path.setEnabled(false);
+		    	} else {
+		    		samtools_path.setEnabled(true);
+		    	}
 	    	}
-	    	samtools_path.setStringValue(toolPath);
-    	}
-    }
+		} else {
+			veppl.setEnabled(true);
+			samtools_path.setEnabled(true);
+		}
+	}
 }
 

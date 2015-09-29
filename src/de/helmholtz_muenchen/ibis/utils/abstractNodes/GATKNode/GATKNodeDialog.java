@@ -51,20 +51,6 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	
     	addDialogComponent();
     	
-    	usePrefPage.addChangeListener(new ChangeListener() {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				GATK.setEnabled(!usePrefPage.getBooleanValue());
-				String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-		    	if(gatkPath == null) {
-		    		gatkPath = "GATK jar not found!";
-		    	}
-		    	GATK.setStringValue(gatkPath);
-			}
-    		
-    	});
-    	
     	m_bed_file_check.addChangeListener(new ChangeListener () {
     		
     		@Override
@@ -74,16 +60,26 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	});
 
     }
-	
-    public void onOpen() {
-    	super.onOpen();
-    	GATK.setEnabled(!usePrefPage.getBooleanValue());
+    
+    protected void updatePrefs() {
     	if(usePrefPage.getBooleanValue()) {
     		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-    		if(gatkPath == null) {
-    			gatkPath = "GATK jar not found!";
+    		if(gatkPath != null && !gatkPath.equals("")) {
+    			GATK.setStringValue(gatkPath);
+    			GATK.setEnabled(false);
+    		} else {
+    			GATK.setEnabled(true);
     		}
-    		GATK.setStringValue(gatkPath);
+    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+    		if(refGenome != null && !refGenome.equals("")) {
+    			REF_GENOME.setStringValue(refGenome);
+    			REF_GENOME.setEnabled(false);
+    		} else {
+    			REF_GENOME.setEnabled(true);
+    		}
+    	} else {
+    		GATK.setEnabled(true);
+    		REF_GENOME.setEnabled(true);
     	}
     }
 	

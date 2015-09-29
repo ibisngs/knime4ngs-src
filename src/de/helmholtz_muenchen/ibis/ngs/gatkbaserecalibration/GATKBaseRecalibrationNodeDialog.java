@@ -50,6 +50,7 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 	 */
 	
 	final SettingsModelString gatk = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_GATK, "");
+	final SettingsModelString reffile = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_REF_GENOME, "");
 	final SettingsModelBoolean use_phase1_1000G = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USE_PHASE1_1000G, GATKBaseRecalibrationNodeModel.DEF_USE_PHASE1_1000G);
 	final SettingsModelString phase1_1000G_file = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PHASE1_1000G_FILE, GATKBaseRecalibrationNodeModel.DEF_PHASE1_1000G_FILE);
 	final SettingsModelBoolean use_mills_1000G = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USE_MILLS_1000G, GATKBaseRecalibrationNodeModel.DEF_USE_MILLS_1000G);
@@ -134,7 +135,14 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
     	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk2", JFileChooser.OPEN_DIALOG, false, ".jar");
     	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
     	addDialogComponent(gatkf);
-        // sets of known indels from database for realignment
+        
+    	// reffile
+    	createNewGroup("Path to reference genome");
+    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
+    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
+    	addDialogComponent(reff);
+    	
+    	// sets of known indels from database for realignment
         createNewGroup("Sets of known polymorphisms (at least one set has to be chosen)");
         
         addDialogComponent(new DialogComponentBoolean(use_phase1_1000G, "Use 1000 genomes phase1 indel set (required for proper recalibration)"));
@@ -346,7 +354,29 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 	    	}
 	    	gatk.setStringValue(toolPath);
     	}
-    }	
-    
+    }
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+	    	if(toolPath != null && !toolPath.equals("")) {
+	    		gatk.setStringValue(toolPath);
+	    		gatk.setEnabled(false);
+	    	} else {
+	    		gatk.setEnabled(true);
+	    	}
+	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+	    	if(refGenome != null && !refGenome.equals("")) {
+	    		reffile.setStringValue(refGenome);
+	    		reffile.setEnabled(false);
+	    	} else {
+	    		reffile.setEnabled(true);
+	    	}
+		} else {
+			gatk.setEnabled(true);
+			reffile.setEnabled(true);
+		}
+	} 	
 }
 

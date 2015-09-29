@@ -71,12 +71,15 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put("vcftools",false);
 	}
 	
+	public static String REF_GENOME;
+	
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
 	public static String EMAIL;
 	
+	private Text refGenome;
 	private Text thresholdText;
 	private Text dbFile;
 	private Text email;
@@ -176,6 +179,32 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		edit.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				editBinary(shell2);
+			}
+		});
+		
+		//Reference genome
+		Group ref_genome = new Group(top,SWT.NONE);
+		ref_genome.setText("Reference genome");
+		ref_genome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout refLayout = new GridLayout();
+		refLayout.numColumns = 3;
+		ref_genome.setLayout(refLayout);
+		
+		REF_GENOME = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+		
+		Label refGenomeLabel = new Label(ref_genome,SWT.LEFT);
+		refGenomeLabel.setText("File path:");
+		
+		refGenome = new Text(ref_genome,SWT.BORDER);
+		refGenome.setText(REF_GENOME);
+		refGenome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseRefGenome = new Button(ref_genome, SWT.RIGHT);
+		browseRefGenome.setText("Browse");
+		final Shell shell5 = new Shell(parent.getDisplay());
+		browseRefGenome.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				selectRefGenome(shell5);
 			}
 		});
 		
@@ -298,6 +327,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			i.setText(1,"");
 		}
 		
+		REF_GENOME = IBISKNIMENodesPlugin.REF_GENOME_DEFAULT;
+		refGenome.setText(REF_GENOME);
+		iknp.setRefGenomePreference(REF_GENOME);
+		
 		USE_HTE = IBISKNIMENodesPlugin.HTE_DEFAULT;
 		checkHTE.setSelection(USE_HTE);
 		iknp.setHTEPreference(USE_HTE);
@@ -327,6 +360,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	public boolean performOk() {
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
+		
+		REF_GENOME = refGenome.getText();
+		iknp.setRefGenomePreference(REF_GENOME);
+		LOGGER.debug("Setting REF_GENOME to: "+REF_GENOME);
 		
 		iknp.setHTEPreference(USE_HTE);
 		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
@@ -481,6 +518,16 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		
 		
+	}
+	
+	private void selectRefGenome(Shell shell) {
+		FileDialog fdl = new FileDialog(shell);
+		fdl.setText("Selecte reference genome");
+		fdl.setFilterExtensions(new String[]{"*.fa","*.fasta"});
+		fdl.setFilterPath("~/");
+		String path = fdl.open();
+		REF_GENOME = path;
+		refGenome.setText(REF_GENOME);
 	}
 	
 	private void selectDBFile(Shell shell) {

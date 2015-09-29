@@ -1,9 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.vcfnormalizer;
 
-
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -41,36 +37,29 @@ public class VCFNormalizerNodeDialog extends HTExecutorNodeDialog {
     	
     	createNewGroup("Path to reference genome");
     	addDialogComponent(new DialogComponentFileChooser(ref_genome, "his_id_REF_GENOME", 0, ".fa|.fasta"));
-    	
-    	usePrefPage.addChangeListener(new ChangeListener() {
+    }
 
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				vt_path.setEnabled(!usePrefPage.getBooleanValue());
-				if(usePrefPage.getBooleanValue()){
-					String vtPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vt");
-					if(vtPath == null) {
-						vtPath = "vt executable not found!";
-					}
-					vt_path.setStringValue(vtPath);
-				}
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String vtPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vt");
+	    	if(vtPath != null && !vtPath.equals("")) {
+	    		vt_path.setStringValue(vtPath);
+	    		vt_path.setEnabled(false);
+			} else {
+				vt_path.setEnabled(true);
 			}
-    		
-    	});
-    }
-    
-    
-    
-    public void onOpen() {
-    	super.onOpen();
-    	vt_path.setEnabled(!usePrefPage.getBooleanValue());
-    	if(!usePrefPage.getBooleanValue()) return;
-    	
-    	String vtPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vt");
-		if(vtPath == null) {
-			vtPath = "vt executable not found!";
+	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+	    	if(refGenome != null && !refGenome.equals("")) {
+	    		ref_genome.setStringValue(refGenome);
+	    		ref_genome.setEnabled(false);
+	    	} else {
+	    		ref_genome.setEnabled(true);
+	    	}
+		} else {
+			vt_path.setEnabled(true);
+			ref_genome.setEnabled(true);
 		}
-		vt_path.setStringValue(vtPath);
-    }
+		
+	}
 }
-

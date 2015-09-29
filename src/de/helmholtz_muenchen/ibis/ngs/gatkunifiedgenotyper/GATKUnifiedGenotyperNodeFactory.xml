@@ -100,7 +100,7 @@
     
     <ports>
         <inPort index="0" name="In-Port">
-        	DCell 0: Path2BAMFile (BAM file for variant calling, it has to be indexed)
+        	Cell 0: Path2BAMFile (BAM file for variant calling, it has to be indexed)
 			<br />
 			Cell 1: Path2SEQFile (Reference sequence used for mapping the BAM file, a sequence index and sequence dictionary are required)
     		<br />
@@ -121,7 +121,7 @@
 			<br />
     		Cell 2: Path2BAMFile (BAM file used for variant calling)
     		<br />
-    		Cell 3: Path2SEQFile    (Reference sequence used for mapping the BAM file)
+    		Cell 3: Path2SEQFile (Reference sequence used for mapping the BAM file)
     		<br />
     		Cell 4: Path2GATKFile (GATK executable)
     		<br />

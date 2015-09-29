@@ -170,7 +170,23 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
 	    	}
 	    	segemehlfile.setStringValue(toolPath);
     	}
-    }	
+    }
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+			String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
+	    	if(toolPath != null && !toolPath.equals("")) {
+	    		segemehlfile.setStringValue(toolPath);
+	    		segemehlfile.setEnabled(false);
+	    	} else {
+	    		segemehlfile.setEnabled(true);
+	    	}
+		} else {
+			segemehlfile.setEnabled(true);
+		}
+		
+	}	
     
 }
 

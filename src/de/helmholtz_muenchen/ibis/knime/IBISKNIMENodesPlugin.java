@@ -18,6 +18,9 @@ import de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage;
  */
 public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
+	public static final String REF_GENOME = "ref_genome";
+	public static final String REF_GENOME_DEFAULT = "";
+	
 	public static final String USE_HTE = "hte";
 	public static final boolean HTE_DEFAULT = false;
 	
@@ -152,11 +155,20 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	 * @param store the preference store to fill
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(REF_GENOME, REF_GENOME_DEFAULT);
 		store.setDefault(USE_HTE, HTE_DEFAULT);
 		store.setDefault(THRESHOLD, THRESHOLD_DEFAULT);
 		store.setDefault(DB_FILE, DB_FILE_DEFAULT);
 		store.setDefault(NOTIFY, NOTIFY_DEFAULT);
 		store.setDefault(EMAIL, EMAIL_DEFAULT);
+	}
+	
+	public String getRefGenomePreference() {
+		return getPreferenceStore().getString(REF_GENOME);
+	}
+	
+	public void setRefGenomePreference(String path) {
+		getPreferenceStore().setValue(REF_GENOME, path);
 	}
 	
 	public String getToolPathPreference(String tool) {

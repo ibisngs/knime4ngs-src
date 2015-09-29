@@ -25,5 +25,11 @@ public class FastQCNodeDialog extends HTExecutorNodeDialog {
     	
     	
     }
+
+	@Override
+	protected void updatePrefs() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

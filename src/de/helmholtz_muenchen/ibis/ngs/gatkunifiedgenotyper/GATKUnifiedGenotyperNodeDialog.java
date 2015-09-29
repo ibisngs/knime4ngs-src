@@ -48,6 +48,7 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 	
 	
 	final SettingsModelString gatk = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_GATK, "");
+	final SettingsModelString reffile = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_REF_GENOME, "");
 	final SettingsModelBoolean use_dbsnp=new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USE_DBSNP, GATKUnifiedGenotyperNodeModel.DEF_USE_DBSNP);
 	final SettingsModelString dbsnp_file=new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_DBSNP_FILE, GATKUnifiedGenotyperNodeModel.DEF_DBSNP_FILE);
 	final SettingsModelBoolean use_interval = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USE_INTERVAL, GATKUnifiedGenotyperNodeModel.DEF_USE_INTERVAL);
@@ -166,6 +167,12 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
     	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
     	addDialogComponent(gatkf);
     	
+    	// reffile
+    	createNewGroup("Path to reference genome");
+    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
+    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
+    	addDialogComponent(reff);
+    	
     	// dbsnp set for annotation
     	createNewGroup("Variants from dbSNP");
         addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Annotate Variants with ID from dbSNP"));
@@ -204,20 +211,6 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
         	}
         	
         });
-        
-    	usePrefPage.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				gatk.setEnabled(!usePrefPage.getBooleanValue());
-				if(usePrefPage.getBooleanValue()) {
-					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-			    	if(toolPath.equals("")) {
-			    		toolPath = "GATK Jar File not found!";
-			    	}
-			    	gatk.setStringValue(toolPath);
-				}
-			}
-    	});
         
         // variant types
         createNewGroup("Variants");
@@ -275,17 +268,29 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 				}
 			});
   }
-    
-    public void onOpen() {
-    	super.onOpen();
-    	if(usePrefPage.getBooleanValue()){
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
 	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-	    	if(toolPath == null) {
-	    		toolPath = "GATK Jar File not found!";
+	    	if(toolPath != null && !toolPath.equals("")) {
+	    		gatk.setStringValue(toolPath);
+	    		gatk.setEnabled(false);
+	    	} else {
+	    		gatk.setEnabled(true);
 	    	}
-	    	gatk.setStringValue(toolPath);
-    	}
-    }	
-    
+	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+	    	if(refGenome != null && !refGenome.equals("")) {
+	    		reffile.setStringValue(refGenome);
+	    		reffile.setEnabled(false);
+	    	} else {
+	    		reffile.setEnabled(true);
+	    	}
+		} else {
+			gatk.setEnabled(true);
+			reffile.setEnabled(true);
+		}
+		
+	} 
 }
 

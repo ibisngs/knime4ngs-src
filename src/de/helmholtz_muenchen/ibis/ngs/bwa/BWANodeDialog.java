@@ -49,10 +49,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	    	
     	readGroup.setEnabled(false);
     	
-    	createNewGroup("BWA");
-    	
-    	addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
-    	
+    	createNewGroup("BWA");    	
     	addDialogComponent(dcfc);
     	bwa.setEnabled(false);
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
@@ -96,32 +93,30 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 					}
 			}
 		});
-    	
-    	usePrefPage.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				bwa.setEnabled(!usePrefPage.getBooleanValue());
-				if(usePrefPage.getBooleanValue()) {
-					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
-			    	if(toolPath.equals("")) {
-			    		toolPath = "BWA binary not found!";
-			    	}
-			    	bwa.setStringValue(toolPath);
-				}
-			}
-    	});
     }
     
-   
-    public void onOpen() {
-    	super.onOpen();
-    	if(usePrefPage.getBooleanValue()){
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
 	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
-	    	if(toolPath == null) {
-	    		toolPath = "BWA binary not found!";
+	    	if(toolPath != null && !toolPath.equals("")) {
+	    		bwa.setStringValue(toolPath);
+	    		bwa.setEnabled(false);
+	    	} else {
+	    		bwa.setEnabled(true);
 	    	}
-	    	bwa.setStringValue(toolPath);
-    	}
-    }		
+	    	
+	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+	    	if(refGenome != null && !refGenome.equals("")) {
+	    		refseq.setStringValue(refGenome);
+	    		refseq.setEnabled(false);
+	    	} else {
+	    		refseq.setEnabled(true);
+	    	}
+		} else {
+			bwa.setEnabled(true);
+			refseq.setEnabled(true);
+		}
+	}		
 }
 

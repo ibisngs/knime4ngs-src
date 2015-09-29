@@ -49,6 +49,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 					String n = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
 			    	threshold.setIntValue(Integer.parseInt(n));
 				}
+				updatePrefs();
 			}
     	});
 	}
@@ -59,5 +60,9 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	    	threshold.setIntValue(Integer.parseInt(n));
 	    	threshold.setEnabled(false);
 		}
+    	updatePrefs();
     }
+    
+    protected abstract void updatePrefs();
+    
 }

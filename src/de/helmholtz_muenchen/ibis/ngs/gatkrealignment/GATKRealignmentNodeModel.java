@@ -46,6 +46,9 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     // path to gatk executable
     static final String CFGKEY_GATK="gatk";
     private final SettingsModelString m_gatk = new SettingsModelString(CFGKEY_GATK, "");
+    // path to reference genome
+    static final String CFGKEY_REF_GENOME = "ref_genome";
+    private final SettingsModelString m_ref_genome = new SettingsModelString(CFGKEY_REF_GENOME,"");
     // use 1000 genomes phase 1 indel set
     static final String CFGKEY_USE_PHASE1_1000G="use_phase1_1000G";
     static final boolean DEF_USE_PHASE1_1000G=true;
@@ -262,9 +265,13 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
         }
         
         
-        // reference
-        
-        String reffile=r.getCell(posRef).toString();
+        // reference file
+        String reffile = "";
+        if(gatk) {
+        	reffile=r.getCell(posRef).toString();
+        } else {
+        	reffile=m_ref_genome.getStringValue();
+        }
 
         // path to reference should not be null
         if(reffile.equals("")){
@@ -586,6 +593,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	super.saveSettingsTo(settings);
         //general options
     	m_gatk.saveSettingsTo(settings);
+        m_ref_genome.saveSettingsTo(settings);
     	m_use_phase1_1000G.saveSettingsTo(settings);
     	m_phase1_1000G_file.saveSettingsTo(settings);
     	m_use_mills_1000G.saveSettingsTo(settings);
@@ -633,6 +641,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	super.loadValidatedSettingsFrom(settings);    
     	// general options
     	m_gatk.loadSettingsFrom(settings);
+        m_ref_genome.loadSettingsFrom(settings);
     	m_use_phase1_1000G.loadSettingsFrom(settings);
     	m_phase1_1000G_file.loadSettingsFrom(settings);
     	m_use_mills_1000G.loadSettingsFrom(settings);
@@ -681,6 +690,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	//general options
     	
     	m_gatk.validateSettings(settings);
+    	m_ref_genome.validateSettings(settings);
     	m_use_phase1_1000G.validateSettings(settings);
     	m_phase1_1000G_file.validateSettings(settings);    	
     	m_use_mills_1000G.validateSettings(settings);
@@ -738,9 +748,4 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
        
 
     }
-
-    
-
-    
 }
-

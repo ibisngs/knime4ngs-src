@@ -47,6 +47,9 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     // path to gatk executable
     static final String CFGKEY_GATK="gatk";
     private final SettingsModelString m_gatk = new SettingsModelString(CFGKEY_GATK, "");
+    // path to reference genome
+    static final String CFGKEY_REF_GENOME = "ref_genome";
+    private final SettingsModelString m_ref_genome = new SettingsModelString(CFGKEY_REF_GENOME,"");
     // use dbsnp snp set
  	static final String CFGKEY_USE_DBSNP="use_dbsnp";
  	static final boolean DEF_USE_DBSNP=true;
@@ -283,8 +286,12 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         }
         
         // reference file
-        
-        String reffile=r.getCell(posRef).toString();
+        String reffile = "";
+        if(gatk) {
+        	reffile=r.getCell(posRef).toString();
+        } else {
+        	reffile=m_ref_genome.getStringValue();
+        }
         
         // path to reffile should not be null
         if(reffile.equals("")){
@@ -316,7 +323,7 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         if(gatk){
         	gatkfile=r.getCell(posGatk).toString();
             if(gatkfile.equals("")){
-            	throw new Exception("No gatk executable available, something went wrong with the previous node!");
+            	throw new Exception("No GATK executable available, something went wrong with the previous node!");
             }
         }
         // info from node dialog
@@ -627,6 +634,7 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     	super.saveSettingsTo(settings);
     	
         m_gatk.saveSettingsTo(settings);
+        m_ref_genome.saveSettingsTo(settings);
         m_use_dbsnp.saveSettingsTo(settings);
         m_dbsnp_file.saveSettingsTo(settings);
         m_use_interval.saveSettingsTo(settings);
@@ -671,6 +679,7 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     	super.loadValidatedSettingsFrom(settings);
     	
     	m_gatk.loadSettingsFrom(settings);
+    	m_ref_genome.loadSettingsFrom(settings);
     	m_use_dbsnp.loadSettingsFrom(settings);
     	m_dbsnp_file.loadSettingsFrom(settings);
     	m_use_interval.loadSettingsFrom(settings);
@@ -716,6 +725,7 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     	super.validateSettings(settings);
     	
     	m_gatk.validateSettings(settings);
+    	m_ref_genome.validateSettings(settings);
     	m_use_dbsnp.validateSettings(settings);
     	m_dbsnp_file.validateSettings(settings);
     	m_use_interval.validateSettings(settings);
@@ -757,13 +767,6 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     protected void loadInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-        
-        // load internal data. 
-        // Everything handed to output ports is loaded automatically (data
-        // returned by the execute method, models loaded in loadModelContent,
-        // and user settings set through loadSettingsFrom - is all taken care 
-        // of). Load here only the other internals that need to be restored
-        // (e.g. data used by the views).
 
     }
     
@@ -774,13 +777,6 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
     protected void saveInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-       
-        // save internal models. 
-        // Everything written to output ports is saved automatically (data
-        // returned by the execute method, models saved in the saveModelContent,
-        // and user settings saved through saveSettingsTo - is all taken care 
-        // of). Save here only the other internals that need to be preserved
-        // (e.g. data used by the views).
 
     }
 
