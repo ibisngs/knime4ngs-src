@@ -44,6 +44,7 @@ import org.knime.core.node.util.CheckUtils;
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
+import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 /**
  * @author hastreiter
@@ -184,7 +185,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		//Reference genome
 		Group ref_genome = new Group(top,SWT.NONE);
-		ref_genome.setText("Reference genome");
+		ref_genome.setText("Reference (genome) sequence");
 		ref_genome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout refLayout = new GridLayout();
 		refLayout.numColumns = 3;
@@ -362,6 +363,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		REF_GENOME = refGenome.getText();
+		if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
+			JOptionPane.showMessageDialog(null,
+					"Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!",
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		iknp.setRefGenomePreference(REF_GENOME);
 		LOGGER.debug("Setting REF_GENOME to: "+REF_GENOME);
 		

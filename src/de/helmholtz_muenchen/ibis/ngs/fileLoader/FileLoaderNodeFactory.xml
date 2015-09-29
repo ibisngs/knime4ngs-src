@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>FileLoader</name>
+    
+    <shortDescription>
+        This node loads one or two input file(s) and serves as a starting point for any NGS workflow.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+        	This node loads one or two input file(s) and serves as a starting point for any NGS workflow.
+        </intro>
+        
+        
+        <option name="Input file">
+        	Choose an input file in BAM/SAM, fastQ or VCF format.
+        </option>
+        <option name="Second optional fastQ file">
+        	A second fastQ file can be given for the analysis of paired end reads.
+        </option>
+    </fullDescription>
+    
+    <ports>
+        <outPort index="0" name="Loaded files">
+        	Cell 0: loaded file
+        	<br />
+        	Cell 1 (optional): second fastQ file
+        </outPort>
+    </ports>    
+</knimeNode>
