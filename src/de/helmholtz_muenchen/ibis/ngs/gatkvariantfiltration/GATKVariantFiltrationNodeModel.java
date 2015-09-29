@@ -105,10 +105,10 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	try{
     		INFILE = inData[0].iterator().next().getCell(0).toString();
     		if(!INFILE.endsWith(".vcf")){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
+    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is "+INFILE);
     		}
     	}catch(IndexOutOfBoundsException e){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
+    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is empty.");
     	}
     	
     	ArrayList<String> command = new ArrayList<String>();

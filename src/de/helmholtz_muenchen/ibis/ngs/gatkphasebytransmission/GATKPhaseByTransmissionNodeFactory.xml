@@ -3,25 +3,53 @@
     <name>GATKPhaseByTransmission</name>
     
     <shortDescription>
-        Computes the most likely genotype combination and phases trios and parent/child pairs
+        Computes the most likely genotype combination and phases trios and parent/child pairs.
     </shortDescription>
     
     <fullDescription>
-        <intro>PhaseByTransmission is a GATK tool that 1) computes the most likely genotype combination and phases trios and parent/child pairs given their genotype likelihoods and a mutation prior and 2) phases all sites were parent/child transmission can be inferred unambiguously. It reports the genotype combination (and hence phasing) probability.</intro>
+        <intro>
+        	PhaseByTransmission is a GATK tool that 
+        	1) computes the most likely genotype combination and phases trios and parent/child pairs given their genotype likelihoods and a mutation prior and 
+        	2) phases all sites were parent/child transmission can be inferred unambiguously.
+        	It reports the genotype combination (and hence phasing) probability.
+        	For further information, see the GATK online documentation of the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_phasing_PhaseByTransmission.php">PhaseByTransmission</a> walker.
+        </intro>
         
+        <tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        </tab>
         
-        <option name="De novo prior">Prior for de novo mutations</option>
-
+        <tab name="PhaseByTransmission">
+        	<option name="PED File">
+        		PED file defining trios and parent/child paires.
+        	</option>
+        	<option name="De novo prior">
+        		Prior for de novo mutations
+        	</option>
+		</tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Path2VCFFile">Path to VCF file from callers</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="GATKpbt output">Path to the phased VCF file</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="Input VCF">
+        	Path to input VCF file.
+        </inPort>
+        <outPort index="0" name="Phased VCF">
+        	Cell 0: Path to the phased VCF file.
+        </outPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
 </knimeNode>

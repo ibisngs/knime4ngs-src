@@ -1,31 +1,19 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of GATKPhaseByTransmission.
@@ -33,182 +21,177 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Maximilian Hastreiter
  * modified by Tanzeem Haque
+ * modified by Tim Jeske
  */
-public class GATKPhaseByTransmissionNodeModel extends NodeModel {
-    
-//	my $com = "java -Xmx8g -jar ".$TOOL_PATH.$GATK_VERSION."/GenomeAnalysisTK.jar -T PhaseByTransmission
-//	-R $REF_GENOME -V $INFILE -o $outfile -ped $PED";
-	
-	static boolean optionalPort = false;
+public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 
 	/**
 	 * Config Keys
 	 */
-	public static final String CFGKEY_GATK_PATH = "GATK_PATH";
-	public static final String CFGKEY_INFILE = "INFILE";
-	public static final String CFGKEY_REF_GENOME = "REFGENOME";
 	public static final String CFGKEY_PED_FILE = "PED";
-	public static final String CFGKEY_JAVAMEMORY = "gatkmemory";
 	public static final String CFGKEY_DENOVOPRIOR = "deNovoPrior";
-	private static final String REFERENCE = "Reference";
-	private static final String INPUT_COL_NAME = "Path2VCFFile";
+
 	/**
 	 * The SettingsModels
 	 */
 	
-    private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
-    private final SettingsModelString m_INFILE = new SettingsModelString(CFGKEY_INFILE, "");
-    private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
-    private final SettingsModelString m_PED_FILE = new SettingsModelString(CFGKEY_PED_FILE, "");
-
-    
-    public static final int DEF_NUM_JAVAMEMORY=8;
-    public static final int MIN_NUM_JAVAMEMORY=1;
-    public static final int MAX_NUM_JAVAMEMORY=Integer.MAX_VALUE;
-    private final SettingsModelIntegerBounded m_GATK_JAVA_MEMORY = new SettingsModelIntegerBounded(CFGKEY_JAVAMEMORY, DEF_NUM_JAVAMEMORY, MIN_NUM_JAVAMEMORY, MAX_NUM_JAVAMEMORY);
-    
+    private final SettingsModelString m_PED_FILE = new SettingsModelString(CFGKEY_PED_FILE, ""); 
     private final SettingsModelString m_DENOVO_PRIOR = new SettingsModelString(CFGKEY_DENOVOPRIOR, "1.0E-8");
     
 	//The Output Col Names
-	public static final String OUT_COL1 = "PHASED VARIANTS";
-	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(GATKPhaseByTransmissionNodeModel.class); //not used yet
+	public static final String OUT_COL1 = "PhasedVCF";
+		
+	private String OUTFILE, LOCKFILE;
 	
     /**
      * Constructor for the node model.
      */
     protected GATKPhaseByTransmissionNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
-    	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
-    	
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-            final ExecutionContext exec) throws Exception {
-    	
-    	String refGenome = "", inFile = "";
-    	
-    	if (optionalPort) {
-    		inFile = inData[0].iterator().next().getCell(0).toString(); //path2VCFFile
-    		refGenome = getAvailableFlowVariables().get(REFERENCE).getStringValue();
-     		
-    	}
-    	else {
-        	inFile = m_INFILE.getStringValue();
-        	refGenome = m_REF_GENOME.getStringValue();
+	@Override
+	protected String getCommandParameters(BufferedDataTable[] inData)
+			throws InvalidSettingsException {
+		/**
+    	 * Check INFILE
+    	 */
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		if(!INFILE.endsWith(".vcf")){
+    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is empty.");
     	}
     	
-//    	System.out.println("infile "+inFile);
-//		System.out.println("refgenome: "+refGenome);
-		
     	ArrayList<String> command = new ArrayList<String>();
+    	command.add("-V "+INFILE);
     	
-    	command.add("java");
-    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
-    	command.add("-T PhaseByTransmission");
+    	OUTFILE = IO.replaceFileExtension(INFILE, ".PhasedByTransmission.vcf");
+    	LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
     	
     	command.add("-prior "+m_DENOVO_PRIOR.getStringValue());
-    	
-    	command.add("-R "+refGenome);
-    	command.add("-V "+inFile);
-    	
-    	String OUTFILE = inFile.replaceAll(".vcf", "_pbt_phased.vcf");
-//		System.out.println("outfile: "+OUTFILE);
-
-    	command.add("-o "+OUTFILE);
-    	
     	command.add("-ped "+m_PED_FILE.getStringValue());
+    	
+    	return StringUtils.join(command, " ");
+	}
+	
+	
+    /**
+     * {@inheritDoc}
+     */
+//    @Override
+//    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
+//            final ExecutionContext exec) throws Exception {
+//    	
+//    	String refGenome = "", inFile = "";
+//    	
+//    	if (optionalPort) {
+//    		inFile = inData[0].iterator().next().getCell(0).toString(); //path2VCFFile
+//    		refGenome = getAvailableFlowVariables().get(REFERENCE).getStringValue();
+//     		
+//    	}
+//    	else {
+//        	inFile = m_INFILE.getStringValue();
+//        	refGenome = m_REF_GENOME.getStringValue();
+//    	}
+//    	
+////    	System.out.println("infile "+inFile);
+////		System.out.println("refgenome: "+refGenome);
+//		
+//    	ArrayList<String> command = new ArrayList<String>();
+//    	
+//    	command.add("java");
+//    	command.add("-Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"g -jar "+m_GATK.getStringValue());
+//    	command.add("-T PhaseByTransmission");
+//    	
+//    	command.add("-prior "+m_DENOVO_PRIOR.getStringValue());
+//    	
+//    	command.add("-R "+refGenome);
+//    	command.add("-V "+inFile);
+//    	
+//    	String OUTFILE = inFile.replaceAll(".vcf", "_pbt_phased.vcf");
+////		System.out.println("outfile: "+OUTFILE);
+//
+//    	command.add("-o "+OUTFILE);
+//    	
+//    	command.add("-ped "+m_PED_FILE.getStringValue());
+//
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+////    	java -jar $pathGATK/GenomeAnalysisTK.jar -R $absPath/$ref -T PhaseByTransmission 
+////    	-V $absPath/$input -ped $absPath/family.ped -o $absPath/$outputDir/$outputVCF 
+////    	-PF $absPath/$outputDir/$outputRT
+//    	
+//    	
+//    	/**
+//    	 * OUTPUT
+//    	 */
+//    	BufferedDataContainer cont = exec.createDataContainer(
+//    			new DataTableSpec(
+//    			new DataColumnSpec[]{
+//    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+//    	
+//    	FileCell[] c = new FileCell[]{
+//    			(FileCell) FileCellFactory.create(OUTFILE)};
+//    	
+//    	cont.addRowToTable(new DefaultRow("Row0",c));
+//    	cont.close();
+//    	BufferedDataTable outTable = cont.getTable();
+//
+//        return new BufferedDataTable[]{outTable};
+//    }
 
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-//    	java -jar $pathGATK/GenomeAnalysisTK.jar -R $absPath/$ref -T PhaseByTransmission 
-//    	-V $absPath/$input -ped $absPath/family.ped -o $absPath/$outputDir/$outputVCF 
-//    	-PF $absPath/$outputDir/$outputRT
-    	
-    	
-    	/**
-    	 * OUTPUT
-    	 */
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
-    	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(OUTFILE)};
-    	
-    	cont.addRowToTable(new DefaultRow("Row0",c));
-    	cont.close();
-    	BufferedDataTable outTable = cont.getTable();
-
-        return new BufferedDataTable[]{outTable};
-    }
+    /**
+     * {@inheritDoc}
+     */
+//    @Override
+//    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
+//            throws InvalidSettingsException {
+//
+//    	/**
+//    	 * Check OptionalInputPort
+//    	 */
+//		try{
+////			inSpecs[0].getColumnNames();
+//			String[] colNames = inSpecs[0].getColumnNames();
+//			optionalPort=true;
+//			
+////			for (String s : colNames)
+//
+//			if (colNames.length > 1 && colNames[0].equals(INPUT_COL_NAME)) {
+//				m_INFILE.setEnabled(false);
+//				if (getAvailableInputFlowVariables().containsKey(REFERENCE))
+//					m_REF_GENOME.setEnabled(false);
+////				System.out.println(colNames[0]);
+//			}
+//			else
+//				throw new InvalidSettingsException("The in-port is invalid! Don't use an in-port or connect the right node.");
+//			
+//
+//    	}catch(NullPointerException npe){
+//    		m_INFILE.setEnabled(true);
+//    		m_REF_GENOME.setEnabled(true);
+//			optionalPort=false;
+//    	
+//    	}
+//		
+//    	DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
+//    	allColSpecs[0] = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
+//
+//    	DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
+////		System.out.println(optionalPort);
+//        return new DataTableSpec[]{outputSpec};
+//        // TODO: generated method stub
+//    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void reset() {
-        // TODO: generated method stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-
-    	/**
-    	 * Check OptionalInputPort
-    	 */
-		try{
-//			inSpecs[0].getColumnNames();
-			String[] colNames = inSpecs[0].getColumnNames();
-			optionalPort=true;
-			
-//			for (String s : colNames)
-
-			if (colNames.length > 1 && colNames[0].equals(INPUT_COL_NAME)) {
-				m_INFILE.setEnabled(false);
-				if (getAvailableInputFlowVariables().containsKey(REFERENCE))
-					m_REF_GENOME.setEnabled(false);
-//				System.out.println(colNames[0]);
-			}
-			else
-				throw new InvalidSettingsException("The in-port is invalid! Don't use an in-port or connect the right node.");
-			
-
-    	}catch(NullPointerException npe){
-    		m_INFILE.setEnabled(true);
-    		m_REF_GENOME.setEnabled(true);
-			optionalPort=false;
-    	
-    	}
-		
-    	DataColumnSpec[] allColSpecs = new DataColumnSpec[1];
-    	allColSpecs[0] = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
-
-    	DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-//		System.out.println(optionalPort);
-        return new DataTableSpec[]{outputSpec};
-        // TODO: generated method stub
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-		   	 m_GATK.saveSettingsTo(settings);
-		   	 m_INFILE.saveSettingsTo(settings);
-		   	 m_REF_GENOME.saveSettingsTo(settings);
+    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
 		   	 m_PED_FILE.saveSettingsTo(settings);
-		   	 m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
 		   	 m_DENOVO_PRIOR.saveSettingsTo(settings);
     }
 
@@ -216,13 +199,9 @@ public class GATKPhaseByTransmissionNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-		   	 m_GATK.loadSettingsFrom(settings);
-		   	 m_INFILE.loadSettingsFrom(settings);
-		   	 m_REF_GENOME.loadSettingsFrom(settings);
 		   	 m_PED_FILE.loadSettingsFrom(settings);
-		   	 m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
 		   	 m_DENOVO_PRIOR.loadSettingsFrom(settings);
     }
 
@@ -230,35 +209,25 @@ public class GATKPhaseByTransmissionNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
+    protected void validateExtraSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-		   	 m_GATK.validateSettings(settings);
-		   	 m_INFILE.validateSettings(settings);
-		   	 m_REF_GENOME.validateSettings(settings);
 		   	 m_PED_FILE.validateSettings(settings);
-		     m_GATK_JAVA_MEMORY.validateSettings(settings);
 		     m_DENOVO_PRIOR.validateSettings(settings);
     } 
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
 
+	@Override
+	protected String getCommandWalker() {
+		return "PhaseByTransmission";
+	}
+
+	@Override
+	protected File getLockFile() {
+		return new File(LOCKFILE);
+	}
+
+	@Override
+	protected String getOutfile() {
+		return OUTFILE;
+	}
 }
 
