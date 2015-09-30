@@ -1,11 +1,10 @@
-package de.helmholtz_muenchen.ibis.ngs.vcffilter;
+package de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -24,7 +23,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -33,6 +31,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 /**
  * This is the model implementation of LOFFilter.
@@ -40,16 +39,10 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  *
  * @author Tim Jeske
  */
-public class VCFFilterNodeModel extends HTExecutorNodeModel {
+public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFFilterNodeModel.class);
+	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFToolsFilterNodeModel.class);
 	
-	//input
-	static final String CFGKEY_VCFIN = "vcf_infile";
-	private final SettingsModelString m_vcfin = new SettingsModelString(CFGKEY_VCFIN,"-");
-	
-	static final String CFGKEY_VEP_SCRIPT = "vepscript";
-    private final SettingsModelString m_vepscript = new SettingsModelString(CFGKEY_VEP_SCRIPT,"-");
     
     static final String CFGKEY_VCFTOOLS = "vcf_tools";
     private final SettingsModelString m_vcf_tools = new SettingsModelString(CFGKEY_VCFTOOLS,"-");
@@ -86,40 +79,14 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     static final String CFGKEY_GQ_MEAN_THRESHOLD = "GQ_mean_threshold";
     final SettingsModelIntegerBounded m_GQ_mean_threshold = new SettingsModelIntegerBounded(CFGKEY_GQ_MEAN_THRESHOLD,35,0,99);
     
-    //annotation filter
-    static final String CFGKEY_FILTER_ANNOTATIONS = "filter_annotations";
-	final SettingsModelBoolean m_filter_annos = new SettingsModelBoolean(CFGKEY_FILTER_ANNOTATIONS,false);
-    
-	static final String CFGKEY_ANNOTATION="annotation";
-    static final String[] ANNOTATIONS_AVAILABLE={"VAT", "VEP"};
-    private final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
-    
-    static final String [] SO_TERMS = {"splice_acceptor_variant", "splice_donor_variant",
-    	"stop_gained", "frameshift_variant", "stop_lost",
-    	"initiator_codon_variant", "inframe_insertion","inframe_deletion", "missense_variant"};
-    
-    static final String [] DEFAULT_TERMS = {SO_TERMS[0], SO_TERMS[1], SO_TERMS[2], SO_TERMS[3]};
-    
-    static final String CFGKEY_SO_TERM = "so_term"; 
-    
-    static final String CFGKEY_TERM_LIST = "term_list";
-    
-    private final HashSet<String> TERMS	= new HashSet<String>();
-
-    static final String CFGKEY_FILTER = "filter";
-    private final SettingsModelOptionalString m_filter = new SettingsModelOptionalString(CFGKEY_FILTER,"",false);
-    
     
 	//output col names
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
-	public boolean optionalPort=false;
+	private int vcf_index;
 	
-    protected VCFFilterNodeModel() {
-    	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
-        for(String t: DEFAULT_TERMS) {
-        	this.TERMS.add(t);
-        }
+    protected VCFToolsFilterNodeModel() {
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
     /**
@@ -130,16 +97,10 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
             final ExecutionContext exec) throws Exception {
 
 
-    	String infile;
+    	String infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
-    	if(optionalPort){
-    		infile = inData[0].iterator().next().getCell(0).toString();
-    	}else{
-    		infile = m_vcfin.getStringValue();
-    	}
-    	String infile_warning = CheckUtils.checkSourceFile(infile);
-    	if(infile_warning != null) {
-    		setWarningMessage(infile_warning);
+    	if(Files.notExists(Paths.get(infile))) {
+    		throw new InvalidSettingsException("Input VCF does not exist!");
     	}
     	
     	String outfile = infile;
@@ -151,10 +112,6 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     		outfile = filterVariants(infile, exec);
     		infile = outfile;
     	}
-    	if(m_filter_annos.getBooleanValue()) {
-    		outfile = filterAnnotations(infile, exec);
-    		infile = outfile;
-    	}
     	if(m_fill_an_ac.getBooleanValue()) {
     		outfile = postprocess(infile,exec);
     	}
@@ -163,7 +120,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(outfile)};
@@ -182,7 +139,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	if(is_gz) {
     		outfile = infile.replace(".vcf.gz", ".genotype_filtered");
     	} else {
-    		outfile = infile.replace(".vcf", ".genotype_filtered");
+    		outfile = IO.replaceFileExtension(infile, ".genotype_filtered");
     	}
     	
     	if(m_filter_by_GQ.getBooleanValue() || m_filter_by_DP.getBooleanValue()) {
@@ -223,7 +180,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     		if(is_gz) {
         		outfile = infile.replace(".vcf.gz", ".variant_filtered");
         	} else {
-        		outfile = infile.replace(".vcf", ".variant_filtered");
+        		outfile = IO.replaceFileExtension(infile, ".variant_filtered");
         	}
     		
     		ArrayList<String> cmd = new ArrayList<>();
@@ -287,66 +244,6 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	return outfile;
     }
     
-    private String filterAnnotations(String infile, ExecutionContext exec) throws Exception {
-    	String outfile;
-    	if(infile.endsWith(".gz")) {
-    		outfile = infile.replace(".vcf.gz", ".annotation_filtered.vcf");
-    	} else {
-    		outfile = infile.replace(".vcf", ".annotation_filtered.vcf");
-    	}
-    	
-    	LOGGER.debug("CHOSEN TERMS: "+TERMS);
-    	LOGGER.debug("FILTER: "+m_filter.getStringValue());
-    	
-    	String annotation = m_annotation.getStringValue();
-    	LOGGER.debug(annotation);
-    	if(annotation.equals("VAT")) {
-    		LOGGER.debug("Filter VAT annotation");
-    		new VATFilter().filter(infile, outfile, TERMS);
-    	} else if(annotation.equals("VEP")) {
-    		LOGGER.info("Prepare command for filter_vep.pl");
-    		ArrayList<String> cmd = new ArrayList<>();
-    		cmd.add("perl");
-    		cmd.add(m_vepscript.getStringValue());
-    		cmd.add("-i");
-    		cmd.add(infile);
-    		cmd.add("-o");
-    		cmd.add(outfile);
-    		
-    		String filter_terms = "";
-    		Object [] terms =  TERMS.toArray();
-    		if(terms.length>0) {
-    			cmd.add("--filter");
-    			filter_terms += "Consequence is "+terms[0];
-    			for(int i=1; i<terms.length; i++) {
-        			filter_terms += " or Consequence is "+terms[i];
-        		}
-    			cmd.add(filter_terms);
-    		}
-    		
-    		String [] filters = m_filter.getStringValue().split(",");
-    		if(filters.length>0) {
-    			for(String f: filters) {
-    				if(f.equals("")) continue;
-    				cmd.add("--filter");
-    				f = f.trim();
-    				cmd.add(f);
-    			}
-    		}
-    		
-    		cmd.add("--only_matched");
-
-    		String [] cmd_array = new String[cmd.size()];
-    		for(int i = 0; i < cmd.size(); i++) {
-    			cmd_array[i] = cmd.get(i);
-    		}
-    		
-    		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
-    		super.executeCommand(cmd_array, exec, lockFile);
-    	}
-    	return outfile;
-    }
-    
     private String postprocess(String infile, ExecutionContext exec) throws Exception {
     	boolean is_gz = infile.endsWith(".gz");
     	String outfile;
@@ -381,33 +278,12 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	return outfile;
     }
     
-//    private void klockExecute (String [] cmd_array, File lockFile, ExecutionContext exec) throws Exception {
-//    	String command = Arrays.toString(cmd_array);
-//    	
-//    	boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, command);
-//		
-//		if(!b) {
-//			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, command);
-//			int exitCode = Executor.executeCommandWithExitCode(cmd_array, exec, LOGGER);
-//			if(exitCode==0) {
-//				checker.writeOK();
-//				checker.finalize();
-//			}
-//		} else {
-//			LOGGER.info(command+ " has been successfully executed according to klock");
-//		}
-//    }
-    
     /**
      * {@inheritDoc}
      */
     @Override
     protected void reset() {
-//        this.TERMS.clear();
-//        for(String t: DEFAULT_TERMS) {
-//        	this.TERMS.add(t);
-//        }
-        optionalPort = false;
+
     }
 
     /**
@@ -417,13 +293,6 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	if(m_filter_annos.getBooleanValue()) {
-    		String vep_warning = CheckUtils.checkSourceFile(m_vepscript.getStringValue());
-    		if(vep_warning != null) {
-    			setWarningMessage(vep_warning);
-    		}
-    	}
-    	
     	boolean a = m_filter_by_DP.getBooleanValue();
     	boolean b = m_filter_by_GQ.getBooleanValue();
     	boolean c = m_filter_by_callRate.getBooleanValue();
@@ -431,16 +300,22 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	boolean f = m_filter_pass.getBooleanValue();
     	
     	if(a || b || c || d || f) {
-    		String vcftools = m_vcf_tools.getStringValue();
-    		if(vcftools.equals("") || Files.notExists(Paths.get(vcftools))) {
-    			throw new InvalidSettingsException("Path to VCFtools not specified!");
-    		}
+    		String vcftools_warning = CheckUtils.checkSourceFile(m_vcf_tools.getStringValue());
+        	if(vcftools_warning != null) {
+        		setWarningMessage(vcftools_warning);
+        	}
     	}
     	
-    	try{
-			inSpecs[0].getColumnNames();
-			optionalPort=true;
-		}catch(NullPointerException e){}
+    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			vcf_index = i;
+    		}
+    	}
+    
+    	
+    	if(vcf_index==-1) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the output table!");
+    	}
     	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
@@ -463,14 +338,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	m_filter_by_GQ_MEAN.saveSettingsTo(settings);
     	m_GQ_mean_threshold.saveSettingsTo(settings);
     	m_vcf_tools.saveSettingsTo(settings);
-		m_filter_annos.saveSettingsTo(settings);
-		m_vcfin.saveSettingsTo(settings);
 		m_fill_an_ac.saveSettingsTo(settings);
-		m_filter.saveSettingsTo(settings);
-		m_vepscript.saveSettingsTo(settings);
-		m_annotation.saveSettingsTo(settings);
-		settings.addStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST,
-				TERMS.toArray(new String[TERMS.size()]));
 	}
 
     /**
@@ -490,25 +358,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	m_filter_by_GQ_MEAN.loadSettingsFrom(settings);
     	m_GQ_mean_threshold.loadSettingsFrom(settings);
     	m_vcf_tools.loadSettingsFrom(settings);
-    	m_filter_annos.loadSettingsFrom(settings);
-        m_vcfin.loadSettingsFrom(settings);
-        m_fill_an_ac.loadSettingsFrom(settings);
-        m_filter.loadSettingsFrom(settings);
-        m_vepscript.loadSettingsFrom(settings);
-        m_annotation.loadSettingsFrom(settings);
-        
-        // clean the old data
-    	TERMS.clear();
-    	// check, if data is set
-        if (settings.containsKey(VCFFilterNodeModel.CFGKEY_TERM_LIST)) {
-        	try {
-        		// add the values
-				for(String s : settings.getStringArray(VCFFilterNodeModel.CFGKEY_TERM_LIST))
-					this.TERMS.add(s);
-			} catch (InvalidSettingsException e) {
-				LOGGER.error(e.getStackTrace());
-			}
-        } 
+        m_fill_an_ac.loadSettingsFrom(settings); 
     }
 
     /**
@@ -528,12 +378,7 @@ public class VCFFilterNodeModel extends HTExecutorNodeModel {
     	m_filter_by_GQ_MEAN.validateSettings(settings);
     	m_GQ_mean_threshold.validateSettings(settings);
     	m_vcf_tools.validateSettings(settings);
-    	m_filter_annos.validateSettings(settings);
-        m_vcfin.validateSettings(settings);
         m_fill_an_ac.validateSettings(settings);
-        m_filter.validateSettings(settings);
-        m_vepscript.validateSettings(settings);
-        m_annotation.validateSettings(settings);
     }
     
     /**

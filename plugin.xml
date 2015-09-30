@@ -93,7 +93,8 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfnormalizer.VCFNormalizerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfnormalizer.VCFNormalizerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcffilter.VCFFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcffilter.VCFFilterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory"/>
 		
 			
 		<!-- METABOLOMICS -->

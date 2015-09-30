@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.vcffilter;
+package de.helmholtz_muenchen.ibis.ngs.vepfilter;
 
 import org.knime.core.node.NodeView;
 
@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class VCFFilterNodeView extends NodeView<VCFFilterNodeModel> {
+public class VEPFilterNodeView extends NodeView<VEPFilterNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link VCFFilterNodeModel})
+     * @param nodeModel The model (class: {@link VEPFilterNodeModel})
      */
-    protected VCFFilterNodeView(final VCFFilterNodeModel nodeModel) {
+    protected VEPFilterNodeView(final VEPFilterNodeModel nodeModel) {
         super(nodeModel);
         // TODO: generated method stub
     }
