@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -20,8 +21,12 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * This is the model implementation of FileLoader.
@@ -41,7 +46,7 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL2 = "Path2File2";
 	
 	private static final String [] ENDINGS = {".vcf",".fastq",".bam",".sam"};
-	boolean firstOk = false;
+	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 	boolean secondOk = false;
 	
     /**
@@ -59,33 +64,33 @@ public class FileLoaderNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	DataColumnSpec [] colSpec;
+    	String in1 = m_infile1.getStringValue();
+    	String in2 = m_infile2.getStringValue();
     	
-    	if(firstOk && secondOk) {
-    		colSpec = new DataColumnSpec[]{
-    				new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    				new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()};
-    	} else {
-    		colSpec = new DataColumnSpec[]{
-    				new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()};
+    	DataColumnSpec dcs1 = null;
+    	DataColumnSpec dcs2 = null;
+    	DataColumnSpec [] specs = null;
+    	
+    	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
+		specs = new DataColumnSpec[]{dcs1};
+
+    	if(secondOk) {
+			dcs2 = new DataColumnSpecCreator(OUT_COL2, TYPES[checkEnding(in2)]).createSpec();
+    		specs = new DataColumnSpec[]{dcs1, dcs2};
     	}
     	
-    	FileCell [] fileCell;
+    	FileCell [] fileCell = new FileCell[] {
+    			(FileCell) FileCellFactory.create(in1)};
     	
-    	if(firstOk && secondOk) {
+    	if(secondOk) {
     		fileCell = new FileCell[] {
-        			(FileCell) FileCellFactory.create(m_infile1.getStringValue()),
-        			(FileCell) FileCellFactory.create(m_infile2.getStringValue())};
-    	} else {
-    		fileCell = new FileCell[] {
-        			(FileCell) FileCellFactory.create(m_infile1.getStringValue())};
+        			(FileCell) FileCellFactory.create(in1),
+        			(FileCell) FileCellFactory.create(in2)};
     	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(colSpec));
-    	
+    			new DataTableSpec(specs));
     	FileCell[] c = fileCell;
-    	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
@@ -110,43 +115,45 @@ public class FileLoaderNodeModel extends NodeModel {
     	String in1 = m_infile1.getStringValue();
     	String in2 = m_infile2.getStringValue();
     	
-    	firstOk = false;
+    	DataColumnSpec dcs1 = null;
+    	DataColumnSpec dcs2 = null;
+    	DataColumnSpec [] specs = null;
+    	
     	secondOk = false;
     	
-    	if(Files.notExists(Paths.get(in1)) || !hasAllowedEnding(in1)) {
+    	//check first input file
+    	if(Files.notExists(Paths.get(in1)) || checkEnding(in1)==-1) {
     		throw new InvalidSettingsException("First input file does not exist or has disallowed ending!");
-    	} else {
-    		firstOk = true;
     	}
+    	
+    	//first input file is ok
+    	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
     	
     	if(in2.length()>0) {
     		if(Files.notExists(Paths.get(in2)) || !in2.endsWith(".fastq")) {
-    			setWarningMessage("Second input file does not exist or has disallowed ending!");
+    			setWarningMessage("Second input file does not exist or has disallowed ending and will be ignored!");
     		} else {
     			secondOk = true;
+    			dcs2 = new DataColumnSpecCreator(OUT_COL2, TYPES[checkEnding(in2)]).createSpec();
     		}
     	}
     	
-    	
-    	if(firstOk && secondOk) {
-    	return new DataTableSpec[]{new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
+    	if(secondOk) {
+    		specs = new DataColumnSpec[]{dcs1, dcs2};
     	} else {
-    		return new DataTableSpec[]{new DataTableSpec(
-        			new DataColumnSpec[]{
-        					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
+    		specs = new DataColumnSpec[]{dcs1};
     	}
+    	
+    	return new DataTableSpec[]{new DataTableSpec(specs)};
     }
     
-    protected boolean hasAllowedEnding(String path) {
-    	for(String s: ENDINGS) {
-    		if(path.endsWith(s)) {
-    			return true;
+    protected int checkEnding(String path) {
+    	for(int i = 0; i < ENDINGS.length; i++) {
+    		if(path.endsWith(ENDINGS[i])) {
+    			return i;
     		}
     	}
-    	return false;
+    	return -1;
     }
 
     /**
