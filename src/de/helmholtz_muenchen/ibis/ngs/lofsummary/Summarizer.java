@@ -618,7 +618,9 @@ public abstract class Summarizer {
 			int lof_het = e.getValue().getHetTrans();
 			
 			SampleInfo si = sample_statistic.get(e.getKey().split("_")[1]);
-			if(all_trans == lof_hom) {//all transcripts are affected by LoF variants
+			si.addHetTranscripts(gene_statistic.get(gene_id).getSymbol(), e.getValue().getTranscripts_het());
+			si.addHomTranscripts(gene_statistic.get(gene_id).getSymbol(), e.getValue().getTranscripts_hom());
+			if((all_trans == lof_hom) && all_trans>0) {//all transcripts are affected by LoF variants
 				si.addCompleteLoFGene(gene_id);
 				si.addPartLoFGene(gene_id);
 				si.addHomLoFGene(gene_id);
@@ -767,23 +769,43 @@ public abstract class Summarizer {
 		HashSet<String> ko_genes = new HashSet<>();
 		HashSet<String> hom_genes = new HashSet<>();
 		BufferedWriter bw = new BufferedWriter(new FileWriter(outfile));
-		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\taffectedLOFGenes\thomozygousLOFGenes\tkoGenes");
+		bw.write("sample_id\tfull\tpartial\taffectedGenes\thomLOFGenes\tknockedOut\ttranscriptsHet\ttranscriptsHom\taffectedLOFGenes\thomozygousLOFGenes\tkoGenes");
 		bw.newLine();
 		
 		for(String s: sample_statistic.keySet()) {
 			SampleInfo stat = sample_statistic.get(s);
 			
-			
 			hom_genes.addAll(stat.getHom_LOF_genes());
 			ko_genes.addAll(stat.getComplete_LOF_genes());
+			
+			String transcriptsHet = "";
+			
+			for(String t: stat.getHetTranscripts()) {
+				if(transcriptsHet.equals("")) {
+					transcriptsHet += t;
+				} else {
+					transcriptsHet += ","+t;
+				}
+			}
+			
+			String transcriptsHom = "";
+			
+			for(String t: stat.getHomTranscripts()) {
+				if(transcriptsHom.equals("")) {
+					transcriptsHom += t;
+				} else {
+					transcriptsHom += ","+t;
+				}
+			}
 			
 			String affectedGeneList = "";
 			
 			for(String affGene: stat.getPart_LOF_genes()) {
 				if(affectedGeneList.equals("")) {
 					affectedGeneList += gene_statistic.get(affGene).getSymbol();
+				} else {
+					affectedGeneList += ","+gene_statistic.get(affGene).getSymbol();
 				}
-				affectedGeneList += ","+gene_statistic.get(affGene).getSymbol();
 			}
 			
 			String homozygousGeneList = "";
@@ -791,8 +813,9 @@ public abstract class Summarizer {
 			for(String homGene: stat.getHom_LOF_genes()) {
 				if(homozygousGeneList.equals("")) {
 					homozygousGeneList += gene_statistic.get(homGene).getSymbol();
+				} else {
+					homozygousGeneList += ","+gene_statistic.get(homGene).getSymbol();
 				}
-				homozygousGeneList += ","+gene_statistic.get(homGene).getSymbol();
 			}
 			
 			String koGeneList = "";
@@ -800,15 +823,19 @@ public abstract class Summarizer {
 			for(String koGene: stat.getComplete_LOF_genes()) {
 				if(koGeneList.equals("")) {
 					koGeneList += gene_statistic.get(koGene).getSymbol();
+				} else {
+					koGeneList += ","+gene_statistic.get(koGene).getSymbol();
 				}
-				koGeneList += ","+gene_statistic.get(koGene).getSymbol();
 			}
 			
 			bw.write(s+"\t"+stat.getFullLOFs()+"\t"+stat.getPartLOFs()+"\t"+stat.getPart_LOF_genes().size()+"\t"+stat.getHom_LOF_genes().size()+"\t"+stat.getComplete_LOF_genes().size());
+			bw.write("\t"+transcriptsHet);
+			bw.write("\t"+transcriptsHom);
 			bw.write("\t"+affectedGeneList);
 			bw.write("\t"+homozygousGeneList);
 			bw.write("\t"+koGeneList);
 			bw.newLine();
+			
 		}
 		bw.close();
 		writeGeneList(ko_genes,outfile.replace("sample_summary.tsv", "ko_genes.tsv"));
@@ -818,8 +845,8 @@ public abstract class Summarizer {
 	private void writeTrioSummary(String outfile) throws IOException {
 		
 		String header = "sample_id\tde_novo_LOF\tKOs_de_novo\tde_novo_KO";
-		ArrayList<String> lof_genes = new ArrayList<>();
-		ArrayList<String> ko_genes = new ArrayList<>();
+		HashSet<String> lof_genes = new HashSet<>();
+		HashSet<String> ko_genes = new HashSet<>();
 		
 		HashSet<String> de_novo_LOF_genes = new HashSet<>();
 		HashSet<String> de_novo_KO_genes = new HashSet<>();
@@ -829,8 +856,8 @@ public abstract class Summarizer {
 		bw.newLine();
 		for(String s:sample_statistic.keySet()) {
 			SampleInfo stat = sample_statistic.get(s);
-			lof_genes = stat.getPart_LOF_genes();
-			ko_genes = stat.getComplete_LOF_genes();
+			lof_genes.addAll(stat.getPart_LOF_genes());
+			ko_genes.addAll(stat.getComplete_LOF_genes());
 			boolean has_parents = false;
 			
 			if(my_sample_ids.contains(stat.getMatId())) {
