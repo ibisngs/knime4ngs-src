@@ -24,6 +24,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
@@ -62,6 +63,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	
+	private static String readType = "";
+	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
 	public static final String OUT_COL2 = "Path2RefFile";
@@ -92,7 +95,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	String path2refFile = m_refseqfile.getStringValue();
     	String path2readFile = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
+//    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
     	String basePath = path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
     	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
@@ -389,14 +392,52 @@ public class BWANodeModel extends HTExecutorNodeModel {
 //    	}
     	
     	//FlowVariable Control
-    	if(!getAvailableFlowVariables().containsKey("readType")){
-            throw new InvalidSettingsException("FlowVariable 'readType' is missing as input! Please add the FlowVariable or use the 'RunAligner' node.");
+//    	if(!getAvailableFlowVariables().containsKey("readType")){
+//            throw new InvalidSettingsException("FlowVariable 'readType' is missing as input! Please add the FlowVariable or use the 'RunAligner' node.");
+//    	}else{
+//    		String value = getAvailableInputFlowVariables().get("readType").getStringValue();
+//    		if(!value.equals("single-end") & !value.equals("paired-end") ){
+//                throw new InvalidSettingsException("FlowVariable 'readType' has a wrong value: '"+value+"' . Allowed values: 'single-end' or 'paired-end'");
+//    		}
+//    	}
+    	
+    	int NumCols = inSpecs[0].getNumColumns();
+
+    	if(NumCols == 1){
+    		
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "single-end";
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
+    	}else if(NumCols == 2){
+    		
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "paired-end";
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
     	}else{
-    		String value = getAvailableInputFlowVariables().get("readType").getStringValue();
-    		if(!value.equals("single-end") & !value.equals("paired-end") ){
-                throw new InvalidSettingsException("FlowVariable 'readType' has a wrong value: '"+value+"' . Allowed values: 'single-end' or 'paired-end'");
-    		}
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "paired-end";
+    			setWarningMessage("Unexpected number of input columns!");
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
     	}
+    	
+    	
+    	
+    	
     	
         //Version control
     	try {
@@ -419,10 +460,10 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	}
     	
     	// Check input ports
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-    	}
+//    	String[] cn=inSpecs[0].getColumnNames();
+//    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
+//    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+//    	}
 
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
@@ -509,5 +550,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
             CanceledExecutionException {
 
     }
+      
 }
 
