@@ -39,7 +39,6 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
      */
     protected SegemehlNodeDialog() {
 
-    	final SettingsModelString readType = new SettingsModelString(SegemehlNodeModel.CFGKEY_READTYPE,"single-end");
     	final SettingsModelBoolean clip5adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP5ADAPTER, false);
     	final SettingsModelBoolean clip3adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP3ADAPTER, false);
     	final SettingsModelBoolean autoadapter3seq = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_AUTOADAPTER3SEQ, false);
@@ -61,7 +60,6 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     	softhardclipping.setEnabled(false);
     	bisulfiteMappingType.setEnabled(false);
     	checkBisulfiteMapping.setEnabled(false);
-    	readType.setStringValue("single-end");
     	
     	createNewGroup("Segemehl");
     	addDialogComponent(new DialogComponentFileChooser(segemehlfile, "his_id_Segemehl", 0, ""));
@@ -69,7 +67,7 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_Segemehl", 0, ""));
     	createNewGroup("General");
     	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
-    	addDialogComponent(new DialogComponentStringSelection(readType,"Type of reads/ mapping:","single-end","paired-end"));
+
     	addDialogComponent(new DialogComponentNumber(new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_THREADS, 4, 1, 250), "Number of threads/ cores to use:", 1));
     	createNewTab("Further Options");
     	createNewGroup("Alignment parameters");

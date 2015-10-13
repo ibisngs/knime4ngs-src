@@ -23,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
@@ -53,7 +54,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 
 	private final SettingsModelString m_segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
 	private final SettingsModelString m_refseqfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,"");
-	private final SettingsModelString m_readType = new SettingsModelString(SegemehlNodeModel.CFGKEY_READTYPE,"");
 	private final SettingsModelIntegerBounded m_threads = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_THREADS, 4, 1, 250);
 	private final SettingsModelBoolean m_clip5adapter = new SettingsModelBoolean(CFGKEY_CLIP5ADAPTER, false);
 	private final SettingsModelBoolean m_clip3adapter = new SettingsModelBoolean(CFGKEY_CLIP3ADAPTER, false);
@@ -74,7 +74,9 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL2 = "Path2RefFile";
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(SegemehlNodeModel.class);
-		
+	
+	private static String readType = "";
+	
     /**
      * Constructor for the node model.
      */
@@ -89,7 +91,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
         m_softhardclipping.setEnabled(false);
         m_bisulfiteMappingType.setEnabled(false);
         m_checkBisulfiteMapping.setEnabled(false);
-        m_readType.setStringValue("single-end");
         
     }
 
@@ -106,8 +107,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	
     	String path2segemehl = m_segemehlfile.getStringValue();
     	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
+    	  	
     	String path2refSeq = m_refseqfile.getStringValue();
     	String path2indexedRefSeq = path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx";
     	String basePath = path2reads1.substring(0,path2reads1.lastIndexOf('/')+1);
@@ -124,9 +124,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	String outNameUnmatchedReads = path2refSeq.substring(0,path2refSeq.lastIndexOf("/")+1)+"unmatchedReads.f";
     	int nrOfThreads = m_threads.getIntValue();
     	int accuracy = m_accuracy.getIntValue();
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
-    		readType = readTypePrevious;
-    	}
+
     	
     // Indexing reference sequence: segemehl -x chr1.idx -d chr1.fa
     	if(m_checkIndexRefSeq.getBooleanValue()) {
@@ -246,23 +244,9 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	// Warning if there is a problem with readType
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
-    		setWarningMessage("The previous node indicates that you have " + readTypePrevious + " reads, but you have chosen " + readType + ". Segemehl will use " + readTypePrevious + " mapping.");
-    	}
-    	
+ 	
     	//Warning concerning files
-    	String isBam = getAvailableInputFlowVariables().get("isBAM").getStringValue();
-    	if(isBam.equals("true")) {
-    		if(readTypePrevious.equals("single-end")) {
-    			throw new InvalidSettingsException("Segemehl does not support BAM files. Please choose a FastQ or FastA file containing your reads.");
-    		} else {
-    			throw new InvalidSettingsException("Segemehl does not support BAM files. Please choose two FastQ or FastA files containing your reads.");
-    		}
-    	}
-    	
+  	
 		if(!m_checkIndexRefSeq.getBooleanValue()) {
 	    	String path2refSeq = m_refseqfile.getStringValue();
 			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx");    	        
@@ -277,10 +261,38 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	    	}
 		}
     		
-		// Check input ports
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+		
+    	int NumCols = inSpecs[0].getNumColumns();
+    	if(NumCols == 1){
+    		
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "single-end";
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
+    	}else if(NumCols == 2){
+    		
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "paired-end";
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
+    	}else{
+    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
+        		//Everything fine, input is single-end
+    			readType = "paired-end";
+    			setWarningMessage("Unexpected number of input columns!");
+    			
+        	}else{
+        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+
+        	}
     	}
     	
         return new DataTableSpec[]{new DataTableSpec(
@@ -305,7 +317,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_clip3adapter.saveSettingsTo(settings);
     	m_clip5adapter.saveSettingsTo(settings);
     	m_clippolya.saveSettingsTo(settings);
-    	m_readType.saveSettingsTo(settings);
     	m_softhardclipping.saveSettingsTo(settings);
     	m_threads.saveSettingsTo(settings);
     	m_clippingaccuracy.saveSettingsTo(settings);
@@ -333,7 +344,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_clip3adapter.loadSettingsFrom(settings);
     	m_clip5adapter.loadSettingsFrom(settings);
     	m_clippolya.loadSettingsFrom(settings);
-    	m_readType.loadSettingsFrom(settings);
     	m_softhardclipping.loadSettingsFrom(settings);
     	m_threads.loadSettingsFrom(settings);
     	m_clippingaccuracy.loadSettingsFrom(settings);
@@ -361,7 +371,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_clip3adapter.validateSettings(settings);
     	m_clip5adapter.validateSettings(settings);
     	m_clippolya.validateSettings(settings);
-    	m_readType.validateSettings(settings);
     	m_softhardclipping.validateSettings(settings);
     	m_threads.validateSettings(settings);
     	m_clippingaccuracy.validateSettings(settings);

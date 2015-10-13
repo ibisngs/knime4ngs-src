@@ -23,7 +23,6 @@
         <option name="*************** General ***************"></option>
         <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using Segemehl). In this case the reference sequence 
         		will not be indexed again.</option>
-        <option name="Type of reads/ mapping">Choose between single-end and paired-end read mapping.</option>
         <option name="Number of threads/ cores to use">Parallel threads &lt;n&gt; will make matching much faster on machines with  &lt;n&gt; multiple cores. Use them!</option>
         <option name="############### Further Options ###############"></option>
         <option name="*************** Alignment Parameters ***************"></option>
