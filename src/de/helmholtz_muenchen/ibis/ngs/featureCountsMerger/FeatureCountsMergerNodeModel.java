@@ -107,6 +107,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     				sampleName = sampleName + tmp[i];
     			}
     		}
+
     		sampleNames.add(sampleName);
     		
     		// open file
@@ -124,7 +125,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     				if(tmp.length == 7) {
     					// replace white spaces at start and end, if some are there
     					name = tmp[0].trim();
-    					count = tmp[6].trim();
+    					count = tmp[6].trim();		
     					
     					// store data (skip first line)
     					if(!headerLine) {
@@ -137,6 +138,8 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     					}
     					headerLine = false;
     				}
+
+    				
     			}
     			// close the file
     			r.close();
@@ -170,7 +173,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     	for(Iterator<String> itNames = counts.keySet().iterator(); itNames.hasNext(); ) {
     		String name = itNames.next();
     		HashMap<String, String> c = counts.get(name);
-
+    		
     		// write name of feature
     		outfileBW.write(name);
         	outfileBW.write(TAB);

@@ -22,6 +22,8 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -33,20 +35,13 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  *
  * @author Maximilian Hastreiter
  */
-public class ReorderVCFNodeModel extends NodeModel {
+public class ReorderVCFNodeModel extends HTExecutorNodeModel {
     
-//	public static final String CFGKEY_INFILE 		= "INFILE";
 	public static final String CFGKEY_REFERENCE_VCF = "REFERENCE_VCF";
 	public static final String CFGKEY_VCFTOOLS 		= "VCFTOOLS";
 	
-//	private final SettingsModelString m_INFILE 				= new SettingsModelString(ReorderVCFNodeModel.CFGKEY_INFILE, "---");
 	private final SettingsModelString m_REFERENCE_VCF 		= new SettingsModelString(ReorderVCFNodeModel.CFGKEY_REFERENCE_VCF, "---");
 	private final SettingsModelString m_VCFTOOLS 			= new SettingsModelString(ReorderVCFNodeModel.CFGKEY_VCFTOOLS, "---");
-
-	/**
-	 * Logger
-	 */
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(ReorderVCFNodeModel.class);
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "REORDEREDVCF";
@@ -112,8 +107,12 @@ public class ReorderVCFNodeModel extends NodeModel {
     	command.add(VCFTOOLS+"/vcf-shuffle-cols");
     	command.add("-t "+ReferenceVCF);
     	command.add(VCFToOrder);
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new String[]{"PERL5LIB=PERL5LIB:"+VCFTOOLS},LOGGER,REORDERED,REORDERED+".stdErr");
     	
+    	File lockFile = new File(REORDERED + SuccessfulRunChecker.LOCK_ENDING);
+    	
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new String[]{"PERL5LIB=PERL5LIB:"+VCFTOOLS},lockFile,REORDERED,REORDERED+".stdErr",null,null,null);
+    	
+
     	/**
     	 * OUTPUT
     	 */
@@ -136,17 +135,17 @@ public class ReorderVCFNodeModel extends NodeModel {
      * Execute bgzip on Infile
      * @param INFILE
      * @param exec
-     * @throws CanceledExecutionException
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws UnsuccessfulExecutionException
      * @return Outfile
+     * @throws Exception 
      */
-    private String bgzip(String INFILE,final ExecutionContext exec) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
+    private String bgzip(String INFILE,final ExecutionContext exec) throws Exception{
     	String GZFILE = INFILE+".gz";
     	ArrayList<String> command = new ArrayList<String>();
     	command.add("/home/software/bin/bgzip -c "+INFILE);
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,GZFILE);
+    	
+    	File lockFile = new File(GZFILE + SuccessfulRunChecker.LOCK_ENDING);
+    	
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,lockFile,GZFILE);
     	
     	return GZFILE;
     }
@@ -155,15 +154,13 @@ public class ReorderVCFNodeModel extends NodeModel {
      * Execute tabix on Infile
      * @param INFILE
      * @param exec
-     * @throws CanceledExecutionException
-     * @throws InterruptedException
-     * @throws ExecutionException
-     * @throws UnsuccessfulExecutionException
+     * @throws Exception 
      */
-    private void tabix(String INFILE,final ExecutionContext exec) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
+    private void tabix(String INFILE,final ExecutionContext exec) throws Exception{
     	ArrayList<String> command = new ArrayList<String>();
     	command.add("/home/software/bin/tabix -p vcf "+INFILE);
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    	File lockFile = new File(INFILE+".tbi" + SuccessfulRunChecker.LOCK_ENDING);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,lockFile);
     }
     
     
@@ -191,7 +188,9 @@ public class ReorderVCFNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-//         m_INFILE.saveSettingsTo(settings);
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
+    	
          m_REFERENCE_VCF.saveSettingsTo(settings);
          m_VCFTOOLS.saveSettingsTo(settings);
     }
@@ -202,7 +201,9 @@ public class ReorderVCFNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-//        m_INFILE.loadSettingsFrom(settings);
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
+    	
         m_REFERENCE_VCF.loadSettingsFrom(settings);
         m_VCFTOOLS.loadSettingsFrom(settings);
     }
@@ -213,7 +214,9 @@ public class ReorderVCFNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-//        m_INFILE.validateSettings(settings);
+    	/** added for HTE **/
+    	super.validateSettings(settings);
+    	
         m_REFERENCE_VCF.validateSettings(settings);
         m_VCFTOOLS.validateSettings(settings);
     }
