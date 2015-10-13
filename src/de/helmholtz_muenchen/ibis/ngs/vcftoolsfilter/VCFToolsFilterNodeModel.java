@@ -100,7 +100,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	String infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
     	if(Files.notExists(Paths.get(infile))) {
-    		throw new InvalidSettingsException("Input VCF does not exist!");
+    		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
     	
     	String outfile = infile;
@@ -298,6 +298,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	boolean c = m_filter_by_callRate.getBooleanValue();
     	boolean d = m_fill_an_ac.getBooleanValue();
     	boolean f = m_filter_pass.getBooleanValue();
+    	vcf_index = -1;
     	
     	if(a || b || c || d || f) {
     		String vcftools_warning = CheckUtils.checkSourceFile(m_vcf_tools.getStringValue());
@@ -314,12 +315,12 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     
     	
     	if(vcf_index==-1) {
-    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the output table!");
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
     /**

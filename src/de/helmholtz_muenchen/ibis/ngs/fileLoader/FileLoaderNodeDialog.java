@@ -28,7 +28,7 @@ public class FileLoaderNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FileLoaderNodeDialog() {
     	createNewGroup("Input file (BAM/SAM, fastQ, VCF)");
-    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam|.fastq|.vcf"));
+    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam|.fastq|.vcf|.bed"));
 
     	createNewGroup("Second optional fastQ file");
     	addDialogComponent(new DialogComponentFileChooser(m_infile2, "his0_infile2", 0, ".fastq"));

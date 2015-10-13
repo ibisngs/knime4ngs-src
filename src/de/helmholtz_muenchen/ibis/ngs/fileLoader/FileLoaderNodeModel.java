@@ -22,6 +22,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BEDCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -45,8 +46,8 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {".vcf",".fastq",".bam",".sam"};
-	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {".vcf",".fastq",".bam",".sam", ".bed"};
+	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE, BEDCell.TYPE};
 	boolean secondOk = false;
 	
     /**
