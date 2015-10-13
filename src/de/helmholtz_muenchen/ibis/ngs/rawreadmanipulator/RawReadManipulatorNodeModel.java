@@ -23,9 +23,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 
@@ -119,6 +121,9 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_trimbothends = new SettingsModelBoolean(CFGKEY_TRIMBOTHENDS, false);
 	public final SettingsModelOptionalString m_outputfolder = new SettingsModelOptionalString(CFGKEY_OUTPUTFOLDER, "", false);
 	
+	//ReadType: paired-end or single-end
+	private static String readType = "";
+	
 	
 	/**
      * Constructor for the node model.
@@ -149,8 +154,13 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
             final ExecutionContext exec) throws Exception {
     	    	
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
-    	String inFile2 = inData[0].iterator().next().getCell(1).toString();
-    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
+    	String inFile2 = "";
+    	
+    	if(readType.equals("paired-end")){
+    		inFile2 = inData[0].iterator().next().getCell(1).toString();
+    	}
+    	
+    	
     	String outputFolder = m_outputfolder.getStringValue().isEmpty() ? "" : new File(m_outputfolder.getStringValue() + File.separator).getAbsolutePath();
   	
     	
@@ -246,7 +256,7 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	}
     	
     	String outReadsFile2 = "";
-    	if(!inFile2.equals("")) {
+    	if(readType.equals("paired-end")) {
     		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
     		/**
              * fq format handling. fastq is already handled in Fastqc.jar
@@ -262,16 +272,19 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
         	}
     	}
 
+    	BufferedDataContainer cont;
+    	FileCell[] c;
     	
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),}));
-    	
-    	DataCell[] c = new DataCell[]{
-    			(FileCell) FileCellFactory.create(outReadsFile1),
-    			(FileCell) FileCellFactory.create(outReadsFile2)};
+    	if(readType.equals("single-end")){
+        	cont = exec.createDataContainer(createSpecs());
+        	c = new FileCell[]{
+        			(FileCell) FileCellFactory.create(outReadsFile1)};
+    	}else{
+        	cont = exec.createDataContainer(createSpecs());
+        	c = new FileCell[]{
+        			(FileCell) FileCellFactory.create(outReadsFile1),
+        			(FileCell) FileCellFactory.create(outReadsFile2)};
+    	}
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -297,19 +310,41 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	
-    	// Check input ports
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
     	}
+    	 	
+    	// Check input ports
+//    	String[] cn=inSpecs[0].getColumnNames();
+//    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
+//    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+//    	}
     	    	
-        return new DataTableSpec[]{new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),})};
+        return new DataTableSpec[]{createSpecs()};
     }
 
+    
+    /**
+     * Create Tablespecs
+     * @return
+     */
+    private DataTableSpec createSpecs(){
+    	DataTableSpec out;
+    	if(readType.equals("single-end")){ 	
+    		out = new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL1, FastQCell.TYPE).createSpec()});
+    	}else{
+    		out = new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL1, FastQCell.TYPE).createSpec(),
+        					new DataColumnSpecCreator(OUT_COL2, FastQCell.TYPE).createSpec()});
+    	}
+    	return out;
+    }
+    
     
     /**
      * {@inheritDoc}

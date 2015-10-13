@@ -23,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -401,44 +402,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
 //    		}
 //    	}
     	
-    	int NumCols = inSpecs[0].getNumColumns();
-
-    	if(NumCols == 1){
-    		
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "single-end";
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
-    	}else if(NumCols == 2){
-    		
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "paired-end";
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
-    	}else{
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "paired-end";
-    			setWarningMessage("Unexpected number of input columns!");
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
     	}
     	
-    	
-    	
-    	
-    	
+    	    	
         //Version control
     	try {
 	        if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){

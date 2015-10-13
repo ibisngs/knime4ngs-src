@@ -19,10 +19,11 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
-import de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeModel;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -47,6 +48,9 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL2 = "Path2ReadFile2";
 	public static final String OUT_COL3 = "Path2filterfile";
 	
+	//ReadType: paired-end or single-end
+	private static String readType = "";
+	
     /**
      * Constructor for the node model.
      */
@@ -67,7 +71,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
     	  
     	
-    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
+//    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
         /**Create Output Specs**/
         String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
@@ -151,18 +155,23 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	        	LOGGER.info(sysErr);
 			}
 
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
-    	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(readsFile1),
-    			(FileCell) FileCellFactory.create(readsFile2),
-    			(FileCell) FileCellFactory.create(outFileSettings)};
-    	
+	    	BufferedDataContainer cont;
+	    	FileCell[] c;
+	    	
+	    	if(readType.equals("single-end")){
+	        	cont = exec.createDataContainer(createSpecs());
+	        	c = new FileCell[]{
+	        			(FileCell) FileCellFactory.create(readsFile1),
+	        			(FileCell) FileCellFactory.create(outFileSettings)};
+	    		
+	    	}else{
+	        	cont = exec.createDataContainer(createSpecs());
+	        	c = new FileCell[]{
+	        			(FileCell) FileCellFactory.create(readsFile1),
+	        			(FileCell) FileCellFactory.create(readsFile2),
+	        			(FileCell) FileCellFactory.create(outFileSettings)};
+	    	}
+	  
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
@@ -198,21 +207,14 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	// Check input ports
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals(RunFastQCNodeModel.OUT_COL1) && !cn[0].equals(RunFastQCNodeModel.OUT_COL2)) {
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
+    	
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
     	}
     	
-    	if(!getAvailableInputFlowVariables().containsKey("readType")){
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. Node has to be connected to RunFastQC");
-    	}
-    	
-        return new DataTableSpec[]{new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
+    	return new DataTableSpec[]{createSpecs()};
     }
 
     /**
@@ -239,6 +241,28 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
         		zipFile3.delete();
         	}
     	}
+    }
+    
+    
+    /**
+     * Create Tablespecs
+     * @return
+     */
+    private DataTableSpec createSpecs(){
+    	DataTableSpec out;
+    	if(readType.equals("single-end")){ 	
+    		out = new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL1, FastQCell.TYPE).createSpec(),
+        					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()});
+    	}else{
+    		out = new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL1, FastQCell.TYPE).createSpec(),
+        					new DataColumnSpecCreator(OUT_COL2, FastQCell.TYPE).createSpec(),
+        					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()});
+    	}
+    	return out;
     }
     
     
