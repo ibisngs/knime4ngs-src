@@ -123,6 +123,7 @@
 		<node category-path="/ibis/plotting" factory-class="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory" id="de.helmholtz_muenchen.ibis.plotting.scatterplot.ScatterplotNodeFactory"/>
 		
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory"/>
 </extension>
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
