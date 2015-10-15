@@ -47,7 +47,7 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL2 = "Path2File2";
 	
 	private static final String [] ENDINGS = {".vcf",".fastq",".fq",".bam",".sam", ".bed"};
-	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE, BEDCell.TYPE};
+	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE, BEDCell.TYPE};
 	boolean secondOk = false;
 	
     /**
