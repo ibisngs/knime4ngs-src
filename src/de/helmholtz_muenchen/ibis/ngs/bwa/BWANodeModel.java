@@ -25,7 +25,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
@@ -213,12 +212,14 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	ArrayList<String> command = new ArrayList<String>();
         	// Constant values
         	command.add(path2bwa+" index");
-        	
+        	      	
         	//Indexing Type
-	    	if(m_bwtIndex.getStringValue() == "BWT-SW") {
+	    	if(m_bwtIndex.getStringValue().equals("BWT-SW")) {
 	    		command.add("-a bwtsw");
-	    	} else {
+	    	} else if(m_bwtIndex.getStringValue().equals("IS")){
 	    		command.add("-a is");
+	    	}else{
+	    		throw new InvalidSettingsException("Oh oh oh! No valid indexing algorithm!");
 	    	}
 	    	// Colorspace
 	    	if(m_checkColorSpaced.getBooleanValue()) {
