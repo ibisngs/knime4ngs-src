@@ -28,16 +28,16 @@ public class FileLoaderNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FileLoaderNodeDialog() {
     	createNewGroup("Input file (BAM/SAM, fastQ, VCF)");
-    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam|.fastq|.vcf|.bed"));
+    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam","fastq|.fq",".vcf",".bed"));
 
     	createNewGroup("Second optional fastQ file");
-    	addDialogComponent(new DialogComponentFileChooser(m_infile2, "his0_infile2", 0, ".fastq"));
+    	addDialogComponent(new DialogComponentFileChooser(m_infile2, "his0_infile2", 0, ".fastq|.fq"));
     
     	m_infile1.addChangeListener(new ChangeListener() {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if(m_infile1.getStringValue().endsWith(".fastq")) {
+				if(m_infile1.getStringValue().endsWith(".fastq") | m_infile1.getStringValue().endsWith(".fq")) {
 					m_infile2.setEnabled(true);
 				} else {
 					m_infile2.setEnabled(false);
