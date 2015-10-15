@@ -1,18 +1,16 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
-
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
@@ -23,19 +21,11 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 
-	
-	public static final String CFGKEY_EVAL 		= "EVAL";
-	public static final String CFGKEY_COMP 		= "COMP";
-//	public static final String CFGKEY_UNSAFE	= "UNSAFE";
-	
-    private final SettingsModelString m_EVAL 	= new SettingsModelString(GATKGenotypeConcordanceNodeModel.CFGKEY_EVAL, "");
-    private final SettingsModelString m_COMP 	= new SettingsModelString(GATKGenotypeConcordanceNodeModel.CFGKEY_COMP, "");
-//	private final SettingsModelBoolean m_UNSAFE = new SettingsModelBoolean(GATKGenotypeConcordanceNodeModel.CFGKEY_UNSAFE,false);
-    
     private String OUTFILE, LOCKFILE;
+    private int eval_index, comp_index;
     
 	protected GATKGenotypeConcordanceNodeModel() {
-		super(OptionalPorts.createOPOs(2,1,2), OptionalPorts.createOPOs(1));
+		super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1));
 	}
 
 	@Override
@@ -43,36 +33,34 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 		
 		String eval, comp;
 		
-		if (inData[0]!=null) {
-			eval = inData[0].iterator().next().getCell(0).toString();
-		} else {
-			eval = m_EVAL.getStringValue();
-		}
+    	try{
+    		eval = inData[0].iterator().next().getCell(eval_index).toString();
+    		if(!eval.endsWith(".vcf")){
+    			throw new InvalidSettingsException("A cell of the first input table has to be the path to the evaluation VCF infile but it is "+eval);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("A cell of the first input table has to be the path to the evaluation VCF infile but it is empty.");
+    	}
 		
-		if (inData[1]!=null) {
-			comp = inData[1].iterator().next().getCell(0).toString();
-		} else {
-			comp = m_COMP.getStringValue();
-		}
+    	try{
+    		comp = inData[1].iterator().next().getCell(comp_index).toString();
+    		if(!comp.endsWith(".vcf")){
+    			throw new InvalidSettingsException("A cell of the second input table has to be the path to the comparison VCF infile but it is "+comp);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("A cell of the second input table has to be the path to the comparison VCF infile but it is empty.");
+    	}
 		
-		if((eval.equals("") || Files.notExists(Paths.get(eval))) || (comp.equals("") || Files.notExists(Paths.get(comp)))) {
-			throw new InvalidSettingsException("Specify two VCF files as a test and a truth set!");
-		}
 		
 		OUTFILE = eval + "_evaluation";
 		LOCKFILE = IO.replaceFileExtension(eval, SuccessfulRunChecker.LOCK_ENDING);
 		
 		String command = "--eval "+eval;
 		command 	  += " --comp "+comp;
-	
-//		if(m_UNSAFE.getBooleanValue()){
-//			command		  += " --unsafe ALL";	
-//		}
-		
 		
 		//Push FlowVars in order to provide Infile Names for plotgenotypeconcordance Node
-		pushFlowVariableString("EVAL", m_EVAL.getStringValue());
-		pushFlowVariableString("COMP", m_COMP.getStringValue());
+		pushFlowVariableString("EVAL", eval);
+		pushFlowVariableString("COMP", comp);
 		
 		return command;
 	}
@@ -87,35 +75,48 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 		return OUTFILE;
 	}
 
-	
-	
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_COMP.saveSettingsTo(settings);
-		m_EVAL.saveSettingsTo(settings);
-//		m_UNSAFE.saveSettingsTo(settings);
-		
+	
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings) throws InvalidSettingsException {
-		m_COMP.loadSettingsFrom(settings);
-		m_EVAL.loadSettingsFrom(settings);
-//		m_UNSAFE.loadSettingsFrom(settings);
-		
+	
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings) throws InvalidSettingsException {
-		m_COMP.validateSettings(settings);
-		m_EVAL.validateSettings(settings);
-//		m_UNSAFE.validateSettings(settings);
-		
+	
 	}
 
 	@Override
 	protected File getLockFile() {
 		return new File(LOCKFILE);
+	}
+
+	@Override
+	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
+		comp_index = -1;
+		eval_index = -1;
+		
+		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			eval_index = i;
+    		}
+    	}
+		
+		for(int i = 0; i < inSpecs[1].getNumColumns(); i++) {
+    		if(inSpecs[1].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			comp_index = i;
+    		}
+    	}
+		return (comp_index>-1 && eval_index>-1);
+	}
+
+	@Override
+	protected DataType getOutColType() {
+		return FileCell.TYPE;
 	}
 }
 

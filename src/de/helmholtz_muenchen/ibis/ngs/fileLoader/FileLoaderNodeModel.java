@@ -26,6 +26,7 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.BEDCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
@@ -46,8 +47,8 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {".vcf",".fastq",".fq",".bam",".sam", ".bed"};
-	private static final DataType [] TYPES = {VCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE, BEDCell.TYPE};
+	private static final String [] ENDINGS = {".vcf",".gvcf",".fastq",".fq",".bam",".sam", ".bed"};
+	private static final DataType [] TYPES = {VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE, BEDCell.TYPE};
 	boolean secondOk = false;
 	
     /**

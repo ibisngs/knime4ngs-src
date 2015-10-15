@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -14,6 +16,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 
@@ -68,6 +71,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 	public static final String OUT_COL1 = "FILTERED_VARIANTS";
 	
 	private String OUTFILE, LOCKFILE;
+	private int vcf_index;
 	
     /**
      * Constructor for the node model.
@@ -92,8 +96,6 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	}
     	return filterString;
     }
-    
-
 
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData)
@@ -103,12 +105,12 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	 */
     	String INFILE;
     	try{
-    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
     		if(!INFILE.endsWith(".vcf")){
-    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is "+INFILE);
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to VCF infile but it is "+INFILE);
     		}
     	}catch(IndexOutOfBoundsException e){
-    			throw new InvalidSettingsException("First cell of input table has to be the path to VCF infile but it is empty.");
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to VCF infile but it is empty.");
     	}
     	
     	ArrayList<String> command = new ArrayList<String>();
@@ -244,8 +246,6 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
         m_FORMATFilterName.validateSettings(settings);
         m_NOCALL.validateSettings(settings);
     }
-    
-
 
 	@Override
 	protected String getCommandWalker() {
@@ -260,6 +260,23 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 	@Override
 	protected String getOutfile() {
 		return OUTFILE;
+	}
+
+	@Override
+	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
+		vcf_index = -1;
+		
+		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			vcf_index = i;
+    		}
+    	}
+		return (vcf_index>-1);
+	}
+
+	@Override
+	protected DataType getOutColType() {
+		return VCFCell.TYPE;
 	}
 }
 

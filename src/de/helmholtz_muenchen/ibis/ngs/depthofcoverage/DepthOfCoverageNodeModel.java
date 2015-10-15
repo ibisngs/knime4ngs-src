@@ -1,11 +1,11 @@
 package de.helmholtz_muenchen.ibis.ngs.depthofcoverage;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -17,6 +17,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 
@@ -35,8 +36,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	/**
 	 * Config Keys
 	 */
-	
-
 	public static final String CFGKEY_INFILE = "infile";
 	public static final String CFGKEY_EXTRAFILTERS = "extrafilters";
 	public static final String CFGKEY_FILESUFFIX = "suffix";
@@ -44,44 +43,45 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	/**
 	 * Node Models
 	 */
-	
 	private final SettingsModelOptionalString m_extrafilters = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_EXTRAFILTERS,"",false);
 	private final SettingsModelString m_filesuffix = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"DoC");
-	private final SettingsModelString m_infile = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_INFILE,"");
 	
 	private String OUTFILE, LOCKFILE;
+	private int bam_index;
 
     /**
      * Constructor for the node model.
      */
     protected DepthOfCoverageNodeModel() {
-        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
     @Override
 	protected String getCommandParameters(BufferedDataTable[] inData) throws InvalidSettingsException {
-    	
-    	String infile = "";
-    	ArrayList<String> command = new ArrayList<String>();
-    	
-		if (inData[0]!=null) {
-			infile = inData[0].iterator().next().getCell(0).toString();
-		} else {
-			infile = m_infile.getStringValue();
-		}
+
+    	/**
+    	 * Check INFILE
+    	 */
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(bam_index).toString();
+    		if(!INFILE.endsWith(".bam")){
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to BAM infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to BAM infile but it is empty.");
+    	}
 		
-		if(infile.equals("") || Files.notExists(Paths.get(infile))) {
-			throw new InvalidSettingsException("No infile specified!");
-		}
+    	ArrayList<String> command = new ArrayList<String>();
 		
 		String fileSuffix = m_filesuffix.getStringValue();
 		if(fileSuffix.equals("")) {
 			fileSuffix = "DoC";
 		}
 		
-		this.OUTFILE = IO.replaceFileExtension(infile, fileSuffix);
-		this.LOCKFILE = IO.replaceFileExtension(infile, SuccessfulRunChecker.LOCK_ENDING);
-		command.add("-I "+infile);
+		this.OUTFILE = IO.replaceFileExtension(INFILE, fileSuffix);
+		this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
+		command.add("-I "+INFILE);
 
 		
 		if(!m_extrafilters.getStringValue().equals("")){
@@ -96,46 +96,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		
 		return StringUtils.join(command, " ");
 	}
-    
-    
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
-//            final ExecutionContext exec) throws Exception {
-//
-//    	String outfile = m_infile.getStringValue().replace(".bam","."+m_filesuffix.getStringValue());
-//    	
-//    	String cmd = "java -jar -Xmx"+m_memory.getIntValue()+"G " + m_path2gatk.getStringValue();
-//    	cmd += " -T DepthOfCoverage";
-//    	cmd += " -R "+m_refgenome.getStringValue();
-//    	cmd += " -o "+outfile;
-//    	cmd += " -I "+m_infile.getStringValue();
-//    	
-//    	if(!m_path2bed.getStringValue().equals("")){
-//    		cmd += " -L "+m_path2bed.getStringValue();
-//    	}
-//    	
-//    	cmd += " -nt "+m_threads.getIntValue();
-//    	
-//    	if(!m_extrafilters.getStringValue().equals("")){
-//        	String[] filters = m_extrafilters.getStringValue().split(",");
-//        	for(String filter : filters){
-//        		cmd += " --read_filter "+filter;
-//        	}
-//    	}
-//
-//    	DepthOfCoverageNodeModel.logger.info("Running GATK DepthOfCoverage...");
-//    	DepthOfCoverageNodeModel.logger.info("Log files can be found in "+outfile+".out.log and "+outfile+".err.log");
-//    	
-//		Executor.executeCommand(new String[]{cmd}, exec, null, DepthOfCoverageNodeModel.logger, outfile+".out.log", outfile+".err.log", null);
-//		System.out.println("GATK finished, processing outfiles");
-//    	DepthOfCoverage.processCoverageFile(outfile);
-//		
-//        return null;
-//    }
-    
 
 	@Override
 	protected String getCommandWalker() {
@@ -156,7 +116,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
 		m_extrafilters.saveSettingsTo(settings);
         m_filesuffix.saveSettingsTo(settings);
-        m_infile.saveSettingsTo(settings);
 	}
 
 	@Override
@@ -164,7 +123,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 			throws InvalidSettingsException {
 		m_extrafilters.loadSettingsFrom(settings);
         m_filesuffix.loadSettingsFrom(settings);
-        m_infile.loadSettingsFrom(settings);
 	}
 
 	@Override
@@ -172,7 +130,23 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 			throws InvalidSettingsException {
 		m_extrafilters.validateSettings(settings);
         m_filesuffix.validateSettings(settings);
-        m_infile.validateSettings(settings);
+	}
+
+	@Override
+	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
+		bam_index = -1;
+		
+		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
+    			bam_index = i;
+    		}
+    	}
+		return (bam_index>-1);
+	}
+
+	@Override
+	protected DataType getOutColType() {
+		return FileCell.TYPE;
 	}
 }
 

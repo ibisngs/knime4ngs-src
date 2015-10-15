@@ -530,7 +530,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	
 	private void selectRefGenome(Shell shell) {
 		FileDialog fdl = new FileDialog(shell);
-		fdl.setText("Selecte reference genome");
+		fdl.setText("Select reference genome");
 		fdl.setFilterExtensions(new String[]{"*.fa","*.fasta"});
 		fdl.setFilterPath("~/");
 		String path = fdl.open();

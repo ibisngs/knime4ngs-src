@@ -18,16 +18,11 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class GenotypeGVCFsNodeDialog extends GATKNodeDialog {
-
-	
-	
-
 	
 	@Override
 	protected void addDialogComponent() {
 		
 		final SettingsModelIntegerBounded NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
-		
 		
 		addDialogComponent(new DialogComponentNumber(NT, "Number of threads", 1));
 		

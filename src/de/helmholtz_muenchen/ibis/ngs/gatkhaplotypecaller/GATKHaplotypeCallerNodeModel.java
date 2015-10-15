@@ -5,8 +5,8 @@ import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataRow;
-import org.knime.core.data.container.CloseableRowIterator;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
@@ -15,6 +15,7 @@ import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
@@ -25,22 +26,28 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 
-	private String INFILE; 
-    private String OUTFILE;
-    private String LOCKFILE;
+	private String OUTFILE, LOCKFILE;
+    private int bam_index;
 	
 	protected GATKHaplotypeCallerNodeModel(int INPORTS, int OUTPORTS) {
 		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
 	}
 
 	@Override
-	protected String getCommandParameters(final BufferedDataTable[] inData) {
+	protected String getCommandParameters(final BufferedDataTable[] inData) throws InvalidSettingsException {
 		
-		CloseableRowIterator it = inData[0].iterator();
-		while (it.hasNext()) {
-			DataRow row = it.next();
-			INFILE = row.getCell(0).toString();
-		}
+		/**
+    	 * Check INFILE
+    	 */
+    	String INFILE;
+    	try{
+    		INFILE = inData[0].iterator().next().getCell(bam_index).toString();
+    		if(!INFILE.endsWith(".bam")){
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to BAM infile but it is "+INFILE);
+    		}
+    	}catch(IndexOutOfBoundsException e){
+    			throw new InvalidSettingsException("A cell of the input table has to be the path to BAM infile but it is empty.");
+    	}
 		ArrayList<String> command 	= new ArrayList<String>();
 
 		command.add("-I "+INFILE);
@@ -48,27 +55,9 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
 		
-		this.OUTFILE = IO.replaceFileExtension(INFILE/*_arrList.get(0)*/, ".gvcf");
+		this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
 		this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
-		String commandLine = StringUtils.join(command, " ");
-		
-		String reffile = "";
-		String[] lines = commandLine.split(" ");
-		for (int i = 0; i < lines.length-1; i++) {
-			if (lines[i] == "-R") {
-				reffile = lines[i+1];
-				break;
-			}
-		}
-		
-		/**
-    	 * push the reference file extra to flow variable for the phasers in next step
-    	 */
-    	pushFlowVariableString("Reference", reffile); 
-    	/**
-    	 * 
-    	 */
-		return commandLine;
+		return StringUtils.join(command, " ");
 	}
 
 	@Override
@@ -104,6 +93,23 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 	@Override
 	protected File getLockFile() {
 		return new File(LOCKFILE);
+	}
+
+	@Override
+	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
+		bam_index = -1;
+		
+		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
+    			bam_index = i;
+    		}
+    	}
+		return (bam_index>-1);
+	}
+
+	@Override
+	protected DataType getOutColType() {
+		return GVCFCell.TYPE;
 	}
 }
 

@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -117,7 +118,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1_TABLE1, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1_TABLE1, getOutColType()).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(OUTFILE)};
@@ -149,6 +150,10 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	if(!checkInputCellType(inSpecs)) {
+    		new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
+    	}
+    	
     	String gatk_warning = CheckUtils.checkSourceFile(m_GATK.getStringValue());
     	if(gatk_warning != null) {
     		setWarningMessage(gatk_warning);
@@ -162,10 +167,12 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 		if (!outtable) {
 			return null;
 		}
+		
+	
 
 		DataTableSpec outSpecTable1 = new DataTableSpec(
 				new DataColumnSpec[] { new DataColumnSpecCreator(
-						OUT_COL1_TABLE1, FileCell.TYPE).createSpec() });
+						OUT_COL1_TABLE1, getOutColType()).createSpec() });
 		return new DataTableSpec[] { outSpecTable1 };
     }
 
@@ -249,6 +256,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     protected abstract String getCommandWalker();
     protected abstract File getLockFile();
     protected abstract String getOutfile();
+    protected abstract boolean checkInputCellType(DataTableSpec[] inSpecs);
+    protected abstract DataType getOutColType();
     
     protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);
     protected abstract void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException;

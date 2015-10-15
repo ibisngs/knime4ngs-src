@@ -46,7 +46,7 @@
         	Input evaluation VCF file.
         </inPort>
         <inPort index="1" name="Comp VCF">
-        	Input comp VCF file.
+        	Input comparison VCF file.
         </inPort>
         <outPort index="0" name="Outfile">
         	Cell 0: Evaluation Outfile
