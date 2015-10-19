@@ -119,19 +119,17 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		binPrefs.setText("Binary preferences");
 		binPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		binPrefs.setLayout(new GridLayout());
-		
-		Composite tableComp = new Composite(binPrefs,SWT.CENTER);
-		tableComp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridLayout tableLayout = new GridLayout();
-		tableLayout.numColumns = 3;
-		tableComp.setLayout(tableLayout);
 
-		table = new Table(binPrefs, SWT.BORDER | SWT.V_SCROLL);
+		GridData gd_table = new GridData(SWT.FILL, SWT.TOP, true, false);
+		gd_table.heightHint = 200;
+		table = new Table(binPrefs, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		table.setLayoutData(gd_table);
 		table.setHeaderVisible(true);
 		String [] titles = {"Tool", "Path to binary"};
 		
 		for(int i = 0; i < titles.length; i++) {
 			TableColumn col = new TableColumn(table, SWT.NULL);
+		
 			col.setText(titles[i]);
 		}
 		
@@ -144,6 +142,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		for(int i = 0; i < titles.length; i++) {
 			table.getColumn(i).pack();
 		}
+
 		
 		table.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
