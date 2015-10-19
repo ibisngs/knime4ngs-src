@@ -93,6 +93,7 @@ public class RecordWriters {
 				int pos = Integer.parseInt(col[1]);
 				mutations.add(pos);
 			}
+			sc.close();
 		}
 		catch (FileNotFoundException e) {
 	        e.printStackTrace();
@@ -157,6 +158,7 @@ public class RecordWriters {
 	        }
 			truncateFiles(child_tmp);
 
+			sc.close();
 	        sc = new Scanner(parents_tmp, "UTF-8");
 	        while(sc.hasNextLine()) {
 	        	String [] col = sc.nextLine().trim().split("\t");
@@ -189,6 +191,7 @@ public class RecordWriters {
 	        Collections.sort(this.vcf);
 	        
 	        removeDuplicates(this.duplicates);
+	        sc.close();
 	        
 		}
 		catch (FileNotFoundException e) {
@@ -222,6 +225,7 @@ public class RecordWriters {
 	        	String s = sc.nextLine();
 	        	data.add(s);
 	        }
+	        sc.close();
 		}
 	    catch (FileNotFoundException e) {
 		       e.printStackTrace();
@@ -230,10 +234,11 @@ public class RecordWriters {
 		 * truncate .tmp
 		 */
 	    try {
-			FileChannel outChan = new FileOutputStream(tmpFile, true).getChannel();
+			FileOutputStream fileOutputStream = new FileOutputStream(tmpFile, true);
+			FileChannel outChan = fileOutputStream.getChannel();
 			outChan.truncate(0);
 		    outChan.close();
-
+		    fileOutputStream.close();
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -271,6 +276,7 @@ public class RecordWriters {
 //	        	System.out.println(s);
 	        	
 	        }
+	        sc.close();
 	          
 		}
 		catch (FileNotFoundException e) {

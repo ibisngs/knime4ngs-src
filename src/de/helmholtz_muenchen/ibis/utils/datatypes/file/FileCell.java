@@ -13,7 +13,6 @@ import org.knime.core.data.DataCellDataInput;
 import org.knime.core.data.DataCellDataOutput;
 import org.knime.core.data.DataCellSerializer;
 import org.knime.core.data.DataType;
-import org.knime.core.data.DataValue;
 import org.knime.core.data.StringValue;
 
 @SuppressWarnings("serial")
@@ -28,9 +27,7 @@ public class FileCell extends DataCell implements FileValue, StringValue{
      *
      * @return FileValue.class;
      */
-    public static final Class<? extends DataValue> getPreferredValueClass() {
-        return FileValue.class;
-    }
+
 
     private static final FileSerializer SERIALIZER = new FileSerializer();
 

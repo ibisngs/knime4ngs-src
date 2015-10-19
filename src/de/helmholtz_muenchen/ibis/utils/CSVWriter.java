@@ -179,7 +179,7 @@ public class CSVWriter extends BufferedWriter {
         int i = 0;
         int rowCnt = -1;
         if (table instanceof BufferedDataTable) {
-            rowCnt = ((BufferedDataTable)table).getRowCount();
+            rowCnt = (int)((BufferedDataTable)table).size();
         }
 
         for (DataRow row : table) {

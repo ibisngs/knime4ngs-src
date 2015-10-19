@@ -10,6 +10,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataValue;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 
 
 
@@ -19,7 +20,7 @@ public class Global {
 	static public String[] R_OPTIONS_GLM_FAMILY       = new String[] {"binomial", "gaussian", "Gamma", "inverse.gaussian", "poisson", "quasi", "quasibinomial", "quasipoisson"};
 
     static public String FILE_CHOOSER_HISTORIE_ID     = "file.chooser.history.id";
-	 public static final PortType OPTIONAL_PORT_TYPE = new PortType(BufferedDataTable.class, true);
+	 public static final PortType OPTIONAL_PORT_TYPE = PortTypeRegistry.getInstance().getPortType(BufferedDataTable.class, true);
 	 
 	 
 	 public static PortType[] createOPOs(final int nrDataPorts, final int... optionalPortsIds){

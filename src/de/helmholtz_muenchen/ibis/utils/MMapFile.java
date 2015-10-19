@@ -51,9 +51,11 @@ public class MMapFile {
 	private long numLines = -1;
 
 	public MMapFile(String file) throws FileNotFoundException, IOException {
-		FileChannel fc = new FileInputStream(new File(file)).getChannel();
+		FileInputStream fileInputStream = new FileInputStream(new File(file));
+		FileChannel fc = fileInputStream.getChannel();
 		size = fc.size();
 		cb = fc.map(FileChannel.MapMode.READ_ONLY, 0, fc.size());
+		fileInputStream.close();
 	}
 
 	public long getNumLines() {

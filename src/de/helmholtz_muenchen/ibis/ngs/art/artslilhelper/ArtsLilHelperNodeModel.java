@@ -89,7 +89,7 @@ public class ArtsLilHelperNodeModel extends NodeModel {
     	ArrayList<String> M_read = new ArrayList<>();
     	ArrayList<String> C_read = new ArrayList<>();
     	
-    	int row_count = inData[0].getRowCount()-1;
+    	int row_count = (int)inData[0].size()-1;
 		while (it.hasNext()) {
 			DataRow row = it.next();
 //			System.out.println(row.toString());
@@ -97,7 +97,7 @@ public class ArtsLilHelperNodeModel extends NodeModel {
 			String chunk_idx = id.split("_")[0]; // 0_ 1_ 2_ ...24_
 			String chr = id.split("_")[1]; // chr1, chr2 ... chr21
 			String indiv = id.split("_")[2].substring(0, 1); // _F, _M, _C
-			if (tmp_chr.equals("") && row_count == inData[0].getRowCount()-1)
+			if (tmp_chr.equals("") && row_count == inData[0].size()-1)
 				tmp_chr = chr;
 
 			
@@ -141,7 +141,7 @@ public class ArtsLilHelperNodeModel extends NodeModel {
 			
 			}
 
-			if (row_count < inData[0].getRowCount()-1) 
+			if (row_count < inData[0].size()-1) 
 				tmp_chr = chr;
 			row_count--;
 

@@ -230,7 +230,8 @@ public class DeNovoCaller {
 
 	            }else{//Only write if deNovo
 	            	if(ChildIndex==-1 || MotherIndex==-1 || FatherIndex==-1){
-	            	throw new Exception("Something went wrong...Probably VCF SampleIDs dont match the PED file SampleIDs!");
+	            		writer.close();
+	            		throw new Exception("Something went wrong...Probably VCF SampleIDs dont match the PED file SampleIDs!");
 	            	}
 	            	
 	            	if(checkdeNovoTrioVariantline(line, ChildIndex, FatherIndex, MotherIndex)){

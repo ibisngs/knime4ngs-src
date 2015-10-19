@@ -768,7 +768,7 @@ public class TrioSimulator {
 					char_arrList.add(char_arr[i]);
 				}
 			}
-
+			br.close();
 		} catch (FileNotFoundException f) {
 			System.err.println("Can't find file" + file.getPath());
 			f.printStackTrace();
@@ -788,13 +788,15 @@ public class TrioSimulator {
 			BufferedReader in = new BufferedReader(new FileReader(fileName));
 			StringBuffer buffer = new StringBuffer();
 			String currentLine = "";
-			if ((currentLine = in.readLine()) == null)
+			if ((currentLine = in.readLine()) == null) {
+				in.close();
 				throw new IOException(fileName + " File is empty ");
-
-			if (currentLine.charAt(0) != '>')
+			}
+			if (currentLine.charAt(0) != '>') {
+				in.close();
 				throw new IOException("Header of the file " + fileName
 						+ " must be '>'");
-
+			}
 			for (currentLine = in.readLine().trim(); currentLine != null; currentLine = in
 					.readLine()) {
 				if (currentLine.length() > 0 && currentLine.charAt(0) == '>') {
@@ -806,6 +808,8 @@ public class TrioSimulator {
 					buffer.append(currentLine.trim());
 				}
 			}
+			
+			in.close();
 			if (buffer.length() != 0)
 				seq = buffer.toString();
 

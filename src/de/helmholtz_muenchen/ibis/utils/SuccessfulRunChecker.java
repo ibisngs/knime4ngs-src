@@ -84,11 +84,15 @@ public class SuccessfulRunChecker {
 				if(line.equals(command)) {
 					br.readLine();
 					if((line = br.readLine()) != null) {
-						if(OK.equals(line)) 
+						if(OK.equals(line)) {
+							br.close();
 							return true;
+						}
+							
 					}
 				}
 			}
+			br.close();
 		}
 		catch(Exception e) {
 			e.printStackTrace();

@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.ngs.reordervcf;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
@@ -16,8 +15,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
+
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -26,8 +24,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
-import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
+
 
 /**
  * This is the model implementation of ReorderVCF.

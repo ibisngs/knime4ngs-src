@@ -84,9 +84,9 @@ public class ImputerNodeModel extends RNodeModel {
 
 		// check if k < num Rows
 		int knn = m_knn_k.getIntValue();
-		if(knn > inData[0].getRowCount()){
-			LOGGER.info("k is higher than number of rows. Using number of rows -1 (" + (inData[0].getRowCount()-1) + ") instead.");
-			knn = inData[0].getRowCount()-1;
+		if(knn > inData[0].size()){
+			LOGGER.info("k is higher than number of rows. Using number of rows -1 (" + (inData[0].size()-1) + ") instead.");
+			knn = (int)inData[0].size()-1;
 		}		
 
 		this.addArgument("--method"   , m_method.getStringValue());

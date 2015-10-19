@@ -236,7 +236,7 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         
         // bam file   
         
-        String[] inputfiles = new String[inData[0].getRowCount()];
+        String[] inputfiles = new String[(int) inData[0].size()];
         // check bam input files
         int row_counter = 0;
         while(it.hasNext()){

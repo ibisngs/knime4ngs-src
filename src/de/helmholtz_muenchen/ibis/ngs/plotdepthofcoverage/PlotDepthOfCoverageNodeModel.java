@@ -149,6 +149,7 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
 			value = (double) Math.round(value * 100) / 100;
 			result += "\t" + value;
 		}
+		br.close();
 		return result;
 	}
 

@@ -50,6 +50,7 @@ public class FilterGATKVariants {
 	        			
 		        		//Compare Header Lines
 		        		if(!PINDEL_VCF_HEADER.equals(GATK_VCF_HEADER)){
+		        			writer.close();
 		        			throw new InvalidSettingsException("Sample Names do not match!\n"+PINDEL_VCF_HEADER+"\n vs. \n"+GATK_VCF_HEADER);
 		        		}
 	        		}

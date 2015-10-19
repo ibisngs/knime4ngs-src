@@ -4,10 +4,11 @@ import java.util.Arrays;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.port.PortTypeRegistry;
 
 public class OptionalPorts {
 
-	public static final PortType OPTIONAL_PORT_TYPE = new PortType(BufferedDataTable.class, true);
+	public static final PortType OPTIONAL_PORT_TYPE = PortTypeRegistry.getInstance().getPortType(BufferedDataTable.class, true);
 	
     public static PortType[] createOPOs(final int nrDataPorts, final int... optionalPortsIds)
     {
