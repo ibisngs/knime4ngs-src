@@ -28,6 +28,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
@@ -43,14 +44,15 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected static final NodeLogger logger = NodeLogger.getLogger(VEPNodeModel.class);
     
     //general options
+	static final String DEF_CACHE_DIR = System.getProperty("user.home") + System.getProperty("file.separator") + ".vep";
+	static final String DEF_PLUGIN_DIR = DEF_CACHE_DIR + System.getProperty("file.separator") + "Plugins";
+
+    
     static final String CFGKEY_VEP_PL = "vep_pl";
 	final SettingsModelString m_veppl = new SettingsModelString(CFGKEY_VEP_PL,"");
 	
-    static final String CFGKEY_VCF_INFILE = "vcf_infile";
-	final SettingsModelString m_vcfin = new SettingsModelString(CFGKEY_VCF_INFILE,"");
-	
 	static final String CFGKEY_FASTA_FILE = "fasta_file";
-	final SettingsModelString m_fasta = new SettingsModelString(CFGKEY_FASTA_FILE,"");
+	final SettingsModelString m_fasta = new SettingsModelString(CFGKEY_FASTA_FILE,DEF_CACHE_DIR);
 	
 	static final String CFGKEY_OUTFOLDER = "outfolder";
 	final SettingsModelString m_outfolder = new SettingsModelString(CFGKEY_OUTFOLDER,"");
@@ -77,11 +79,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	final SettingsModelString m_stats_type = new SettingsModelString(CFGKEY_STATS_TYPE,"");
 	
 	static final String CFGKEY_CACHE_DIR = "cache_dir";
-	static final String DEF_CACHE_DIR = System.getProperty("user.home") + System.getProperty("file.separator") + ".vep";
 	final SettingsModelString m_cache_dir = new SettingsModelString(CFGKEY_CACHE_DIR, DEF_CACHE_DIR);
 	
 	static final String CFGKEY_PLUGIN_DIR = "plugin_dir";
-	static final String DEF_PLUGIN_DIR = DEF_CACHE_DIR + System.getProperty("file.separator") + "Plugins";
 	final SettingsModelString m_plugin_dir = new SettingsModelString(CFGKEY_PLUGIN_DIR, DEF_PLUGIN_DIR);
 	
 	//loftee
@@ -97,38 +97,15 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	static final String CFGKEY_SAMTOOLS_PATH = "samtools_path";
 	final SettingsModelString m_samtools_path = new SettingsModelString(CFGKEY_SAMTOOLS_PATH,"");
 	
-//	plugins CADD and ExAC not supported any more
-//	tabix path
-//	static final String CFGKEY_TABIX_PATH = "tabix_path";
-//	final SettingsModelString m_tabix_path = new SettingsModelString(CFGKEY_TABIX_PATH,"");
-//	
-//	CADD
-//	static final String CFGKEY_USE_CADD = "use_cadd";
-//	final SettingsModelBoolean m_use_cadd = new SettingsModelBoolean(CFGKEY_USE_CADD,false);
-//	
-//	static final String CFGKEY_FIRST_CADD_FILE = "first_cadd_file";
-//	final SettingsModelString m_first_cadd_file = new SettingsModelString(CFGKEY_FIRST_CADD_FILE,"");
-//	
-//	static final String CFGKEY_SEC_CADD_FILE = "sec_cadd_file";
-//	final SettingsModelString m_sec_cadd_file = new SettingsModelString(CFGKEY_SEC_CADD_FILE,"");
-//	
-//	ExAC
-//	static final String CFGKEY_USE_EXAC = "use_exac";
-//	final SettingsModelBoolean m_use_exac = new SettingsModelBoolean(CFGKEY_USE_EXAC,false);
-//	
-//	static final String CFGKEY_EXAC_FILE = "exac_file";
-//	final SettingsModelString m_exac_file = new SettingsModelString(CFGKEY_EXAC_FILE,"");
-	
-	
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
 	
-	public boolean optionalPort=false;
+	private int vcf_index;
 	
     /**
      * Constructor for the node model.
      */
     protected VEPNodeModel() {
-    	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
     /**
@@ -142,15 +119,10 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String script = m_veppl.getStringValue();
     	
     	//input file
-    	String vcf_infile;
-    	if(optionalPort){
-    		vcf_infile = inData[0].iterator().next().getCell(0).toString();
-    	}else{
-    		vcf_infile = m_vcfin.getStringValue();
-    	}
-    	String infile_warning = CheckUtils.checkSourceFile(vcf_infile);
-    	if(infile_warning != null) {
-    		setWarningMessage(infile_warning);
+    	String vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
+    	
+    	if(Files.notExists(Paths.get(vcf_infile))) {
+    		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
     	
     	String outfileBase = m_outfolder.getStringValue()+ System.getProperty("file.separator")+ new File(vcf_infile).getName();
@@ -249,12 +221,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		int pos = samtools_path.lastIndexOf(System.getProperty("file.separator"));
     		path_variable +=":"+samtools_path.substring(0,pos);
     	}
-//    	String tabix_path = m_tabix_path.getStringValue();
-//    	if(tabix_path.equals("")|| Files.notExists(Paths.get(tabix_path))) {
-//    		setWarningMessage("Tabix path was not specified!");
-//    	} else {
-//    		path_variable += ":"+tabix_path;
-//    	}
     	
     	//LOFTEE parameters
 
@@ -276,34 +242,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		}
     	}
     	
-//    	CADD parameters
-//    	String first_cadd_file = m_first_cadd_file.getStringValue();
-//    	String sec_cadd_file = m_sec_cadd_file.getStringValue();
-//    	if(m_use_cadd.getBooleanValue() && (first_cadd_file.equals("") && sec_cadd_file.equals(""))) {
-//    		throw new InvalidSettingsException("No CADD file specified!");
-//    	}
-//    	if(m_use_cadd.getBooleanValue()) {
-//    		cmd += " --plugin CADD";
-//    		if(!first_cadd_file.equals("") && Files.exists(Paths.get(first_cadd_file))) {
-//    			cmd += ","+first_cadd_file;
-//    		}
-//    		if(!sec_cadd_file.equals("") && Files.exists(Paths.get(sec_cadd_file))) {
-//    			cmd += ","+sec_cadd_file;
-//    		}
-//    	}
-//    	
-//    	ExAC parameters
-//    	String exac_file = m_exac_file.getStringValue();
-//    	if(m_use_exac.getBooleanValue()) {
-//    		cmd += " --plugin ExAC";
-//    		if(exac_file.equals("")|| Files.notExists(Paths.get(exac_file))) {
-//    			throw new InvalidSettingsException("No ExAC file specified!");
-//    		} else {
-//    			cmd += ","+exac_file;
-//    		}
-//    	}
-    	
-    	
     	String stdOutFile = outfileBase + ".vep.stdout";
     	
     	String stdErrFile = outfileBase + ".vep.stderr";
@@ -322,7 +260,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(res_file)};
@@ -335,13 +273,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         return new BufferedDataTable[]{outTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        optionalPort = false;
-    }
+
 
     /**
      * {@inheritDoc}
@@ -349,7 +281,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-
     	
     	String script_warning = CheckUtils.checkSourceFile(m_veppl.getStringValue());
     	if(script_warning != null) {
@@ -360,7 +291,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	if(outfolder_warning!=null) {
     		setWarningMessage(outfolder_warning);
     	}
-    	
     	
     	if(m_use_loftee.getBooleanValue()) {
     		try {
@@ -377,14 +307,20 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		}
     	}
     	
-    	try{
-			inSpecs[0].getColumnNames();
-			optionalPort=true;
-		}catch(NullPointerException e){}
-
+    	vcf_index = -1;
+    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			vcf_index = i;
+    		}
+    	}
+    	
+    	if(vcf_index==-1) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	}
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
     /**
@@ -394,7 +330,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	super.saveSettingsTo(settings);
         m_veppl.saveSettingsTo(settings);
-        m_vcfin.saveSettingsTo(settings);
         m_fasta.saveSettingsTo(settings);
         m_outfolder.saveSettingsTo(settings);
         m_stats_type.saveSettingsTo(settings);
@@ -409,12 +344,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.saveSettingsTo(settings);
         m_transcript_set.saveSettingsTo(settings);
         m_overwrite.saveSettingsTo(settings);
-//        m_tabix_path.saveSettingsTo(settings);
-//        m_use_cadd.saveSettingsTo(settings);
-//        m_first_cadd_file.saveSettingsTo(settings);
-//        m_sec_cadd_file.saveSettingsTo(settings);
-//        m_use_exac.saveSettingsTo(settings);
-//        m_exac_file.saveSettingsTo(settings);
     }
 
     /**
@@ -425,7 +354,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	super.loadValidatedSettingsFrom(settings);
         m_veppl.loadSettingsFrom(settings);
-        m_vcfin.loadSettingsFrom(settings);
         m_fasta.loadSettingsFrom(settings);
         m_outfolder.loadSettingsFrom(settings);
         m_stats_type.loadSettingsFrom(settings);
@@ -440,12 +368,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.loadSettingsFrom(settings);
         m_transcript_set.loadSettingsFrom(settings);
         m_overwrite.loadSettingsFrom(settings);
-//        m_tabix_path.loadSettingsFrom(settings);
-//        m_use_cadd.loadSettingsFrom(settings);
-//        m_first_cadd_file.loadSettingsFrom(settings);
-//        m_sec_cadd_file.loadSettingsFrom(settings);
-//        m_use_exac.loadSettingsFrom(settings);
-//        m_exac_file.loadSettingsFrom(settings);
     }
 
     /**
@@ -456,7 +378,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	super.validateSettings(settings);
         m_veppl.validateSettings(settings);
-        m_vcfin.validateSettings(settings);
         m_fasta.validateSettings(settings);
         m_outfolder.validateSettings(settings);
         m_stats_type.validateSettings(settings);
@@ -471,12 +392,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_forks.validateSettings(settings);
         m_transcript_set.validateSettings(settings);
         m_overwrite.validateSettings(settings);
-//        m_tabix_path.validateSettings(settings);
-//        m_use_cadd.validateSettings(settings);
-//        m_first_cadd_file.validateSettings(settings);
-//        m_sec_cadd_file.validateSettings(settings);
-//        m_use_exac.validateSettings(settings);
-//        m_exac_file.validateSettings(settings);
     }
     
     /**
@@ -486,7 +401,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected void loadInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-        // TODO: generated method stub
     }
     
     /**
@@ -496,8 +410,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected void saveInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-        // TODO: generated method stub
     }
+
+	@Override
+	protected void reset() {
+		
+	}
 
 }
 

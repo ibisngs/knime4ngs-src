@@ -35,8 +35,7 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
 	
 	//VEP options tab
 	private final SettingsModelString veppl = new SettingsModelString(VEPNodeModel.CFGKEY_VEP_PL,"-");
-	private final SettingsModelString vcfin = new SettingsModelString(VEPNodeModel.CFGKEY_VCF_INFILE,"-");
-	private final SettingsModelString fasta = new SettingsModelString(VEPNodeModel.CFGKEY_FASTA_FILE,"");
+	private final SettingsModelString fasta = new SettingsModelString(VEPNodeModel.CFGKEY_FASTA_FILE,VEPNodeModel.DEF_CACHE_DIR);
 	private final SettingsModelString outfolder = new SettingsModelString(VEPNodeModel.CFGKEY_OUTFOLDER,"");
 	private final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPNodeModel.CFGKEY_OVERWRITE,false);
 	private final SettingsModelBoolean use_cache = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_CACHE,true);
@@ -61,9 +60,6 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	
     	createNewGroup("Path to variant_effect_predictor.pl");
     	addDialogComponent(new DialogComponentFileChooser(veppl, "his_id_VEP_VEPPL", 0, ".pl"));
-    	
-    	createNewGroup("Path to VCF file");
-    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_VEP_VCFIN", 0, ".vcf|.vcf.gz"));
     	
     	createNewGroup("Path to fasta file");
     	addDialogComponent(new DialogComponentFileChooser(fasta, "his_id_FASTA", 0, ".fa|.fasta"));

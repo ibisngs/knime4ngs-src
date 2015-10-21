@@ -12,11 +12,13 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButton;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringListSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
@@ -57,6 +59,9 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
 	private final SettingsModelOptionalString filter = new SettingsModelOptionalString(VEPFilterNodeModel.CFGKEY_FILTER,"",false);
 	private final DialogComponentOptionalString DC_FILTER = new DialogComponentOptionalString(filter,"Conditions");
 	
+	private final SettingsModelString outfolder = new SettingsModelString(VEPFilterNodeModel.CFGKEY_OUTFOLDER,"");
+	private final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPFilterNodeModel.CFGKEY_OVERWRITE,false);
+	
 	HashSet<String> terms = new HashSet<>();
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VEPFilterNodeModel.class);
@@ -70,6 +75,8 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
 		addDialogComponent(new DialogComponentStringSelection(so_term,
 				"SO terms", VEPFilterNodeModel.SO_TERMS));
 		addDialogComponent(ADD_TERM_BUTTON);
+		
+		
 		
 		DC_TERM_DISPLAY.setVisibleRowCount(5);
 		for(String t: VEPFilterNodeModel.DEFAULT_TERMS) {
@@ -109,6 +116,10 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
 				restoreTermDefaults();
 			}
 		});
+		
+		createNewGroup("Folder for output files");
+    	addDialogComponent(new DialogComponentFileChooser(outfolder, "his_id_VEP_Filtered_OUT", 0, true));
+    	addDialogComponent(new DialogComponentBoolean(overwrite, "Overwrite, if output files exist?"));
     }
     
     public void addSOTerm(String t) {

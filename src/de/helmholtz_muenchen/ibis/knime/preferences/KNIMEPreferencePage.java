@@ -68,7 +68,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put("GenomeAnalysisTK.jar",false);
 		TOOLS.put("variant_effect_predictor.pl",false);
 		TOOLS.put("filter_vep.pl", false);
-		TOOLS.put("vt",false);
+//		TOOLS.put("vt",false);
 		TOOLS.put("vcftools",false);
 	}
 	
