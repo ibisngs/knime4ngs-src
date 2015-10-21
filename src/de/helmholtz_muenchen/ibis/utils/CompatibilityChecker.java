@@ -3,8 +3,6 @@ package de.helmholtz_muenchen.ibis.utils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
-
 public class CompatibilityChecker {
 
 	private String WarningMessage;
