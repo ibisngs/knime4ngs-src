@@ -159,6 +159,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     		cmd.add("--minGQ");
     		cmd.add(m_GQ_threshold.getIntValue()+"");
     		cmd.add("--recode");
+    		cmd.add("--recode-INFO-all");
     		
     		String [] cmd_array = new String[cmd.size()];
     		for(int i = 0; i < cmd.size(); i++) {
@@ -203,6 +204,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     		}
     		
     		cmd.add("--recode");
+    		cmd.add("--recode-INFO-all");
     		
     		String [] cmd_array = new String[cmd.size()];
     		for(int i = 0; i < cmd.size(); i++) {

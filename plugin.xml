@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?eclipse version="3.0"?>
-
-<plugin>
+<?eclipse version="3.0"?><plugin>
    <extension point="org.knime.workbench.repository.nodes">
 		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory" id="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory"/>
@@ -83,7 +81,8 @@
 		
 		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory"/>
 		<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory"/>
-	</extension>
+	<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.CaseControlAnalyzerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.CaseControlAnalyzerNodeFactory"/>
+</extension>
 	
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
@@ -105,22 +104,22 @@
 	
 	<extension point="org.knime.core.DataType">
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell$FileSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell$FileSerializer"/> 
 		</DataType>
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell$VCFCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell$VCFSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell$VCFSerializer"/> 
 		</DataType>
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell$BAMCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell$BAMSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell$BAMSerializer"/> 
 		</DataType>
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell$FastQCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell$FastQSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell$FastQSerializer"/> 
 		</DataType>
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell$GVCFCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell$GVCFSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell$GVCFSerializer"/> 
 		</DataType>
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell$SAMCellFactory">
-			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell$SAMSerializer" /> 
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell$SAMSerializer"/> 
 		</DataType>
 	</extension>
 </plugin>

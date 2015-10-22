@@ -224,8 +224,11 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	try {
 			bw = Files.newBufferedWriter(Paths.get(outfile), c);
 			for(String s: gene_frequency.keySet()) {
-				bw.write(s+"\t"+gene_frequency.get(s));
-				bw.newLine();
+				double freq = gene_frequency.get(s);
+				if(freq > 0.0) {
+					bw.write(s+"\t"+gene_frequency.get(s));
+					bw.newLine();
+				}
 			}
 			bw.close();
 		} catch (IOException e) {
