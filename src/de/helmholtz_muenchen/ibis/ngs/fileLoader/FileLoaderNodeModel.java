@@ -46,8 +46,8 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {".vcf",".vcf.gz",".gvcf",".fastq",".fq",".bam",".sam"};
-	private static final DataType [] TYPES = {VCFCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {"",".vcf",".vcf.gz",".gvcf",".fastq",".fq",".bam",".sam"};
+	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 	boolean secondOk = false;
 	
     /**
@@ -123,8 +123,10 @@ public class FileLoaderNodeModel extends NodeModel {
     	secondOk = false;
     	
     	//check first input file
-    	if(Files.notExists(Paths.get(in1)) || checkEnding(in1)==-1) {
-    		throw new InvalidSettingsException("First input file does not exist or has disallowed ending!");
+    	if(Files.notExists(Paths.get(in1)) || in1.equals("")) {
+    		throw new InvalidSettingsException("First input file does not exist");
+    	} else if(checkEnding(in1)==0){
+    		this.setWarningMessage("The input file is not in a supported NGS format");
     	}
     	
     	//first input file is ok
@@ -149,12 +151,12 @@ public class FileLoaderNodeModel extends NodeModel {
     }
     
     protected int checkEnding(String path) {
-    	for(int i = 0; i < ENDINGS.length; i++) {
+    	for(int i = 1; i < ENDINGS.length; i++) {
     		if(path.endsWith(ENDINGS[i])) {
     			return i;
     		}
     	}
-    	return -1;
+    	return 0;
     }
 
     /**
