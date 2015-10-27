@@ -37,10 +37,6 @@ public class LOFSummaryNodeModel extends NodeModel {
 	// the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
 	
-	//input file
-	static final String CFGKEY_VCF_INFILE = "vcf_infile";
-	final SettingsModelString m_vcfin = new SettingsModelString(CFGKEY_VCF_INFILE,"");
-	
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
 	final SettingsModelString m_cdsin = new SettingsModelString(CFGKEY_CDS_INFILE,"");
 	
@@ -49,22 +45,20 @@ public class LOFSummaryNodeModel extends NodeModel {
 	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
-    static final String[] ANNOTATIONS_AVAILABLE={"VAT","VEP"};
+    static final String[] ANNOTATIONS_AVAILABLE={"VEP"};
     final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
 	
 	//output
-	public static final String OUT_COL1 = "Path2Variant_Summary";
-	public static final String OUT_COL2 = "Path2Gene_Summary";
-	public static final String OUT_COL3 = "Path2Sample_Summary";
+	public static final String OUT_COL1 = "Path2Gene_Summary";
 	
-	public boolean optionalPort=false;
+	private int vcf_index;
 	
     /**
      * Constructor for the node model.
      */
     protected LOFSummaryNodeModel() {
     
-    	super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
 
     /**
@@ -74,13 +68,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-    	String vcf_infile;
+    	String vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
-    	if(optionalPort){	//Input Table available
-    		vcf_infile = inData[0].iterator().next().getCell(0).toString();
-    	}else{
-    		vcf_infile = m_vcfin.getStringValue();
+    	if(Files.notExists(Paths.get(vcf_infile))) {
+    		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
+    	
     	String infile_warning = CheckUtils.checkSourceFile(vcf_infile);
     	if(infile_warning != null) {
     		setWarningMessage(infile_warning);
@@ -101,9 +94,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	
     	Summarizer summy = null;
     	String annotation = m_annotation.getStringValue();
-    	if(annotation.equals("VAT")) {
-    		summy = new VATSummarizer(vcf_infile, cds_file, ped_file);
-    	} else if(annotation.equals("VEP")) {
+    	if(annotation.equals("VEP")) {
     		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file);
     	}
     	
@@ -113,14 +104,10 @@ public class LOFSummaryNodeModel extends NodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(LOF_Summary[0]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[1]),
-    			(FileCell) FileCellFactory.create(LOF_Summary[2])};
+    			(FileCell) FileCellFactory.create(LOF_Summary[1])};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -135,7 +122,6 @@ public class LOFSummaryNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        optionalPort = false;
     }
 
     /**
@@ -144,15 +130,14 @@ public class LOFSummaryNodeModel extends NodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-    	try{
-			inSpecs[0].getColumnNames();
-			optionalPort=true;
-		}catch(NullPointerException e){}
+    	
+    	if(vcf_index==-1) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	}
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -160,7 +145,6 @@ public class LOFSummaryNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	m_vcfin.saveSettingsTo(settings);
     	m_cdsin.saveSettingsTo(settings);
     	m_pedin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
@@ -172,7 +156,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_vcfin.loadSettingsFrom(settings);
     	m_cdsin.loadSettingsFrom(settings);
     	m_pedin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
@@ -184,7 +167,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_vcfin.validateSettings(settings);
     	m_cdsin.validateSettings(settings);
     	m_pedin.validateSettings(settings);
     	m_annotation.validateSettings(settings);

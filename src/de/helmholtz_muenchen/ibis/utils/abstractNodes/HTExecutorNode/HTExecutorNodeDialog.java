@@ -7,7 +7,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 
@@ -29,7 +29,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	*/
 	
 	protected final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
-	private final SettingsModelInteger threshold = new SettingsModelInteger(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD);
+	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
 	
 	protected HTExecutorNodeDialog() {
 		super();

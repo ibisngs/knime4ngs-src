@@ -26,7 +26,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
+import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -63,7 +63,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	//model file settings models
     private final SettingsModelString m_model_gene_id = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_MODEL_GENE_ID, "gene_id");
     private final SettingsModelString m_freq = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_FREQ, "lof_freq");
-    private final SettingsModelDouble m_pseudo_freq = new SettingsModelDouble(CaseControlAnalyzerNodeModel.CFGKEY_PSEUDO_FREQ,0.0);
+    private final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(CaseControlAnalyzerNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
     
     //summary file settings models
     private final SettingsModelString m_summary_gene_id = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_SUMMARY_GENE_ID, "gene_id");

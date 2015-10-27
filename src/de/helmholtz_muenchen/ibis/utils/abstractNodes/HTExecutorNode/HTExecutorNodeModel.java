@@ -14,7 +14,7 @@ import javax.mail.internet.MimeMessage;
 
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
@@ -57,8 +57,8 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	static final String CFGKEY_USE_PREF = "use_pref";
 	private final SettingsModelBoolean m_use_pref = new SettingsModelBoolean(CFGKEY_USE_PREF, true);
 	
-	private final SettingsModelInteger threshold = new SettingsModelInteger(
-			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, 1);
+	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(
+			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, DEFAULT_THRESHOLD,1,Integer.MAX_VALUE);
 
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
 			PortType[] outPortTypes) {

@@ -22,16 +22,11 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     /**
      * New pane for configuring the LOFStatistics node.
      */
-	private final SettingsModelString vcfin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_VCF_INFILE,"-");
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
 	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
 	
     protected LOFSummaryNodeDialog() {
-    	
-    	//input file
-    	createNewGroup("Path to VCF file");
-    	addDialogComponent(new DialogComponentFileChooser(vcfin, "his_id_LOFStatistics_VCFIN", 0, ".vcf"));
     	
     	createNewGroup("Path to CDS file");
     	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa"));
