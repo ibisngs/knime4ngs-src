@@ -47,9 +47,6 @@ public class LOFSummaryNodeModel extends NodeModel {
 	static final String CFGKEY_PED_INFILE = "ped_infile";
 	final SettingsModelString m_pedin = new SettingsModelString(CFGKEY_PED_INFILE,"");
 	
-	static final String CFGKEY_GENEBACK_INFILE = "geneback_infile";
-	final SettingsModelString m_genebackin = new SettingsModelString(CFGKEY_GENEBACK_INFILE,"");
-	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
     static final String[] ANNOTATIONS_AVAILABLE={"VAT","VEP"};
@@ -102,18 +99,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     		ped_file = null;
     	}
     	
-    	String geneback_file = m_genebackin.getStringValue();
-    	if(geneback_file.equals("") || Files.notExists(Paths.get(geneback_file))) {
-    		geneback_file = null;
-    		setWarningMessage("No genetic background file specified!");
-    	}
-    	
     	Summarizer summy = null;
     	String annotation = m_annotation.getStringValue();
     	if(annotation.equals("VAT")) {
-    		summy = new VATSummarizer(vcf_infile, cds_file, ped_file, geneback_file);
+    		summy = new VATSummarizer(vcf_infile, cds_file, ped_file);
     	} else if(annotation.equals("VEP")) {
-    		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file, geneback_file);
+    		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file);
     	}
     	
     	String LOF_Summary[] = summy.getSummaries();
@@ -172,7 +163,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.saveSettingsTo(settings);
     	m_cdsin.saveSettingsTo(settings);
     	m_pedin.saveSettingsTo(settings);
-    	m_genebackin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
     }
 
@@ -185,7 +175,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.loadSettingsFrom(settings);
     	m_cdsin.loadSettingsFrom(settings);
     	m_pedin.loadSettingsFrom(settings);
-    	m_genebackin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
     }
 
@@ -198,7 +187,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_vcfin.validateSettings(settings);
     	m_cdsin.validateSettings(settings);
     	m_pedin.validateSettings(settings);
-    	m_genebackin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
     }
     

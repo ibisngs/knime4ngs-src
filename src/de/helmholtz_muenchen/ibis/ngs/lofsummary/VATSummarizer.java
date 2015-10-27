@@ -8,8 +8,8 @@ public class VATSummarizer extends Summarizer{
 	//map VAT terms to SO terms
 	HashMap<String,String> VATtoSO;
 	
-	public VATSummarizer(String vcf_file, String cds_file, String ped_file, String geneback_file) {
-		super(vcf_file, cds_file,ped_file, geneback_file);
+	public VATSummarizer(String vcf_file, String cds_file, String ped_file) {
+		super(vcf_file, cds_file,ped_file);
 		VATtoSO = new HashMap<>();
 		VATtoSO.put("spliceOverlap", "splice_site_variant");
 		VATtoSO.put("synonymous", "synonymous_variant");

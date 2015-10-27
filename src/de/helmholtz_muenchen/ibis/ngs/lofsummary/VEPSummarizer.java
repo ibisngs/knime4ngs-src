@@ -5,8 +5,8 @@ import java.util.HashMap;
 
 public class VEPSummarizer extends Summarizer{
 	
-	public VEPSummarizer(String vcf_file, String cds_file,String ped_file, String geneback_file) {
-		super(vcf_file, cds_file,ped_file,geneback_file);
+	public VEPSummarizer(String vcf_file, String cds_file,String ped_file) {
+		super(vcf_file, cds_file,ped_file);
 	}
 
 	@Override

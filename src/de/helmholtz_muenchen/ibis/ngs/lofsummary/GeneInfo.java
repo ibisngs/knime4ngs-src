@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 
-public class GeneInfo implements Comparable<GeneInfo> {
+public class GeneInfo {
 	
 	String contig;
 	String symbol;
@@ -15,7 +15,6 @@ public class GeneInfo implements Comparable<GeneInfo> {
 	HashSet<String> affected_samples;
 	HashSet<String> hom_samples;
 	HashSet<String> ko_samples;
-	double p_lof_aff, p_val_case_vs_control, p_val_vs_bg, p_val_fisher;
 	
 	int fullLoFs, partLoFs, aff_case, aff_ctrl, un_case, un_ctrl;
 	
@@ -26,10 +25,6 @@ public class GeneInfo implements Comparable<GeneInfo> {
 		aff_ctrl = 0; 
 		un_case = 0; 
 		un_ctrl = 0;
-		p_val_fisher = -1.0;
-		p_val_case_vs_control = -1.0;
-		p_val_vs_bg = -1.0;
-		p_lof_aff = -1.0;
 		contig = "";
 		pos2af_prob = new HashMap<>();
 		affected_samples = new HashSet<>();
@@ -54,24 +49,11 @@ public class GeneInfo implements Comparable<GeneInfo> {
 		return un_ctrl;
 	}
 	
-	public void calcFisher(int aff_case, int aff_ctrl, int un_case, int un_ctrl) {
+	public void setTable(int aff_case, int aff_ctrl, int un_case, int un_ctrl) {
 		this.aff_case = aff_case;
 		this.aff_ctrl = aff_ctrl;
 		this.un_case = un_case;
 		this.un_ctrl = un_ctrl;
-		p_val_fisher = FisherExact.oneTailedGreater(aff_case, aff_ctrl, un_case, un_ctrl);
-	}
-	
-	public double getP_val_Fisher() {
-		return this.p_val_fisher;
-	}
-	
-	public double getP_lof_aff() {
-		return p_lof_aff;
-	}
-
-	public void setP_lof_aff(double p_lof_aff) {
-		this.p_lof_aff = p_lof_aff;
 	}
 
 	public void setContig(String contig) {
@@ -152,26 +134,5 @@ public class GeneInfo implements Comparable<GeneInfo> {
 
 	public void addHomSample(String sample_id) {
 		this.hom_samples.add(sample_id);
-	}
-
-	@Override
-	public int compareTo(GeneInfo gi) {
-		return Double.compare(p_val_fisher, gi.getP_val_Fisher());
-	}
-
-	public double getP_val_case_vs_control() {
-		return p_val_case_vs_control;
-	}
-
-	public void setP_val_case_vs_control(double p_val_case_vs_control) {
-		this.p_val_case_vs_control = p_val_case_vs_control;
-	}
-
-	public double getP_val_vs_exac() {
-		return p_val_vs_bg;
-	}
-
-	public void setP_val_vs_bg(double p_val_vs_exac) {
-		this.p_val_vs_bg = p_val_vs_exac;
 	}
 }
