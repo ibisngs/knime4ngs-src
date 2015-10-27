@@ -285,10 +285,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	ValueComparator vc = new ValueComparator(pvalues);
 
 		TreeMap<String,Double> sorted_gene_statistic = new TreeMap<String, Double>(vc);
-
 		sorted_gene_statistic.putAll(pvalues);
 		genes.addAll(sorted_gene_statistic.keySet());
-    	
     	return genes;
     }
     
@@ -300,7 +298,10 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	    }
    
 	    public int compare(String a, String b) {
-	        return Double.compare(base.get(a),base.get(b));
+	    	if(base.get(a).isNaN() || base.get(a) > base.get(b)) {
+	    		return 1;
+	    	}
+	        return -1;
 	    }
 	}
      
