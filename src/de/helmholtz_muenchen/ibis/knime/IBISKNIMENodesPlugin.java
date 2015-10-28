@@ -4,6 +4,8 @@ package de.helmholtz_muenchen.ibis.knime;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.swing.JOptionPane;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.core.node.NodeLogger;
@@ -33,9 +35,15 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String NOTIFY = "notify";
 	public static final boolean NOTIFY_DEFAULT = false;
 	
-	public static final String EMAIL = "email";
-	public static final String EMAIL_DEFAULT = "";
+	public static final String EMAIL_HOST = "host";
+	public static final String EMAIL_HOST_DEFAULT = "outmail.helmholtz-muenchen.de";
 	
+	public static final String EMAIL_SENDER = "sender";
+	public static final String EMAIL_SENDER_DEFAULT = "ibis.knime@helmholtz-muenchen.de";
+
+	public static final String EMAIL_RECEIVER = "receiver";
+	public static final String EMAIL_RECEIVER_DEFAULT = "";
+
 	/**
      * The shared instance.
      */
@@ -114,15 +122,48 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 
         log("starting IKN_PLUGIN: IBISKNIMENodesPlugin");
 
+        String warn_message = "";
+        
+        //check tool paths
         for(String s: KNIMEPreferencePage.TOOLS.keySet()) {
 			String path = this.getToolPathPreference(s);
-			if(Files.notExists(Paths.get(path))) {
+			if(Files.notExists(Paths.get(path)) && !path.equals("")) {
 				this.setToolPathPreference(s, "");
+				warn_message += "Path to "+s+" has been changed!"+ System.getProperty("line.separator"); 
 			}
 		}
-//        IPreferenceStore store = IBISKNIMENodesPlugin.getDefault()
-//                .getPreferenceStore();
-
+        
+        if(warn_message.length()>0) {
+        	warn_message += "Please edit the paths in the KNIME4NGS preference page!"+System.getProperty("line.separator");
+        }
+        
+        //check path to reference genome
+        String ref_genome = this.getRefGenomePreference();
+        if(Files.notExists(Paths.get(ref_genome)) && !ref_genome.equals("")) {
+			this.setRefGenomePreference("");
+			warn_message += "Path to the reference genome has been changed!"+ 
+					System.getProperty("line.separator") + 
+					"You can reset it in the KNIME4NGS preference page!" +
+					System.getProperty("line.separator"); 
+		}
+        
+        //check path to database
+        String database = this.getDBFilePreference();
+        if(Files.notExists(Paths.get(database)) && !database.equals("")) {
+			this.setDBFilePreference("");
+			this.setHTEPreference(false);
+			warn_message += "Path to the HTE database has been changed!"+ 
+					System.getProperty("line.separator") + 
+					"You can reset it or create a new one in the KNIME4NGS preference page!" +
+					System.getProperty("line.separator"); 
+		}
+        
+        if(warn_message.length()>0) {
+        JOptionPane.showMessageDialog(null,
+			    warn_message,
+			    "Warning",
+			    JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     /**
@@ -160,7 +201,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		store.setDefault(THRESHOLD, THRESHOLD_DEFAULT);
 		store.setDefault(DB_FILE, DB_FILE_DEFAULT);
 		store.setDefault(NOTIFY, NOTIFY_DEFAULT);
-		store.setDefault(EMAIL, EMAIL_DEFAULT);
+		store.setDefault(EMAIL_HOST, EMAIL_HOST_DEFAULT);
+		store.setDefault(EMAIL_SENDER, EMAIL_SENDER_DEFAULT);
+		store.setDefault(EMAIL_RECEIVER, EMAIL_RECEIVER_DEFAULT);
 	}
 	
 	public String getRefGenomePreference() {
@@ -211,11 +254,20 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		return getPreferenceStore().getBoolean(NOTIFY);
 	}
 	
-	public String getEmailPreference() {
-		return getPreferenceStore().getString(EMAIL);
+	public String getEmailPreference(String id) {
+		if(id.equals(EMAIL_HOST)) {
+			return getPreferenceStore().getString(EMAIL_HOST);
+		}
+		if(id.equals(EMAIL_SENDER)) {
+			return getPreferenceStore().getString(EMAIL_SENDER);
+		}
+		if(id.equals(EMAIL_RECEIVER)) {
+			return getPreferenceStore().getString(EMAIL_RECEIVER);
+		}
+		return "";
 	}
 	
-	public void setEmailPreference(String s) {
-		getPreferenceStore().setValue(EMAIL, s);
+	public void setEmailPreference(String id, String s) {
+		getPreferenceStore().setValue(id, s);
 	}
 }

@@ -1,8 +1,6 @@
 
 package de.helmholtz_muenchen.ibis.knime.preferences;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -48,12 +46,13 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 /**
  * @author hastreiter
+ * @author jeske
  */
 public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
 	public static final String GATK_ID = "GenomeAnalysisTK.jar";
-	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
+	private static final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
 	public static final HashMap<String, Boolean> TOOLS;
 	static {
 		TOOLS = new HashMap<>();
@@ -69,7 +68,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put(GATK_ID,false);
 		TOOLS.put("variant_effect_predictor.pl",false);
 		TOOLS.put("filter_vep.pl", false);
-//		TOOLS.put("vt",false);
 		TOOLS.put("vcftools",false);
 	}
 	
@@ -79,12 +77,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
-	public static String EMAIL;
+	public static String EMAILSENDER;
+	public static String EMAILHOST;
+	public static String EMAILRECEIVER;
 	
 	private Text refGenome;
 	private Text thresholdText;
 	private Text dbFile;
-	private Text email;
+	private Text email_sender, email_host, email_receiver;
 	
 	private Button checkHTE;
 	private Button checkNotify;
@@ -100,8 +100,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		IPreferenceStore store =
 				IBISKNIMENodesPlugin.getDefault().getPreferenceStore();
 		setPreferenceStore(store);
-		
-		
 	}
 
 	/**
@@ -109,7 +107,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		
 		
 		Composite top = new Composite(parent, SWT.LEFT);
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -249,6 +246,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
 		browseDBFile.setText("Browse");
+		browseDBFile.setEnabled(USE_HTE);
 		final Shell shell3 = new Shell(parent.getDisplay());
 		browseDBFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -258,6 +256,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Button createDBFile = new Button(use_hte, SWT.NONE);
 		createDBFile.setText("Create new db file");
+		createDBFile.setEnabled(USE_HTE);
 		final Shell shell4 = new Shell(parent.getDisplay());
 		createDBFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -271,36 +270,64 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				USE_HTE = btn.getSelection();
 				thresholdText.setEnabled(USE_HTE);
 				dbFile.setEnabled(USE_HTE);
+				checkNotify.setEnabled(USE_HTE);
+				checkNotify.setSelection(false);
+				browseDBFile.setEnabled(USE_HTE);
+				createDBFile.setEnabled(USE_HTE);
+				NOTIFY = false;
+				email_receiver.setEnabled(NOTIFY);
+				email_host.setEnabled(NOTIFY);
+				email_sender.setEnabled(NOTIFY);
 			}
 		});
 		
-		Composite address = new Composite(htePrefs,SWT.LEFT);
-		address.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		//email preferences
+		Composite email = new Composite(htePrefs,SWT.LEFT);
+		email.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		GridLayout emailLayout = new GridLayout();
 		emailLayout.numColumns = 1;
-		address.setLayout(emailLayout);
+		email.setLayout(emailLayout);
 		
 		NOTIFY = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
-		checkNotify = new Button(address,SWT.CHECK);
+		checkNotify = new Button(email,SWT.CHECK);
 		checkNotify.setText("Email notification?");
 		checkNotify.setSelection(NOTIFY);
 		checkNotify.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Button btn = (Button) e.getSource();
 				NOTIFY = btn.getSelection();
-				email.setEnabled(NOTIFY);
+				email_receiver.setEnabled(NOTIFY);
+				email_host.setEnabled(NOTIFY);
+				email_sender.setEnabled(NOTIFY);
 			}
 		});
 		
-		Label emailLabel = new Label(address, SWT.LEFT);
-		emailLabel.setText("Email address:");
+		EMAILHOST = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
 		
-		EMAIL = IBISKNIMENodesPlugin.getDefault().getEmailPreference();
+		Label emailHost = new Label(email, SWT.LEFT);
+		emailHost.setText("Email host:");
+		email_host = new Text(email,SWT.BORDER);
+		email_host.setText(EMAILHOST);
+		email_host.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		email_host.setEnabled(NOTIFY);
 		
-		email = new Text(address,SWT.BORDER);
-		email.setText(EMAIL);
-		email.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		email.setEnabled(NOTIFY);
+		EMAILSENDER = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
+		
+		Label emailSender = new Label(email, SWT.LEFT);
+		emailSender.setText("Email sender:");
+		email_sender = new Text(email,SWT.BORDER);
+		email_sender.setText(EMAILSENDER);
+		email_sender.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		email_sender.setEnabled(NOTIFY);
+		
+		EMAILRECEIVER = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
+		
+		Label emailReceiver = new Label(email, SWT.LEFT);
+		emailReceiver.setText("Email address (send to):");
+		email_receiver = new Text(email,SWT.BORDER);
+		email_receiver.setText(EMAILRECEIVER);
+		email_receiver.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		email_receiver.setEnabled(NOTIFY);
 
 		return top;
 	}
@@ -348,10 +375,17 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		checkNotify.setSelection(NOTIFY);
 		iknp.setNotifyPreference(NOTIFY);
 		
-		EMAIL = IBISKNIMENodesPlugin.EMAIL_DEFAULT;
-		email.setText(EMAIL);
-		iknp.setEmailPreference(EMAIL);
+		EMAILHOST = IBISKNIMENodesPlugin.EMAIL_HOST_DEFAULT;
+		email_host.setText(EMAILHOST);
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
 		
+		EMAILSENDER = IBISKNIMENodesPlugin.EMAIL_SENDER_DEFAULT;
+		email_sender.setText(EMAILSENDER);
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER, EMAILSENDER);
+		
+		EMAILRECEIVER = IBISKNIMENodesPlugin.EMAIL_RECEIVER_DEFAULT;
+		email_receiver.setText(EMAILRECEIVER);
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
 	}
 	
 	/*
@@ -398,7 +432,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		if(DB_FILE.equals("")) {
 			JOptionPane.showMessageDialog(null,
-				    "Select valid SQLite database or create new one.",
+				    "HTE requires a SQLite database. Please create a new one or choose an existing one.",
 				    "Error",
 				    JOptionPane.ERROR_MESSAGE);
 			return false;
@@ -408,13 +442,35 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		iknp.setNotifyPreference(NOTIFY);
 		
-		EMAIL = email.getText();
-		iknp.setEmailPreference(EMAIL);
-		LOGGER.debug("Setting EMAIL to: "+EMAIL);
+		EMAILHOST = email_host.getText();
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
+		
+		EMAILSENDER = email_sender.getText();
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER, EMAILSENDER);
+		
+		EMAILRECEIVER = email_receiver.getText();
+		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
 		
 		if(NOTIFY) {
+			
+			if(EMAILHOST.equals("")) {
+				JOptionPane.showMessageDialog(null,
+					    "Email host is required for Email notification!",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+			
+			if(EMAILSENDER.equals("")) {
+				JOptionPane.showMessageDialog(null,
+					    "Email sender is required for Email notification!",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+			
 			try {
-				new InternetAddress(EMAIL).validate();
+				new InternetAddress(EMAILRECEIVER).validate();
 			} catch (AddressException e) {
 				JOptionPane.showMessageDialog(null,
 						"Enter valid Email address.",
@@ -435,6 +491,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dlg.setText("Choose directory in which tool binaries will be stored");
 		dlg.setFilterPath("~/");
 		String dir = dlg.open();
+		
+		//do nothing if DirectoryDialog was cancelled
+		if(dir==null) return;
 		
 		try {
 			CheckUtils.checkDestinationDirectory(dir);
@@ -473,10 +532,23 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
-		DirectoryDialog dlg = new DirectoryDialog(shell);
-		dlg.setText("Choose directory in which tool binaries shall be searched");
-		dlg.setFilterPath("~/");
-		String dir = dlg.open();
+		DirectoryDialog dirlg = new DirectoryDialog(shell);
+		dirlg.setText("Choose directory in which tool binaries shall be searched");
+		dirlg.setFilterPath("~/");
+		String dir = dirlg.open();
+		
+		//do nothing if DirectoryDialog was cancelled
+		if(dir==null) return;
+
+	    Thread t = new Thread(new Runnable() {
+	      public void run() {
+	    	  JOptionPane.showMessageDialog(null,
+	  			    "Please wait while directories are searched. The file dialog will be closed automatically.",
+	  			    "Information",
+	  			    JOptionPane.INFORMATION_MESSAGE);
+	      }
+	    });
+	    t.start();
 		
 		for(String s: TOOLS.keySet()) {
 			if(iknp.getToolPathPreference(s).equals("")) {
@@ -492,6 +564,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				}
 			}
 		}
+		
 		
 		for(TableItem i: table.getItems()) {
 			i.setText(1,iknp.getToolPathPreference(i.getText(0)));
@@ -513,6 +586,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dlg.setFilterPath(path);
 		String file = dlg.open();
 		
+		//do nothing if FileDialog was cancelled
+		if(file==null) return;
+		
 		try {
 			CheckUtils.checkSourceFile(file);
 			iknp.setToolPathPreference(item.getText(0), file);
@@ -524,8 +600,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
-		
 	}
 	
 	private void selectRefGenome(Shell shell) {
@@ -534,6 +608,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		fdl.setFilterExtensions(new String[]{"*.fa","*.fasta"});
 		fdl.setFilterPath("~/");
 		String path = fdl.open();
+		
+		//do nothing if FileDialog was cancelled
+		if(path==null) return;
+		
 		REF_GENOME = path;
 		refGenome.setText(REF_GENOME);
 	}
@@ -544,6 +622,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		fdl.setFilterExtensions(new String[]{"*.db","*.sql"});
 		fdl.setFilterPath("~/");
 		String path = fdl.open();
+		
+		//do nothing if FileDialog was cancelled
+		if(path==null) return;
 		
 		HTEDBHandler htedb;
 		try {
@@ -574,6 +655,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		dlg.setText("Choose directory in which database file will be stored");
 		dlg.setFilterPath("~/");
 		String dir = dlg.open();
+		
+		//do nothing if DirectoryDialog was cancelled
+		if(dir==null) return;
 		
 		try {
 			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db",null);

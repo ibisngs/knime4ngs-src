@@ -44,9 +44,9 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private int threshold_value = DEFAULT_THRESHOLD;
 	private String db_file = "";
 	private String email = "";
+	private String emailsender = "";
+	private String emailhost = "";
 	
-	private final String EMAILSENDER = "ibis.knime@helmholtz-muenchen.de";
-	private final String EMAILHOST = "outmail.helmholtz-muenchen.de";
 	private final String HEADER = "IBIS KNIME Nodes Notification";
 	
 	//internal flags
@@ -175,7 +175,9 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		db_file = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
 		boolean notify = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
 		if(notify) {
-			email = IBISKNIMENodesPlugin.getDefault().getEmailPreference();
+			email = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
+			emailhost = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
+			emailsender = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
 		} else {
 			email = null;
 		}
@@ -241,12 +243,12 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	private void sendMail(String content) {
 
 		Properties properties = System.getProperties();
-		properties.setProperty("mail.smtp.host", EMAILHOST);
+		properties.setProperty("mail.smtp.host", emailhost);
 		Session session = Session.getDefaultInstance(properties);
 
 		try {
 			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(EMAILSENDER));
+			message.setFrom(new InternetAddress(emailsender));
 			message.addRecipient(Message.RecipientType.TO, new InternetAddress(
 					email));
 			message.setSubject(HEADER);
