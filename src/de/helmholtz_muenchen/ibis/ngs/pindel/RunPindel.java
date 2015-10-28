@@ -1,20 +1,27 @@
 package de.helmholtz_muenchen.ibis.ngs.pindel;
 
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.ExecutionContext;
 
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.lofs.FileInputReader;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 import de.helmholtz_muenchen.ibis.utils.lofs.Writer_Output;
 
 
-public class RunPindel {
+public class RunPindel extends PindelNodeModel {
 	
-	public static String createOutputFilePindel(String filebase, String toolextension, String variant) throws Exception{
+	public RunPindel(){
+		
+	}
+	
+	
+	public String createOutputFilePindel(String filebase, String toolextension, String variant) throws Exception{
 		
 		//path to output file
 		String path =filebase+"."+toolextension+"_"+variant;
@@ -41,7 +48,7 @@ public class RunPindel {
 		
 	}
 	
-	public static void PindelConfig(String bamfile, String ismfile, String configfile) throws Exception {
+	public void PindelConfig(String bamfile, String ismfile, String configfile) throws Exception {
 		
 		PindelNodeModel.logger.info("Creating Pindel config file: "+configfile);
 		
@@ -99,7 +106,7 @@ public class RunPindel {
 	}
 	
 	
-	public static void Pindel (ExecutionContext exec, String pex, String conf, String ref, String out, String intv, int [] threadsbins, double [] params) throws Exception{
+	public void Pindel (ExecutionContext exec, String pex, String conf, String ref, String out, String intv, int [] threadsbins, double [] params) throws Exception{
 		
 		String cmd = pex;
 		cmd+=" -i "+conf;
@@ -125,11 +132,15 @@ public class RunPindel {
 		PindelNodeModel.logger.info("Running Pindel...");
 		PindelNodeModel.logger.info("Log files can be found in "+out+".out.log and "+out+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, out+".out.log", out+".err.log", null);
+    	/**Execute**/
+    	String lockFile = out + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),out+".out.log", out+".err.log");
+		
+//		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, out+".out.log", out+".err.log", null);
 		
 	}
 	
-	public static void Pindel2VCF (ExecutionContext exec, String p2vcf, String ref, String refn, String refd, String pfile, String vout, boolean [] fs, double [] nums) throws Exception{
+	public void Pindel2VCF (ExecutionContext exec, String p2vcf, String ref, String refn, String refd, String pfile, String vout, boolean [] fs, double [] nums) throws Exception{
 		
 		String cmd = p2vcf;
 		cmd+=" -r "+ref;
@@ -158,7 +169,11 @@ public class RunPindel {
 		PindelNodeModel.logger.info("Running Pindel2VCF...");
 		PindelNodeModel.logger.info("Log files can be found in "+vout+".out.log and "+vout+".err.log");
 		
-		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, vout+".out.log", vout+".err.log", null);
+    	/**Execute**/
+    	String lockFile = vout + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),vout+".out.log", vout+".err.log");
+		
+//		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, vout+".out.log", vout+".err.log", null);
 
 	}
 

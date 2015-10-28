@@ -32,6 +32,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -41,7 +42,7 @@ import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
  *
  * @author 
  */
-public class PindelNodeModel extends NodeModel {
+public class PindelNodeModel extends HTExecutorNodeModel {
     
     // the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(PindelNodeModel.class);
@@ -233,6 +234,9 @@ public class PindelNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	
+    	RunPindel rPindel = new RunPindel();
+    	
+    	
         //retrieve information from table
         DataRow r=inData[0].iterator().next();
         
@@ -354,19 +358,19 @@ public class PindelNodeModel extends NodeModel {
         if(ISM && m_create_config.getBooleanValue()){
         	
         	configfile=PathProcessor.createOutputFile(base, "config", "pindel");
-        	RunPindel.PindelConfig(inputfile, ismfile, configfile);
+        	rPindel.PindelConfig(inputfile, ismfile, configfile);
 
         }
 
         
         //run Pindel
-        String pout= RunPindel.createOutputFilePindel(base, "pindel", "D");
+        String pout= rPindel.createOutputFilePindel(base, "pindel", "D");
         
         int [] resources = new int[] {m_threads.getIntValue(), m_bin_size.getIntValue()};
         double [] sen_spec = new double[] {m_min_match_bases.getIntValue(), m_additional_mismatch.getIntValue(), m_min_match_breakpoint.getIntValue(), m_seq_err.getDoubleValue(), m_max_mismatch_rate.getDoubleValue()};
 
         
-        RunPindel.Pindel(exec, pindelfile, configfile, reffile, pout, interval, resources, sen_spec);
+        rPindel.Pindel(exec, pindelfile, configfile, reffile, pout, interval, resources, sen_spec);
         
         //check output files: pindel_D deletions, pindel_SI small insertions
         String pindeldeletions=pout+"_D";
@@ -408,8 +412,8 @@ public class PindelNodeModel extends NodeModel {
         	boolean [] flags = new boolean []{m_gatk_comp.getBooleanValue(), m_both_strands.getBooleanValue(), m_limit_size.getBooleanValue()};
         	double [] numbers = new double []{m_min_reads.getIntValue(), m_hetero_frac.getDoubleValue(), m_homo_frac.getDoubleValue(), m_min_supp_reads.getIntValue(), m_min_size.getIntValue(), m_max_size.getIntValue()};
  
-        	RunPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindeldeletions, delout, flags, numbers);
-        	RunPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindelinsertions, inout, flags, numbers);
+        	rPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindeldeletions, delout, flags, numbers);
+        	rPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindelinsertions, inout, flags, numbers);
     	}
         
         //create output table
@@ -511,7 +515,25 @@ public class PindelNodeModel extends NodeModel {
     		m_config_file.setEnabled(true);
     	}
 
-        return new DataTableSpec[]{null};
+    	
+    	// create column specifications
+    	DataColumnSpec [] colspec = new DataColumnSpec[4];
+    	if(m_vcf_out.getBooleanValue()){
+	    	colspec[0]=new DataColumnSpecCreator("Path2VCFdeletionsFile", StringCell.TYPE).createSpec();
+	    	colspec[1]=new DataColumnSpecCreator("Path2VCFinsertionsFile", StringCell.TYPE).createSpec();    		
+    	}
+    	else{
+	    	colspec[0]=new DataColumnSpecCreator("Path2PindelDFile", StringCell.TYPE).createSpec();
+	    	colspec[1]=new DataColumnSpecCreator("Path2PindelSIFile", StringCell.TYPE).createSpec();
+    	}
+    	colspec[2]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+    	colspec[3]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
+  	
+    	//create table
+	    DataTableSpec outspec=new DataTableSpec(colspec);
+    	
+    	
+        return new DataTableSpec[]{outspec};
     }
 
     /**
@@ -520,6 +542,8 @@ public class PindelNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
+    	super.saveSettingsTo(settings);
+    	
         m_pindel.saveSettingsTo(settings);
         m_interval.saveSettingsTo(settings);
         m_chrom.saveSettingsTo(settings); 
@@ -559,7 +583,9 @@ public class PindelNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-            
+        
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	m_pindel.loadSettingsFrom(settings);
     	m_interval.loadSettingsFrom(settings);
     	m_chrom.loadSettingsFrom(settings);
@@ -600,6 +626,8 @@ public class PindelNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
             
+    	super.validateSettings(settings);
+    	
     	m_pindel.validateSettings(settings);
     	m_interval.validateSettings(settings);
     	m_chrom.validateSettings(settings);

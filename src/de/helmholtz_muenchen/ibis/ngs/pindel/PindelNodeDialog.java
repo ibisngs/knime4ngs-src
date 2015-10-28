@@ -19,6 +19,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "Pindel" Node.
  * 
@@ -30,7 +33,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author 
  */
-public class PindelNodeDialog extends DefaultNodeSettingsPane {	
+public class PindelNodeDialog extends HTExecutorNodeDialog {	
 	
 	/*
 	 * executables
@@ -226,7 +229,7 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				pindel2vcf.setEnabled(vcf_out.getBooleanValue());
-				setEnabled(vcf_out.getBooleanValue(), "Pindel2vcf parameters");
+//				setEnabled(vcf_out.getBooleanValue(), "Pindel2vcf parameters");
 			}
 		});
         
@@ -264,6 +267,31 @@ public class PindelNodeDialog extends DefaultNodeSettingsPane {
         addDialogComponent(new DialogComponentNumber(max_mismatch_rate, "Fraction of mismatching bases per read", 0.01, 5));
     	
     }
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String pindel_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel");
+	    	if(pindel_path != null && !pindel_path.equals("")) {
+	    		pindel.setStringValue(pindel_path);
+	    		pindel.setEnabled(false);
+			} else {
+				pindel.setEnabled(true);
+			}
+
+		    String pindel2vcfPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel2vcf");
+		    	if(pindel2vcfPath != null && !pindel2vcfPath.equals("")) {
+		    		pindel2vcf.setStringValue(pindel2vcfPath);
+		    		pindel2vcf.setEnabled(false);
+		    	} else {
+		    		pindel2vcf.setEnabled(true);
+		    	}
+	    	
+		} else {
+			pindel.setEnabled(true);
+			pindel2vcf.setEnabled(true);
+		}
+	}
     
     
     /* 
