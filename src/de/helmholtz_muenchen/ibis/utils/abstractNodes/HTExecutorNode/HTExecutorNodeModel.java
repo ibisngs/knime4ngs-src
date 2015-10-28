@@ -18,6 +18,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -84,6 +85,15 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 					environment,LOGGER, stdOutFile, stdErrFile, stdOut,
 					stdErr, StdInFile);
 			err_msg = stdErr.toString();
+			
+			for(String c: command) {
+				if(c.contains(KNIMEPreferencePage.GATK_ID)) {
+					err_msg = parseGATKError(err_msg);
+					break;
+				}
+			}
+			
+			
 			stdErr = new StringBuffer();
 			if (exitcode == 0) {
 				htedb.writeSuccess(exec_id);
@@ -130,6 +140,17 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			recExecuteCommand(command, exec, environment, stdOutFile,
 					stdErrFile, stdOut, stdErr, StdInFile, checker, htedb);
 		}
+	}
+	
+	private String parseGATKError(String err) {
+		String result = "";
+		
+		for(String line: err.split(System.getProperty("line.separator"))) {
+			if(line.contains("ERROR MESSAGE")) {
+				result += line + System.getProperty("line.separator");
+			}
+		}
+		return result;
 	}
 
 	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile) throws Exception {

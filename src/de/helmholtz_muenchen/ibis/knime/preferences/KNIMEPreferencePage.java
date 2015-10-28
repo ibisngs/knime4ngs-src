@@ -52,6 +52,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
+	public static final String GATK_ID = "GenomeAnalysisTK.jar";
 	private final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
 	public static final HashMap<String, Boolean> TOOLS;
 	static {
@@ -65,7 +66,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put("samtools",true);
 		TOOLS.put("segemehl.x",true);
 		TOOLS.put("STAR",true);
-		TOOLS.put("GenomeAnalysisTK.jar",false);
+		TOOLS.put(GATK_ID,false);
 		TOOLS.put("variant_effect_predictor.pl",false);
 		TOOLS.put("filter_vep.pl", false);
 //		TOOLS.put("vt",false);
