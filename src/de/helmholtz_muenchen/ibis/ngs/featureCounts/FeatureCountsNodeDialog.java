@@ -100,5 +100,11 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
 	}
+
+	@Override
+	protected void updatePrefs() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

@@ -1,16 +1,17 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentMultiLineString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
  * <code>BinaryWrapperNodeDialog</code> provides some options to set a path to a binary and set additional commands.
  * @author Michael Kluge
  *
  */
-public abstract class BinaryWrapperNodeDialog extends DefaultNodeSettingsPane {
+public abstract class BinaryWrapperNodeDialog extends HTExecutorNodeDialog {
 
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);

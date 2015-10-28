@@ -3,23 +3,32 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.util.Pair;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 
 /**
@@ -27,7 +36,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
  * @author Michael Kluge
  *
  */
-public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
+public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 
     // keys for SettingsModels
 	protected static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
@@ -52,6 +61,17 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
 	private static final String REGEX_WHITESPACE	= "\\s+";
 	
+
+	// stores the defined SettingsModels objects
+	private final HashMap<String, SettingsModel> SETTINGS_MAP = new HashMap<String, SettingsModel>();
+	private final ArrayList<SettingsModel> SETTINGS = new ArrayList<SettingsModel>();
+	
+	//Catch Stdout/err streams
+	private boolean catchStdout;
+	private boolean catchStderr;
+	
+	
+	
 	/**
 	 * Constructor with number of input and output ports.
 	 * @param nrInDataPorts number of input ports
@@ -60,11 +80,14 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 	 * @param catchStderr catches stderr if true
 	 */
 	protected BinaryWrapperNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
-		super(nrInDataPorts, nrOutDataPorts, catchStdout, catchStderr);
+		super(nrInDataPorts,nrOutDataPorts);
 		// init is called by child classes
+		
+		this.catchStderr = catchStderr;
+		this.catchStdout = catchStdout;
 	}
 	
-	@Override
+
 	public void init() {
 		addSetting(SET_BINARY_PATH);
 		addSetting(SET_ADDITIONAL_PARAMETER);
@@ -94,18 +117,8 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
     	System.out.println(ExecuteThread.getCommand(command));
     	// check if run was already successful 
     	File lockFile = getPathToLockFile();
-    	String joinedCommand = ExecuteThread.getCommand(command);
-    	boolean terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, joinedCommand);
-		LOGGER.info("Successful termination state: " + terminationState);
-
-		// do not execute if termination state is true
-		if(!terminationState) {
-			SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, joinedCommand);
-			
-			// execute the command
-			executeCommand(exec, new String[]{joinedCommand}, null, getPathToStdoutFile(), getPathToStderrFile());
-			checker.writeOK();
-		}
+    	
+    	runHTExecute(command,exec,lockFile);
 		
 		exec.setProgress(1.00); // we are done
         return getOutputData(exec, ExecuteThread.getCommand(command), inData);
@@ -303,4 +316,114 @@ public abstract class BinaryWrapperNodeModel extends ExecutorNodeModel {
 
     	return filenPath;
     }
+    
+    
+	public void addSetting(SettingsModel model) {
+		if(model != null) {
+			SETTINGS.add(model);
+			// get protected config name
+			try {
+				Method m = model.getClass().getDeclaredMethod("getConfigName");
+				m.setAccessible(true);
+				String configName = m.invoke(model, new Object[]{}).toString();
+				
+				// add it to the settings map
+				SETTINGS_MAP.put(configName, model);
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		else {
+			throw new IllegalArgumentException("SettingsModel can not be null if it should be added!");
+		}
+	}
+    
+	/**
+	 * gets a saved settings or null, if not there
+	 * @param name
+	 */
+	public SettingsModel getSetting(String name) {
+		return this.SETTINGS_MAP.get(name);
+	}
+	
+	
+	
+	private void runHTExecute(String[] command, ExecutionContext exec, File lockFile) throws Exception{
+	
+		// StringBuffer for stdout and stderr
+		StringBuffer STDOUT = null;
+		StringBuffer STDERR = null;
+		
+		if(catchStderr){
+			STDERR = new StringBuffer("Not yet executed!");		
+		}else if(catchStdout){
+			STDOUT = new StringBuffer("Not yet executed!");		
+		}
+		
+		//HTE Execution
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, null, null, STDOUT, STDERR, null);	
+	}
+	
+	
+	
+	/**************************************** KNIME METHODS ****************************************/
+	/***********************************************************************************************/
+    
+    /**
+     * {@inheritDoc}
+     */
+    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
+    	
+    	super.validateSettings(settings);
+    	
+    	// get all models and validate them
+    	for(SettingsModel set : SETTINGS)
+    		set.validateSettings(settings);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
+    	
+    	super.loadValidatedSettingsFrom(settings);
+    	
+    	// get all models and load them
+    	for(SettingsModel set : SETTINGS)
+    		set.loadSettingsFrom(settings);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	
+    	super.saveSettingsTo(settings);
+    	
+    	// get all models and save them
+    	for(SettingsModel set : SETTINGS)
+    		set.saveSettingsTo(settings);
+    }
+	
+	@Override
+	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec)
+			throws IOException, CanceledExecutionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec)
+			throws IOException, CanceledExecutionException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void reset() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }
