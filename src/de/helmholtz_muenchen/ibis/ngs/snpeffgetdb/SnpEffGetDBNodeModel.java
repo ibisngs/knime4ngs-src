@@ -22,14 +22,14 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
@@ -38,7 +38,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author 
  */
-public class SnpEffGetDBNodeModel extends NodeModel {
+public class SnpEffGetDBNodeModel extends HTExecutorNodeModel {
     
 	/**
 	 * Input arguments
@@ -87,14 +87,7 @@ public class SnpEffGetDBNodeModel extends NodeModel {
     	String dbName = m_database.getStringValue();
     	//String dbFolder = m_database_folder.getStringValue();
     	
-    	//TODO: change folder for log file or delete
-    	/**Initialize logfile**/
-    	String logfile = snpEffDirectory + "/logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("SnpEffGetDB"));
-    	/**logfile initialized**/
-    	
+   	
     	/*Modify .config file to set new database folder*/
     	String configFile = snpEffDirectory + "/snpEff.config";
     	String pattern = "^data_dir.*";
@@ -155,17 +148,15 @@ public class SnpEffGetDBNodeModel extends NodeModel {
     		command.add("-jar snpEff.jar download");
         	command.add("-v "+dbName);
         	
-        	/**
-        	 * Execute
-        	 */
+        	/**Execute**/
+        	String lockFile = file.getAbsolutePath() + SuccessfulRunChecker.LOCK_ENDING;
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
+        	
         	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-        	logBuffer.append(ShowOutput.getNodeEndTime());
-        	ShowOutput.writeLogFile(logBuffer);
+
     	}
     	else{
-	    	logBuffer.append("Database " + dbName + " already exists\n");
-	    	logBuffer.append(ShowOutput.getNodeEndTime());
-	    	ShowOutput.writeLogFile(logBuffer);
+	    	System.out.println("Database " + dbName + " already exists\n");
     	}
     	
     	/**
@@ -215,7 +206,10 @@ public class SnpEffGetDBNodeModel extends NodeModel {
         //	throw new InvalidSettingsException("Specify a database to download!");
         //}
 
-        return new DataTableSpec[]{null};
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -224,6 +218,8 @@ public class SnpEffGetDBNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	
+    	super.saveSettingsTo(settings);
+    	    	
         m_snpeff_folder.saveSettingsTo(settings);
     	m_database.saveSettingsTo(settings);
     	//m_database_folder.saveSettingsTo(settings);
@@ -236,6 +232,8 @@ public class SnpEffGetDBNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         
+    	super.loadValidatedSettingsFrom(settings);
+    	
         m_snpeff_folder.loadSettingsFrom(settings);
     	m_database.loadSettingsFrom(settings);
     	//m_database_folder.loadSettingsFrom(settings);
@@ -248,6 +246,8 @@ public class SnpEffGetDBNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	
+    	super.validateSettings(settings);
     	
         m_snpeff_folder.validateSettings(settings);
     	m_database.validateSettings(settings);

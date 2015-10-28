@@ -11,8 +11,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -21,8 +19,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 
 
 
@@ -32,7 +30,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Maximilian Hastreiter
  */
-public class SnpSiftNodeModel extends NodeModel {
+public class SnpSiftNodeModel extends HTExecutorNodeModel {
     
 	public static final String CFGKEY_SNPEFF_FOLDER = "snpeff_folder";
 	public static final String CFGKEY_INVCF = "invcf";
@@ -104,11 +102,8 @@ public class SnpSiftNodeModel extends NodeModel {
 	private final SettingsModelBoolean m_dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
 
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(SnpSiftNodeModel.class);
 	
     protected SnpSiftNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
         super(1, 0);
     }
 
@@ -118,13 +113,6 @@ public class SnpSiftNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-
-    	/**Initialize logfile**/
-    	String logfile = m_snpeff_folder.getStringValue() + "/logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("SnpEff"));
-    	/**logfile initialized**/
     	
         String folder = m_snpeff_folder.getStringValue();
         String stdOutFile = "";
@@ -211,13 +199,11 @@ public class SnpSiftNodeModel extends NodeModel {
         	stdOutFile = basename+"_dbnsfp.vcf";
         }
         
+    	/**Execute**/
+    	String lockFile = stdOutFile + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),stdOutFile);
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,stdOutFile);
 
-    	/**
-    	 * Execute
-    	 */
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,stdOutFile);
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
          	
         return null;
     }
@@ -248,6 +234,9 @@ public class SnpSiftNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	
+    	super.saveSettingsTo(settings);
+    	
     	m_invcf.saveSettingsTo(settings);
     	m_method.saveSettingsTo(settings);
     	m_snpeff_folder.saveSettingsTo(settings);
@@ -274,6 +263,9 @@ public class SnpSiftNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	
+    	super.loadValidatedSettingsFrom(settings);
+    	
         m_filtercoveragebool.loadSettingsFrom(settings);
         m_filterqualbool.loadSettingsFrom(settings);
         m_filtercoverage.loadSettingsFrom(settings);
@@ -299,6 +291,9 @@ public class SnpSiftNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	
+    	super.validateSettings(settings);
+    	
         m_filtercoverage.validateSettings(settings);
         m_filterqual.validateSettings(settings);
         m_filtercoveragebool.validateSettings(settings);

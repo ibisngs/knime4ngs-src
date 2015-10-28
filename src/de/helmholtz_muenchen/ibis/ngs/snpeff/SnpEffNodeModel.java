@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -24,11 +22,11 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of SnpEff.
@@ -36,7 +34,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Sebastian Kopetzky
  */
-public class SnpEffNodeModel extends NodeModel {
+public class SnpEffNodeModel extends HTExecutorNodeModel {
     /*Mandatory options*/
 	
 	public static final String CFGKEY_SNPEFF_FOLDER = "snpeff_folder";
@@ -131,7 +129,6 @@ public class SnpEffNodeModel extends NodeModel {
 	
 	/*Other variables*/
 	private boolean optionalPort = false;
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(SnpEffNodeModel.class);
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "snpEffDirectory";
@@ -174,15 +171,7 @@ public class SnpEffNodeModel extends NodeModel {
     		snpEffDirectory = m_snpeff_folder.getStringValue();
     		dbName = m_database.getStringValue();
     	}
-    	
-    	//TODO: change folder for log file or delete
-    	/**Initialize logfile**/
-    	String logfile = snpEffDirectory + "/logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("SnpEff"));
-    	/**logfile initialized**/
-    	
+    	   	
     	/*Make & run command*/
     	//TODO change -Xmx value? Dynamically?
     	ArrayList<String> command = new ArrayList<String>();
@@ -246,12 +235,13 @@ public class SnpEffNodeModel extends NodeModel {
     	command.add(vcfFile);
 
     	
-    	/**
-    	 * Execute
-    	 */
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outFile + ".eff.vcf");
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
+    	/**Execute**/
+    	String lockFile = outFile + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),outFile + ".eff.vcf");
+    	
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outFile + ".eff.vcf");
+//    	logBuffer.append(ShowOutput.getNodeEndTime());
+//    	ShowOutput.writeLogFile(logBuffer);
     	
     	/**
     	 * Output
@@ -331,6 +321,8 @@ public class SnpEffNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	
+    	super.saveSettingsTo(settings);
+    	
     	/*Mandatory options*/
     	m_snpeff_folder.saveSettingsTo(settings);
     	m_database.saveSettingsTo(settings);
@@ -371,6 +363,8 @@ public class SnpEffNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	/*Mandatory options*/
     	m_snpeff_folder.loadSettingsFrom(settings);
     	m_database.loadSettingsFrom(settings);
@@ -409,6 +403,8 @@ public class SnpEffNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
 
+    	super.validateSettings(settings);
+    	
     	/*Mandatory options*/
     	m_snpeff_folder.validateSettings(settings);
     	m_database.validateSettings(settings);

@@ -13,6 +13,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "SnpEff" Node.
  * 
@@ -24,7 +26,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author
  */
-public class SnpEffNodeDialog extends DefaultNodeSettingsPane {
+public class SnpEffNodeDialog extends HTExecutorNodeDialog {
 
 	/*Mandatory options*/
 	final SettingsModelString snpeff_folder = new SettingsModelString(
@@ -82,6 +84,8 @@ public class SnpEffNodeDialog extends DefaultNodeSettingsPane {
      * New pane for configuring the SnpEff node.
      */
     protected SnpEffNodeDialog() {
+    	
+    	super();
     	
     	createNewGroup("snpEff directory");
     	addDialogComponent(new DialogComponentFileChooser(snpeff_folder, "par_1", 0, true));
@@ -229,5 +233,11 @@ public class SnpEffNodeDialog extends DefaultNodeSettingsPane {
 		});
     	
     }
+
+	@Override
+	protected void updatePrefs() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

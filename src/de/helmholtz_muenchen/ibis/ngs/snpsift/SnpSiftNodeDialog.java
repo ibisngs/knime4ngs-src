@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.ngs.snpsift;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -16,18 +15,14 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "SnpSift" Node.
  * 
- *
- * This node dialog derives from {@link DefaultNodeSettingsPane} which allows
- * creation of a simple dialog with standard components. If you need a more 
- * complex dialog please derive directly from 
- * {@link org.knime.core.node.NodeDialogPane}.
- * 
- * @author Max
+ * @author Maximilian Hastreiter
  */
-public class SnpSiftNodeDialog extends DefaultNodeSettingsPane {
+public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
 
 	private final SettingsModelString snpeff_folder = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_SNPEFF_FOLDER,"");
@@ -74,6 +69,8 @@ public class SnpSiftNodeDialog extends DefaultNodeSettingsPane {
      */
     protected SnpSiftNodeDialog() {
 
+    	super();
+    	
     	createNewGroup("snpEff/snpSIFT directory");
     	addDialogComponent(new DialogComponentFileChooser(snpeff_folder, "par_1", 0, true));
     	createNewGroup("Input vcf file");
@@ -186,5 +183,12 @@ public class SnpSiftNodeDialog extends DefaultNodeSettingsPane {
 			}
 		});
     }
+
+
+	@Override
+	protected void updatePrefs() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
