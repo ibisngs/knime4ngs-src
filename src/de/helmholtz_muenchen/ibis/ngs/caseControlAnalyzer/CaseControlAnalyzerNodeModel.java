@@ -131,7 +131,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	
     	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
     	
-    	writeResults(outfile, summary_file, m_summary_gene_id.getStringValue(), gene2pvalues,ordered_genes);
+    	writeResults(outfile, summary_file, m_summary_gene_id.getStringValue(), gene2pvalues,gene2frequency,ordered_genes);
     	
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
@@ -238,15 +238,16 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     private HashMap<String, Double> getBinomialBackgroundPvalues(HashMap<String,ContingencyTable> gene2contingency, HashMap<String, Double> gene2freq, double pseudo_freq) {
     	HashMap<String, Double> result = new HashMap<>();
 		double freq;
+		Statistics my = new Statistics();
     	for(String gene: gene2contingency.keySet()) {
 			
     		if(gene2freq.containsKey(gene)) {
-    			freq = gene2freq.get(gene);
+    			freq = (gene2freq.get(gene) +pseudo_freq)/(1.0+pseudo_freq);
     		} else {
     			freq = pseudo_freq;
     		}
-    		
-    		result.put(gene, Statistics.getBinomialBackground(gene2contingency.get(gene), freq));
+
+    		result.put(gene, my.getBinomialBackground(gene2contingency.get(gene), freq));
 		}
 		
     	return result;
@@ -305,12 +306,12 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	    }
 	}
      
-    private void  writeResults(String outfile, String summary_file, String gene_id_header, LinkedHashMap<String, HashMap<String,Double>> pvalues, LinkedList<String> order) throws IOException {
+    private void  writeResults(String outfile, String summary_file, String gene_id_header, LinkedHashMap<String, HashMap<String,Double>> pvalues, HashMap<String,Double> gene2frequency, LinkedList<String> order) throws IOException {
     	HashMap<String, String> content = new HashMap<>();
     	BufferedReader br = Files.newBufferedReader(Paths.get(summary_file));
     	
     	//read header
-    	String header = br.readLine();
+    	String header = br.readLine() + "\tbackground_freq";
     	int gene_index = -1;
     	String [] cols = header.split("\t");
     	for(int i = 0; i < cols.length; i++) {
@@ -336,6 +337,11 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 
     	for(String gene: order) {
     		line = content.get(gene);
+    		if(gene2frequency.containsKey(gene)) {
+    			line +="\t"+(gene2frequency.get(gene)+m_pseudo_freq.getDoubleValue())/(1.0 + m_pseudo_freq.getDoubleValue());
+    		} else {
+    			line += "\t"+m_pseudo_freq.getDoubleValue();
+    		}
     		for(HashMap<String,Double> map: pvalues.values()) {
     			line += "\t" + map.get(gene);
     		}

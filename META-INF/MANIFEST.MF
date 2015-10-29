@@ -15,7 +15,8 @@ Bundle-ClassPath: ibis.knimenodes.jar,
  libs/org.apache.commons.net_3.1.0.v201205071737.jar,
  libs/sqlite-jdbc-3.8.7.jar,
  libs/javax.mail.jar,
- libs/jaf-1.1.1/activation.jar
+ libs/jaf-1.1.1/activation.jar,
+ libs/RCaller-2.5.jar
 Bundle-Activator: de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin
 Bundle-Vendor: IBIS KNIME Team
 Require-Bundle: org.eclipse.core.runtime,

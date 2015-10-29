@@ -152,6 +152,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         if(Files.notExists(Paths.get(database)) && !database.equals("")) {
 			this.setDBFilePreference("");
 			this.setHTEPreference(false);
+			this.setNotifyPreference(false);
 			warn_message += "Path to the HTE database has been changed!"+ 
 					System.getProperty("line.separator") + 
 					"You can reset it or create a new one in the KNIME4NGS preference page!" +

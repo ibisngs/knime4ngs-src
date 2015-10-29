@@ -411,6 +411,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
 		
 		if(!USE_HTE) {
+			iknp.setNotifyPreference(false);
 			return super.performOk();
 		}
 		
@@ -674,5 +675,4 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		dbFile.setText(DB_FILE);	
 	}
-	
 }
