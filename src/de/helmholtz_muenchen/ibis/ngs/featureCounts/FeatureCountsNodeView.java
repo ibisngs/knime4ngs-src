@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.featureCounts;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeView;
+import org.knime.core.node.NodeView;
+
 
 /**
  * <code>NodeView</code> for the "FeatureCounts" Node.
@@ -10,7 +11,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeV
  *
  * @author Michael Kluge
  */
-public class FeatureCountsNodeView extends ExecutorNodeView<FeatureCountsNodeModel> {
+public class FeatureCountsNodeView extends NodeView<FeatureCountsNodeModel> {
 
     /**
      * Creates a new view.
@@ -20,5 +21,23 @@ public class FeatureCountsNodeView extends ExecutorNodeView<FeatureCountsNodeMod
     protected FeatureCountsNodeView(final FeatureCountsNodeModel nodeModel) {
         super(nodeModel);
     }
+
+	@Override
+	protected void onClose() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void onOpen() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void modelChanged() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
