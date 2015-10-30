@@ -22,11 +22,13 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -45,7 +47,6 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	//model file configure keys
 	static final String CFGKEY_MODEL_GENE_ID = "model_gene_id";
 	static final String CFGKEY_FREQ = "freq";
-	static final String CFGKEY_PSEUDO_FREQ = "pseudo_freq";
 	
 	//summary file configure keys
 	static final String CFGKEY_SUMMARY_GENE_ID = "summary_gene_id";
@@ -57,13 +58,15 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	//method configure keys
 	static final String CFGKEY_FISHER = "fisher_exact";
 	static final String CFGKEY_BINOMIAL_BACKGROUND = "binomial_background";
+	static final String CFGKEY_PSEUDO_FREQ = "pseudo_freq";
+	static final String CFGKEY_HYPER_BACKGROUND = "hypergeometric_background";
+	static final String CFGKEY_POP_SIZE = "pop_size";
 	static final String CFGKEY_ORDER_BY = "order_by";
-	static final String [] METHODS = {"fisher_exact","binomial_background"};
+	static final String [] METHODS = {CFGKEY_FISHER, CFGKEY_BINOMIAL_BACKGROUND, CFGKEY_HYPER_BACKGROUND};
 	
 	//model file settings models
     private final SettingsModelString m_model_gene_id = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_MODEL_GENE_ID, "gene_id");
     private final SettingsModelString m_freq = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_FREQ, "lof_freq");
-    private final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(CaseControlAnalyzerNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
     
     //summary file settings models
     private final SettingsModelString m_summary_gene_id = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_SUMMARY_GENE_ID, "gene_id");
@@ -75,11 +78,17 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     //method settings models
     private final SettingsModelBoolean m_fisher = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_FISHER,true);
     private final SettingsModelBoolean m_bin_back = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_BINOMIAL_BACKGROUND,true);
+    private final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(CaseControlAnalyzerNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
+    private final SettingsModelBoolean m_hyper = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_HYPER_BACKGROUND,true);
+    private final SettingsModelIntegerBounded m_pop_size = new SettingsModelIntegerBounded(CaseControlAnalyzerNodeModel.CFGKEY_POP_SIZE, 1, 1, Integer.MAX_VALUE);
     private final SettingsModelString m_order_by = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_ORDER_BY,METHODS[0]);
     
     private static final String OUT_COL1 = "Path2ExtendedSummary";
     
     private boolean model_given = false;
+    
+	protected static final NodeLogger logger = NodeLogger.getLogger(CaseControlAnalyzerNodeModel.class);
+
     
     protected CaseControlAnalyzerNodeModel() {
     
@@ -94,6 +103,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	Statistics stats = new Statistics();
+    	
     	String summary_file, model_file, outfile;
     	HashMap<String, Double> gene2frequency;
     	HashMap<String, ContingencyTable> gene2table;
@@ -111,26 +122,39 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	
     	gene2pvalues = new LinkedHashMap<>();
     	
+    	logger.debug("Compute Fisher statistic");
     	if(m_fisher.getBooleanValue()) {
-        	HashMap<String, Double> fisher = getFisherPvalues(gene2table);
+        	HashMap<String, Double> fisher = getFisherPvalues(gene2table,stats);
     		gene2pvalues.put("fisher_exact", fisher);
-    		gene2pvalues.put("fisher_exact_adj", adjustPvaluesFDR(fisher));
+    		gene2pvalues.put("fisher_exact_adj", adjustPvaluesFDR(fisher,stats));
     		if(m_order_by.getStringValue().equals(METHODS[0])) {
     			ordered_genes = getOrder(fisher);
     		}
     	}
     	
+    	logger.debug("Compute binomial background statistic");
     	if(m_bin_back.getBooleanValue() && model_given) {
-        	HashMap<String, Double> bg = getBinomialBackgroundPvalues(gene2table, gene2frequency, m_pseudo_freq.getDoubleValue());
+        	HashMap<String, Double> bg = getBinomialBackgroundPvalues(gene2table, gene2frequency, m_pseudo_freq.getDoubleValue(), stats);
     		gene2pvalues.put("binomial_background", bg);
-    		gene2pvalues.put("binomial_background_adj", adjustPvaluesFDR(bg));
+    		gene2pvalues.put("binomial_background_adj", adjustPvaluesFDR(bg, stats));
     		if(m_order_by.getStringValue().equals(METHODS[1])) {
     			ordered_genes = getOrder(bg);
     		}
     	}
     	
+    	logger.debug("Compute hypergeometric background statistic");
+    	if(m_hyper.getBooleanValue() && model_given) {
+    		HashMap<String, Double> hg = getHypergeometricBackgroundPvalues(gene2table, gene2frequency, m_pop_size.getIntValue(), stats);
+    		gene2pvalues.put("hypergeometric_background", hg);
+    		gene2pvalues.put("hypergeometric_background_adj", adjustPvaluesFDR(hg, stats));
+    		if(m_order_by.getStringValue().equals(METHODS[2])) {
+    			ordered_genes = getOrder(hg);
+    		}
+    	}
+    	
     	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
     	
+    	stats.quit();
     	writeResults(outfile, summary_file, m_summary_gene_id.getStringValue(), gene2pvalues,gene2frequency,ordered_genes);
     	
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -227,18 +251,17 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	return result;
     }
     
-    private HashMap<String, Double> getFisherPvalues(HashMap<String,ContingencyTable> gene2contingency) {
+    private HashMap<String, Double> getFisherPvalues(HashMap<String,ContingencyTable> gene2contingency, Statistics stats) {
     	HashMap<String, Double> result = new HashMap<>();
     	for(String gene: gene2contingency.keySet()) {
-    		result.put(gene, Statistics.getFisherOneTailedGreater(gene2contingency.get(gene)));
+    		result.put(gene, stats.getFisherOneTailedGreater(gene2contingency.get(gene)));
     	}
     	return result;
     }
     
-    private HashMap<String, Double> getBinomialBackgroundPvalues(HashMap<String,ContingencyTable> gene2contingency, HashMap<String, Double> gene2freq, double pseudo_freq) {
+    private HashMap<String, Double> getBinomialBackgroundPvalues(HashMap<String,ContingencyTable> gene2contingency, HashMap<String, Double> gene2freq, double pseudo_freq, Statistics stats) {
     	HashMap<String, Double> result = new HashMap<>();
 		double freq;
-		Statistics my = new Statistics();
     	for(String gene: gene2contingency.keySet()) {
 			
     		if(gene2freq.containsKey(gene)) {
@@ -247,35 +270,61 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     			freq = pseudo_freq;
     		}
 
-    		result.put(gene, my.getBinomialBackground(gene2contingency.get(gene), freq));
+    		result.put(gene, stats.getBinomialBackground(gene2contingency.get(gene), freq));
 		}
-		
     	return result;
     }
     
-    private HashMap<String, Double> adjustPvaluesFDR(HashMap<String, Double> pvalues) {
+    private HashMap<String, Double> getHypergeometricBackgroundPvalues(HashMap<String,ContingencyTable> gene2contingency, HashMap<String, Double> gene2freq, int pop_size, Statistics stats) {
+    	HashMap<String, Double> result = new HashMap<>();
+		int pop_cases = 0;
+    	for(String gene: gene2contingency.keySet()) {
+    		pop_cases = 0;
+    		if(gene2freq.containsKey(gene)) {
+    			pop_cases = (int)Math.round(gene2freq.get(gene)*pop_size);
+    		}
+    		result.put(gene, stats.getHypergeometricBackground(gene2contingency.get(gene), pop_size, pop_cases));
+		}
+    	
+    	return result;
+    }
+    
+    private HashMap<String, Double> adjustPvaluesFDR(HashMap<String, Double> pvalues, Statistics stats) {
     	HashMap<String, Double> result = new HashMap<>();
 
     	LinkedList<String> genes = getOrder(pvalues);
-    	int m = genes.size();
-    	String gene;
-    	double adjusted;
     	
-    	for(int k=0; k < m; k++) {
-    		gene = genes.get(k);
-    		adjusted = ((double)m/(double)(k+1))*pvalues.get(gene);
-    		result.put(gene, adjusted);
+    	double [] a = new double[genes.size()];
+    	
+    	for(int i = 0; i<genes.size(); i++) {
+    		a[i] = pvalues.get(genes.get(i));
     	}
     	
-    	double last = result.get(genes.get(genes.size()-1));
-    	for(int k = m-2; k>=0; k--) {
-    		gene = genes.get(k);
-    		if(result.get(gene) > last) {
-    			result.put(gene, last);
-    		} else {
-    			last = result.get(gene);
-    		}
+    	a = stats.adjustP(a, "fdr");
+    	
+    	for(int i = 0; i<genes.size(); i++) {
+    		result.put(genes.get(i), a[i]);
     	}
+    	
+//    	int m = genes.size();
+//    	String gene;
+//    	double adjusted;
+//    	
+//    	for(int k=0; k < m; k++) {
+//    		gene = genes.get(k);
+//    		adjusted = ((double)m/(double)(k+1))*pvalues.get(gene);
+//    		result.put(gene, adjusted);
+//    	}
+//    	
+//    	double last = result.get(genes.get(genes.size()-1));
+//    	for(int k = m-2; k>=0; k--) {
+//    		gene = genes.get(k);
+//    		if(result.get(gene) > last) {
+//    			result.put(gene, last);
+//    		} else {
+//    			last = result.get(gene);
+//    		}
+//    	}
 
     	return result;
     }
@@ -415,6 +464,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
          m_control_ncond.saveSettingsTo(settings);
          m_fisher.saveSettingsTo(settings);
          m_bin_back.saveSettingsTo(settings);
+         m_hyper.saveSettingsTo(settings);
+         m_pop_size.saveSettingsTo(settings);
          m_order_by.saveSettingsTo(settings);
     }
 
@@ -434,6 +485,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	m_control_ncond.loadSettingsFrom(settings);
     	m_fisher.loadSettingsFrom(settings);
     	m_bin_back.loadSettingsFrom(settings);
+    	m_hyper.loadSettingsFrom(settings);
+    	m_pop_size.loadSettingsFrom(settings);
     	m_order_by.loadSettingsFrom(settings);
     }
 
@@ -453,6 +506,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
         m_control_ncond.validateSettings(settings);
         m_fisher.validateSettings(settings);
         m_bin_back.validateSettings(settings);
+        m_hyper.validateSettings(settings);
+        m_pop_size.loadSettingsFrom(settings);
         m_order_by.validateSettings(settings);
     }
     
