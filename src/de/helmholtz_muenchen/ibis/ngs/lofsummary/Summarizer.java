@@ -379,9 +379,7 @@ public abstract class Summarizer {
 			for(String gene_id: gene2lof.keySet()) {
 				
 				GeneInfo gene_info = gene_statistic.get(gene_id);
-				
-				gene_info.addProb(lof.getPos(), lof.getAF());
-				
+								
 				ArrayList<String> transList = gene2lof.get(gene_id).getTranscripts();
 				//copy to remove duplicates
 				HashSet<String> transcripts = new HashSet<>();

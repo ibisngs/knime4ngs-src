@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 
@@ -8,8 +7,6 @@ public class GeneInfo {
 	
 	String contig;
 	String symbol;
-
-	HashMap<String, Double> pos2af_prob;
 	
 	HashSet<String> unaffected_samples;
 	HashSet<String> affected_samples;
@@ -26,7 +23,6 @@ public class GeneInfo {
 		un_case = 0; 
 		un_ctrl = 0;
 		contig = "";
-		pos2af_prob = new HashMap<>();
 		affected_samples = new HashSet<>();
 		ko_samples = new HashSet<>();
 		hom_samples = new HashSet<>();
@@ -88,21 +84,6 @@ public class GeneInfo {
 		return this.partLoFs;
 	}
 	
-	public double getProbUnaffected() {
-		double result = 1.0;
-		for(String pos: pos2af_prob.keySet()) {
-			result = result * Math.pow(1.0 - pos2af_prob.get(pos),2);
-		}
-		return result;
-	}
-	
-	public void addProb(String pos, double prob) {
-		if(pos2af_prob.containsKey(pos)) {
-			pos2af_prob.put(pos, prob+pos2af_prob.get(pos));
-		} else {
-			pos2af_prob.put(pos, prob);
-		}
-	}
 
 	public void addUnaffectedSample(String sample_id) {
 		this.unaffected_samples.add(sample_id);

@@ -28,8 +28,8 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	
     protected LOFSummaryNodeDialog() {
     	
-    	createNewGroup("Path to CDS file");
-    	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa"));
+    	createNewGroup("Path to CDS/GTF file");
+    	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa|.fasta|.gtf"));
     	
     	createNewGroup("Path to PED file");
     	addDialogComponent(new DialogComponentFileChooser(pedin, "his_id_LOFStatistics_PEDIN", 0, ".ped"));

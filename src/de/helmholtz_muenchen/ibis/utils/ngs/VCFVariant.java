@@ -14,7 +14,7 @@ public class VCFVariant {
 	}
 	
 	public String getChrom() {
-		return chrom;
+		return chrom.replaceAll("chr", "");
 	}
 
 	public void setChrom(String chrom) {
@@ -94,6 +94,9 @@ public class VCFVariant {
 		HashSet<String> result = new HashSet<>();
 		for(String s: sample_genotype.keySet()) {
 			gt = sample_genotype.get(s).split(":")[0];
+			if(gt.length()!=3) {
+				continue;
+			}
 			if (gt.charAt(0) != '.'
 					&& !allele_nums.contains(Character.getNumericValue(gt.charAt(0)))
 					&& gt.charAt(2) != '.'
@@ -133,5 +136,60 @@ public class VCFVariant {
 			}
 		}
 		return null;
+	}
+	
+	public double getAF(int allele_id) {
+		String gt;
+		double an = 0.0;
+		double ac = 0.0;
+		for(String s: sample_genotype.values()) {
+			gt = s.split(":")[0];
+			if(gt.length()!=3) {
+				continue;
+			}
+			if(gt.charAt(0)!='.') {
+				an++;
+				if(Character.getNumericValue(gt.charAt(0))==allele_id) {
+					ac++;
+				}
+			}
+			if(gt.charAt(2)!='.') {
+				an++;
+				if(Character.getNumericValue(gt.charAt(2))==allele_id) {
+					ac++;
+				}
+			}
+		}
+		return ac/an;
+	}
+	
+	public int getHomCount(int allele_id) {
+		int res = 0;
+		String gt;
+		for(String s: sample_genotype.values()) {
+			gt = s.split(":")[0];
+			if(gt.length()!=3) {
+				continue;
+			}
+			if(Character.getNumericValue(gt.charAt(0)) == allele_id && Character.getNumericValue(gt.charAt(2))== allele_id) {
+				res++;
+			}
+		}
+		return res;
+	}
+	
+	public int getHetCount(int allele_id) {
+		int res = 0;
+		String gt;
+		for(String s: sample_genotype.values()) {
+			gt = s.split(":")[0];
+			if(gt.length()!=3) {
+				continue;
+			}
+			if(Character.getNumericValue(gt.charAt(0)) == allele_id ^ Character.getNumericValue(gt.charAt(2))== allele_id) {
+				res++;
+			}
+		}
+		return res;
 	}
 }

@@ -28,6 +28,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 import de.helmholtz_muenchen.ibis.utils.ngs.VEPAnnotationParser;
@@ -83,12 +84,12 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	}
     	
     	VCFFile vcf_it = new VCFFile(vcf_infile);
-    	String vep_header = vcf_it.getInfoHeader(VEPAnnotationParser.INFO_ID);
+    	String vep_header = vcf_it.getInfoHeader(VEPAnnotationParser.ANN_ID);
     	if(vep_header == null) {
     		throw new InvalidSettingsException("No VEP annotations found!");
     	}
     	
-    	VEPAnnotationParser parser = new VEPAnnotationParser(vep_header);
+    	AnnotationParser parser = new VEPAnnotationParser(vep_header);
     	
     	HashMap<String, Double> gene_frequency;
     	
@@ -117,7 +118,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
         return new BufferedDataTable[]{outTable};
     }
 
-	private HashMap<String, Double> fillAF(VCFFile vcf_it, String ac_id, String an_id, VEPAnnotationParser parser) {
+	private HashMap<String, Double> fillAF(VCFFile vcf_it, String ac_id, String an_id, AnnotationParser parser) {
 		HashMap<String, Double> result = new HashMap<>();
 		VCFVariant var;
 		String ac, an, csq;
@@ -125,7 +126,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 			var = vcf_it.next();
 			ac = var.getInfoField(ac_id);
 			an = var.getInfoField(an_id);
-			csq = var.getInfoField(VEPAnnotationParser.INFO_ID);
+			csq = var.getInfoField(parser.getAnnId());
 			
 			if(ac == null || an == null) {
 				LOGGER.error("The INFO fields "+ac_id+ " and "+an_id+ " have not been found for variant on chr "+var.getChrom()+" at position "+var.getPos()+"!");
@@ -137,7 +138,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 				continue;
 			}
 			
-			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleNum(csq);
+			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq);
 			String [] acs = ac.split(",");
 			
 			//compute frequency of being unaffected for each gene 
@@ -166,7 +167,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 		return result;
 	}
 
-	private HashMap<String, Double> fillGenotypes(VCFFile vcf_it, VEPAnnotationParser parser) {
+	private HashMap<String, Double> fillGenotypes(VCFFile vcf_it, AnnotationParser parser) {
 		HashMap<String, Double> result = new HashMap<>();
 		HashMap<String, HashSet<String>> unaffected_samples, affected_samples;
 		unaffected_samples = new HashMap<>();
@@ -175,14 +176,14 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 		String csq;
 		while(vcf_it.hasNext()) {
 			var = vcf_it.next();
-			csq = var.getInfoField(VEPAnnotationParser.INFO_ID);
+			csq = var.getInfoField(parser.getAnnId());
 			
 			if(csq == null) {
 				LOGGER.error("No annotations have been found for variant on chr "+var.getChrom()+" at position "+var.getPos()+"!");
 				continue;
 			}
 			
-			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleNum(csq);
+			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq);
 			
 			HashSet<Integer> alt_alleles;
 			HashSet<String> aff_samp, unaff_samp;
