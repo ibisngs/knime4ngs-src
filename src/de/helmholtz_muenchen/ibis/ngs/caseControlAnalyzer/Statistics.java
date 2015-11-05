@@ -20,24 +20,6 @@ public class Statistics {
 		r.StopRCallerOnline();
 		r.stopStreamConsumers();
 	}
-
-    /**
-     * calculates the P-value for this specific state
-     *
-     * @param a     a, b, c, d are the four cells in a 2x2 matrix
-     * @param b
-     * @param c
-     * @param d
-     * @return the P-value
-     */
-//    public static double getFisherP(int a, int b, int c, int d) {
-//        int n = a + b + c + d;
-//        
-//        double p = CombinatoricsUtils.binomialCoefficientDouble(a+b,b)/CombinatoricsUtils.binomialCoefficientDouble(n, a+c);
-//        p = p * CombinatoricsUtils.binomialCoefficientDouble(c+d, c);
-//        return p;
-//        
-//    }
     
     public double getFisherOneTailedGreater(ContingencyTable ct) {
     	
@@ -87,13 +69,22 @@ public class Statistics {
 		return res;
     }
     
-//    public static double getFisherOneTailedGreater(int a, int b, int c, int d) {
-//    	double p = 0.0;
-//    	int z = Math.min(b, c);
-//    	for(int i = 0; i <= z; i++) {
-//    		p += getFisherP(a+i, b-i, c-i, d+i);
-//    	}
-//    	return p;
+//    public double getNormalApproximation(ContingencyTable ct, int pop_size, int pop_cases) {
+//    	int N_case = ct.getA()+ct.getB() + pop_size;
+//    	int D_case = ct.getA() + pop_cases; //has LOF
+//    	int n_case = ct.getA()+ct.getB(); //has disease
+//    	int x_case = ct.getA();
+//    	double p_case = (double)D_case/(double)N_case;
+//    	double z_case = (((double)x_case - 0.5) - (double)n_case * p_case)/(Math.sqrt((double)n_case*p_case*(1.0-p_case)));
+//    	
+//    	int N_ctrl = ct.getC() + ct.getD() + pop_size;
+//    	int D_ctrl = ct.getC() + pop_cases;
+//    	int n_ctrl = ct.getC() + ct.getD();
+//    	int x_ctrl = ct.getC();
+//    	double p_ctrl = (double)D_ctrl/(double)N_ctrl;
+//    	double z_ctrl = (((double)x_ctrl - 0.5) - (double)n_ctrl * p_ctrl)/(Math.sqrt((double)n_ctrl*p_ctrl*(1.0-p_ctrl)));
+//
+//    	return z_case - z_ctrl;
 //    }
     
     public double getBinomialBackground(ContingencyTable ct, double bg_freq) {
@@ -105,14 +96,6 @@ public class Statistics {
     	int n_controls = ct.getC() + ct.getD()+1;
     	int exp_cases = (int)(bg_freq * n_cases);
     	int exp_controls = (int)(bg_freq * n_controls);
-    	
-//    	NormalDistribution nd = new NormalDistribution();		
-//		double p_val_case_vs_bg = 1 - new BinomialDistribution(n_cases+1, bg_freq).cumulativeProbability(case_aff);
-//		double z_score_case_vs_bg = nd.inverseCumulativeProbability(p_val_case_vs_bg);
-//		double p_val_control_vs_bg = 1 - new BinomialDistribution(n_controls+1, bg_freq).cumulativeProbability(control_aff);
-//		double z_score_control_vs_bg = nd.inverseCumulativeProbability(p_val_control_vs_bg);
-//		double z_score_diff = z_score_case_vs_bg - z_score_control_vs_bg;
-//		return nd.cumulativeProbability(z_score_diff);
     	
     	code.clear();
     	if(exp_cases > case_aff) {

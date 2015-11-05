@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -119,16 +120,55 @@ public class LOFSummaryNodeModel extends NodeModel {
     		parser = new VEPAnnotationParser(vcf.getInfoHeader(VEPAnnotationParser.ANN_ID));
     	}
     	
+    	logger.debug("Read CDS/GTF file...");
     	HashMap<String, Gene> geneid2gene = new HashMap<>();
     	if(cds_file.endsWith("fa") || cds_file.endsWith("fasta")) {
     		geneid2gene = this.readCDSFile(cds_file);
     	} else if(cds_file.endsWith("gtf")) {
     		geneid2gene = this.readGTFFile(cds_file);
     	}
-    			
     	
-    	LOFSummarizer.getVarSum(vcf, parser, geneid2gene, var_outfile);
-    	LOFSummarizer.getGeneSum(new VCFFile(vcf_infile), parser, gene_outfile);
+    	logger.debug("Read PED file...");
+    	HashMap<String, Boolean> sampleid2affected = readPEDFile(ped_file);
+    	
+    	//parallel execution
+    	final AnnotationParser myparser = parser;
+    	final HashMap<String, Gene> mygene2gene = geneid2gene;
+    	
+    	Thread t1 = new Thread() {
+    		public void run() {
+    			try {
+    				logger.info("Generate variant summary...");
+					LOFSummarizer.getVarSum(vcf, myparser, mygene2gene, var_outfile);
+					logger.info("Variant summary ready!");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	};
+    	
+    	Thread t2 = new Thread() {
+    		public void run() {
+    	    	try {
+    	    		logger.info("Generate gene summary...");
+					LOFSummarizer.getGeneSum(new VCFFile(vcf_infile), myparser, mygene2gene, sampleid2affected, gene_outfile);
+					logger.info("Gene summary ready!");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	};
+    	
+    	t1.start();
+    	t2.start();
+    	
+    	t1.join();
+    	t2.join();
+
+    	
+    	logger.debug("Generate sample summary...");
     	LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), parser, sample_outfile);
     	
     	//Create Output Table
@@ -250,6 +290,28 @@ public class LOFSummaryNodeModel extends NodeModel {
 		    }
 		}
 		return geneid2gene;
+	}
+	
+	private HashMap<String, Boolean> readPEDFile(String ped_file) throws IOException {
+		HashMap<String, Boolean> res = new HashMap<>();
+		
+		BufferedReader br = Files.newBufferedReader(Paths.get(ped_file));
+		String line;
+		String[] fields;
+		while ((line = br.readLine()) != null) {
+			if (line.startsWith("Family ID"))
+				continue;
+
+			fields = line.split("\t");
+			if (fields[5].equals("2")) {
+				res.put(fields[1], true);
+			} else {
+				res.put(fields[1], false);
+			}
+		}
+		br.close();
+		
+		return res;
 	}
 
     /**

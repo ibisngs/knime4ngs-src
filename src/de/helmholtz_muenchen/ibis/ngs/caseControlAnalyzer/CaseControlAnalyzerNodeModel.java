@@ -152,6 +152,9 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     		}
     	}
     	
+    	//test
+//    	gene2pvalues.put("normal_approx", getNormalApprox(gene2table, gene2frequency,m_pop_size.getIntValue(),stats));
+    	
     	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
     	
     	stats.quit();
@@ -172,7 +175,9 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	return new BufferedDataTable[]{outTable};
     }
    
-    private HashMap<String, Double> readModelFile(String file, String gene_id_header, String freq_header) throws IOException, InvalidSettingsException {
+
+
+	private HashMap<String, Double> readModelFile(String file, String gene_id_header, String freq_header) throws IOException, InvalidSettingsException {
     	HashMap<String, Double> result = new HashMap<>();
     	
     	int gene_index = -1;
@@ -285,9 +290,22 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     		}
     		result.put(gene, stats.getHypergeometricBackground(gene2contingency.get(gene), pop_size, pop_cases));
 		}
-    	
     	return result;
     }
+    
+//    private HashMap<String, Double> getNormalApprox(HashMap<String, ContingencyTable> gene2table,
+//			HashMap<String, Double> gene2frequency, int pop_size, Statistics stats) {
+//		HashMap<String, Double> result = new HashMap<>();
+//		int pop_cases = 0;
+//		for(String gene: gene2table.keySet()) {
+//    		pop_cases = 0;
+//    		if(gene2frequency.containsKey(gene)) {
+//    			pop_cases = (int)Math.round(gene2frequency.get(gene)*pop_size);
+//    		}
+//    		result.put(gene, stats.getNormalApproximation(gene2table.get(gene), pop_size, pop_cases));
+//		}
+//		return result;
+//	}
     
     private HashMap<String, Double> adjustPvaluesFDR(HashMap<String, Double> pvalues, Statistics stats) {
     	HashMap<String, Double> result = new HashMap<>();
@@ -305,26 +323,6 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	for(int i = 0; i<genes.size(); i++) {
     		result.put(genes.get(i), a[i]);
     	}
-    	
-//    	int m = genes.size();
-//    	String gene;
-//    	double adjusted;
-//    	
-//    	for(int k=0; k < m; k++) {
-//    		gene = genes.get(k);
-//    		adjusted = ((double)m/(double)(k+1))*pvalues.get(gene);
-//    		result.put(gene, adjusted);
-//    	}
-//    	
-//    	double last = result.get(genes.get(genes.size()-1));
-//    	for(int k = m-2; k>=0; k--) {
-//    		gene = genes.get(k);
-//    		if(result.get(gene) > last) {
-//    			result.put(gene, last);
-//    		} else {
-//    			last = result.get(gene);
-//    		}
-//    	}
 
     	return result;
     }
