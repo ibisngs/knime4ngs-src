@@ -14,6 +14,7 @@ public class VEPAnnotationParser implements AnnotationParser {
 	int gene_id_index = -1;
 	int transcript_id_index = -1;
 	int consequence_index = -1;
+	int symbol_index = -1;
 	
 	/**
 	 * 
@@ -38,6 +39,8 @@ public class VEPAnnotationParser implements AnnotationParser {
     			this.transcript_id_index = i;
     		} else if(part.contains("Consequence")) {
     			this.consequence_index = i;
+    		} else if(part.equals("SYMBOL")) {
+    			this.symbol_index = i;
     		}
     	}	
 	}
@@ -47,7 +50,7 @@ public class VEPAnnotationParser implements AnnotationParser {
 	 * @param anno VEP annotation string in the INFO field of a variant, can be retrieved by getInfoField(VEPAnnotationParser.INFO_ID) for a VCFVariant
 	 * @return annotated alleles (ALLELE_NUM) for each gene affected by a variant
 	 */
-	public HashMap<String, HashSet<Integer>> getGene2AlleleIds (String anno) {
+	public HashMap<String, HashSet<Integer>> getGene2AlleleIds (String anno, boolean use_id) {
 		if(allele_id_index == -1 || gene_id_index == -1) {
 			throw new IllegalArgumentException("ALLELE_NUM and/or gene have not been annotated by VEP!");
 		}
@@ -58,7 +61,12 @@ public class VEPAnnotationParser implements AnnotationParser {
 		
 		//iterate over all transcript annotations
 		for(String a : anno.split(",")) {
-			gene = a.split("\\|")[gene_id_index];
+			if(use_id) {
+				gene = a.split("\\|")[gene_id_index];
+			} else {
+				gene = a.split("\\|")[symbol_index];
+			}
+			
 			allele_num = Integer.parseInt(a.split("\\|")[allele_id_index]);
 			if(gene2allele_num.containsKey(gene)) {
 				gene2allele_num.get(gene).add(allele_num);

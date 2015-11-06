@@ -138,7 +138,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 				continue;
 			}
 			
-			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq);
+			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq, true);
 			String [] acs = ac.split(",");
 			
 			//compute frequency of being unaffected for each gene 
@@ -183,7 +183,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 				continue;
 			}
 			
-			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq);
+			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq, true);
 			
 			HashSet<Integer> alt_alleles;
 			HashSet<String> aff_samp, unaff_samp;

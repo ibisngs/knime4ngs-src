@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Scanner;
 
 import org.knime.core.data.DataColumnSpec;
@@ -46,10 +47,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
 	
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
-	final SettingsModelString m_cdsin = new SettingsModelString(CFGKEY_CDS_INFILE,"");
-	
 	static final String CFGKEY_PED_INFILE = "ped_infile";
-	final SettingsModelString m_pedin = new SettingsModelString(CFGKEY_PED_INFILE,"");
+	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
+	
+	final SettingsModelString m_cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"");
+	final SettingsModelString m_pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"");
+	final SettingsModelString m_genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
@@ -96,22 +99,20 @@ public class LOFSummaryNodeModel extends NodeModel {
     	String ped_file = m_pedin.getStringValue();
     	
     	if(ped_file.equals("") || Files.notExists(Paths.get(ped_file))) {
-    		setWarningMessage("No PED file specified! Trio summary will not be written.");
+    		setWarningMessage("No PED file specified!");
     		ped_file = null;
     	}
     	
-//    	Summarizer summy = null;
-//    	String annotation = m_annotation.getStringValue();
-//    	if(annotation.equals("VEP")) {
-//    		summy = new VEPSummarizer(vcf_infile, cds_file, ped_file);
-//    	}
-//    	
-//    	String LOF_Summary[] = summy.getSummaries();
-    	
-    	
+    	String geneset_file = m_genesetin.getStringValue();
+    	if(geneset_file.equals("") || Files.notExists(Paths.get(geneset_file))) {
+    		setWarningMessage("No gene set file specified!");
+    		geneset_file = null;
+    	}
+
     	String var_outfile = IO.replaceFileExtension(vcf_infile, ".new_variant_summary.tsv");
     	String gene_outfile = IO.replaceFileExtension(vcf_infile, ".new_gene_summary.tsv");
     	String sample_outfile = IO.replaceFileExtension(vcf_infile, ".new_sample_summary.tsv");
+    	String enrichment_outfile = IO.replaceFileExtension(vcf_infile, ".enrichment_summary.tsv");
     	
     	VCFFile vcf = new VCFFile(vcf_infile);
     	AnnotationParser parser = null;
@@ -130,6 +131,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     	
     	logger.debug("Read PED file...");
     	HashMap<String, Boolean> sampleid2affected = readPEDFile(ped_file);
+    	
+    	logger.debug("Read gene set file...");
+    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file);
     	
     	//parallel execution
     	final AnnotationParser myparser = parser;
@@ -161,15 +165,40 @@ public class LOFSummaryNodeModel extends NodeModel {
     		}
     	};
     	
+    	Thread t3 = new Thread() {
+    		public void run() {
+    	    	try {
+    	    		logger.info("Generate sample summary...");
+    	    		LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), myparser, sample_outfile);
+					logger.info("Sample summary ready!");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	};
+    	Thread t4 = new Thread() {
+    		public void run() {
+    	    	try {
+    	    		logger.info("Generate enrichment summary...");
+    	    		LOFSummarizer.getEnrichmentSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, enrichment_outfile);
+					logger.info("Enrichment summary ready!");
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+    	};
+    	
     	t1.start();
     	t2.start();
+    	t3.start();
+    	t4.start();
     	
     	t1.join();
     	t2.join();
-
-    	
-    	logger.debug("Generate sample summary...");
-    	LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), parser, sample_outfile);
+    	t3.join();
+    	t4.join();
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -313,6 +342,28 @@ public class LOFSummaryNodeModel extends NodeModel {
 		
 		return res;
 	}
+	
+	private HashMap<String, HashSet<String>> readGeneSetFile(String file) throws IOException {
+		HashMap<String, HashSet<String>> set2genes = new HashMap<>();
+		
+		BufferedReader br = Files.newBufferedReader(Paths.get(file));
+		String line;
+		String [] fields;
+		
+		while((line=br.readLine())!=null) {
+			line = line.trim();
+			fields = line.split("\t");
+			HashSet<String> tmp = new HashSet<>();
+			for(int i = 2; i < fields.length; i++) {
+				tmp.add(fields[i]);
+			}
+			set2genes.put(fields[0], tmp);
+		}
+		
+		br.close();
+		
+		return set2genes;
+	}
 
     /**
      * {@inheritDoc}
@@ -345,6 +396,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_cdsin.saveSettingsTo(settings);
     	m_pedin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
+    	m_genesetin.saveSettingsTo(settings);
     }
 
     /**
@@ -356,6 +408,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_cdsin.loadSettingsFrom(settings);
     	m_pedin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
+    	m_genesetin.loadSettingsFrom(settings);
     }
 
     /**
@@ -367,6 +420,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_cdsin.validateSettings(settings);
     	m_pedin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
+    	m_genesetin.validateSettings(settings);
     }
     
     /**
