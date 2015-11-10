@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.utils.ngs;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 public class VCFVariant {
 	
@@ -192,10 +191,6 @@ public class VCFVariant {
 			}
 		}
 		return res;
-	}
-	
-	public Set<String> getSampleIds()  {
-		return this.sample_genotype.keySet();
 	}
 	
 	public boolean isAffected(String sample, int id) {

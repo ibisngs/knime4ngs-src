@@ -24,7 +24,7 @@ public class Statistics {
     public double getFisherOneTailedGreater(ContingencyTable ct) {
     	
     	//add pseudo counts
-    	int x = ct.getA()+1;
+    	int x = ct.getA(); //+1;
     	int m = x + ct.getB();
     	int n = ct.getC() + ct.getD();
     	int k = x + ct.getC();

@@ -35,4 +35,8 @@ public class ContingencyTable {
 		return a+b+c+d;
 	}
 
+	public String verticalToString() {
+		return a + "\t" + c + "\t" + b + "\t" + d;
+	}
+	
 }

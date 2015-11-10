@@ -109,10 +109,10 @@ public class LOFSummaryNodeModel extends NodeModel {
     		geneset_file = null;
     	}
 
-    	String var_outfile = IO.replaceFileExtension(vcf_infile, ".new_variant_summary.tsv");
-    	String gene_outfile = IO.replaceFileExtension(vcf_infile, ".new_gene_summary.tsv");
-    	String sample_outfile = IO.replaceFileExtension(vcf_infile, ".new_sample_summary.tsv");
-    	String enrichment_outfile = IO.replaceFileExtension(vcf_infile, ".enrichment_summary.tsv");
+    	String var_outfile = IO.replaceFileExtension(vcf_infile, ".variant_summary.tsv");
+    	String gene_outfile = IO.replaceFileExtension(vcf_infile, ".gene_summary.tsv");
+    	String sample_outfile = IO.replaceFileExtension(vcf_infile, ".sample_summary.tsv");
+    	String enrichment_outfile = IO.replaceFileExtension(vcf_infile, ".gene_set_summary.tsv");
     	
     	VCFFile vcf = new VCFFile(vcf_infile);
     	AnnotationParser parser = null;
@@ -180,9 +180,9 @@ public class LOFSummaryNodeModel extends NodeModel {
     	Thread t4 = new Thread() {
     		public void run() {
     	    	try {
-    	    		logger.info("Generate enrichment summary...");
+    	    		logger.info("Generate gene set summary...");
     	    		LOFSummarizer.getEnrichmentSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, enrichment_outfile);
-					logger.info("Enrichment summary ready!");
+					logger.info("Gene set summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

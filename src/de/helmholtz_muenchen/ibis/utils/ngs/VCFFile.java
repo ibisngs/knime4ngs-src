@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.utils.ngs;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -114,6 +115,20 @@ public class VCFFile implements Iterator<VCFVariant> {
 	
 	public String getInfoHeader(String info_id) {
 		return this.info_header.get(info_id);
+	}
+	
+	public ArrayList<String> getSampleIds() {
+		ArrayList<String> result = new ArrayList<>();
+		if(field_index.containsKey(FORMAT)) {
+			for(int i = 9; i < vcf_header.length; i++) {
+				result.add(vcf_header[i]);
+			}
+		} else {
+			for(int i = 8; i < vcf_header.length; i++) {
+				result.add(vcf_header[i]);
+			}
+		}
+		return result;
 	}
 
 }

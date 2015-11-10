@@ -5,6 +5,7 @@ import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -24,13 +25,14 @@ public class GeneticBackgroundModelNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString gtf_aff = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GTF_AFF,GeneticBackgroundModelNodeModel.BASIS[0]);
 	private final SettingsModelString m_ac = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_AC,"AC");
 	private final SettingsModelString m_an = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_AN,"AN");
+	private final SettingsModelString genesetin = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	
     /**
      * New pane for configuring the GeneticBackgroundModel node.
      */
     protected GeneticBackgroundModelNodeDialog() {
     	
-    	createNewGroup("Compute gene-based variant frequencies using");
+    	createNewGroup("Compute gene-(set)-based variant frequencies using");
     	addDialogComponent(new DialogComponentButtonGroup(gtf_aff, true, null, GeneticBackgroundModelNodeModel.BASIS));
     	
     	createNewGroup("Field IDs indicating the AC and AN to be used");
@@ -52,6 +54,9 @@ public class GeneticBackgroundModelNodeDialog extends DefaultNodeSettingsPane {
 				}
 			}
     	});
+    	
+    	createNewGroup("Path to gene set file");
+    	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_gb_GENESET",0,".gmt"));
     }
 }
 

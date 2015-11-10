@@ -4,11 +4,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
+import de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
@@ -81,78 +82,24 @@ public class LOFSummarizer {
 	
 	public static void getGeneSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
 		
-		HashMap<String, HashSet<String>> unaffected_samples = new HashMap<>();
-		HashMap<String, HashSet<String>> affected_samples = new HashMap<>();
-		HashMap<String, HashSet<Integer>> gene2allele_ids;
-		HashSet<Integer> alt_alleles;
-		HashSet<String> aff_samp, unaff_samp;
-		VCFVariant var;
-		String anno;
-		
-		while(vcf.hasNext()) {
-			var = vcf.next();
-			anno = var.getInfoField(ap.getAnnId());
-			gene2allele_ids = ap.getGene2AlleleIds(anno, true);
-			
-			for(String gene: gene2allele_ids.keySet()) {
-				alt_alleles = gene2allele_ids.get(gene);
-				aff_samp = var.getAffectedSamples(alt_alleles);
-				unaff_samp = var.getUnaffectedSamples(alt_alleles);
-				if(unaffected_samples.containsKey(gene)) {
-					//unaffected samples contains all samples that carry only non-LOF alleles in a gene
-					unaffected_samples.get(gene).retainAll(unaff_samp);
-				} else {
-					unaffected_samples.put(gene,unaff_samp);
-				}
-				
-				if(affected_samples.containsKey(gene)) {
-					affected_samples.get(gene).addAll(aff_samp);
-				} else {
-					affected_samples.put(gene, aff_samp);
-				}
-			}
-		}
+		RegionSummary rs = new RegionSummary(vcf,ap, true);
+		HashMap<String, ContingencyTable> tables = rs.getTables(sampleid2case);
 		
 		//writing sample counts for each gene
 		
 		//initialize header
 		String header = "gene_id\tgene_symbol\taff_case\taff_ctrl\tun_case\tun_ctrl";
-				
-		//initialize writer
+
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
 		bw.write(header);
 		bw.newLine();
 		
 		String line;
-		int aff_case, aff_ctrl, un_case, un_ctrl;
-		for(String gene: affected_samples.keySet()) {
-			
-			aff_case = 0;
-			aff_ctrl = 0;
-			un_case = 0;
-			un_ctrl = 0;
-			
-			for(String s: affected_samples.get(gene)) {
-				if(sampleid2case.get(s)) {
-					aff_case++;
-				} else {
-					aff_ctrl++;
-				}
-			}
-			
-			for(String s: unaffected_samples.get(gene)) {
-				if(sampleid2case.get(s)) {
-					un_case++;
-				} else {
-					un_ctrl++;
-				}
-			}
-			
-			if(aff_case>0 || aff_ctrl>0) {
-				line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+aff_case+"\t"+aff_ctrl+"\t"+un_case+"\t"+un_ctrl;
-				bw.write(line);
-				bw.newLine();
-			}
+		
+		for(String gene: tables.keySet()) {
+			line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+tables.get(gene).verticalToString();
+			bw.write(line);
+			bw.newLine();
 		}
 		bw.close();
 	}
@@ -165,11 +112,10 @@ public class LOFSummarizer {
 		HashMap<String, HashSet<String>> gene2trans;
 		HashMap<String, String> t2aff;
 		HashMap<String, HashMap<String, String>> gene2t2aff;
-		Set<String> samples;
+		ArrayList<String> samples = vcf.getSampleIds();
 		
 		while(vcf.hasNext()) {
 			var = vcf.next();
-			samples = var.getSampleIds();
 			anno = var.getInfoField(ap.getAnnId());
 			
 			for(String id: ap.getAnnotatedAlleleIds(anno)) {
@@ -217,61 +163,6 @@ public class LOFSummarizer {
 	}
 	
 	public static void getEnrichmentSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
-		HashMap<String, HashSet<String>> unaffected_samples = new HashMap<>();
-		HashMap<String, HashSet<String>> affected_samples = new HashMap<>();
-		HashMap<String, HashSet<Integer>> gene2allele_ids;
-		HashSet<Integer> alt_alleles;
-		HashSet<String> aff_samp, unaff_samp;
-		VCFVariant var;
-		String anno;
-		
-		while(vcf.hasNext()) {
-			var = vcf.next();
-			anno = var.getInfoField(ap.getAnnId());
-			gene2allele_ids = ap.getGene2AlleleIds(anno, false); //use gene symbol
-			
-			for(String gene: gene2allele_ids.keySet()) {
-				alt_alleles = gene2allele_ids.get(gene);
-				aff_samp = var.getAffectedSamples(alt_alleles);
-				unaff_samp = var.getUnaffectedSamples(alt_alleles);
-				if(unaffected_samples.containsKey(gene)) {
-					//unaffected samples contains all samples that carry only non-LOF alleles in a gene
-					unaffected_samples.get(gene).retainAll(unaff_samp);
-				} else {
-					unaffected_samples.put(gene,unaff_samp);
-				}
-				
-				if(affected_samples.containsKey(gene)) {
-					affected_samples.get(gene).addAll(aff_samp);
-				} else {
-					affected_samples.put(gene, aff_samp);
-				}
-			}
-		}
-		
-		HashMap<String, Set<String>> enrich_unaffected_samples = new HashMap<>();
-		HashMap<String, Set<String>> enrich_affected_samples = new HashMap<>();
-		
-		HashSet<String> genes;
-		
-		for(String set:set2genes.keySet()) {
-			genes = set2genes.get(set);
-			
-			Set<String> tmp_enrich_un = new HashSet<>();
-			for(String s: sampleid2case.keySet()) {
-				tmp_enrich_un.add(s);
-			}
-			Set<String> tmp_enrich_aff = new HashSet<>();
-			for(String g: genes) {
-				if(unaffected_samples.containsKey(g)) { 
-					tmp_enrich_un.retainAll(unaffected_samples.get(g));
-					tmp_enrich_aff.addAll(affected_samples.get(g));
-				}
-			}
-			enrich_unaffected_samples.put(set, tmp_enrich_un);
-			enrich_affected_samples.put(set, tmp_enrich_aff);
-		}
-		
 		
 		//writing sample counts for each gene
 		
@@ -284,35 +175,15 @@ public class LOFSummarizer {
 		bw.newLine();
 		
 		String line;
-		int aff_case, aff_ctrl, un_case, un_ctrl;
-		for(String set: enrich_affected_samples.keySet()) {
-			
-			aff_case = 0;
-			aff_ctrl = 0;
-			un_case = 0;
-			un_ctrl = 0;
-			
-			for(String s: enrich_affected_samples.get(set)) {
-				if(sampleid2case.get(s)) {
-					aff_case++;
-				} else {
-					aff_ctrl++;
-				}
-			}
-			
-			for(String s: enrich_unaffected_samples.get(set)) {
-				if(sampleid2case.get(s)) {
-					un_case++;
-				} else {
-					un_ctrl++;
-				}
-			}
-			
-			if(aff_case>0 || aff_ctrl>0) {
-				line = set+"\t"+aff_case+"\t"+aff_ctrl+"\t"+un_case+"\t"+un_ctrl;
-				bw.write(line);
-				bw.newLine();
-			}
+		
+		RegionSummary rs = new RegionSummary(vcf,ap,false);
+		rs.groupBy(set2genes);
+		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
+		
+		for(String set: tables.keySet()) {
+			line = set+"\t"+tables.get(set).verticalToString();
+			bw.write(line);
+			bw.newLine();
 		}
 		bw.close();
 	}

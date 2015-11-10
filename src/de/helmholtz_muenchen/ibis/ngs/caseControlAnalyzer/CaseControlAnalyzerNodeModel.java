@@ -152,10 +152,14 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     		}
     	}
     	
-    	//test
 //    	gene2pvalues.put("normal_approx", getNormalApprox(gene2table, gene2frequency,m_pop_size.getIntValue(),stats));
     	
     	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
+    	
+    	//order by first map in gene2pvalues if ordering was incorrectly specified
+    	if(ordered_genes.size()==0) {
+    		ordered_genes = getOrder(gene2pvalues.get(gene2pvalues.keySet().iterator().next()));
+    	}
     	
     	stats.quit();
     	writeResults(outfile, summary_file, m_summary_gene_id.getStringValue(), gene2pvalues,gene2frequency,ordered_genes);
