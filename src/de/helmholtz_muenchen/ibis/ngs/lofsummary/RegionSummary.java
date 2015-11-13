@@ -34,8 +34,6 @@ public class RegionSummary {
 		VCFVariant var;
 		String anno;
 		
-		
-		
 		while(vcf.hasNext()) {
 			var = vcf.next();
 			anno = var.getInfoField(ap.getAnnId());
@@ -88,7 +86,7 @@ public class RegionSummary {
 			un_ctrl = 0;
 			
 			for(String s: aff.get(gene)) {
-				if(sample_id2affected.get(s)) {
+				if(sample_id2affected.containsKey(s) && sample_id2affected.get(s)) {
 					aff_case++;
 				} else {
 					aff_ctrl++;
@@ -96,7 +94,7 @@ public class RegionSummary {
 			}
 			
 			for(String s: un.get(gene)) {
-				if(sample_id2affected.get(s)) {
+				if(sample_id2affected.containsKey(s) && sample_id2affected.get(s)) {
 					un_case++;
 				} else {
 					un_ctrl++;
@@ -156,6 +154,4 @@ public class RegionSummary {
 			enrich_affected_samples.put(set, tmp_enrich_aff);
 		}
 	}
-	
-	
 }

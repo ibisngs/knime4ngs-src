@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +25,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -49,10 +51,12 @@ public class LOFSummaryNodeModel extends NodeModel {
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
 	static final String CFGKEY_PED_INFILE = "ped_infile";
 	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
+	static final String CFGKEY_INTERNAL_GENE_SET = "internal_gene_set";
 	
 	final SettingsModelString m_cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"");
 	final SettingsModelString m_pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"");
 	final SettingsModelString m_genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
+	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 	
 	//selected annotation
     static final String CFGKEY_ANNOTATION="annotation";
@@ -89,11 +93,34 @@ public class LOFSummaryNodeModel extends NodeModel {
     	if(infile_warning != null) {
     		setWarningMessage(infile_warning);
     	}
-
+    	
+    	HashMap<String, Gene> geneid2gene = new HashMap<>();
     	String cds_file = m_cdsin.getStringValue();
-    	if(cds_file.equals("") || Files.notExists(Paths.get(cds_file))) {
+    	if(cds_file.equals("") || Files.notExists(Paths.get(cds_file))) { //no fasta or gtf file given
     		cds_file = null;
     		throw new InvalidSettingsException("No CDS or GTF file specified!");
+    	} else { //path to fasta or gtf file given
+    		
+    		if(m_internal_gene_set.getBooleanValue()) { //use internal file representation
+    			String internal = IO.replaceFileExtension(cds_file, ".geneinfo");
+    			if(Files.exists(Paths.get(internal))) { //internal file representation exists
+        			geneid2gene = this.readGeneInfoFile(internal);
+        		} else { //internal file representation has to be created
+        			if(cds_file.endsWith("fa") || cds_file.endsWith("fasta")) {
+        	    		geneid2gene = this.readCDSFile(cds_file);
+        	    	} else if(cds_file.endsWith("gtf")) {
+        	    		geneid2gene = this.readGTFFile(cds_file);
+        	    	}
+        			this.writeGeneInfoFile(geneid2gene,internal);
+        		}
+    		} else { //read fasta or gtf file but do not save in a file
+    			if(cds_file.endsWith("fa") || cds_file.endsWith("fasta")) {
+    	    		geneid2gene = this.readCDSFile(cds_file);
+    	    	} else if(cds_file.endsWith("gtf")) {
+    	    		geneid2gene = this.readGTFFile(cds_file);
+    	    	}
+    		}
+    		
     	}
     	
     	String ped_file = m_pedin.getStringValue();
@@ -121,13 +148,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		parser = new VEPAnnotationParser(vcf.getInfoHeader(VEPAnnotationParser.ANN_ID));
     	}
     	
-    	logger.debug("Read CDS/GTF file...");
-    	HashMap<String, Gene> geneid2gene = new HashMap<>();
-    	if(cds_file.endsWith("fa") || cds_file.endsWith("fasta")) {
-    		geneid2gene = this.readCDSFile(cds_file);
-    	} else if(cds_file.endsWith("gtf")) {
-    		geneid2gene = this.readGTFFile(cds_file);
-    	}
+    	
     	
     	logger.debug("Read PED file...");
     	HashMap<String, Boolean> sampleid2affected = readPEDFile(ped_file);
@@ -193,12 +214,17 @@ public class LOFSummaryNodeModel extends NodeModel {
     	t1.start();
     	t2.start();
     	t3.start();
-    	t4.start();
+    	if(geneset_file != null) {
+    		t4.start();
+    	}
     	
     	t1.join();
     	t2.join();
     	t3.join();
-    	t4.join();
+    	if(geneset_file != null) {
+        	t4.join();
+    	}
+
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -261,6 +287,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 		}
 		return geneid2gene;
 	}
+
 	
     /**
 	 * reads GTF file and returns map with gene ids as keys and Gene objects as values
@@ -324,6 +351,10 @@ public class LOFSummaryNodeModel extends NodeModel {
 	private HashMap<String, Boolean> readPEDFile(String ped_file) throws IOException {
 		HashMap<String, Boolean> res = new HashMap<>();
 		
+		if(ped_file == null) {
+			return res;
+		}
+		
 		BufferedReader br = Files.newBufferedReader(Paths.get(ped_file));
 		String line;
 		String[] fields;
@@ -343,8 +374,14 @@ public class LOFSummaryNodeModel extends NodeModel {
 		return res;
 	}
 	
+	
+	
 	private HashMap<String, HashSet<String>> readGeneSetFile(String file) throws IOException {
 		HashMap<String, HashSet<String>> set2genes = new HashMap<>();
+		
+		if(file==null) {
+			return set2genes;
+		}
 		
 		BufferedReader br = Files.newBufferedReader(Paths.get(file));
 		String line;
@@ -363,6 +400,33 @@ public class LOFSummaryNodeModel extends NodeModel {
 		br.close();
 		
 		return set2genes;
+	}
+	
+	private HashMap<String, Gene> readGeneInfoFile(String in) throws IOException {
+		HashMap<String, Gene> result = new HashMap<>();
+		BufferedReader br = Files.newBufferedReader(Paths.get(in));
+		String line;
+		String [] fields;
+		
+		while((line=br.readLine())!=null) {
+			fields = line.split("\t");
+			Gene g = new Gene(fields[0], fields[1]);
+			for(String t: fields[2].split(",")) {
+				g.addTranscript(t);
+			}
+			result.put(fields[0], g);
+		}
+		br.close();
+		return result;
+	}
+	
+	public void writeGeneInfoFile(HashMap<String, Gene> geneid2info, String outfile) throws IOException {
+		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+		for(Gene g: geneid2info.values()) {
+			bw.write(g.toString());
+			bw.newLine();
+		}
+		bw.close();
 	}
 
     /**
@@ -397,6 +461,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_pedin.saveSettingsTo(settings);
     	m_annotation.saveSettingsTo(settings);
     	m_genesetin.saveSettingsTo(settings);
+    	m_internal_gene_set.saveSettingsTo(settings);
     }
 
     /**
@@ -409,6 +474,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_pedin.loadSettingsFrom(settings);
     	m_annotation.loadSettingsFrom(settings);
     	m_genesetin.loadSettingsFrom(settings);
+    	m_internal_gene_set.loadSettingsFrom(settings);
     }
 
     /**
@@ -421,6 +487,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	m_pedin.validateSettings(settings);
     	m_annotation.validateSettings(settings);
     	m_genesetin.validateSettings(settings);
+    	m_internal_gene_set.validateSettings(settings);
     }
     
     /**

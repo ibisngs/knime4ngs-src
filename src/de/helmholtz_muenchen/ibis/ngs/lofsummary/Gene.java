@@ -35,5 +35,16 @@ public class Gene {
 	public String getId() {
 		return this.id;
 	}
+	
+	public String toString() {
+		String res = id+"\t"+symbol+"\t";
+		String transcripts = "";
+		for(String t: transcript_ids) {
+			transcripts += ","+t;
+		}
+		transcripts = transcripts.replaceFirst(",", "");
+		
+		return res+transcripts;
+	}
 
 }

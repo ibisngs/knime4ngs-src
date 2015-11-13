@@ -8,9 +8,11 @@
     
     <fullDescription>
         <intro>
-        	This nodes allows to filter VCF files based on VCFTools.
+        	This node allows to filter VCF files based on VCFTools.
         	Default values are taken from <a href="http://www.ncbi.nlm.nih.gov/pmc/articles/PMC4098776/">Carson et al. (2014)</a>.
         	The output is a VCF file containing the variants that have passed the filters.
+        	All INFO fields are included in the output file but values might not be correct due to filtering.
+        	However, the node provides the possibility to restore allele counts after filtering.
         </intro>
         
         <tab name="Options">
