@@ -3,13 +3,13 @@
     <name>GeneticBackgroundModel</name>
     
     <shortDescription>
-        This node computes frequencies indicating the incidence of variants in a gene.
+        This node computes frequencies indicating the incidence of variants in a gene or a gene set.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	This node computes frequencies indicating the incidence of variants in a gene.
-        	All variants in the input file that have been annotated by VEP are integrated in the computation of gene-based variant frequencies.
+        	This node computes frequencies indicating the incidence of variants in a gene or within a gene set.
+        	All variants in the input file that have been annotated by VEP are integrated in the computation of gene-(set)-based variant frequencies.
         	The frequencies can be computed based on genotypes or allele counts/numbers (if genotypes are not available).
       		These frequencies can be used as a background model for the analysis of case-control studies.
         </intro>
@@ -21,6 +21,14 @@
         
         <option name="Field IDs indicating the AC and AN to be used">
         	Set field IDs of the allele counts (in general AC) and allele numbers (in general AN).
+        </option>
+        
+        <option name="Path to gene set file">
+        	The node is able to read gene set descriptions of the MSigDB which can be found here:
+        	<br />
+        	<a href="http://software.broadinstitute.org/gsea/downloads.jsp">MSigDB Downloads</a>
+        	<br />
+        	Note, that you have to download the "gene symbols" version of the desired data set.
         </option>
     </fullDescription>
     

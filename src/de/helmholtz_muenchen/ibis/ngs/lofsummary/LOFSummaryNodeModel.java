@@ -59,12 +59,16 @@ public class LOFSummaryNodeModel extends NodeModel {
 	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 	
 	//selected annotation
-    static final String CFGKEY_ANNOTATION="annotation";
-    static final String[] ANNOTATIONS_AVAILABLE={"VEP"};
-    final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
+//    static final String CFGKEY_ANNOTATION="annotation";
+//    static final String[] ANNOTATIONS_AVAILABLE={"VEP"};
+//    final SettingsModelString m_annotation = new SettingsModelString(CFGKEY_ANNOTATION, "");
 	
 	//output
-	public static final String OUT_COL1 = "Path2Gene_Summary";
+	public static final String OUT_COL1 = "Path2Variant_Summary";
+	public static final String OUT_COL2 = "Path2Gene_Summary";
+	public static final String OUT_COL3 = "Path2Sample_Summary";
+	public static final String OUT_COL4 = "Path2Gene_Set_Summary";
+
 	
 	private int vcf_index;
 	
@@ -139,16 +143,14 @@ public class LOFSummaryNodeModel extends NodeModel {
     	String var_outfile = IO.replaceFileExtension(vcf_infile, ".variant_summary.tsv");
     	String gene_outfile = IO.replaceFileExtension(vcf_infile, ".gene_summary.tsv");
     	String sample_outfile = IO.replaceFileExtension(vcf_infile, ".sample_summary.tsv");
-    	String enrichment_outfile = IO.replaceFileExtension(vcf_infile, ".gene_set_summary.tsv");
+    	String gene_set_outfile = IO.replaceFileExtension(vcf_infile, ".gene_set_summary.tsv");
     	
     	VCFFile vcf = new VCFFile(vcf_infile);
     	AnnotationParser parser = null;
-    	String annotation = m_annotation.getStringValue();
-    	if(annotation.equals("VEP")) {
+//    	String annotation = m_annotation.getStringValue();
+//    	if(annotation.equals("VEP")) {
     		parser = new VEPAnnotationParser(vcf.getInfoHeader(VEPAnnotationParser.ANN_ID));
-    	}
-    	
-    	
+//    	}
     	
     	logger.debug("Read PED file...");
     	HashMap<String, Boolean> sampleid2affected = readPEDFile(ped_file);
@@ -190,7 +192,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     	    	try {
     	    		logger.info("Generate sample summary...");
-    	    		LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), myparser, sample_outfile);
+    	    		LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), myparser, mygene2gene, sample_outfile);
 					logger.info("Sample summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -202,7 +204,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     	    	try {
     	    		logger.info("Generate gene set summary...");
-    	    		LOFSummarizer.getEnrichmentSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, enrichment_outfile);
+    	    		LOFSummarizer.getEnrichmentSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, gene_set_outfile);
 					logger.info("Gene set summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -225,17 +227,35 @@ public class LOFSummaryNodeModel extends NodeModel {
         	t4.join();
     	}
 
-    	
     	//Create Output Table
+    	DataColumnSpec dcs1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs3 = new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs4 = new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec();
+    	DataColumnSpec [] specs;
+    	
+    	if(geneset_file != null) {
+    		specs = new DataColumnSpec[]{dcs1,dcs2,dcs3,dcs4};
+    	} else {
+    		specs = new DataColumnSpec[]{dcs1,dcs2,dcs3};
+    	}
+    	
+    	FileCell fc1 = (FileCell) FileCellFactory.create(var_outfile);
+    	FileCell fc2 = (FileCell) FileCellFactory.create(gene_outfile);
+    	FileCell fc3 = (FileCell) FileCellFactory.create(sample_outfile);
+    	FileCell fc4 = (FileCell) FileCellFactory.create(gene_set_outfile);
+    	FileCell [] cells;
+    	
+    	if(geneset_file != null) {
+    		cells = new FileCell[]{fc1,fc2,fc3,fc4};
+    	} else {
+    		cells = new FileCell[]{fc1,fc2,fc3};
+    	}
+    	
     	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    			new DataTableSpec(specs));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(gene_outfile)};
-    	
-    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.addRowToTable(new DefaultRow("Row0",cells));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
     	
@@ -447,9 +467,21 @@ public class LOFSummaryNodeModel extends NodeModel {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
-        return new DataTableSpec[]{new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
+    	//Create Output Table
+    	DataColumnSpec dcs1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs3 = new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec();
+    	DataColumnSpec dcs4 = new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec();
+    	DataColumnSpec [] specs;
+    	
+    	String geneset_file = m_genesetin.getStringValue();
+    	if(geneset_file.equals("") || Files.notExists(Paths.get(geneset_file))) {
+    		specs = new DataColumnSpec[]{dcs1,dcs2,dcs3};
+    	} else {
+    		specs = new DataColumnSpec[]{dcs1,dcs2,dcs3,dcs4};
+    	}
+
+        return new DataTableSpec[]{new DataTableSpec(specs)};
     }
 
     /**
@@ -459,7 +491,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	m_cdsin.saveSettingsTo(settings);
     	m_pedin.saveSettingsTo(settings);
-    	m_annotation.saveSettingsTo(settings);
+//    	m_annotation.saveSettingsTo(settings);
     	m_genesetin.saveSettingsTo(settings);
     	m_internal_gene_set.saveSettingsTo(settings);
     }
@@ -472,7 +504,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_cdsin.loadSettingsFrom(settings);
     	m_pedin.loadSettingsFrom(settings);
-    	m_annotation.loadSettingsFrom(settings);
+//    	m_annotation.loadSettingsFrom(settings);
     	m_genesetin.loadSettingsFrom(settings);
     	m_internal_gene_set.loadSettingsFrom(settings);
     }
@@ -485,7 +517,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_cdsin.validateSettings(settings);
     	m_pedin.validateSettings(settings);
-    	m_annotation.validateSettings(settings);
+//    	m_annotation.validateSettings(settings);
     	m_genesetin.validateSettings(settings);
     	m_internal_gene_set.validateSettings(settings);
     }

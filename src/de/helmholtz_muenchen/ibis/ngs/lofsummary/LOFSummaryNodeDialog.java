@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.ngs.lofsummary;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -26,7 +25,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
      */
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
-	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
+//	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
 	private final SettingsModelString genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 
@@ -44,8 +43,8 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_LOFStatistics_GENESET",0,".gmt"));
     	
     	//annotation selection
-        createNewGroup("Used annotation tool");
-        addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
+//        createNewGroup("Used annotation tool");
+//        addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
     }
 }
 

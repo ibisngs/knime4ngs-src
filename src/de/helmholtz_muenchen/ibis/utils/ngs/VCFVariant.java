@@ -196,4 +196,31 @@ public class VCFVariant {
 	public boolean isAffected(String sample, int id) {
 		return sample_genotype.get(sample).split(":")[0].contains(id+"");
 	}
+	
+	public String getAff(String sample, int id) {
+		String gt = sample_genotype.get(sample).split(":")[0];
+		if(gt.contains(".")) {
+			return "undef";
+		} else if(gt.contains("|")) { //phased genotypes
+			int mat = Integer.parseInt(gt.split("\\|")[0]);
+			int pat = Integer.parseInt(gt.split("\\|")[1]);
+			if(mat == id && pat == id) {
+				return "hom";
+			} else if(mat == id) {
+				return "mat";
+			} else if(pat == id) {
+				return "pat";
+			}
+		} else if(gt.contains("/")){ //not phased
+			int a = Integer.parseInt(gt.split("/")[0]);
+			int b = Integer.parseInt(gt.split("/")[1]);
+			
+			if(a == id && b == id) {
+				return "hom";
+			} else if(a==id || b == id) {
+				return "het";
+			}
+		}
+		return "undef";
+	}
 }

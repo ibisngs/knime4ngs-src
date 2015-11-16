@@ -104,7 +104,7 @@ public class LOFSummarizer {
 		bw.close();
 	}
 
-	public static void getSampleSum(VCFFile vcf, AnnotationParser ap, String outfile) throws IOException {
+	public static void getSampleSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, String outfile) throws IOException {
 		HashMap<String, HashMap<String, HashMap<String,String>>> sample2gene2transcript2aff = new HashMap<>();
 		
 		VCFVariant var;
@@ -113,6 +113,7 @@ public class LOFSummarizer {
 		HashMap<String, String> t2aff;
 		HashMap<String, HashMap<String, String>> gene2t2aff;
 		ArrayList<String> samples = vcf.getSampleIds();
+		String aff;
 		
 		while(vcf.hasNext()) {
 			var = vcf.next();
@@ -121,8 +122,9 @@ public class LOFSummarizer {
 			for(String id: ap.getAnnotatedAlleleIds(anno)) {
 				gene2trans = ap.getGene2TranscriptIds(Integer.parseInt(id), anno);
 				
-				for(String s: samples) {	
-					if(var.isAffected(s,Integer.parseInt(id))) {
+				for(String s: samples) {
+					if(!(aff = var.getAff(s,Integer.parseInt(id))).equals("undef")) {
+//					if(var.isAffected(s,Integer.parseInt(id))) {
 						
 						if(sample2gene2transcript2aff.containsKey(s)) {
 							gene2t2aff = sample2gene2transcript2aff.get(s);
@@ -141,7 +143,11 @@ public class LOFSummarizer {
 							}
 							
 							for(String t: gene2trans.get(g)) {
-								t2aff.put(t,"aff");
+								if(t2aff.containsKey(t)) {
+									t2aff.put(t, getAff(t2aff.get(t), aff));
+								} else {
+									t2aff.put(t,aff);
+								}
 							}
 						}
 					}
@@ -150,16 +156,58 @@ public class LOFSummarizer {
 		}
 		
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
-		
-		bw.write("sample\tnr_aff\taffected_genes");
+		String geneanno, final_aff;
+		int hom, ko;
+		bw.write("sample\tnr_aff\tnr_hom\tnr_ko\taffected_genes");
 		bw.newLine();
 		
 		for(String s: sample2gene2transcript2aff.keySet()) {
-			bw.write(s+"\t"+sample2gene2transcript2aff.get(s).keySet().size()+"\t"+sample2gene2transcript2aff.get(s).keySet());
+			gene2t2aff = sample2gene2transcript2aff.get(s);
+			geneanno = "";
+			hom = 0;
+			ko = 0;
+			
+			for(String g: gene2t2aff.keySet()) {
+				t2aff = gene2t2aff.get(g);
+				final_aff = "";
+				for(String t: t2aff.keySet()) {
+					final_aff = getAff(final_aff, t2aff.get(t));
+				}
+				
+				//counter for homozygously affected genes
+				if(final_aff.equals("hom")) {
+					hom++;
+				}
+				
+				//check ko of gene
+				if((final_aff.equals("hom") || final_aff.equals("comp")) && t2aff.keySet().size() == genes.get(g).getTranscripts().size()) {
+					final_aff = "ko";
+					ko++;
+				}
+				geneanno += ";"+"("+g+","+final_aff+")";
+			}
+			
+			geneanno = geneanno.replaceFirst(";", "");
+			bw.write(s+"\t"+gene2t2aff.keySet().size()+"\t"+hom+"\t"+ko+"\t"+geneanno);
 			bw.newLine();
 		}
 		
 		bw.close();
+	}
+	
+	private static String getAff(String a, String b) {
+		if(a.equals(b)) {
+			return a;
+		} else if(a.equals("hom") || b.equals("hom")) {
+			return "hom";
+		} else if(a.equals("comp") || b.equals("comp")) {
+			return "comp";
+		} else if(a.equals("het") || b.equals("het")) {
+			return "het";
+		} else if((a.equals("mat") && b.equals("pat")) ||(a.equals("pat") && b.equals("mat"))) {
+			return "comp";
+		}
+		return "undef";
 	}
 	
 	public static void getEnrichmentSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
@@ -187,4 +235,5 @@ public class LOFSummarizer {
 		}
 		bw.close();
 	}
+
 }
