@@ -191,7 +191,8 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			lockCommand += s;
 		}
 
-		LOGGER.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value);
+		LOGGER.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value+" Host"+host_name);
+		
 		
 		if(lockFile == null) {
 			lockFile = new File(defaultLockFile);
