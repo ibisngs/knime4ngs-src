@@ -4,9 +4,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -26,6 +28,8 @@ public class GeneticBackgroundModelNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString m_ac = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_AC,"AC");
 	private final SettingsModelString m_an = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_AN,"AN");
 	private final SettingsModelString genesetin = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GENE_SET_INFILE,"");
+    private final SettingsModelBoolean use_symbol = new SettingsModelBoolean(GeneticBackgroundModelNodeModel.CFGKEY_USE_SYMBOL, false);
+
 	
     /**
      * New pane for configuring the GeneticBackgroundModel node.
@@ -57,6 +61,9 @@ public class GeneticBackgroundModelNodeDialog extends DefaultNodeSettingsPane {
     	
     	createNewGroup("Path to gene set file");
     	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_gb_GENESET",0,".gmt"));
+    	
+    	createNewGroup("Output options");
+    	addDialogComponent(new DialogComponentBoolean(use_symbol, "Use gene symbols as unique identifier?"));
     }
 }
 

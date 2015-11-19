@@ -30,6 +30,11 @@
         	<br />
         	Note, that you have to download the "gene symbols" version of the desired data set.
         </option>
+        
+        <option name="Output options">
+        	By default, variant frequencies are computed for each gene identified by its Ensembl ID.
+        	If you check the box, the gene symbols will be used as identifiers instead.
+        </option>
     </fullDescription>
     
     <ports>

@@ -24,6 +24,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.ngs.lofsummary.RegionSummary;
@@ -48,14 +49,16 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 	static final String CFGKEY_AC = "ac";
 	static final String CFGKEY_AN = "an";
 	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
+	static final String CFGKEY_USE_SYMBOL = "use_symbol";
 	
 	//settings models
 	static final String [] BASIS = new String[]{"genotypes","allele frequencies"};
 	private final SettingsModelString m_gtf_aff = new SettingsModelString(CFGKEY_GTF_AFF, BASIS[0]);
 	private final SettingsModelString m_ac = new SettingsModelString(CFGKEY_AC,"AC");
 	private final SettingsModelString m_an = new SettingsModelString(CFGKEY_AN,"AN");
-	final SettingsModelString m_genesetin = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GENE_SET_INFILE,"");
-    
+	private final SettingsModelString m_genesetin = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GENE_SET_INFILE,"");
+    private final SettingsModelBoolean m_use_symbol = new SettingsModelBoolean(GeneticBackgroundModelNodeModel.CFGKEY_USE_SYMBOL, false);
+	
 	private int vcf_index;
 	
 	//output col names
@@ -105,6 +108,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     		gene2set = this.readGeneSetFile(geneset_file);
     	}
     	
+    	boolean use_id = !m_use_symbol.getBooleanValue();
     	String ending = "";
     	RegionSummary rs;
     	if(m_gtf_aff.getStringValue().equals(BASIS[0])) {//computation based on genotypes
@@ -114,7 +118,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     			gene_frequency = rs.getSetFrequencies();
     			ending = ".set_model_gtf.tsv";
     		} else {
-    			rs = new RegionSummary(vcf_it, parser, true);
+    			rs = new RegionSummary(vcf_it, parser, use_id);
     			gene_frequency = rs.getFrequencies();
     			ending = ".gene_model_gtf.tsv";
     		}
@@ -123,7 +127,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     			gene_frequency = fillSetAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser,gene2set);
     			ending = ".set_model_aff.tsv";
     		} else {
-        		gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, true);
+        		gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, use_id);
     			ending = ".gene_model_aff.tsv";
     		}
     	}
@@ -379,6 +383,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_ac.saveSettingsTo(settings);
     	m_an.saveSettingsTo(settings);
     	m_genesetin.saveSettingsTo(settings);
+    	m_use_symbol.saveSettingsTo(settings);
     }
 
     /**
@@ -391,6 +396,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_ac.loadSettingsFrom(settings);
     	m_an.loadSettingsFrom(settings);
     	m_genesetin.loadSettingsFrom(settings);
+    	m_use_symbol.loadSettingsFrom(settings);
     }
 
     /**
@@ -403,6 +409,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_ac.validateSettings(settings);
     	m_an.validateSettings(settings);
     	m_genesetin.validateSettings(settings);
+    	m_use_symbol.validateSettings(settings);
     }
     
     /**

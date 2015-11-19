@@ -198,6 +198,10 @@ public class LOFSummarizer {
 	private static String getAff(String a, String b) {
 		if(a.equals(b)) {
 			return a;
+		} else if(a.equals("")) {
+			return b;
+		} else if(b.equals("")) {
+			return a;
 		} else if(a.equals("hom") || b.equals("hom")) {
 			return "hom";
 		} else if(a.equals("comp") || b.equals("comp")) {
@@ -207,6 +211,7 @@ public class LOFSummarizer {
 		} else if((a.equals("mat") && b.equals("pat")) ||(a.equals("pat") && b.equals("mat"))) {
 			return "comp";
 		}
+		System.out.println("returned undef for: "+a+" "+b);
 		return "undef";
 	}
 	
