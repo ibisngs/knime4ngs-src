@@ -12,7 +12,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -20,10 +19,10 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.ngs.bamsamconverter.BAMSAMConverterNodeModel;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
 /**
@@ -33,7 +32,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * @author Maximilian Hastreiter
  */
 
-public class SamToolsNodeModel extends NodeModel {
+public class SamToolsNodeModel extends HTExecutorNodeModel {
     
 	
 	protected static boolean useSamtools = true;
@@ -53,7 +52,7 @@ public class SamToolsNodeModel extends NodeModel {
 	private final SettingsModelString m_refseqfile = new SettingsModelString(SamToolsNodeModel.CFGKEY_REFSEQFILE, "");
 	
 
-	/**Parameters for "fillmd"**/
+	/**Parameters for "calmd"**/
 	public static final String CFGKEY_CHANGEIDENTBASES = "changeIdentBases";
 	public static final String CFGKEY_USECOMPRESSION = "useCompression";
 	public static final String CFGKEY_COMPRESSION = "compression";
@@ -143,7 +142,7 @@ public class SamToolsNodeModel extends NodeModel {
         super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0));
        
 
-        //fillmd
+        //calmd
         m_changeIdentBases.setEnabled(false);
     	m_compression.setEnabled(false);
     	m_useCompression.setEnabled(false);
@@ -189,12 +188,13 @@ public class SamToolsNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
-
-    	
+    	    	
     	String path2samtools = "";
     	String path2bamfile = "";
     	String path2seqfile = "";
+    	
+    	String lockFile = "";
+    	
     	
     	if(optionalPort){
     		path2samtools = inData[0].iterator().next().getCell(0).toString();
@@ -206,20 +206,6 @@ public class SamToolsNodeModel extends NodeModel {
     		path2bamfile = m_bamfile.getStringValue();
     		path2seqfile = m_refseqfile.getStringValue();
     	}
-    	
-    	/**Initialize logfile**/
-    	String folder = "";
-    	if(path2seqfile.length()>0){
-    		folder = path2seqfile;
-    	}
-    	else{
-    		folder = path2bamfile;
-    	}
-    	String logfile = folder.substring(0,folder.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("SamTools"));
-    	/**logfile initialized**/
     	
     	String basePathWithFileName = "";
     	if(path2bamfile != ""){
@@ -235,13 +221,16 @@ public class SamToolsNodeModel extends NodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	command.add(path2samtools+" "+utility);
     	String outfile = "-1";
+    	boolean stdOut = false;
     	
     	
     	if(utility.equals("flagstat") || utility.equals("idxstats") || utility.equals("depth")) {
     		command.add(path2bamfile);
     		outfile = basePathWithFileName + "_" + utility + ".txt";
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    		stdOut = true;
     		
-    	} else if(utility.equals("fillmd")) {
+    	} else if(utility.equals("calmd")) {
 
     		String outFileExtension = ".sam";
     		
@@ -273,10 +262,15 @@ public class SamToolsNodeModel extends NodeModel {
     		command.add(path2bamfile);
     		command.add(path2seqfile);
     		outfile = basePathWithFileName + "_" + utility + outFileExtension;
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    		stdOut = true;
+    		
     			
     	} else if (utility.equals("fixmate")) {
     		command.add(path2bamfile);
-    		command.add(basePathWithFileName + "_" + utility + ".bam");
+    		outfile = basePathWithFileName + "_" + utility + ".bam";
+    		command.add(outfile);
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		
     	} else if (utility.equals("rmdup")) {
     		if(m_removeDup.getBooleanValue()){
@@ -286,10 +280,13 @@ public class SamToolsNodeModel extends NodeModel {
     			command.add("-S");
     		}
     		command.add(path2bamfile);
-    		command.add( basePathWithFileName + "_" + utility + ".bam");
+    		outfile = basePathWithFileName + "_" + utility + ".bam";
+    		command.add(outfile);
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		
     	} else if (utility.equals("cat")) {
-    		String outFile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
+    		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
+    		
     		outfile += "_" + m_inBAM1.getStringValue().substring(m_inBAM1.getStringValue().lastIndexOf("/")+1,m_inBAM1.getStringValue().lastIndexOf("."));
     		outfile += "_" + utility + ".bam";
     		if(m_useHeaderSAM.getBooleanValue()){
@@ -297,7 +294,8 @@ public class SamToolsNodeModel extends NodeModel {
     		}
      		command.add(path2bamfile);
      		command.add(m_inBAM1.getStringValue());
-     		command.add("-o " + outFile);
+     		command.add("-o " + outfile);
+     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
      		
     	} else if (utility.equals("faidx")){
     		command.add(path2seqfile);
@@ -306,11 +304,14 @@ public class SamToolsNodeModel extends NodeModel {
     		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf(".")) + "_" + utility + ".bam";
     		command.add(m_rehInSAM.getStringValue());
     		command.add(path2bamfile);
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    		stdOut = true;
     		
     	} else if (utility.equals("merge")) {
-    		String outFile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
-    		outFile += "_" + m_minbam1.getStringValue().substring(m_minbam1.getStringValue().lastIndexOf("/")+1,m_minbam1.getStringValue().lastIndexOf("."));
-    		outFile += "_" + utility + ".bam";
+    		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
+    		outfile += "_" + m_minbam1.getStringValue().substring(m_minbam1.getStringValue().lastIndexOf("/")+1,m_minbam1.getStringValue().lastIndexOf("."));
+    		outfile += "_" + utility + ".bam";
+    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		
     		if(m_mcompression.getBooleanValue()){
     			command.add("-1");    			
@@ -334,7 +335,7 @@ public class SamToolsNodeModel extends NodeModel {
     			command.add("-R "+m_mregion.getStringValue());
     		}
     		
-    		command.add(outFile);
+    		command.add(outfile);
     		command.add(path2bamfile);
     		command.add(m_minbam1.getStringValue());
     		
@@ -350,8 +351,9 @@ public class SamToolsNodeModel extends NodeModel {
        		}
 
        		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf(".")+1) + "phase";
-       		
+       		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
        		command.add(path2bamfile);
+       		stdOut = true;
        		
        		//com = "cd "+folder+"; " + path2samtools + " " + utility + " "+ params.toString() + path2bamfile + " >"+outfile; 
     		//redirect STDOUT, else SAM stuff is spammed in log file; it's necessary to "cd" to right directory, else files won't be written there
@@ -360,18 +362,17 @@ public class SamToolsNodeModel extends NodeModel {
     	
     	if(command.size()!=0) {
     		
-    		if(outfile.equals("-1")){	//No extra output file required
-    			Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    		if(!stdOut){	//No extra output file required
+//    			Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
+    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile));
+    			
     		}else{	//StdOut to outfile
-    			Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
+    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),outfile);
     		}
     	}else{
     		throw new Exception("Something went wrong...Execution command is empty!");
     	}
-
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
+   	
     	return new BufferedDataTable[]{};
     }
 
@@ -411,7 +412,7 @@ public class SamToolsNodeModel extends NodeModel {
 	    		useSamtools=false;
 	    		useBamfile=false;
 	    		//useFastafile=false;
-	    		if(m_utility.getStringValue().equals("fillmd") || m_utility.getStringValue().equals("faidx")){
+	    		if(m_utility.getStringValue().equals("calmd") || m_utility.getStringValue().equals("faidx")){
 	    			m_refseqfile.setEnabled(true);
 	    			useFastafile=true;
 	    		}
@@ -434,7 +435,7 @@ public class SamToolsNodeModel extends NodeModel {
     		useSamtools=true;
     		useBamfile=true;
     		useFastafile=true;
-    		if(m_utility.getStringValue().equals("fillmd")){
+    		if(m_utility.getStringValue().equals("calmd")){
     				m_refseqfile.setEnabled(true);
     				useFastafile=true;
     		}
@@ -459,7 +460,7 @@ public class SamToolsNodeModel extends NodeModel {
         else if(utility.equals("faidx")){
         	outfile = fastafile + ".fai";
         }
-        else if(utility.equals("fillmd")){
+        else if(utility.equals("calmd")){
         	String outFileExtension = ".sam";
         	if(m_useCompression.getBooleanValue()){
     			outFileExtension = ".bam";
@@ -523,11 +524,13 @@ public class SamToolsNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
 
+    	super.saveSettingsTo(settings);
+    	
     	m_utility.saveSettingsTo(settings);
     	m_samtools.saveSettingsTo(settings);
     	m_bamfile.saveSettingsTo(settings);
     	m_refseqfile.saveSettingsTo(settings);
-    	//fillmd
+    	//calmd
     	m_changeIdentBases.saveSettingsTo(settings);
     	m_compression.saveSettingsTo(settings);
     	m_useCompression.saveSettingsTo(settings);
@@ -579,11 +582,13 @@ public class SamToolsNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	m_utility.loadSettingsFrom(settings);
     	m_samtools.loadSettingsFrom(settings);
     	m_bamfile.loadSettingsFrom(settings);
     	m_refseqfile.loadSettingsFrom(settings);
-    	//fillmd
+    	//calmd
     	m_changeIdentBases.loadSettingsFrom(settings);
     	m_compression.loadSettingsFrom(settings);
     	m_useCompression.loadSettingsFrom(settings); 
@@ -635,11 +640,13 @@ public class SamToolsNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
     	
+    	super.validateSettings(settings);
+    	
     	m_utility.validateSettings(settings);
     	m_samtools.validateSettings(settings);
     	m_bamfile.validateSettings(settings);
     	m_refseqfile.validateSettings(settings);
-    	//fillmd
+    	//calmd
     	m_changeIdentBases.validateSettings(settings);
     	m_compression.validateSettings(settings);
     	m_useCompression.validateSettings(settings); 

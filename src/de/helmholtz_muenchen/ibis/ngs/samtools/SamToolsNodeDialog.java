@@ -13,6 +13,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "SamTools" Node.
  * 
@@ -22,7 +25,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * complex dialog please derive directly from 
  * {@link org.knime.core.node.NodeDialogPane}.
  */
-public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
+public class SamToolsNodeDialog extends HTExecutorNodeDialog {
 
 	final SettingsModelString utility = new SettingsModelString(SamToolsNodeModel.CFGKEY_UTILITY, "");
 
@@ -30,7 +33,7 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
 	final SettingsModelString bamfile = new SettingsModelString(SamToolsNodeModel.CFGKEY_BAMFILE, "");
 	final SettingsModelString refseqfile = new SettingsModelString(SamToolsNodeModel.CFGKEY_REFSEQFILE, "");
 	
-	//fillmd
+	//calmd
 	final SettingsModelBoolean changeIdentBases = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_CHANGEIDENTBASES, false);
 	final SettingsModelBoolean useCompression = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_USECOMPRESSION, false);	
 	final SettingsModelString compression = new SettingsModelString(SamToolsNodeModel.CFGKEY_COMPRESSION, "");
@@ -78,9 +81,10 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
 	
     protected SamToolsNodeDialog() {
         
+    	super();
     	
     	createNewGroup("Select utility");
-    	addDialogComponent(new DialogComponentStringSelection(utility,"Select Utility", "cat", "faidx", "fillmd", "fixmate", "flagstat","idxstats","merge", "phase", "reheader", "rmdup"));
+    	addDialogComponent(new DialogComponentStringSelection(utility,"Select Utility", "cat", "faidx", "calmd", "fixmate", "flagstat","idxstats","merge", "phase", "reheader", "rmdup"));
 
     	
     	createNewGroup("SamTools");
@@ -104,7 +108,7 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
       	//createNewGroup("Fasta file to index:");
       	//addDialogComponent(new DialogComponentFileChooser(infasta, "", 0, false));
       	
-    	createNewTab("fillmd");
+    	createNewTab("calmd");
     	addDialogComponent(new DialogComponentBoolean(changeIdentBases, "Change ident. bases to '='"));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(useCompression, "Output as BAM file"));
@@ -164,12 +168,12 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
        
        	
        	
-    	//checkboxes for fillmd tab
+    	//checkboxes for calmd tab
     	utility.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				setEnabled(true, "cat");
-				//fillmd
-				if(utility.getStringValue().equals("fillmd")){
+				//calmd
+				if(utility.getStringValue().equals("calmd")){
 					changeIdentBases.setEnabled(true);
 					compression.setEnabled(true);
 					useCompression.setEnabled(true);
@@ -178,7 +182,7 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
 					bqTag.setEnabled(true);
 					extendedBAQ.setEnabled(true);
 					//doCapMapQual.setEnabled(true);
-					setEnabled(true, "fillmd");
+					setEnabled(true, "calmd");
 
 					if(SamToolsNodeModel.useFastafile){
 						refseqfile.setEnabled(true);
@@ -201,7 +205,7 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
 					extendedBAQ.setEnabled(false);
 					//capMapQual.setEnabled(false);
 					//doCapMapQual.setEnabled(false);
-					setEnabled(false, "fillmd");
+					setEnabled(false, "calmd");
 
 				}
 				//rmdup
@@ -411,5 +415,31 @@ public class SamToolsNodeDialog extends DefaultNodeSettingsPane {
 
     	
     }
+
+	@Override
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+			String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+		    if(toolPath != null && !toolPath.equals("")) {
+		    	samtools.setStringValue(toolPath);
+		    	samtools.setEnabled(false);
+		    } else {
+		    	samtools.setEnabled(true);
+		    }
+		    
+	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+	    	if(refGenome != null && !refGenome.equals("")) {
+	    		refseqfile.setStringValue(refGenome);
+	    		refseqfile.setEnabled(false);
+	    	} else {
+	    		refseqfile.setEnabled(true);
+	    	}
+		    
+		} else {
+			samtools.setEnabled(true);
+			refseqfile.setEnabled(true);
+		}
+	}
+
 }
 
