@@ -33,15 +33,13 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
 
     	final SettingsModelString bcfmethod = new SettingsModelString(BcftoolsNodeModel.CFGKEY_BCFMETHOD,"");
     	final SettingsModelString catinfile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_CATINFILE,"");
-    	final SettingsModelString ldpairinfile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_LDPAIRINFILE,"");
     	final SettingsModelString infile = new SettingsModelString(BcftoolsNodeModel.CFGKEY_INFILE,"");
     	final SettingsModelString vcfsampleheader = new SettingsModelString(BcftoolsNodeModel.CFGKEY_VCFSAMPLEHEADER, "");
     	catinfile.setEnabled(false);
-    	ldpairinfile.setEnabled(false);
     	vcfsampleheader.setEnabled(false);
     	
     	/**
-    	 *Models for Bcftools view
+    	 *Models for Bcftools call
     	 */
     	final SettingsModelBoolean outbcf = new SettingsModelBoolean(BcftoolsNodeModel.CFGKEY_OUTBCF, false);
     	final SettingsModelBoolean outuncompressedbcf = new SettingsModelBoolean(BcftoolsNodeModel.CFGKEY_OUTUNCOMPRESSEDBCF, false);
@@ -71,19 +69,17 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
 //    	addDialogComponent(new DialogComponentFileChooser(use_FILE, "Testing", 0, true));
     	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, ""),"his_bcft_ID5",""));
     	createNewGroup("");
-    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","call","index", "cat (Not available)", "ld (Not available)","ldpair (Not available)","reheader (Not available)"));
+    	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","call","index", "concat","reheader"));
     	createNewGroup("Select Inputfile for selected method");
     	addDialogComponent(new DialogComponentFileChooser(infile,"his_bcft_ID3",".bcf",".vcf"));
-    	createNewGroup("Select second BCF file (cat only)");
+    	createNewGroup("Select second BCF file (concat only)");
     	addDialogComponent(new DialogComponentFileChooser(catinfile,"his_bcft_ID4",".bcf"));
-    	createNewGroup("Select list file (ldpair only)");
-    	addDialogComponent(new DialogComponentFileChooser(ldpairinfile,"hisID_bcft_ldpair",""));
     	createNewGroup("Select file that includes the new sample names");
     	addDialogComponent(new DialogComponentFileChooser(vcfsampleheader,"hisID_bcft_vcfsampleheader",""));
     	
     	
     	
-    	createNewTab("Call In/Out Options");
+    	createNewTab("View In/Out Options");
     	createNewGroup("Input/Output Options");
 //    	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(
 //    			BcftoolsNodeModel.CFGKEY_INISVCF, false), "Input is VCF"));
@@ -183,22 +179,17 @@ public class BcftoolsNodeDialog extends DefaultNodeSettingsPane {
     	//Main method chooser
     	bcfmethod.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if(bcfmethod.getStringValue().equals("call")){
-					setEnabled(true,"Call In/Out Options");
-			    	setEnabled(true,"Call Calling Options");
+				if(bcfmethod.getStringValue().equals("view")){
+					setEnabled(true,"View In/Out Options");
+			    	setEnabled(true,"Call Options");
 				}else{
-					setEnabled(false,"Call In/Out Options");
-			    	setEnabled(false,"Call Calling Options");
+					setEnabled(false,"View In/Out Options");
+			    	setEnabled(false,"Calling Options");
 				}
-				if(bcfmethod.getStringValue().equals("cat")){
+				if(bcfmethod.getStringValue().equals("concat")){
 					catinfile.setEnabled(true);
 				}else{
 					catinfile.setEnabled(false);
-				}
-				if(bcfmethod.getStringValue().equals("ldpair")){
-					ldpairinfile.setEnabled(true);
-				}else{
-					ldpairinfile.setEnabled(false);
 				}
 				if(bcfmethod.getStringValue().equals("reheader")){
 					vcfsampleheader.setEnabled(true);

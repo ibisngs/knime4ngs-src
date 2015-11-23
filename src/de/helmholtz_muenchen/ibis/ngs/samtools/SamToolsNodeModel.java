@@ -11,7 +11,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
+//import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -132,7 +132,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	
 	protected static Boolean optionalPort = false;
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(SamToolsNodeModel.class);
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(SamToolsNodeModel.class);
 	
 	/**
      * Constructor for the node model.

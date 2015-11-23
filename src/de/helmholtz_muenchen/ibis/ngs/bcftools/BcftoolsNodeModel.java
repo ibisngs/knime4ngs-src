@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -24,22 +22,20 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Bcftools.
  * 
  *
  * @author Maximilian Hastreiter
- * @editor tanzeem.haque :-D
- * 
- * The only change i made here was changing "view" into "call" 
+
  */
-public class BcftoolsNodeModel extends NodeModel {
+public class BcftoolsNodeModel extends HTExecutorNodeModel {
     /**
      * Input/output options:
 
@@ -85,12 +81,11 @@ Contrast calling and association test options:
 	public static final String CFGKEY_INFILE="infile";
 	public static final String CFGKEY_CATINFILE="catinfile";
 	public static final String CFGKEY_PATH2BCFTOOLS="path2bcftools";
-	public static final String CFGKEY_LDPAIRINFILE="ldpairinfile";
 	public static final String CFGKEY_VCFSAMPLEHEADER="VCFSAMPLEHEADER";
 	
 	
 	/**
-	 * Bcftools view In/Out Options
+	 * Bcftools call In/Out Options
 	 */
 	public static final String CFGKEY_KEEPALLELES="keepalleles";
 	public static final String CFGKEY_OUTBCF="outbcf";
@@ -158,8 +153,6 @@ Contrast calling and association test options:
 			CFGKEY_INFILE, "");
 	private final SettingsModelString m_catinfile = new SettingsModelString(
 			CFGKEY_CATINFILE, "");
-	private final SettingsModelString m_ldpairinfile = new SettingsModelString(
-			CFGKEY_LDPAIRINFILE, "");
 	private final SettingsModelString m_vcfsampleheader = new SettingsModelString(
 			CFGKEY_VCFSAMPLEHEADER, "");
 	
@@ -238,7 +231,7 @@ Contrast calling and association test options:
 	
 	private boolean OptionalPort=false;
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(BcftoolsNodeModel.class);
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(BcftoolsNodeModel.class);
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2Bcftools";
@@ -255,7 +248,6 @@ Contrast calling and association test options:
         m_seqdic.setEnabled(false);
         m_samplelist.setEnabled(false);
         m_catinfile.setEnabled(false);
-    	m_ldpairinfile.setEnabled(false);
     	m_samplecoverage.setEnabled(false);
     	
     }
@@ -280,15 +272,7 @@ Contrast calling and association test options:
         	infile =m_infile.getStringValue();
         	path2bcftools=m_path2bcftools.getStringValue();
     	}
-    
-    	/**Initialize logfile**/
-    	String logfile = infile.substring(0,infile.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("Bcftools"));
-    	/**end initializing logfile**/
-    	
-    	
+      	 	
     	ArrayList<String> command = new ArrayList<String>();
 
     	String method = m_bcfmethod.getStringValue();
@@ -314,8 +298,7 @@ File format options:
 
 
     	 */
-    	if(m_bcfmethod.getStringValue().equals("call")){
-        logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools call "));
+    	if(m_bcfmethod.getStringValue().equals("view")){
     	//Bcftools View !
     	/**
     	 *    Input/output options
@@ -409,31 +392,17 @@ File format options:
     	command.add("-o " +outfile);
 
     	}
-    	else if(m_bcfmethod.getStringValue().equals("cat")){
-            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools cat "));
+    	else if(m_bcfmethod.getStringValue().equals("concat")){
             command.add(m_infile.getStringValue());
             command.add(m_catinfile.getStringValue());
         	String secfile =m_catinfile.getStringValue().substring(m_catinfile.getStringValue().lastIndexOf("/")+1,m_catinfile.getStringValue().length());
         	secfile=secfile.substring(0,secfile.lastIndexOf("."));
-        	outfile+="_"+secfile+"_cat.bcf";
-    	}
-    	else if(m_bcfmethod.getStringValue().equals("ldpair")){
-            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ldpair "));
-            command.add(m_infile.getStringValue());
-            command.add(m_ldpairinfile.getStringValue());
-        	outfile+="_ldpair.out";
+        	outfile+="_"+secfile+"_concat.bcf";
     	}
     	else if(m_bcfmethod.getStringValue().equals("index")){
-            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools index "));
             command.add(m_infile.getStringValue());
-    	}
-    	else if(m_bcfmethod.getStringValue().equals("ld")){
-            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools ld "));
-            command.add(m_infile.getStringValue());
-    		outfile+="_ld.out";
     	}
     	else if(m_bcfmethod.getStringValue().equals("reheader")){
-            logBuffer.append(ShowOutput.getNodeStartTime("Running Bcftools reheader "));
             command.add("-s "+m_vcfsampleheader.getStringValue());
             command.add(m_infile.getStringValue());
             
@@ -449,10 +418,11 @@ File format options:
     	/**
     	 * Execute
     	 */
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,outfile,outfile+".stdErr");
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-
+    	
+    	String lockFile = outfile +"_"+m_bcfmethod.getStringValue()+SuccessfulRunChecker.LOCK_ENDING;
+    	
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,null,LOGGER,outfile,outfile+".stdErr");
+		super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),outfile,outfile+".stdErr");
     	/**
     	 * Output
     	 */
@@ -546,7 +516,6 @@ File format options:
     	 m_infile.saveSettingsTo(settings);
     	 m_catinfile.saveSettingsTo(settings);
     	 m_path2bcftools.saveSettingsTo(settings);
-    	 m_ldpairinfile.saveSettingsTo(settings);
     	 m_vcfsampleheader.saveSettingsTo(settings);
     	
     	 m_bedfile.saveSettingsTo(settings);
@@ -593,7 +562,6 @@ File format options:
     	m_infile.loadSettingsFrom(settings);
     	m_catinfile.loadSettingsFrom(settings);
    	 	m_path2bcftools.loadSettingsFrom(settings);
-   	 	m_ldpairinfile.loadSettingsFrom(settings);
    	 	m_vcfsampleheader.loadSettingsFrom(settings);
     	
         m_bedfile.loadSettingsFrom(settings);
@@ -637,7 +605,6 @@ File format options:
    	 	m_infile.validateSettings(settings);
    	 	m_catinfile.validateSettings(settings);
    	 	m_path2bcftools.validateSettings(settings);
-   	 	m_ldpairinfile.validateSettings(settings);
    	 	m_vcfsampleheader.validateSettings(settings);
     	
     	m_bedfile.validateSettings(settings);
