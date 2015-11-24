@@ -28,6 +28,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -451,7 +452,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	// create column specifications
     	DataColumnSpec [] colspec = new DataColumnSpec[colcount];
     	int count=0;
-    	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+    	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
     	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
     	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", StringCell.TYPE).createSpec();
     	if(p1 || m_use_phase1_1000G.getBooleanValue()){

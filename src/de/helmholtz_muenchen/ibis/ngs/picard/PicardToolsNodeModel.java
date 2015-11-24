@@ -25,6 +25,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 //import net.sf.picard.sam.SortSam;
@@ -200,7 +201,7 @@ public class PicardToolsNodeModel extends NodeModel {
 		    DataColumnSpec[] colspec= new DataColumnSpec[3];
 		    
 		    if(m_bsformat.getStringValue().equals("bam")){
-		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
 		    }
 		    else{
 		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE).createSpec();
