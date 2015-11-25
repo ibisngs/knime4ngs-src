@@ -27,6 +27,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
@@ -523,19 +524,19 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	String [] cols= inSpecs[0].getColumnNames();
     	
     	//check if path to bam file is available
-    	if(!inSpecs[0].containsName("Path2BAMFile")){
-    		if(inSpecs[0].containsName("Path2SAMFile")){
+    	if(!CompatibilityChecker.checkInputCellType(inSpecs[0],"BAMCell")){
+    		if(CompatibilityChecker.checkInputCellType(inSpecs[0],"SAMCell")){
     			throw new InvalidSettingsException("Your input file is in sam format! GATK requires an indexed bam file which is sorted by genomic coordinate. Try out the PicardTools node.");
     		}
     		else{
     			throw new InvalidSettingsException("Previous node is incompatible! Missing path to bam file!");
     		}
     	}
-    	
-    	//check if path to reference sequence file is available
-    	if(!inSpecs[0].containsName("Path2SEQFile")){
-    		throw new InvalidSettingsException("Previous node is incompatible! Missing path to reference sequence!");
-    	}
+//    	
+//    	//check if path to reference sequence file is available
+//    	if(!inSpecs[0].containsName("Path2SEQFile")){
+//    		throw new InvalidSettingsException("Previous node is incompatible! Missing path to reference sequence!");
+//    	}
     	
     	// if previous node is a gatk node -> pass informations/files on to this node
     	if(inSpecs[0].containsName("Path2GATKFile")){

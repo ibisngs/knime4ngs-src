@@ -25,6 +25,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
@@ -325,14 +326,14 @@ public class PicardToolsNodeModel extends NodeModel {
 			String [] cols=inSpecs[0].getColumnNames();
 			
 			// checking for input bam/sam file
-			if(!inSpecs[0].containsName("Path2SAMFile") && !inSpecs[0].containsName("Path2BAMFile")){
+			if(!CompatibilityChecker.checkInputCellType(inSpecs[0],"SAMCell") && !CompatibilityChecker.checkInputCellType(inSpecs[0],"BAMCell")){
 				throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
 			}
-			
-			//checking for reference sequence
-			if(!inSpecs[0].containsName("Sequence file") && !inSpecs[0].containsName("Path2SEQFile") && !inSpecs[0].containsName("Path2RefFile")){
-				throw new InvalidSettingsException("Previous node is incompatible! Missing path to reference sequence!");
-			}
+//			
+//			//checking for reference sequence
+//			if(!inSpecs[0].containsName("Sequence file") && !inSpecs[0].containsName("Path2SEQFile") && !inSpecs[0].containsName("Path2RefFile")){
+//				throw new InvalidSettingsException("Previous node is incompatible! Missing path to reference sequence!");
+//			}
 			
 			//determining position of reference and sam/bam file
 			for(int i=0; i<cols.length; i++){

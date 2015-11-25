@@ -74,4 +74,16 @@ public class CompatibilityChecker {
 		}
 	}
 	
+	
+	public static boolean checkInputCellType(DataTableSpec inSpecs, String CellType) {
+		int index = -1;
+		
+		for(int i = 0; i < inSpecs.getNumColumns(); i++) {
+    		if(inSpecs.getColumnSpec(i).getType().toString().equals(CellType)) {
+    			index = i;
+    		}
+    	}
+		return (index>-1);
+	}
+	
 }
