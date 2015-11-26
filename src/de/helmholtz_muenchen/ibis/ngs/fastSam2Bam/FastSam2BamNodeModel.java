@@ -32,6 +32,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell.BAMCellFactory;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.FileHelpers;
@@ -285,10 +286,10 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	///////////////////////////////////////////////////////
     	
     	exec.setProgress(1); // we are done :)
-    	
+
     	// write output
     	BufferedDataContainer cont= exec.createDataContainer(getDataOutSpec1());
-    	DataCell[] c = new DataCell[]{ (FileCell) FileCellFactory.create(nameOfBamFile), (FileCell) FileCellFactory.create(nameOfBaiFile), new StringCell(SET_GENOME.getStringValue()) };
+    	FileCell[] c = new FileCell[]{ (FileCell)FileCellFactory.create(nameOfBamFile), (FileCell)FileCellFactory.create(nameOfBaiFile), (FileCell)FileCellFactory.create(SET_GENOME.getStringValue()) };
     	cont.addRowToTable(new DefaultRow("Row0", c));
     	cont.close();
         return new BufferedDataTable[]{cont.getTable()};
@@ -311,6 +312,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 
     	// TODO: check fasta genome file 
     	// TODO: check other stuff ?!?
+    	
         return new DataTableSpec[]{getDataOutSpec1()};
     }
     
@@ -322,8 +324,8 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	return new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()});
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec()});
     }
 
 	@Override

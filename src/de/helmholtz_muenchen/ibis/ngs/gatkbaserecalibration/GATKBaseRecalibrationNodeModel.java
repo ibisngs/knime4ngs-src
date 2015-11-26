@@ -30,6 +30,8 @@ import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -516,16 +518,16 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     	DataColumnSpec [] colspec = new DataColumnSpec[colcount];
     	int count=0;
     	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
-    	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
-    	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", StringCell.TYPE).createSpec();
+    	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
+    	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", FileCell.TYPE).createSpec();
     	if(p1 || m_use_phase1_1000G.getBooleanValue()){
-        	colspec[count++]=new DataColumnSpecCreator("Path2phase1", StringCell.TYPE).createSpec();
+        	colspec[count++]=new DataColumnSpecCreator("Path2phase1", FileCell.TYPE).createSpec();
     	}
     	if(mills || m_use_mills_1000G.getBooleanValue()){
-    		colspec[count++]=new DataColumnSpecCreator("Path2mills", StringCell.TYPE).createSpec();
+    		colspec[count++]=new DataColumnSpecCreator("Path2mills", FileCell.TYPE).createSpec();
     	}
     	if(dbsnp || m_use_dbsnp.getBooleanValue()){
-    		colspec[count++]=new DataColumnSpecCreator("Path2dbsnp", StringCell.TYPE).createSpec();
+    		colspec[count++]=new DataColumnSpecCreator("Path2dbsnp", FileCell.TYPE).createSpec();
     	}
     	
     	
@@ -534,28 +536,28 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 	    BufferedDataContainer c = exec.createDataContainer(outspec);
 	    
 	    // fill string cells
-	    DataCell [] row = new DataCell [colcount];
+	    FileCell [] row = new FileCell [colcount];
 	    count=0;
-	    row[count++]=new StringCell(recalbam);
-	    row[count++]=new StringCell(reffile);
-	    row[count++]=new StringCell(gatkfile);
+	    row[count++]=(FileCell)FileCellFactory.create(recalbam);
+	    row[count++]=(FileCell)FileCellFactory.create(reffile);
+	    row[count++]=(FileCell)FileCellFactory.create(gatkfile);
 	    if(p1){
-		    row[count++]=new StringCell(r.getCell(posP1).toString());
+		    row[count++]=(FileCell)FileCellFactory.create(r.getCell(posP1).toString());
 	    }
 	    else if (m_use_phase1_1000G.getBooleanValue()){
-	    	row[count++]=new StringCell(phase1file);
+	    	row[count++]=(FileCell)FileCellFactory.create(phase1file);
 	    }
 	    if(mills){
-		    row[count++]=new StringCell(r.getCell(posMills).toString());
+		    row[count++]=(FileCell)FileCellFactory.create(r.getCell(posMills).toString());
 	    }
 	    else if (m_use_mills_1000G.getBooleanValue()){
-	    	row[count++]=new StringCell(millsfile);
+	    	row[count++]=(FileCell)FileCellFactory.create(millsfile);
 	    }
     	if(dbsnp){
-		    row[count++]=new StringCell(r.getCell(posDbsnp).toString());
+		    row[count++]=(FileCell)FileCellFactory.create(r.getCell(posDbsnp).toString());
     	}
     	else if (m_use_dbsnp.getBooleanValue()){
-    		row[count++]=new StringCell(dbsnpfile);
+    		row[count++]=(FileCell)FileCellFactory.create(dbsnpfile);
     	}
 
 	    //create row and add it to the container

@@ -27,6 +27,9 @@ import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 //import net.sf.picard.sam.SortSam;
@@ -205,22 +208,21 @@ public class PicardToolsNodeModel extends NodeModel {
 		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
 		    }
 		    else{
-		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
 		    }
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
-		    colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", StringCell.TYPE).createSpec();
+		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
+		    colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
 		    DataTableSpec outspec=new DataTableSpec(colspec);
 		    
 		    //container which is filled with cells and rows
 		    BufferedDataContainer c = exec.createDataContainer(outspec);
-		    
-		    //single cells containing paths to use for the next node
-		    StringCell sc1 = new StringCell(inputfile);
-		    StringCell sc2 = new StringCell(reffile);
-		    StringCell sc3 = new StringCell(output_data);
+		    		    
+		    FileCell sc1 = (FileCell)FileCellFactory.create(inputfile);
+		    FileCell sc2 = (FileCell)FileCellFactory.create(reffile);
+		    FileCell sc3 = (FileCell)FileCellFactory.create(output_data);
 		    
 		    //create row and add it to the container
-		    DefaultRow row = new DefaultRow("row0", new DataCell[]{sc1, sc2, sc3});
+		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc2, sc3});
 		    c.addRowToTable(row);
 		    
 		    //create final table
@@ -269,25 +271,25 @@ public class PicardToolsNodeModel extends NodeModel {
 		    DataColumnSpec[] colspec= new DataColumnSpec[2];
 		    
 		    if(m_bsformat.getStringValue().equals("bam")){
-		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
 		    }
 		    else{
-		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
 		    }
 		    
 		    //create column specifications for table
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
+		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
 		    DataTableSpec outspec=new DataTableSpec(colspec);
 		    
 		    //container which is filled with cells and rows
 		    BufferedDataContainer c = exec.createDataContainer(outspec);
 		    
 		    //single cells containing paths to use for the next node
-		    StringCell sc1= new StringCell(output);
-		    StringCell sc2=new StringCell(reffile);
+		    FileCell sc1= (FileCell)FileCellFactory.create(output);
+		    FileCell sc2= (FileCell)FileCellFactory.create(reffile);
 		    
 		    //create row and add it to the container
-		    DefaultRow row = new DefaultRow("row0", new DataCell[]{sc1, sc2});
+		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc2});
 		    c.addRowToTable(row);
 		    
 		    //create final table
@@ -356,16 +358,16 @@ public class PicardToolsNodeModel extends NodeModel {
 			} 
 			
 		    if(m_bsformat.getStringValue().equals("bam")){
-		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
 		    }
 		    else{
-		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", StringCell.TYPE).createSpec();
+		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
 		    }
 		    
 		    //create column specifications for table
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", StringCell.TYPE).createSpec();
+		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
 		    if(add_col) {
-		    	colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", StringCell.TYPE).createSpec();
+		    	colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
 		    }
 
         return new DataTableSpec[]{new DataTableSpec(colspec)};
