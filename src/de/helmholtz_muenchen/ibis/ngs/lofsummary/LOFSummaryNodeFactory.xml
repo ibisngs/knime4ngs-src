@@ -69,7 +69,11 @@
         	<a href="http://software.broadinstitute.org/gsea/downloads.jsp">MSigDB Downloads</a>
         	<br />
         	Note, that you have to download the "gene symbols" version of the desired data set.
-        </option> 
+        </option>
+        <option name="Further options">
+        	The node can be run in parallel mode which is recommended for file sizes up to 1 GB.
+        	Larger files should be processed in sequential mode to prevent OutOfMemoryError exceptions.
+        </option>
     </fullDescription>
     
     <ports>

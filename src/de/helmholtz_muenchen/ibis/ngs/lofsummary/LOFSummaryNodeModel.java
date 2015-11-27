@@ -52,11 +52,13 @@ public class LOFSummaryNodeModel extends NodeModel {
 	static final String CFGKEY_PED_INFILE = "ped_infile";
 	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
 	static final String CFGKEY_INTERNAL_GENE_SET = "internal_gene_set";
+	static final String CFGKEY_PARALLEL_EXEC = "parallel_execution";
 	
 	final SettingsModelString m_cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"");
 	final SettingsModelString m_pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"");
 	final SettingsModelString m_genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
+	final SettingsModelBoolean m_parallel_exec = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
 	
 	//selected annotation
 //    static final String CFGKEY_ANNOTATION="annotation";
@@ -213,20 +215,34 @@ public class LOFSummaryNodeModel extends NodeModel {
     		}
     	};
     	
-    	t1.start();
-    	t2.start();
-    	t3.start();
-    	if(geneset_file != null) {
-    		t4.start();
+    	if(m_parallel_exec.getBooleanValue()) {
+        	t1.start();
+        	t2.start();
+        	t3.start();
+        	if(geneset_file != null) {
+        		t4.start();
+        		t4.join();
+        	}
+        	
+        	t1.join();
+        	t2.join();
+        	t3.join();
+        	if(geneset_file != null) {
+            	t4.join();
+        	}
+    	} else {
+	    	t1.start();
+	    	t1.join();
+	    	t2.start();
+	    	t2.join();
+	    	t3.start();
+	    	t3.join();
+	    	if(geneset_file != null) {
+	    		t4.start();
+	    		t4.join();
+	    	}
     	}
-    	
-    	t1.join();
-    	t2.join();
-    	t3.join();
-    	if(geneset_file != null) {
-        	t4.join();
-    	}
-
+    
     	//Create Output Table
     	DataColumnSpec dcs1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
     	DataColumnSpec dcs2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec();
@@ -494,6 +510,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 //    	m_annotation.saveSettingsTo(settings);
     	m_genesetin.saveSettingsTo(settings);
     	m_internal_gene_set.saveSettingsTo(settings);
+    	m_parallel_exec.saveSettingsTo(settings);
     }
 
     /**
@@ -507,6 +524,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 //    	m_annotation.loadSettingsFrom(settings);
     	m_genesetin.loadSettingsFrom(settings);
     	m_internal_gene_set.loadSettingsFrom(settings);
+    	m_parallel_exec.loadSettingsFrom(settings);
     }
 
     /**
@@ -520,6 +538,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 //    	m_annotation.validateSettings(settings);
     	m_genesetin.validateSettings(settings);
     	m_internal_gene_set.validateSettings(settings);
+    	m_parallel_exec.validateSettings(settings);
     }
     
     /**

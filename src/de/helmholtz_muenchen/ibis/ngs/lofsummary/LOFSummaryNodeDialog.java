@@ -27,7 +27,8 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
 //	private final SettingsModelString annotation = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_ANNOTATION, "");
 	private final SettingsModelString genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
-	final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
+	private final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
+	private final SettingsModelBoolean parallel_exec = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
 
 	
     protected LOFSummaryNodeDialog() {
@@ -42,6 +43,8 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to gene set file");
     	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_LOFStatistics_GENESET",0,".gmt"));
     	
+    	createNewGroup("Further options");
+    	addDialogComponent(new DialogComponentBoolean(parallel_exec,"Create summaries in parallel?"));
     	//annotation selection
 //        createNewGroup("Used annotation tool");
 //        addDialogComponent(new DialogComponentStringSelection(annotation, "Tool", LOFSummaryNodeModel.ANNOTATIONS_AVAILABLE));
