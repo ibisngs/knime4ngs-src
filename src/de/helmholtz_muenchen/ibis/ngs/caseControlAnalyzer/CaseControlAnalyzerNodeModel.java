@@ -54,6 +54,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
 	static final String CFGKEY_CASE_NCOND = "case_ncond";
 	static final String CFGKEY_CONTROL_COND = "control_cond";
 	static final String CFGKEY_CONTROL_NCOND = "control_ncond";
+	static final String CFGKEY_IGNORE = "ignore";
 	
 	//method configure keys
 	static final String CFGKEY_FISHER = "fisher_exact";
@@ -74,7 +75,8 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     private final SettingsModelString m_case_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CASE_NCOND, "un_case");
     private final SettingsModelString m_control_cond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_COND, "aff_ctrl");
     private final SettingsModelString m_control_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_NCOND, "un_ctrl");
-
+    private final SettingsModelBoolean m_ignore = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_IGNORE, true);
+    
     //method settings models
     private final SettingsModelBoolean m_fisher = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_FISHER,true);
     private final SettingsModelBoolean m_bin_back = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_BINOMIAL_BACKGROUND,true);
@@ -248,12 +250,25 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     		throw new InvalidSettingsException("Specified column headers are not found in summary file!");
     	}
     	
+    	int case_aff, case_un, control_aff, control_un;
+    	double frac_case, frac_control;
+    	
     	while((line=br.readLine())!=null) {
     		fields = line.split("\t");
-    		result.put(fields[gene_index], new ContingencyTable(Integer.parseInt(fields[a_index]),
-    				Integer.parseInt(fields[b_index]),
-    				Integer.parseInt(fields[c_index]),
-    				Integer.parseInt(fields[d_index])));
+    		case_aff = Integer.parseInt(fields[a_index]);
+    		case_un = Integer.parseInt(fields[b_index]);
+    		control_aff = Integer.parseInt(fields[c_index]);
+    		control_un = Integer.parseInt(fields[d_index]);
+    		
+    		if(m_ignore.getBooleanValue()) {
+    			frac_case = (double)case_aff/(double)(case_aff+case_un);
+    			frac_control = (double)control_aff/(double)(control_aff+control_un);
+    			if(Double.compare(frac_case, frac_control) <= 0) {
+    				continue;
+    			}
+    		}
+    		
+    		result.put(fields[gene_index], new ContingencyTable(case_aff, case_un, control_aff, control_un));
     	}
     	
     	br.close();
@@ -469,6 +484,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
          m_hyper.saveSettingsTo(settings);
          m_pop_size.saveSettingsTo(settings);
          m_order_by.saveSettingsTo(settings);
+         m_ignore.saveSettingsTo(settings);
     }
 
     /**
@@ -490,6 +506,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
     	m_hyper.loadSettingsFrom(settings);
     	m_pop_size.loadSettingsFrom(settings);
     	m_order_by.loadSettingsFrom(settings);
+    	m_ignore.loadSettingsFrom(settings);
     }
 
     /**
@@ -511,6 +528,7 @@ public class CaseControlAnalyzerNodeModel extends NodeModel {
         m_hyper.validateSettings(settings);
         m_pop_size.loadSettingsFrom(settings);
         m_order_by.validateSettings(settings);
+        m_ignore.validateSettings(settings);
     }
     
     /**

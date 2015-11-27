@@ -66,6 +66,10 @@ public class Statistics {
 		r.runAndReturnResultOnline("res");
 		double res = r.getParser().getAsDoubleArray("res")[0];
 		r.deleteTempFiles();
+		
+		if(Double.compare(res, 0.0) == 0 || Double.compare(res, 1.0) == 0) {
+			res = Double.NaN;
+		}
 		return res;
     }
     
@@ -115,6 +119,9 @@ public class Statistics {
 		r.runAndReturnResultOnline("res");
 		double res = r.getParser().getAsDoubleArray("res")[0];
 		r.deleteTempFiles();
+		if(Double.compare(res, 0.0) == 0 || Double.compare(res, 1.0) == 0) {
+			res = Double.NaN;
+		}
 		return res;
     }
     

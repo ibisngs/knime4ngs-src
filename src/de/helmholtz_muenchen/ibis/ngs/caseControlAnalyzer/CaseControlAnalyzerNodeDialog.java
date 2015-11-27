@@ -36,6 +36,7 @@ public class CaseControlAnalyzerNodeDialog extends DefaultNodeSettingsPane {
     private final SettingsModelString m_case_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CASE_NCOND, "un_case");
     private final SettingsModelString m_control_cond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_COND, "aff_ctrl");
     private final SettingsModelString m_control_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_NCOND, "un_ctrl");
+    private final SettingsModelBoolean m_ignore = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_IGNORE, true);
     
     //method settings models
     private final SettingsModelBoolean m_fisher = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_FISHER,true);
@@ -52,14 +53,15 @@ public class CaseControlAnalyzerNodeDialog extends DefaultNodeSettingsPane {
     protected CaseControlAnalyzerNodeDialog() {
     	
     	createNewGroup("Summary file settings");
-    	addDialogComponent(new DialogComponentString(m_summary_gene_id,"Gene identifier column"));
+    	addDialogComponent(new DialogComponentString(m_summary_gene_id,"Gene (set) identifier column"));
     	addDialogComponent(new DialogComponentString(m_case_cond, "Case condition column"));
     	addDialogComponent(new DialogComponentString(m_case_ncond, "Case non-condition column"));
     	addDialogComponent(new DialogComponentString(m_control_cond, "Control condition column"));
     	addDialogComponent(new DialogComponentString(m_control_ncond, "Control non-condition column"));
+    	addDialogComponent(new DialogComponentBoolean(m_ignore, "Ignore gene (set) with higher fraction of affected controls than cases?"));
     	
     	createNewGroup("Model file settings");
-    	addDialogComponent(new DialogComponentString(m_model_gene_id, "Model gene identifier column"));
+    	addDialogComponent(new DialogComponentString(m_model_gene_id, "Model gene (set) identifier column"));
     	addDialogComponent(new DialogComponentString(m_freq, "Gene-based frequency column"));
     	
     	createNewGroup("Choose statistics and ordering");
