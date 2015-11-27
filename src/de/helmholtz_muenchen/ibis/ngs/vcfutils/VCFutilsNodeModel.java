@@ -4,15 +4,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -20,9 +17,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of VCFutils.
@@ -32,7 +29,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  * @author Sebastian Kopetzky
  * @author Maximilian Hastreiter
  */
-public class VCFutilsNodeModel extends NodeModel {
+public class VCFutilsNodeModel extends HTExecutorNodeModel {
 	
 	public static final String CFGKEY_VCFFILE = "vcffile";
 	public static final String CFGKEY_UTILITY = "utility";
@@ -91,7 +88,7 @@ public class VCFutilsNodeModel extends NodeModel {
 
 	public static boolean optionalPort=false;	
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFutilsNodeModel.class);
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(VCFutilsNodeModel.class);
 	
     /**
      * Constructor for the node model.
@@ -139,12 +136,6 @@ public class VCFutilsNodeModel extends NodeModel {
     			fle = m_snpfile.getStringValue();
     		}
     	}
-    	/**Initialize logfile**/
-    	String logfile = fle.substring(0,fle.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("FastQC"));
-    	/**end initializing logfile**/
     	
     	String path2vcf = "";
     	if(optionalPort){
@@ -251,10 +242,10 @@ public class VCFutilsNodeModel extends NodeModel {
     	/**
     	 * Execute
     	 */
-    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
+    	String lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{command.toString()}, exec, new File(lockFile),outfile);
+//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
+  	
         return new BufferedDataTable[]{};
     }
 
@@ -411,6 +402,10 @@ public class VCFutilsNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	
+    	/** added for HTE **/
+    	super.saveSettingsTo(settings);
+    	
     	m_adjacentgaps.saveSettingsTo(settings);
     	m_baseqpval.saveSettingsTo(settings);
     	m_enddistpval.saveSettingsTo(settings);
@@ -439,6 +434,10 @@ public class VCFutilsNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	
+    	/** added for HTE **/
+    	super.loadValidatedSettingsFrom(settings);
+    	
     	m_adjacentgaps.loadSettingsFrom(settings);
     	m_baseqpval.loadSettingsFrom(settings);
     	m_enddistpval.loadSettingsFrom(settings);
@@ -467,6 +466,10 @@ public class VCFutilsNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	
+    	/** added for HTE **/
+    	super.validateSettings(settings);
+    	
     	m_adjacentgaps.validateSettings(settings);
     	m_baseqpval.validateSettings(settings);
     	m_enddistpval.validateSettings(settings);

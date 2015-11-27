@@ -13,6 +13,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+
 /**
  * <code>NodeDialog</code> for the "VCFutils" Node.
  * 
@@ -24,7 +26,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author 
  */
-public class VCFutilsNodeDialog extends DefaultNodeSettingsPane {
+public class VCFutilsNodeDialog extends HTExecutorNodeDialog {
 
     /**
      * New pane for configuring the VCFutils node.
@@ -165,6 +167,8 @@ public class VCFutilsNodeDialog extends DefaultNodeSettingsPane {
 			    	indelfilteringwindow.setEnabled(true);
 			    	minreaddepth.setIntValue(3);
 			    	maxreaddepth.setIntValue(100000);
+				}else{
+					indelfilteringwindow.setEnabled(false);
 				}
 			}
 		});
@@ -177,5 +181,11 @@ public class VCFutilsNodeDialog extends DefaultNodeSettingsPane {
     	
     	
     }
+
+	@Override
+	protected void updatePrefs() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
