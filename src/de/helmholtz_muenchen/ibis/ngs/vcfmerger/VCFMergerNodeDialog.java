@@ -226,7 +226,7 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
     	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "Outfolder", 0,true,""));
     	createNewGroup("");
 //    	addDialogComponent(new DialogComponentString(REGEX, "File Suffix of VCF Files to merge"));
-    	addDialogComponent(new DialogComponentString(OUTFILETAG, "Outfile Tag of merged VCF File"));
+    	addDialogComponent(new DialogComponentString(OUTFILETAG, "Name of merged VCF File"));
     	addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
     
         // create dialogs
