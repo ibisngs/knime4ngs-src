@@ -168,7 +168,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 			return null;
 		}
 		
-	
+		extraConfig();
 
 		DataTableSpec outSpecTable1 = new DataTableSpec(
 				new DataColumnSpec[] { new DataColumnSpecCreator(
@@ -258,6 +258,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     protected abstract String getOutfile();
     protected abstract boolean checkInputCellType(DataTableSpec[] inSpecs);
     protected abstract DataType getOutColType();
+    protected abstract void extraConfig() throws InvalidSettingsException;
     
     protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);
     protected abstract void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException;

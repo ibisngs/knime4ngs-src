@@ -1,6 +1,8 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkfiltervqslod;
 
 
+import org.knime.core.node.InvalidSettingsException;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SelectVariants.SelectVariantsNodeModel;
 
 /**
@@ -27,6 +29,12 @@ public class GATKFilterVQSLODNodeModel extends SelectVariantsNodeModel {
 	@Override
 	protected String getOutfileSuffix() {
 		return "VQSLOD_Filtered.vcf";
+	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

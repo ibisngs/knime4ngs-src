@@ -118,5 +118,11 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 	protected DataType getOutColType() {
 		return FileCell.TYPE;
 	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

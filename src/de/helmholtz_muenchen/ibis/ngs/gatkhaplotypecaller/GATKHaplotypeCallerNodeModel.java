@@ -111,5 +111,11 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 	protected DataType getOutColType() {
 		return GVCFCell.TYPE;
 	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

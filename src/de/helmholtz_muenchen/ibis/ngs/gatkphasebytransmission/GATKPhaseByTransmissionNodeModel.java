@@ -143,5 +143,11 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 	protected DataType getOutColType() {
 		return VCFCell.TYPE;
 	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

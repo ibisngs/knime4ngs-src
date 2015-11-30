@@ -1,6 +1,8 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkselectvariants;
 
 
+import org.knime.core.node.InvalidSettingsException;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SelectVariants.SelectVariantsNodeModel;
 
 
@@ -26,6 +28,12 @@ public class GATKSelectVariantsNodeModel extends SelectVariantsNodeModel {
 	@Override
 	protected String getOutfileSuffix() {
 		return "."+getFILTERSTRINGModel().getStringValue()+".vcf";
+	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
 	}    
 }
 

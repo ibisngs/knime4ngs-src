@@ -18,7 +18,7 @@ public class VCFMergerNodeFactory
      */
     @Override
     public VCFMergerNodeModel createNodeModel() {
-        return new VCFMergerNodeModel();
+        return new VCFMergerNodeModel(1, 1);
     }
 
     /**

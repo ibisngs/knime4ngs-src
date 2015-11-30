@@ -1,5 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkexcludevariants;
 
+import org.knime.core.node.InvalidSettingsException;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SelectVariants.SelectVariantsNodeModel;
 
 /**
@@ -26,6 +28,12 @@ public class GATKExcludeVariantsNodeModel extends SelectVariantsNodeModel {
 	@Override
 	protected String getOutfileSuffix() {
 		return ".PASS_variants.vcf";
+	}
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

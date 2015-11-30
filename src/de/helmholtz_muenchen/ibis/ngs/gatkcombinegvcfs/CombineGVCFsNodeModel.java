@@ -118,5 +118,12 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 		return GVCFCell.TYPE;
 	}
 
+
+	@Override
+	protected void extraConfig() throws InvalidSettingsException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
 
