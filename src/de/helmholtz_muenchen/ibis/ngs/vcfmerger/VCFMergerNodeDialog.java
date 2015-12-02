@@ -209,11 +209,11 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
 		  m_SET_FILE_LIST_DISPLAY	= new SettingsModelStringArray(VCFMergerNodeModel.CFGKEY_FILE_LIST_DISPLAY, new String[0]);
 		    
 			// components which must be accessible inside a event handler or somewhere else
-		  DC_FILE_DIR_BUTTON			= new DialogComponentButton("add all VCF files of this folder");
+		  DC_FILE_DIR_BUTTON			= new DialogComponentButton("add all matching files of this folder");
 		  DC_FILE_FILE_BUTTON			= new DialogComponentButton("add selected VCF file");
 		  DC_FILE_REMOVE_BUTTON		= new DialogComponentButton("remove selected VCF files");
 		  DC_FILE_DISPLAY= new DialogComponentStringListSelection(m_SET_FILE_LIST_DISPLAY, "files: ", NO_SELECTION_MADE);
-		  DC_REGEX 					= new DialogComponentString(m_SET_NAME_REGEX, "filename regex filter");
+		  DC_REGEX 					= new DialogComponentString(m_SET_NAME_REGEX, "filename regex");
 		
 		
 		
@@ -222,12 +222,10 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
 		
 //    	createNewGroup("Folder in which the search is performed");
 //    	addDialogComponent(new DialogComponentFileChooser(INFOLDER, "Folder in which the search is performed", 0,true,""));
-    	createNewGroup("Outfolder");
-    	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "Outfolder", 0,true,""));
-    	createNewGroup("");
+		
+		
+    	
 //    	addDialogComponent(new DialogComponentString(REGEX, "File Suffix of VCF Files to merge"));
-    	addDialogComponent(new DialogComponentString(OUTFILETAG, "Name of merged VCF File"));
-    	addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
     
         // create dialogs
         DialogComponentFileChooser dcFastaDir 	= new DialogComponentFileChooser(m_SET_FILE_DIR, "his_id_FILE_DIR", 0, true);
@@ -250,6 +248,7 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
         //DC_FILE_REMOVE_BUTTON.getModel().setEnabled(false);
                
         // add elements
+		createNewTab("CombineVariants options");
         createNewGroup("add VCF files");
         addDialogComponent(dcFastaFile);
         addDialogComponent(DC_FILE_FILE_BUTTON);
@@ -263,7 +262,14 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
         createNewGroup("currently selected VCF files");
         addDialogComponent(DC_FILE_DISPLAY);  
         addDialogComponent(DC_FILE_REMOVE_BUTTON);
+        
+        createNewGroup("GenotypeMergeType");
+        addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
        
+        createNewGroup("Output");
+    	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "Outfolder", 0,true,""));
+    	addDialogComponent(new DialogComponentString(OUTFILETAG, "Name of merged VCF File"));
+        
         // add action listener        
         DC_FILE_DIR_BUTTON.addActionListener(new ActionListener() {
 			@Override

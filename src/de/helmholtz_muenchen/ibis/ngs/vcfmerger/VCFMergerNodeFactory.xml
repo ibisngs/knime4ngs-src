@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./default.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<knimeNode icon="./icon_d_green.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
     <name>VCFMerger</name>
     
     <shortDescription>
@@ -7,29 +7,60 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Combines VCF records from different sources.</intro>
+        <intro>
+        	Combines VCF records from different sources using GATK's CombineVariants.
+        	The tool reads in variant records from separate ROD (Reference-Ordered Data) sources and combines them into a single VCF.
+        	For further information, see the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineVariants.php">GATK documentation</a>.
+        </intro>
         
+        <tab name="Options">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar and memory usage.
+        	</option>
+        	<option name="Reference Genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to BED file">
+        		Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	</option>
+        	<option name="Further options">
+        		Commit further options to GATK.
+        	</option>
+        </tab>
         
-        <option name="Folder in which the search is performed">Folder in which input files are searched using the suffix and merged into a single vcf</option>
-        <option name="Outfolder">Location were the Output is stored</option>
-        <option name="File Suffix">Suffix that is used to detect input files</option>
-        <option name="GenotypeMergeOption">
-<b>UNIQUIFY:</b>
-    Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.
-    <br />
-<b>UNSORTED:</b>
-    Take the genotypes in any order.
-    <br />
-<b>REQUIRE_UNIQUE:</b>
-    Require that all samples/genotypes be unique between all inputs. </option>
-
-
+        <tab name="CombineVariants options">
+        	
+        	<option name="add VCF file">
+        		It is possible to add input VCF files one by one by setting the path to each VCF file or by adding all files in a folder that match the given regular expression (regex).
+        	</option>
+        	<option name="currently selected VCF files">
+        		The file list shows the files that are going to be merged.
+        		It is possible to select some files and remove them from the list.
+        	</option>
+        	<option name="GenotypeMergeOption">
+				<b>UNIQUIFY:</b>
+    			Make all sample genotypes unique by file.
+    			Each sample shared across RODs gets named sample.ROD.
+    			<br />
+				<b>UNSORTED:</b>
+    			Take the genotypes in any order.
+    			<br />
+				<b>REQUIRE_UNIQUE:</b>
+    			Require that all samples/genotypes be unique between all inputs.
+    		</option>
+    		<option name="Output">
+        		Set a folder were the merged VCF file is stored.
+        	</option>
+        </tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name"></inPort>
-    </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+        <outPort index="0" name="Merged VCF">
+        	Path to the merged VCF file.
+        </outPort>
+    </ports>
 </knimeNode>
