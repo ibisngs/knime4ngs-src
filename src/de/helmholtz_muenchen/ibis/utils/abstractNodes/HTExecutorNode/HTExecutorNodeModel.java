@@ -93,7 +93,8 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 				}
 			}
 			
-			
+			err_msg = err_msg.trim();
+
 			stdErr = new StringBuffer();
 			if (exitcode == 0) {
 				htedb.writeSuccess(exec_id);
@@ -101,6 +102,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 				checker.finalize();
 				return;
 			} else {
+				LOGGER.error(err_msg);
 				htedb.writeError(exec_id, err_msg);
 			}
 		}

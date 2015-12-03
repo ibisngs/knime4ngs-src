@@ -63,7 +63,6 @@ public class HTEDBHandler {
 	public void createDB() throws SQLException {
 		Statement stmt = con.createStatement();
 		stmt.executeUpdate(HTEXECUTION);
-
 		stmt.executeUpdate(HTERROR);
 		stmt.close();
 	}
@@ -75,6 +74,7 @@ public class HTEDBHandler {
 		int id = -1;
 		try {
 			preStmt = con.prepareStatement(query,Statement.RETURN_GENERATED_KEYS);
+			preStmt.setQueryTimeout(60);
 			preStmt.setString(1, command);
 			preStmt.setString(2, name);
 			preStmt.setString(3, host);
@@ -95,6 +95,7 @@ public class HTEDBHandler {
 		PreparedStatement preStmt;
 		try {
 			preStmt = con.prepareStatement(query);
+			preStmt.setQueryTimeout(30);
 			preStmt.setInt(1, count);
 			preStmt.setInt(2, exec_id);
 			preStmt.execute();
@@ -108,6 +109,7 @@ public class HTEDBHandler {
 		PreparedStatement preStmt;
 		try {
 			preStmt = con.prepareStatement(query);
+			preStmt.setQueryTimeout(30);
 			preStmt.setInt(1, exec_id);
 			preStmt.execute();
 		} catch (SQLException e) {
@@ -120,6 +122,7 @@ public class HTEDBHandler {
 		PreparedStatement preStmt;
 		try {
 			preStmt = con.prepareStatement(query);
+			preStmt.setQueryTimeout(30);
 			preStmt.setInt(1, exec_id);
 			preStmt.setString(2, errmsg);
 			preStmt.execute();
