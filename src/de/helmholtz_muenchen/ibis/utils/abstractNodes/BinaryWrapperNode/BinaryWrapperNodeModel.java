@@ -361,8 +361,10 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 			STDOUT = new StringBuffer("Not yet executed!");		
 		}
 		
+		
+		
 		//HTE Execution
-		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, null, null, STDOUT, STDERR, null);	
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, getPathToStdoutFile().getAbsolutePath(), getPathToStderrFile().getAbsolutePath(), STDOUT, STDERR, null);	
 	}
 	
 	
