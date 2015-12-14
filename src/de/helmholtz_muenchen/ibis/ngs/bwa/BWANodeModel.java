@@ -27,6 +27,7 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 
@@ -171,7 +172,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
@@ -438,7 +439,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
