@@ -12,6 +12,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import org.apache.commons.lang3.StringUtils;
 import org.knime.core.node.*;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -108,14 +109,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		}
 
 		if (count >= threshold_value) {
-			String cmd = "";
-			if(command.length==1) {
-				cmd = " " +command[0];
-			} else {
-				for(String c : command) {
-					cmd = " "+ c;
-				}
-			}
+			String cmd = StringUtils.join(command, " ");
 			
 			String newLine = System.getProperty("line.separator");
 			

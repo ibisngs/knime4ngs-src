@@ -206,7 +206,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     	    	try {
     	    		logger.info("Generate gene set summary...");
-    	    		LOFSummarizer.getEnrichmentSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, gene_set_outfile);
+    	    		LOFSummarizer.getGeneSetSum(new VCFFile(vcf_infile), myparser, set2genes, sampleid2affected, gene_set_outfile);
 					logger.info("Gene set summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

@@ -156,39 +156,47 @@ public class LOFSummarizer {
 		}
 		
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
-		String geneanno, final_aff;
-		int hom, ko;
-		bw.write("sample\tnr_aff\tnr_hom\tnr_ko\taffected_genes");
+		String geneanno,ko_genes;
+		boolean is_ko;
+		boolean oneInactive;
+		int at_least_one, ko;
+		bw.write("sample\tnr_aff\tat_least_one_transcript_ko\tnr_ko\tko_genes\taffected_genes");
 		bw.newLine();
 		
 		for(String s: sample2gene2transcript2aff.keySet()) {
 			gene2t2aff = sample2gene2transcript2aff.get(s);
 			geneanno = "";
-			hom = 0;
+			ko_genes = "";
+			at_least_one = 0;
 			ko = 0;
 			
 			for(String g: gene2t2aff.keySet()) {
 				t2aff = gene2t2aff.get(g);
-				final_aff = "";
+				is_ko = true;
+				oneInactive = false;
+				
 				for(String t: t2aff.keySet()) {
-					final_aff = getAff(final_aff, t2aff.get(t));
+					geneanno += ";"+"("+g+","+t+","+t2aff.get(t)+")";
+					if(t2aff.get(t).equals("hom") || t2aff.get(t).equals("comp")) {
+						oneInactive=true;
+					} else {
+						is_ko = false;
+					}
 				}
-				
-				//counter for homozygously affected genes
-				if(final_aff.equals("hom")) {
-					hom++;
-				}
-				
-				//check ko of gene
-				if((final_aff.equals("hom") || final_aff.equals("comp")) && t2aff.keySet().size() == genes.get(g).getTranscripts().size()) {
-					final_aff = "ko";
+					
+				if((t2aff.keySet().size() == genes.get(g).getTranscripts().size()) && is_ko) { //all protein coding transcripts are affected
 					ko++;
+					ko_genes += ";"+genes.get(g).getSymbol();
 				}
-				geneanno += ";"+"("+g+","+final_aff+")";
+				
+				if(oneInactive) {
+					at_least_one++;
+				}
 			}
 			
 			geneanno = geneanno.replaceFirst(";", "");
-			bw.write(s+"\t"+gene2t2aff.keySet().size()+"\t"+hom+"\t"+ko+"\t"+geneanno);
+			ko_genes = ko_genes.replaceFirst(";", "");
+			bw.write(s+"\t"+gene2t2aff.keySet().size()+"\t"+at_least_one+"\t"+ko+"\t"+ko_genes+"\t"+geneanno);
 			bw.newLine();
 		}
 		
@@ -196,7 +204,9 @@ public class LOFSummarizer {
 	}
 	
 	private static String getAff(String a, String b) {
-		if(a.equals(b)) {
+		if(a.equals("het") && b.equals("het")) {
+			return "pot_comp";
+		} else if(a.equals(b)) {
 			return a;
 		} else if(a.equals("")) {
 			return b;
@@ -206,8 +216,8 @@ public class LOFSummarizer {
 			return "hom";
 		} else if(a.equals("comp") || b.equals("comp")) {
 			return "comp";
-		} else if(a.equals("het") || b.equals("het")) {
-			return "het";
+		} else if (a.equals("pot_comp") || b.equals("pot_comp")) {
+			return "pot_comp";
 		} else if((a.equals("mat") && b.equals("pat")) ||(a.equals("pat") && b.equals("mat"))) {
 			return "comp";
 		}
@@ -215,12 +225,12 @@ public class LOFSummarizer {
 		return "undef";
 	}
 	
-	public static void getEnrichmentSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
+	public static void getGeneSetSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
 		
 		//writing sample counts for each gene
 		
 		//initialize header
-		String header = "set\taff_case\taff_ctrl\tun_case\tun_ctrl";
+		String header = "set\tsize\taff_case\taff_ctrl\tun_case\tun_ctrl\taff_genes";
 				
 		//initialize writer
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
@@ -230,11 +240,11 @@ public class LOFSummarizer {
 		String line;
 		
 		RegionSummary rs = new RegionSummary(vcf,ap,false);
-		rs.groupBy(set2genes);
+		HashMap<String, HashSet<String>> gene_sets = rs.groupBy(set2genes);
 		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
 		
 		for(String set: tables.keySet()) {
-			line = set+"\t"+tables.get(set).verticalToString();
+			line = set+"\t"+set2genes.get(set).size()+"\t"+tables.get(set).verticalToString()+"\t"+gene_sets.get(set).toString().replaceAll("\\[|\\]", "");
 			bw.write(line);
 			bw.newLine();
 		}

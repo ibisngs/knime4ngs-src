@@ -133,25 +133,35 @@ public class RegionSummary {
 		return getTables(sample_id2affected, enrich_affected_samples, enrich_unaffected_samples);
 	}
 	
-	public void groupBy(HashMap<String, HashSet<String>> id2set) {
+	/**
+	 * The method gets a map of gene sets and returns the same map excluding the non LOF genes.
+	 * @param id2set
+	 * @return
+	 */
+	public HashMap<String, HashSet<String>> groupBy(HashMap<String, HashSet<String>> id2set) {
+		HashMap<String,HashSet<String>> reduced_gene_sets = new HashMap<>();
 		HashSet<String> genes;
+		HashSet<String> tmp;
 		
 		for(String set:id2set.keySet()) {
 			genes = id2set.get(set);
-			
+			tmp = new HashSet<>();
 			Set<String> tmp_enrich_un = new HashSet<>();
 			for(String s: sample_ids) {
 				tmp_enrich_un.add(s);
 			}
 			Set<String> tmp_enrich_aff = new HashSet<>();
 			for(String g: genes) {
-				if(unaffected_samples.containsKey(g)) { 
+				if(unaffected_samples.containsKey(g)) {
+					tmp.add(g);
 					tmp_enrich_un.retainAll(unaffected_samples.get(g));
 					tmp_enrich_aff.addAll(affected_samples.get(g));
 				}
 			}
 			enrich_unaffected_samples.put(set, tmp_enrich_un);
 			enrich_affected_samples.put(set, tmp_enrich_aff);
+			reduced_gene_sets.put(set,tmp);
 		}
+		return reduced_gene_sets;
 	}
 }

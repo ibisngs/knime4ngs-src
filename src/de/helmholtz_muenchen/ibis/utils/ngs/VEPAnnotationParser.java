@@ -111,8 +111,6 @@ public class VEPAnnotationParser implements AnnotationParser {
 		return res;
 	}
 	
-	
-
 	@Override
 	public HashSet<String> getAnnotatedAlleleIds(String anno) {
 		if(allele_id_index == -1) {
@@ -148,6 +146,4 @@ public class VEPAnnotationParser implements AnnotationParser {
 		}
 		return res;
 	}
-	
-
 }

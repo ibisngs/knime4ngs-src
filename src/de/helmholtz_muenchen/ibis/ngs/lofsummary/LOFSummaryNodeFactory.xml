@@ -29,24 +29,27 @@
         			If no PED file is given, all samples are considered as controls.
         		</li>
         		<li>
-        			The sample_summary comprises the following fields: sample, nr_aff, nr_hom, nr_ko, affected_genes.
+        			The sample_summary comprises the following fields: sample, nr_aff, at_least_one_transcript_ko, nr_ko, ko_genes, affected_genes.
         			<br />
         			The number of genes affected by at least one LOF variant is given in column nr_aff.
-        			The number of genes homozygously affected by at least one variant is given in column nr_hom.
+        			The number of genes with at least one inactivated transcript is given in column at_least_one_transcript_ko.
+        			A transcript can be inactivated due to homozygous LOF variants or by compound heterozygosity.
         			If all transcripts of a gene are completely inactivated, the gene is considered as a knock-out (ko). 
-        			The number of ko genes per sample is given in column nr_ko.
-        			The last column is a semi-colon separated list of LOF genes.
-        			For each gene, it is annoated to what extend it is inactivated given by the levels: 
+        			The number of ko genes per sample is given in column nr_ko, the symbols are given in the subsequent column.
+        			The last column is a semi-colon separated list of LOF transcripts/genes.
+        			For each affected transcript, it is annotated to what extend it is inactivated given by the levels: 
         			mat (transcripts are only maternally affected),
         			pat (analogous to mat),
         			het (analogous to mat if no phasing information is given),
+        			pot_comp (two heterozygous variants affect a transcript),
         			comp (equal to compound heterozygosity),
-        			hom (at least one transcript carries a homozygous variant),
-        			ko (gene is completely inactivated).
+        			hom (at least one transcript carries a homozygous variant).
         		</li>
         		<li>
         			A gene_set_summary is generated if you select a gene set file in the configuration dialog.
-        			The columns of the gene_set_summary are analogous to the gene_summary except for the first column which contains the name of the gene set.
+        			The first column contains the name of the gene set, the second one the number of assigned genes. 
+        			The subsequent four columns contain a contingency table for the whole gene set. 
+        			The last column shows the genes affected by LOF mutations.
         		</li>
         	</ul>
         </intro>

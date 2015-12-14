@@ -199,6 +199,7 @@ public class VCFVariant {
 	
 	public String getAff(String sample, int id) {
 		String gt = sample_genotype.get(sample).split(":")[0];
+
 		if(gt.contains(".")) {
 			return "undef";
 		} else if(gt.contains("|")) { //phased genotypes

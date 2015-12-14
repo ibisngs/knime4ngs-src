@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -48,7 +47,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 	static final String CFGKEY_GTF_AFF = "gtf_aff";
 	static final String CFGKEY_AC = "ac";
 	static final String CFGKEY_AN = "an";
-	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
 	static final String CFGKEY_USE_SYMBOL = "use_symbol";
 	
 	//settings models
@@ -56,7 +54,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 	private final SettingsModelString m_gtf_aff = new SettingsModelString(CFGKEY_GTF_AFF, BASIS[0]);
 	private final SettingsModelString m_ac = new SettingsModelString(CFGKEY_AC,"AC");
 	private final SettingsModelString m_an = new SettingsModelString(CFGKEY_AN,"AN");
-	private final SettingsModelString m_genesetin = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_GENE_SET_INFILE,"");
     private final SettingsModelBoolean m_use_symbol = new SettingsModelBoolean(GeneticBackgroundModelNodeModel.CFGKEY_USE_SYMBOL, false);
 	
 	private int vcf_index;
@@ -100,45 +97,20 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	
     	HashMap<String, Double> gene_frequency;
     	
-    	boolean gene_sets = false;
-    	HashMap<String, HashSet<String>> gene2set = new HashMap<>();
-    	String geneset_file = m_genesetin.getStringValue();
-    	if(!geneset_file.equals("") && Files.exists(Paths.get(geneset_file))) {
-    		gene_sets = true;
-    		gene2set = this.readGeneSetFile(geneset_file);
-    	}
-    	
     	boolean use_id = !m_use_symbol.getBooleanValue();
     	String ending = "";
     	RegionSummary rs;
     	if(m_gtf_aff.getStringValue().equals(BASIS[0])) {//computation based on genotypes
-    		if(gene_sets) {
-    			rs = new RegionSummary(vcf_it, parser, false);
-    			rs.groupBy(gene2set);
-    			gene_frequency = rs.getSetFrequencies();
-    			ending = ".set_model_gtf.tsv";
-    		} else {
-    			rs = new RegionSummary(vcf_it, parser, use_id);
-    			gene_frequency = rs.getFrequencies();
-    			ending = ".gene_model_gtf.tsv";
-    		}
+    		rs = new RegionSummary(vcf_it, parser, use_id);
+    		gene_frequency = rs.getFrequencies();
+    		ending = ".gene_model_gtf.tsv";
     	} else {
-    		if(gene_sets) {
-    			gene_frequency = fillSetAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser,gene2set);
-    			ending = ".set_model_aff.tsv";
-    		} else {
-        		gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, use_id);
-    			ending = ".gene_model_aff.tsv";
-    		}
+        	gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, use_id);
+    		ending = ".gene_model_aff.tsv";
     	}
     	
 		outfile = IO.replaceFileExtension(vcf_infile, ending);
-    	
-    	if(gene_sets) {
-    		writeModel(outfile, gene_frequency, this.readGeneSetFile(geneset_file));
-    	} else {
-    		writeModel(outfile, gene_frequency);
-    	}
+    	writeModel(outfile, gene_frequency);
 		
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
@@ -204,135 +176,22 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 		return result;
 	}
 	
-	private HashMap<String, Double> fillSetAF(VCFFile vcf_it, String ac_id, String an_id, AnnotationParser parser, HashMap<String, HashSet<String>> gene_sets) {
-		
-		HashMap<String, Double> result = new HashMap<>();
-		
-		HashMap<String, Double> gene_freq = fillAF(vcf_it, ac_id, an_id, parser, false);
-		
-		HashSet<String> genes;
-		double tmp = 1.0;
-		
-		for(String set:gene_sets.keySet()) {
-			genes = gene_sets.get(set);
-			tmp = 1.0;
-			for(String gene:genes) {
-				if(gene_freq.containsKey(gene)) {
-					tmp *= (1.0-gene_freq.get(gene));
-				}
-			}
-			result.put(set, 1.0-tmp);
-		}
-		
-		return result;
-	}
-
-//	private HashMap<String, Double> fillGenotypes(VCFFile vcf_it, AnnotationParser parser) {
-//		HashMap<String, Double> result = new HashMap<>();
-//		HashMap<String, HashSet<String>> unaffected_samples, affected_samples;
-//		unaffected_samples = new HashMap<>();
-//		affected_samples = new HashMap<>();
-//		VCFVariant var;
-//		String csq;
-//		while(vcf_it.hasNext()) {
-//			var = vcf_it.next();
-//			csq = var.getInfoField(parser.getAnnId());
-//			
-//			if(csq == null) {
-//				LOGGER.error("No annotations have been found for variant on chr "+var.getChrom()+" at position "+var.getPos()+"!");
-//				continue;
-//			}
-//			
-//			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq, true);
-//			
-//			HashSet<Integer> alt_alleles;
-//			HashSet<String> aff_samp, unaff_samp;
-//			
-//			for(String gene: gene2allele_num.keySet()) {
-//				alt_alleles = gene2allele_num.get(gene);
-//				aff_samp = var.getAffectedSamples(alt_alleles);
-//				unaff_samp = var.getUnaffectedSamples(alt_alleles);
-//				if(unaffected_samples.containsKey(gene)) {
-//					//unaffected samples contains all samples that carry only non-LOF alleles in a gene
-//					unaffected_samples.get(gene).retainAll(unaff_samp);
-//				} else {
-//					unaffected_samples.put(gene,unaff_samp);
-//				}
-//				
-//				if(affected_samples.containsKey(gene)) {
-//					affected_samples.get(gene).addAll(aff_samp);
-//				} else {
-//					affected_samples.put(gene, aff_samp);
-//				}
-//			}
-//		}
-//		
-//		HashSet<String> called_samples;
-//		for(String gene: affected_samples.keySet()) {
-//			called_samples = new HashSet<>();
-//			called_samples.addAll(unaffected_samples.get(gene));
-//			called_samples.addAll(affected_samples.get(gene));
-//			result.put(gene, (double)affected_samples.get(gene).size()/(double)called_samples.size());
-//		}
-//	
-//		return result;
-//	}
-	
-	private HashMap<String, HashSet<String>> readGeneSetFile(String file) throws IOException {
-		HashMap<String, HashSet<String>> set2genes = new HashMap<>();
-		
-		BufferedReader br = Files.newBufferedReader(Paths.get(file));
-		String line;
-		String [] fields;
-		
-		while((line=br.readLine())!=null) {
-			line = line.trim();
-			fields = line.split("\t");
-			HashSet<String> tmp = new HashSet<>();
-			for(int i = 2; i < fields.length; i++) {
-				tmp.add(fields[i]);
-			}
-			set2genes.put(fields[0], tmp);
-		}
-		
-		br.close();
-		
-		return set2genes;
-	}
-	
     private void writeModel(String outfile, HashMap<String, Double> gene_frequency) {
 		
     	Charset c = Charset.forName("UTF-8");
     	BufferedWriter bw;
     	try {
 			bw = Files.newBufferedWriter(Paths.get(outfile), c);
-			bw.write("gene_id\tvariant_freq");
+			if(m_use_symbol.getBooleanValue()) {
+				bw.write("gene_symbol\tvariant_freq");
+			} else {
+				bw.write("gene_id\tvariant_freq");
+			}
 			bw.newLine();
 			for(String s: gene_frequency.keySet()) {
 				double freq = gene_frequency.get(s);
 				if(freq > 0.0) {
 					bw.write(s+"\t"+gene_frequency.get(s));
-					bw.newLine();
-				}
-			}
-			bw.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-    
-    private void writeModel(String outfile, HashMap<String, Double> gene_frequency, HashMap<String, HashSet<String>> genesets) {
-		
-    	Charset c = Charset.forName("UTF-8");
-    	BufferedWriter bw;
-    	try {
-			bw = Files.newBufferedWriter(Paths.get(outfile), c);
-			bw.write("set\tsize_of_set\tvariant_freq");
-			bw.newLine();
-			for(String s: gene_frequency.keySet()) {
-				double freq = gene_frequency.get(s);
-				if(freq > 0.0) {
-					bw.write(s+"\t"+genesets.get(s).size()+"\t"+gene_frequency.get(s));
 					bw.newLine();
 				}
 			}
@@ -382,7 +241,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_gtf_aff.saveSettingsTo(settings);
     	m_ac.saveSettingsTo(settings);
     	m_an.saveSettingsTo(settings);
-    	m_genesetin.saveSettingsTo(settings);
     	m_use_symbol.saveSettingsTo(settings);
     }
 
@@ -395,7 +253,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_gtf_aff.loadSettingsFrom(settings);
     	m_ac.loadSettingsFrom(settings);
     	m_an.loadSettingsFrom(settings);
-    	m_genesetin.loadSettingsFrom(settings);
     	m_use_symbol.loadSettingsFrom(settings);
     }
 
@@ -408,7 +265,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	m_gtf_aff.validateSettings(settings);
     	m_ac.validateSettings(settings);
     	m_an.validateSettings(settings);
-    	m_genesetin.validateSettings(settings);
     	m_use_symbol.validateSettings(settings);
     }
     
