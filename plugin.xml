@@ -57,7 +57,6 @@
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.CaseControlAnalyzerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.CaseControlAnalyzerNodeFactory"/>
 		<!--RNA-Seq-->
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultPlotter.MatsResultPlotterNodeFactory"/>
@@ -86,7 +85,10 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeFactory"/>	
-	</extension>
+		<!--CaseControlAnalysis-->
+		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
+</extension>
 	
 	<extension point="org.knime.workbench.repository.categories">
 		<category icon="/libs/icons/ibis.png" level-id="ibis" name="Helmholtz IBIS" path="/"/>
@@ -106,6 +108,7 @@
 		<category icon="/libs/icons/icon_r_green2.png" level-id="anno" name="Annotation" path="/ibis/ngs/ngs_post/"/>
 		<category icon="/libs/icons/icon_r_green2.png" level-id="rna" name="RNA-Seq" path="/ibis/ngs/ngs_post/"/>
 		<category icon="/libs/icons/icon_r_green2.png" level-id="sam" name="Samtools" path="/ibis/ngs/ngs_post/"/>
+		<category icon="/libs/icons/icon_r_green2.png" level-id="cca" name="Case Control Analysis" path="/ibis/ngs/ngs_post/"/>
 	</extension>
    	
    	<extension point="org.eclipse.ui.preferencePages">

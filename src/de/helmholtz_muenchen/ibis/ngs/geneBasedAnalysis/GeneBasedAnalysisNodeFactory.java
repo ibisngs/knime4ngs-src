@@ -1,24 +1,24 @@
-package de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer;
+package de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "CaseControlAnalyzer" Node.
+ * <code>NodeFactory</code> for the "GeneBasedAnalysis" Node.
  * 
  *
  * @author Tim Jeske
  */
-public class CaseControlAnalyzerNodeFactory 
-        extends NodeFactory<CaseControlAnalyzerNodeModel> {
+public class GeneBasedAnalysisNodeFactory 
+        extends NodeFactory<GeneBasedAnalysisNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public CaseControlAnalyzerNodeModel createNodeModel() {
-        return new CaseControlAnalyzerNodeModel();
+    public GeneBasedAnalysisNodeModel createNodeModel() {
+        return new GeneBasedAnalysisNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class CaseControlAnalyzerNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<CaseControlAnalyzerNodeModel> createNodeView(final int viewIndex,
-            final CaseControlAnalyzerNodeModel nodeModel) {
-        return new CaseControlAnalyzerNodeView(nodeModel);
+    public NodeView<GeneBasedAnalysisNodeModel> createNodeView(final int viewIndex,
+            final GeneBasedAnalysisNodeModel nodeModel) {
+        return new GeneBasedAnalysisNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class CaseControlAnalyzerNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new CaseControlAnalyzerNodeDialog();
+        return new GeneBasedAnalysisNodeDialog();
     }
 
 }

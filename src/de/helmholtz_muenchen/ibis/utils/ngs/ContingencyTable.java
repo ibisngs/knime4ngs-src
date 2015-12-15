@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer;
+package de.helmholtz_muenchen.ibis.utils.ngs;
 
 public class ContingencyTable {
 	

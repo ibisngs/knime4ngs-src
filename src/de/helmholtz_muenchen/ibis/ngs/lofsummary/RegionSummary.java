@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.ContingencyTable;
+import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
@@ -42,6 +42,7 @@ public class RegionSummary {
 			for(String gene: gene2allele_ids.keySet()) {
 				alt_alleles = gene2allele_ids.get(gene);
 				aff_samp = var.getAffectedSamples(alt_alleles);
+				if(aff_samp.size()==0) continue;
 				unaff_samp = var.getUnaffectedSamples(alt_alleles);
 				if(unaffected_samples.containsKey(gene)) {
 					//unaffected samples contains all samples that carry only non-LOF alleles in a gene

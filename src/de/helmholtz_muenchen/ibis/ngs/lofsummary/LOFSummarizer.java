@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import de.helmholtz_muenchen.ibis.ngs.caseControlAnalyzer.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
+import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 
@@ -82,6 +82,14 @@ public class LOFSummarizer {
 	
 	public static void getGeneSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
 		
+		int nr_cases = 0;
+		int nr_controls = 0;
+		
+		for(boolean a: sampleid2case.values()) {
+			if(a) nr_cases++;
+			else nr_controls++;
+		}
+		
 		RegionSummary rs = new RegionSummary(vcf,ap, true);
 		HashMap<String, ContingencyTable> tables = rs.getTables(sampleid2case);
 		
@@ -96,11 +104,24 @@ public class LOFSummarizer {
 		
 		String line;
 		
-		for(String gene: tables.keySet()) {
-			line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+tables.get(gene).verticalToString();
+		
+//		for(String gene: tables.keySet()) {
+//			line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+tables.get(gene).verticalToString();
+//			bw.write(line);
+//			bw.newLine();
+//		}
+		
+		for(String gene: genes.keySet()) {
+			line = gene+"\t"+genes.get(gene).getSymbol();
+			if(tables.containsKey(gene)) {
+				line += "\t"+tables.get(gene).verticalToString();
+			} else {
+				line += "\t"+new ContingencyTable(0,nr_cases,0,nr_controls).verticalToString();
+			}
 			bw.write(line);
 			bw.newLine();
 		}
+		
 		bw.close();
 	}
 
