@@ -261,11 +261,11 @@ public class LOFSummarizer {
 		String line;
 		
 		RegionSummary rs = new RegionSummary(vcf,ap,false);
-		HashMap<String, HashSet<String>> gene_sets = rs.groupBy(set2genes);
+		rs.groupBy(set2genes);
 		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
 		
 		for(String set: tables.keySet()) {
-			line = set+"\t"+set2genes.get(set).size()+"\t"+tables.get(set).verticalToString()+"\t"+gene_sets.get(set).toString().replaceAll("\\[|\\]", "");
+			line = set+"\t"+set2genes.get(set).size()+"\t"+tables.get(set).verticalToString()+"\t"+set2genes.get(set).toString().replaceAll("\\[|\\]", "");
 			bw.write(line);
 			bw.newLine();
 		}

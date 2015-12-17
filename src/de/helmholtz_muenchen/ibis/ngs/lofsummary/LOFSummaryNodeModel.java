@@ -48,6 +48,8 @@ public class LOFSummaryNodeModel extends NodeModel {
 	// the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
 	
+    private final static String CONTIGS[] = new String[]{"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"};
+    
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
 	static final String CFGKEY_PED_INFILE = "ped_infile";
 	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
@@ -158,7 +160,12 @@ public class LOFSummaryNodeModel extends NodeModel {
     	HashMap<String, Boolean> sampleid2affected = readPEDFile(ped_file);
     	
     	logger.debug("Read gene set file...");
-    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file);
+    	//create set of allowed genes
+    	HashSet<String> my_genes = new HashSet<>();
+    	for(Gene g: geneid2gene.values()) {
+    		my_genes.add(g.getSymbol());
+    	}
+    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file, my_genes);
     	
     	//parallel execution
     	final AnnotationParser myparser = parser;
@@ -286,7 +293,8 @@ public class LOFSummaryNodeModel extends NodeModel {
 	private HashMap<String, Gene> readCDSFile(String cds_file) throws IOException {
 		HashMap<String, Gene> geneid2gene = new HashMap<>();
 		String [] fields;
-		String transcript_id, gene_id;
+		String transcript_id, gene_id, contig;
+		boolean check = false;
 		
 		FileInputStream inputStream = null;
 		Scanner sc = null;
@@ -297,6 +305,17 @@ public class LOFSummaryNodeModel extends NodeModel {
 		        String line = sc.nextLine();
 		        if(line.startsWith(">") && line.contains("transcript_biotype:protein_coding")) {
 		        	fields = line.split("\\s");
+		        	contig = fields[2].split(":")[2];
+		        	
+				    check = false;
+				    for(String c: CONTIGS) {
+				    	if(contig.equals(c)) {
+				        	check = true;
+				        	break;
+				        }
+				    }
+				    if(!check) continue;
+		        	
 		        	transcript_id = fields[0].replaceFirst(">","");
 		        	gene_id = fields[3].split(":")[1];
 		        	
@@ -332,6 +351,8 @@ public class LOFSummaryNodeModel extends NodeModel {
 	private HashMap<String, Gene> readGTFFile(String gtf_file) throws IOException {
 		HashMap<String, Gene> geneid2gene = new HashMap<>();
 		String [] fields, info_fields;
+		String contig = "";
+		boolean check = false;
 		String transcript_id = "";
 		String gene_id = "";
 		String gene_symbol = "";
@@ -345,6 +366,18 @@ public class LOFSummaryNodeModel extends NodeModel {
 		        String line = sc.nextLine();
 		        if(line.startsWith("#")) continue;
 		        fields = line.split("\t");
+		        
+		        
+		        contig = fields[0];
+		        check = false;
+		        for(String c: CONTIGS) {
+		        	if(contig.equals(c)) {
+		        		check = true;
+		        		break;
+		        	}
+		        }
+		        if(!check) continue;
+		        
 		        if(fields[1].equals("protein_coding")) {
 		        	if(fields[8].contains("gene_id") && fields[8].contains("transcript_id") && fields[8].contains("gene_name")) {
 						info_fields = fields[8].split(";");
@@ -412,7 +445,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 	
 	
 	
-	private HashMap<String, HashSet<String>> readGeneSetFile(String file) throws IOException {
+	private HashMap<String, HashSet<String>> readGeneSetFile(String file, HashSet<String> genes) throws IOException {
 		HashMap<String, HashSet<String>> set2genes = new HashMap<>();
 		
 		if(file==null) {
@@ -428,7 +461,11 @@ public class LOFSummaryNodeModel extends NodeModel {
 			fields = line.split("\t");
 			HashSet<String> tmp = new HashSet<>();
 			for(int i = 2; i < fields.length; i++) {
-				tmp.add(fields[i]);
+				if(genes.contains(fields[i])) {
+					tmp.add(fields[i]);
+				} else {
+					logger.debug("No gene information found for: "+fields[i] +" in set "+fields[0]);
+				}
 			}
 			set2genes.put(fields[0], tmp);
 		}

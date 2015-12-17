@@ -99,14 +99,20 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	
     	boolean use_id = !m_use_symbol.getBooleanValue();
     	String ending = "";
+    	if(use_id) {
+    		ending = ".gene_id";
+    	} else {
+    		ending = ".gene_set";
+    	}
+    	
     	RegionSummary rs;
     	if(m_gtf_aff.getStringValue().equals(BASIS[0])) {//computation based on genotypes
     		rs = new RegionSummary(vcf_it, parser, use_id);
     		gene_frequency = rs.getFrequencies();
-    		ending = ".gene_model_gtf.tsv";
+    		ending += ".gene_model_gtf.tsv";
     	} else {
         	gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, use_id);
-    		ending = ".gene_model_aff.tsv";
+    		ending += ".gene_model_aff.tsv";
     	}
     	
 		outfile = IO.replaceFileExtension(vcf_infile, ending);
