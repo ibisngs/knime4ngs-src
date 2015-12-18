@@ -137,6 +137,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	} else if (order_by.equals(METHODS[2]) && hyper != null) {
     		vc = new ValueComparator(hyper);
     	}
+    	
     	Arrays.sort(indices, vc);
     	
     	//get header and arrays to print
@@ -163,6 +164,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		p_values.add(hyper_adj);
     		headers.add("hyper_adj");
     	}
+    	
     	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
     	writeResults(outfile, summary_file, gene_id, headers, p_values, indices, genes, frequencies);
 	}

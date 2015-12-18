@@ -100,7 +100,7 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	    @Override
 	    public int compare(String a, String b) {
-	         if(p_vals.get(a) > p_vals.get(b)) {
+	         if(p_vals.get(a).isNaN()|| p_vals.get(a) > p_vals.get(b)) {
 	        	 return 1; 
 	         }
 	         return -1;

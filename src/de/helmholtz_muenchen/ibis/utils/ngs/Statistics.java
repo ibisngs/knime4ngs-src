@@ -60,6 +60,59 @@ public class Statistics {
     	return res;
     }
     
+    /*
+     * returns same results as getHypergeometricBackground
+     */
+    public double [] getFisherExactBackground(ContingencyTable [] ct, int pop_size, double [] frequencies) {
+    	int [] aff_case = new int[ct.length];
+    	int [] aff_ctrl = new int[ct.length];
+    	int [] un_case = new int[ct.length];
+    	int [] un_ctrl = new int[ct.length];
+    	int [] pop_cases = new int[ct.length];
+    	
+    	ContingencyTable my_table;
+    	for(int i = 0; i < ct.length; i++) {
+    		my_table = ct[i];
+    		aff_case[i] = my_table.getA()+1;
+    		aff_ctrl[i] = my_table.getC()+1;	
+    		un_case[i] = my_table.getB();
+    		un_ctrl[i] = my_table.getD();
+    		pop_cases[i] = (int)Math.round(frequencies[i]*pop_size);
+    	}
+    	
+    	code.clear();
+    	try {
+			r.redirectROutputToFile("/home/ibis/tim.jeske/log",false);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	code.addIntArray("aff_case", aff_case);
+    	code.addIntArray("aff_ctrl", aff_ctrl);
+    	code.addIntArray("un_case", un_case);
+    	code.addIntArray("un_ctrl", un_ctrl);
+    	code.addIntArray("pop_cases", pop_cases);
+    	code.addRCode("df1 <- data.frame(aff_case,un_case,pop_cases,"+pop_size+")");
+    	code.addRCode("df2 <- data.frame(aff_ctrl,un_ctrl,pop_cases,"+pop_size+")");
+    	code.addRCode("z_case_bg<-qnorm(apply(df1,1,function(x) fisher.test(matrix(x,2),alternative=\"greater\")$p.value))");
+    	code.addRCode("z_ctrl_bg<-qnorm(apply(df2,1,function(x) fisher.test(matrix(x,2),alternative=\"greater\")$p.value))");
+    	code.addRCode("res<-pnorm(z_case_bg-z_ctrl_bg)");
+
+		r.runAndReturnResultOnline("res");
+		double [] res = r.getParser().getAsDoubleArray("res");
+		r.deleteTempFiles();
+		
+		for(int i = 0 ; i< res.length; i++) {
+			if(Double.compare(res[i], 0.0) == 0 || Double.compare(res[i], 1.0) == 0) {
+				res[i] = Double.NaN;
+			}
+		}
+		return res;
+    }
+    
+    /*
+     * returns the same results as getFisherExactBackground
+     */
     public double [] getHypergeometricBackground(ContingencyTable [] ct, int pop_size, double [] frequencies) {
     	
     	int [] x_case = new int[ct.length];
@@ -128,8 +181,8 @@ public class Statistics {
     	for(int i = 0; i < ct.length; i++) {
     		my_table = ct[i];
     		//add pseudo counts
-    		x_case[i] = my_table.getA()+1;
-    		x_ctrl[i] = my_table.getC()+1;	
+    		x_case[i] = my_table.getA();
+    		x_ctrl[i] = my_table.getC();	
     		m_case[i] = x_case[i] + my_table.getB();
     		m_ctrl[i] = x_ctrl[i] + my_table.getD();
     		pop_cases[i] = (int)Math.round(frequencies[i]*pop_size);
@@ -141,15 +194,16 @@ public class Statistics {
     	code.addIntArray("m_case", m_case);
     	code.addIntArray("m_ctrl", m_ctrl);
     	code.addIntArray("pop_cases", pop_cases);
-    	code.addRCode("case_bg<-phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F)");
-    	code.addRCode("ctrl_bg<-phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F)");
-//    	code.addRCode("z_case_bg<-qnorm(phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F))");
-//    	code.addRCode("z_ctrl_bg<-qnorm(phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F))");
+//    	code.addRCode("case_bg<-phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F)");
+//    	code.addRCode("ctrl_bg<-phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F)");
+    	code.addRCode("z_case_bg<-qnorm(phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F))");
+    	code.addRCode("z_ctrl_bg<-qnorm(phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F))");
 
-//    	code.addRCode("z_case_bg1<-z_case_bg[is.finite(z_case_bg) | is.finite(z_ctrl_bg)]");
+    	code.addRCode("z_case_bg1<-replace(z_case_bg, !is.finite(z_case_bg) & z_case_bg==z_ctrl_bg,0)");
+    	code.addRCode("z_ctrl_bg1<-replace(z_ctrl_bg, !is.finite(z_ctrl_bg) & z_case_bg==z_ctrl_bg,0)");
 //    	code.addRCode("z_ctrl_bg1<-z_ctrl_bg[is.finite(z_case_bg) | is.finite(z_ctrl_bg)]");
     	
-    	code.addRCode("res<-wilcox.test(case_bg,ctrl_bg,paired=TRUE)");
+    	code.addRCode("res<-wilcox.test(z_case_bg1,z_ctrl_bg1,paired=TRUE)");
 		code.addRCode("p<-res$p.value");
 		r.setRCode(code);
 		
