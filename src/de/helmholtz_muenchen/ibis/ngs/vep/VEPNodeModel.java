@@ -70,7 +70,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	final SettingsModelBoolean m_coding_only = new SettingsModelBoolean(CFGKEY_CODING_ONLY,true);
 	
 	static final String CFGKEY_TRANSCRIPT_SET ="transcript_set";
-	static final String [] TRANSCRIPT_SETS = {"Ensembl","RefSeq","GENCODE Basic"};
+	static final String [] TRANSCRIPT_SETS = {"GENCODE Basic","Ensembl","RefSeq"};
 	final SettingsModelString m_transcript_set = new SettingsModelString(CFGKEY_TRANSCRIPT_SET,"");
 	
 	//advanced options: cache directory, plugin directory, stats type

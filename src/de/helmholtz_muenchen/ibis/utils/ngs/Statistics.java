@@ -1,7 +1,5 @@
 package de.helmholtz_muenchen.ibis.utils.ngs;
 
-import java.io.FileNotFoundException;
-
 import rcaller.RCaller;
 import rcaller.RCaller.FailurePolicy;
 import rcaller.RCode;
@@ -48,12 +46,6 @@ public class Statistics {
     	code.addIntArray("n", n);
     	code.addIntArray("k", k);
     	code.addRCode("res<-phyper(x-1,m,n,k,lower.tail=F)");
-    	try {
-			r.redirectROutputToFile("/home/ibis/tim.jeske/log",false);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     	r.runAndReturnResultOnline("res");
     	double [] res = r.getParser().getAsDoubleArray("res");
 		r.deleteTempFiles();
@@ -81,12 +73,6 @@ public class Statistics {
     	}
     	
     	code.clear();
-    	try {
-			r.redirectROutputToFile("/home/ibis/tim.jeske/log",false);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
     	code.addIntArray("aff_case", aff_case);
     	code.addIntArray("aff_ctrl", aff_ctrl);
     	code.addIntArray("un_case", un_case);

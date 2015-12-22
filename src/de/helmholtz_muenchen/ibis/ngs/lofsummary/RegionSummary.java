@@ -87,18 +87,26 @@ public class RegionSummary {
 			un_ctrl = 0;
 			
 			for(String s: aff.get(gene)) {
-				if(sample_id2affected.containsKey(s) && sample_id2affected.get(s)) {
+				if(sample_id2affected.containsKey(s)) {
+					if(sample_id2affected.get(s)) {
+						aff_case++;
+					} else {
+						aff_ctrl++;
+					}
+				} else if(sample_id2affected.isEmpty()) {
 					aff_case++;
-				} else {
-					aff_ctrl++;
 				}
 			}
 			
 			for(String s: un.get(gene)) {
-				if(sample_id2affected.containsKey(s) && sample_id2affected.get(s)) {
+				if(sample_id2affected.containsKey(s)) {
+					if(sample_id2affected.get(s)) {
+						un_case++;
+					} else {
+						un_ctrl++;
+					}
+				} else if(sample_id2affected.isEmpty()) {
 					un_case++;
-				} else {
-					un_ctrl++;
 				}
 			}
 			
