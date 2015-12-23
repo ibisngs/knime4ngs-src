@@ -21,6 +21,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -48,6 +49,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
 	static final String CFGKEY_CASE_NCOND = "case_ncond";
 	static final String CFGKEY_CONTROL_COND = "control_cond";
 	static final String CFGKEY_CONTROL_NCOND = "control_ncond";
+	static final String CFGKEY_IGNORE_UNOBSERVED = "ignore_unobserved";
 	
 	//model file settings models
     private final SettingsModelString m_model_gene_id = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_MODEL_GENE_ID, "gene_id");
@@ -60,6 +62,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     private final SettingsModelString m_case_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CASE_NCOND, "un_case");
     private final SettingsModelString m_control_cond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_COND, "aff_ctrl");
     private final SettingsModelString m_control_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_NCOND, "un_ctrl");
+    private final SettingsModelBoolean m_ignore_unobserved = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_IGNORE_UNOBSERVED,false);
     
 	protected static final NodeLogger logger = NodeLogger.getLogger(CaseControlAnalyzerNodeModel.class);
     
@@ -176,8 +179,10 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     		case_un = Integer.parseInt(fields[b_index]);
     		control_aff = Integer.parseInt(fields[c_index]);
     		control_un = Integer.parseInt(fields[d_index]);
-    		
-    		result.put(fields[gene_index], new ContingencyTable(case_aff, case_un, control_aff, control_un));
+    		if(m_ignore_unobserved.getBooleanValue() && case_aff == 0 && control_aff == 0) {
+    			continue;
+    		}
+	    	result.put(fields[gene_index], new ContingencyTable(case_aff, case_un, control_aff, control_un));
     	}
     	
     	br.close();
@@ -233,6 +238,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
          m_control_cond.saveSettingsTo(settings);
          m_control_ncond.saveSettingsTo(settings);
          m_pop_size.saveSettingsTo(settings);
+         m_ignore_unobserved.saveSettingsTo(settings);
          saveExtraSettingsTo(settings);
     }
 
@@ -250,6 +256,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     	m_control_cond.loadSettingsFrom(settings);
     	m_control_ncond.loadSettingsFrom(settings);
     	m_pop_size.loadSettingsFrom(settings);
+    	m_ignore_unobserved.loadSettingsFrom(settings);
     	loadExtraValidatedSettingsFrom(settings);
     }
 
@@ -267,6 +274,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
         m_control_cond.validateSettings(settings);
         m_control_ncond.validateSettings(settings);
         m_pop_size.validateSettings(settings);
+        m_ignore_unobserved.validateSettings(settings);
         validateExtraSettings(settings);
     }
     

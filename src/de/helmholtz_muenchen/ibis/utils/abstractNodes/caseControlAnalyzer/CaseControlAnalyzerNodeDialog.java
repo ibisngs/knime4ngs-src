@@ -1,8 +1,10 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -30,6 +32,7 @@ public abstract class CaseControlAnalyzerNodeDialog extends DefaultNodeSettingsP
     private final SettingsModelString m_case_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CASE_NCOND, "un_case");
     private final SettingsModelString m_control_cond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_COND, "aff_ctrl");
     private final SettingsModelString m_control_ncond = new SettingsModelString(CaseControlAnalyzerNodeModel.CFGKEY_CONTROL_NCOND, "un_ctrl");
+    private final SettingsModelBoolean m_ignore_unobserved = new SettingsModelBoolean(CaseControlAnalyzerNodeModel.CFGKEY_IGNORE_UNOBSERVED,false);
     
     /**
      * New pane for configuring the CaseControlAnalyzer node.
@@ -42,6 +45,7 @@ public abstract class CaseControlAnalyzerNodeDialog extends DefaultNodeSettingsP
     	addDialogComponent(new DialogComponentString(m_case_ncond, "Case non-condition column"));
     	addDialogComponent(new DialogComponentString(m_control_cond, "Control condition column"));
     	addDialogComponent(new DialogComponentString(m_control_ncond, "Control non-condition column"));
+    	addDialogComponent(new DialogComponentBoolean(m_ignore_unobserved, "Ignore genes unaffected in cases and controls?"));
     	
     	createNewGroup("Model file settings");
     	addDialogComponent(new DialogComponentString(m_model_gene_id, "Model gene identifier column"));

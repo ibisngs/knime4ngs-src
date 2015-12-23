@@ -188,9 +188,11 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	    @Override
 	    public int compare(Integer index1, Integer index2) {
-	         if(new Double(array[index1]).isNaN() || array[index1] > array[index2]) {
+	    	 if (new Double(array[index1]).isNaN() && new Double(array[index2]).isNaN()) {
+	        	 return 0;
+	         } else if(new Double(array[index1]).isNaN() || array[index1] > array[index2]) {
 	        	 return 1; 
-	         }
+	         } 
 	         return -1;
 	    }
 	}
