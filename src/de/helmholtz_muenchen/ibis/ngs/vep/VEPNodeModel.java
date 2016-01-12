@@ -71,9 +71,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	
 	static final String CFGKEY_TRANSCRIPT_SET ="transcript_set";
 	static final String [] TRANSCRIPT_SETS = {"GENCODE Basic","Ensembl","RefSeq"};
-	final SettingsModelString m_transcript_set = new SettingsModelString(CFGKEY_TRANSCRIPT_SET,"");
+	final SettingsModelString m_transcript_set = new SettingsModelString(CFGKEY_TRANSCRIPT_SET,"GENCODE Basic");
 	
-	//advanced options: cache directory, plugin directory, stats type
+	//advanced options: cache directory, plugin directory, stats type, further plugins
 	static final String CFGKEY_STATS_TYPE = "stats_type";
 	static final String [] STAT_TYPES = {"none", "html", "plain text"};
 	final SettingsModelString m_stats_type = new SettingsModelString(CFGKEY_STATS_TYPE,"");
@@ -83,6 +83,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	
 	static final String CFGKEY_PLUGIN_DIR = "plugin_dir";
 	final SettingsModelString m_plugin_dir = new SettingsModelString(CFGKEY_PLUGIN_DIR, DEF_PLUGIN_DIR);
+	
+	static final String CFGKEY_FURTHER_PLUGINS = "further_plugins";
+	final SettingsModelString m_further_plugins = new SettingsModelString(CFGKEY_FURTHER_PLUGINS, "");
 	
 	//loftee
 	static final String CFGKEY_USE_LOFTEE = "use_loftee";
@@ -197,12 +200,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	cmd += " --sift b";
     	cmd += " --polyphen b";
     	cmd += " --symbol";
-    	cmd += " --numbers";
+//    	cmd += " --numbers";
     	cmd += " --biotype";
-    	cmd += " --total_length";
+//    	cmd += " --total_length";
     	cmd += " --canonical";
     	cmd += " --ccds";
-    	cmd += " --fields Consequence,ALLELE_NUM,Codons,Amino_acids,Gene,SYMBOL,Feature,EXON,PolyPhen,SIFT,Protein_position,BIOTYPE,CANONICAL,CCDS,LoF,LoF_filter,LoF_flags";
+//    	cmd += " --fields Consequence,ALLELE_NUM,Codons,Amino_acids,Gene,SYMBOL,Feature,EXON,PolyPhen,SIFT,Protein_position,BIOTYPE,CANONICAL,CCDS,LoF,LoF_filter,LoF_flags";
     	
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();
@@ -241,6 +244,10 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     			}
     		}
     	}
+    	
+    	//user defined plugins
+    	
+    	cmd += " " + m_further_plugins.getStringValue().trim();
     	
     	String stdOutFile = outfileBase + ".vep.stdout";
     	
@@ -337,6 +344,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_use_cache.saveSettingsTo(settings);
         m_cache_dir.saveSettingsTo(settings);
         m_plugin_dir.saveSettingsTo(settings);
+        m_further_plugins.saveSettingsTo(settings);
         m_use_loftee.saveSettingsTo(settings);
         m_human_ancestor.saveSettingsTo(settings);
         m_conservation_file.saveSettingsTo(settings);
@@ -361,6 +369,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_use_cache.loadSettingsFrom(settings);
         m_cache_dir.loadSettingsFrom(settings);
         m_plugin_dir.loadSettingsFrom(settings);
+        m_further_plugins.loadSettingsFrom(settings);
         m_use_loftee.loadSettingsFrom(settings);
         m_human_ancestor.loadSettingsFrom(settings);
         m_conservation_file.loadSettingsFrom(settings);
@@ -385,6 +394,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         m_use_cache.validateSettings(settings);
         m_cache_dir.validateSettings(settings);
         m_plugin_dir.validateSettings(settings);
+        m_further_plugins.validateSettings(settings);
         m_use_loftee.validateSettings(settings);
         m_human_ancestor.validateSettings(settings);
         m_conservation_file.validateSettings(settings);

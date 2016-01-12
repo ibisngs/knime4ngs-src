@@ -52,6 +52,55 @@ public class Statistics {
     	return res;
     }
     
+public double [] getFisherTwoSided(ContingencyTable [] ct) {
+    	
+    	int [] a = new int[ct.length];
+    	int [] b = new int[ct.length];
+    	int [] c = new int[ct.length];
+    	int [] d = new int[ct.length];
+    	
+    	ContingencyTable my_table;
+    	for(int i = 0; i < ct.length; i++) {
+    		my_table = ct[i];
+    		a[i] = my_table.getA();
+        	b[i] = my_table.getB();
+        	c[i] = my_table.getC();
+        	d[i] = my_table.getD();
+    	}
+    	
+    	code.clear();
+    	code.addIntArray("a", a);
+    	code.addIntArray("b", b);
+    	code.addIntArray("c", c);
+    	code.addIntArray("d", d);
+    	code.addRCode("df<- data.frame(a,b,c,d)");
+    	code.addRCode("res<-apply(df,1,function(x) fisher.test(matrix(x,2))$p.value)");
+    	r.runAndReturnResultOnline("res");
+    	double [] res = r.getParser().getAsDoubleArray("res");
+		r.deleteTempFiles();
+    	return res;
+    }
+    
+    public double [] getWilcoxon(ContingencyTable [] ct) {
+    	
+    	double [] result = new double[ct.length];
+    	double [] res;
+    	
+    	for(int i = 0; i < ct.length; i++) {
+    		ContingencyTable t = ct[i];
+    		code.clear();
+    		code.addRCode("case<-c(rep(1,"+t.getA()+"),rep(0,"+t.getB()+"))");
+    		code.addRCode("ctrl<-c(rep(1,"+t.getC()+"),rep(0,"+t.getD()+"))");
+    		code.addRCode("res<-wilcox.test(case,ctrl)$p.value");
+    		r.runAndReturnResultOnline("res");
+        	res = r.getParser().getAsDoubleArray("res");
+    		r.deleteTempFiles();
+        	result[i] = res[0];
+    	}
+    	
+    	return result;
+    }
+    
     /*
      * returns same results as getHypergeometricBackground
      */
@@ -60,7 +109,8 @@ public class Statistics {
     	int [] aff_ctrl = new int[ct.length];
     	int [] un_case = new int[ct.length];
     	int [] un_ctrl = new int[ct.length];
-    	int [] pop_cases = new int[ct.length];
+    	int [] aff_pop = new int[ct.length];
+    	int [] un_pop = new int[ct.length];
     	
     	ContingencyTable my_table;
     	for(int i = 0; i < ct.length; i++) {
@@ -69,7 +119,8 @@ public class Statistics {
     		aff_ctrl[i] = my_table.getC()+1;	
     		un_case[i] = my_table.getB();
     		un_ctrl[i] = my_table.getD();
-    		pop_cases[i] = (int)Math.round(frequencies[i]*pop_size);
+    		aff_pop[i] = (int)Math.round(frequencies[i]*pop_size);
+    		un_pop[i] = pop_size - aff_pop[i];
     	}
     	
     	code.clear();
@@ -77,9 +128,10 @@ public class Statistics {
     	code.addIntArray("aff_ctrl", aff_ctrl);
     	code.addIntArray("un_case", un_case);
     	code.addIntArray("un_ctrl", un_ctrl);
-    	code.addIntArray("pop_cases", pop_cases);
-    	code.addRCode("df1 <- data.frame(aff_case,un_case,pop_cases,"+pop_size+")");
-    	code.addRCode("df2 <- data.frame(aff_ctrl,un_ctrl,pop_cases,"+pop_size+")");
+    	code.addIntArray("aff_pop", aff_pop);
+    	code.addIntArray("un_pop", un_pop);
+    	code.addRCode("df1 <- data.frame(aff_case,un_case,aff_pop,un_pop)");
+    	code.addRCode("df2 <- data.frame(aff_ctrl,un_ctrl,aff_pop,un_pop)");
     	code.addRCode("z_case_bg<-qnorm(apply(df1,1,function(x) fisher.test(matrix(x,2),alternative=\"greater\")$p.value))");
     	code.addRCode("z_ctrl_bg<-qnorm(apply(df2,1,function(x) fisher.test(matrix(x,2),alternative=\"greater\")$p.value))");
     	code.addRCode("res<-pnorm(z_case_bg-z_ctrl_bg)");
