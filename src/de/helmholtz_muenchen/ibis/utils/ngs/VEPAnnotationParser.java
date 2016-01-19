@@ -78,6 +78,31 @@ public class VEPAnnotationParser implements AnnotationParser {
 		}
 		return gene2allele_num;
 	}
+	
+	public HashMap<String, HashSet<Integer>> getTranscript2AlleleIds (String anno) {
+		if(allele_id_index == -1 || transcript_id_index == -1) {
+			throw new IllegalArgumentException("ALLELE_NUM and/or transcript id have not been annotated by VEP!");
+		}
+		
+		HashMap<String, HashSet<Integer>> t2allele_num = new HashMap<>();
+		int allele_num;
+		String t = "";
+		
+		//iterate over all transcript annotations
+		for(String a : anno.split(",")) {
+			t = a.split("\\|")[transcript_id_index];
+			
+			allele_num = Integer.parseInt(a.split("\\|")[allele_id_index]);
+			if(t2allele_num.containsKey(t)) {
+				t2allele_num.get(t).add(allele_num);
+			} else {
+				HashSet<Integer> tmp = new HashSet<>();
+				tmp.add(allele_num);
+				t2allele_num.put(t,tmp);
+			}
+		}
+		return t2allele_num;
+	}
 
 	@Override
 	public String getAnnId() {

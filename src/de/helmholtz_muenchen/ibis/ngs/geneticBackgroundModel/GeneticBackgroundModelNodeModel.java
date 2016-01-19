@@ -26,7 +26,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.RegionSummary;
+import de.helmholtz_muenchen.ibis.ngs.lofsummary.GeneSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -105,9 +105,9 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     		ending = ".gene_set";
     	}
     	
-    	RegionSummary rs;
+    	GeneSummary rs;
     	if(m_gtf_aff.getStringValue().equals(BASIS[0])) {//computation based on genotypes
-    		rs = new RegionSummary(vcf_it, parser, use_id);
+    		rs = new GeneSummary(vcf_it, parser, use_id);
     		gene_frequency = rs.getFrequencies();
     		ending += ".gene_model_gtf.tsv";
     	} else {

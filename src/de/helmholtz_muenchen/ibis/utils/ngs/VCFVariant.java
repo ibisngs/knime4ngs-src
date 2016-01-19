@@ -3,6 +3,7 @@ package de.helmholtz_muenchen.ibis.utils.ngs;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 
 public class VCFVariant {
 	
@@ -164,31 +165,53 @@ public class VCFVariant {
 	}
 	
 	public int getHomCount(int allele_id) {
+		return this.getHomCount(allele_id, sample_genotype.keySet());
+	}
+	
+	public int getHomCount(int allele_id, Set<String> ids) {
 		int res = 0;
-		String gt;
-		for(String s: sample_genotype.values()) {
-			gt = s.split(":")[0];
-			if(gt.length()!=3) {
-				continue;
+		String gt,s;
+		for(String id: sample_genotype.keySet()) {
+			if(ids.contains(id)) {
+				s = sample_genotype.get(id);
+				gt = s.split(":")[0];
+				if(gt.length()!=3) {
+					continue;
+				}
+				if(Character.getNumericValue(gt.charAt(0)) == allele_id && Character.getNumericValue(gt.charAt(2))== allele_id) {
+					res++;
+				}
 			}
-			if(Character.getNumericValue(gt.charAt(0)) == allele_id && Character.getNumericValue(gt.charAt(2))== allele_id) {
-				res++;
-			}
+			
 		}
 		return res;
 	}
 	
 	public int getHetCount(int allele_id) {
+		return this.getHetCount(allele_id, sample_genotype.keySet());
+	}
+	
+	/**
+	 * get number of heterozygous individuals with respect to a given allele
+	 * @param allele_id defines the heterozygous allele
+	 * @param ids indicates the set of individuals to analyze
+	 * @return number of heterozygous individuals 
+	 */
+	public int getHetCount(int allele_id, Set<String> ids) {
 		int res = 0;
-		String gt;
-		for(String s: sample_genotype.values()) {
-			gt = s.split(":")[0];
-			if(gt.length()!=3) {
-				continue;
+		String gt,s;
+		for(String id: sample_genotype.keySet()) {
+			if(ids.contains(id)) {
+				s = sample_genotype.get(id);
+				gt = s.split(":")[0];
+				if(gt.length()!=3) {
+					continue;
+				}
+				if(Character.getNumericValue(gt.charAt(0)) == allele_id ^ Character.getNumericValue(gt.charAt(2))== allele_id) {
+					res++;
+				}
 			}
-			if(Character.getNumericValue(gt.charAt(0)) == allele_id ^ Character.getNumericValue(gt.charAt(2))== allele_id) {
-				res++;
-			}
+			
 		}
 		return res;
 	}
@@ -196,6 +219,36 @@ public class VCFVariant {
 	public boolean isAffected(String sample, int id) {
 		return sample_genotype.get(sample).split(":")[0].contains(id+"");
 	}
+	
+
+	
+//	public Short getShortAff(String sample, int id) {
+//		String gt = sample_genotype.get(sample).split(":")[0];
+//
+//		if(gt.contains(".")) {
+//			return -1;
+//		} else if(gt.contains("|")) { //phased genotypes
+//			int mat = Integer.parseInt(gt.split("\\|")[0]);
+//			int pat = Integer.parseInt(gt.split("\\|")[1]);
+//			if(mat == id && pat == id) {
+//				return 4;
+//			} else if(mat == id) {
+//				return 1;
+//			} else if(pat == id) {
+//				return 2;
+//			}
+//		} else if(gt.contains("/")){ //not phased
+//			int a = Integer.parseInt(gt.split("/")[0]);
+//			int b = Integer.parseInt(gt.split("/")[1]);
+//			
+//			if(a == id && b == id) {
+//				return 4;
+//			} else if(a==id || b == id) {
+//				return 3;
+//			}
+//		}
+//		return 0; //the sample does not carry the allele with the given id
+//	}
 	
 	public String getAff(String sample, int id) {
 		String gt = sample_genotype.get(sample).split(":")[0];
@@ -222,6 +275,6 @@ public class VCFVariant {
 				return "het";
 			}
 		}
-		return "undef";
+		return "unaff"; //the sample does not carry the allele with the given id
 	}
 }

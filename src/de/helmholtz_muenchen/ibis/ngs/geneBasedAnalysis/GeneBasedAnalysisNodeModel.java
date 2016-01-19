@@ -232,6 +232,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		}
     	}
     	
+    	
     	for(String stat : headers) {
     		header += "\t" + stat;
     	}
@@ -246,6 +247,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
     	bw.write(header);
     	bw.newLine();
+
 
     	for(int i :indices) {
     		line = content.get(genes[i]);

@@ -10,7 +10,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 
-public class RegionSummary {
+public class GeneSummary {
 	
 	ArrayList<String> sample_ids;
 	HashMap<String, Set<String>> unaffected_samples = new HashMap<>();
@@ -23,7 +23,7 @@ public class RegionSummary {
 	 * @param vcf
 	 * @param ap
 	 */
-	public RegionSummary(VCFFile vcf, AnnotationParser ap, boolean use_id) {
+	public GeneSummary(VCFFile vcf, AnnotationParser ap, boolean use_id) {
 		unaffected_samples = new HashMap<>();
 		affected_samples = new HashMap<>();
 		sample_ids = vcf.getSampleIds();

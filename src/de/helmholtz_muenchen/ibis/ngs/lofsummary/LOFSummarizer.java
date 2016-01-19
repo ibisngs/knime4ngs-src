@@ -16,10 +16,21 @@ import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 
 public class LOFSummarizer {
 	
-	public static void getVarSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, String outfile) throws IOException {
+	public static void getVarSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
+		
+		//generate set of cases and controls
+		HashSet<String> cases = new HashSet<>();
+		HashSet<String> ctrls = new HashSet<>();
+		for(String s: sampleid2case.keySet()) {
+			if(sampleid2case.get(s)) {
+				cases.add(s);
+			} else {
+				ctrls.add(s);
+			}
+		}
 		
 		//initialize header
-		String header = "chr\tpos\tid\tref_allele\talt_allele\tAF\tobs_het\tobs_hom\tgene_id\tgene_symbol\teffect\tlof_trans\tall_trans\tconsequence";
+		String header = "chr\tpos\tid\tref_allele\talt_allele\tAF\tobs_het\tobs_hom\tgene_id\tgene_symbol\teffect\tlof_trans\tall_trans\tconsequence\tobs_hom_case\tobs_hom_ctrl";
 		
 		//initialize writer
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
@@ -71,7 +82,7 @@ public class LOFSummarizer {
 					all_trans = all_trans.replaceFirst(",", "");
 					
 					annos = ap.getAnnotations(i, anno);
-					alt_line = alt_alleles[i-1]+"\t"+af+"\t"+var.getHetCount(i)+"\t"+var.getHomCount(i)+"\t"+gene_ids+"\t"+gene_symbols+"\t"+effects+"\t"+lof_trans+"\t"+all_trans+"\t"+annos.toString();
+					alt_line = alt_alleles[i-1]+"\t"+af+"\t"+var.getHetCount(i)+"\t"+var.getHomCount(i)+"\t"+gene_ids+"\t"+gene_symbols+"\t"+effects+"\t"+lof_trans+"\t"+all_trans+"\t"+annos.toString()+"\t"+var.getHomCount(i,cases)+"\t"+var.getHomCount(i,ctrls);
 					bw.write(var_line + alt_line);
 					bw.newLine();	
 				}
@@ -90,7 +101,7 @@ public class LOFSummarizer {
 			else nr_controls++;
 		}
 		
-		RegionSummary rs = new RegionSummary(vcf,ap, true);
+		GeneSummary rs = new GeneSummary(vcf,ap, true);
 		HashMap<String, ContingencyTable> tables = rs.getTables(sampleid2case);
 		
 		//writing sample counts for each gene
@@ -134,7 +145,7 @@ public class LOFSummarizer {
 		HashMap<String, String> t2aff;
 		HashMap<String, HashMap<String, String>> gene2t2aff;
 		ArrayList<String> samples = vcf.getSampleIds();
-		String aff;
+		String aff = "undef";
 		
 		while(vcf.hasNext()) {
 			var = vcf.next();
@@ -144,7 +155,8 @@ public class LOFSummarizer {
 				gene2trans = ap.getGene2TranscriptIds(Integer.parseInt(id), anno);
 				
 				for(String s: samples) {
-					if(!(aff = var.getAff(s,Integer.parseInt(id))).equals("undef")) {
+					aff = var.getAff(s,Integer.parseInt(id));
+					if(!aff.equals("undef") && !aff.equals("unaff")) {
 //					if(var.isAffected(s,Integer.parseInt(id))) {
 						
 						if(sample2gene2transcript2aff.containsKey(s)) {
@@ -224,25 +236,126 @@ public class LOFSummarizer {
 		bw.close();
 	}
 	
+	/*
+	 * write output as matrix, samples as header, new row for each transcript
+	 */
+	public static void getMatrix(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case,  String outfile) throws IOException {
+		
+		HashMap<Boolean,String> state = new HashMap<>();
+		state.put(true, "case");
+		state.put(false, "control");
+		
+		//create map transcript id -> gene id
+		HashMap<String,String> transcript2gene = new HashMap<>();
+		for(Gene g: genes.values()) {
+			for(String t: g.getTranscripts()) {
+				transcript2gene.put(t, g.getId());
+			}
+		}
+		
+		ArrayList<String> samples = vcf.getSampleIds();
+		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+		
+		//write header
+		StringBuilder header = new StringBuilder("transcript_id");
+		for(String s:samples) {
+			header.append("\t"+s+"_"+state.get(sampleid2case.get(s)));
+		}
+		bw.write(header.toString());
+		bw.newLine();
+		
+		//create matrix
+		HashMap<String, HashMap<String,String>> transcript2sample2aff = new HashMap<>();
+		HashMap<String, String> sample2aff;
+		
+		VCFVariant var;
+		String anno, aff, gene;
+		String chr = "";
+		StringBuilder tmp = new StringBuilder();
+		
+		while(vcf.hasNext()) {
+			var = vcf.next();
+			
+			//write results
+			if(!var.getChrom().equals(chr)) {
+				chr = var.getChrom();
+				
+				for(String t: transcript2sample2aff.keySet()) {
+					gene = transcript2gene.get(t);
+					tmp = new StringBuilder(t+"_"+gene+"_"+genes.get(gene).getSymbol());
+					sample2aff = transcript2sample2aff.get(t);
+					for(String s: samples) {
+						tmp.append("\t"+sample2aff.get(s));
+					}
+					bw.write(tmp.toString());
+					bw.newLine();
+				}
+				transcript2sample2aff.clear();
+			}
+			
+			anno = var.getInfoField(ap.getAnnId());
+			
+			HashMap<String, HashSet<Integer>> t2allele_ids = ap.getTranscript2AlleleIds(anno);
+			
+			for(String t: t2allele_ids.keySet()) {
+				
+				//get sample2aff
+				if(transcript2sample2aff.containsKey(t)) {
+					sample2aff = transcript2sample2aff.get(t);
+				} else {
+					sample2aff = new HashMap<>();
+					for(String s: samples) {
+						sample2aff.put(s, "unaff"); //default state
+					}
+				}
+				
+				for(Integer id: t2allele_ids.get(t)) {
+					
+					if(var.getAF(id)>0.0) {
+						for(String s: samples) {
+							aff = var.getAff(s,id);
+							sample2aff.put(s, getAff(sample2aff.get(s), aff));
+						}
+					}
+				}
+				
+				transcript2sample2aff.put(t, sample2aff);
+			}
+		}
+		
+		for(String t: transcript2sample2aff.keySet()) {
+			gene = transcript2gene.get(t);
+			tmp = new StringBuilder(t+"_"+gene+"_"+genes.get(gene).getSymbol());
+			sample2aff = transcript2sample2aff.get(t);
+			for(String s: samples) {
+				tmp.append("\t"+sample2aff.get(s));
+			}
+			bw.write(tmp.toString());
+			bw.newLine();
+		}
+		bw.close();
+	}
+	
 	private static String getAff(String a, String b) {
 		if(a.equals("het") && b.equals("het")) {
 			return "pot_comp";
 		} else if(a.equals(b)) {
 			return a;
-		} else if(a.equals("")) {
+		} else if(a.equals("unaff")) {
 			return b;
-		} else if(b.equals("")) {
+		} else if(b.equals("unaff")) {
 			return a;
-		} else if(a.equals("hom") || b.equals("hom")) {
+		}  else if(a.equals("hom") || b.equals("hom")) {
 			return "hom";
 		} else if(a.equals("comp") || b.equals("comp")) {
 			return "comp";
 		} else if (a.equals("pot_comp") || b.equals("pot_comp")) {
 			return "pot_comp";
+		} else if(a.equals("het") || b.equals("het")) {
+			return "het";
 		} else if((a.equals("mat") && b.equals("pat")) ||(a.equals("pat") && b.equals("mat"))) {
 			return "comp";
 		}
-		System.out.println("returned undef for: "+a+" "+b);
 		return "undef";
 	}
 	
@@ -260,7 +373,7 @@ public class LOFSummarizer {
 		
 		String line;
 		
-		RegionSummary rs = new RegionSummary(vcf,ap,false);
+		GeneSummary rs = new GeneSummary(vcf,ap,false);
 		rs.groupBy(set2genes);
 		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
 		

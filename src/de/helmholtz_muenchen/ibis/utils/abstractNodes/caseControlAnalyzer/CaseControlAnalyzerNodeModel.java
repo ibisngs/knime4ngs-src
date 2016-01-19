@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -82,7 +83,11 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     	HashMap<String, ContingencyTable> gene2table;
     	
     	summary_file = inData[0].iterator().next().getCell(0).toString();
-    	gene2table = readSummaryFile(summary_file, m_summary_gene_id.getStringValue(), m_case_cond.getStringValue(), m_case_ncond.getStringValue(), m_control_cond.getStringValue(), m_control_ncond.getStringValue());
+    	if(summary_file.contains("gene_summary")) {
+    		gene2table = readSummaryFile(summary_file, m_summary_gene_id.getStringValue(), m_case_cond.getStringValue(), m_case_ncond.getStringValue(), m_control_cond.getStringValue(), m_control_ncond.getStringValue());
+    	} else {
+    		gene2table = readMatrixFile(summary_file);
+    	}
     	
     	model_file = inData[1].iterator().next().getCell(0).toString();
     	gene2frequency = readModelFile(model_file, m_model_gene_id.getStringValue(), m_freq.getStringValue());
@@ -138,6 +143,83 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     	return result;
     }
     
+	private HashMap<String, ContingencyTable> readMatrixFile(String file) throws IOException {
+		HashMap<String, ContingencyTable> result = new HashMap<>();
+		
+		HashMap<String, HashSet<String>> gene2aff_cases = new HashMap<>();
+		HashMap<String, HashSet<String>> gene2un_cases = new HashMap<>();
+		HashMap<String, HashSet<String>> gene2aff_ctrls = new HashMap<>();
+		HashMap<String, HashSet<String>> gene2un_ctrls = new HashMap<>();
+		HashSet<String> cases = new HashSet<>();
+		HashSet<String> ctrls = new HashSet<>();
+		
+		BufferedReader br = Files.newBufferedReader(Paths.get(file));
+		
+		String [] header = br.readLine().split("\t");
+		for(int i = 1; i < header.length; i++) {
+			if(header[i].contains("case")) {
+				cases.add(header[i]);
+			} else if(header[i].contains("control")) {
+				ctrls.add(header[i]);
+			}
+		}
+		
+		String line;
+		String [] fields;
+		String gene;
+		HashSet<String> tmp;
+		while((line=br.readLine())!=null) {
+			fields = line.split("\t");
+			gene = fields[0].split("_")[1];
+			if(!gene2aff_ctrls.containsKey(gene)) {
+				gene2aff_ctrls.put(gene, new HashSet<>());
+			}
+			if(!gene2aff_cases.containsKey(gene)) {
+				gene2aff_cases.put(gene, new HashSet<>());
+			}
+			if(!gene2un_ctrls.containsKey(gene)) {
+				gene2un_ctrls.put(gene, new HashSet<>(ctrls));
+			}
+			if(!gene2un_cases.containsKey(gene)) {
+				gene2un_cases.put(gene, new HashSet<>(cases));
+			}
+			
+			for(int i = 1; i < fields.length; i++) {
+				if(fields[i].equals("het") || fields[i].equals("hom") || fields[i].equals("pot_comp")) {
+					if(header[i].contains("case")) {
+						tmp = gene2aff_cases.get(gene);
+						tmp.add(header[i]);
+						gene2aff_cases.put(gene, tmp);
+						gene2un_cases.get(gene).remove(header[i]);
+					} else if(header[i].contains("control")) {
+						tmp = gene2aff_ctrls.get(gene);
+						tmp.add(header[i]);
+						gene2aff_ctrls.put(gene, tmp);
+						gene2un_ctrls.get(gene).remove(header[i]);
+					}
+				} else if(fields[i].equals("undef")) {
+					if(header[i].contains("case")) {
+						gene2un_cases.get(gene).remove(header[i]);
+					} else if(header[i].contains("control")) {
+						gene2un_ctrls.get(gene).remove(header[i]);
+					}
+				}
+			}
+		}
+		br.close();
+		
+		int case_aff, control_aff;
+		for(String g: gene2un_ctrls.keySet()) {
+			case_aff = gene2aff_cases.get(g).size();
+			control_aff = gene2aff_ctrls.get(g).size();
+			if(m_ignore_unobserved.getBooleanValue() && case_aff == 0 && control_aff == 0) {
+    			continue;
+    		}
+			result.put(g, new ContingencyTable(case_aff,gene2un_cases.get(g).size(),control_aff,gene2un_ctrls.get(g).size()));
+		}
+		return result;
+	}
+	
     private HashMap<String, ContingencyTable> readSummaryFile(String file, String gene_id, String case_cond, String case_ncond, String control_cond, String control_ncond) throws IOException, InvalidSettingsException {
     	HashMap<String, ContingencyTable> result = new HashMap<>();
     	
