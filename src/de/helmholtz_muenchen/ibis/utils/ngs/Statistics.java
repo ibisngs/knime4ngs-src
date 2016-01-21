@@ -24,35 +24,39 @@ public class Statistics {
 		r.stopStreamConsumers();
 	}
     
-    public double [] getFisherOneTailedGreater(ContingencyTable [] ct) {
-    	
-    	int [] x = new int[ct.length];
-    	int [] m = new int[ct.length];
-    	int [] n = new int[ct.length];
-    	int [] k = new int[ct.length];
-    	
-    	ContingencyTable my_table;
-    	for(int i = 0; i < ct.length; i++) {
-    		my_table = ct[i];
-    		x[i] = my_table.getA(); //+1;
-        	m[i] = x[i] + my_table.getB();
-        	n[i] = my_table.getC() + my_table.getD();
-        	k[i] = x[i] + my_table.getC();
-    	}
-    	
-    	code.clear();
-    	code.addIntArray("x", x);
-    	code.addIntArray("m", m);
-    	code.addIntArray("n", n);
-    	code.addIntArray("k", k);
-    	code.addRCode("res<-phyper(x-1,m,n,k,lower.tail=F)");
-    	r.runAndReturnResultOnline("res");
-    	double [] res = r.getParser().getAsDoubleArray("res");
-		r.deleteTempFiles();
-    	return res;
-    }
+//    public double [] getFisherOneTailedGreater(ContingencyTable [] ct) {
+//    	
+//    	int [] x = new int[ct.length];
+//    	int [] m = new int[ct.length];
+//    	int [] n = new int[ct.length];
+//    	int [] k = new int[ct.length];
+//    	
+//    	ContingencyTable my_table;
+//    	for(int i = 0; i < ct.length; i++) {
+//    		my_table = ct[i];
+//    		x[i] = my_table.getA(); //+1;
+//        	m[i] = x[i] + my_table.getB();
+//        	n[i] = my_table.getC() + my_table.getD();
+//        	k[i] = x[i] + my_table.getC();
+//    	}
+//    	
+//    	code.clear();
+//    	code.addIntArray("x", x);
+//    	code.addIntArray("m", m);
+//    	code.addIntArray("n", n);
+//    	code.addIntArray("k", k);
+//    	code.addRCode("res<-phyper(x-1,m,n,k,lower.tail=F)");
+//    	r.runAndReturnResultOnline("res");
+//    	double [] res = r.getParser().getAsDoubleArray("res");
+//		r.deleteTempFiles();
+//    	return res;
+//    }
     
-public double [] getFisherTwoSided(ContingencyTable [] ct) {
+    public double [] getFisherTest(ContingencyTable [] ct, String alternative) {
+    	
+    	if(!(alternative.equals("greater") || alternative.equals("less"))) {
+    		alternative = "two.sided";
+    	}
     	
     	int [] a = new int[ct.length];
     	int [] b = new int[ct.length];
@@ -74,32 +78,32 @@ public double [] getFisherTwoSided(ContingencyTable [] ct) {
     	code.addIntArray("c", c);
     	code.addIntArray("d", d);
     	code.addRCode("df<- data.frame(a,b,c,d)");
-    	code.addRCode("res<-apply(df,1,function(x) fisher.test(matrix(x,2))$p.value)");
+    	code.addRCode("res<-apply(df,1,function(x) fisher.test(matrix(x,2),alternative=\""+alternative+"\")$p.value)");
     	r.runAndReturnResultOnline("res");
     	double [] res = r.getParser().getAsDoubleArray("res");
 		r.deleteTempFiles();
     	return res;
     }
     
-    public double [] getWilcoxon(ContingencyTable [] ct) {
-    	
-    	double [] result = new double[ct.length];
-    	double [] res;
-    	
-    	for(int i = 0; i < ct.length; i++) {
-    		ContingencyTable t = ct[i];
-    		code.clear();
-    		code.addRCode("case<-c(rep(1,"+t.getA()+"),rep(0,"+t.getB()+"))");
-    		code.addRCode("ctrl<-c(rep(1,"+t.getC()+"),rep(0,"+t.getD()+"))");
-    		code.addRCode("res<-wilcox.test(case,ctrl)$p.value");
-    		r.runAndReturnResultOnline("res");
-        	res = r.getParser().getAsDoubleArray("res");
-    		r.deleteTempFiles();
-        	result[i] = res[0];
-    	}
-    	
-    	return result;
-    }
+//    public double [] getWilcoxon(ContingencyTable [] ct) {
+//    	
+//    	double [] result = new double[ct.length];
+//    	double [] res;
+//    	
+//    	for(int i = 0; i < ct.length; i++) {
+//    		ContingencyTable t = ct[i];
+//    		code.clear();
+//    		code.addRCode("case<-c(rep(1,"+t.getA()+"),rep(0,"+t.getB()+"))");
+//    		code.addRCode("ctrl<-c(rep(1,"+t.getC()+"),rep(0,"+t.getD()+"))");
+//    		code.addRCode("res<-wilcox.test(case,ctrl)$p.value");
+//    		r.runAndReturnResultOnline("res");
+//        	res = r.getParser().getAsDoubleArray("res");
+//    		r.deleteTempFiles();
+//        	result[i] = res[0];
+//    	}
+//    	
+//    	return result;
+//    }
     
     /*
      * returns same results as getHypergeometricBackground
@@ -232,35 +236,15 @@ public double [] getFisherTwoSided(ContingencyTable [] ct) {
     	code.addIntArray("m_case", m_case);
     	code.addIntArray("m_ctrl", m_ctrl);
     	code.addIntArray("pop_cases", pop_cases);
-//    	code.addRCode("case_bg<-phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F)");
-//    	code.addRCode("ctrl_bg<-phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F)");
     	code.addRCode("z_case_bg<-qnorm(phyper(x_case-1,m_case,"+pop_size+",pop_cases+x_case,lower.tail=F))");
     	code.addRCode("z_ctrl_bg<-qnorm(phyper(x_ctrl-1,m_ctrl,"+pop_size+",pop_cases+x_ctrl,lower.tail=F))");
 
     	code.addRCode("z_case_bg1<-replace(z_case_bg, !is.finite(z_case_bg) & z_case_bg==z_ctrl_bg,0)");
     	code.addRCode("z_ctrl_bg1<-replace(z_ctrl_bg, !is.finite(z_ctrl_bg) & z_case_bg==z_ctrl_bg,0)");
-//    	code.addRCode("z_ctrl_bg1<-z_ctrl_bg[is.finite(z_case_bg) | is.finite(z_ctrl_bg)]");
     	
     	code.addRCode("res<-wilcox.test(z_case_bg1,z_ctrl_bg1,paired=TRUE)");
 		code.addRCode("p<-res$p.value");
 		r.setRCode(code);
-		
-		//debugging
-//		if(set.equals("SECRETION_BY_CELL")) {
-//			System.out.println("x_case");
-//			System.out.println(Arrays.toString(x_case));
-//			
-//			r.runAndReturnResultOnline("z_case_bg");
-//			System.out.println("z_case_bg");
-//			System.out.println(Arrays.toString(r.getParser().getAsDoubleArray("z_case_bg")));
-//			
-//			System.out.println("x_ctrl");
-//			System.out.println(Arrays.toString(x_ctrl));
-//			r.runAndReturnResultOnline("z_ctrl_bg");
-//			System.out.println("z_ctrl_bg");
-//			System.out.println(Arrays.toString(r.getParser().getAsDoubleArray("z_ctrl_bg")));
-//		}
-		
 		r.runAndReturnResultOnline("p");
 		double res = r.getParser().getAsDoubleArray("p")[0];
 		r.deleteTempFiles();
@@ -268,60 +252,45 @@ public double [] getFisherTwoSided(ContingencyTable [] ct) {
 
     }
     
-    public double [] getBinomialBackground(ContingencyTable [] ct, double [] bg_freq, double pseudo_freq) {
-    	
-    	int [] case_aff = new int[ct.length];
-    	int [] n_cases = new int[ct.length];
-    	int [] control_aff = new int[ct.length];
-    	int [] n_controls = new int[ct.length];
-    	
-    	ContingencyTable my_table;
-    	for(int i = 0; i < ct.length; i++) {
-    		my_table = ct[i];
-    		//add pseudo counts
-        	case_aff[i] = my_table.getA();
-        	n_cases[i] = my_table.getA()+my_table.getB() +1;
-        	control_aff[i] = my_table.getC();
-        	n_controls[i] = my_table.getC() + my_table.getD()+1;
-        	bg_freq[i] = (bg_freq[i] +pseudo_freq)/(1.0+pseudo_freq);
-    	}
-    	
-//    	int exp_cases = (int)(bg_freq * n_cases);
-//    	int exp_controls = (int)(bg_freq * n_controls);
-//    	if(exp_cases > case_aff) {
-//    		code.addRCode("z_case_bg<--qnorm(pbinom("+case_aff+","+n_cases+","+bg_freq+",lower.tail=T))");
-//    	} else {
-//    		code.addRCode("z_case_bg<-qnorm(pbinom("+case_aff+","+n_cases+","+bg_freq+",lower.tail=F))");
+//    public double [] getBinomialBackground(ContingencyTable [] ct, double [] bg_freq, double pseudo_freq) {
+//    	
+//    	int [] case_aff = new int[ct.length];
+//    	int [] n_cases = new int[ct.length];
+//    	int [] control_aff = new int[ct.length];
+//    	int [] n_controls = new int[ct.length];
+//    	
+//    	ContingencyTable my_table;
+//    	for(int i = 0; i < ct.length; i++) {
+//    		my_table = ct[i];
+//    		//add pseudo counts
+//        	case_aff[i] = my_table.getA();
+//        	n_cases[i] = my_table.getA()+my_table.getB() +1;
+//        	control_aff[i] = my_table.getC();
+//        	n_controls[i] = my_table.getC() + my_table.getD()+1;
+//        	bg_freq[i] = (bg_freq[i] +pseudo_freq)/(1.0+pseudo_freq);
 //    	}
-//		
-//    	if(exp_controls > control_aff) {
-//    		code.addRCode("z_ctrl_bg<--qnorm(pbinom("+control_aff+","+n_controls+","+bg_freq+",lower.tail=T))");
+//    	
+//    	code.clear();
+//    	code.addIntArray("case_aff", case_aff);
+//    	code.addIntArray("control_aff",control_aff);
+//    	code.addIntArray("n_cases", n_cases);
+//    	code.addIntArray("n_controls", n_controls);
+//    	code.addDoubleArray("bg_freq", bg_freq);
+//    	code.addRCode("z_case_bg<-qnorm(pbinom(case_aff,n_cases,bg_freq,lower.tail=F))");
+//    	code.addRCode("z_ctrl_bg<-qnorm(pbinom(control_aff,n_controls,bg_freq,lower.tail=F))");
+//		code.addRCode("res<-pnorm(z_case_bg-z_ctrl_bg)");
 //
-//    	} else {
-//    		code.addRCode("z_ctrl_bg<-qnorm(pbinom("+control_aff+","+n_controls+","+bg_freq+",lower.tail=F))");
-//    	}
-    	
-    	code.clear();
-    	code.addIntArray("case_aff", case_aff);
-    	code.addIntArray("control_aff",control_aff);
-    	code.addIntArray("n_cases", n_cases);
-    	code.addIntArray("n_controls", n_controls);
-    	code.addDoubleArray("bg_freq", bg_freq);
-    	code.addRCode("z_case_bg<-qnorm(pbinom(case_aff,n_cases,bg_freq,lower.tail=F))");
-    	code.addRCode("z_ctrl_bg<-qnorm(pbinom(control_aff,n_controls,bg_freq,lower.tail=F))");
-		code.addRCode("res<-pnorm(z_case_bg-z_ctrl_bg)");
-
-		r.runAndReturnResultOnline("res");
-		double [] res = r.getParser().getAsDoubleArray("res");
-		r.deleteTempFiles();
-		
-		for(int i = 0 ; i< res.length; i++) {
-			if(Double.compare(res[i], 0.0) == 0 || Double.compare(res[i], 1.0) == 0) {
-				res[i] = Double.NaN;
-			}
-		}
-		return res;
-    }
+//		r.runAndReturnResultOnline("res");
+//		double [] res = r.getParser().getAsDoubleArray("res");
+//		r.deleteTempFiles();
+//		
+//		for(int i = 0 ; i< res.length; i++) {
+//			if(Double.compare(res[i], 0.0) == 0 || Double.compare(res[i], 1.0) == 0) {
+//				res[i] = Double.NaN;
+//			}
+//		}
+//		return res;
+//    }
     
     public double [] adjustP(double [] a, String method) {
     	code.clear();
