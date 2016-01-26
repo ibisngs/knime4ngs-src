@@ -91,50 +91,50 @@ public class LOFSummarizer {
 		bw.close();
 	}
 	
-	public static void getGeneSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
-		
-		int nr_cases = 0;
-		int nr_controls = 0;
-		
-		for(boolean a: sampleid2case.values()) {
-			if(a) nr_cases++;
-			else nr_controls++;
-		}
-		
-		GeneSummary rs = new GeneSummary(vcf,ap, true);
-		HashMap<String, ContingencyTable> tables = rs.getTables(sampleid2case);
-		
-		//writing sample counts for each gene
-		
-		//initialize header
-		String header = "gene_id\tgene_symbol\taff_case\taff_ctrl\tun_case\tun_ctrl";
-
-		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
-		bw.write(header);
-		bw.newLine();
-		
-		String line;
-		
-		
-//		for(String gene: tables.keySet()) {
-//			line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+tables.get(gene).verticalToString();
+//	public static void getGeneSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
+//		
+//		int nr_cases = 0;
+//		int nr_controls = 0;
+//		
+//		for(boolean a: sampleid2case.values()) {
+//			if(a) nr_cases++;
+//			else nr_controls++;
+//		}
+//		
+//		GeneSummary rs = new GeneSummary(vcf,ap, true);
+//		HashMap<String, ContingencyTable> tables = rs.getTables(sampleid2case);
+//		
+//		//writing sample counts for each gene
+//		
+//		//initialize header
+//		String header = "gene_id\tgene_symbol\taff_case\taff_ctrl\tun_case\tun_ctrl";
+//
+//		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+//		bw.write(header);
+//		bw.newLine();
+//		
+//		String line;
+//		
+//		
+////		for(String gene: tables.keySet()) {
+////			line = gene+"\t"+genes.get(gene).getSymbol()+"\t"+tables.get(gene).verticalToString();
+////			bw.write(line);
+////			bw.newLine();
+////		}
+//		
+//		for(String gene: genes.keySet()) {
+//			line = gene+"\t"+genes.get(gene).getSymbol();
+//			if(tables.containsKey(gene)) {
+//				line += "\t"+tables.get(gene).verticalToString();
+//			} else {
+//				line += "\t"+new ContingencyTable(0,nr_cases,0,nr_controls).verticalToString();
+//			}
 //			bw.write(line);
 //			bw.newLine();
 //		}
-		
-		for(String gene: genes.keySet()) {
-			line = gene+"\t"+genes.get(gene).getSymbol();
-			if(tables.containsKey(gene)) {
-				line += "\t"+tables.get(gene).verticalToString();
-			} else {
-				line += "\t"+new ContingencyTable(0,nr_cases,0,nr_controls).verticalToString();
-			}
-			bw.write(line);
-			bw.newLine();
-		}
-		
-		bw.close();
-	}
+//		
+//		bw.close();
+//	}
 
 	public static void getSampleSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, String outfile) throws IOException {
 		HashMap<String, HashMap<String, HashMap<String,String>>> sample2gene2transcript2aff = new HashMap<>();

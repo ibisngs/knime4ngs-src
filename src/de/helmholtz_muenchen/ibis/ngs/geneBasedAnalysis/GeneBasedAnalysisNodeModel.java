@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
@@ -68,10 +68,12 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     
 	@Override
 	protected void performAnalysis(BufferedDataTable[] inData, ExecutionContext exec,
-			HashMap<String, Double> gene2frequency, int pop_size, HashMap<String, ContingencyTable> gene2table, String gene_id) throws IOException {
+			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms) throws IOException {
+		
+		HashMap<String, ContingencyTable> gene2table = ms.toTables();
+		
 		Statistics stats = new Statistics();
     	
-    	String summary_file;
     	
     	String [] genes;
     	ContingencyTable [] tables;
@@ -85,8 +87,8 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	double [] hyper = null;
     	double [] hyper_adj = null;
     	
-    	summary_file = inData[0].iterator().next().getCell(0).toString();
-    	outfile = IO.replaceFileExtension(summary_file, ".extended.tsv");
+    	String summary_file = inData[0].iterator().next().getCell(0).toString();
+    	outfile = IO.replaceFileExtension(summary_file, ".gene_analysis.tsv");
     	
     	//create arrays
     	int n = gene2table.size();
@@ -100,8 +102,8 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		my_gene = (String)g[i];
     		genes[i] = my_gene;
     		tables[i] = gene2table.get(my_gene);
-    		if(gene2frequency.containsKey(my_gene)) {
-    			frequencies[i] = gene2frequency.get(my_gene);
+    		if(gene2frequency.containsKey(my_gene.split("_")[0])) {
+    			frequencies[i] = gene2frequency.get(my_gene.split("_")[0]);
     		} else {
     			frequencies[i] = 0.0;
     		}
@@ -133,26 +135,6 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	
     	stats.quit();
     	
-    	//prepare output
-    	//get order
-    	Integer [] indices = new Integer [genes.length];
-    	for(int i = 0; i < indices.length; i++) {
-    		indices[i] = i;
-    	}
-
-    	String order_by = m_order_by.getStringValue();
-    	ValueComparator vc = null;
-    	if(order_by.equals(METHODS[0]) && fisher != null) {
-    		vc = new ValueComparator(fisher);
-//    	} else if (order_by.equals(METHODS[1]) && wilcoxon != null) {
-//    		vc = new ValueComparator(wilcoxon);
-//    	} else if (order_by.equals(METHODS[2]) && binomial != null) {
-//    		vc = new ValueComparator(binomial);
-    	} else if (order_by.equals(METHODS[3]) && hyper != null) {
-    		vc = new ValueComparator(hyper);
-    	}
-    	
-    	Arrays.sort(indices, vc);
     	
     	//get header and arrays to print
     	ArrayList<double[]> p_values = new ArrayList<>();
@@ -186,8 +168,33 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		headers.add("hyper_adj");
     	}
     	
-    	outfile= IO.replaceFileExtension(summary_file, "extended.tsv");
-    	writeResults(outfile, summary_file, gene_id, headers, p_values, indices, genes, frequencies);
+    	//prepare output
+    	//get order
+    	Integer [] indices = new Integer [genes.length];
+    	for(int i = 0; i < indices.length; i++) {
+    		indices[i] = i;
+    	}
+
+    	String order_by = m_order_by.getStringValue();
+    	ValueComparator vc = null;
+    	if(order_by.equals(METHODS[0]) && fisher != null) {
+    		vc = new ValueComparator(fisher);
+//    	} else if (order_by.equals(METHODS[1]) && wilcoxon != null) {
+//    		vc = new ValueComparator(wilcoxon);
+//    	} else if (order_by.equals(METHODS[2]) && binomial != null) {
+//    		vc = new ValueComparator(binomial);
+    	} else if (order_by.equals(METHODS[1]) && hyper != null) {
+    		vc = new ValueComparator(hyper);
+    	}
+    	
+    	//wrong user input
+    	if(vc == null) {
+    		vc = new ValueComparator(p_values.get(0));
+    	}
+    	
+    	Arrays.sort(indices, vc);
+    	
+    	writeResults(outfile, headers, p_values, indices, genes, gene2table, frequencies);
 	}
 
 	@Override
@@ -217,42 +224,22 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	         return -1;
 	    }
 	}
-    
      
-    private void  writeResults(String outfile, String summary_file, String gene_id_header, ArrayList<String> headers, ArrayList<double[]> p_values, Integer[] indices, String [] genes, double [] frequencies) throws IOException {
-    	HashMap<String, String> content = new HashMap<>();
-    	BufferedReader br = Files.newBufferedReader(Paths.get(summary_file));
+    private void  writeResults(String outfile, ArrayList<String> headers, ArrayList<double[]> p_values, Integer[] indices, String [] genes,  HashMap<String, ContingencyTable> gene2table, double [] frequencies) throws IOException {
     	
-    	//read header
-    	String header = br.readLine() + "\tbackground_freq";
-    	int gene_index = -1;
-    	String [] cols = header.split("\t");
-    	for(int i = 0; i < cols.length; i++) {
-    		if(cols[i].equals(gene_id_header)) {
-    			gene_index = i;
-    		}
-    	}
-    	
-    	
+    	String header = "gene_id\tgene_symbol\taff_case\taff_ctrl\tun_case\tun_ctrl\tbackground_freq";
     	for(String stat : headers) {
     		header += "\t" + stat;
     	}
-    	
-    	//read input file and save in content map
-    	String line;
-    	while((line=br.readLine())!= null) {
-    		content.put(line.split("\t")[gene_index], line);
-    	}
-    	br.close();
     	
     	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
     	bw.write(header);
     	bw.newLine();
 
-
+    	String line;
     	for(int i :indices) {
-    		line = content.get(genes[i]);
-    		line += "\t"+frequencies[i];
+//    		line = content.get(genes[i]);
+    		line = genes[i].split("_")[0]+"\t"+genes[i].split("_")[1]+"\t"+gene2table.get(genes[i]).verticalToString()+"\t"+frequencies[i];
     		for(double [] stat: p_values) {
     			line += "\t" + stat[i];
     		}

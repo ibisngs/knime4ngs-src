@@ -28,7 +28,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelString genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	private final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 	private final SettingsModelBoolean create_var_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
-	private final SettingsModelBoolean create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
+//	private final SettingsModelBoolean create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
 	private final SettingsModelBoolean create_sample_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_SAMPLE_SUM,true);
 	private final SettingsModelBoolean parallel_exec = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
 	private final SettingsModelBoolean create_matrix = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_MATRIX,true);
@@ -48,7 +48,7 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentBoolean(create_var_sum,"Create variant summary?"));
-    	addDialogComponent(new DialogComponentBoolean(create_gene_sum,"Create gene summary?"));
+//    	addDialogComponent(new DialogComponentBoolean(create_gene_sum,"Create gene summary?"));
     	addDialogComponent(new DialogComponentBoolean(create_sample_sum,"Create sample summary?"));
     	addDialogComponent(new DialogComponentBoolean(create_matrix, "Create matrix file?"));
     	addDialogComponent(new DialogComponentBoolean(parallel_exec,"Create summaries in parallel?"));
