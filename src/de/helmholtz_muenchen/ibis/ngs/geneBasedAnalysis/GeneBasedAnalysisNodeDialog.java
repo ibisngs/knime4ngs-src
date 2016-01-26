@@ -38,7 +38,7 @@ public class GeneBasedAnalysisNodeDialog extends CaseControlAnalyzerNodeDialog {
 	    final SettingsModelBoolean m_hyper = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_HYPER_BACKGROUND,true);
 	    final SettingsModelString m_order_by = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ORDER_BY,GeneBasedAnalysisNodeModel.METHODS[0]);
 		
-	    
+	    createNewGroup("Statistic settings");
 	    addDialogComponent(new DialogComponentBoolean(m_fisher,"Perform Fisher's exact test?"));
 	    addDialogComponent(new DialogComponentStringSelection(m_alternative,"Choose alternative hypothesis", GeneBasedAnalysisNodeModel.ALTERNATIVES));
 //	    addDialogComponent(new DialogComponentBoolean(m_wilcoxon,"Compute Wilcoxon p-value?"));

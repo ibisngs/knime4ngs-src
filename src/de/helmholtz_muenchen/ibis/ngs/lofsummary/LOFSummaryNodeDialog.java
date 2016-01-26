@@ -25,7 +25,6 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
      */
 	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
 	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
-	private final SettingsModelString genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	private final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 	private final SettingsModelBoolean create_var_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
 //	private final SettingsModelBoolean create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
@@ -43,8 +42,6 @@ public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
     	createNewGroup("Path to PED file");
     	addDialogComponent(new DialogComponentFileChooser(pedin, "his_id_LOFStatistics_PEDIN", 0, ".ped"));
     	
-    	createNewGroup("Path to gene set file");
-    	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_LOFStatistics_GENESET",0,".gmt"));
     	
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentBoolean(create_var_sum,"Create variant summary?"));

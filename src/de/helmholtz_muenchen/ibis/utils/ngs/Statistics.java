@@ -249,7 +249,6 @@ public class Statistics {
 		double res = r.getParser().getAsDoubleArray("p")[0];
 		r.deleteTempFiles();
     	return res;
-
     }
     
 //    public double [] getBinomialBackground(ContingencyTable [] ct, double [] bg_freq, double pseudo_freq) {

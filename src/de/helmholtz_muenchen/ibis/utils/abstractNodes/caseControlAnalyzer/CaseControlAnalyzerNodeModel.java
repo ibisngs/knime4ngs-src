@@ -380,7 +380,7 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
     }
     
 	protected abstract void performAnalysis(BufferedDataTable[] inData, ExecutionContext exec,
-			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms) throws IOException;
+			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms) throws IOException, InvalidSettingsException;
 	
 	protected abstract String getOutCol();
 	protected abstract String getOutfile();

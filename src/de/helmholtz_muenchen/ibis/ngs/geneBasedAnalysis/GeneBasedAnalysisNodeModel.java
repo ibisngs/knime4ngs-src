@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -22,6 +23,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier;
 import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
@@ -70,7 +72,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	protected void performAnalysis(BufferedDataTable[] inData, ExecutionContext exec,
 			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms) throws IOException {
 		
-		HashMap<String, ContingencyTable> gene2table = ms.toTables();
+		HashMap<String, ContingencyTable> gene2table = ms.toTables(new GeneIdentifier());
 		
 		Statistics stats = new Statistics();
     	
@@ -207,6 +209,16 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 		return this.outfile;
 	}
     
+	class GeneIdentifier implements Identifier {
+
+		@Override
+		public List<String> getMappings(String identifier) {
+			List<String> res = new ArrayList<>();
+			res.add(identifier.split("_",2)[1]); //id_symbol
+			return res;
+		}
+	}
+	
 	class ValueComparator implements Comparator<Integer> {
 
 	    private final double [] array;

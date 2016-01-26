@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
 
@@ -55,7 +56,7 @@ public class MatrixSummary {
 	 * Converts matrix to a contingency table for each gene
 	 * @return a map with genes as keys (id_symbol) and ContingencyTables as values
 	 */
-	public HashMap<String, ContingencyTable> toTables() {
+	public HashMap<String, ContingencyTable> toTables(Identifier identifier) {
 		HashMap<String, ContingencyTable> result = new HashMap<>();
 		
 		HashMap<String, HashSet<Integer>> gene2aff_cases = new HashMap<>();
@@ -73,46 +74,49 @@ public class MatrixSummary {
 			}
 		}
 		
-		String gene;
+		List<String> entities;
 		Short aff;
 		HashSet<Integer> tmp;
 		HashMap<Integer,Short> sample2aff;
 		for(String transcript : transcript2sample2aff.keySet()) {
-			gene = transcript.split("_",2)[1]; //gene = id_symbol
-			if(!gene2aff_ctrls.containsKey(gene)) {
-				gene2aff_ctrls.put(gene, new HashSet<>());
-			}
-			if(!gene2aff_cases.containsKey(gene)) {
-				gene2aff_cases.put(gene, new HashSet<>());
-			}
-			if(!gene2un_ctrls.containsKey(gene)) {
-				gene2un_ctrls.put(gene, new HashSet<>(ctrls));
-			}
-			if(!gene2un_cases.containsKey(gene)) {
-				gene2un_cases.put(gene, new HashSet<>(cases));
-			}
-			
-			sample2aff = transcript2sample2aff.get(transcript);
-			
-			for(Integer s: sample2aff.keySet()) {
-				aff = sample2aff.get(s);
-				if(aff >= 1) { //affected
-					if(samples[s].contains("case")) {
-						tmp = gene2aff_cases.get(gene);
-						tmp.add(s);
-						gene2aff_cases.put(gene, tmp);
-						gene2un_cases.get(gene).remove(s);
-					} else if(samples[s].contains("control")) {
-						tmp = gene2aff_ctrls.get(gene);
-						tmp.add(s);
-						gene2aff_ctrls.put(gene, tmp);
-						gene2un_ctrls.get(gene).remove(s);
-					}
-				} else { //unclear whether affected or not
-					if(samples[s].contains("case")) {
-						gene2un_cases.get(gene).remove(s);
-					} else if(samples[s].contains("control")) {
-						gene2un_ctrls.get(gene).remove(s);
+			entities = identifier.getMappings(transcript);
+//			gene = transcript.split("_",2)[1]; //gene = id_symbol
+			for(String gene: entities) {
+				if(!gene2aff_ctrls.containsKey(gene)) {
+					gene2aff_ctrls.put(gene, new HashSet<>());
+				}
+				if(!gene2aff_cases.containsKey(gene)) {
+					gene2aff_cases.put(gene, new HashSet<>());
+				}
+				if(!gene2un_ctrls.containsKey(gene)) {
+					gene2un_ctrls.put(gene, new HashSet<>(ctrls));
+				}
+				if(!gene2un_cases.containsKey(gene)) {
+					gene2un_cases.put(gene, new HashSet<>(cases));
+				}
+				
+				sample2aff = transcript2sample2aff.get(transcript);
+				
+				for(Integer s: sample2aff.keySet()) {
+					aff = sample2aff.get(s);
+					if(aff >= 1) { //affected
+						if(samples[s].contains("case")) {
+							tmp = gene2aff_cases.get(gene);
+							tmp.add(s);
+							gene2aff_cases.put(gene, tmp);
+							gene2un_cases.get(gene).remove(s);
+						} else if(samples[s].contains("control")) {
+							tmp = gene2aff_ctrls.get(gene);
+							tmp.add(s);
+							gene2aff_ctrls.put(gene, tmp);
+							gene2un_ctrls.get(gene).remove(s);
+						}
+					} else { //unclear whether affected or not
+						if(samples[s].contains("case")) {
+							gene2un_cases.get(gene).remove(s);
+						} else if(samples[s].contains("control")) {
+							gene2un_ctrls.get(gene).remove(s);
+						}
 					}
 				}
 			}
@@ -129,6 +133,4 @@ public class MatrixSummary {
 		}
 		return result;
 	}
-	
-	
 }

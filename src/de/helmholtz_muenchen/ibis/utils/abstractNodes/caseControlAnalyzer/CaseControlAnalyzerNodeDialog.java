@@ -45,7 +45,6 @@ public abstract class CaseControlAnalyzerNodeDialog extends DefaultNodeSettingsP
 //    	addDialogComponent(new DialogComponentString(m_control_ncond, "Control non-condition column"));
 //    	addDialogComponent(new DialogComponentBoolean(m_ignore_unobserved, "Ignore genes/transcripts unaffected in cases and controls?"));
     	
-    	createNewGroup("Statistic settings");
     	addDialogComponent();
     	
     	createNewGroup("Model file settings");

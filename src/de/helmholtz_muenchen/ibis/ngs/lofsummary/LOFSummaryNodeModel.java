@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Scanner;
 
 import org.knime.core.data.DataColumnSpec;
@@ -53,7 +52,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     
 	static final String CFGKEY_CDS_INFILE = "cds_infile";
 	static final String CFGKEY_PED_INFILE = "ped_infile";
-	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
 	static final String CFGKEY_INTERNAL_GENE_SET = "internal_gene_set";
 	static final String CFGKEY_PARALLEL_EXEC = "parallel_execution";
 	static final String CFGKEY_CREATE_VAR_SUM = "create_var_sum";
@@ -63,7 +61,6 @@ public class LOFSummaryNodeModel extends NodeModel {
 	
 	final SettingsModelString m_cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"");
 	final SettingsModelString m_pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"");
-	final SettingsModelString m_genesetin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_GENE_SET_INFILE,"");
 	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
 	final SettingsModelBoolean m_create_var_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
 //	final SettingsModelBoolean m_create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
@@ -80,7 +77,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2Variant_Summary";
 //	public static final String OUT_COL2 = "Path2Gene_Summary";
 	public static final String OUT_COL3 = "Path2Sample_Summary";
-	public static final String OUT_COL4 = "Path2Gene_Set_Summary";
+//	public static final String OUT_COL4 = "Path2Gene_Set_Summary";
 	public static final String OUT_COL5 = "Path2Matrix";
 	
 	private int vcf_index;
@@ -117,7 +114,7 @@ public class LOFSummaryNodeModel extends NodeModel {
 //    	String gene_outfile = IO.replaceFileExtension(vcf_infile, ".gene_summary.tsv");
     	String matrix_outfile = IO.replaceFileExtension(vcf_infile, ".matrix.tsv");
     	String sample_outfile = IO.replaceFileExtension(vcf_infile, ".sample_summary.tsv");
-    	String gene_set_outfile = IO.replaceFileExtension(vcf_infile, ".gene_set_summary.tsv");
+//    	String gene_set_outfile = IO.replaceFileExtension(vcf_infile, ".gene_set_summary.tsv");
     	
     	VCFFile vcf = new VCFFile(vcf_infile);
     	final AnnotationParser parser = new VEPAnnotationParser(vcf.getInfoHeader(VEPAnnotationParser.ANN_ID));
@@ -127,7 +124,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     	 */
     	boolean create_var_sum = m_create_var_sum.getBooleanValue();
 //    	boolean create_gene_sum = m_create_gene_sum.getBooleanValue();
-    	boolean create_gene_set_sum = true;
+//    	boolean create_gene_set_sum = true;
     	boolean create_sample_sum = m_create_sample_sum.getBooleanValue();
     	boolean create_matrix = m_create_matrix.getBooleanValue();
     	
@@ -174,24 +171,6 @@ public class LOFSummaryNodeModel extends NodeModel {
     	HashMap<String, Boolean> sampleid2is_case = readPEDFile(ped_file);
     	
     	/*
-    	 * check/read gene set file
-    	 */
-    	logger.debug("Read gene set file...");
-    	String geneset_file = m_genesetin.getStringValue();
-    	if(geneset_file.equals("") || Files.notExists(Paths.get(geneset_file))) {
-    		setWarningMessage("No gene set file specified!");
-    		geneset_file = null;
-    		create_gene_set_sum = false;
-    	}
-    	//create set of allowed genes
-    	HashSet<String> my_genes = new HashSet<>();
-    	for(Gene g: geneid2gene.values()) {
-    		my_genes.add(g.getSymbol());
-    	}
-    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file, my_genes);
-    	
-    	
-    	/*
     	 * generate threads for parallel execution
     	 */
     	HashMap<String,Gene> mygeneid2gene = geneid2gene;
@@ -233,18 +212,18 @@ public class LOFSummaryNodeModel extends NodeModel {
 				}
     		}
     	};
-    	Thread t4 = new Thread() {
-    		public void run() {
-    	    	try {
-    	    		logger.info("Generate gene set summary...");
-    	    		LOFSummarizer.getGeneSetSum(new VCFFile(vcf_infile), parser, set2genes, sampleid2is_case, gene_set_outfile);
-					logger.info("Gene set summary ready!");
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		}
-    	};
+//    	Thread t4 = new Thread() {
+//    		public void run() {
+//    	    	try {
+//    	    		logger.info("Generate gene set summary...");
+//    	    		LOFSummarizer.getGeneSetSum(new VCFFile(vcf_infile), parser, set2genes, sampleid2is_case, gene_set_outfile);
+//					logger.info("Gene set summary ready!");
+//				} catch (IOException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//    		}
+//    	};
     	Thread t5 = new Thread() {
     		public void run() {
     	    	try {
@@ -265,13 +244,13 @@ public class LOFSummaryNodeModel extends NodeModel {
         	if(create_var_sum) t1.start();
 //        	if(create_gene_sum) t2.start();
         	if(create_sample_sum) t3.start();
-        	if(create_gene_set_sum) t4.start();
+//        	if(create_gene_set_sum) t4.start();
         	if(create_matrix) t5.start();
         	
         	if(create_var_sum) t1.join();
 //        	if(create_gene_sum) t2.join();
         	if(create_sample_sum) t3.join();
-        	if(create_gene_set_sum) t4.join();
+//        	if(create_gene_set_sum) t4.join();
         	if(create_matrix) t5.join();
     	} else {
     		if(create_var_sum) t1.start();
@@ -280,8 +259,8 @@ public class LOFSummaryNodeModel extends NodeModel {
 //        	if(create_gene_sum) t2.join();
         	if(create_sample_sum) t3.start();
         	if(create_sample_sum) t3.join();
-        	if(create_gene_set_sum) t4.start();
-        	if(create_gene_set_sum) t4.join();
+//        	if(create_gene_set_sum) t4.start();
+//        	if(create_gene_set_sum) t4.join();
         	if(create_matrix) t5.start();
         	if(create_matrix) t5.join();
     	}
@@ -292,14 +271,14 @@ public class LOFSummaryNodeModel extends NodeModel {
     	FileCell fc1 = (FileCell) FileCellFactory.create(var_outfile);
 //    	FileCell fc2 = (FileCell) FileCellFactory.create(gene_outfile);
     	FileCell fc3 = (FileCell) FileCellFactory.create(sample_outfile);
-    	FileCell fc4 = (FileCell) FileCellFactory.create(gene_set_outfile);
+//    	FileCell fc4 = (FileCell) FileCellFactory.create(gene_set_outfile);
     	FileCell fc5 = (FileCell) FileCellFactory.create(matrix_outfile);
     	
     	ArrayList<FileCell> cells = new ArrayList<>();
     	if(create_var_sum) cells.add(fc1);
 //    	if(create_gene_sum) cells.add(fc2);
     	if(create_sample_sum) cells.add(fc3);
-    	if(create_gene_set_sum) cells.add(fc4);
+//    	if(create_gene_set_sum) cells.add(fc4);
     	if(create_matrix) cells.add(fc5);
     	
     	FileCell [] fcells = new FileCell[cells.size()];
@@ -474,38 +453,6 @@ public class LOFSummaryNodeModel extends NodeModel {
 		return res;
 	}
 	
-	
-	
-	private HashMap<String, HashSet<String>> readGeneSetFile(String file, HashSet<String> genes) throws IOException {
-		HashMap<String, HashSet<String>> set2genes = new HashMap<>();
-		
-		if(file==null) {
-			return set2genes;
-		}
-		
-		BufferedReader br = Files.newBufferedReader(Paths.get(file));
-		String line;
-		String [] fields;
-		
-		while((line=br.readLine())!=null) {
-			line = line.trim();
-			fields = line.split("\t");
-			HashSet<String> tmp = new HashSet<>();
-			for(int i = 2; i < fields.length; i++) {
-				if(genes.contains(fields[i])) {
-					tmp.add(fields[i]);
-				} else {
-					logger.debug("No gene information found for: "+fields[i] +" in set "+fields[0]);
-				}
-			}
-			set2genes.put(fields[0], tmp);
-		}
-		
-		br.close();
-		
-		return set2genes;
-	}
-	
 	private HashMap<String, Gene> readGeneInfoFile(String in) throws IOException {
 		HashMap<String, Gene> result = new HashMap<>();
 		BufferedReader br = Files.newBufferedReader(Paths.get(in));
@@ -555,25 +502,25 @@ public class LOFSummaryNodeModel extends NodeModel {
     }
     
     private DataTableSpec getTableSpec() {
-    	String geneset_file = m_genesetin.getStringValue();
+//    	String geneset_file = m_genesetin.getStringValue();
     	
     	boolean create_var_sum = m_create_var_sum.getBooleanValue();
 //    	boolean create_gene_sum = m_create_gene_sum.getBooleanValue();
-    	boolean create_gene_set_sum = !(geneset_file.equals("") || Files.notExists(Paths.get(geneset_file)));
+//    	boolean create_gene_set_sum = !(geneset_file.equals("") || Files.notExists(Paths.get(geneset_file)));
     	boolean create_sample_sum = m_create_sample_sum.getBooleanValue();
     	boolean create_matrix = m_create_matrix.getBooleanValue();
     	
     	DataColumnSpec dcs1 = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
 //    	DataColumnSpec dcs2 = new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec();
     	DataColumnSpec dcs3 = new DataColumnSpecCreator(OUT_COL3, FileCell.TYPE).createSpec();
-    	DataColumnSpec dcs4 = new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec();
+//    	DataColumnSpec dcs4 = new DataColumnSpecCreator(OUT_COL4, FileCell.TYPE).createSpec();
     	DataColumnSpec dcs5 = new DataColumnSpecCreator(OUT_COL5, FileCell.TYPE).createSpec();
     	
     	ArrayList<DataColumnSpec> cols = new ArrayList<>();
     	if(create_var_sum) cols.add(dcs1);
 //    	if(create_gene_sum) cols.add(dcs2);
     	if(create_sample_sum) cols.add(dcs3);
-    	if(create_gene_set_sum) cols.add(dcs4);
+//    	if(create_gene_set_sum) cols.add(dcs4);
     	if(create_matrix) cols.add(dcs5);
     	
     	//Create Output Table
@@ -594,7 +541,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     protected void saveSettingsTo(final NodeSettingsWO settings) {
     	m_cdsin.saveSettingsTo(settings);
     	m_pedin.saveSettingsTo(settings);
-    	m_genesetin.saveSettingsTo(settings);
+//    	m_genesetin.saveSettingsTo(settings);
     	m_internal_gene_set.saveSettingsTo(settings);
     	m_parallel_exec.saveSettingsTo(settings);
     	m_create_var_sum.saveSettingsTo(settings);
@@ -611,7 +558,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_cdsin.loadSettingsFrom(settings);
     	m_pedin.loadSettingsFrom(settings);
-    	m_genesetin.loadSettingsFrom(settings);
+//    	m_genesetin.loadSettingsFrom(settings);
     	m_internal_gene_set.loadSettingsFrom(settings);
     	m_parallel_exec.loadSettingsFrom(settings);
     	m_create_var_sum.loadSettingsFrom(settings);
@@ -628,7 +575,7 @@ public class LOFSummaryNodeModel extends NodeModel {
             throws InvalidSettingsException {
     	m_cdsin.validateSettings(settings);
     	m_pedin.validateSettings(settings);
-    	m_genesetin.validateSettings(settings);
+//    	m_genesetin.validateSettings(settings);
     	m_internal_gene_set.validateSettings(settings);
     	m_parallel_exec.validateSettings(settings);
     	m_create_var_sum.validateSettings(settings);
