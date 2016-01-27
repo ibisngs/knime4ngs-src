@@ -201,7 +201,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	@Override
 	protected String getOutCol() {
-		return "Path2ExtendedSummary";
+		return "Path2GeneSummary";
 	}
 
 	@Override

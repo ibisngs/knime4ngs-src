@@ -59,10 +59,10 @@ public class MatrixSummary {
 	public HashMap<String, ContingencyTable> toTables(Identifier identifier) {
 		HashMap<String, ContingencyTable> result = new HashMap<>();
 		
-		HashMap<String, HashSet<Integer>> gene2aff_cases = new HashMap<>();
-		HashMap<String, HashSet<Integer>> gene2un_cases = new HashMap<>();
-		HashMap<String, HashSet<Integer>> gene2aff_ctrls = new HashMap<>();
-		HashMap<String, HashSet<Integer>> gene2un_ctrls = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2aff_cases = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2un_cases = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2aff_ctrls = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2un_ctrls = new HashMap<>();
 		HashSet<Integer> cases = new HashSet<>();
 		HashSet<Integer> ctrls = new HashSet<>();
 		
@@ -76,23 +76,16 @@ public class MatrixSummary {
 		
 		List<String> entities;
 		Short aff;
-		HashSet<Integer> tmp;
 		HashMap<Integer,Short> sample2aff;
 		for(String transcript : transcript2sample2aff.keySet()) {
 			entities = identifier.getMappings(transcript);
 //			gene = transcript.split("_",2)[1]; //gene = id_symbol
-			for(String gene: entities) {
-				if(!gene2aff_ctrls.containsKey(gene)) {
-					gene2aff_ctrls.put(gene, new HashSet<>());
-				}
-				if(!gene2aff_cases.containsKey(gene)) {
-					gene2aff_cases.put(gene, new HashSet<>());
-				}
-				if(!gene2un_ctrls.containsKey(gene)) {
-					gene2un_ctrls.put(gene, new HashSet<>(ctrls));
-				}
-				if(!gene2un_cases.containsKey(gene)) {
-					gene2un_cases.put(gene, new HashSet<>(cases));
+			for(String entity: entities) {
+				if(!entity2aff_cases.containsKey(entity)) {
+					entity2aff_cases.put(entity, new HashSet<>());
+					entity2aff_ctrls.put(entity, new HashSet<>());
+					entity2un_ctrls.put(entity, new HashSet<>(ctrls));
+					entity2un_cases.put(entity, new HashSet<>(cases));
 				}
 				
 				sample2aff = transcript2sample2aff.get(transcript);
@@ -101,21 +94,17 @@ public class MatrixSummary {
 					aff = sample2aff.get(s);
 					if(aff >= 1) { //affected
 						if(samples[s].contains("case")) {
-							tmp = gene2aff_cases.get(gene);
-							tmp.add(s);
-							gene2aff_cases.put(gene, tmp);
-							gene2un_cases.get(gene).remove(s);
+							entity2aff_cases.get(entity).add(s);
+							entity2un_cases.get(entity).remove(s);
 						} else if(samples[s].contains("control")) {
-							tmp = gene2aff_ctrls.get(gene);
-							tmp.add(s);
-							gene2aff_ctrls.put(gene, tmp);
-							gene2un_ctrls.get(gene).remove(s);
+							entity2aff_ctrls.get(entity).add(s);
+							entity2un_ctrls.get(entity).remove(s);
 						}
 					} else { //unclear whether affected or not
 						if(samples[s].contains("case")) {
-							gene2un_cases.get(gene).remove(s);
+							entity2un_cases.get(entity).remove(s);
 						} else if(samples[s].contains("control")) {
-							gene2un_ctrls.get(gene).remove(s);
+							entity2un_ctrls.get(entity).remove(s);
 						}
 					}
 				}
@@ -123,13 +112,13 @@ public class MatrixSummary {
 		}
 		
 		int case_aff, control_aff;
-		for(String g: gene2un_ctrls.keySet()) {
-			case_aff = gene2aff_cases.get(g).size();
-			control_aff = gene2aff_ctrls.get(g).size();
+		for(String e: entity2un_ctrls.keySet()) {
+			case_aff = entity2aff_cases.get(e).size();
+			control_aff = entity2aff_ctrls.get(e).size();
 			if(case_aff == 0 && control_aff == 0) {
     			continue;
     		}
-			result.put(g, new ContingencyTable(case_aff,gene2un_cases.get(g).size(),control_aff,gene2un_ctrls.get(g).size()));
+			result.put(e, new ContingencyTable(case_aff,entity2un_cases.get(e).size(),control_aff,entity2un_ctrls.get(e).size()));
 		}
 		return result;
 	}

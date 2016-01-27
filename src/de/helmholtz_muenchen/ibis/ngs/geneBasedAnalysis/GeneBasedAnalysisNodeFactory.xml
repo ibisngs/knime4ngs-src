@@ -28,6 +28,7 @@
         </option>
         <option name="Model file settings">
         	Select the column of the gene identifier and the gene-based background frequency in the model file.
+        	Specify the correct background population size to get valid results.
         </option>
        
     </fullDescription>

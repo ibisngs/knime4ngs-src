@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
-import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 
@@ -359,30 +358,30 @@ public class LOFSummarizer {
 		return "undef";
 	}
 	
-	public static void getGeneSetSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
-		
-		//writing sample counts for each gene
-		
-		//initialize header
-		String header = "set\tsize\taff_case\taff_ctrl\tun_case\tun_ctrl\taff_genes";
-				
-		//initialize writer
-		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
-		bw.write(header);
-		bw.newLine();
-		
-		String line;
-		
-		GeneSummary rs = new GeneSummary(vcf,ap,false);
-		rs.groupBy(set2genes);
-		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
-		
-		for(String set: tables.keySet()) {
-			line = set+"\t"+set2genes.get(set).size()+"\t"+tables.get(set).verticalToString()+"\t"+set2genes.get(set).toString().replaceAll("\\[|\\]", "");
-			bw.write(line);
-			bw.newLine();
-		}
-		bw.close();
-	}
+//	public static void getGeneSetSum(VCFFile vcf, AnnotationParser ap, HashMap<String, HashSet<String>> set2genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
+//		
+//		//writing sample counts for each gene
+//		
+//		//initialize header
+//		String header = "set\tsize\taff_case\taff_ctrl\tun_case\tun_ctrl\taff_genes";
+//				
+//		//initialize writer
+//		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+//		bw.write(header);
+//		bw.newLine();
+//		
+//		String line;
+//		
+//		GeneSummary rs = new GeneSummary(vcf,ap,false);
+//		rs.groupBy(set2genes);
+//		HashMap<String, ContingencyTable> tables = rs.getSetTables(sampleid2case);
+//		
+//		for(String set: tables.keySet()) {
+//			line = set+"\t"+set2genes.get(set).size()+"\t"+tables.get(set).verticalToString()+"\t"+set2genes.get(set).toString().replaceAll("\\[|\\]", "");
+//			bw.write(line);
+//			bw.newLine();
+//		}
+//		bw.close();
+//	}
 
 }

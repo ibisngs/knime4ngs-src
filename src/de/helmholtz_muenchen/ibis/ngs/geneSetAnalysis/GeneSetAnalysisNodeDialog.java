@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeDialog;
@@ -31,9 +32,12 @@ public class GeneSetAnalysisNodeDialog extends CaseControlAnalyzerNodeDialog {
 	protected void addDialogComponent() {
 
     	final SettingsModelString genesetin = new SettingsModelString(GeneSetAnalysisNodeModel.CFGKEY_GENE_SET_INFILE,"");
+    	final SettingsModelString genesetname = new SettingsModelString(GeneSetAnalysisNodeModel.CFGKEY_GENE_SET,"gene_set");
 
-		createNewGroup("Path to gene set file");
+    	
+		createNewGroup("Gene set file");
     	addDialogComponent(new DialogComponentFileChooser(genesetin,"his_id_LOFStatistics_GENESET",0,".gmt"));
+    	addDialogComponent(new DialogComponentString(genesetname,"Gene set symbol"));
 	}
 }
 

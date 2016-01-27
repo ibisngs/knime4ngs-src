@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;

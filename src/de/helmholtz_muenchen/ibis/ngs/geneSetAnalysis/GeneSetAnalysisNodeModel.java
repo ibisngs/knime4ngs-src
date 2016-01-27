@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -39,12 +40,12 @@ import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
  */
 public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	
-	static final int SET_ID_INDEX = 0;
-	static final int SET_INDEX = 6;
 	static final String CFGKEY_GENE_SET_INFILE = "gene_set_infile";
+	static final String CFGKEY_GENE_SET = "gene_set_name";
 		
 	final SettingsModelString m_genesetin = new SettingsModelString(GeneSetAnalysisNodeModel.CFGKEY_GENE_SET_INFILE,"");
-
+	final SettingsModelString m_genesetname = new SettingsModelString(GeneSetAnalysisNodeModel.CFGKEY_GENE_SET,"gene_set");
+	
 	protected static final NodeLogger logger = NodeLogger.getLogger(GeneSetAnalysisNodeModel.class);
 	
 	private String outfile;
@@ -57,9 +58,8 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	protected void performAnalysis(BufferedDataTable[] inData, ExecutionContext exec,
 			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms)
 					throws IOException, InvalidSettingsException {
-		//get input
-    	String matrix_file = inData[0].iterator().next().getCell(0).toString();
-    	outfile = IO.replaceFileExtension(matrix_file, ".gene_set_analysis.tsv");
+		
+    	
     	
     	// check/read gene set file
     	logger.debug("Read gene set file...");
@@ -68,9 +68,11 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		throw new InvalidSettingsException("No gene set file specified!");
     	}
 
+    	//generate map: gene_symbol -> ContingencyTable
     	HashMap<String, ContingencyTable> gene2table = ms.toTables(new GeneSymbolIdentifier());
-    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file, gene2table.keySet());
     	
+    	//generate maps: gene_set(s) <-> gene_symbol(s)
+    	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file, gene2table.keySet());
     	HashMap<String, HashSet<String>> genes2sets = new HashMap<>();
     	HashSet<String> tmp;
     	for(String s: set2genes.keySet()) {
@@ -85,9 +87,7 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		}
     	}
     	
-    	HashMap<String, ContingencyTable> set2table = ms.toTables(new GeneSetIdentifier(genes2sets));
-    	
-    	//store input and results
+    	//compute Wilcoxon test
     	HashMap<String,Double> set2pval = new HashMap<>();
     	
     	ArrayList<ContingencyTable> my_cts;
@@ -116,12 +116,40 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		for(int i = 0; i < my_bg_freq.size(); i++) {
     			bg_freqs[i] = my_bg_freq.get(i);
     		}
-    		if(bg_freqs.length > 1 && cts.length > 1) {
+    		if(bg_freqs.length >= 1 && cts.length >= 1) {
     			set2pval.put(s, stats.getWilcoxonSignedRankTest(cts,pop_size,bg_freqs));
     		}
     	}
     	
-    	writeResults(outfile, set2genes,set2table, set2pval); 
+    	//sort p-values
+    	ValueComparator vc = new ValueComparator(set2pval);
+    	TreeMap<String,Double> sorted_pvals = new TreeMap<>(vc);
+    	sorted_pvals.putAll(set2pval);
+    	
+    	//adjust p-values
+    	double [] pvals = new double[sorted_pvals.size()];
+    	int i = 0;
+    	for(Entry<String,Double> e: sorted_pvals.entrySet()) {
+    		pvals[i] = e.getValue();
+    		i++;
+    	}
+    	
+    	double [] adj_pvals = stats.adjustP(pvals, "fdr");
+    	stats.quit();
+    	
+    	//generate map: gene_set -> ContingencyTable
+    	HashMap<String, ContingencyTable> set2table = ms.toTables(new GeneSetIdentifier(genes2sets));
+    	
+    	
+    	String matrix_file = inData[0].iterator().next().getCell(0).toString();
+    	
+    	String set_name = m_genesetname.getStringValue();
+    	if(set_name.equals("")) {
+    		set_name = "gene_set";
+    	}
+    	
+    	outfile = IO.replaceFileExtension(matrix_file, "."+set_name+"_analysis.tsv");
+    	writeResults(outfile, set2genes, set2table, sorted_pvals, adj_pvals); 
 	}
 
 	class GeneSymbolIdentifier implements Identifier {
@@ -200,48 +228,19 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 		return set2genes;
 	}
 	
-//	private HashMap<String, HashSet<String>> readGeneSetSummary(String gene_set_sum_file) throws IOException {
-//		HashMap<String, HashSet<String>> res = new HashMap<>();
-//    	
-//    	BufferedReader br = Files.newBufferedReader(Paths.get(gene_set_sum_file));
-//		String line;
-//		String [] fields;
-//		HashSet<String> tmp;
-//		while((line=br.readLine())!=null) {
-//			fields = line.split("\t");
-//			tmp = new HashSet<>();
-//			for(String s: fields[SET_INDEX].split(",")) {
-//				tmp.add(s.trim());
-//			}
-//			res.put(fields[SET_ID_INDEX],tmp);
-//		}
-//		return res;
-//	}
-	
-    private void writeResults(String outfile, HashMap<String, HashSet<String>> set2genes, HashMap<String, ContingencyTable> set2table, HashMap<String, Double> set2pval) throws IOException {
-//    	HashMap<String,String> content = new HashMap<>();
+    private void writeResults(String outfile, HashMap<String, HashSet<String>> set2genes, HashMap<String, ContingencyTable> set2table, TreeMap<String, Double> set2pval, double[] adj_pvals) throws IOException {
+
+    	String header = "set\tsize\taff_case\taff_ctrl\tun_case\tun_ctrl\tp_Wilcoxon\tp_adj\taff_genes";
     	
-//    	BufferedReader br = Files.newBufferedReader(Paths.get(gene_set_sum_file));
-//    	String header = br.readLine() + "\tp_Wilcoxon";
-    	String header = "set\tsize\tp_Wilcoxon";
-//    	String line;
-//    	String set;
-//    	while((line=br.readLine())!=null) {
-//    		set = line.split("\t")[0];
-//    		content.put(set,line);
-//    	}
-//    	br.close();
-    	
-    	ValueComparator vc = new ValueComparator(set2pval);
-    	TreeMap<String,Double> sorted_pvals = new TreeMap<>(vc);
-    	sorted_pvals.putAll(set2pval);
     	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
     	bw.write(header);
     	bw.newLine();
     	
-    	for(String s: sorted_pvals.keySet()) {
-    		bw.write(s+"\t"+set2genes.get(s).size()+"\t"+set2table.get(s).verticalToString()+"\t"+set2pval.get(s));
+    	int i = 0;
+    	for(Entry<String, Double> s: set2pval.entrySet()) {
+    		bw.write(s.getKey()+"\t"+set2genes.get(s.getKey()).size()+"\t"+set2table.get(s.getKey()).verticalToString()+"\t"+s.getValue()+"\t"+adj_pvals[i]+"\t"+set2genes.get(s.getKey()));
     		bw.newLine();
+    		i++;
     	}
 		bw.close();
 	}
@@ -270,7 +269,7 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	@Override
 	protected String getOutCol() {
-		return "Path2ExtendedSetSummary";
+		return "Path2GeneSetSummary";
 	}
 
 	@Override
@@ -281,15 +280,18 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
 		m_genesetin.saveSettingsTo(settings);
+		m_genesetname.saveSettingsTo(settings);
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings) throws InvalidSettingsException {
 		m_genesetin.loadSettingsFrom(settings);
+		m_genesetname.loadSettingsFrom(settings);
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings) throws InvalidSettingsException {
 		m_genesetin.validateSettings(settings);
+		m_genesetname.validateSettings(settings);
 	}
 }
