@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -23,7 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier;
+import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier.*;
 import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
@@ -38,22 +37,31 @@ import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
  */
 public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	
-	//method configure keys
-	static final String CFGKEY_FISHER = "fisher_exact";
-	static final String CFGKEY_ALT = "fisher_alternative";
+	//arrays for string selection fields
+	static final String [] RESOLUTION = {"gene","transcript"};
 	static final String [] ALTERNATIVES = {"two.sided", "greater", "less"};
-//	static final String CFGKEY_WILCOXON = "wilcoxon";
+	
+	//method configure keys
+	static final String CFGKEY_RESOLUTION = "resolution";
+
+	static final String CFGKEY_FISHER = "fisher_exact";
+	static final String CFGKEY_ALT_FISHER = "fisher_alternative";
+	static final String CFGKEY_WILCOXON = "wilcoxon";
+	static final String CFGKEY_ALT_WILCOXON = "wilcoxon_alternative";
 //	static final String CFGKEY_BINOMIAL_BACKGROUND = "binomial_background";
 //	static final String CFGKEY_PSEUDO_FREQ = "pseudo_freq";
 	static final String CFGKEY_HYPER_BACKGROUND = "hypergeometric_background";
 	static final String CFGKEY_POP_SIZE = "pop_size";
 	static final String CFGKEY_ORDER_BY = "order_by";
-	static final String [] METHODS = {CFGKEY_FISHER, CFGKEY_HYPER_BACKGROUND};
+	static final String [] METHODS = {CFGKEY_FISHER, CFGKEY_WILCOXON, CFGKEY_HYPER_BACKGROUND};
+	
     
     //method settings models
+	private final SettingsModelString m_resolution = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_RESOLUTION, GeneBasedAnalysisNodeModel.RESOLUTION[0]);
     private final SettingsModelBoolean m_fisher = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_FISHER,true);
-    private final SettingsModelString m_alternative = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT,ALTERNATIVES[0]);
-//    private final SettingsModelBoolean m_wilcoxon = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_WILCOXON,true);
+    private final SettingsModelString m_alt_fisher = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT_FISHER,"two.sided");
+    private final SettingsModelBoolean m_wilcoxon = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_WILCOXON,true);
+    private final SettingsModelString m_alt_wilcoxon = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT_WILCOXON,"two.sided");
 //    private final SettingsModelBoolean m_bin_back = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_BINOMIAL_BACKGROUND,true);
 //    private final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(GeneBasedAnalysisNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
     private final SettingsModelBoolean m_hyper = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_HYPER_BACKGROUND,true);
@@ -72,40 +80,50 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	protected void performAnalysis(BufferedDataTable[] inData, ExecutionContext exec,
 			HashMap<String, Double> gene2frequency, int pop_size, MatrixSummary ms) throws IOException {
 		
-		HashMap<String, ContingencyTable> gene2table = ms.toTables(new GeneIdentifier());
+		HashMap<String, ContingencyTable> entity2table;
+		HashMap<String, CaseControlArray> entity2array;
+		if(m_resolution.getStringValue().equals("gene")) {
+			entity2table = ms.toTables(new GeneIdentifier());
+			entity2array = ms.toArrays(new GeneIdentifier());
+		} else {
+			entity2table = ms.toTables();
+			entity2array = ms.toArrays();
+		}
 		
 		Statistics stats = new Statistics();
     	
-    	
     	String [] genes;
     	ContingencyTable [] tables;
+    	CaseControlArray [] arrays;
     	double [] frequencies = null;
     	double [] fisher = null;
     	double [] fisher_adj = null;
-//    	double [] wilcoxon = null;
-//    	double [] wilcoxon_adj = null;
+    	double [] wilcoxon = null;
+    	double [] wilcoxon_adj = null;
 //    	double [] binomial = null;
 //    	double [] binomial_adj = null;
     	double [] hyper = null;
     	double [] hyper_adj = null;
     	
     	String summary_file = inData[0].iterator().next().getCell(0).toString();
-    	outfile = IO.replaceFileExtension(summary_file, ".gene_analysis.tsv");
+    	outfile = IO.replaceFileExtension(summary_file, "."+m_resolution.getStringValue()+"_analysis.tsv");
     	
     	//create arrays
-    	int n = gene2table.size();
+    	int n = entity2table.size();
     	genes = new String[n];
     	tables = new ContingencyTable[n];
+    	arrays = new CaseControlArray[n];
     	frequencies = new double[n];
     	
-    	Object[] g = gene2table.keySet().toArray();
-    	String my_gene;
+    	Object[] g = entity2table.keySet().toArray();
+    	String entity;
     	for(int i = 0; i < n; i++) {
-    		my_gene = (String)g[i];
-    		genes[i] = my_gene;
-    		tables[i] = gene2table.get(my_gene);
-    		if(gene2frequency.containsKey(my_gene.split("_")[0])) {
-    			frequencies[i] = gene2frequency.get(my_gene.split("_")[0]);
+    		entity = (String)g[i];
+    		genes[i] = entity;
+    		tables[i] = entity2table.get(entity);
+    		arrays[i] = entity2array.get(entity);
+    		if(gene2frequency.containsKey(entity.split("_")[0])) { //works in case of genes and transcripts
+    			frequencies[i] = gene2frequency.get(entity.split("_")[0]);
     		} else {
     			frequencies[i] = 0.0;
     		}
@@ -113,15 +131,16 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	
     	logger.debug("Compute Fisher statistic");
     	if(m_fisher.getBooleanValue()) {
-        	fisher = stats.getFisherTest(tables,m_alternative.getStringValue());
+        	fisher = stats.getFisherTest(tables,m_alt_fisher.getStringValue());
         	fisher_adj = stats.adjustP(fisher, "fdr");
     	}
     	
-//    	logger.debug("Compute Wilcoxon statistic");
-//    	if(m_wilcoxon.getBooleanValue()) {
-//        	wilcoxon = stats.getWilcoxon(tables);
-//        	wilcoxon_adj = stats.adjustP(wilcoxon, "fdr");
-//    	}
+    	logger.debug("Compute Wilcoxon statistic");
+    	if(m_wilcoxon.getBooleanValue()) {
+        	wilcoxon = stats.getWilcoxon(arrays,m_alt_wilcoxon.getStringValue());
+        	wilcoxon_adj = stats.adjustP(wilcoxon, "fdr");
+    	}
+    	
     	
 //    	logger.debug("Compute binomial background statistic");
 //    	if(m_bin_back.getBooleanValue()) {
@@ -149,12 +168,12 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		headers.add("fisher_adj");
     	}
     	
-//    	if(wilcoxon != null) {
-//    		p_values.add(wilcoxon);
-//    		headers.add("wilcoxon");
-//    		p_values.add(wilcoxon_adj);
-//    		headers.add("wilcoxon_adj");
-//    	}
+    	if(wilcoxon != null) {
+    		p_values.add(wilcoxon);
+    		headers.add("wilcoxon");
+    		p_values.add(wilcoxon_adj);
+    		headers.add("wilcoxon_adj");
+    	}
     	
 //    	if(binomial!=null) {
 //    		p_values.add(binomial);
@@ -181,11 +200,11 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	ValueComparator vc = null;
     	if(order_by.equals(METHODS[0]) && fisher != null) {
     		vc = new ValueComparator(fisher);
-//    	} else if (order_by.equals(METHODS[1]) && wilcoxon != null) {
-//    		vc = new ValueComparator(wilcoxon);
+    	} else if (order_by.equals(METHODS[1]) && wilcoxon != null) {
+    		vc = new ValueComparator(wilcoxon);
 //    	} else if (order_by.equals(METHODS[2]) && binomial != null) {
 //    		vc = new ValueComparator(binomial);
-    	} else if (order_by.equals(METHODS[1]) && hyper != null) {
+    	} else if (order_by.equals(METHODS[2]) && hyper != null) {
     		vc = new ValueComparator(hyper);
     	}
     	
@@ -196,7 +215,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	
     	Arrays.sort(indices, vc);
     	
-    	writeResults(outfile, headers, p_values, indices, genes, gene2table, frequencies);
+    	writeResults(outfile, headers, p_values, indices, genes, entity2table, frequencies);
 	}
 
 	@Override
@@ -207,16 +226,6 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	@Override
 	protected String getOutfile() {
 		return this.outfile;
-	}
-    
-	class GeneIdentifier implements Identifier {
-
-		@Override
-		public List<String> getMappings(String identifier) {
-			List<String> res = new ArrayList<>();
-			res.add(identifier.split("_",2)[1]); //id_symbol
-			return res;
-		}
 	}
 	
 	class ValueComparator implements Comparator<Integer> {
@@ -239,7 +248,14 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
      
     private void  writeResults(String outfile, ArrayList<String> headers, ArrayList<double[]> p_values, Integer[] indices, String [] genes,  HashMap<String, ContingencyTable> gene2table, double [] frequencies) throws IOException {
     	
-    	String header = "gene_id\tgene_symbol\taff_case\taff_ctrl\tun_case\tun_ctrl\tbackground_freq";
+    	String entity;
+    	if(m_resolution.getStringValue().equals("gene")) {
+    		entity = "gene_id\tgene_symbol";
+    	} else {
+    		entity = "transcript\tgene_id\tgene_symbol";
+    	}
+    	
+    	String header = entity + "\taff_case\taff_ctrl\tun_case\tun_ctrl\tbackground_freq";
     	for(String stat : headers) {
     		header += "\t" + stat;
     	}
@@ -250,8 +266,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
     	String line;
     	for(int i :indices) {
-//    		line = content.get(genes[i]);
-    		line = genes[i].split("_")[0]+"\t"+genes[i].split("_")[1]+"\t"+gene2table.get(genes[i]).verticalToString()+"\t"+frequencies[i];
+    		line = genes[i].replaceAll("_", "\t")+"\t"+gene2table.get(genes[i]).verticalToString()+"\t"+frequencies[i];
     		for(double [] stat: p_values) {
     			line += "\t" + stat[i];
     		}
@@ -282,22 +297,26 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-//		 m_pseudo_freq.saveSettingsTo(settings);
-//		 m_wilcoxon.saveSettingsTo(settings);
-         m_fisher.saveSettingsTo(settings);
-         m_alternative.saveSettingsTo(settings);
-//       m_bin_back.saveSettingsTo(settings);
-         m_hyper.saveSettingsTo(settings);
-         m_pop_size.saveSettingsTo(settings);
-         m_order_by.saveSettingsTo(settings);
+		m_resolution.saveSettingsTo(settings);
+//		m_pseudo_freq.saveSettingsTo(settings);
+		m_wilcoxon.saveSettingsTo(settings);
+		m_alt_wilcoxon.saveSettingsTo(settings);
+        m_fisher.saveSettingsTo(settings);
+        m_alt_fisher.saveSettingsTo(settings);
+//      m_bin_back.saveSettingsTo(settings);
+        m_hyper.saveSettingsTo(settings);
+        m_pop_size.saveSettingsTo(settings);
+        m_order_by.saveSettingsTo(settings);
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings) throws InvalidSettingsException {
+		m_resolution.loadSettingsFrom(settings);
 //		m_pseudo_freq.loadSettingsFrom(settings);
-//		m_wilcoxon.loadSettingsFrom(settings);
+		m_wilcoxon.loadSettingsFrom(settings);
+		m_alt_wilcoxon.loadSettingsFrom(settings);
     	m_fisher.loadSettingsFrom(settings);
-    	m_alternative.loadSettingsFrom(settings);
+    	m_alt_fisher.loadSettingsFrom(settings);
 //    	m_bin_back.loadSettingsFrom(settings);
     	m_hyper.loadSettingsFrom(settings);
     	m_pop_size.loadSettingsFrom(settings);
@@ -306,10 +325,12 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings) throws InvalidSettingsException {
+		m_resolution.validateSettings(settings);
 //		m_pseudo_freq.validateSettings(settings);
-//		m_wilcoxon.validateSettings(settings);
+		m_wilcoxon.validateSettings(settings);
+		m_alt_wilcoxon.validateSettings(settings);
         m_fisher.validateSettings(settings);
-        m_alternative.loadSettingsFrom(settings);
+        m_alt_fisher.loadSettingsFrom(settings);
 //      m_bin_back.validateSettings(settings);
         m_hyper.validateSettings(settings);
         m_pop_size.loadSettingsFrom(settings);

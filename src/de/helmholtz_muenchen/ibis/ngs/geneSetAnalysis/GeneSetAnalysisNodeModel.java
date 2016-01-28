@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -26,7 +25,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier;
+import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier.*;
 import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
@@ -152,34 +151,9 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	writeResults(outfile, set2genes, set2table, sorted_pvals, adj_pvals); 
 	}
 
-	class GeneSymbolIdentifier implements Identifier {
-
-		@Override
-		public List<String> getMappings(String identifier) {
-			List<String> res = new ArrayList<String>();
-			res.add(identifier.split("_")[2].toUpperCase());
-			return res;
-		}
-	}
 	
-	class GeneSetIdentifier implements Identifier {
+	
 
-		HashMap <String, HashSet<String>> gene2sets;
-		
-		public GeneSetIdentifier(HashMap <String, HashSet<String>> gene2sets) {
-			this.gene2sets = gene2sets;
-		}
-		
-		@Override
-		public List<String> getMappings(String identifier) {
-			String gene = identifier.split("_")[2].toUpperCase();
-			List<String> res = new ArrayList<String>();
-			if(gene2sets.containsKey(gene)) {
-				res.addAll(gene2sets.get(gene));
-			}
-			return res;
-		}
-	}
 	
 	class ValueComparator implements Comparator<String> {
 

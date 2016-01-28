@@ -88,7 +88,6 @@
 		<!--CaseControlAnalysis-->
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.transcriptBasedAnalysis.TranscriptBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.transcriptBasedAnalysis.TranscriptBasedAnalysisNodeFactory"/>
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">

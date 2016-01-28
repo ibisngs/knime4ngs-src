@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.utils.ngs;
 
+import de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.CaseControlArray;
 import rcaller.RCaller;
 import rcaller.RCaller.FailurePolicy;
 import rcaller.RCode;
@@ -85,24 +86,61 @@ public class Statistics {
     	return res;
     }
     
-//    public double [] getWilcoxon(ContingencyTable [] ct) {
+    public double [] getWilcoxon(CaseControlArray [] cca, String alternative) {
+    	
+    	if(!(alternative.equals("greater") || alternative.equals("less"))) {
+    		alternative = "two.sided";
+    	}
+    	
+    	double [] result = new double[cca.length];
+    	double [] res;
+    	
+//    	if(cca.length==0) return result;
 //    	
-//    	double [] result = new double[ct.length];
-//    	double [] res;
+//    	StringBuilder my_code = new StringBuilder("xaver<-list(list("+array2vector(cca[0].getCaseArray())+","+array2vector(cca[0].getControlArray())+")");
+//    	for(CaseControlArray c: cca) {
+//    		my_code.append(",list("+array2vector(c.getCaseArray())+","+array2vector(c.getControlArray())+")");
+//    	}
+//    	my_code.append(")");
 //    	
-//    	for(int i = 0; i < ct.length; i++) {
-//    		ContingencyTable t = ct[i];
-//    		code.clear();
-//    		code.addRCode("case<-c(rep(1,"+t.getA()+"),rep(0,"+t.getB()+"))");
-//    		code.addRCode("ctrl<-c(rep(1,"+t.getC()+"),rep(0,"+t.getD()+"))");
-//    		code.addRCode("res<-wilcox.test(case,ctrl)$p.value");
-//    		r.runAndReturnResultOnline("res");
-//        	res = r.getParser().getAsDoubleArray("res");
-//    		r.deleteTempFiles();
-//        	result[i] = res[0];
+//    	code.clear();
+//    	code.addRCode(my_code.toString());
+//    	code.addRCode("res<-sapply(xaver, function(x) wilcox.test(x[[1]],x[[2]])$p.value");
+//    	r.runAndReturnResultOnline("res");
+//    	res = r.getParser().getAsDoubleArray("res");
+//		r.deleteTempFiles();
+//    	return res;
+    	
+    	System.out.println(cca.length+" transcripts to analyze");
+    	for(int i = 0; i < cca.length; i++) {
+    		if(i % 1000 == 0) {
+    			System.out.println("Progress: "+i+"/"+cca.length);
+    		}
+    		CaseControlArray t = cca[i];
+    		code.clear();
+    		
+    		code.addShortArray("case", t.getCaseArray());
+    		code.addShortArray("control", t.getControlArray());
+    		code.addRCode("res<-wilcox.test(case,control,alternative=\""+alternative+"\")$p.value");
+    		r.runAndReturnResultOnline("res");
+        	res = r.getParser().getAsDoubleArray("res");
+    		r.deleteTempFiles();
+        	result[i] = res[0];
+    	}
+    	
+    	return result;
+    }
+    
+//    private String array2vector(short [] array) {
+//    	if(array.length==0) {
+//    		return "c()";
+//    	}
+//    	StringBuilder res = new StringBuilder("("+array[0]);
+//    	for(int i = 1; i < array.length; i++) {
+//    		res.append(","+array[i]);
 //    	}
 //    	
-//    	return result;
+//    	return res.toString();
 //    }
     
     /*

@@ -30,18 +30,22 @@ public class GeneBasedAnalysisNodeDialog extends CaseControlAnalyzerNodeDialog {
 
 	@Override
 	protected void addDialogComponent() {
+		final SettingsModelString m_resolution = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_RESOLUTION, GeneBasedAnalysisNodeModel.RESOLUTION[0]);
 		final SettingsModelBoolean m_fisher = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_FISHER,true);
-	    final SettingsModelString m_alternative = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT,GeneBasedAnalysisNodeModel.ALTERNATIVES[0]);
-//	    final SettingsModelBoolean m_wilcoxon = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_WILCOXON,true);
+	    final SettingsModelString m_alt_fisher = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT_FISHER,"two.sided");
+	    final SettingsModelBoolean m_wilcoxon = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_WILCOXON,true);
+	    final SettingsModelString m_alt_wilcoxon = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT_WILCOXON,"two.sided");
 //		final SettingsModelBoolean m_bin_back = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_BINOMIAL_BACKGROUND,true);
 //	    final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(GeneBasedAnalysisNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
 	    final SettingsModelBoolean m_hyper = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_HYPER_BACKGROUND,true);
 	    final SettingsModelString m_order_by = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ORDER_BY,GeneBasedAnalysisNodeModel.METHODS[0]);
 		
 	    createNewGroup("Statistic settings");
+	    addDialogComponent(new DialogComponentStringSelection(m_resolution, "Choose resolution",GeneBasedAnalysisNodeModel.RESOLUTION));
 	    addDialogComponent(new DialogComponentBoolean(m_fisher,"Perform Fisher's exact test?"));
-	    addDialogComponent(new DialogComponentStringSelection(m_alternative,"Choose alternative hypothesis", GeneBasedAnalysisNodeModel.ALTERNATIVES));
-//	    addDialogComponent(new DialogComponentBoolean(m_wilcoxon,"Compute Wilcoxon p-value?"));
+	    addDialogComponent(new DialogComponentStringSelection(m_alt_fisher,"Choose alternative hypothesis", GeneBasedAnalysisNodeModel.ALTERNATIVES));
+	    addDialogComponent(new DialogComponentBoolean(m_wilcoxon,"Compute Wilcoxon p-value?"));
+	    addDialogComponent(new DialogComponentStringSelection(m_alt_wilcoxon,"Choose alternative hypothesis", GeneBasedAnalysisNodeModel.ALTERNATIVES));
 //	    addDialogComponent(new DialogComponentBoolean(m_bin_back,"Compute binomial background?"));
 //	    addDialogComponent(new DialogComponentNumber(m_pseudo_freq,"Background pseudo frequency",0.001));
 	    addDialogComponent(new DialogComponentBoolean(m_hyper,"Compute hypergeometric background?"));
