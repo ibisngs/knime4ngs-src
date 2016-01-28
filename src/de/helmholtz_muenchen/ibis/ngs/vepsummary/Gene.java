@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import java.util.HashSet;
 

@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -43,10 +43,10 @@ import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
  *
  * @author Tim Jeske
  */
-public class LOFSummaryNodeModel extends NodeModel {
+public class VEPSummaryNodeModel extends NodeModel {
     
 	// the logger instance
-    protected static final NodeLogger logger = NodeLogger.getLogger(LOFSummaryNodeModel.class);
+    protected static final NodeLogger logger = NodeLogger.getLogger(VEPSummaryNodeModel.class);
 	
     private final static String CONTIGS[] = new String[]{"1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y","MT"};
     
@@ -59,14 +59,14 @@ public class LOFSummaryNodeModel extends NodeModel {
 	static final String CFGKEY_CREATE_SAMPLE_SUM = "create_sample_sum";
 	static final String CFGKEY_CREATE_MATRIX = "create_matrix";
 	
-	final SettingsModelString m_cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"");
-	final SettingsModelString m_pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"");
-	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
-	final SettingsModelBoolean m_create_var_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
+	final SettingsModelString m_cdsin = new SettingsModelString(VEPSummaryNodeModel.CFGKEY_CDS_INFILE,"");
+	final SettingsModelString m_pedin = new SettingsModelString(VEPSummaryNodeModel.CFGKEY_PED_INFILE,"");
+	final SettingsModelBoolean m_internal_gene_set = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
+	final SettingsModelBoolean m_create_var_sum = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
 //	final SettingsModelBoolean m_create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
-	final SettingsModelBoolean m_create_sample_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_SAMPLE_SUM,true);
-	final SettingsModelBoolean m_parallel_exec = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
-	final SettingsModelBoolean m_create_matrix = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_MATRIX,true);
+	final SettingsModelBoolean m_create_sample_sum = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_SAMPLE_SUM,true);
+	final SettingsModelBoolean m_parallel_exec = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
+	final SettingsModelBoolean m_create_matrix = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_MATRIX,true);
 	
 	//selected annotation
 //    static final String CFGKEY_ANNOTATION="annotation";
@@ -85,7 +85,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     /**
      * Constructor for the node model.
      */
-    protected LOFSummaryNodeModel() {
+    protected VEPSummaryNodeModel() {
     
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     }
@@ -178,7 +178,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     			try {
     				logger.info("Generate variant summary...");
-					LOFSummarizer.getVarSum(vcf, parser, mygeneid2gene, sampleid2is_case, var_outfile);
+					VEPSummarizer.getVarSum(vcf, parser, mygeneid2gene, sampleid2is_case, var_outfile);
 					logger.info("Variant summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -204,7 +204,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     	    	try {
     	    		logger.info("Generate sample summary...");
-    	    		LOFSummarizer.getSampleSum(new VCFFile(vcf_infile), parser, mygeneid2gene, sample_outfile);
+    	    		VEPSummarizer.getSampleSum(new VCFFile(vcf_infile), parser, mygeneid2gene, sample_outfile);
 					logger.info("Sample summary ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -228,7 +228,7 @@ public class LOFSummaryNodeModel extends NodeModel {
     		public void run() {
     	    	try {
     	    		logger.info("Generate matrix...");
-			    	LOFSummarizer.getMatrix(new VCFFile(vcf_infile), parser, mygeneid2gene, sampleid2is_case, matrix_outfile);
+			    	VEPSummarizer.getMatrix(new VCFFile(vcf_infile), parser, mygeneid2gene, sampleid2is_case, matrix_outfile);
 					logger.info("Matrix ready!");
 				} catch (IOException e) {
 					// TODO Auto-generated catch block

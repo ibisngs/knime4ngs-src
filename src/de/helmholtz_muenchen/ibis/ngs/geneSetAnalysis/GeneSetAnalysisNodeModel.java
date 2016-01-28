@@ -24,11 +24,11 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier.*;
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.*;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.*;
 import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
 
 /**
@@ -68,7 +68,7 @@ public class GeneSetAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	}
 
     	//generate map: gene_symbol -> ContingencyTable
-    	HashMap<String, ContingencyTable> gene2table = ms.toTables(new GeneSymbolIdentifier());
+    	HashMap<String, ContingencyTable> gene2table = ms.toTables(new EntityIdentifier(BioEntity.GENE_SYMBOL));
     	
     	//generate maps: gene_set(s) <-> gene_symbol(s)
     	HashMap<String, HashSet<String>> set2genes = readGeneSetFile(geneset_file, gene2table.keySet());

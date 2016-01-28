@@ -1,9 +1,11 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+
+import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 
 public interface Identifier {
 	
@@ -14,17 +16,36 @@ public interface Identifier {
 		@Override
 		public List<String> getMappings(String identifier) {
 			List<String> res = new ArrayList<>();
-			res.add(identifier.split("_",2)[1]); //id_symbol
+			res.add(identifier.split("_",2)[1]); //returns ensemblid_genesymbol
 			return res;
 		}
 	}
 	
-	public class GeneSymbolIdentifier implements Identifier {
+	public class EntityIdentifier implements Identifier {
 
+		BioEntity e;
+		
+		public EntityIdentifier(BioEntity e) {
+			this.e = e;
+		}
+		
 		@Override
 		public List<String> getMappings(String identifier) {
 			List<String> res = new ArrayList<String>();
-			res.add(identifier.split("_")[2].toUpperCase());
+			
+			switch(e) {
+			case GENE_ID:
+				res.add(identifier.split("_")[1].toUpperCase()); //returns ensemblid
+				break;
+
+			case GENE_SYMBOL:
+				res.add(identifier.split("_")[2].toUpperCase());
+				break;
+				
+			case TRANSCRIPT_ID:	
+				res.add(identifier.split("_")[0].toUpperCase()); //returns transcriptid
+				break;
+			}
 			return res;
 		}
 	}

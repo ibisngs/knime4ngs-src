@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
@@ -10,15 +10,15 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFSummaryNodeFactory 
-        extends NodeFactory<LOFSummaryNodeModel> {
+public class VEPSummaryNodeFactory 
+        extends NodeFactory<VEPSummaryNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public LOFSummaryNodeModel createNodeModel() {
-        return new LOFSummaryNodeModel();
+    public VEPSummaryNodeModel createNodeModel() {
+        return new VEPSummaryNodeModel();
     }
 
     /**
@@ -33,9 +33,9 @@ public class LOFSummaryNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<LOFSummaryNodeModel> createNodeView(final int viewIndex,
-            final LOFSummaryNodeModel nodeModel) {
-        return new LOFSummaryNodeView(nodeModel);
+    public NodeView<VEPSummaryNodeModel> createNodeView(final int viewIndex,
+            final VEPSummaryNodeModel nodeModel) {
+        return new VEPSummaryNodeView(nodeModel);
     }
 
     /**
@@ -51,7 +51,7 @@ public class LOFSummaryNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new LOFSummaryNodeDialog();
+        return new VEPSummaryNodeDialog();
     }
 
 }

@@ -22,10 +22,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.Identifier.*;
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.*;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.*;
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
 import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
 

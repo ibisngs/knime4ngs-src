@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -10,10 +10,11 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
+import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 
-public class LOFSummarizer {
+public class VEPSummarizer {
 	
 	public static void getVarSum(VCFFile vcf, AnnotationParser ap, HashMap<String, Gene> genes, HashMap<String,Boolean> sampleid2case, String outfile) throws IOException {
 		
@@ -192,7 +193,7 @@ public class LOFSummarizer {
 		boolean is_ko;
 		boolean oneInactive;
 		int at_least_one, ko;
-		bw.write("sample\tnr_aff\tat_least_one_transcript_ko\tnr_ko\tko_genes\taffected_genes");
+		bw.write("sample\tnr_aff\tat_least_one_transcript_complete\tnr_complete\tgenes_complete\taffected_genes");
 		bw.newLine();
 		
 		for(String s: sample2gene2transcript2aff.keySet()) {
@@ -294,7 +295,7 @@ public class LOFSummarizer {
 			
 			anno = var.getInfoField(ap.getAnnId());
 			
-			HashMap<String, HashSet<Integer>> t2allele_ids = ap.getTranscript2AlleleIds(anno);
+			HashMap<String, HashSet<Integer>> t2allele_ids = ap.getEntity2AlleleIds(anno, BioEntity.TRANSCRIPT_ID);
 			
 			for(String t: t2allele_ids.keySet()) {
 				

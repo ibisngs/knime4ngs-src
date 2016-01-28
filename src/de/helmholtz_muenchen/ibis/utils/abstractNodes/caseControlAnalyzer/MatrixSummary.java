@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -57,9 +57,9 @@ public class MatrixSummary {
 	}
 	
 	private Short replaceAff(String aff) {
-		if(aff.equals("het") || aff.equals("pot_comp")) {
+		if(aff.equals("het") || aff.equals("pot_comp") || aff.equals("mat") || aff.equals("pat")) {
 			return 1;
-		} else if(aff.equals("hom")) {
+		} else if(aff.equals("hom") || aff.equals("comp")) {
 			return 2;
 		} 
 		return -1;
@@ -81,6 +81,7 @@ public class MatrixSummary {
 		Short aff;
 		HashMap<Integer,Short> sample2aff;
 		for(String transcript : transcript2sample2aff.keySet()) {
+			sample2aff = transcript2sample2aff.get(transcript);
 			entities = identifier.getMappings(transcript);
 			for(String entity: entities) {
 				if(!entity2aff_cases.containsKey(entity)) {
@@ -90,24 +91,18 @@ public class MatrixSummary {
 					entity2un_cases.put(entity, new HashSet<>(cases));
 				}
 				
-				sample2aff = transcript2sample2aff.get(transcript);
-				
 				for(Integer s: sample2aff.keySet()) {
 					aff = sample2aff.get(s);
-					if(aff >= 1) { //affected
-						if(samples[s].contains("case")) {
+					if(samples[s].contains("case")) {
+						if(aff >= 1) {
 							entity2aff_cases.get(entity).add(s);
-							entity2un_cases.get(entity).remove(s);
-						} else if(samples[s].contains("control")) {
+						}
+						entity2un_cases.get(entity).remove(s);
+					} else if(samples[s].contains("control")) {
+						if(aff >=1) {
 							entity2aff_ctrls.get(entity).add(s);
-							entity2un_ctrls.get(entity).remove(s);
 						}
-					} else { //unclear whether affected or not
-						if(samples[s].contains("case")) {
-							entity2un_cases.get(entity).remove(s);
-						} else if(samples[s].contains("control")) {
-							entity2un_ctrls.get(entity).remove(s);
-						}
+						entity2un_ctrls.get(entity).remove(s);
 					}
 				}
 			}
@@ -146,20 +141,17 @@ public class MatrixSummary {
 				
 			for(Integer s: sample2aff.keySet()) {
 				aff = sample2aff.get(s);
-				if(aff >= 1) { //affected
-					if(samples[s].contains("case")) {
-							aff_cases++;
-							un_cases--;
-						} else if(samples[s].contains("control")) {
-							aff_ctrls++;
-							un_ctrls--;
-						}
-				} else { //unclear whether affected or not
-					if(samples[s].contains("case")) {
-						un_cases--;
-					} else if(samples[s].contains("control")) {
-						un_ctrls--;
+				 //affected
+				if(samples[s].contains("case")) {
+					if(aff >= 1) {
+						aff_cases++;
 					}
+					un_cases--;
+				} else if(samples[s].contains("control")) {
+					if(aff >=1) {
+						aff_ctrls++;
+					}		
+					un_ctrls--;
 				}
 			}
 			if(aff_cases == 0 && aff_ctrls == 0) {
@@ -176,11 +168,8 @@ public class MatrixSummary {
 		short [] cases,controls;
 		Short aff;
 		HashMap<Integer,Short> sample2aff;
-		ArrayList<Short> my_cases;
-		ArrayList<Short> my_ctrls;
-		int un_case;
-		int un_ctrl;
-		
+		ArrayList<Short> my_cases, my_ctrls;
+		int un_case, un_ctrl;
 		
 		for(String transcript : transcript2sample2aff.keySet()) {
 			
@@ -193,20 +182,17 @@ public class MatrixSummary {
 				
 			for(Integer s: sample2aff.keySet()) {
 				aff = sample2aff.get(s);
-				if(aff >= 1) { //affected
-					if(samples[s].contains("case")) {
-							my_cases.add(aff);
-							un_case--;
-						} else if(samples[s].contains("control")) {
-							my_ctrls.add(aff);
-							un_ctrl--;
-						}
-				} else { //unclear whether affected or not
-					if(samples[s].contains("case")) {
-						un_case--;
-					} else if(samples[s].contains("control")) {
-						un_ctrl--;
+				 //affected
+				if(samples[s].contains("case")) {
+					if(aff >= 1) {
+						my_cases.add(aff);
 					}
+					un_case--;
+				} else if(samples[s].contains("control")) {
+					if(aff>= 1) {
+						my_ctrls.add(aff);
+					}
+					un_ctrl--;
 				}
 			}
 			if(my_cases.size() == 0 && my_ctrls.size() == 0) {
@@ -239,7 +225,9 @@ public class MatrixSummary {
 		List<String> entities;
 		Short aff;
 		HashMap<Integer,Short> sample2aff;
+		
 		for(String transcript : transcript2sample2aff.keySet()) {
+			sample2aff = transcript2sample2aff.get(transcript);
 			entities = identifier.getMappings(transcript);
 			for(String entity: entities) {
 				if(!entity2hom_cases.containsKey(entity)) {
@@ -251,32 +239,22 @@ public class MatrixSummary {
 					entity2un_cases.put(entity, new HashSet<>(cases));
 				}
 				
-				sample2aff = transcript2sample2aff.get(transcript);
-				
 				for(Integer s: sample2aff.keySet()) {
 					aff = sample2aff.get(s);
-					if(aff == 1) {//het affected
-						if(samples[s].contains("case")) {
+					if(samples[s].contains("case")) {
+						if(aff==1) {
 							entity2het_cases.get(entity).add(s);
-							entity2un_cases.get(entity).remove(s);
-						} else if(samples[s].contains("control")) {
-							entity2het_ctrls.get(entity).add(s);
-							entity2un_ctrls.get(entity).remove(s);
-						}
-					} else if(aff == 2) { //hom affected
-						if(samples[s].contains("case")) {
+						} else if (aff==2) {
 							entity2hom_cases.get(entity).add(s);
-							entity2un_cases.get(entity).remove(s);
-						} else if(samples[s].contains("control")) {
+						}
+						entity2un_cases.get(entity).remove(s);
+					} else if(samples[s].contains("control")) {
+						if(aff==1) {
+							entity2het_ctrls.get(entity).add(s);
+						} else if (aff==2) {
 							entity2hom_ctrls.get(entity).add(s);
-							entity2un_ctrls.get(entity).remove(s);
 						}
-					} else { //unclear whether affected or not
-						if(samples[s].contains("case")) {
-							entity2un_cases.get(entity).remove(s);
-						} else if(samples[s].contains("control")) {
-							entity2un_ctrls.get(entity).remove(s);
-						}
+						entity2un_ctrls.get(entity).remove(s);
 					}
 				}
 			}
@@ -312,5 +290,76 @@ public class MatrixSummary {
 		
 		}
 		return res;
+	}
+	
+	public HashMap<String,Double> getFrequencies (Identifier identifier) {
+		
+		HashMap<String, Double> result = new HashMap<>();
+		
+		HashMap<String, HashSet<Integer>> entity2aff = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2un = new HashMap<>();
+		
+		List<String> entities;
+		Short aff;
+		HashSet<Integer> my_samples = new HashSet<>();
+		for(int i = 0; i < samples.length; i++) {
+			my_samples.add(i);
+		}
+		
+		HashMap<Integer,Short> sample2aff;
+		for(String transcript : transcript2sample2aff.keySet()) {
+			sample2aff = transcript2sample2aff.get(transcript);
+			entities = identifier.getMappings(transcript);
+			
+			for(String entity: entities) {
+				if(!entity2aff.containsKey(entity)) {
+					entity2aff.put(entity, new HashSet<>());
+					entity2un.put(entity, new HashSet<>(my_samples));
+				}
+				
+				for(Integer s: sample2aff.keySet()) {
+					aff = sample2aff.get(s);
+					if(aff >= 1) { //affected
+						entity2aff.get(entity).add(s);
+					}
+					entity2un.get(entity).remove(s);
+				}
+			}
+		}
+		
+		int affected, unaff;
+		for(String e: entity2un.keySet()) {
+			affected = entity2aff.get(e).size();
+			unaff = entity2un.get(e).size();
+			result.put(e, (double)affected/(double)(affected+unaff));
+		}
+		return result;
+	}
+	
+	public HashMap<String,Double> getFrequencies () {
+		
+		HashMap<String, Double> result = new HashMap<>();
+		
+		int affected, unaff;
+		Short aff;
+		
+		HashMap<Integer,Short> sample2aff;
+		for(String transcript : transcript2sample2aff.keySet()) {
+			affected = 0;
+			unaff = samples.length;
+				
+			sample2aff = transcript2sample2aff.get(transcript);
+				
+			for(Integer s: sample2aff.keySet()) {
+				aff = sample2aff.get(s);
+				if(aff >= 1) { //affected
+					affected++;
+				}
+				unaff--;
+			}
+			
+			result.put(transcript.split("_")[0], (double)affected/(double)(affected+unaff));
+		}
+		return result;
 	}
 }

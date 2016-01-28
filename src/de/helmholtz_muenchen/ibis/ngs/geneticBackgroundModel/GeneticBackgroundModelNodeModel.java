@@ -23,13 +23,15 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.MatrixSummary;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.*;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
+import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
 import de.helmholtz_muenchen.ibis.utils.ngs.VEPAnnotationParser;
@@ -46,19 +48,18 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 	static final String CFGKEY_GTF_AFF = "gtf_aff";
 	static final String CFGKEY_AC = "ac";
 	static final String CFGKEY_AN = "an";
-	static final String CFGKEY_USE_SYMBOL = "use_symbol";
+	static final String CFGKEY_RESOLUTION = "resolution";
+	static final String [] RESOLUTION = {"gene_id", "gene_symbol", "transcript_id"};
 	
 	//settings models
-	static final String [] BASIS = new String[]{"genotypes","allele frequencies"};
-	private final SettingsModelString m_gtf_aff = new SettingsModelString(CFGKEY_GTF_AFF, BASIS[0]);
 	private final SettingsModelString m_ac = new SettingsModelString(CFGKEY_AC,"AC");
 	private final SettingsModelString m_an = new SettingsModelString(CFGKEY_AN,"AN");
-    private final SettingsModelBoolean m_use_symbol = new SettingsModelBoolean(GeneticBackgroundModelNodeModel.CFGKEY_USE_SYMBOL, false);
+	private final SettingsModelString m_resolution = new SettingsModelString(GeneticBackgroundModelNodeModel.CFGKEY_RESOLUTION, GeneticBackgroundModelNodeModel.RESOLUTION[0]);
 	
-	private int vcf_index;
+	private boolean use_genotypes;
 	
 	//output col names
-	public static final String OUT_COL1 = "Path2GeneticBackgroundModel";
+	public static final String OUT_COL1 = "Path2BackgroundModel";
 	
 	NodeLogger LOGGER = NodeLogger.getLogger(GeneticBackgroundModelNodeModel.class);
 	
@@ -66,8 +67,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
      * Constructor for the node model.
      */
     protected GeneticBackgroundModelNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
         super(1, 1);
     }
 
@@ -77,44 +76,50 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+    	
+    	//get and check input file
+    	String infile = inData[0].iterator().next().getCell(0).toString();
+    	
+    	if(Files.notExists(Paths.get(infile))) {
+    		throw new InvalidSettingsException("Input file does not exist!");
+    	}
 
-    	String vcf_infile, outfile;
-    	
-    	vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
-    	
-    	if(Files.notExists(Paths.get(vcf_infile))) {
-    		throw new InvalidSettingsException("Input VCF file does not exist!");
-    	}
-    	
-    	VCFFile vcf_it = new VCFFile(vcf_infile);
-    	String vep_header = vcf_it.getInfoHeader(VEPAnnotationParser.ANN_ID);
-    	if(vep_header == null) {
-    		throw new InvalidSettingsException("No VEP annotations found!");
-    	}
-    	
-    	AnnotationParser parser = new VEPAnnotationParser(vep_header);
-    	
+    	//check resolution
+    	String ending = m_resolution.getStringValue();
+    	BioEntity e;
+    	if(ending.equals("gene_id")) e = BioEntity.GENE_ID;
+    	else if(ending.equals("gene_symbol")) e = BioEntity.GENE_SYMBOL;
+    	else e = BioEntity.TRANSCRIPT_ID;
+
+    	//compute frequencies according to input file type (VCF or matrix)
     	HashMap<String, Double> gene_frequency;
-    	
-    	boolean use_id = !m_use_symbol.getBooleanValue();
-    	String ending = "";
-    	if(use_id) {
-    		ending = ".gene_id";
+    	if(use_genotypes) {
+    		
+    		if(!infile.endsWith("matrix.tsv")) {
+    			throw new InvalidSettingsException("The input file is neither a VCF nor a matrix file!");
+    		}
+    		
+    		MatrixSummary ms = new MatrixSummary(infile);
+    		if(e == BioEntity.TRANSCRIPT_ID) {
+    			gene_frequency = ms.getFrequencies();
+    		} else {
+    			gene_frequency = ms.getFrequencies(new EntityIdentifier(e));
+    		}
+    		ending += ".model_gtf.tsv";
     	} else {
-    		ending = ".gene_set";
+    		VCFFile vcf_it = new VCFFile(infile);
+        	String vep_header = vcf_it.getInfoHeader(VEPAnnotationParser.ANN_ID);
+        	
+        	if(vep_header == null) {
+        		throw new InvalidSettingsException("No VEP annotations found!");
+        	}
+        	
+        	AnnotationParser parser = new VEPAnnotationParser(vep_header);
+        	gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, e);
+    		ending += ".model_aff.tsv";
     	}
     	
-    	GeneSummary rs;
-    	if(m_gtf_aff.getStringValue().equals(BASIS[0])) {//computation based on genotypes
-    		rs = new GeneSummary(vcf_it, parser, use_id);
-    		gene_frequency = rs.getFrequencies();
-    		ending += ".gene_model_gtf.tsv";
-    	} else {
-        	gene_frequency = fillAF(vcf_it, m_ac.getStringValue(), m_an.getStringValue(), parser, use_id);
-    		ending += ".gene_model_aff.tsv";
-    	}
-    	
-		outfile = IO.replaceFileExtension(vcf_infile, ending);
+		String outfile = IO.replaceFileExtension(infile, ending);
     	writeModel(outfile, gene_frequency);
 		
     	BufferedDataContainer cont = exec.createDataContainer(
@@ -132,7 +137,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
         return new BufferedDataTable[]{outTable};
     }
 
-	private HashMap<String, Double> fillAF(VCFFile vcf_it, String ac_id, String an_id, AnnotationParser parser, boolean use_id) {
+	private HashMap<String, Double> fillAF(VCFFile vcf_it, String ac_id, String an_id, AnnotationParser parser, BioEntity ent) {
 		HashMap<String, Double> result = new HashMap<>();
 		VCFVariant var;
 		String ac, an, csq;
@@ -152,7 +157,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
 				continue;
 			}
 			
-			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getGene2AlleleIds(csq, use_id);
+			HashMap<String, HashSet<Integer>> gene2allele_num = parser.getEntity2AlleleIds(csq, ent);
 			String [] acs = ac.split(",");
 			
 			//compute frequency of being unaffected for each gene 
@@ -187,11 +192,7 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     	BufferedWriter bw;
     	try {
 			bw = Files.newBufferedWriter(Paths.get(outfile), c);
-			if(m_use_symbol.getBooleanValue()) {
-				bw.write("gene_symbol\tvariant_freq");
-			} else {
-				bw.write("gene_id\tvariant_freq");
-			}
+			bw.write(m_resolution.getStringValue()+"\tvariant_freq");
 			bw.newLine();
 			for(String s: gene_frequency.keySet()) {
 				double freq = gene_frequency.get(s);
@@ -221,16 +222,11 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-    	vcf_index = -1;
-    	
-    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
-    		}
-    	}
-    	
-    	if(vcf_index==-1) {
-    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+
+    	if(inSpecs[0].getColumnSpec(0).getType().toString().equals("VCFCell")) {
+    			use_genotypes = false;
+    	} else {
+    		use_genotypes = true;
     	}
     	
     	return new DataTableSpec[]{new DataTableSpec(
@@ -243,10 +239,9 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	m_gtf_aff.saveSettingsTo(settings);
     	m_ac.saveSettingsTo(settings);
     	m_an.saveSettingsTo(settings);
-    	m_use_symbol.saveSettingsTo(settings);
+    	m_resolution.saveSettingsTo(settings);
     }
 
     /**
@@ -255,10 +250,9 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_gtf_aff.loadSettingsFrom(settings);
     	m_ac.loadSettingsFrom(settings);
     	m_an.loadSettingsFrom(settings);
-    	m_use_symbol.loadSettingsFrom(settings);
+    	m_resolution.loadSettingsFrom(settings);
     }
 
     /**
@@ -267,10 +261,9 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-    	m_gtf_aff.validateSettings(settings);
     	m_ac.validateSettings(settings);
     	m_an.validateSettings(settings);
-    	m_use_symbol.validateSettings(settings);
+    	m_resolution.validateSettings(settings);
     }
     
     /**
@@ -280,7 +273,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     protected void loadInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-        // TODO: generated method stub
     }
     
     /**
@@ -290,7 +282,6 @@ public class GeneticBackgroundModelNodeModel extends NodeModel {
     protected void saveInternals(final File internDir,
             final ExecutionMonitor exec) throws IOException,
             CanceledExecutionException {
-        // TODO: generated method stub
     }
 
 }

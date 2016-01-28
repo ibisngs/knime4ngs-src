@@ -35,7 +35,6 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfloader.VCFLoaderNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.lofsummary.LOFSummaryNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory"/>
 		<!--Samtools-->
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory"/>
@@ -56,6 +55,7 @@
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vat.VATNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vepfilter.VEPFilterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.vepsummary.VEPSummaryNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vepsummary.VEPSummaryNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneticBackgroundModel.GeneticBackgroundModelNodeFactory"/>
 		<!--RNA-Seq-->
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeFactory"/>

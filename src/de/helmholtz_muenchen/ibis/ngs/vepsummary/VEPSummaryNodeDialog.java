@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
@@ -18,22 +18,22 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
  * 
  * @author tim.jeske
  */
-public class LOFSummaryNodeDialog extends DefaultNodeSettingsPane {
+public class VEPSummaryNodeDialog extends DefaultNodeSettingsPane {
 
     /**
      * New pane for configuring the LOFStatistics node.
      */
-	private final SettingsModelString cdsin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
-	private final SettingsModelString pedin = new SettingsModelString(LOFSummaryNodeModel.CFGKEY_PED_INFILE,"-");
-	private final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
-	private final SettingsModelBoolean create_var_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
+	private final SettingsModelString cdsin = new SettingsModelString(VEPSummaryNodeModel.CFGKEY_CDS_INFILE,"-");
+	private final SettingsModelString pedin = new SettingsModelString(VEPSummaryNodeModel.CFGKEY_PED_INFILE,"-");
+	private final SettingsModelBoolean internal_gene_set = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_INTERNAL_GENE_SET,true);
+	private final SettingsModelBoolean create_var_sum = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_VAR_SUM,true);
 //	private final SettingsModelBoolean create_gene_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_GENE_SUM,true);
-	private final SettingsModelBoolean create_sample_sum = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_SAMPLE_SUM,true);
-	private final SettingsModelBoolean parallel_exec = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
-	private final SettingsModelBoolean create_matrix = new SettingsModelBoolean(LOFSummaryNodeModel.CFGKEY_CREATE_MATRIX,true);
+	private final SettingsModelBoolean create_sample_sum = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_SAMPLE_SUM,true);
+	private final SettingsModelBoolean parallel_exec = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_PARALLEL_EXEC,false);
+	private final SettingsModelBoolean create_matrix = new SettingsModelBoolean(VEPSummaryNodeModel.CFGKEY_CREATE_MATRIX,true);
 
 	
-    protected LOFSummaryNodeDialog() {
+    protected VEPSummaryNodeDialog() {
     	
     	createNewGroup("Path to CDS/GTF file");
     	addDialogComponent(new DialogComponentFileChooser(cdsin, "his_id_LOFStatistics_CDSIN", 0, ".fa|.fasta|.gtf"));

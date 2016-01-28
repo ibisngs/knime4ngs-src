@@ -1,4 +1,4 @@
-package de.helmholtz_muenchen.ibis.ngs.lofsummary;
+package de.helmholtz_muenchen.ibis.ngs.vepsummary;
 
 import org.knime.core.node.NodeView;
 
@@ -8,14 +8,14 @@ import org.knime.core.node.NodeView;
  *
  * @author tim.jeske
  */
-public class LOFSummaryNodeView extends NodeView<LOFSummaryNodeModel> {
+public class VEPSummaryNodeView extends NodeView<VEPSummaryNodeModel> {
 
     /**
      * Creates a new view.
      * 
-     * @param nodeModel The model (class: {@link LOFSummaryNodeModel})
+     * @param nodeModel The model (class: {@link VEPSummaryNodeModel})
      */
-    protected LOFSummaryNodeView(final LOFSummaryNodeModel nodeModel) {
+    protected VEPSummaryNodeView(final VEPSummaryNodeModel nodeModel) {
         super(nodeModel);
         // TODO: generated method stub
     }

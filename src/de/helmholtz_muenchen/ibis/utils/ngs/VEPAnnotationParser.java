@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-import de.helmholtz_muenchen.ibis.ngs.lofsummary.Annotation;
+import de.helmholtz_muenchen.ibis.ngs.vepsummary.Annotation;
 
 public class VEPAnnotationParser implements AnnotationParser {
 	
@@ -48,60 +48,38 @@ public class VEPAnnotationParser implements AnnotationParser {
 	/**
 	 * 
 	 * @param anno VEP annotation string in the INFO field of a variant, can be retrieved by getInfoField(VEPAnnotationParser.INFO_ID) for a VCFVariant
-	 * @return annotated alleles (ALLELE_NUM) for each gene affected by a variant
+	 * @return annotated alleles (ALLELE_NUM) for each entity affected by a variant
 	 */
-	public HashMap<String, HashSet<Integer>> getGene2AlleleIds (String anno, boolean use_id) {
-		if(allele_id_index == -1 || gene_id_index == -1) {
-			throw new IllegalArgumentException("ALLELE_NUM and/or gene have not been annotated by VEP!");
-		}
+	public HashMap<String, HashSet<Integer>> getEntity2AlleleIds (String anno, BioEntity e) {
 		
-		HashMap<String, HashSet<Integer>> gene2allele_num = new HashMap<>();
+		HashMap<String, HashSet<Integer>> entity2allele_num = new HashMap<>();
 		int allele_num;
-		String gene = "";
+		String ent = "";
 		
 		//iterate over all transcript annotations
 		for(String a : anno.split(",")) {
-			if(use_id) {
-				gene = a.split("\\|")[gene_id_index];
-			} else {
-				gene = a.split("\\|")[symbol_index];
+			switch(e) {
+				case GENE_ID:
+					ent = a.split("\\|")[gene_id_index];
+					break;
+				case GENE_SYMBOL:
+					ent = a.split("\\|")[symbol_index];
+					break;
+				case TRANSCRIPT_ID:
+					ent = a.split("\\|")[transcript_id_index];
+					break;
 			}
 			
 			allele_num = Integer.parseInt(a.split("\\|")[allele_id_index]);
-			if(gene2allele_num.containsKey(gene)) {
-				gene2allele_num.get(gene).add(allele_num);
+			if(entity2allele_num.containsKey(ent)) {
+				entity2allele_num.get(ent).add(allele_num);
 			} else {
 				HashSet<Integer> tmp = new HashSet<>();
 				tmp.add(allele_num);
-				gene2allele_num.put(gene,tmp);
+				entity2allele_num.put(ent,tmp);
 			}
 		}
-		return gene2allele_num;
-	}
-	
-	public HashMap<String, HashSet<Integer>> getTranscript2AlleleIds (String anno) {
-		if(allele_id_index == -1 || transcript_id_index == -1) {
-			throw new IllegalArgumentException("ALLELE_NUM and/or transcript id have not been annotated by VEP!");
-		}
-		
-		HashMap<String, HashSet<Integer>> t2allele_num = new HashMap<>();
-		int allele_num;
-		String t = "";
-		
-		//iterate over all transcript annotations
-		for(String a : anno.split(",")) {
-			t = a.split("\\|")[transcript_id_index];
-			
-			allele_num = Integer.parseInt(a.split("\\|")[allele_id_index]);
-			if(t2allele_num.containsKey(t)) {
-				t2allele_num.get(t).add(allele_num);
-			} else {
-				HashSet<Integer> tmp = new HashSet<>();
-				tmp.add(allele_num);
-				t2allele_num.put(t,tmp);
-			}
-		}
-		return t2allele_num;
+		return entity2allele_num;
 	}
 
 	@Override
