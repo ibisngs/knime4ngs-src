@@ -494,6 +494,13 @@ public class VEPSummaryNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	vcf_index = -1;
+    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			vcf_index = i;
+    		}
+    	}
+    	
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}

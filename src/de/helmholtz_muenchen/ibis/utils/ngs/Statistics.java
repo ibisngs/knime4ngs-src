@@ -12,8 +12,10 @@ public class Statistics {
 	
 	public Statistics() {
 		r = new RCaller();
-		r.setRscriptExecutable("/home/software/bin/Rscript");
-		r.setRExecutable("/home/software/bin/R");
+//		r.setRscriptExecutable("/home/software/bin/Rscript");
+//		r.setRExecutable("/home/software/bin/R");
+		r.setRscriptExecutable("/usr/bin/Rscript");
+		r.setRExecutable("/usr/bin/R");
 		r.setFailurePolicy(FailurePolicy.CONTINUE);
 		r.setMaxWaitTime(60000);
 		code = new RCode();
@@ -339,4 +341,43 @@ public class Statistics {
 		r.deleteTempFiles();
     	return res;
     }
+    
+    /**
+     * 
+     * @param elements from which to choose
+     * @param probs is a matrix of probabilities: each row corresponds to a vector of probability weights for obtaining the elements of the vector being sampled
+     * @return
+     */
+    public String[][] getSamples(String [] elements, double[][]probs, int size) {
+    	String [][] result = new String[probs.length][size];
+    	r.redirectROutputToConsole();
+    	code.clear();
+    	code.addDoubleMatrix("probs", probs);
+    	code.addStringArray("elements", elements);
+    	code.addRCode("res<-apply(probs,1, function(x) sample(elements,"+size+", replace=TRUE, x))");
+    	r.runAndReturnResultOnline("res");
+    	
+    	String [] res = r.getParser().getAsStringArray("res");
+    	
+    	for(int i = 0; i < res.length; i++) {
+    		result[i/size][i%size] = res[i];
+    	}
+    	
+    	r.deleteTempFiles();
+		return result;
+    }
+    
+//    public static void main(String [] args) {
+//    	String [] gts = {"0/0","0/1","1/1"};
+//    	double [][] probs = new double[][]{new double[]{0.8,0.15,0.05}, new double[]{0.05,0.15,0.8},new double[]{0.1,0.8,0.1}};
+//    	Statistics stats = new Statistics();
+//    	String [][] res = stats.getSamples(gts, probs,10);
+//    	for(int i = 0; i < res.length; i++) {
+//    		for(int j = 0; j < res[i].length; j++) {
+//    			System.out.print(res[i][j]+" ");
+//    		}
+//    		System.out.println();
+//    	}
+//    	stats.quit();
+//    }
 }
