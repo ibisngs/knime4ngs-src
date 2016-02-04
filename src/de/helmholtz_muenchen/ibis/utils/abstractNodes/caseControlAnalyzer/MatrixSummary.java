@@ -267,25 +267,24 @@ public class MatrixSummary {
     		}
 			my_cases = new ArrayList<>();
 			my_controls = new ArrayList<>();
-			while(entity2hom_cases.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2hom_cases.get(e).size(); i++) {
 				my_cases.add((short)2);
 			}
-			while(entity2het_cases.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2het_cases.get(e).size(); i++) {
 				my_cases.add((short)1);
 			}
-			while(entity2un_cases.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2un_cases.get(e).size(); i++) {
 				my_cases.add((short)0);
 			}
-			while(entity2hom_ctrls.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2hom_ctrls.get(e).size(); i++) {
 				my_controls.add((short)2);
 			}
-			while(entity2het_ctrls.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2het_ctrls.get(e).size(); i++) {
 				my_controls.add((short)1);
 			}
-			while(entity2un_ctrls.get(e).iterator().hasNext()) {
+			for(int i = 0; i < entity2un_ctrls.get(e).size(); i++) {
 				my_controls.add((short)0);
 			}
-			
 			res.put(e, new CaseControlArray(my_cases,my_controls));
 		
 		}

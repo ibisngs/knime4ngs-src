@@ -5,7 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -20,14 +25,19 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
+import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
+import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
+import de.helmholtz_muenchen.ibis.utils.ngs.VEPAnnotationParser;
 
 /**
  * This is the model implementation of VCFSampler.
@@ -37,8 +47,21 @@ import de.helmholtz_muenchen.ibis.utils.ngs.VCFVariant;
  */
 public class VCFSamplerNodeModel extends NodeModel {
     
+	//configuration keys
+	static final String CFGKEY_BUFFER = "buffer_size";
+	static final String CFGKEY_CASES = "cases";
+	static final String CFGKEY_CTRLS = "controls";
+	static final String CFGKEY_DEF = "signal_def";
+	
+	//settings models
+	private final SettingsModelInteger m_buffer = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_BUFFER, 50);
+	private final SettingsModelInteger m_cases = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_CASES, 100);
+	private final SettingsModelInteger m_ctrls = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_CTRLS, 100);
+	private final SettingsModelString m_def = new SettingsModelString(VCFSamplerNodeModel.CFGKEY_DEF,"10/2");
+	
 	private int vcf_index;
 	public static final String OUT_COL1 = "Path2SampledVCF";
+	public static final String OUT_COL2 = "PedFile";
 	
     /**
      * Constructor for the node model.
@@ -63,13 +86,24 @@ public class VCFSamplerNodeModel extends NodeModel {
     		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
     	
-    	int sample_size = 100;
     	
-    	String outfile = IO.replaceFileExtension(vcf_infile, "sampled.vcf");
+    	int buffer_size = m_buffer.getIntValue();
+    	int case_size = m_cases.getIntValue();
+    	int ctrls_size = m_ctrls.getIntValue();
+    	int samples = case_size + ctrls_size;
     	
-    	//create probs list
+    	int iter = this.getAvailableFlowVariables().get("currentIteration").getIntValue();
+    	String outfile = IO.replaceFileExtension(vcf_infile, "sampled_"+samples+"_Iter_"+iter+".vcf");
+    	
     	ArrayList<double []> probs_list = new ArrayList<>();
+    	ArrayList<String> var_fields = new ArrayList<>();
+    	ArrayList<Set<String>> gene_list = new ArrayList<>();
     	VCFFile vcf_it = new VCFFile(vcf_infile);
+    	AnnotationParser ap = new VEPAnnotationParser(vcf_it.getInfoHeader(VEPAnnotationParser.ANN_ID));
+    	
+    	writeHeader(outfile,vcf_it.getCompleteHeader());
+
+    	//read input VCF and save relevant content
     	VCFVariant var;
     	String ac_het, ac_hom, an;
     	double prob_un, prob_het, prob_hom;
@@ -77,36 +111,109 @@ public class VCFSamplerNodeModel extends NodeModel {
     		var = vcf_it.next();
     		ac_het = var.getInfoField("AC_Het");
     		ac_hom = var.getInfoField("AC_Hom");
-    		an = var.getInfoField("AN");
-    		prob_het = Double.parseDouble(ac_het)/Double.parseDouble(an);
-    		prob_hom = Double.parseDouble(ac_hom)/Double.parseDouble(an);
+    		an = var.getInfoField("AN_Adj");
+    		prob_het = 2.0 * (Double.parseDouble(ac_het)/Double.parseDouble(an));
+    		prob_hom = 2.0 * (Double.parseDouble(ac_hom)/Double.parseDouble(an));
+    		if(prob_het+prob_hom == 0.0 || var.getChrom().contains("Y") || var.getChrom().contains("X")) {
+    			continue;
+    		}
     		prob_un = 1 - prob_het - prob_hom;
-    		probs_list.add(new double[]{prob_un, prob_het,prob_hom});
+    		probs_list.add(new double[]{prob_hom+ prob_het,prob_un});
+    		var_fields.add(var.getChrom()+"\t"+var.getPos()+"\t"+var.getId()+"\t"+var.getRef()+"\t"+var.getAlt()+"\t"+var.getQual()+"\t"+var.getFilter()+"\t"+var.getInfo()+"\t"+var.getFormat());
+    		gene_list.add(ap.getEntity2AlleleIds(var.getInfoField(ap.getAnnId()), BioEntity.GENE_ID).keySet());
     	}
     	
-    	//create double[][] array
-    	double[][] probs = new double[probs_list.size()][3];
-    	for(int i = 0; i < probs_list.size(); i++) {
-    		probs[i] = probs_list.get(i);
+//    	logger.debug("start ranking");
+//    	HashMap<Integer,Integer> index2rank = new HashMap<>();
+//    	HashMap<Integer,Integer> rank2index = new HashMap<>();
+//    	
+//    	ArrayList<Double> sortedAFs = new ArrayList<>(af_list);
+//    	Collections.sort(sortedAFs);
+//    	int rank;
+//    	for(int i = 0; i < af_list.size(); i++) {
+//    		rank = sortedAFs.indexOf(af_list.get(i));
+//    		index2rank.put(i, rank);
+//    		rank2index.put(rank, i);
+//    	}
+//    	logger.debug("finished ranking");
+    	
+    	ArrayList<double []> case_list = new ArrayList<>();
+    	double [] my;
+    	for(double [] a: probs_list) {
+    		my = new double[a.length];
+    		for(int i = 0; i < a.length; i++) {
+    			my[i] = a[i];
+    		}
+    		case_list.add(my);
     	}
+    	
+    	//create signals and document
+    	String signal_def = m_def.getStringValue();
+    	String [] defs = signal_def.split(";");
+    	int rands;
+    	double increase, bg;
+    	double [] tmp;
+    	HashSet<Integer> rand_indices;
+    	int range = probs_list.size();
+    	StringBuilder sb = new StringBuilder();
+    	String nl = System.getProperty("line.separator");
+    	
+    	for(String d: defs) {
+    		rands = Integer.parseInt(d.split("/")[0]);
+    		increase = Double.parseDouble(d.split("/")[1]);
+    		
+        	rand_indices = new HashSet<>();
+        	while(rand_indices.size() < rands) {
+        		rand_indices.add(new Random().nextInt(range));
+        	}
+        	
+        	for(int i : rand_indices) {
+        		tmp = case_list.get(i);
+        		bg = tmp[0];
+        		tmp[0] = increase*tmp[0];
+        		if(tmp[0] > 1.0) {
+        			tmp[0] = 1.0;
+        		}
+        		tmp[1] = 1 - tmp[0];
+        		case_list.set(i, tmp);
+        		sb.append(gene_list.get(i)+"\t"+bg+"\t"+increase+"\t"+tmp[0]+nl);
+        	}
+    	}
+    	
+    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".signals.tsv")));
+    	bw.write(sb.toString());
+    	bw.close();
     	
     	//create vcf
-    	String [] elements = {"0/0", "0/1", "1/1"};
+    	int [] coding = {1,0};
     	Statistics stats = new Statistics();
     	
-    	String [][] gts = stats.getSamples(elements, probs, sample_size);
+    	int end;
+    	for(int i = 0; i < probs_list.size(); i+= buffer_size) {
+    		end = i + buffer_size;
+    		if(end >= probs_list.size()) {
+    			end = probs_list.size();
+    		}
+    		int [][] gts_case = stats.getSamples(coding, case_list.subList(i, end), case_size);
+    		int [][] gts_ctrl = stats.getSamples(coding, probs_list.subList(i,end), ctrls_size);
+        	writeVCF(var_fields.subList(i, end),outfile,gts_case, gts_ctrl);
+    	}
+    	
     	stats.quit();
     	
-    	writeVCF(outfile,gts);
+    	String ped_file = IO.replaceFileExtension(outfile, ".ped");
+    	writePEDFile(ped_file);
     	
     	//Create Output Table
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outfile)};
+    			(FileCell) FileCellFactory.create(outfile),
+    			(FileCell) FileCellFactory.create(ped_file)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -116,20 +223,48 @@ public class VCFSamplerNodeModel extends NodeModel {
         return new BufferedDataTable[]{outTable};
     }
     
-    private void writeVCF(String outfile, String [][] gts) throws IOException {
+    private void writeVCF(List<String> vars, String outfile, int [][] gts_case, int [][] gts_ctrl) throws IOException {
     	
-    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+    	String [] gts_rep = {"0/0", "0/1"};
     	
-    	for(int i = 0; i < gts.length; i++) {
-    		bw.write(gts[i][0]);
-    		for(int j = 1; j < gts[i].length; j++) {
-    			bw.write("\t"+gts[i][j]);
+    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile), StandardOpenOption.APPEND);
+    	
+    	for(int i = 0; i < gts_case.length; i++) {
+    		bw.write(vars.get(i));
+    		for(int j = 0; j < gts_case[i].length; j++) {
+    			bw.write("\t"+gts_rep[gts_case[i][j]]);
+    		}
+    		for(int j = 0; j < gts_ctrl[i].length; j++) {
+    			bw.write("\t"+gts_rep[gts_ctrl[i][j]]);
     		}
     		bw.newLine();
     	}
-    	
     	bw.close();
+    }
+    
+    private void writeHeader(String outfile, String header) throws IOException {
     	
+    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+    	bw.write(header.trim()+"\tFORMAT");
+    	for(int i = 0; i < m_cases.getIntValue()+m_ctrls.getIntValue(); i++) {
+    		bw.write("\tS"+i);
+    	}
+    	bw.newLine();
+    	bw.close();
+    }
+    
+    private void writePEDFile(String outfile) throws IOException {
+    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
+    	
+    	for(int i = 0; i < m_cases.getIntValue(); i++) {
+    		bw.write("F"+i+"\tS"+i+"\t0\t0\t-1\t2");
+    		bw.newLine();
+    	} 
+    	for(int i= m_cases.getIntValue(); i < m_ctrls.getIntValue()+m_cases.getIntValue(); i++) {
+    		bw.write("F"+i+"\tS"+i+"\t0\t0\t-1\t1");
+    		bw.newLine();
+    	}
+    	bw.close();
     }
 
     /**
@@ -160,7 +295,8 @@ public class VCFSamplerNodeModel extends NodeModel {
 
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec(),
+    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
     /**
@@ -168,7 +304,10 @@ public class VCFSamplerNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-         // TODO: generated method stub
+         m_ctrls.saveSettingsTo(settings);
+         m_buffer.saveSettingsTo(settings);
+         m_cases.saveSettingsTo(settings);
+         m_def.saveSettingsTo(settings);
     }
 
     /**
@@ -177,7 +316,10 @@ public class VCFSamplerNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        // TODO: generated method stub
+    	m_ctrls.loadSettingsFrom(settings);
+    	m_buffer.loadSettingsFrom(settings);
+    	m_cases.loadSettingsFrom(settings);
+    	m_def.loadSettingsFrom(settings);
     }
 
     /**
@@ -186,7 +328,10 @@ public class VCFSamplerNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        // TODO: generated method stub
+    	m_ctrls.validateSettings(settings);
+    	m_buffer.validateSettings(settings);
+    	m_cases.validateSettings(settings);
+    	m_def.validateSettings(settings);
     }
     
     /**

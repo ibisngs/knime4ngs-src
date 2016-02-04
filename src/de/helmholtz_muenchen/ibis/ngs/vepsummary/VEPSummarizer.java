@@ -266,7 +266,7 @@ public class VEPSummarizer {
 		
 		//create matrix
 		HashMap<String, HashMap<String,String>> transcript2sample2aff = new HashMap<>();
-		HashMap<String, String> sample2aff;
+		HashMap<String, String> sample2aff = null;
 		
 		VCFVariant var;
 		String anno, aff, gene;
@@ -298,20 +298,21 @@ public class VEPSummarizer {
 			HashMap<String, HashSet<Integer>> t2allele_ids = ap.getEntity2AlleleIds(anno, BioEntity.TRANSCRIPT_ID);
 			
 			for(String t: t2allele_ids.keySet()) {
-				
-				//get sample2aff
-				if(transcript2sample2aff.containsKey(t)) {
-					sample2aff = transcript2sample2aff.get(t);
-				} else {
-					sample2aff = new HashMap<>();
-					for(String s: samples) {
-						sample2aff.put(s, "unaff"); //default state
-					}
-				}
-				
+				sample2aff = null;
 				for(Integer id: t2allele_ids.get(t)) {
 					
 					if(var.getAF(id)>0.0) {
+						
+						//get sample2aff
+						if(transcript2sample2aff.containsKey(t)) {
+							sample2aff = transcript2sample2aff.get(t);
+						} else {
+							sample2aff = new HashMap<>();
+							for(String s: samples) {
+								sample2aff.put(s, "unaff"); //default state
+							}
+						}
+						
 						for(String s: samples) {
 							aff = var.getAff(s,id);
 							sample2aff.put(s, getAff(sample2aff.get(s), aff));
@@ -319,7 +320,9 @@ public class VEPSummarizer {
 					}
 				}
 				
-				transcript2sample2aff.put(t, sample2aff);
+				if(sample2aff != null) {
+					transcript2sample2aff.put(t, sample2aff);
+				}
 			}
 		}
 		

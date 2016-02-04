@@ -89,7 +89,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 			entity2array = ms.toArrays();
 		}
 		
-		Statistics stats = new Statistics();
+		Statistics stats = new Statistics(logger);
     	
     	String [] genes;
     	ContingencyTable [] tables;
@@ -107,6 +107,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	String summary_file = inData[0].iterator().next().getCell(0).toString();
     	outfile = IO.replaceFileExtension(summary_file, "."+m_resolution.getStringValue()+"_analysis.tsv");
     	
+    	logger.debug("create arrays");
     	//create arrays
     	int n = entity2table.size();
     	genes = new String[n];
@@ -236,7 +237,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 
 	    @Override
 	    public int compare(Integer index1, Integer index2) {
-	    	 if (new Double(array[index1]).isNaN() && new Double(array[index2]).isNaN()) {
+	    	 if ((new Double(array[index1]).isNaN() && new Double(array[index2]).isNaN()) || (Double.compare(array[index1], array[index2])==0)) {
 	        	 return 0;
 	         } else if(new Double(array[index1]).isNaN() || array[index1] > array[index2]) {
 	        	 return 1; 

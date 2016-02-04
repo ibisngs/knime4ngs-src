@@ -3,6 +3,7 @@
    <extension point="org.knime.workbench.repository.nodes">
    		<!--FileLoader-->
    		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory"/>
+   		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory"/>
    	
    		<!--Preprocessing-->
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory"/>
@@ -67,6 +68,7 @@
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.featureCountsMerger.FeatureCountsMergerNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/rna" factory-class="de.helmholtz_muenchen.ibis.ngs.mats.MatsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.mats.MatsNodeFactory"/>
 		<!--GATK-->
+		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkraw.GATKRawNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkraw.GATKRawNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration.GATKVariantFiltrationNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission.GATKPhaseByTransmissionNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.depthofcoverage.DepthOfCoverageNodeFactory"/>
@@ -88,7 +90,7 @@
 		<!--CaseControlAnalysis-->
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory"/>
+		
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">

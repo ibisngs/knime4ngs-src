@@ -3,35 +3,32 @@
     <name>VCFSampler</name>
     
     <shortDescription>
-        
+        Simulates VCF file for a given ExAC VCF file.
     </shortDescription>
     
     <fullDescription>
-        <intro>Creates sampled VCF file based on ExAC allele frequencies of biallelic variants.</intro>
+        <intro>
+        	Simluates VCF file based on ExAC allele frequencies of biallelic variants.
+        	The AC_Het, AC_Hom and AN_Adj fields of a variant are used to compute the probability that an individual is affected by the variant.
+        </intro>
         
+        <option name="Number of cases/controls">
+        	Set the number of cases and controls to be sampled.
+        </option>
+        <option name="Define variant frequency changes">
+        	Define signals in the case group of the data set.
+      		You can define an arbitrary number of signals in the form x/y where x corresponds to the number of variants whose frequency is multiplied by y. 
+        </option>
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="ExAC VCF">
+        	Input ExAC VCF.
+        </inPort>
+        <outPort index="0" name="Output VCF">
+        	Simulated VCF.
+        </outPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+
 </knimeNode>

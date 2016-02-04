@@ -86,7 +86,11 @@ public abstract class CaseControlAnalyzerNodeModel extends NodeModel {
 //    	}
     	
     	/*first port = input matrix*/
+
     	String matrix_file = inData[0].iterator().next().getCell(0).toString();
+    	if(!matrix_file.endsWith("matrix.tsv")) {
+    		throw new InvalidSettingsException("Matrix file as input required!");
+    	}
     	MatrixSummary ms = new MatrixSummary(matrix_file);
     	
     	/*second port = background model file*/

@@ -1,5 +1,10 @@
 package de.helmholtz_muenchen.ibis.utils.ngs;
 
+import java.util.List;
+import java.util.Random;
+
+import org.knime.core.node.NodeLogger;
+
 import de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.CaseControlArray;
 import rcaller.RCaller;
 import rcaller.RCaller.FailurePolicy;
@@ -9,17 +14,23 @@ public class Statistics {
 	
 	private RCaller r = null;
 	private RCode code = null;
+	private NodeLogger logger = null;
 	
 	public Statistics() {
+		this(NodeLogger.getLogger(Statistics.class));
+	}
+	
+	public Statistics(NodeLogger logger) {
 		r = new RCaller();
-//		r.setRscriptExecutable("/home/software/bin/Rscript");
-//		r.setRExecutable("/home/software/bin/R");
-		r.setRscriptExecutable("/usr/bin/Rscript");
-		r.setRExecutable("/usr/bin/R");
+		r.setRscriptExecutable("/home/software/bin/Rscript");
+		r.setRExecutable("/home/software/bin/R");
+//		r.setRscriptExecutable("/usr/bin/Rscript");
+//		r.setRExecutable("/usr/bin/R");
 		r.setFailurePolicy(FailurePolicy.CONTINUE);
 		r.setMaxWaitTime(60000);
 		code = new RCode();
 		r.setRCode(code);
+		this.logger = logger;
 	}
 	
 	public void quit() {
@@ -113,10 +124,10 @@ public class Statistics {
 //		r.deleteTempFiles();
 //    	return res;
     	
-    	System.out.println(cca.length+" transcripts to analyze");
+    	logger.debug(cca.length+" transcripts/genes to analyze");
     	for(int i = 0; i < cca.length; i++) {
     		if(i % 1000 == 0) {
-    			System.out.println("Progress: "+i+"/"+cca.length);
+    			logger.debug("Progress: "+i+"/"+cca.length);
     		}
     		CaseControlArray t = cca[i];
     		code.clear();
@@ -348,16 +359,15 @@ public class Statistics {
      * @param probs is a matrix of probabilities: each row corresponds to a vector of probability weights for obtaining the elements of the vector being sampled
      * @return
      */
-    public String[][] getSamples(String [] elements, double[][]probs, int size) {
-    	String [][] result = new String[probs.length][size];
-    	r.redirectROutputToConsole();
+    public int[][] getSamples(int [] elements, double[][]probs, int size) {
+    	int [][] result = new int[probs.length][size];
     	code.clear();
     	code.addDoubleMatrix("probs", probs);
-    	code.addStringArray("elements", elements);
+    	code.addIntArray("elements", elements);
     	code.addRCode("res<-apply(probs,1, function(x) sample(elements,"+size+", replace=TRUE, x))");
     	r.runAndReturnResultOnline("res");
     	
-    	String [] res = r.getParser().getAsStringArray("res");
+    	int[] res = r.getParser().getAsIntArray("res");
     	
     	for(int i = 0; i < res.length; i++) {
     		result[i/size][i%size] = res[i];
@@ -365,6 +375,47 @@ public class Statistics {
     	
     	r.deleteTempFiles();
 		return result;
+    }
+    
+//    public int[][] getSamples(int [] elements, List<double[]>probs_list, int size) {
+//    	
+//    	double[][] probs = new double[probs_list.size()][elements.length];
+//    	for(int i = 0; i < probs_list.size(); i++) {
+//    		probs[i] = probs_list.get(i);
+//    	}
+//    	
+//    	return this.getSamples(elements, probs, size);
+//    }
+    
+    public int[][] getSamples(int [] elements, List<double[]>probs_list, int size) {
+    	
+    	int [][] result = new int[probs_list.size()][size];
+    	Random rand = new Random();
+    	
+    	double [] tmp_probs, intervals;
+    	double tmp, sum;
+    	for(int i = 0; i < probs_list.size(); i++) {
+    		tmp_probs = probs_list.get(i);
+    		
+    		intervals = new double[tmp_probs.length];
+    		sum = 0.0;
+    		for(int k = 0; k < intervals.length; k++) {
+    			intervals[k] = tmp_probs[k] + sum;
+    			sum += tmp_probs[k];
+    		}
+    		
+    		for(int j = 0; j < size; j++) {
+    			tmp = rand.nextDouble();
+    			for(int z = 0; z < intervals.length; z++) {
+    				if(tmp < intervals[z]) {
+    					result[i][j] = elements[z];
+    					break;
+    				}
+    			}
+    		}
+    	}
+    	
+    	return result;
     }
     
 //    public static void main(String [] args) {

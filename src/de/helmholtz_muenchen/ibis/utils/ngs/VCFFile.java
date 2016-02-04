@@ -7,9 +7,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Scanner;
 
+import org.apache.xmlbeans.SystemProperties;
+
 public class VCFFile implements Iterator<VCFVariant> {
 	
-	private String [] vcf_header;
+	private String [] chr_header;
+	private String header;
 	private HashMap<String, Integer> field_index;
 	final String CHR = "CHR";
 	final String POS = "POS";
@@ -31,16 +34,20 @@ public class VCFFile implements Iterator<VCFVariant> {
 		this.sc = new Scanner(inputStream, "UTF-8");
 		String line = "";
 		boolean found_header = false;
+		StringBuilder header_lines = new StringBuilder();
 		field_index = new HashMap<>();
 		info_header = new HashMap<>();
 		
 		while (!found_header && sc.hasNextLine()) {
 			line = sc.nextLine();
+			if(line.startsWith("#")) {
+				header_lines.append(line.trim()+SystemProperties.getProperty("line.separator"));
+			}
 			if(line.startsWith("#CHR")) {
 				line = line.replaceFirst("#", "");
-				vcf_header = line.split("\t");
-				for(int i = 0; i < vcf_header.length; i++) {
-					String tmp =vcf_header[i];
+				chr_header = line.split("\t");
+				for(int i = 0; i < chr_header.length; i++) {
+					String tmp =chr_header[i];
 					if (tmp.contains(CHR)) {
 						field_index.put(CHR, i);
 					} else if (tmp.equals(POS)) {
@@ -71,8 +78,14 @@ public class VCFFile implements Iterator<VCFVariant> {
 				info_header.put(id,field);
 			}
 		}
+		
+		this.header = header_lines.toString();
 	}
 
+	public String getCompleteHeader() {
+		return this.header;
+	}
+	
 	@Override
 	public boolean hasNext() {
 		boolean result = sc.hasNextLine();
@@ -84,6 +97,8 @@ public class VCFFile implements Iterator<VCFVariant> {
 
 	@Override
 	public VCFVariant next() {
+		
+				
 		VCFVariant var = new VCFVariant();
 		
 		String line = sc.nextLine();
@@ -101,8 +116,8 @@ public class VCFFile implements Iterator<VCFVariant> {
 		if(field_index.containsKey(FORMAT)) {
 			var.setFormat(fields[field_index.get(FORMAT)]);
 			
-			for(int i = 9; i < vcf_header.length; i++) {
-				var.addGenotype(vcf_header[i], fields[i]);
+			for(int i = 9; i < chr_header.length; i++) {
+				var.addGenotype(chr_header[i], fields[i]);
 			}
 		}
 		return var;
@@ -120,12 +135,12 @@ public class VCFFile implements Iterator<VCFVariant> {
 	public ArrayList<String> getSampleIds() {
 		ArrayList<String> result = new ArrayList<>();
 		if(field_index.containsKey(FORMAT)) {
-			for(int i = 9; i < vcf_header.length; i++) {
-				result.add(vcf_header[i]);
+			for(int i = 9; i < chr_header.length; i++) {
+				result.add(chr_header[i]);
 			}
 		} else {
-			for(int i = 8; i < vcf_header.length; i++) {
-				result.add(vcf_header[i]);
+			for(int i = 8; i < chr_header.length; i++) {
+				result.add(chr_header[i]);
 			}
 		}
 		return result;
