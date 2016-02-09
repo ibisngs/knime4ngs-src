@@ -10,7 +10,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
@@ -35,7 +34,7 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.FileHelpers;
 import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.samhelpers.SamSplitter;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
+import picard.sam.MergeSamFiles;
 
 /**
  * This node is a faster implementation of a sam to bam converter based on
@@ -51,7 +50,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 	protected static final String CFGKEY_GENOME_FILE		= "FS2B_genomeFile";
 	protected static final String CFGKEY_OUTPUT_PATH 		= "FS2B_outputPath";
 	protected static final String CFGKEY_PATH_SAMTOOLS 		= "FS2B_samTools";
-	protected static final String CFGKEY_PATH_PICTOOLS 		= "FS2B_picTools";
+//	protected static final String CFGKEY_PATH_PICTOOLS 		= "FS2B_picTools";
 	protected static final String CFGKEY_TMP_PATH 			= "FS2B_tmpPath";
 	protected static final String CFGKEY_USE_RAM 			= "FS2B_useRam";
 	protected static final String CFGKEY_DELETE_SAM 		= "FS2B_deleteSam";
@@ -71,8 +70,8 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 	protected static final String DEFAULT_USE_RAM_PATH 		= "/dev/shm/";
 	
 	// other settings
-	private final static String SAMTOOLS_BINARY_NAME = "samtools";
-	private final static String PICTOOLS_JAR_NAME = "MergeSamFiles.jar";
+//	private final static String SAMTOOLS_BINARY_NAME = "samtools";
+//	private final static String PICTOOLS_JAR_NAME = "MergeSamFiles.jar";
 	
 	// name of the output variables
 	public static final String OUT_COL1 = "Path2BAMFile";
@@ -87,7 +86,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     private final SettingsModelString SET_TMP_PATH			= new SettingsModelString(CFGKEY_TMP_PATH, DEFAULT_TMP_PATH);
     private final SettingsModelBoolean SET_USE_RAM_AS_TMP  	= new SettingsModelBoolean(CFGKEY_USE_RAM, DEFAULT_USE_RAM);
     private final SettingsModelString SET_PATH_SAMTOOLS		= new SettingsModelString(CFGKEY_PATH_SAMTOOLS, DEFAULT_PATH_SAMTOOLS);
-    private final SettingsModelString SET_PATH_PICTOOLS    	= new SettingsModelString(CFGKEY_PATH_PICTOOLS, DEFAULT_PATH_PICTOOLS);
+//    private final SettingsModelString SET_PATH_PICTOOLS    	= new SettingsModelString(CFGKEY_PATH_PICTOOLS, DEFAULT_PATH_PICTOOLS);
     private final SettingsModelBoolean SET_DELETE_SAM		= new SettingsModelBoolean(CFGKEY_DELETE_SAM, DEFAULT_DELETE_SAM);
 
     
@@ -111,7 +110,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     	addSetting(SET_TMP_PATH);
     	addSetting(SET_USE_RAM_AS_TMP);
     	addSetting(SET_PATH_SAMTOOLS);
-    	addSetting(SET_PATH_PICTOOLS);
+//    	addSetting(SET_PATH_PICTOOLS);
     	addSetting(SET_DELETE_SAM);
     }
 
@@ -167,10 +166,10 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				// get file of folder which must be processed
 				ArrayList<String> partsSam = IO.getFilesOfFolder(tmpPath.getAbsolutePath());			
 				for(String parFile : partsSam) {
-					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
+//					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
 					String bamFile = parFile + ".bam";
 					partsBam.add(bamFile);
-					command = command + "samtools view -b -S -T " + SET_GENOME.getStringValue() + " -o " + bamFile + " " + parFile;
+					String command = SET_PATH_SAMTOOLS.getStringValue()+ " view -b -S -T " + SET_GENOME.getStringValue() + " -o " + bamFile + " " + parFile;
 					String outFile = parFile + ".log";
 					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null);
 					pool.submit(task);
@@ -207,10 +206,10 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				// re-init worker pool
 				pool = Executors.newFixedThreadPool(cores);
 				for(String bamFile : partsBam) {
-					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
+//					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
 					String sortedBamFile = bamFile + ".sorted";
 					partsBamSorted.add(sortedBamFile);
-					command = command + "samtools sort -m 10000000000 " + bamFile + " " + sortedBamFile;
+					String command = SET_PATH_SAMTOOLS.getStringValue() + " sort -m 10000000000 " + bamFile + " " + sortedBamFile;
 					String outFile = partsBam + ".log";
 					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null);
 					pool.submit(task);
@@ -244,21 +243,37 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				}
 				
 				////////////////////////////Merge it again ////////////////////////////////////////////////////////
-				ArrayList<String> mergeCommand = new ArrayList<String>();
-				mergeCommand.add("java -jar");
-				mergeCommand.add(SET_PATH_PICTOOLS.getStringValue() + File.separator + PICTOOLS_JAR_NAME);
-				for(String bamSorted : partsBamSorted) {
-					mergeCommand.add("INPUT=" + bamSorted + ".bam");
+				int parts = partsBamSorted.size();
+				String [] args = new String[7+parts];
+				for(int i = 0; i< parts; i++) {
+					args[i] = "INPUT=" + partsBamSorted.get(i) + ".bam";
 				}
-				mergeCommand.add("OUTPUT=" + nameOfBamFile);
-				mergeCommand.add("SORT_ORDER=coordinate");
-				mergeCommand.add("USE_THREADING=true");
-				mergeCommand.add("CREATE_INDEX=true");
-				mergeCommand.add("MAX_RECORDS_IN_RAM=600000000");
-				mergeCommand.add("TMP_DIR=" + tmpPath);
-				mergeCommand.add("VALIDATION_STRINGENCY=LENIENT");
-				String outLogFile = nameOfBamFile + ".log";
-				Executor.executeCommand(new String[]{StringUtils.join(mergeCommand, " ")}, exec, null, LOGGER, outLogFile, outLogFile, null, null);
+				
+				args[parts+0] = "OUTPUT=" + nameOfBamFile;
+				args[parts+1] = "SORT_ORDER=coordinate";
+				args[parts+2] = "USE_THREADING=true";
+				args[parts+3] = "CREATE_INDEX=true";
+				args[parts+4] = "MAX_RECORDS_IN_RAM=600000000";
+				args[parts+5] = "TMP_DIR=" + tmpPath;
+				args[parts+6] = "VALIDATION_STRINGENCY=LENIENT";
+				
+				new MergeSamFiles().instanceMain(args);
+				
+//				ArrayList<String> mergeCommand = new ArrayList<String>();
+//				mergeCommand.add("java -jar");
+//				mergeCommand.add(SET_PATH_PICTOOLS.getStringValue() + File.separator + PICTOOLS_JAR_NAME);
+//				for(String bamSorted : partsBamSorted) {
+//					mergeCommand.add("INPUT=" + bamSorted + ".bam");
+//				}
+//				mergeCommand.add("OUTPUT=" + nameOfBamFile);
+//				mergeCommand.add("SORT_ORDER=coordinate");
+//				mergeCommand.add("USE_THREADING=true");
+//				mergeCommand.add("CREATE_INDEX=true");
+//				mergeCommand.add("MAX_RECORDS_IN_RAM=600000000");
+//				mergeCommand.add("TMP_DIR=" + tmpPath);
+//				mergeCommand.add("VALIDATION_STRINGENCY=LENIENT");
+//				String outLogFile = nameOfBamFile + ".log";
+//				Executor.executeCommand(new String[]{StringUtils.join(mergeCommand, " ")}, exec, null, LOGGER, outLogFile, outLogFile, null, null);
     		}
     		
 	    	// ensure that bam file is there
@@ -304,8 +319,10 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	// validate binaries
-    	IO.isBinaryValid(this.SET_PATH_SAMTOOLS.getStringValue() + File.separator + SAMTOOLS_BINARY_NAME, true);
-    	IO.isBinaryValid(this.SET_PATH_PICTOOLS.getStringValue() + File.separator + PICTOOLS_JAR_NAME, false);
+//    	IO.isBinaryValid(this.SET_PATH_SAMTOOLS.getStringValue() + File.separator + SAMTOOLS_BINARY_NAME, true);
+    	IO.isBinaryValid(this.SET_PATH_SAMTOOLS.getStringValue(), true);
+
+    	//    	IO.isBinaryValid(this.SET_PATH_PICTOOLS.getStringValue() + File.separator + PICTOOLS_JAR_NAME, false);
 
     	// TODO: check fasta genome file 
     	// TODO: check other stuff ?!?

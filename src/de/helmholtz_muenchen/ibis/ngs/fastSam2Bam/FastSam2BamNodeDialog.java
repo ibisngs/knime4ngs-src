@@ -12,6 +12,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+
 
 /**
  * Dialog for a faster implementation of a sam to bam converter.
@@ -28,19 +30,17 @@ public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
     private final SettingsModelString SET_TMP_PATH			= new SettingsModelString(FastSam2BamNodeModel.CFGKEY_TMP_PATH, FastSam2BamNodeModel.DEFAULT_TMP_PATH);
     private final SettingsModelBoolean SET_USE_RAM_AS_TMP  	= new SettingsModelBoolean(FastSam2BamNodeModel.CFGKEY_USE_RAM, FastSam2BamNodeModel.DEFAULT_USE_RAM);
     private final SettingsModelString SET_PATH_SAMTOOLS		= new SettingsModelString(FastSam2BamNodeModel.CFGKEY_PATH_SAMTOOLS, FastSam2BamNodeModel.DEFAULT_PATH_SAMTOOLS);
-    private final SettingsModelString SET_PATH_PICTOOLS    	= new SettingsModelString(FastSam2BamNodeModel.CFGKEY_PATH_PICTOOLS, FastSam2BamNodeModel.DEFAULT_PATH_PICTOOLS);
+//    private final SettingsModelString SET_PATH_PICTOOLS    	= new SettingsModelString(FastSam2BamNodeModel.CFGKEY_PATH_PICTOOLS, FastSam2BamNodeModel.DEFAULT_PATH_PICTOOLS);
     private final SettingsModelBoolean SET_DELETE_SAM		= new SettingsModelBoolean(FastSam2BamNodeModel.CFGKEY_DELETE_SAM, FastSam2BamNodeModel.DEFAULT_DELETE_SAM);
     
     /**
      * New pane for configuring the FastSam2Bam node.
      */
     protected FastSam2BamNodeDialog() {
-    	createNewGroup("path to binary folders");
-    	
         
         // create open file/folder components
-        DialogComponentFileChooser dcPathSamtools 	= new DialogComponentFileChooser(SET_PATH_SAMTOOLS, "his_id_fs2b_samtools", 0, true);
-        DialogComponentFileChooser dcPathPictools 	= new DialogComponentFileChooser(SET_PATH_PICTOOLS, "his_id_fs2b_pictools", 0, true);
+        DialogComponentFileChooser dcPathSamtools 	= new DialogComponentFileChooser(SET_PATH_SAMTOOLS, "his_id_fs2b_samtools", 0, false);
+//        DialogComponentFileChooser dcPathPictools 	= new DialogComponentFileChooser(SET_PATH_PICTOOLS, "his_id_fs2b_pictools", 0, true);
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_PATH, "his_id_fs2b_outpath", 0, true);
         DialogComponentFileChooser dcGenomeFile 	= new DialogComponentFileChooser(SET_GENOME, "his_id_fs2b_genomeFile", 0, false);
        	DialogComponentString dcTmpPath				= new DialogComponentString(SET_TMP_PATH, "temp path:"); 
@@ -49,16 +49,18 @@ public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
      	DialogComponentBoolean dcUseRamAsTmp 		= new DialogComponentBoolean(SET_USE_RAM_AS_TMP, "use RAM (" + FastSam2BamNodeModel.DEFAULT_USE_RAM_PATH + ") as temp folder");
      	DialogComponentBoolean dcDeleteSam			= new DialogComponentBoolean(SET_DELETE_SAM, "delete sam file after conversion");
       
+    	
+     	
        	// set a new title to them
      	dcOutputFolder.setBorderTitle("path to output folder");
      	dcPathSamtools.setBorderTitle("path to samtool binaries");
-     	dcPathPictools.setBorderTitle("path to picard tool binaries");
+//     	dcPathPictools.setBorderTitle("path to picard tool binaries");
      	dcGenomeFile.setBorderTitle("path to genome in fasta format");
      
        	// add groups and components
         createNewGroup("path to binaries");
         addDialogComponent(dcPathSamtools);
-        addDialogComponent(dcPathPictools);
+//        addDialogComponent(dcPathPictools);
         
         createNewGroup("output");
         addDialogComponent(dcOutputFolder);
@@ -97,6 +99,13 @@ public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
 				//	SET_SPLIT_SIZE.setIntValue(50000);
 			}	
         });
+    }
+    
+    public void onOpen() {
+    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+    	if(toolPath != null && !toolPath.equals("")) {
+    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
+    	}
     }
 }
 

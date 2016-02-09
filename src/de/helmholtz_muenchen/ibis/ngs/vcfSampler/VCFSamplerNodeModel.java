@@ -105,20 +105,23 @@ public class VCFSamplerNodeModel extends NodeModel {
 
     	//read input VCF and save relevant content
     	VCFVariant var;
-    	String ac_het, ac_hom, an;
+    	String ac_het, ac_hom, an, ac;
     	double prob_un, prob_het, prob_hom;
     	while(vcf_it.hasNext()) {
     		var = vcf_it.next();
     		ac_het = var.getInfoField("AC_Het");
     		ac_hom = var.getInfoField("AC_Hom");
     		an = var.getInfoField("AN_Adj");
+    		ac = var.getInfoField("AC_Adj");
     		prob_het = 2.0 * (Double.parseDouble(ac_het)/Double.parseDouble(an));
     		prob_hom = 2.0 * (Double.parseDouble(ac_hom)/Double.parseDouble(an));
-    		if(prob_het+prob_hom == 0.0 || var.getChrom().contains("Y") || var.getChrom().contains("X")) {
+    		if(prob_het+prob_hom == 0.0 || prob_het+prob_hom == 1.0 || var.getChrom().contains("Y") || var.getChrom().contains("X")) {
     			continue;
     		}
-    		prob_un = 1 - prob_het - prob_hom;
-    		probs_list.add(new double[]{prob_hom+ prob_het,prob_un});
+//    		prob_un = 1 - prob_het - prob_hom;
+    		prob_un = Math.pow(1.0 - (Double.parseDouble(ac)/Double.parseDouble(an)),2);
+//    		probs_list.add(new double[]{prob_hom+ prob_het,prob_un});
+    		probs_list.add(new double[]{1-prob_un,prob_un});
     		var_fields.add(var.getChrom()+"\t"+var.getPos()+"\t"+var.getId()+"\t"+var.getRef()+"\t"+var.getAlt()+"\t"+var.getQual()+"\t"+var.getFilter()+"\t"+var.getInfo()+"\t"+var.getFormat());
     		gene_list.add(ap.getEntity2AlleleIds(var.getInfoField(ap.getAnnId()), BioEntity.GENE_ID).keySet());
     	}

@@ -49,10 +49,11 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 	static final String CFGKEY_ALT_WILCOXON = "wilcoxon_alternative";
 //	static final String CFGKEY_BINOMIAL_BACKGROUND = "binomial_background";
 //	static final String CFGKEY_PSEUDO_FREQ = "pseudo_freq";
+	static final String CFGKEY_FISHER_BACKGROUND = "fisher_background";
 	static final String CFGKEY_HYPER_BACKGROUND = "hypergeometric_background";
 	static final String CFGKEY_POP_SIZE = "pop_size";
 	static final String CFGKEY_ORDER_BY = "order_by";
-	static final String [] METHODS = {CFGKEY_FISHER, CFGKEY_WILCOXON, CFGKEY_HYPER_BACKGROUND};
+	static final String [] METHODS = {CFGKEY_FISHER, CFGKEY_WILCOXON, CFGKEY_FISHER_BACKGROUND, CFGKEY_HYPER_BACKGROUND};
 	
     
     //method settings models
@@ -63,11 +64,13 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     private final SettingsModelString m_alt_wilcoxon = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ALT_WILCOXON,"two.sided");
 //    private final SettingsModelBoolean m_bin_back = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_BINOMIAL_BACKGROUND,true);
 //    private final SettingsModelDoubleBounded m_pseudo_freq = new SettingsModelDoubleBounded(GeneBasedAnalysisNodeModel.CFGKEY_PSEUDO_FREQ,0.0,0.0,1.0);
+    private final SettingsModelBoolean m_fisher_bg = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_FISHER_BACKGROUND,true);
     private final SettingsModelBoolean m_hyper = new SettingsModelBoolean(GeneBasedAnalysisNodeModel.CFGKEY_HYPER_BACKGROUND,true);
     private final SettingsModelIntegerBounded m_pop_size = new SettingsModelIntegerBounded(GeneBasedAnalysisNodeModel.CFGKEY_POP_SIZE, 1, 1, Integer.MAX_VALUE);
     private final SettingsModelString m_order_by = new SettingsModelString(GeneBasedAnalysisNodeModel.CFGKEY_ORDER_BY,METHODS[0]);
     
-	protected static final NodeLogger logger = NodeLogger.getLogger(CaseControlAnalyzerNodeModel.class);
+	
+    protected static final NodeLogger logger = NodeLogger.getLogger(CaseControlAnalyzerNodeModel.class);
 
 	private String outfile;
 	
@@ -101,6 +104,8 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	double [] wilcoxon_adj = null;
 //    	double [] binomial = null;
 //    	double [] binomial_adj = null;
+    	double [] fisher_bg = null;
+    	double [] fisher_bg_adj = null;
     	double [] hyper = null;
     	double [] hyper_adj = null;
     	
@@ -148,6 +153,27 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 //        	binomial_adj = stats.adjustP(binomial, "fdr");
 //    	}
     	
+    	logger.debug("Compute Fisher background statistic");
+    	
+    	ContingencyTable [] my_tables = new ContingencyTable[tables.length];
+    	ContingencyTable ct;
+    	double freq;
+    	int a,b,c,d;
+    	for(int i = 0; i < tables.length; i++) {
+    		ct = tables[i];
+    		freq = frequencies[i];
+    		a = ct.getA();
+    		b = ct.getB();
+    		c = (int) Math.round(pop_size*freq);
+    		d = pop_size -c;
+    		my_tables[i] = new ContingencyTable(a,b,c,d);
+    	}
+    	
+    	if(m_fisher_bg.getBooleanValue()) {
+    		fisher_bg = stats.getFisherTest(my_tables, "greater");
+    		fisher_bg_adj = stats.adjustP(fisher_bg, "fdr");
+    	}
+    	
     	logger.debug("Compute hypergeometric background statistic");
     	if(m_hyper.getBooleanValue()) {
     		hyper = stats.getHypergeometricBackground(tables, pop_size, frequencies);
@@ -182,6 +208,13 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
 //    		headers.add("biomial_adj");
 //    	}
     	
+    	if(fisher_bg!=null) {
+    		p_values.add(fisher_bg);
+    		headers.add("fisher_bg");
+    		p_values.add(fisher_bg_adj);
+    		headers.add("fisher_bg_adj");
+    	}
+    	
     	if(hyper!=null) {
     		p_values.add(hyper);
     		headers.add("hyper");
@@ -202,9 +235,9 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     		vc = new ValueComparator(fisher);
     	} else if (order_by.equals(METHODS[1]) && wilcoxon != null) {
     		vc = new ValueComparator(wilcoxon);
-//    	} else if (order_by.equals(METHODS[2]) && binomial != null) {
-//    		vc = new ValueComparator(binomial);
-    	} else if (order_by.equals(METHODS[2]) && hyper != null) {
+    	} else if (order_by.equals(METHODS[2]) && fisher_bg != null) {
+    		vc = new ValueComparator(fisher_bg);
+    	} else if (order_by.equals(METHODS[3]) && hyper != null) {
     		vc = new ValueComparator(hyper);
     	}
     	
@@ -304,6 +337,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
         m_fisher.saveSettingsTo(settings);
         m_alt_fisher.saveSettingsTo(settings);
 //      m_bin_back.saveSettingsTo(settings);
+        m_fisher_bg.saveSettingsTo(settings);
         m_hyper.saveSettingsTo(settings);
         m_pop_size.saveSettingsTo(settings);
         m_order_by.saveSettingsTo(settings);
@@ -318,6 +352,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
     	m_fisher.loadSettingsFrom(settings);
     	m_alt_fisher.loadSettingsFrom(settings);
 //    	m_bin_back.loadSettingsFrom(settings);
+    	m_fisher_bg.loadSettingsFrom(settings);
     	m_hyper.loadSettingsFrom(settings);
     	m_pop_size.loadSettingsFrom(settings);
     	m_order_by.loadSettingsFrom(settings);
@@ -332,6 +367,7 @@ public class GeneBasedAnalysisNodeModel extends CaseControlAnalyzerNodeModel {
         m_fisher.validateSettings(settings);
         m_alt_fisher.loadSettingsFrom(settings);
 //      m_bin_back.validateSettings(settings);
+        m_fisher_bg.validateSettings(settings);
         m_hyper.validateSettings(settings);
         m_pop_size.loadSettingsFrom(settings);
         m_order_by.validateSettings(settings);
