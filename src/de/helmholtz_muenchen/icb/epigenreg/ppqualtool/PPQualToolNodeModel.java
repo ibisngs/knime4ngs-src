@@ -17,6 +17,7 @@ import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
@@ -25,6 +26,10 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.ngs.*;
+
 
 /**
  * This is the model implementation of PPQualTool.
@@ -32,7 +37,10 @@ import org.knime.core.node.NodeSettingsWO;
  *
  * @author 
  */
-public class PPQualToolNodeModel extends NodeModel {
+public class PPQualToolNodeModel extends RNodeModel {
+	
+	//Static Variables:
+	private static String PATH_PHANTOMPEAKQUALTOOL = "";
     
     // the logger instance
     private static final NodeLogger logger = NodeLogger
@@ -41,27 +49,26 @@ public class PPQualToolNodeModel extends NodeModel {
     /** the settings key which is used to retrieve and 
         store the settings (from the dialog or from a settings file)    
        (package visibility to be usable from the dialog). */
-	static final String CFGKEY_COUNT = "Count";
-
-    /** initial default count value. */
-    static final int DEFAULT_COUNT = 100;
+    
+    static final String CFGKEY_OUTFILE = "Outfile";
+	
 
     // example value: the models count variable filled from the dialog 
     // and used in the models execution method. The default components of the
     // dialog work with "SettingsModels".
-    private final SettingsModelIntegerBounded m_count =
-        new SettingsModelIntegerBounded(PPQualToolNodeModel.CFGKEY_COUNT,
-                    PPQualToolNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE);
+    static final String DEFAULT_OUTFILE = "qc.txt";
+    private final SettingsModelString SET_OUTFILE =
+        new SettingsModelString(PPQualToolNodeModel.CFGKEY_OUTFILE, DEFAULT_OUTFILE);
     
 
     /**
      * Constructor for the node model.
      */
-    protected PPQualToolNodeModel() {
+    protected PPQualToolNodeModel(){
     
         // TODO one incoming port and one outgoing port is assumed
-        super(1, 1);
+    	//TODO add paths
+        super(1, 1, PATH_PHANTOMPEAKQUALTOOL, new String[0], new String[0]);
     }
 
     /**
@@ -70,47 +77,19 @@ public class PPQualToolNodeModel extends NodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-
-        // TODO do something here
-        logger.info("Node Model Stub... this is not yet implemented !");
-
+        logger.info("Initializing R execution");
         
-        // the data table spec of the single output table, 
-        // the table will have three columns:
-        DataColumnSpec[] allColSpecs = new DataColumnSpec[3];
-        allColSpecs[0] = 
-            new DataColumnSpecCreator("Column 0", StringCell.TYPE).createSpec();
-        allColSpecs[1] = 
-            new DataColumnSpecCreator("Column 1", DoubleCell.TYPE).createSpec();
-        allColSpecs[2] = 
-            new DataColumnSpecCreator("Column 2", IntCell.TYPE).createSpec();
-        DataTableSpec outputSpec = new DataTableSpec(allColSpecs);
-        // the execution context will provide us with storage capacity, in this
-        // case a data container to which we will add rows sequentially
-        // Note, this container can also handle arbitrary big data tables, it
-        // will buffer to disc if necessary.
-        BufferedDataContainer container = exec.createDataContainer(outputSpec);
-        // let's add m_count rows to it
-        for (int i = 0; i < m_count.getIntValue(); i++) {
-            RowKey key = new RowKey("Row " + i);
-            // the cells of the current row, the types of the cells must match
-            // the column spec (see above)
-            DataCell[] cells = new DataCell[3];
-            cells[0] = new StringCell("String_" + i); 
-            cells[1] = new DoubleCell(0.5 * i); 
-            cells[2] = new IntCell(i);
-            DataRow row = new DefaultRow(key, cells);
-            container.addRowToTable(row);
-            
-            // check if the execution monitor was canceled
-            exec.checkCanceled();
-            exec.setProgress(i / (double)m_count.getIntValue(), 
-                "Adding row " + i);
-        }
-        // once we are done, we close the container and return its table
-        container.close();
-        BufferedDataTable out = container.getTable();
-        return new BufferedDataTable[]{out};
+        //retrieve BAM file name from BufferedDataTabel
+        String readsFile1 = inData[0].iterator().next().getCell(0).toString();
+        
+        //create command
+        this.addArgument("-c", readsFile1);
+        this.addArgument("-savp", "");
+        this.addArgument("-out=", SET_OUTFILE.getStringValue());
+        
+        
+        logger.info("");
+        return(super.execute(inData, exec));
     }
 
     /**
@@ -135,52 +114,32 @@ public class PPQualToolNodeModel extends NodeModel {
         // to execute. If the node can execute in its current state return
         // the spec of its output data table(s) (if you can, otherwise an array
         // with null elements), or throw an exception with a useful user message
-
-        return new DataTableSpec[]{null};
+    	
+    	//validate incoming data table spec
+    	boolean hasBAMfile = false;
+    	boolean bamCell = false;
+    	//search filename (String) in input array
+    	//we can only have one input DtatTableSpec and it has only one row and colum
+    	//containing Bamfile name
+    	//Normally, the is only one input incoming
+    	 for (int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+             DataColumnSpec columnSpec = inSpecs[0].getColumnSpec(i);
+             if(columnSpec.getType().isCompatible(BAMCell.class)){
+            	 bamCell = true;
+             }
+             //TODO: Check if table name existst???
+    	 }
+    	 
+    	 if(!bamCell) {
+    		 throw new InvalidSettingsException("Input table must be a BAM file");
+    	 }
+    	 //Empty return, since no further processing planned
+        return new DataTableSpec[]{new DataTableSpec()};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
 
-        // TODO save user settings to the config object.
-        
-        m_count.saveSettingsTo(settings);
+ 
 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-        // TODO load (valid) settings from the config object.
-        // It can be safely assumed that the settings are valided by the 
-        // method below.
-        
-        m_count.loadSettingsFrom(settings);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-        // TODO check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
-
-        m_count.validateSettings(settings);
-
-    }
     
     /**
      * {@inheritDoc}
@@ -214,6 +173,10 @@ public class PPQualToolNodeModel extends NodeModel {
         // of). Save here only the other internals that need to be preserved
         // (e.g. data used by the views).
 
+    }
+    public void init(){
+    	super.init();
+    	addSetting(SET_OUTFILE);
     }
 
 }

@@ -1,8 +1,11 @@
 package de.helmholtz_muenchen.icb.epigenreg.ppqualtool;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
  * <code>NodeDialog</code> for the "PPQualTool" Node.
@@ -25,12 +28,10 @@ public class PPQualToolNodeDialog extends DefaultNodeSettingsPane {
     protected PPQualToolNodeDialog() {
         super();
         
-        addDialogComponent(new DialogComponentNumber(
-                new SettingsModelIntegerBounded(
-                    PPQualToolNodeModel.CFGKEY_COUNT,
-                    PPQualToolNodeModel.DEFAULT_COUNT,
-                    Integer.MIN_VALUE, Integer.MAX_VALUE),
-                    "Counter:", /*step*/ 1, /*componentwidth*/ 5));
+        addDialogComponent(new DialogComponentFileChooser(
+                new SettingsModelString(
+                    PPQualToolNodeModel.CFGKEY_OUTFILE,
+                    PPQualToolNodeModel.DEFAULT_OUTFILE), "dubios", 0 , ""));
                     
     }
 }
