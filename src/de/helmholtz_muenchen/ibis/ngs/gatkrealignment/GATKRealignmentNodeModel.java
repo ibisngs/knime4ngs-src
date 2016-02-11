@@ -584,7 +584,35 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     		}
     	}
     	
-        return new DataTableSpec[]{null};
+    	
+    	//determine number of output columns
+    	int colcount=3;
+    	if(p1 || m_use_phase1_1000G.getBooleanValue()){
+    		colcount++;
+    	}
+    	if(mills || m_use_mills_1000G.getBooleanValue()){
+    		colcount++;
+    	}
+    	if(dbsnp){
+    		colcount++;
+    	}
+    	
+    	DataColumnSpec [] colspec = new DataColumnSpec[colcount];
+    	int count=0;
+    	colspec[count++]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
+    	colspec[count++]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
+    	colspec[count++]=new DataColumnSpecCreator("Path2GATKFile", FileCell.TYPE).createSpec();
+    	if(p1 || m_use_phase1_1000G.getBooleanValue()){
+        	colspec[count++]=new DataColumnSpecCreator("Path2phase1", FileCell.TYPE).createSpec();
+    	}
+    	if(mills || m_use_mills_1000G.getBooleanValue()){
+    		colspec[count++]=new DataColumnSpecCreator("Path2mills", FileCell.TYPE).createSpec();
+    	}
+    	if(dbsnp){
+    		colspec[count++]=new DataColumnSpecCreator("Path2dbsnp", FileCell.TYPE).createSpec();
+    	}
+    	
+        return new DataTableSpec[]{new DataTableSpec(colspec)};
     }
 
     /**

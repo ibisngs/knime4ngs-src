@@ -3,6 +3,8 @@ package de.helmholtz_muenchen.ibis.ngs.fastSam2Bam;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
@@ -136,9 +138,13 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 			// create worker pool
 			ExecutorService pool = Executors.newFixedThreadPool(cores);			
     		String inputFile = it.next().getCell(0).toString();
-        	nameOfBamFile = SET_OUTPUT_PATH.getStringValue() + File.separator + new File(inputFile).getName() + ".sorted.bam";
+    		String outfolder = SET_OUTPUT_PATH.getStringValue();
+    		if(outfolder.equals("") || Files.notExists(Paths.get(outfolder))) {
+    			outfolder = new File(inputFile).getParent();
+    		}
+    		
+        	nameOfBamFile = outfolder + File.separator + new File(inputFile).getName() + ".sorted.bam";
         	nameOfBaiFile = nameOfBamFile.replaceFirst(".bam$", ".bai");
-        	
         	
         	
     		// check if input file is there
@@ -147,7 +153,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     		
     		// check, if bam file is already there
     		if(!(new File(nameOfBamFile).exists() && new File(nameOfBaiFile).exists())) {
-    			new File(SET_OUTPUT_PATH.getStringValue()).mkdirs();
+    			new File(outfolder).mkdirs();
 	    		// run SamSplitter
     			FileHelpers.noExitRule = true; 	// do not call System.exit()!
     			SamSplitter.noExit = true; 		// do not call System.exit()!

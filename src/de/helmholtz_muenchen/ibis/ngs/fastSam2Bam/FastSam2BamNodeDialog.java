@@ -106,6 +106,10 @@ public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
     	if(toolPath != null && !toolPath.equals("")) {
     		SET_PATH_SAMTOOLS.setStringValue(toolPath);
     	}
+    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+    	if(refGenome != null && !refGenome.equals("")) {
+    		SET_GENOME.setStringValue(refGenome);
+    	}
     }
 }
 

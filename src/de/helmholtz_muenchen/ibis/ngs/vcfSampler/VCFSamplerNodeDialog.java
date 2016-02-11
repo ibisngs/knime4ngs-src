@@ -23,6 +23,7 @@ public class VCFSamplerNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelInteger buffer = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_BUFFER, 100);
 	private final SettingsModelInteger cases = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_CASES, 100);
 	private final SettingsModelString def = new SettingsModelString(VCFSamplerNodeModel.CFGKEY_DEF,"10/2");
+	private final SettingsModelString noise = new SettingsModelString(VCFSamplerNodeModel.CFGKEY_NOISE,"100/1.5");
 	
     /**
      * New pane for configuring the VCFSampler node.
@@ -31,7 +32,8 @@ public class VCFSamplerNodeDialog extends DefaultNodeSettingsPane {
 
     	addDialogComponent(new DialogComponentNumber(cases, "Number of cases", 100));
     	addDialogComponent(new DialogComponentNumber(ctrls, "Number of controls", 100));
-    	addDialogComponent(new DialogComponentString(def, "Define variant frequency changes"));
+    	addDialogComponent(new DialogComponentString(def, "Define variant frequency changes in cases"));
+    	addDialogComponent(new DialogComponentString(noise, "Define sub-population bias"));
     	addDialogComponent(new DialogComponentNumber(buffer, "Buffer size", 50));
     }
 }

@@ -52,12 +52,14 @@ public class VCFSamplerNodeModel extends NodeModel {
 	static final String CFGKEY_CASES = "cases";
 	static final String CFGKEY_CTRLS = "controls";
 	static final String CFGKEY_DEF = "signal_def";
+	static final String CFGKEY_NOISE = "noise_def";
 	
 	//settings models
 	private final SettingsModelInteger m_buffer = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_BUFFER, 50);
 	private final SettingsModelInteger m_cases = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_CASES, 100);
 	private final SettingsModelInteger m_ctrls = new SettingsModelInteger(VCFSamplerNodeModel.CFGKEY_CTRLS, 100);
 	private final SettingsModelString m_def = new SettingsModelString(VCFSamplerNodeModel.CFGKEY_DEF,"10/2");
+	private final SettingsModelString m_noise = new SettingsModelString(VCFSamplerNodeModel.CFGKEY_NOISE,"100/2");
 	
 	private int vcf_index;
 	public static final String OUT_COL1 = "Path2SampledVCF";
@@ -103,42 +105,30 @@ public class VCFSamplerNodeModel extends NodeModel {
     	
     	writeHeader(outfile,vcf_it.getCompleteHeader());
 
-    	//read input VCF and save relevant content
+    	//read input VCF
     	VCFVariant var;
-    	String ac_het, ac_hom, an, ac;
-    	double prob_un, prob_het, prob_hom;
+//    	double ac_het, ac_hom, prob_het, prob_hom;
+    	double an, ac, prob_un;
     	while(vcf_it.hasNext()) {
     		var = vcf_it.next();
-    		ac_het = var.getInfoField("AC_Het");
-    		ac_hom = var.getInfoField("AC_Hom");
-    		an = var.getInfoField("AN_Adj");
-    		ac = var.getInfoField("AC_Adj");
-    		prob_het = 2.0 * (Double.parseDouble(ac_het)/Double.parseDouble(an));
-    		prob_hom = 2.0 * (Double.parseDouble(ac_hom)/Double.parseDouble(an));
-    		if(prob_het+prob_hom == 0.0 || prob_het+prob_hom == 1.0 || var.getChrom().contains("Y") || var.getChrom().contains("X")) {
+    		
+//    		ac_het = Double.parseDouble(var.getInfoField("AC_Het"));
+//    		ac_hom = Double.parseDouble(var.getInfoField("AC_Hom"));
+    		ac = Double.parseDouble(var.getInfoField("AC_Adj"));
+    		an = Double.parseDouble(var.getInfoField("AN_Adj"));
+    		
+//    		prob_het = 2.0 * (ac_het/an);
+//    		prob_hom = 2.0 * (ac_hom/an);
+    		if(ac == 0.0 || var.getChrom().contains("Y") || var.getChrom().contains("X")) {
     			continue;
     		}
 //    		prob_un = 1 - prob_het - prob_hom;
-    		prob_un = Math.pow(1.0 - (Double.parseDouble(ac)/Double.parseDouble(an)),2);
+    		prob_un = Math.pow(1.0 - (ac/an),2);
 //    		probs_list.add(new double[]{prob_hom+ prob_het,prob_un});
     		probs_list.add(new double[]{1-prob_un,prob_un});
     		var_fields.add(var.getChrom()+"\t"+var.getPos()+"\t"+var.getId()+"\t"+var.getRef()+"\t"+var.getAlt()+"\t"+var.getQual()+"\t"+var.getFilter()+"\t"+var.getInfo()+"\t"+var.getFormat());
     		gene_list.add(ap.getEntity2AlleleIds(var.getInfoField(ap.getAnnId()), BioEntity.GENE_ID).keySet());
     	}
-    	
-//    	logger.debug("start ranking");
-//    	HashMap<Integer,Integer> index2rank = new HashMap<>();
-//    	HashMap<Integer,Integer> rank2index = new HashMap<>();
-//    	
-//    	ArrayList<Double> sortedAFs = new ArrayList<>(af_list);
-//    	Collections.sort(sortedAFs);
-//    	int rank;
-//    	for(int i = 0; i < af_list.size(); i++) {
-//    		rank = sortedAFs.indexOf(af_list.get(i));
-//    		index2rank.put(i, rank);
-//    		rank2index.put(rank, i);
-//    	}
-//    	logger.debug("finished ranking");
     	
     	ArrayList<double []> case_list = new ArrayList<>();
     	double [] my;
@@ -153,24 +143,29 @@ public class VCFSamplerNodeModel extends NodeModel {
     	//create signals and document
     	String signal_def = m_def.getStringValue();
     	String [] defs = signal_def.split(";");
-    	int rands;
+    	int nr_rands, random;
     	double increase, bg;
     	double [] tmp;
-    	HashSet<Integer> rand_indices;
+    	
     	int range = probs_list.size();
+    	HashSet<Integer> general_rand_indices = new HashSet<>();
+    	HashSet<Integer> my_rand_indices;
     	StringBuilder sb = new StringBuilder();
     	String nl = System.getProperty("line.separator");
     	
     	for(String d: defs) {
-    		rands = Integer.parseInt(d.split("/")[0]);
+    		nr_rands = Integer.parseInt(d.split("/")[0]);
     		increase = Double.parseDouble(d.split("/")[1]);
     		
-        	rand_indices = new HashSet<>();
-        	while(rand_indices.size() < rands) {
-        		rand_indices.add(new Random().nextInt(range));
+        	my_rand_indices = new HashSet<>();
+        	while(my_rand_indices.size() < nr_rands) {
+        		random = new Random().nextInt(range);
+        		if(general_rand_indices.contains(random)) continue;
+        		general_rand_indices.add(random);
+        		my_rand_indices.add(random);
         	}
         	
-        	for(int i : rand_indices) {
+        	for(int i : my_rand_indices) {
         		tmp = case_list.get(i);
         		bg = tmp[0];
         		tmp[0] = increase*tmp[0];
@@ -184,6 +179,41 @@ public class VCFSamplerNodeModel extends NodeModel {
     	}
     	
     	BufferedWriter bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".signals.tsv")));
+    	bw.write(sb.toString());
+    	bw.close();
+    	
+    	//create noise and document
+    	String noise_def = m_noise.getStringValue();
+    	defs = noise_def.split(";");
+    	
+    	sb = new StringBuilder();
+    	
+    	for(String d: defs) {
+    		nr_rands = Integer.parseInt(d.split("/")[0]);
+    		increase = Double.parseDouble(d.split("/")[1]);
+    		
+        	my_rand_indices = new HashSet<>();
+        	while(my_rand_indices.size() < nr_rands) {
+        		random = new Random().nextInt(range);
+        		if(general_rand_indices.contains(random)) continue;
+        		general_rand_indices.add(random);
+        		my_rand_indices.add(random);
+        	}
+        	
+        	for(int i : my_rand_indices) {
+        		tmp = probs_list.get(i);
+        		bg = tmp[0];
+        		tmp[0] = increase*tmp[0];
+        		if(tmp[0] > 1.0) {
+        			tmp[0] = 1.0;
+        		}
+        		tmp[1] = 1 - tmp[0];
+        		probs_list.set(i, tmp);
+        		sb.append(gene_list.get(i)+"\t"+bg+"\t"+increase+"\t"+tmp[0]+nl);
+        	}
+    	}
+    	
+    	bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".noise.tsv")));
     	bw.write(sb.toString());
     	bw.close();
     	
@@ -311,6 +341,7 @@ public class VCFSamplerNodeModel extends NodeModel {
          m_buffer.saveSettingsTo(settings);
          m_cases.saveSettingsTo(settings);
          m_def.saveSettingsTo(settings);
+         m_noise.saveSettingsTo(settings);
     }
 
     /**
@@ -323,6 +354,7 @@ public class VCFSamplerNodeModel extends NodeModel {
     	m_buffer.loadSettingsFrom(settings);
     	m_cases.loadSettingsFrom(settings);
     	m_def.loadSettingsFrom(settings);
+    	m_noise.loadSettingsFrom(settings);
     }
 
     /**
@@ -335,6 +367,7 @@ public class VCFSamplerNodeModel extends NodeModel {
     	m_buffer.validateSettings(settings);
     	m_cases.validateSettings(settings);
     	m_def.validateSettings(settings);
+    	m_noise.validateSettings(settings);
     }
     
     /**
