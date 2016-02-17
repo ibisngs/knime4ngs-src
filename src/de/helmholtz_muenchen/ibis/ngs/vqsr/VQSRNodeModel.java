@@ -29,6 +29,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * This is the model implementation of VQSR.
@@ -185,7 +186,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(outFile)};
@@ -361,7 +362,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
 
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
     /**

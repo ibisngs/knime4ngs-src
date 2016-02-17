@@ -130,19 +130,9 @@ public class VCFSamplerNodeModel extends NodeModel {
     		gene_list.add(ap.getEntity2AlleleIds(var.getInfoField(ap.getAnnId()), BioEntity.GENE_ID).keySet());
     	}
     	
-    	ArrayList<double []> case_list = new ArrayList<>();
-    	double [] my;
-    	for(double [] a: probs_list) {
-    		my = new double[a.length];
-    		for(int i = 0; i < a.length; i++) {
-    			my[i] = a[i];
-    		}
-    		case_list.add(my);
-    	}
-    	
-    	//create signals and document
-    	String signal_def = m_def.getStringValue();
-    	String [] defs = signal_def.split(";");
+    	//create noise and document
+    	String noise_def = m_noise.getStringValue();
+    	String [] defs = noise_def.split(";");
     	int nr_rands, random;
     	double increase, bg;
     	double [] tmp;
@@ -150,43 +140,9 @@ public class VCFSamplerNodeModel extends NodeModel {
     	int range = probs_list.size();
     	HashSet<Integer> general_rand_indices = new HashSet<>();
     	HashSet<Integer> my_rand_indices;
-    	StringBuilder sb = new StringBuilder();
     	String nl = System.getProperty("line.separator");
     	
-    	for(String d: defs) {
-    		nr_rands = Integer.parseInt(d.split("/")[0]);
-    		increase = Double.parseDouble(d.split("/")[1]);
-    		
-        	my_rand_indices = new HashSet<>();
-        	while(my_rand_indices.size() < nr_rands) {
-        		random = new Random().nextInt(range);
-        		if(general_rand_indices.contains(random)) continue;
-        		general_rand_indices.add(random);
-        		my_rand_indices.add(random);
-        	}
-        	
-        	for(int i : my_rand_indices) {
-        		tmp = case_list.get(i);
-        		bg = tmp[0];
-        		tmp[0] = increase*tmp[0];
-        		if(tmp[0] > 1.0) {
-        			tmp[0] = 1.0;
-        		}
-        		tmp[1] = 1 - tmp[0];
-        		case_list.set(i, tmp);
-        		sb.append(gene_list.get(i)+"\t"+bg+"\t"+increase+"\t"+tmp[0]+nl);
-        	}
-    	}
-    	
-    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".signals.tsv")));
-    	bw.write(sb.toString());
-    	bw.close();
-    	
-    	//create noise and document
-    	String noise_def = m_noise.getStringValue();
-    	defs = noise_def.split(";");
-    	
-    	sb = new StringBuilder();
+    	StringBuilder sb = new StringBuilder();
     	
     	for(String d: defs) {
     		nr_rands = Integer.parseInt(d.split("/")[0]);
@@ -213,7 +169,52 @@ public class VCFSamplerNodeModel extends NodeModel {
         	}
     	}
     	
-    	bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".noise.tsv")));
+    	BufferedWriter bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".noise.tsv")));
+    	bw.write(sb.toString());
+    	bw.close();
+    	
+    	
+    	ArrayList<double []> case_list = new ArrayList<>();
+    	double [] my;
+    	for(double [] a: probs_list) {
+    		my = new double[a.length];
+    		for(int i = 0; i < a.length; i++) {
+    			my[i] = a[i];
+    		}
+    		case_list.add(my);
+    	}
+    	
+    	//create signals and document
+    	String signal_def = m_def.getStringValue();
+    	defs = signal_def.split(";");
+    	sb = new StringBuilder();
+    	
+    	for(String d: defs) {
+    		nr_rands = Integer.parseInt(d.split("/")[0]);
+    		increase = Double.parseDouble(d.split("/")[1]);
+    		
+        	my_rand_indices = new HashSet<>();
+        	while(my_rand_indices.size() < nr_rands) {
+        		random = new Random().nextInt(range);
+        		if(general_rand_indices.contains(random)) continue;
+        		general_rand_indices.add(random);
+        		my_rand_indices.add(random);
+        	}
+        	
+        	for(int i : my_rand_indices) {
+        		tmp = case_list.get(i);
+        		bg = tmp[0];
+        		tmp[0] = increase*tmp[0];
+        		if(tmp[0] > 1.0) {
+        			tmp[0] = 1.0;
+        		}
+        		tmp[1] = 1 - tmp[0];
+        		case_list.set(i, tmp);
+        		sb.append(gene_list.get(i)+"\t"+bg+"\t"+increase+"\t"+tmp[0]+nl);
+        	}
+    	}
+    	
+    	bw = Files.newBufferedWriter(Paths.get(IO.replaceFileExtension(outfile, ".signals.tsv")));
     	bw.write(sb.toString());
     	bw.close();
     	

@@ -504,6 +504,10 @@ public class VEPSummaryNodeModel extends NodeModel {
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
+    	
+    	if(m_cdsin.getStringValue().equals("")) {
+    		throw new InvalidSettingsException("Set path to GTF or CDS file!");
+    	}
 
         return new DataTableSpec[]{getTableSpec()};
     }

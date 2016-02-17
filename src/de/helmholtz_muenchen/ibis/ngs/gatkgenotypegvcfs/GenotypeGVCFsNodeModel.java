@@ -47,7 +47,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 		boolean first = true;
 		while(it.hasNext()){
 			DataRow row = it.next();
-			String INFILE = row.getCell(0).toString();
+			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
 				this.OUTFILE = IO.replaceFileExtension(INFILE, ".GenotypedVariants.vcf");
