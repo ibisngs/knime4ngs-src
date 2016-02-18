@@ -33,6 +33,8 @@
         	<option name="Further options">
         		Commit further options to GATK.
         	</option>
+        	<option name="GenotypeMergeType">
+        	</option> 
         </tab>
     </fullDescription>
     

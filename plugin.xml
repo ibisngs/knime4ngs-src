@@ -91,6 +91,8 @@
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
 		
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory"/>
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">
