@@ -42,6 +42,9 @@ public class VCFToolsFilterNodeDialog extends HTExecutorNodeDialog {
 	private final SettingsModelBoolean filter_by_GQ = new SettingsModelBoolean(VCFToolsFilterNodeModel.CFGKEY_FILTER_BY_GQ,false);
 	private final SettingsModelIntegerBounded GQ_threshold = new SettingsModelIntegerBounded(VCFToolsFilterNodeModel.CFGKEY_GQ_THRESHOLD,20,0,99);
 	
+	private final SettingsModelBoolean filter_by_AD = new SettingsModelBoolean(VCFToolsFilterNodeModel.CFGKEY_FILTER_BY_AD,false);
+	private final SettingsModelInteger AD_threshold = new SettingsModelInteger(VCFToolsFilterNodeModel.CFGKEY_AD_THRESHOLD,8);
+	
 	//variant filter
 	private final SettingsModelBoolean filter_by_GQ_mean = new SettingsModelBoolean(VCFToolsFilterNodeModel.CFGKEY_FILTER_BY_GQ_MEAN,false);
 	private final SettingsModelIntegerBounded GQ_MEAN_threshold = new SettingsModelIntegerBounded(VCFToolsFilterNodeModel.CFGKEY_GQ_MEAN_THRESHOLD,35,0,99);
@@ -65,6 +68,11 @@ public class VCFToolsFilterNodeDialog extends HTExecutorNodeDialog {
 		addDialogComponent(new DialogComponentBoolean(filter_by_DP, "Filter genotypes by DP?"));
 		setHorizontalPlacement(true);
 		addDialogComponent(new DialogComponentNumber(DP_threshold, "DP threshold",1));
+		setHorizontalPlacement(false);
+		
+		addDialogComponent(new DialogComponentBoolean(filter_by_AD, "Filter genotypes by AD? (Pindel VCF)"));
+		setHorizontalPlacement(true);
+		addDialogComponent(new DialogComponentNumber(AD_threshold, "AD threshold",1));
 		setHorizontalPlacement(false);
 		
 		addDialogComponent(new DialogComponentBoolean(filter_by_GQ, "Filter genotypes by GQ?"));

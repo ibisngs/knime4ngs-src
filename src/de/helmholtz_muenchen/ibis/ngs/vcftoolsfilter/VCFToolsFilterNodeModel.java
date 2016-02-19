@@ -57,6 +57,12 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     static final String CFGKEY_DP_THRESHOLD = "DP_threshold";
     final SettingsModelInteger m_DP_threshold = new SettingsModelInteger(CFGKEY_DP_THRESHOLD,8);
     
+    static final String CFGKEY_FILTER_BY_AD = "filter_by_AD";
+    final SettingsModelBoolean m_filter_by_AD = new SettingsModelBoolean(CFGKEY_FILTER_BY_AD,false);
+    
+    static final String CFGKEY_AD_THRESHOLD = "AD_threshold";
+    final SettingsModelInteger m_AD_threshold = new SettingsModelInteger(CFGKEY_AD_THRESHOLD,8);
+    
     static final String CFGKEY_FILTER_BY_GQ = "filter_by_GQ";
     final SettingsModelBoolean m_filter_by_GQ = new SettingsModelBoolean(CFGKEY_FILTER_BY_GQ,false);
     
@@ -104,7 +110,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	}
     	
     	String outfile = infile;
-    	if(m_filter_by_DP.getBooleanValue() || m_filter_by_GQ.getBooleanValue()) {
+    	if(m_filter_by_DP.getBooleanValue() || m_filter_by_GQ.getBooleanValue() || m_filter_by_AD.getBooleanValue()) {
     		outfile = filterGenotypes(infile, exec);
     		infile = outfile;
     	}
@@ -170,6 +176,34 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
     		super.executeCommand(cmd_array, exec, lockFile);
     	}
+    	
+    	if(m_filter_by_AD.getBooleanValue()) {
+    		
+    		if(infile.endsWith(".gz")) {
+    			LOGGER.warn("AD filter can only process unzipped vcf files!");
+    			return outfile;
+    		}
+    		
+    		outfile = infile.replace(".vcf",".AD_filtered.vcf");
+    		
+    		ArrayList<String> cmd = new ArrayList<>();
+			cmd.add("perl");
+			cmd.add(IO.getScriptPath()+"scripts/perl/filterByAD.pl");
+			cmd.add(infile);
+			cmd.add(m_AD_threshold.getIntValue()+"");
+			cmd.add("./.");
+			
+			String[] cmd_array = new String[cmd.size()];
+			for (int i = 0; i < cmd.size(); i++) {
+				cmd_array[i] = cmd.get(i);
+			}
+
+			File lockFile = new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
+
+			super.executeCommand(cmd_array, exec, lockFile);
+    		
+    	}
+    	
     	return outfile;
     }
     
@@ -221,7 +255,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	if(m_filter_by_GQ_MEAN.getBooleanValue()) {
     		
     		if(infile.endsWith(".gz")) {
-    			LOGGER.warn("Mean GQ filer can only process unzipped vcf files!");
+    			LOGGER.warn("Mean GQ filter can only process unzipped vcf files!");
     			return outfile;
     		}
     		
@@ -332,6 +366,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 	protected void saveSettingsTo(final NodeSettingsWO settings) {
     	super.saveSettingsTo(settings);
     	m_filter_by_DP.saveSettingsTo(settings);
+    	m_filter_by_AD.saveSettingsTo(settings);
     	m_DP_threshold.saveSettingsTo(settings);
     	m_filter_by_GQ.saveSettingsTo(settings);
     	m_GQ_threshold.saveSettingsTo(settings);
@@ -352,6 +387,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	super.loadValidatedSettingsFrom(settings);
     	m_filter_by_DP.loadSettingsFrom(settings);
+    	m_filter_by_AD.loadSettingsFrom(settings);
     	m_DP_threshold.loadSettingsFrom(settings);
     	m_filter_by_GQ.loadSettingsFrom(settings);
     	m_GQ_threshold.loadSettingsFrom(settings);
@@ -372,6 +408,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	super.validateSettings(settings);
     	m_filter_by_DP.validateSettings(settings);
+    	m_filter_by_AD.validateSettings(settings);
     	m_DP_threshold.validateSettings(settings);
     	m_filter_by_GQ.validateSettings(settings);
     	m_GQ_threshold.validateSettings(settings);
