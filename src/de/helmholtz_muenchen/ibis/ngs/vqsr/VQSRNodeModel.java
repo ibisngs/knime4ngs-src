@@ -15,7 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -43,7 +42,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
 	/**
 	 * Logger
 	 */
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(VQSRNodeModel.class);
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(VQSRNodeModel.class);
 	
 	/**
 	 * CFGKEYS
@@ -343,21 +342,21 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
 
     	
-    	if(inSpecs[0].containsName("Path2GATKFile")){
-    		m_GATK.setEnabled(false);
-    		m_GATK.setStringValue("GATK Path already set");
-    		LOGGER.info("Found GATK Path in inData");
-    	}else{
-    		LOGGER.warn("No path to GATK found in inData. User input required.");
-    	}
-    	
-    	if(inSpecs[0].containsName("Path2SEQFile")){
-    		m_REF_GENOME.setEnabled(false);
-    		m_REF_GENOME.setStringValue("Reference Sequence already set");
-    		LOGGER.info("Found Reference Sequence in inData");
-    	}else{
-    		LOGGER.warn("No path to Reference Sequence found in inData. User input required.");
-    	}
+//    	if(inSpecs[0].containsName("Path2GATKFile")){
+//    		m_GATK.setEnabled(false);
+//    		m_GATK.setStringValue("GATK Path already set");
+//    		LOGGER.info("Found GATK Path in inData");
+//    	}else{
+//    		LOGGER.warn("No path to GATK found in inData. User input required.");
+//    	}
+//    	
+//    	if(inSpecs[0].containsName("Path2SEQFile")){
+//    		m_REF_GENOME.setEnabled(false);
+//    		m_REF_GENOME.setStringValue("Reference Sequence already set");
+//    		LOGGER.info("Found Reference Sequence in inData");
+//    	}else{
+//    		LOGGER.warn("No path to Reference Sequence found in inData. User input required.");
+//    	}
     	
 
     	return new DataTableSpec[]{new DataTableSpec(
