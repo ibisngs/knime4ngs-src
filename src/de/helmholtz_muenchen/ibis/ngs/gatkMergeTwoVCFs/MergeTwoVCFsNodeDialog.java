@@ -30,8 +30,8 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 	protected void addDialogComponent() {
 		
     	GENOTYPEMERGEOPTION = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
-		INPUT1 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT1, "");
-		INPUT2 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2, "");
+		INPUT1 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT1_TAG, "");
+		INPUT2 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG, "");
 		PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE, "");
 		
 		createNewGroup("GenotypeMergeType");
