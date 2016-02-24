@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkphasebytransmission;
 
-import java.io.File;
+
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -44,7 +44,7 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 	//The Output Col Names
 	public static final String OUT_COL1 = "PhasedVCF";
 		
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int vcf_index;
 	
     /**
@@ -74,7 +74,6 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
     	command.add("-V "+INFILE);
     	
     	OUTFILE = IO.replaceFileExtension(INFILE, ".PhasedByTransmission.vcf");
-    	LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
     	
     	command.add("-prior "+m_DENOVO_PRIOR.getStringValue());
     	command.add("-ped "+m_PED_FILE.getStringValue());
@@ -117,10 +116,6 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 		return "PhaseByTransmission";
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(LOCKFILE);
-	}
 
 	@Override
 	protected String getOutfile() {

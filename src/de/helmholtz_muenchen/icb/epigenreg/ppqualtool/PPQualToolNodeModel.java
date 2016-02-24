@@ -3,32 +3,22 @@ package de.helmholtz_muenchen.icb.epigenreg.ppqualtool;
 import java.io.File;
 import java.io.IOException;
 
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
-import org.knime.core.node.BufferedDataContainer;
+
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
+
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
-import de.helmholtz_muenchen.ibis.utils.ngs.*;
+
 
 
 /**
@@ -116,7 +106,7 @@ public class PPQualToolNodeModel extends RNodeModel {
         // with null elements), or throw an exception with a useful user message
     	
     	//validate incoming data table spec
-    	boolean hasBAMfile = false;
+//    	boolean hasBAMfile = false;
     	boolean bamCell = false;
     	//search filename (String) in input array
     	//we can only have one input DtatTableSpec and it has only one row and colum

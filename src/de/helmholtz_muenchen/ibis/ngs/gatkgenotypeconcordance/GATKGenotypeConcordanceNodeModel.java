@@ -1,14 +1,12 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypeconcordance;
 
-import java.io.File;
+
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
-import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -21,7 +19,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 
-    private String OUTFILE, LOCKFILE;
+    private String OUTFILE;
     private int eval_index, comp_index;
     
 	protected GATKGenotypeConcordanceNodeModel() {
@@ -53,7 +51,7 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 		
 		
 		OUTFILE = eval + "_evaluation";
-		LOCKFILE = IO.replaceFileExtension(eval, SuccessfulRunChecker.LOCK_ENDING);
+		
 		
 		String command = "--eval "+eval;
 		command 	  += " --comp "+comp;
@@ -90,10 +88,6 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 	
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(LOCKFILE);
-	}
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

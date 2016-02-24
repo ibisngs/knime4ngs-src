@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -14,7 +14,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -27,7 +26,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class CombineGVCFsNodeModel extends GATKNodeModel {
     
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int gvcf_index;
     
     /**
@@ -55,7 +54,6 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 			
 			if(first){
 				this.OUTFILE = IO.replaceFileExtension(INFILE, ".ALLVARIANTS.gvcf");
-				this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 				first=false;
 			}
 
@@ -94,10 +92,6 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 	}
 
 
-	@Override
-	protected File getLockFile() {
-		return new File(this.LOCKFILE);
-	}
 
 
 	@Override

@@ -28,6 +28,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -93,6 +94,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	String OUTFILE = getOutfile(); 	
     	command.add("-o "+OUTFILE);
     	
+    	File lockFile = new File(OUTFILE+SuccessfulRunChecker.LOCK_ENDING); 
+    	
     	if(m_bed_file_checkbox.getBooleanValue()){
 			if(m_path2bed.getStringValue().equals("") || Files.notExists(Paths.get(m_path2bed.getStringValue()))) {
 				setWarningMessage("Specify valid bed file!");
@@ -104,7 +107,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	command.add(" "+m_OPT_FLAGS.getStringValue());
     	
     	LOGGER.info(StringUtils.join(command, " "));
-     	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec, getLockFile(),OUTFILE+".stdOut",OUTFILE+".stdErr");
+     	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec, lockFile,OUTFILE+".stdOut",OUTFILE+".stdErr");
      	
      	
     	/**
@@ -254,7 +257,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
      * @return
      */
     protected abstract String getCommandWalker();
-    protected abstract File getLockFile();
+//    protected abstract File getLockFile();
     protected abstract String getOutfile();
     protected abstract boolean checkInputCellType(DataTableSpec[] inSpecs);
     protected abstract DataType getOutColType();

@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs;
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -16,7 +16,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -33,7 +33,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	
 	private final SettingsModelString m_GENOTYPEMERGEOPTION	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
 	
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int vcf_index;
 	
     /**
@@ -61,7 +61,6 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 			
 			if(first){
 				this.OUTFILE = IO.replaceFileExtension(INFILE, ".ALLVARIANTS.vcf");
-				this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 				first=false;
 			}
 
@@ -80,10 +79,6 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		return "CombineVariants";
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(this.LOCKFILE);
-	}
 	
 	
 	@Override

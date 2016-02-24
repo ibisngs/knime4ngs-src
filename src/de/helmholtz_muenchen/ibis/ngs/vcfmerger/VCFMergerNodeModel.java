@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.vcfmerger;
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +12,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -158,10 +158,6 @@ public class VCFMergerNodeModel extends GATKNodeModel {
 		return "CombineVariants";
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(getOutfile()+SuccessfulRunChecker.LOCK_ENDING);
-	}
 
 	@Override
 	protected String getOutfile() {

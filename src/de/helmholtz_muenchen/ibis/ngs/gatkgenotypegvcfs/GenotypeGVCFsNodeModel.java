@@ -1,7 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs;
 
 
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -15,7 +15,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -32,7 +31,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 
 	private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
 	
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int gvcf_index;
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
@@ -51,7 +50,6 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			
 			if(first){
 				this.OUTFILE = IO.replaceFileExtension(INFILE, ".GenotypedVariants.vcf");
-				this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 				first=false;
 			}
 
@@ -92,10 +90,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 		m_NT.validateSettings(settings);
 		
 	}
-	@Override
-	protected File getLockFile() {
-		return new File(this.LOCKFILE);
-	}
+	
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		gvcf_index = -1;

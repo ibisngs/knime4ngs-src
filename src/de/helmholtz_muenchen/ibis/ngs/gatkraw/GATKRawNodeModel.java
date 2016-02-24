@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkraw;
 
-import java.io.File;
 
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -46,10 +45,6 @@ public class GATKRawNodeModel extends GATKNodeModel {
 		return m_walker.getStringValue();
 	}
 
-	@Override
-	protected File getLockFile() {
-		return null;
-	}
 
 	@Override
 	protected String getOutfile() {

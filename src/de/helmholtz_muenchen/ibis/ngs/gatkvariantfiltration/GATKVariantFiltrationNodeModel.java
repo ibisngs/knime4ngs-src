@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkvariantfiltration;
 
-import java.io.File;
+
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +14,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -70,7 +70,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 	//The Output Col Names
 	public static final String OUT_COL1 = "FILTERED_VARIANTS";
 	
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int vcf_index;
 	
     /**
@@ -119,7 +119,6 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	command.add("-V "+INFILE);
     	
     	OUTFILE = IO.replaceFileExtension(INFILE, ".VariantFiltration.vcf");
-    	LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
     	
     	/**
     	 * String that holds the complete filter options
@@ -252,10 +251,6 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 		return "VariantFiltration";
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(LOCKFILE);
-	}
 
 	@Override
 	protected String getOutfile() {

@@ -1,7 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller;
 
 
-import java.io.File;
+
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,7 +13,6 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -26,7 +25,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
     private int bam_index;
 	
 	protected GATKHaplotypeCallerNodeModel(int INPORTS, int OUTPORTS) {
@@ -56,7 +55,6 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		command.add("--variant_index_parameter 128000");
 		
 		this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
-		this.LOCKFILE = OUTFILE+SuccessfulRunChecker.LOCK_ENDING;
 		return StringUtils.join(command, " ");
 	}
 
@@ -88,11 +86,6 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 			throws InvalidSettingsException {
 		
 		
-	}
-
-	@Override
-	protected File getLockFile() {
-		return new File(LOCKFILE);
 	}
 
 	@Override

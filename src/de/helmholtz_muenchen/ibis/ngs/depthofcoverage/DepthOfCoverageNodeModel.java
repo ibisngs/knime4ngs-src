@@ -1,6 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.depthofcoverage;
 
-import java.io.File;
+
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,7 +15,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -46,7 +46,7 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	private final SettingsModelOptionalString m_extrafilters = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_EXTRAFILTERS,"",false);
 	private final SettingsModelString m_filesuffix = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"DoC");
 	
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int bam_index;
 
     /**
@@ -80,7 +80,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		}
 		
 		this.OUTFILE = IO.replaceFileExtension(INFILE, fileSuffix);
-		this.LOCKFILE = IO.replaceFileExtension(INFILE, SuccessfulRunChecker.LOCK_ENDING);
 		command.add("-I "+INFILE);
 
 		
@@ -102,10 +101,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		return "DepthOfCoverage";
 	}
 
-	@Override
-	protected File getLockFile() {
-		return new File(this.LOCKFILE);
-	}
 
 	@Override
 	protected String getOutfile() {

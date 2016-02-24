@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs;
 
-import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,7 +13,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -45,7 +43,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	private final SettingsModelString m_INPUT2_TAG = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG,"");
 	private final SettingsModelString m_PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE,"");
 	
-	private String OUTFILE, LOCKFILE;
+	private String OUTFILE;
 	private int vcf_ind1, vcf_ind2;
 
     /**
@@ -68,10 +66,6 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		ArrayList<String> command 	= new ArrayList<String>();
 		
 		this.OUTFILE = IO.replaceFileExtension(vcf1, ".MERGEDVCF.vcf");
-		this.LOCKFILE = IO.replaceFileExtension(vcf1, SuccessfulRunChecker.LOCK_ENDING);
-			
-
-		
 		
 		String mergeOption = m_GENOTYPEMERGEOPTION.getStringValue();
 		command.add("--genotypemergeoption "+mergeOption);
@@ -91,12 +85,6 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	protected String getCommandWalker() {
 		return "CombineVariants";
 	}
-
-	@Override
-	protected File getLockFile() {
-		return new File(this.LOCKFILE);
-	}
-	
 	
 	@Override
 	protected String getOutfile() {
