@@ -16,8 +16,9 @@
         	The score that gets added to the INFO field of each variant is called the VQSLOD.
         	It is the log odds ratio of being a true variant versus being false under the trained Gaussian mixture model.
         	For further information, see the GATK documentation of the 
-        	<a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantrecalibration_VariantRecalibrator.php">VariantRecalibrator</a>
+        	<a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantrecalibration_VariantRecalibrator.php">VariantRecalibrator</a>
         	 and the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantrecalibration_ApplyRecalibration.php">ApplyRecalibration</a> walker.
+        	 Useful information about training sets/arguments can be found in this <a href="https://www.broadinstitute.org/gatk/guide/article?id=1259">GATK article</a>.
         </intro>
         
         <tab name="Options">
@@ -42,10 +43,14 @@
         
         <tab name="VariantRecalibrator">
         	<option name="Tranche levels ">
-        		The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data. (in percent, that is 1.0 for 1 percent)
+        		The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
+        		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).
         	</option>
         	<option name="Annotation">
         		The names of the annotations which should be used for calculations.
+        		<b>DP</b> (Depth of Coverage) should not be used when working with exome datasets.
+        		The <b>InbreedingCoeff</b> is a population level statistic that requires at least 10 samples in order to be computed.
+        		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the command line. 
         	</option>
         	<option name="Gaussians">
         		This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm.  

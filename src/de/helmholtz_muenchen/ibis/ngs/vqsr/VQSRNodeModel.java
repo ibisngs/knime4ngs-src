@@ -79,15 +79,22 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     public static final String CFGKEY_OPT_VAR_RECAL 			= "var_recal_opts";
     public static final String CFGKEY_OPT_APPLY_RECAL			= "apply_recal_opts";
     
+    public static final String DEFAULT_MODE						= "SNP";
+    public static final String DEFAULT_SNP_AN					= "-an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum -an InbreedingCoeff -an MQ";
+    public static final String DEFAULT_INDEL_AN					= "-an QD -an DP -an FS -an SOR -an ReadPosRankSum -an MQRankSum -an InbreedingCoeff";
+    public static final String DEFAULT_TRANCHES					= "-tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0";
+    public static final double DEFAULT_TS_FILTER_SNP			= 99.5;
+    public static final double DEFAULT_TS_FILTER_INDEL			= 99.0;
+    
 	/**
 	 * Models
 	 */
     
     private final SettingsModelString m_GATK = new SettingsModelString(VQSRNodeModel.CFGKEY_GATK, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(VQSRNodeModel.CFGKEY_REF_GENOME, "");
-    private final SettingsModelString m_MODE = new SettingsModelString(VQSRNodeModel.CFGKEY_MODE, "SNP");
-    private final SettingsModelString m_TRANCHE = new SettingsModelString(VQSRNodeModel.CFGKEY_TRANCHE, "-tranche 100.0 -tranche 99.9 -tranche 99.0 -tranche 90.0");
-    private final SettingsModelString m_AN = new SettingsModelString(VQSRNodeModel.CFGKEY_AN, "-an DP -an QD -an FS -an MQRankSum -an ReadPosRankSum");
+    private final SettingsModelString m_MODE = new SettingsModelString(VQSRNodeModel.CFGKEY_MODE, VQSRNodeModel.DEFAULT_MODE);
+    private final SettingsModelString m_TRANCHE = new SettingsModelString(VQSRNodeModel.CFGKEY_TRANCHE, VQSRNodeModel.DEFAULT_TRANCHES);
+    private final SettingsModelString m_AN = new SettingsModelString(VQSRNodeModel.CFGKEY_AN, VQSRNodeModel.DEFAULT_SNP_AN);
     private final SettingsModelIntegerBounded m_GAUSSIANS = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_GAUSS,8,1,Integer.MAX_VALUE);
     private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_NT,1,1,Integer.MAX_VALUE);
 
@@ -110,7 +117,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     private final SettingsModelBoolean m_RESOURCES_BOOLEAN_4 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_4, true);
     private final SettingsModelBoolean m_RESOURCES_BOOLEAN_5 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_5, false);
 
-    private final SettingsModelDoubleBounded m_TS_FILTER = new SettingsModelDoubleBounded(VQSRNodeModel.CFGKEY_TS_FILTER,99.9,1,100);
+    private final SettingsModelDoubleBounded m_TS_FILTER = new SettingsModelDoubleBounded(VQSRNodeModel.CFGKEY_TS_FILTER,VQSRNodeModel.DEFAULT_TS_FILTER_SNP,1,100);
 
     private final SettingsModelOptionalString m_OPT_VAR_RECAL = new SettingsModelOptionalString(VQSRNodeModel.CFGKEY_OPT_VAR_RECAL,"",false);
     private final SettingsModelOptionalString m_OPT_APPLY_RECAL = new SettingsModelOptionalString(VQSRNodeModel.CFGKEY_OPT_APPLY_RECAL,"",false);
