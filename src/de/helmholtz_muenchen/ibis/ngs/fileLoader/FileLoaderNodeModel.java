@@ -46,8 +46,8 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {"",".vcf",".vcf.gz",".gvcf",".fastq",".fq",".bam",".sam"};
-	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {"",".vcf",".vcf.gz",".gvcf",".fastq",".fastq.gz",".fq",".bam",".sam"};
+	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 	boolean secondOk = false;
 	
     /**
@@ -133,7 +133,7 @@ public class FileLoaderNodeModel extends NodeModel {
     	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
     	
     	if(in2.length()>0) {
-    		if(Files.notExists(Paths.get(in2)) || !(in2.endsWith(".fastq") || in2.endsWith(".fq"))) {
+    		if(Files.notExists(Paths.get(in2)) || !(in2.endsWith(".fastq") || in2.endsWith(".fq") || in2.endsWith(".fastq.gz"))) {
     			setWarningMessage("Second input file does not exist or has disallowed ending and will be ignored!");
     		} else {
     			secondOk = true;

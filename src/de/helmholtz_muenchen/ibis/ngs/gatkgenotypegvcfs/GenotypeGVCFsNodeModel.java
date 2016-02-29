@@ -2,6 +2,7 @@ package de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs;
 
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -14,6 +15,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
+
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
@@ -27,9 +31,11 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class GenotypeGVCFsNodeModel extends GATKNodeModel {
     
-	public static final String CFGKEY_NT_FILE = "NT";
+	static final String CFGKEY_NT_FILE = "NT";
+	static final String CFGKEY_OUTFOLDER = "outfolder";
 
 	private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(GenotypeGVCFsNodeModel.CFGKEY_NT_FILE, 1, 1, Integer.MAX_VALUE);
+	private final SettingsModelString m_OUTFOLDER = new SettingsModelString(CFGKEY_OUTFOLDER, "");
 	
 	private String OUTFILE;
 	private int gvcf_index;
@@ -49,7 +55,8 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
-				this.OUTFILE = IO.replaceFileExtension(INFILE, ".GenotypedVariants.vcf");
+				OUTFILE = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName();
+				OUTFILE = IO.replaceFileExtension(OUTFILE, ".GenotypedVariants.vcf");
 				first=false;
 			}
 
@@ -66,14 +73,11 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 		return "GenotypeGVCFs";
 	}
 
-	@Override
-	protected String getOutfile() {
-		return OUTFILE;
-	}
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
 		m_NT.saveSettingsTo(settings);
+		m_OUTFOLDER.saveSettingsTo(settings);
 		
 	}
 
@@ -81,6 +85,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_NT.loadSettingsFrom(settings);
+		m_OUTFOLDER.loadSettingsFrom(settings);
 		
 	}
 
@@ -88,7 +93,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_NT.validateSettings(settings);
-		
+		m_OUTFOLDER.validateSettings(settings);
 	}
 	
 	@Override
@@ -109,8 +114,15 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
-		// TODO Auto-generated method stub
-		
+		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
+		if(outfolder_warning!=null) {
+			setWarningMessage(outfolder_warning);
+		}
+	}
+	
+	@Override
+	protected String getOutfile() {
+		return OUTFILE;
 	}
 }
 

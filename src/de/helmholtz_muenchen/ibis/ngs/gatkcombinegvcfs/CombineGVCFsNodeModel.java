@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -12,6 +13,8 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -26,6 +29,10 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class CombineGVCFsNodeModel extends GATKNodeModel {
     
+	static final String CFGKEY_OUTFOLDER = "outfolder";
+    private final SettingsModelString m_OUTFOLDER = new SettingsModelString(CFGKEY_OUTFOLDER, "");
+	
+	
 	private String OUTFILE;
 	private int gvcf_index;
     
@@ -53,7 +60,8 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
-				this.OUTFILE = IO.replaceFileExtension(INFILE, ".ALLVARIANTS.gvcf");
+				OUTFILE = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName(); 
+				OUTFILE = IO.replaceFileExtension(OUTFILE, ".ALLVARIANTS.gvcf");
 				first=false;
 			}
 
@@ -69,28 +77,25 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 		return "CombineGVCFs";
 	}
 
-	@Override
-	protected String getOutfile() {
-		return this.OUTFILE;
-	}
 
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
+		m_OUTFOLDER.saveSettingsTo(settings);
 	
 	}
 
 	@Override
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
+		m_OUTFOLDER.loadSettingsFrom(settings);
 	
 	}
 
 	@Override
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
-	
+		m_OUTFOLDER.validateSettings(settings);
 	}
-
 
 
 
@@ -115,9 +120,17 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
-		// TODO Auto-generated method stub
-		
+		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
+		if(outfolder_warning!=null) {
+			setWarningMessage(outfolder_warning);
+		}
+	}
+
+	@Override
+	protected String getOutfile() {
+		return OUTFILE;
 	}
 
 }
+	
 

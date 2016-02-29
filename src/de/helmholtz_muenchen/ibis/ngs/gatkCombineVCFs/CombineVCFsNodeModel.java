@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs;
 
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -13,6 +14,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -29,11 +31,13 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  */
 public class CombineVCFsNodeModel extends GATKNodeModel {
     
-	public static final String CFGKEY_GENOTYPEMERGEOPTION 		= "genotypemergeoption";
+	public static final String CFGKEY_GENOTYPEMERGEOPTION = "genotypemergeoption";
+	static final String CFGKEY_OUTFOLDER = "outfolder";
 	
 	private final SettingsModelString m_GENOTYPEMERGEOPTION	= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");
+	private final SettingsModelString m_OUTFOLDER = new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFOLDER, "");
 	
-	private String OUTFILE;
+	private String outfile;
 	private int vcf_index;
 	
     /**
@@ -60,7 +64,8 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(vcf_index).toString();
 			
 			if(first){
-				this.OUTFILE = IO.replaceFileExtension(INFILE, ".ALLVARIANTS.vcf");
+				outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName();
+				outfile = IO.replaceFileExtension(outfile, ".ALLVARIANTS.vcf");
 				first=false;
 			}
 
@@ -80,13 +85,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	}
 
 	
-	
-	@Override
-	protected String getOutfile() {
-		return this.OUTFILE;
-	}
 
-	
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		vcf_index = -1;
@@ -107,15 +106,18 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 
 
 	@Override
-	protected void extraConfig()
-			throws InvalidSettingsException {
-		
+	protected void extraConfig() throws InvalidSettingsException {
+		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
+		if(outfolder_warning!=null) {
+			setWarningMessage(outfolder_warning);
+		}
 	}
 
-
+	
 	@Override
 	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
 		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
+		m_OUTFOLDER.saveSettingsTo(settings);
 		
 	}
 
@@ -124,7 +126,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
-		
+		m_OUTFOLDER.loadSettingsFrom(settings);
 	}
 
 
@@ -132,7 +134,13 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	protected void validateExtraSettings(NodeSettingsRO settings)
 			throws InvalidSettingsException {
 		m_GENOTYPEMERGEOPTION.validateSettings(settings);
-		
+		m_OUTFOLDER.validateSettings(settings);
+	}
+
+	@Override
+	protected String getOutfile() {
+		return outfile;
 	}
 
 }
+

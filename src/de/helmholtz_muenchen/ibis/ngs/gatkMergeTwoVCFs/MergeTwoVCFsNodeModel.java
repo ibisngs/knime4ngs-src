@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
+import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -34,6 +36,9 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	static final String CFGKEY_INPUT1_TAG = "input1_tag";
 	static final String CFGKEY_INPUT2_TAG = "input2_tag";
 	static final String CFGKEY_PRIORITIZE = "priority";
+	static final String CFGKEY_OUTFOLDER = "outfolder";
+	
+
 	
 	//settings models
 	public static final String CFGKEY_GENOTYPEMERGEOPTION 		= "genotypemergeoption";
@@ -42,8 +47,9 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	private final SettingsModelString m_INPUT1_TAG = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT1_TAG, "");
 	private final SettingsModelString m_INPUT2_TAG = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG,"");
 	private final SettingsModelString m_PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE,"");
+	private final SettingsModelString m_OUTFOLDER = new SettingsModelString(CFGKEY_OUTFOLDER, "");
 	
-	private String OUTFILE;
+	private String outfile;
 	private int vcf_ind1, vcf_ind2;
 
     /**
@@ -65,7 +71,10 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		String  vcf2 = inData[1].iterator().next().getCell(vcf_ind2).toString();
 		ArrayList<String> command 	= new ArrayList<String>();
 		
-		this.OUTFILE = IO.replaceFileExtension(vcf1, ".MERGEDVCF.vcf");
+		outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(vcf1).getName();
+		outfile = IO.replaceFileExtension(outfile, "MERGED.vcf"); 
+		
+		
 		
 		String mergeOption = m_GENOTYPEMERGEOPTION.getStringValue();
 		command.add("--genotypemergeoption "+mergeOption);
@@ -86,10 +95,6 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		return "CombineVariants";
 	}
 	
-	@Override
-	protected String getOutfile() {
-		return this.OUTFILE;
-	}
 
 	
 	@Override
@@ -104,8 +109,8 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		
 		vcf_ind2 = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+		for(int i = 0; i < inSpecs[1].getNumColumns(); i++) {
+			if(inSpecs[1].getColumnSpec(i).getType().toString().equals("VCFCell")) {
 				vcf_ind2 = i;
 			}
 		} 
@@ -122,9 +127,11 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 
 
 	@Override
-	protected void extraConfig()
-			throws InvalidSettingsException {
-		
+	protected void extraConfig() throws InvalidSettingsException {
+		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
+		if(outfolder_warning!=null) {
+			setWarningMessage(outfolder_warning);
+		}
 	}
 
 
@@ -134,6 +141,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		m_INPUT1_TAG.saveSettingsTo(settings);
 		m_INPUT2_TAG.saveSettingsTo(settings);
 		m_PRIORITIZE.saveSettingsTo(settings);
+		m_OUTFOLDER.saveSettingsTo(settings);
 		
 	}
 
@@ -145,6 +153,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		m_INPUT1_TAG.loadSettingsFrom(settings);
 		m_INPUT2_TAG.loadSettingsFrom(settings);
 		m_PRIORITIZE.loadSettingsFrom(settings);
+		m_OUTFOLDER.loadSettingsFrom(settings);
 	}
 
 
@@ -155,6 +164,13 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		m_INPUT1_TAG.validateSettings(settings);
 		m_INPUT2_TAG.validateSettings(settings);
 		m_PRIORITIZE.validateSettings(settings);
+		m_OUTFOLDER.validateSettings(settings);
+	}
+
+
+	@Override
+	protected String getOutfile() {
+		return outfile;
 	}
 
 }

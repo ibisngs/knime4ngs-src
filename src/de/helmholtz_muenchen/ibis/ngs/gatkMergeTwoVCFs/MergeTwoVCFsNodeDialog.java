@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -24,6 +25,7 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 	 private SettingsModelString INPUT1;
 	 private SettingsModelString INPUT2;
 	 private SettingsModelString PRIORITIZE;
+	 private SettingsModelString OUTFOLDER;
 
 
     @Override
@@ -33,11 +35,16 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 		INPUT1 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT1_TAG, "");
 		INPUT2 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG, "");
 		PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE, "");
+		OUTFOLDER = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_OUTFOLDER, "");
 		
+		createNewTab("CombineVariants");
 		createNewGroup("GenotypeMergeType");
         addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
         addDialogComponent(new DialogComponentString(INPUT1, "Input VCF file 1"));
     	addDialogComponent(new DialogComponentString(INPUT2, "Input VCF file 2"));
     	addDialogComponent(new DialogComponentString(PRIORITIZE, "Prioritize input"));
+    	
+    	createNewGroup("Folder for output files");
+    	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "his_id_VEP_OUT", 0, true));
 	}
 }

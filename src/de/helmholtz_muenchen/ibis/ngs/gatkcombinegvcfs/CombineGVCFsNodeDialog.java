@@ -1,6 +1,9 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkcombinegvcfs;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
 
@@ -16,10 +19,16 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class CombineGVCFsNodeDialog extends GATKNodeDialog {
+	
+	private SettingsModelString OUTFOLDER;
 
 	@Override
 	protected void addDialogComponent() {
+		OUTFOLDER = new SettingsModelString(CombineGVCFsNodeModel.CFGKEY_OUTFOLDER, "");
 		
+		
+	createNewGroup("Folder for output files");
+    addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "his_id_VEP_OUT", 0, true));	
 	}
 }
 
