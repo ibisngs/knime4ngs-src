@@ -103,7 +103,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    	ArrayList<String> command = new ArrayList<String>();
 	    	command.add("java");
 	    	String jarCall 			= "-jar "+IO.getScriptPath()+"libs/FastQC.jar ";
-	    	String path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
+	    	String path2mergeScript = "sh "+IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
 	    	command.add(jarCall + readsFile1);
 	
 	    	
