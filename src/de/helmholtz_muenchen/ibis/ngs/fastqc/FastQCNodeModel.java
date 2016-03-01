@@ -74,14 +74,17 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 //    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
     	
         /**Create Output Specs**/
-        String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
+    	String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
+    	if(readsFile1.endsWith("gz")) {
+    		outfile1 = readsFile1.replace(".fastq.gz", "_fastqc.filterSettings");
+    	}
         
         /**
          * fq format handling. fastq is already handled in Fastqc.jar
          */
-        if (readsFile1.substring(readsFile1.length()-2, readsFile1.length()).equals("fq"))
-    	{
-        	outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
+        if (readsFile1.endsWith("fq")) {
+        	outfile1 = IO.replaceFileExtension(readsFile1, ".fq_fastqc.filterSettings");
+//        	outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
     	}
         
         String outFileSettings = outfile1;
@@ -136,7 +139,10 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    		
 	    		/** merge the two filter settings files */
 	        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
-	        	if (readsFile2.substring(readsFile2.length()-2, readsFile2.length()).equals("fq"))
+	        	if(readsFile2.endsWith("gz")) {
+	        		outfile2 = readsFile2.replace(".fastq.gz", "_fastqc.filterSettings");
+	        	}
+	        	if (readsFile2.endsWith("fq"))
 	         	{
 	             	outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
 	         	}
