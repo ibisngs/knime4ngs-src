@@ -225,13 +225,15 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	
     	command.add("--noexit");
    	
+    	String inFile1nozip = IO.removeZipExtension(inFile1);
+    	String inFile2nozip = IO.removeZipExtension(inFile2);
     	
     	/** check if run was already sucessful **/
     	String[] com = command.toArray(new String[command.size()]);
-    	File lockFile = new File(inFile1.substring(0,inFile1.lastIndexOf(".")) + ".RRM" +  SuccessfulRunChecker.LOCK_ENDING);
+    	File lockFile = new File(inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".RRM" +  SuccessfulRunChecker.LOCK_ENDING);
 
-		String stdOutFile = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered.stdOut.log";
-		String stdErrFile = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered.stdErr.log";
+		String stdOutFile = inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".filtered.stdOut.log";
+		String stdErrFile = inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".filtered.stdErr.log";
 			
 	    /**Execute**/
 //	    Executor.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, LOGGER, stdOutFile, stdErrFile, null);
@@ -240,13 +242,14 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
 		
     	
         /**Create Output**/
-    	String outReadsFile1 = inFile1.substring(0,inFile1.lastIndexOf(".")) + ".filtered"+inFile1.substring(inFile1.lastIndexOf("."));
+	    
+    	String outReadsFile1 = inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".filtered"+inFile1nozip.substring(inFile1nozip.lastIndexOf("."));
     	/**
          * fq format handling. fastq is already handled in Fastqc.jar
          */
         if (outReadsFile1.substring(outReadsFile1.length()-2, outReadsFile1.length()).equals("fq"))
     	{
-        	outReadsFile1 = outReadsFile1.substring(0,inFile1.lastIndexOf(".")) + ".fq.filtered.fastq";
+        	outReadsFile1 = outReadsFile1.substring(0,inFile1nozip.lastIndexOf(".")) + ".fq.filtered.fastq";
     	}
         
     	if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile1).getName();
@@ -256,13 +259,13 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	
     	String outReadsFile2 = "";
     	if(readType.equals("paired-end")) {
-    		outReadsFile2 = inFile2.substring(0,inFile2.lastIndexOf(".")) + ".filtered"+inFile2.substring(inFile2.lastIndexOf("."));
+    		outReadsFile2 = inFile2nozip.substring(0,inFile2nozip.lastIndexOf(".")) + ".filtered"+inFile2nozip.substring(inFile2nozip.lastIndexOf("."));
     		/**
              * fq format handling. fastq is already handled in Fastqc.jar
              */
             if (outReadsFile2.substring(outReadsFile2.length()-2, outReadsFile2.length()).equals("fq"))
         	{
-            	outReadsFile2 = outReadsFile2.substring(0,inFile2.lastIndexOf(".")) + ".fq.filtered.fastq";
+            	outReadsFile2 = outReadsFile2.substring(0,inFile2nozip.lastIndexOf(".")) + ".fq.filtered.fastq";
         	}
             
     		if(!outputFolder.isEmpty()) outReadsFile1 = outputFolder + File.separator + new File(outReadsFile2).getName();

@@ -21,6 +21,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -46,8 +47,8 @@ public class FileLoaderNodeModel extends NodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {"",".vcf",".vcf.gz",".gvcf",".fastq",".fastq.gz",".fq",".bam",".sam"};
-	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE,FastQCell.TYPE,FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {"",".vcf",".gvcf",".fastq",".fq",".bam",".sam"};
+	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 	boolean secondOk = false;
 	
     /**
@@ -133,7 +134,8 @@ public class FileLoaderNodeModel extends NodeModel {
     	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
     	
     	if(in2.length()>0) {
-    		if(Files.notExists(Paths.get(in2)) || !(in2.endsWith(".fastq") || in2.endsWith(".fq") || in2.endsWith(".fastq.gz"))) {
+    		String in2nozip = IO.removeZipExtension(in2);
+    		if(Files.notExists(Paths.get(in2)) || !(in2nozip.endsWith(".fastq") || in2nozip.endsWith(".fq"))) {
     			setWarningMessage("Second input file does not exist or has disallowed ending and will be ignored!");
     		} else {
     			secondOk = true;
@@ -151,6 +153,7 @@ public class FileLoaderNodeModel extends NodeModel {
     }
     
     protected int checkEnding(String path) {
+    	path = IO.removeZipExtension(path);
     	for(int i = 1; i < ENDINGS.length; i++) {
     		if(path.endsWith(ENDINGS[i])) {
     			return i;

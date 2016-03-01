@@ -371,6 +371,15 @@ public class IO {
     	return File.substring(0, File.lastIndexOf(".")-point+1)+NewExtension;	
     }
     
+    public static String removeZipExtension(String file) {
+		
+    	if(file.endsWith(".gz")) {
+    		file = file.replaceAll("\\.gz$", "");
+    	}
+    	
+    	return file;
+    }
+    
     /**
      * Returns the folder in which a file is located
      * @param File

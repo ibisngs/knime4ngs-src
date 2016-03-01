@@ -7,6 +7,8 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
+
 
 /**
  * <code>NodeDialog</code> for the "FileLoader" Node.
@@ -28,7 +30,7 @@ public class FileLoaderNodeDialog extends DefaultNodeSettingsPane {
      */
     protected FileLoaderNodeDialog() {
     	createNewGroup("Input file (BAM/SAM, fastQ, VCF)");
-    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam","fastq|.fastq.gz|.fq",".vcf|.gvcf|.vcf.gz"));
+    	addDialogComponent(new DialogComponentFileChooser(m_infile1, "his0_infile1", 0, ".bam|.sam","fastq|.fastq.gz|.fq|.fq.gz",".vcf|.vcf.gz|.gvcf"));
 
     	createNewGroup("Second optional fastQ file");
     	addDialogComponent(new DialogComponentFileChooser(m_infile2, "his0_infile2", 0, "fastq|.fastq.gz|.fq"));
@@ -37,7 +39,9 @@ public class FileLoaderNodeDialog extends DefaultNodeSettingsPane {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				if(m_infile1.getStringValue().endsWith(".fastq") || m_infile1.getStringValue().endsWith(".fq") || m_infile1.getStringValue().endsWith(".fastq.gz")) {
+				String file1 = m_infile1.getStringValue();
+				file1 = IO.removeZipExtension(file1);
+				if(file1.endsWith(".fastq") || file1.endsWith(".fq")) {
 					m_infile2.setEnabled(true);
 				} else {
 					m_infile2.setEnabled(false);

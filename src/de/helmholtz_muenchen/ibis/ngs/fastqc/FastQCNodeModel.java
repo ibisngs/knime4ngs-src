@@ -29,8 +29,6 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 
-
-
 /**
  * This is the model implementation of FastQC.
  * 
@@ -68,59 +66,38 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	   	
     	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
-    	String readsFile2 = inData[0].iterator().next().getCell(1).toString();
-    	  
-    	
-//    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	
-        /**Create Output Specs**/
-    	String outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_fastqc.filterSettings";
-    	if(readsFile1.endsWith("gz")) {
-    		outfile1 = readsFile1.replace(".fastq.gz", "_fastqc.filterSettings");
-    	}
-        
-        /**
-         * fq format handling. fastq is already handled in Fastqc.jar
-         */
-        if (readsFile1.endsWith("fq")) {
-        	outfile1 = IO.replaceFileExtension(readsFile1, ".fq_fastqc.filterSettings");
-//        	outfile1 = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
-    	}
-        
-        String outFileSettings = outfile1;
-    	String outfileMerged = outfile1;
-    	String readFile2Name;
-    	  	
-    	
-    	/**If Paired-End data**/
-    	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
-    		readFile2Name = new File(readsFile2).getName();
-        	outFileSettings = outfileMerged; // override this path
-        	outfileMerged = readsFile1.substring(0,readsFile1.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
-    	}
+    	String outfile1 = this.getSettingsFileName(readsFile1);
+    	String outfileMerged = outfile1;  	
     	
     	File lockFile = new File(readsFile1.substring(0,readsFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
 
-	  	
-	    	/**Prepare Command**/
-	    	ArrayList<String> command = new ArrayList<String>();
-	    	command.add("java");
-	    	String jarCall 			= "-jar "+IO.getScriptPath()+"libs/FastQC.jar ";
-	    	String path2mergeScript = "sh "+IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
-	    	command.add(jarCall + readsFile1);
-	
-	    	
-	    	/**Execute for first file**/
-	    	String[] com = command.toArray(new String[command.size()]);
-	    	StringBuffer sysErr = new StringBuffer(50);
-	    	
-	    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
-	    	
-	    	//Show FastQC Output
-	    	LOGGER.info(sysErr);
-
-	    	/**If Paired-End data**/
-	    	if(readType.equals("paired-end") && !readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
+    	/**Prepare Command**/
+    	ArrayList<String> command = new ArrayList<String>();
+    	command.add("java");
+    	String jarCall 			= "-jar "+IO.getScriptPath()+"libs/FastQC.jar ";
+    	String path2mergeScript = "sh "+IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
+    	command.add(jarCall + readsFile1);
+    	
+    	/**Execute for first file**/
+    	String[] com = command.toArray(new String[command.size()]);
+    	StringBuffer sysErr = new StringBuffer(50);
+    	
+    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
+    	
+    	//Show FastQC Output
+    	LOGGER.info(sysErr);
+    	
+    	/**If Paired-End data**/
+    	String readsFile2 = "";
+    	if(readType.equals("paired-end")) {
+    		readsFile2 = inData[0].iterator().next().getCell(1).toString();
+    		if (!readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
+    		
+    			String outfile2 = this.getSettingsFileName(readsFile2); // override this path
+    			String readFile1Path = IO.removeZipExtension(readsFile1);
+    			String readFile2Name = IO.removeZipExtension(new File(readsFile2).getName());
+    			
+    			outfileMerged = readFile1Path.substring(0,readFile1Path.lastIndexOf(".")) + "_" + readFile2Name.substring(0,readFile2Name.lastIndexOf(".")) + "_fastqc.filterSettings";
 	    		
 	    		//Set new lock file for reverse read
 	    		lockFile = new File(readsFile2.substring(0,readsFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
@@ -138,15 +115,6 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    		sysErr.append("\n");
 	    		
 	    		/** merge the two filter settings files */
-	        	String outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + "_fastqc.filterSettings";
-	        	if(readsFile2.endsWith("gz")) {
-	        		outfile2 = readsFile2.replace(".fastq.gz", "_fastqc.filterSettings");
-	        	}
-	        	if (readsFile2.endsWith("fq"))
-	         	{
-	             	outfile2 = readsFile2.substring(0,readsFile2.lastIndexOf(".")) + ".fq_fastqc.filterSettings";
-	         	}
-	        	// merge the two settings files
 	        	ArrayList<String> commandMerge = new ArrayList<String>();
 //	        	commandMerge.add("sh");
 	        	commandMerge.add(path2mergeScript);
@@ -160,36 +128,37 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 //	        	//Show FastQC Output
 	        	LOGGER.info(sysErr);
 			}
+    	}
 
-	    	BufferedDataContainer cont;
-	    	FileCell[] c;
+	    BufferedDataContainer cont;
+	    FileCell[] c;
 	    	
-	    	if(readType.equals("single-end")){
-	        	cont = exec.createDataContainer(createSpecs());
-	        	c = new FileCell[]{
-	        			(FileCell) FileCellFactory.create(readsFile1),
-	        			(FileCell) FileCellFactory.create(outFileSettings)};
+	    if(readType.equals("single-end")){
+	        cont = exec.createDataContainer(createSpecs());
+	        c = new FileCell[]{
+	        		(FileCell) FileCellFactory.create(readsFile1),
+	       			(FileCell) FileCellFactory.create(outfileMerged)};
 	    		
-	    	}else{
-	        	cont = exec.createDataContainer(createSpecs());
-	        	c = new FileCell[]{
-	        			(FileCell) FileCellFactory.create(readsFile1),
-	        			(FileCell) FileCellFactory.create(readsFile2),
-	        			(FileCell) FileCellFactory.create(outFileSettings)};
-	    	}
+	    }else{
+	       	cont = exec.createDataContainer(createSpecs());
+	       	c = new FileCell[]{
+	       			(FileCell) FileCellFactory.create(readsFile1),
+	       			(FileCell) FileCellFactory.create(readsFile2),
+	       			(FileCell) FileCellFactory.create(outfileMerged)};
+	   	}
 	  
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
     	
     	/**Push FlowVars**/
-    	String secFile = "";
-    	if(readsFile1.substring(readsFile1.length()-3,readsFile1.length()).equals("bam")) {
-    		secFile = "true";
-    	}else {
-    		secFile = "false";
-    	}
-    	pushFlowVariableString("isBAM", secFile);
+//    	String secFile = "";
+//    	if(readsFile1.substring(readsFile1.length()-3,readsFile1.length()).equals("bam")) {
+//    		secFile = "true";
+//    	}else {
+//    		secFile = "false";
+//    	}
+//    	pushFlowVariableString("isBAM", secFile);
     	
     	/**Delete FastQC zip files**/
     	deleteZipFiles(readsFile1, readsFile2);
@@ -229,6 +198,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
      * @param readsFile2
      */
     private void deleteZipFiles(String readsFile1, String readsFile2){
+    	readsFile1 = IO.removeZipExtension(readsFile1);
     	File zipFile = new File(readsFile1 + "_fastqc.zip");
     	if(zipFile.exists()) {
     		zipFile.delete();
@@ -238,6 +208,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     		zipFile1.delete();
     	}
     	if(!readsFile2.equals("")) {
+    		readsFile2 = IO.removeZipExtension(readsFile2);
     		File zipFile2 = new File(readsFile2 + "_fastqc.zip");
         	if(zipFile2.exists()) {
         		zipFile2.delete();
@@ -247,6 +218,13 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
         		zipFile3.delete();
         	}
     	}
+    }
+    
+    private String getSettingsFileName(String infile) {
+    	infile = IO.removeZipExtension(infile);
+    	infile = infile.replaceAll("\\.fq$", ".fq_fastqc.filterSettings");
+    	infile = infile.replaceAll("\\.fastq$", "_fastqc.filterSettings");
+    	return infile;
     }
     
     
