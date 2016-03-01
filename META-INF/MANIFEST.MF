@@ -2,21 +2,20 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IBIS Helmholtz-Node extension for KNIME Workbench
 Bundle-SymbolicName: de.helmholtz_muenchen.ibis.knimenodes;singleton:=true
-Bundle-Version: 1.4.16
+Bundle-Version: 1.4.19
 Bundle-ClassPath: ibis.knimenodes.jar,
  libs/commons-lang3-3.1/commons-lang3-3.1.jar,
  libs/commons-codec-1.8.jar,
  libs/FastQC.jar,
  libs/FastQReadFiltering.jar,
  libs/jbzip2-0.9.jar,
- libs/picard-tools-1.136/picard.jar,
- libs/picard-tools-1.136/htsjdk-1.136.jar,
  libs/commons-math3-3.5.jar,
  libs/org.apache.commons.net_3.1.0.v201205071737.jar,
  libs/sqlite-jdbc-3.8.7.jar,
  libs/javax.mail.jar,
  libs/jaf-1.1.1/activation.jar,
- libs/RCaller-2.5.jar
+ libs/RCaller-2.5.jar,
+ libs/picard.jar
 Bundle-Activator: de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin
 Bundle-Vendor: IBIS KNIME Team
 Require-Bundle: org.eclipse.core.runtime,

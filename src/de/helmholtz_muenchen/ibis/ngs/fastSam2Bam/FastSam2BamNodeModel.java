@@ -173,6 +173,8 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				ArrayList<String> partsSam = IO.getFilesOfFolder(tmpPath.getAbsolutePath());			
 				for(String parFile : partsSam) {
 //					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
+					System.out.println(parFile);
+					
 					String bamFile = parFile + ".bam";
 					partsBam.add(bamFile);
 					String command = SET_PATH_SAMTOOLS.getStringValue()+ " view -b -S -T " + SET_GENOME.getStringValue() + " -o " + bamFile + " " + parFile;
@@ -213,9 +215,9 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				pool = Executors.newFixedThreadPool(cores);
 				for(String bamFile : partsBam) {
 //					String command = SET_PATH_SAMTOOLS.getStringValue() + File.separator;
-					String sortedBamFile = bamFile + ".sorted";
+					String sortedBamFile = bamFile + ".sorted.bam";
 					partsBamSorted.add(sortedBamFile);
-					String command = SET_PATH_SAMTOOLS.getStringValue() + " sort -m 10000000000 " + bamFile + " " + sortedBamFile;
+					String command = SET_PATH_SAMTOOLS.getStringValue() + " sort -m 10000000000 -o" + sortedBamFile + " " + bamFile;
 					String outFile = partsBam + ".log";
 					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null);
 					pool.submit(task);
@@ -252,7 +254,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				int parts = partsBamSorted.size();
 				String [] args = new String[7+parts];
 				for(int i = 0; i< parts; i++) {
-					args[i] = "INPUT=" + partsBamSorted.get(i) + ".bam";
+					args[i] = "INPUT=" + partsBamSorted.get(i);
 				}
 				
 				args[parts+0] = "OUTPUT=" + nameOfBamFile;
@@ -262,7 +264,6 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 				args[parts+4] = "MAX_RECORDS_IN_RAM=600000000";
 				args[parts+5] = "TMP_DIR=" + tmpPath;
 				args[parts+6] = "VALIDATION_STRINGENCY=LENIENT";
-				
 				new MergeSamFiles().instanceMain(args);
 				
 //				ArrayList<String> mergeCommand = new ArrayList<String>();

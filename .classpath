@@ -17,8 +17,7 @@
 	<classpathentry kind="lib" path="libs/javax.mail.jar"/>
 	<classpathentry kind="lib" path="libs/sqlite-jdbc-3.8.7.jar"/>
 	<classpathentry kind="lib" path="libs/jbzip2-0.9.jar"/>
-	<classpathentry kind="lib" path="libs/picard-tools-1.136/picard.jar"/>
-	<classpathentry kind="lib" path="libs/picard-tools-1.136/htsjdk-1.136.jar"/>
 	<classpathentry kind="lib" path="libs/RCaller-2.5.jar"/>
+	<classpathentry kind="lib" path="libs/picard.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

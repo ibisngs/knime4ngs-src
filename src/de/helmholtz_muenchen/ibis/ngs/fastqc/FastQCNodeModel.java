@@ -142,7 +142,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	         	}
 	        	// merge the two settings files
 	        	ArrayList<String> commandMerge = new ArrayList<String>();
-	        	commandMerge.add("sh");
+//	        	commandMerge.add("sh");
 	        	commandMerge.add(path2mergeScript);
 	        	commandMerge.add(outfile1);
 	        	commandMerge.add(outfile2);
