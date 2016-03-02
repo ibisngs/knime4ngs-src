@@ -3,7 +3,6 @@ package de.helmholtz_muenchen.ibis.ngs.fastSam2Bam;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -13,13 +12,14 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 
 /**
  * Dialog for a faster implementation of a sam to bam converter.
  * @author Michael Kluge
  */
-public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
+public class FastSam2BamNodeDialog extends HTExecutorNodeDialog {
 
 	
 	// definition of SettingsModel (all prefixed with SET)
@@ -101,15 +101,30 @@ public class FastSam2BamNodeDialog extends DefaultNodeSettingsPane {
         });
     }
     
-    public void onOpen() {
-    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-    	if(toolPath != null && !toolPath.equals("")) {
-    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
-    	}
-    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-    	if(refGenome != null && !refGenome.equals("")) {
-    		SET_GENOME.setStringValue(refGenome);
-    	}
-    }
+	protected void updatePrefs() {
+		if(usePrefPage.getBooleanValue()) {
+	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+	    	if(toolPath != null && !toolPath.equals("")) {
+	    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
+	    		SET_PATH_SAMTOOLS.setEnabled(false);
+	    	} else {
+	    		SET_PATH_SAMTOOLS.setEnabled(true);
+	    	}
+	    	
+		} else {
+			SET_PATH_SAMTOOLS.setEnabled(true);
+		}
+	}
+    
+//    public void onOpen() {
+//    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+//    	if(toolPath != null && !toolPath.equals("")) {
+//    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
+//    	}
+//    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+//    	if(refGenome != null && !refGenome.equals("")) {
+//    		SET_GENOME.setStringValue(refGenome);
+//    	}
+//    }
 }
 
