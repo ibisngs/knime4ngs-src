@@ -183,7 +183,10 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	}
     	
     	if(m_filterfileexists.getBooleanValue()){
-    		command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
+    		command.add("--filtersettings="+inData[0].iterator().next().getCell(1).toString());
+    		if(readType.equals("paired-end")) {
+    			command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
+    		}
     	}
     	
 		if(m_useotherfilterfile.getBooleanValue()) {
