@@ -3,35 +3,42 @@
     <name>Bcl2FastQ</name>
     
     <shortDescription>
-        
+        Bcl2FastQ combines BCL files and translates them into FASTQ files.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+        	Bcl2FastQ combines BCL basecall files, which are generated as primary sequencing output by Illumina sequencing instruments, and translates them into FASTQ files.
+        	At the same time as converting, Bcl2FastQ also separates multiplexed samples (demultiplexing). Multiplexed sequencing allows you to run multiple individual samples, which are identified by index sequences that are were attached to the template during sample prep, in one lane. The multiplexed sample FASTQ files are assigned to projects and sample directories, based on a sample sheet. 
+        </intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+     <tab name="Options">
+        <option name="HTE">
+        	Use HTE settings from preference page or set an individual threshold.
+        </option>
+        <option name="Path to tool">
+        	Select the path to the tool.
+        </option>
+        <option name="Path to input files">
+        	Select the folder, where all the necessary files are stored.
+        </option>
+        <option name="Path to output files">
+        	Select a folder to store the output files.
+        </option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        <tab name="Further options">
+        	<option name="Paired end reads">
+        		Chose whether you have paired ends or not.
+        	</option>
+        	<option name="Number of threads">
+        		Set number of threads for the execution of the Bcl2FastQ.
+        	</option>	
         </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <outPort index="0" name="FASTQ files">
+        	Path to FASTQ files.
+        </outPort> 
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
 </knimeNode>

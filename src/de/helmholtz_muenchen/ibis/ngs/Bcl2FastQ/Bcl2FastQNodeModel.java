@@ -52,7 +52,6 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 	static final String CFGKEY_ISPAIRED = "IsPaired";
 	final SettingsModelBoolean m_IsPaired = new SettingsModelBoolean(CFGKEY_ISPAIRED, true);
 	
-	
 	static final String CFGKEY_THREADS = "threads";
 	final SettingsModelIntegerBounded m_threads = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
 	
@@ -113,15 +112,15 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 		String cmd = tool;
 		cmd += " -R " + infiles;
 		cmd += " -o " + outfiles;
-		cmd += " --loading-threads" + r;
-		cmd += " --demultiplexing-threads" + d;
-		cmd += " --processing-threads" + p;
-		cmd += " --writing-threads" + w;
+		cmd += " --loading-threads " + r;
+		cmd += " --demultiplexing-threads " + d;
+		cmd += " --processing-threads " + p;
+		cmd += " --writing-threads " + w;
 		// cmd += " --interop-dir="+ interop;
 
-		String lockFile = outfiles + File.pathSeparator + "bcl2fastq" + SuccessfulRunChecker.LOCK_ENDING;
-		String stdErrFile = outfiles + File.pathSeparator + "bcl2fastq.stderr";
-		String stdOutFile = outfiles + File.pathSeparator + "bcl2fastq.stdout";
+		String lockFile = outfiles + File.separatorChar + "bcl2fastq" + SuccessfulRunChecker.LOCK_ENDING;
+		String stdErrFile = outfiles + File.separatorChar + "bcl2fastq.stderr";
+		String stdOutFile = outfiles + File.separatorChar + "bcl2fastq.stdout";
 
 		/** Execute **/
 		super.executeCommand(new String[] { StringUtils.join(cmd, " ") }, exec, new File(lockFile), stdErrFile,
@@ -248,7 +247,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
     	m_InputPath.validateSettings(settings);
     	m_outfolder.validateSettings(settings);
     	m_IsPaired.validateSettings(settings);
-    	m_threads.loadSettingsFrom(settings);
+    	m_threads.validateSettings(settings);
     	//m_interop.validateSettings(settings);
     	
     }
