@@ -26,6 +26,18 @@
         	<option name="Path to BED file">
         		Coverage analysis can be restricted to genomic regions defined in a BED file.
         	</option>
+        </tab>	
+        <tab name="CombineVariants">
+        	<option name="FilteredRecordMergeType">
+        		<b>KEEP_IF_ANY_UNFILTERED:</b>
+        		Union - leaves the record if any record is unfiltered.
+        		<br />
+        		<b>KEEP_IF_ALL_UNFILTERED:</b>
+        		Requires all records present at site to be unfiltered. VCF files that don't contain the record don't influence this.
+        		<br />
+        		<b>KEEP_UNCONDITIONAL:</b>
+        		If any record is present at this site (regardless of possibility being filtered), then all such records are kept and the filters are reset.	
+        	</option>
         	<option name="GenotypeMergeType">
         		<b>UNIQUIFY:</b>
     			Make all sample genotypes unique by file.

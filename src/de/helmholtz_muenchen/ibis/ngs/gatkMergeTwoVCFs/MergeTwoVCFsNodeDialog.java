@@ -26,6 +26,7 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 	 private SettingsModelString INPUT2;
 	 private SettingsModelString PRIORITIZE;
 	 private SettingsModelString OUTFOLDER;
+	 private SettingsModelString FILTEREDRECORDSMERGETYPE;
 
 
     @Override
@@ -36,6 +37,7 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 		INPUT2 = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG, "");
 		PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE, "");
 		OUTFOLDER = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_OUTFOLDER, "");
+		FILTEREDRECORDSMERGETYPE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_FILTEREDRECORDSMERGETYPE, "");
 		
 		createNewTab("CombineVariants");
 		createNewGroup("GenotypeMergeType");
@@ -46,5 +48,8 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
     	
     	createNewGroup("Folder for output files");
     	addDialogComponent(new DialogComponentFileChooser(OUTFOLDER, "his_id_VEP_OUT", 0, true));
+    	
+    	createNewGroup("FilteredRecordMergeType");
+    	addDialogComponent(new DialogComponentStringSelection(FILTEREDRECORDSMERGETYPE, "FilteredRecordMergeType","KEEP_IF_ANY_UNFILTERED","KEEP_IF_ALL_UNFILTERED","KEEP_UNCONDITIONAL"));
 	}
 }

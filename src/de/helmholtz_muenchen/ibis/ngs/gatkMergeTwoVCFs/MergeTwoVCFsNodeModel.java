@@ -37,6 +37,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	static final String CFGKEY_INPUT2_TAG = "input2_tag";
 	static final String CFGKEY_PRIORITIZE = "priority";
 	static final String CFGKEY_OUTFOLDER = "outfolder";
+	static final String CFGKEY_FILTEREDRECORDSMERGETYPE = "filteredrecordsmergetype";
 	
 
 	
@@ -48,6 +49,8 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	private final SettingsModelString m_INPUT2_TAG = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_INPUT2_TAG,"");
 	private final SettingsModelString m_PRIORITIZE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_PRIORITIZE,"");
 	private final SettingsModelString m_OUTFOLDER = new SettingsModelString(CFGKEY_OUTFOLDER, "");
+	private final SettingsModelString m_FILTEREDRECORDSMERGETYPE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_FILTEREDRECORDSMERGETYPE, "");
+	
 	
 	private String outfile;
 	private int vcf_ind1, vcf_ind2;
@@ -74,6 +77,8 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(vcf1).getName();
 		outfile = IO.replaceFileExtension(outfile, "MERGED.vcf"); 
 		
+		String filterOption = m_FILTEREDRECORDSMERGETYPE.getStringValue();
+		command.add("--filteredrecordsmergetype "+filterOption);
 		
 		
 		String mergeOption = m_GENOTYPEMERGEOPTION.getStringValue();
