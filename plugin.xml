@@ -94,6 +94,7 @@
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory"/>
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory"/>
 <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory"/>
+<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory"/>
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">
