@@ -9,12 +9,11 @@
     <fullDescription>
         <intro>This node can generate a index structure for events found by MATS for usage this annotation with MISO.</intro>
         
-        <tab name="level 0 and 1 options">
+        <tab name="General Options">
         	<option name="path to index_gff binary">Path to the compiled index_gff binary.</option>
-			<option name="path to parameter file">not used in this case</option>
 			<option name="additional parameters">not used in this case</option>
         </tab>
-        <tab name="level 2 options">
+        <tab name="MatsResultIndexer">
         	<option name="path to input folder">Path to output folder ASEvents of MATS</option>
         	<option name="path to output folder">Path where the output index should be stored.</option>
         	<option name="use novel events">Can be used to include the novel events found by MATS in the index.</option>
@@ -23,8 +22,5 @@
     
     <ports>
         <outPort index="0" name="Out-Port name">Cell 0: path to output file index<br />Cell 1: Path to gff3 file</outPort>
-    </ports>    
-    <views>
-        <view index="0" name="not implemented">not implemented</view>
-    </views>
+    </ports>
 </knimeNode>

@@ -37,17 +37,17 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
        	DialogComponentStringSelection dcRunMode 	= new DialogComponentStringSelection(SET_RUN_MODE, "runMode:", StarNodeModel.DEFAULT_RUN_MODE, StarNodeModel.ALTERNATIVE_RUN_MODE);
        	
        	// set a new title to them
-       	dcOutputFolder.setBorderTitle("path to output folder");
-       	dcGenomeFolder.setBorderTitle("path to indexed genome");
+       	dcOutputFolder.setBorderTitle("Path to output folder");
+       	dcGenomeFolder.setBorderTitle("Path to indexed genome");
      
        	// add groups and components
-        createNewGroup("generell options");
+       	createNewGroup("STAR Options");
         addDialogComponent(dcRunMode);
 
-        createNewGroup("input");
+        createNewGroup("Input");
         addDialogComponent(dcGenomeFolder);
         
-        createNewGroup("output");
+        createNewGroup("Output");
         addDialogComponent(dcOutputFolder);
  
         // add change listener to runMode
@@ -65,12 +65,6 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
 	@Override
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
-	}
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
 	}
 }
 

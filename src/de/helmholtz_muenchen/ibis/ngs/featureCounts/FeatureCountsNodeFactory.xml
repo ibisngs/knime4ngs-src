@@ -11,28 +11,53 @@
        Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656<br />
        <a href="http://bioinformatics.oxfordjournals.org/content/early/2013/11/30/bioinformatics.btt656.full.pdf">featureCounts: an efficient general purpose program for assigning sequence reads to genomic features</a></intro>
         
-        <tab name="level 0 and 1 options">
-        	<option name="path to featureCounts binary">Path to the compiled featureCounts binary. Theoretically all versions starting from <i>1.4.3</i> should be supported.</option>
-			<option name="path to parameter file">Can be used to set parameters which can not be set directly in this node.<br /><br />Expected syntax: parameterName (with '-' or '--') parameterValue(s)<br />Example: --runThreadN 4</option>
-			<option name="additional parameters">Parameters can be set like you would normally use them on the command line for this binary. This parameters override the settings in the parameter file and are overridden by the settings of level 2.</option>
+        <tab name="General options">
+        	<option name="Path to featureCounts binary">
+        		Path to the compiled featureCounts binary.
+        		Theoretically all versions starting from <i>1.4.3</i> should be supported.
+        	</option>
+			<option name="Additional parameters">
+				Parameters can be set like you would normally use them on the command line for this binary.
+			</option>
         </tab>
-        <tab name="level 2 options">
-        	<option name="path to annotation file">GTF or SAF annotation file.</option>
-        	<option name="path to output file">Path where the output file should be stored.</option>
-        	<option name="file type">GTF or SAF annotation files are supported.</option>
-        	<option name="feature type used for counting">Feature type which is used for counting when GTF file is used. Default: exon</option>
-        	<option name="count multimapped reads">Counts also reads, which do not map uniquely</option>
-        	<option name="perform read summarization at the feature level">If specified, read summarization will be performed at the feature level (eg. exon level). Otherwise, it is performed at meta-feature level (eg. gene level)</option>
-        	<option name="feature type used for grouping results">Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided. `gene_id' by default. This attribute type is usually the gene identifier. This argument is useful for the meta-feature level summarization.</option>
-        	<option name="thread number">Number of threads which are used for counting. [1-16]</option>
+        <tab name="FeatureCounts">
+        	<option name="Path to annotation file">
+        		GTF or SAF annotation file.
+        	</option>
+        	<option name="Path to output folder">
+        		Path where the output file should be stored.
+        	</option>
+        	<option name="file type">
+        		GTF or SAF annotation files are supported.
+        	</option>
+        	<option name="feature type used for counting">
+        		Feature type which is used for counting when GTF file is used. Default: exon
+        	</option>
+        	<option name="count multimapped reads">
+        		Counts also reads, which do not map uniquely.
+        	</option>
+        	<option name="perform read summarization at the feature level">
+        		If specified, read summarization will be performed at the feature level (eg. exon level).
+        		Otherwise, it is performed at meta-feature level (eg. gene level)
+        	</option>
+        	<option name="feature type used for grouping results">
+        		Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.
+        		`gene_id' by default. This attribute type is usually the gene identifier.
+        		This argument is useful for the meta-feature level summarization.
+        	</option>
+        	<option name="thread number">
+        		Number of threads which are used for counting. [1-16]
+        	</option>
         </tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">Cell 0: One or more SAM or BAM files</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: path to output file<br />Cell 1: command which was used to call the binary</outPort>
-    </ports>    
-    <views>
-        <view index="0" name="STDOUT/STDERR log">Shows the STDOUT and STDERR output of featureCounts when it was executed successfully.</view>
-    </views>
+        <inPort index="0" name="In-Port">
+        	Cell 0: One or more SAM or BAM files.
+        </inPort>
+        <outPort index="0" name="Out-Port">
+        	Cell 0: path to output file<br />
+        	Cell 1: command which was used to call the binary.
+        </outPort>
+    </ports> 
 </knimeNode>

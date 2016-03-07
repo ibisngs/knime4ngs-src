@@ -30,29 +30,24 @@ public class MatsResultIndexerNodeDialog extends BinaryWrapperNodeDialog {
 		DialogComponentBoolean dcIncludeNovel	 	= new DialogComponentBoolean(SET_INCLUDE_NOVEL, "include novel events found by MATS");
 		  	
 		// set a new title to them
-		dcOutputFile.setBorderTitle("path to output folder");
-		dcInputFile.setBorderTitle("path to input folder");
+		dcOutputFile.setBorderTitle("Path to output folder");
+		dcInputFile.setBorderTitle("Path to input folder");
 		  
+		createNewTab("MatsResultIndexer");
 		    // add groups and components
-		createNewGroup("input");
+		createNewGroup("Input");
 		addDialogComponent(dcInputFile);
 		 
-		createNewGroup("output");
+		createNewGroup("Output");
 		addDialogComponent(dcOutputFile);
 		 
-		createNewGroup("further options");
+		createNewGroup("Further options");
 		addDialogComponent(dcIncludeNovel);
     }
     
 	@Override
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
-	}
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
 	}
 }
 

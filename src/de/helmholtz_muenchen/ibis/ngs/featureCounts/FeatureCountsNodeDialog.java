@@ -28,7 +28,7 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 	
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FEATURE);
-    private final SettingsModelString SET_OUTPUT_FILE 				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FILE, FeatureCountsNodeModel.DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_OUTPUT_FILE 				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_OUTPUT_FOLDER, "");
     private final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FILE);
     private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE);
     private final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, FeatureCountsNodeModel.DEFAULT_THREAD_NUMBER);
@@ -44,7 +44,7 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         super();
        
         // create open file/folder components
-        DialogComponentFileChooser dcOutputFile 	= new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_OUTPUT_FILE_FeatureCounts", 0, false);
+        DialogComponentFileChooser dcOutputFile 	= new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_OUTPUT_FILE_FeatureCounts", 0, true);
        	DialogComponentFileChooser dcAnnotationFile = new DialogComponentFileChooser(SET_ANNOTATION_FILE, "his_id_GENOME_FOLDER_FeatureCounts", 0, ".gtf", ".saf");
        	DialogComponentNumber dcThreadNumber		= new DialogComponentNumber(SET_THREAD_NUMBER, "thread number", 1);
        	DialogComponentString dcFeatureType			= new DialogComponentString(SET_FEATURE_TYPE, "feature type used for counting:"); 					
@@ -58,18 +58,19 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
        	// create string selection component
        	DialogComponentStringSelection dcAnnotationType 	= new DialogComponentStringSelection(SET_ANNOTATION_TYPE, "file type:", FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE, FeatureCountsNodeModel.ALTERNATIVE_ANNOTATION_TYPE);
        	
+       	createNewTab("FeatureCounts");
        	// set a new title to them
-       	dcOutputFile.setBorderTitle("path to output file");
-       	dcAnnotationFile.setBorderTitle("path to annotation file");
+       	dcOutputFile.setBorderTitle("Path to output folder");
+       	dcAnnotationFile.setBorderTitle("Path to annotation file");
      
        	// add groups and components
-        createNewGroup("input");
+        createNewGroup("Input");
         addDialogComponent(dcAnnotationFile);
         
-        createNewGroup("output");
+        createNewGroup("Output");
         addDialogComponent(dcOutputFile);
         
-        createNewGroup("further options");
+        createNewGroup("Further options");
         addDialogComponent(dcAnnotationType);
         addDialogComponent(dcFeatureType);
         addDialogComponent(dcCountMultimapped);
@@ -78,7 +79,7 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         addDialogComponent(dcCountOnFeatureLvl);
         addDialogComponent(dcGroupFeature);
         
-        createNewGroup("paired read options");
+        createNewGroup("Paired read options");
         addDialogComponent(dcCountFragments);
         addDialogComponent(dcCountChimeric);
         
@@ -99,12 +100,6 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 	@Override
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
-	}
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
 	}
 }
 

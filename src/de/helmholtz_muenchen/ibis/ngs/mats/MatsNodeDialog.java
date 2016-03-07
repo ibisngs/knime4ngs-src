@@ -42,17 +42,18 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
 		DialogComponentNumber dcExpressionChange	= new DialogComponentNumber(SET_EXPRESSION_CHANGE, "gene expression foldchange filter", 0.5);
 		
 		// set a new title to them
-		dcOutputFolder.setBorderTitle("path to output folder");
-		dcAnnotationFile.setBorderTitle("path to gtf annotation file");
-		  
+		dcOutputFolder.setBorderTitle("Path to output folder");
+		dcAnnotationFile.setBorderTitle("Path to gtf annotation file");
+		
+		createNewTab("Mats Options");
 		// add groups and components
-		createNewGroup("input");
+		createNewGroup("Input");
 		addDialogComponent(dcAnnotationFile);
 		
-		createNewGroup("output");
+		createNewGroup("Output");
 		addDialogComponent(dcOutputFolder); 
 		  
-		createNewGroup("further options");
+		createNewGroup("Further options");
 		addDialogComponent(dcReadLength);
 		addDialogComponent(dcAnalysisType);
 		addDialogComponent(dcDiffCutoff);
@@ -86,11 +87,4 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
 	}
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
-
 }

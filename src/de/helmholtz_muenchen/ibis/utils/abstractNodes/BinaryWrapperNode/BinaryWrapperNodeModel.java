@@ -1,8 +1,6 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -19,15 +17,12 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.util.Pair;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 
@@ -41,25 +36,25 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
     // keys for SettingsModels
 	protected static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
 	protected static final String CFGKEY_ADDITIONAL_PARAMETER 	= "AdditionalParameter";
-    protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
+//    protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
 	
 	// initial default values for SettingsModels    
     protected static final String DEFAULT_BINARY_PATH 			= "";
     protected static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
-    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
+//    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
     private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
-    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
+//    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
     
 	// logger class
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
+//	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
 	
 	// regex for additional parameter
 	private static final String PARAMETER_REGEX 	= "(-{1,2}\\w+)\\s*(([^-]|(?<=\\w)-)*)";
 	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
-	private static final String REGEX_WHITESPACE	= "\\s+";
+//	private static final String REGEX_WHITESPACE	= "\\s+";
 	
 
 	// stores the defined SettingsModels objects
@@ -69,8 +64,6 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	//Catch Stdout/err streams
 	private boolean catchStdout;
 	private boolean catchStderr;
-	
-	
 	
 	/**
 	 * Constructor with number of input and output ports.
@@ -91,7 +84,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	public void init() {
 		addSetting(SET_BINARY_PATH);
 		addSetting(SET_ADDITIONAL_PARAMETER);
-		addSetting(SET_PARAMETER_FILE);
+//		addSetting(SET_PARAMETER_FILE);
 	}
 	
 	@Override
@@ -185,12 +178,12 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 */
 	protected ArrayList<String> getSetParameters(final BufferedDataTable[] inData) {
 		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();			// merged parameter set
-		LinkedHashMap<String, String> parsFile = getParametersFromParameterFile();			// get parameter from file
+//		LinkedHashMap<String, String> parsFile = getParametersFromParameterFile();			// get parameter from file
 		LinkedHashMap<String, String> parsAdditional = getAdditionalParameter();			// get parameter from input field
 		LinkedHashMap<String, String> parsGUI = getGUIParameters(inData);					// get parameter from GUI
 		
 		// merge them all together
-		pars.putAll(parsFile);
+//		pars.putAll(parsFile);
 		pars.putAll(parsAdditional);
 		pars.putAll(parsGUI);
 		
@@ -219,15 +212,15 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * @param completeParameter
 	 * @return
 	 */
-	private Pair<String, String> splitParameter(String completeParameter) {
-		String[] split = completeParameter.split(REGEX_WHITESPACE);
-		String par = split[0];
-		String arg = ""; // default argument is empty
-		
-		if(split.length > 1)
-			arg = completeParameter.replaceFirst(split[0] + REGEX_WHITESPACE, "").replaceFirst(REGEX_WHITESPACE + "$", "");
-		return new Pair<String, String>(par, arg);
-	}
+//	private Pair<String, String> splitParameter(String completeParameter) {
+//		String[] split = completeParameter.split(REGEX_WHITESPACE);
+//		String par = split[0];
+//		String arg = ""; // default argument is empty
+//		
+//		if(split.length > 1)
+//			arg = completeParameter.replaceFirst(split[0] + REGEX_WHITESPACE, "").replaceFirst(REGEX_WHITESPACE + "$", "");
+//		return new Pair<String, String>(par, arg);
+//	}
 	
 	/**
 	 * Returns the parameter which were set in the additional parameter input field.
@@ -250,37 +243,37 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * Returns the values, which are stored in the parameter file, if one is given
 	 * @return
 	 */
-	private LinkedHashMap<String, String> getParametersFromParameterFile() {
-		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
-		String filename = SET_PARAMETER_FILE.getStringValue();
-
-		// check if some parameter file was set
-		if(!(filename.length() > 0 && !DEFAULT_PARAMETER_FILE.equals(filename)))
-			return pars;
-
-		// check, if file is there
-		File f = new File(filename);
-		if(!(f.exists() && f.isFile()))
-			return pars;
-
-		// open file
-		try {
-			String line;
-			BufferedReader r = new BufferedReader(new FileReader(f));
-			// read lines
-			while((line = r.readLine()) != null) {
-				Pair<String, String> p = splitParameter(line);
-				if(p.getFirst().length() > 0)
-					pars.put(p.getFirst(), p.getSecond());
-			}
-			// close the file
-			r.close();
-		}
-		catch(Exception e) {
-			LOGGER.error(e.getStackTrace());
-		}
-		return pars;
-	}
+//	private LinkedHashMap<String, String> getParametersFromParameterFile() {
+//		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
+//		String filename = SET_PARAMETER_FILE.getStringValue();
+//
+//		// check if some parameter file was set
+//		if(!(filename.length() > 0 && !DEFAULT_PARAMETER_FILE.equals(filename)))
+//			return pars;
+//
+//		// check, if file is there
+//		File f = new File(filename);
+//		if(!(f.exists() && f.isFile()))
+//			return pars;
+//
+//		// open file
+//		try {
+//			String line;
+//			BufferedReader r = new BufferedReader(new FileReader(f));
+//			// read lines
+//			while((line = r.readLine()) != null) {
+//				Pair<String, String> p = splitParameter(line);
+//				if(p.getFirst().length() > 0)
+//					pars.put(p.getFirst(), p.getSecond());
+//			}
+//			// close the file
+//			r.close();
+//		}
+//		catch(Exception e) {
+//			LOGGER.error(e.getStackTrace());
+//		}
+//		return pars;
+//	}
 	
 	/**
      * checks, if a binary is there and if the execution flag is set

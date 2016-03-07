@@ -18,10 +18,12 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.util.CheckUtils;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
@@ -40,7 +42,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	public static final String OUT_COL2 = "CallCommand";
 
     // keys for SettingsModels
-    protected static final String CFGKEY_OUTPUT_FILE 				= "OutputFolder";
+    protected static final String CFGKEY_OUTPUT_FOLDER 				= "OutputFolder";
     protected static final String CFGKEY_ANNOTATION_FILE			= "AnnotationFile";
     protected static final String CFGKEY_ANNOTATION_TYPE			= "AnnotationType";
     protected static final String CFGKEY_ANNOTATION_FEATURE			= "AnnotationFeature";
@@ -55,7 +57,6 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     // initial default values for SettingsModels
     protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
     protected static final String ALTERNATIVE_ANNOTATION_TYPE 		= "SAF";			// alternative annotation type
-    protected static final String DEFAULT_OUTPUT_FOLDER 			= "./output/";		// creates a folder "output" relative to the STAR binary
     protected static final String DEFAULT_ANNOTATION_FILE			= "";
     protected static final String DEFAULT_ANNOTATION_FEATURE		= "exon";			// default feature which is used for counting
     protected static final int DEFAULT_THREAD_NUMBER				= 1;				// default threads to use
@@ -82,7 +83,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     				
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(CFGKEY_ANNOTATION_FEATURE, DEFAULT_ANNOTATION_FEATURE);
-    private final SettingsModelString SET_OUTPUT_FILE 				= new SettingsModelString(CFGKEY_OUTPUT_FILE, DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_OUTPUT_FOLDER 			= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, "");
     private final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(CFGKEY_ANNOTATION_FILE, DEFAULT_ANNOTATION_FILE);
     private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(CFGKEY_ANNOTATION_TYPE, DEFAULT_ANNOTATION_TYPE);
     private final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(CFGKEY_THREAD_NUMBER, DEFAULT_THREAD_NUMBER);
@@ -95,6 +96,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     
     protected final static int MIN_THREADS = 1;
     protected final static int MAX_THREADS = 16;
+    
+    private String outfile;
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -116,7 +119,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	super.init();
     	
     	addSetting(SET_FEATURE_TYPE);
-    	addSetting(SET_OUTPUT_FILE);
+    	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
     	addSetting(SET_ANNOTATION_TYPE);
     	addSetting(SET_THREAD_NUMBER);
@@ -134,6 +137,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
+    	
+    	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
+		if(outfolder_warning!=null) {
+			setWarningMessage(outfolder_warning);
+		}
     	
         validateAnnotationFile(SET_ANNOTATION_FILE.getStringValue());
 
@@ -166,23 +174,35 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		pars.put(NAME_OF_GROUP_FEATURE, SET_GROUP_FEATURE.getStringValue());
 		
 		/********************* OUTPUT ****************************/
-		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false);
-    	File outDir = new File(outputFolderArgument).getParentFile();
-    	// create folder, if not already there
-    	if(!outDir.isDirectory())
-    		outDir.mkdir();
+//		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), false);
+//    	File outDir = new File(outputFolderArgument).getParentFile();
+//    	// create folder, if not already there
+//    	if(!outDir.isDirectory())
+//    		outDir.mkdir();
     	
-    	pars.put(NAME_OF_OUTPUT_FILE, outputFolderArgument);
+//    	pars.put(NAME_OF_OUTPUT_FILE, outputFolderArgument);
 
     	
     	/********************** INPUT BAM/SAM ****************************/
     	ArrayList<String> inputArgument = new ArrayList<String>();
+    	boolean first = true;
+    	String infile;
     	// get input parameter from BAM/SAM selector
-    		for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); )
-    			inputArgument.add(it.next().getCell(0).toString());
+    	for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); ) {
+    		infile = it.next().getCell(0).toString();
+    		inputArgument.add(infile);
+    		if(first){
+				outfile = SET_OUTPUT_FOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(infile).getName();
+				outfile = IO.replaceFileExtension(outfile, ".featureCounts");
+				first=false;
+			}
+    	}
 
     	// add the input parameter
     	pars.put(" ", StringUtils.join(inputArgument, " "));
+    	
+    	// add the outfile
+    	pars.put(NAME_OF_OUTPUT_FILE, outfile);
     	// return the GUI parameter
 		return pars;
 	}
@@ -204,7 +224,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 		
     	DataCell[] c = new DataCell[]{
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true)),
+    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true)),
     			new StringCell(command)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
@@ -239,17 +259,17 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + ".out");
+		return new File(outfile + ".out");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + ".err");
+		return new File(outfile + ".err");
 	}
 		
 	@Override
 	protected File getPathToLockFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), false) + SuccessfulRunChecker.LOCK_ENDING);
+		return new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 }
