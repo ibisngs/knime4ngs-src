@@ -1,9 +1,11 @@
 package de.helmholtz_muenchen.ibis.ngs.fileLoader;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -49,7 +51,14 @@ public class FileLoaderNodeModel extends NodeModel {
 	
 	private static final String [] ENDINGS = {"",".vcf",".gvcf",".fastq",".fq",".bam",".sam"};
 	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
-	boolean secondOk = false;
+	
+	private boolean secondOk = false;
+	private boolean is_list = false;
+	private String sep;
+	
+	private DataColumnSpec dcs1 = null;
+	private DataColumnSpec dcs2 = null;
+	private DataColumnSpec [] specs = null;
 	
     /**
      * Constructor for the node model.
@@ -66,34 +75,51 @@ public class FileLoaderNodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	ArrayList<String> in1_list = new ArrayList<>();
+    	ArrayList<String> in2_list = new ArrayList<>();
+    	
     	String in1 = m_infile1.getStringValue();
     	String in2 = m_infile2.getStringValue();
     	
-    	DataColumnSpec dcs1 = null;
-    	DataColumnSpec dcs2 = null;
-    	DataColumnSpec [] specs = null;
-    	
-    	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
-		specs = new DataColumnSpec[]{dcs1};
-
-    	if(secondOk) {
-			dcs2 = new DataColumnSpecCreator(OUT_COL2, TYPES[checkEnding(in2)]).createSpec();
-    		specs = new DataColumnSpec[]{dcs1, dcs2};
-    	}
-    	
-    	FileCell [] fileCell = new FileCell[] {
-    			(FileCell) FileCellFactory.create(in1)};
-    	
-    	if(secondOk) {
-    		fileCell = new FileCell[] {
-        			(FileCell) FileCellFactory.create(in1),
-        			(FileCell) FileCellFactory.create(in2)};
+    	if(is_list) {
+    		BufferedReader bw = Files.newBufferedReader(Paths.get(in1));
+    		String line;
+    		while((line=bw.readLine())!=null) {
+    			if(line.trim().equals("")) continue;
+    			if(secondOk) {
+    				String [] col = line.split(this.sep);
+    				in1_list.add(col[0]);
+    				if(col.length<2) {
+    					setWarningMessage("Second column contains less entries than first! Ignoring those lines!");
+    				}
+    				in2_list.add(col[1]);
+    			} else {
+    				in1_list.add(line.trim());
+    			}
+    		}
+    		
+    		bw.close();
+    	} else {
+    		in1_list.add(in1);
+    		in2_list.add(in2);
     	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(specs));
-    	FileCell[] c = fileCell;
-    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	
+    	for(int i = 0; i < in1_list.size(); i++) {
+    		FileCell [] fileCell = new FileCell[] {
+        			(FileCell) FileCellFactory.create(in1_list.get(i))};
+        	
+        	if(secondOk) {
+        		fileCell = new FileCell[] {
+            			(FileCell) FileCellFactory.create(in1_list.get(i)),
+            			(FileCell) FileCellFactory.create(in2_list.get(i))};
+        	}
+        	FileCell[] c = fileCell;
+    		cont.addRowToTable(new DefaultRow("Row"+i,c));
+    	}
+    	
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
         return new BufferedDataTable[]{outTable};
@@ -104,7 +130,8 @@ public class FileLoaderNodeModel extends NodeModel {
      */
     @Override
     protected void reset() {
-        // TODO: generated method stub
+        secondOk = false;
+        is_list = false;
     }
 
     /**
@@ -117,17 +144,36 @@ public class FileLoaderNodeModel extends NodeModel {
     	String in1 = m_infile1.getStringValue();
     	String in2 = m_infile2.getStringValue();
     	
-    	DataColumnSpec dcs1 = null;
-    	DataColumnSpec dcs2 = null;
-    	DataColumnSpec [] specs = null;
-    	
     	secondOk = false;
+    	is_list = false;
     	
+    	int end = checkEnding(in1);
     	//check first input file
     	if(Files.notExists(Paths.get(in1)) || in1.equals("")) {
     		throw new InvalidSettingsException("First input file does not exist");
-    	} else if(checkEnding(in1)==0){
+    	} else if(end==0) {
     		this.setWarningMessage("The input file is not in a supported NGS format");
+    	} else if(end==-1) {
+    		is_list = true;
+			String firstLine;
+			try {
+				firstLine = IO.head(Paths.get(in1), 1).get(0);
+				in1 = firstLine.trim();
+				String [] sep = {"\t", "\\s", ";", ","};
+				for(String s:sep) {
+					if(firstLine.contains(s)) {
+						String [] col = firstLine.split(s);
+						if(col.length > 2) setWarningMessage("Only the first or first two columns are read. Further columns are ignored.");
+						in1 = col[0];
+						in2 = col[1];
+						this.sep = s;
+						break;
+					}
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     	}
     	
     	//first input file is ok
@@ -152,7 +198,15 @@ public class FileLoaderNodeModel extends NodeModel {
     	return new DataTableSpec[]{new DataTableSpec(specs)};
     }
     
+    /**
+     * checks ending of input file
+     * @param path 
+     * @return -1 if input file is a list (.csv, .tsv, .list), the index of the ENDINGS or 0 if input file is not supported
+     */
     protected int checkEnding(String path) {
+    	if(path.endsWith(".csv") || path.endsWith(".tsv") || path.endsWith(".list")) {
+    		return -1;
+    	}
     	path = IO.removeZipExtension(path);
     	for(int i = 1; i < ENDINGS.length; i++) {
     		if(path.endsWith(ENDINGS[i])) {

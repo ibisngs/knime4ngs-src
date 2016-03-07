@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.utils;
 
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -9,6 +10,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -294,6 +297,19 @@ public class IO {
 			}
 		}
 		return b.toString();
+	}
+	
+	public static ArrayList<String> head(Path f, int maxLines) throws IOException {
+		ArrayList<String> result = new ArrayList<>();
+		String line; 
+		BufferedReader br = Files.newBufferedReader(f);
+		int count = 0;
+		while((line = br.readLine())!=null && count < maxLines) {
+			result.add(line);
+			count++;
+		}
+		br.close();
+		return result;
 	}
 	
 	/**
