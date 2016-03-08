@@ -32,8 +32,6 @@ public class Bcl2FastQNodeDialog extends HTExecutorNodeDialog {
 	private final SettingsModelIntegerBounded threads = new SettingsModelIntegerBounded(Bcl2FastQNodeModel.CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
 	//private final SettingsModelString interop = new SettingsModelString(Bcl2FastQNodeModel.CFGKEY_INTEROP,"");
 	
-	
-	
     /**
      * New pane for configuring the Bcl2FastQ node.
      */
@@ -54,14 +52,6 @@ public class Bcl2FastQNodeDialog extends HTExecutorNodeDialog {
     
     //createNewGroup("Path to interop");
     //addDialogComponent(new DialogComponentFileChooser(interop, "his_id_INTEROP", 0, true));
-    
-    
-    
    }
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

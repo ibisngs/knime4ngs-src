@@ -81,7 +81,8 @@ public class SamToolsNodeDialog extends HTExecutorNodeDialog {
 	
     protected SamToolsNodeDialog() {
         
-    	super();
+    	addPrefPageSetting(samtools, IBISKNIMENodesPlugin.SAMTOOLS);
+    	addPrefPageSetting(refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
     	
     	createNewGroup("Select utility");
     	addDialogComponent(new DialogComponentStringSelection(utility,"Select Utility", "cat", "faidx", "calmd", "fixmate", "flagstat","idxstats","merge", "phase", "reheader", "rmdup"));
@@ -416,30 +417,30 @@ public class SamToolsNodeDialog extends HTExecutorNodeDialog {
     	
     }
 
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-			String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-		    if(toolPath != null && !toolPath.equals("")) {
-		    	samtools.setStringValue(toolPath);
-		    	samtools.setEnabled(false);
-		    } else {
-		    	samtools.setEnabled(true);
-		    }
-		    
-	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-	    	if(refGenome != null && !refGenome.equals("")) {
-	    		refseqfile.setStringValue(refGenome);
-	    		refseqfile.setEnabled(false);
-	    	} else {
-	    		refseqfile.setEnabled(true);
-	    	}
-		    
-		} else {
-			samtools.setEnabled(true);
-			refseqfile.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//			String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+//		    if(toolPath != null && !toolPath.equals("")) {
+//		    	samtools.setStringValue(toolPath);
+//		    	samtools.setEnabled(false);
+//		    } else {
+//		    	samtools.setEnabled(true);
+//		    }
+//		    
+//	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+//	    	if(refGenome != null && !refGenome.equals("")) {
+//	    		refseqfile.setStringValue(refGenome);
+//	    		refseqfile.setEnabled(false);
+//	    	} else {
+//	    		refseqfile.setEnabled(true);
+//	    	}
+//		    
+//		} else {
+//			samtools.setEnabled(true);
+//			refseqfile.setEnabled(true);
+//		}
+//	}
 
 }
 

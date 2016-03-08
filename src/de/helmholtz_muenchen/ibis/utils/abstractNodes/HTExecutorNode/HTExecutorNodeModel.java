@@ -19,7 +19,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
@@ -88,7 +87,7 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			err_msg = stdErr.toString();
 			
 			for(String c: command) {
-				if(c.contains(KNIMEPreferencePage.GATK_ID)) {
+				if(c.contains(IBISKNIMENodesPlugin.GATK)) {
 					err_msg = parseGATKError(err_msg);
 					break;
 				}
@@ -166,14 +165,14 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
 		
-		use_hte = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
+		use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
 		threshold_value = threshold.getIntValue();
-		db_file = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
-		boolean notify = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
+		db_file = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.DB_FILE);
+		boolean notify = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.NOTIFY);
 		if(notify) {
-			email = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
-			emailhost = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
-			emailsender = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
+			email = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
+			emailhost = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
+			emailsender = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
 		} else {
 			email = null;
 		}

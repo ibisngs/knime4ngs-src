@@ -51,24 +51,25 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
-	public static final String GATK_ID = "GenomeAnalysisTK.jar";
+	
 	private static final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
 	public static final HashMap<String, Boolean> TOOLS;
 	static {
 		TOOLS = new HashMap<>();
-		TOOLS.put("bfast",true);
-		TOOLS.put("bowtie2",true);
-		TOOLS.put("bwa",true);
-		TOOLS.put("featureCounts",true);
-		TOOLS.put("pindel",true);
-		TOOLS.put("pindel2vcf",true);
-		TOOLS.put("samtools",true);
-		TOOLS.put("segemehl.x",true);
-		TOOLS.put("STAR",true);
-		TOOLS.put(GATK_ID,false);
-		TOOLS.put("variant_effect_predictor.pl",false);
-		TOOLS.put("filter_vep.pl", false);
-		TOOLS.put("vcftools",false);
+		TOOLS.put(IBISKNIMENodesPlugin.BCFTOOLS, true);
+		TOOLS.put(IBISKNIMENodesPlugin.BOWTIE2,true);
+		TOOLS.put(IBISKNIMENodesPlugin.BWA,true);
+		TOOLS.put(IBISKNIMENodesPlugin.FEATURE_COUNTS,true);
+		TOOLS.put(IBISKNIMENodesPlugin.GATK,false);
+		TOOLS.put(IBISKNIMENodesPlugin.PINDEL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
+		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
+		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
+		TOOLS.put(IBISKNIMENodesPlugin.VEP_FILTER, false);
+//		TOOLS.put(IBISKNIMENodesPlugin.BFAST,true);
 	}
 	
 	public static String REF_GENOME;
@@ -134,7 +135,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		for(String key: TOOLS.keySet()) {
 			TableItem item = new TableItem(table, SWT.NULL);
 			item.setText(0,key);
-			item.setText(1,IBISKNIMENodesPlugin.getDefault().getToolPathPreference(key));
+			item.setText(1,IBISKNIMENodesPlugin.getStringPreference(key));
 		}
 		
 		for(int i = 0; i < titles.length; i++) {
@@ -188,7 +189,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		refLayout.numColumns = 3;
 		ref_genome.setLayout(refLayout);
 		
-		REF_GENOME = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+		REF_GENOME = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.REF_GENOME);
 		
 		Label refGenomeLabel = new Label(ref_genome,SWT.LEFT);
 		refGenomeLabel.setText("File path:");
@@ -218,7 +219,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		hteLayout.numColumns = 3;
 		use_hte.setLayout(hteLayout);
 		
-		USE_HTE = IBISKNIMENodesPlugin.getDefault().getHTEPreference();
+		USE_HTE = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
 		checkHTE = new Button(use_hte,SWT.CHECK);
 		checkHTE.setText("Use HTE?");
 		checkHTE.setSelection(USE_HTE);
@@ -227,7 +228,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Label thresholdLabel = new Label(use_hte,SWT.RIGHT);
 		thresholdLabel.setText("Global threshold:");
 		
-		THRESHOLD = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
+		THRESHOLD = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 
 		thresholdText = new Text(use_hte, SWT.BORDER);
 		thresholdText.setText(THRESHOLD);
@@ -236,7 +237,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Label dbFileLabel = new Label(use_hte, SWT.LEFT);
 		dbFileLabel.setText("Use existing db file:");
 		
-		DB_FILE = IBISKNIMENodesPlugin.getDefault().getDBFilePreference();
+		DB_FILE = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.DB_FILE);
 		
 		dbFile = new Text(use_hte,SWT.BORDER);
 		dbFile.setText(DB_FILE);
@@ -288,7 +289,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		emailLayout.numColumns = 1;
 		email.setLayout(emailLayout);
 		
-		NOTIFY = IBISKNIMENodesPlugin.getDefault().getNotifyPreference();
+		NOTIFY = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.NOTIFY);
 		checkNotify = new Button(email,SWT.CHECK);
 		checkNotify.setText("Email notification?");
 		checkNotify.setSelection(NOTIFY);
@@ -302,7 +303,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			}
 		});
 		
-		EMAILHOST = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
+		EMAILHOST = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_HOST);
 		
 		Label emailHost = new Label(email, SWT.LEFT);
 		emailHost.setText("Email host:");
@@ -311,7 +312,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		email_host.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		email_host.setEnabled(NOTIFY);
 		
-		EMAILSENDER = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
+		EMAILSENDER = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_SENDER);
 		
 		Label emailSender = new Label(email, SWT.LEFT);
 		emailSender.setText("Email sender:");
@@ -320,7 +321,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		email_sender.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		email_sender.setEnabled(NOTIFY);
 		
-		EMAILRECEIVER = IBISKNIMENodesPlugin.getDefault().getEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
+		EMAILRECEIVER = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER);
 		
 		Label emailReceiver = new Label(email, SWT.LEFT);
 		emailReceiver.setText("Email address (send to):");
@@ -345,47 +346,20 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	protected void performDefaults() {
 		super.performDefaults();
 		
-		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
-		
-		for(String s: TOOLS.keySet()) {
-			iknp.setToolPathPreference(s, "");
-		}
+		IBISKNIMENodesPlugin.setAllFieldsToDefault();
 		
 		for(TableItem i: table.getItems()) {
 			i.setText(1,"");
 		}
 		
-		REF_GENOME = IBISKNIMENodesPlugin.REF_GENOME_DEFAULT;
-		refGenome.setText(REF_GENOME);
-		iknp.setRefGenomePreference(REF_GENOME);
-		
-		USE_HTE = IBISKNIMENodesPlugin.HTE_DEFAULT;
-		checkHTE.setSelection(USE_HTE);
-		iknp.setHTEPreference(USE_HTE);
-		
-		THRESHOLD = IBISKNIMENodesPlugin.THRESHOLD_DEFAULT+"";
-		thresholdText.setText(THRESHOLD);
-		iknp.setThresholdPreference(THRESHOLD);
-		
-		DB_FILE = IBISKNIMENodesPlugin.DB_FILE_DEFAULT;
-		dbFile.setText(DB_FILE);
-		iknp.setDBFilePreference(DB_FILE);
-		
-		NOTIFY = IBISKNIMENodesPlugin.NOTIFY_DEFAULT;
-		checkNotify.setSelection(NOTIFY);
-		iknp.setNotifyPreference(NOTIFY);
-		
-		EMAILHOST = IBISKNIMENodesPlugin.EMAIL_HOST_DEFAULT;
-		email_host.setText(EMAILHOST);
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
-		
-		EMAILSENDER = IBISKNIMENodesPlugin.EMAIL_SENDER_DEFAULT;
-		email_sender.setText(EMAILSENDER);
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER, EMAILSENDER);
-		
-		EMAILRECEIVER = IBISKNIMENodesPlugin.EMAIL_RECEIVER_DEFAULT;
-		email_receiver.setText(EMAILRECEIVER);
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
+		refGenome.setText("");
+		checkHTE.setSelection(IBISKNIMENodesPlugin.HTE_DEFAULT);
+		thresholdText.setText(IBISKNIMENodesPlugin.THRESHOLD_DEFAULT+"");
+		dbFile.setText("");
+		checkNotify.setSelection(IBISKNIMENodesPlugin.NOTIFY_DEFAULT);
+		email_host.setText(IBISKNIMENodesPlugin.EMAIL_HOST_DEFAULT);
+		email_sender.setText(IBISKNIMENodesPlugin.EMAIL_SENDER_DEFAULT);
+		email_receiver.setText(IBISKNIMENodesPlugin.EMAIL_RECEIVER_DEFAULT);
 	}
 	
 	/*
@@ -394,7 +368,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 */	
 	public boolean performOk() {
 		
-		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		REF_GENOME = refGenome.getText();
 		if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
@@ -404,14 +377,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		iknp.setRefGenomePreference(REF_GENOME);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.REF_GENOME, REF_GENOME);
 		LOGGER.debug("Setting REF_GENOME to: "+REF_GENOME);
 		
-		iknp.setHTEPreference(USE_HTE);
+		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.USE_HTE, USE_HTE);
 		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
 		
 		if(!USE_HTE) {
-			iknp.setNotifyPreference(false);
+			IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, USE_HTE);
 			return super.performOk();
 		}
 		
@@ -428,7 +401,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		iknp.setThresholdPreference(THRESHOLD);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.THRESHOLD, THRESHOLD);
 		LOGGER.debug("Setting THREHOLD to: "+THRESHOLD);
 		
 		if(DB_FILE.equals("")) {
@@ -438,19 +411,19 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		iknp.setDBFilePreference(DB_FILE);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.DB_FILE, DB_FILE);
 		LOGGER.debug("Setting DB_FILE to: "+DB_FILE);
 		
-		iknp.setNotifyPreference(NOTIFY);
-		
+		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, NOTIFY);
+
 		EMAILHOST = email_host.getText();
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
 		
 		EMAILSENDER = email_sender.getText();
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_SENDER, EMAILSENDER);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.EMAIL_SENDER, EMAILSENDER);
 		
 		EMAILRECEIVER = email_receiver.getText();
-		iknp.setEmailPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
 		
 		if(NOTIFY) {
 			
@@ -486,8 +459,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	
 	private void downloadBinaries(Shell shell){
 		
-		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
-		
 		DirectoryDialog dlg = new DirectoryDialog(shell);
 		dlg.setText("Choose directory in which tool binaries will be stored");
 		dlg.setFilterPath("~/");
@@ -509,13 +480,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			
 		for (String tool : TOOLS.keySet()) {
 			if (TOOLS.get(tool)) {
-				if (iknp.getToolPathPreference(tool).equals("")) {
+				if (IBISKNIMENodesPlugin.getStringPreference(tool).equals("")) {
 					try {
 						File f = new File(dir + "/" + tool);
 						if (!f.exists()) {
 							FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + tool), f);
 							f.setExecutable(true, false);
-							iknp.setToolPathPreference(tool, dir + "/"+ tool);
+							IBISKNIMENodesPlugin.setStringPreference(tool, dir + "/"+ tool);
 						}
 					} catch (IOException e) {
 						LOGGER.error("Downloading " + tool+ " failed! Message: " + e.getMessage());
@@ -525,13 +496,11 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		
 		for(TableItem i: table.getItems()) {
-			i.setText(1,iknp.getToolPathPreference(i.getText(0)));
+			i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
 		}
 	}
 	
 	private void selectSearchDir(Shell shell){
-		
-		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		DirectoryDialog dirlg = new DirectoryDialog(shell);
 		dirlg.setText("Choose directory in which tool binaries shall be searched");
@@ -552,14 +521,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	    t.start();
 		
 		for(String s: TOOLS.keySet()) {
-			if(iknp.getToolPathPreference(s).equals("")) {
+			if(IBISKNIMENodesPlugin.getStringPreference(s).equals("")) {
 				String path = BinaryHandler.checkToolAvailability(s, dir);
 				if(path != null) {
 					try {
 						CheckUtils.checkSourceFile(path);
-						iknp.setToolPathPreference(s, path);
+						IBISKNIMENodesPlugin.setStringPreference(s, path);
 					} catch (InvalidSettingsException e) {
-						iknp.setToolPathPreference(s, "");
+						IBISKNIMENodesPlugin.setStringPreference(s, "");
 					}
 					
 				}
@@ -568,13 +537,11 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		
 		for(TableItem i: table.getItems()) {
-			i.setText(1,iknp.getToolPathPreference(i.getText(0)));
+			i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
 		}
 	}
 	
 	private void editBinary(Shell shell) {
-		
-		IBISKNIMENodesPlugin iknp = IBISKNIMENodesPlugin.getDefault();
 		
 		if(table.getSelectionCount()==0) {
 			return;
@@ -592,7 +559,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		try {
 			CheckUtils.checkSourceFile(file);
-			iknp.setToolPathPreference(item.getText(0), file);
+			IBISKNIMENodesPlugin.setStringPreference(item.getText(0), file);
 			item.setText(1,file);
 		} catch (InvalidSettingsException e) {
 			JOptionPane.showMessageDialog(null,

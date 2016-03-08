@@ -32,11 +32,5 @@ public class VCFSorterNodeDialog extends HTExecutorNodeDialog {
     	
     	
     }
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

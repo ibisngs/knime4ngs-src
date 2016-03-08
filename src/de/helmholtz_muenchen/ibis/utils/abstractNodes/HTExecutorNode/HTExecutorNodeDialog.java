@@ -1,13 +1,17 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
+import java.util.HashMap;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 
@@ -28,12 +32,14 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	 * New pane for configuring the HTExecutorNode node.
 	*/
 	
-	protected final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
+	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
 	
+	protected final HashMap<SettingsModelString, String> model2pref = new HashMap<>();;
+	
 	protected HTExecutorNodeDialog() {
-		super();
-
+		super(); 
+		
 		createNewGroup("HTE");
 		
 		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
@@ -46,7 +52,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 			public void stateChanged(ChangeEvent arg0) {
 				threshold.setEnabled(!usePrefPage.getBooleanValue());
 				if(usePrefPage.getBooleanValue()) {
-					String n = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
+					String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 			    	threshold.setIntValue(Integer.parseInt(n));
 				}
 				updatePrefs();
@@ -56,13 +62,32 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	
     public void onOpen() {
     	if(usePrefPage.getBooleanValue()) {
-			String n = IBISKNIMENodesPlugin.getDefault().getThresholdPreference();
+			String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 	    	threshold.setIntValue(Integer.parseInt(n));
 	    	threshold.setEnabled(false);
 		}
     	updatePrefs();
     }
     
-    protected abstract void updatePrefs();
+    private void updatePrefs() {
+    	for(SettingsModel sm: model2pref.keySet()) {
+			sm.setEnabled(true);
+		}
+    	
+    	String prefValue;
+    	if(usePrefPage.getBooleanValue()) {
+    		for(SettingsModelString sm: model2pref.keySet()) {
+    			prefValue = IBISKNIMENodesPlugin.getStringPreference(model2pref.get(sm));
+    			if(prefValue != null && !prefValue.equals("")) {
+    	    		sm.setStringValue(prefValue);
+    	    		sm.setEnabled(false);
+    	    	}
+    		}
+		}
+    }
+    
+    public void addPrefPageSetting(SettingsModelString sms, String v) {
+    	this.model2pref.put(sms, v);
+    }
     
 }

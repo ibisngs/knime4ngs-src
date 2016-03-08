@@ -25,7 +25,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
-import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -73,7 +72,6 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
         for(String t: DEFAULT_TERMS) {
         	this.TERMS.add(t);
         }
-        m_vepscript.setStringValue(IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl"));
     }
 
     /**

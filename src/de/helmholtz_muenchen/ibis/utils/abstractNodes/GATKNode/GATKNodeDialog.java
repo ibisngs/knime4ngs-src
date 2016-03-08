@@ -33,6 +33,9 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
 
     protected GATKNodeDialog() {
     	
+    	addPrefPageSetting(GATK, IBISKNIMENodesPlugin.GATK);
+    	addPrefPageSetting(REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
+    	
     	createNewGroup("Path to GATK jar file");
     	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(GATK, "gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
     	addDialogComponent(gatkf);
@@ -61,27 +64,27 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
 
     }
     
-    protected void updatePrefs() {
-    	if(usePrefPage.getBooleanValue()) {
-    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-    		if(gatkPath != null && !gatkPath.equals("")) {
-    			GATK.setStringValue(gatkPath);
-    			GATK.setEnabled(false);
-    		} else {
-    			GATK.setEnabled(true);
-    		}
-    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-    		if(refGenome != null && !refGenome.equals("")) {
-    			REF_GENOME.setStringValue(refGenome);
-    			REF_GENOME.setEnabled(false);
-    		} else {
-    			REF_GENOME.setEnabled(true);
-    		}
-    	} else {
-    		GATK.setEnabled(true);
-    		REF_GENOME.setEnabled(true);
-    	}
-    }
+//    protected void updatePrefs() {
+//    	if(usePrefPage.getBooleanValue()) {
+//    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+//    		if(gatkPath != null && !gatkPath.equals("")) {
+//    			GATK.setStringValue(gatkPath);
+//    			GATK.setEnabled(false);
+//    		} else {
+//    			GATK.setEnabled(true);
+//    		}
+//    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+//    		if(refGenome != null && !refGenome.equals("")) {
+//    			REF_GENOME.setStringValue(refGenome);
+//    			REF_GENOME.setEnabled(false);
+//    		} else {
+//    			REF_GENOME.setEnabled(true);
+//    		}
+//    	} else {
+//    		GATK.setEnabled(true);
+//    		REF_GENOME.setEnabled(true);
+//    	}
+//    }
 	
     protected abstract void addDialogComponent();
     

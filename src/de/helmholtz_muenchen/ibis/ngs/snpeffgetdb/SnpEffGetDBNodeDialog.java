@@ -37,10 +37,5 @@ public class SnpEffGetDBNodeDialog extends HTExecutorNodeDialog {
     	//addDialogComponent(new DialogComponentFileChooser(database_folder, "par_2", 0, true));
     	
     }
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

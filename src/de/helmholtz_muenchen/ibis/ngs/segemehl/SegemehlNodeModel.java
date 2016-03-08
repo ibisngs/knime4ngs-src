@@ -2,6 +2,8 @@ package de.helmholtz_muenchen.ibis.ngs.segemehl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +49,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_CLIPPOLYA = "clippolya";
 	public static final String CFGKEY_CLIPPINGACCURACY = "clippingaccuracy";
 	public static final String CFGKEY_SOFTHARDCLIPPING = "softhardclipping";
-	public static final String CFGKEY_CHECKINDEX = "checkIndexRefSeq";
+//	public static final String CFGKEY_CHECKINDEX = "checkIndexRefSeq";
 	public static final String CFGKEY_CHECKSPLITREADMAPPING = "checkSplitReadMapping";
 	public static final String CFGKEY_CHECKSBISULFITEMAPPING = "checkBisulfiteMapping";
 	public static final String CFGKEY_BISULFITEMAPPINGTYPE = "bisulfiteMappingType";
@@ -63,7 +65,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_clippolya = new SettingsModelBoolean(CFGKEY_CLIPPOLYA, false);
 	private final SettingsModelIntegerBounded m_clippingaccuracy = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_CLIPPINGACCURACY, 70, 0, 100);
 	private final SettingsModelString m_softhardclipping = new SettingsModelString(SegemehlNodeModel.CFGKEY_SOFTHARDCLIPPING,"");
-	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX, true);
+//	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX, true);
 	private final SettingsModelBoolean m_checkSplitReadMapping = new SettingsModelBoolean(CFGKEY_CHECKSPLITREADMAPPING, false);
 	private final SettingsModelBoolean m_checkBisulfiteMapping = new SettingsModelBoolean(CFGKEY_CHECKSBISULFITEMAPPING, false);
 	private final SettingsModelString m_bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"");
@@ -90,8 +92,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
         m_clippingaccuracy.setEnabled(false);
         m_softhardclipping.setEnabled(false);
         m_bisulfiteMappingType.setEnabled(false);
-        m_checkBisulfiteMapping.setEnabled(false);
-        
+//        m_checkBisulfiteMapping.setEnabled(false);
     }
 
     /**
@@ -127,7 +128,8 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 
     	
     // Indexing reference sequence: segemehl -x chr1.idx -d chr1.fa
-    	if(m_checkIndexRefSeq.getBooleanValue()) {
+    	String index = path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx"; 
+    	if(Files.notExists(Paths.get(index))) {
     		LOGGER.info("Indexing reference sequence.");
     		command.add(path2segemehl);
     		command.add("-x "+path2indexedRefSeq);
@@ -247,13 +249,13 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
  	
     	//Warning concerning files
   	
-		if(!m_checkIndexRefSeq.getBooleanValue()) {
-	    	String path2refSeq = m_refseqfile.getStringValue();
-			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx");    	        
-			if(!file.exists()){
-				throw new InvalidSettingsException("The reference sequence has not been indexed yet. Please modify the options of Segemehl to run Segemehl.");
-			}
-		}
+//		if(!m_checkIndexRefSeq.getBooleanValue()) {
+//	    	String path2refSeq = m_refseqfile.getStringValue();
+//			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx");    	        
+//			if(!file.exists()){
+//				throw new InvalidSettingsException("The reference sequence has not been indexed yet. Please modify the options of Segemehl to run Segemehl.");
+//			}
+//		}
 		
 		if(m_refseqfile.getStringValue().length() > 1) {
 			if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
@@ -320,7 +322,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_softhardclipping.saveSettingsTo(settings);
     	m_threads.saveSettingsTo(settings);
     	m_clippingaccuracy.saveSettingsTo(settings);
-    	m_checkIndexRefSeq.saveSettingsTo(settings);
+//    	m_checkIndexRefSeq.saveSettingsTo(settings);
     	m_checkSplitReadMapping.saveSettingsTo(settings);
     	m_checkBisulfiteMapping.saveSettingsTo(settings);
     	m_bisulfiteMappingType.saveSettingsTo(settings);
@@ -347,7 +349,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_softhardclipping.loadSettingsFrom(settings);
     	m_threads.loadSettingsFrom(settings);
     	m_clippingaccuracy.loadSettingsFrom(settings);
-    	m_checkIndexRefSeq.loadSettingsFrom(settings);
+//    	m_checkIndexRefSeq.loadSettingsFrom(settings);
     	m_checkSplitReadMapping.loadSettingsFrom(settings);
     	m_checkBisulfiteMapping.loadSettingsFrom(settings);
     	m_bisulfiteMappingType.loadSettingsFrom(settings);
@@ -374,7 +376,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	m_softhardclipping.validateSettings(settings);
     	m_threads.validateSettings(settings);
     	m_clippingaccuracy.validateSettings(settings);
-    	m_checkIndexRefSeq.validateSettings(settings);
+//    	m_checkIndexRefSeq.validateSettings(settings);
     	m_checkSplitReadMapping.validateSettings(settings);
     	m_checkBisulfiteMapping.validateSettings(settings);
     	m_bisulfiteMappingType.validateSettings(settings);

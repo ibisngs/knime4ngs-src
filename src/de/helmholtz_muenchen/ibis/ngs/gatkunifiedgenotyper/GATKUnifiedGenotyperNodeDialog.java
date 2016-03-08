@@ -114,7 +114,8 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
      */
     protected GATKUnifiedGenotyperNodeDialog() {
         super();
-        
+        addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
+        addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
         generalOptions();
         UGOptions();
         proxyOptions();
@@ -269,28 +270,28 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 			});
   }
 
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-	    	if(toolPath != null && !toolPath.equals("")) {
-	    		gatk.setStringValue(toolPath);
-	    		gatk.setEnabled(false);
-	    	} else {
-	    		gatk.setEnabled(true);
-	    	}
-	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-	    	if(refGenome != null && !refGenome.equals("")) {
-	    		reffile.setStringValue(refGenome);
-	    		reffile.setEnabled(false);
-	    	} else {
-	    		reffile.setEnabled(true);
-	    	}
-		} else {
-			gatk.setEnabled(true);
-			reffile.setEnabled(true);
-		}
-		
-	} 
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+//	    	if(toolPath != null && !toolPath.equals("")) {
+//	    		gatk.setStringValue(toolPath);
+//	    		gatk.setEnabled(false);
+//	    	} else {
+//	    		gatk.setEnabled(true);
+//	    	}
+//	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+//	    	if(refGenome != null && !refGenome.equals("")) {
+//	    		reffile.setStringValue(refGenome);
+//	    		reffile.setEnabled(false);
+//	    	} else {
+//	    		reffile.setEnabled(true);
+//	    	}
+//		} else {
+//			gatk.setEnabled(true);
+//			reffile.setEnabled(true);
+//		}
+//		
+//	} 
 }
 

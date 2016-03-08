@@ -56,6 +56,8 @@ public class VCFToolsFilterNodeDialog extends HTExecutorNodeDialog {
 		
     protected VCFToolsFilterNodeDialog() {
     	
+    	addPrefPageSetting(vcf_tools, IBISKNIMENodesPlugin.VCFTOOLS);
+    	
     	createNewGroup("Path to VCFtools binary");
     	addDialogComponent(new DialogComponentFileChooser(vcf_tools, "his_id_vcftools", 0, ""));
     	
@@ -96,19 +98,19 @@ public class VCFToolsFilterNodeDialog extends HTExecutorNodeDialog {
     }
 
     
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
-	    	if(vcftoolsPath != null && !vcftoolsPath.equals("")) {
-	    		vcf_tools.setStringValue(vcftoolsPath);
-	    		vcf_tools.setEnabled(false);
-	    	} else {
-	    		vcf_tools.setEnabled(true);
-	    	}
-	    	
-		} else {
-			vcf_tools.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String vcftoolsPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("vcftools");
+//	    	if(vcftoolsPath != null && !vcftoolsPath.equals("")) {
+//	    		vcf_tools.setStringValue(vcftoolsPath);
+//	    		vcf_tools.setEnabled(false);
+//	    	} else {
+//	    		vcf_tools.setEnabled(true);
+//	    	}
+//	    	
+//		} else {
+//			vcf_tools.setEnabled(true);
+//		}
+//	}
 }

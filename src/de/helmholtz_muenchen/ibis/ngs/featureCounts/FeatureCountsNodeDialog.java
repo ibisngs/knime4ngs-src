@@ -12,6 +12,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
 
 /**
@@ -24,7 +25,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
  */
 public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
 
-	private final static String BINARY_NAME = "featureCounts";
+	private final static String BINARY_NAME = IBISKNIMENodesPlugin.FEATURE_COUNTS;
 	
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FEATURE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FEATURE);

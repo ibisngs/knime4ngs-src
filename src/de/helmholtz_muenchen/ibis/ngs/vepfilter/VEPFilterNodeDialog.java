@@ -68,6 +68,8 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
 	
     protected VEPFilterNodeDialog() {
     	
+    	addPrefPageSetting(vep_script, IBISKNIMENodesPlugin.VEP_FILTER);
+    	
     	createNewGroup("Path to filter_vep.pl");
     	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
     	
@@ -177,18 +179,18 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
     	settings.addStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
     }
     
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-			String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
-			if(filterVep != null && !filterVep.equals("")) {
-				vep_script.setStringValue(filterVep);
-				vep_script.setEnabled(false);
-			} else {
-				vep_script.setEnabled(true);
-			}
-		} else {
-			vep_script.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//			String filterVep = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("filter_vep.pl");
+//			if(filterVep != null && !filterVep.equals("")) {
+//				vep_script.setStringValue(filterVep);
+//				vep_script.setEnabled(false);
+//			} else {
+//				vep_script.setEnabled(true);
+//			}
+//		} else {
+//			vep_script.setEnabled(true);
+//		}
+//	}
 }

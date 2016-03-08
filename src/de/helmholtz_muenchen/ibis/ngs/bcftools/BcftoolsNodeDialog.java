@@ -12,6 +12,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -31,10 +32,13 @@ public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the Bcftools node.
      */
     protected BcftoolsNodeDialog() {
-
+    	
+    	final SettingsModelString bcfpath = new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, "");
     	final SettingsModelString bcfmethod = new SettingsModelString(BcftoolsNodeModel.CFGKEY_BCFMETHOD,"");
     	final SettingsModelString vcfsampleheader = new SettingsModelString(BcftoolsNodeModel.CFGKEY_VCFSAMPLEHEADER, "");
     	vcfsampleheader.setEnabled(false);
+    	
+    	addPrefPageSetting(bcfpath, IBISKNIMENodesPlugin.BCFTOOLS);
     	
     	//Concat
     	final SettingsModelBoolean concat_overlap 	= new SettingsModelBoolean(
@@ -62,7 +66,7 @@ public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
     	
     	//Main Tab 
     	createNewGroup("Path to Bcftools");
-    	addDialogComponent(new DialogComponentFileChooser(new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, ""),"his_bcft_ID5",""));
+    	addDialogComponent(new DialogComponentFileChooser(bcfpath,"his_bcft_ID5",""));
     	createNewGroup("");
     	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","index", "concat","reheader","stats"));
     	createNewGroup("Select file that includes the new sample names");
@@ -162,11 +166,5 @@ public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
  
     	
     }
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

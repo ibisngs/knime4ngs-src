@@ -71,8 +71,10 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the VQSR node.
      */
     protected VQSRNodeDialog() {
-    	super();
-    
+    	
+    	addPrefPageSetting(m_GATK, IBISKNIMENodesPlugin.GATK);
+    	addPrefPageSetting(m_REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
+    	
     	createNewGroup("Path to GATK jar file");
     	addDialogComponent(new DialogComponentFileChooser(m_GATK, "gatk_vqsr", 0, ".jar"));
     	
@@ -197,27 +199,27 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	});
     }
 
-	@Override
-    protected void updatePrefs() {
-    	if(usePrefPage.getBooleanValue()) {
-    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-    		if(gatkPath != null && !gatkPath.equals("")) {
-    			m_GATK.setStringValue(gatkPath);
-    			m_GATK.setEnabled(false);
-    		} else {
-    			m_GATK.setEnabled(true);
-    		}
-    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-    		if(refGenome != null && !refGenome.equals("")) {
-    			m_REF_GENOME.setStringValue(refGenome);
-    			m_REF_GENOME.setEnabled(false);
-    		} else {
-    			m_REF_GENOME.setEnabled(true);
-    		}
-    	} else {
-    		m_GATK.setEnabled(true);
-    		m_REF_GENOME.setEnabled(true);
-    	}
-    }
+//	@Override
+//    protected void updatePrefs() {
+//    	if(usePrefPage.getBooleanValue()) {
+//    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
+//    		if(gatkPath != null && !gatkPath.equals("")) {
+//    			m_GATK.setStringValue(gatkPath);
+//    			m_GATK.setEnabled(false);
+//    		} else {
+//    			m_GATK.setEnabled(true);
+//    		}
+//    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
+//    		if(refGenome != null && !refGenome.equals("")) {
+//    			m_REF_GENOME.setStringValue(refGenome);
+//    			m_REF_GENOME.setEnabled(false);
+//    		} else {
+//    			m_REF_GENOME.setEnabled(true);
+//    		}
+//    	} else {
+//    		m_GATK.setEnabled(true);
+//    		m_REF_GENOME.setEnabled(true);
+//    	}
+//    }
 }
 

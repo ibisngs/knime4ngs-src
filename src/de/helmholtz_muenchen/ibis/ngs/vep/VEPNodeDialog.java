@@ -1,8 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.vep;
 
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
@@ -58,7 +55,8 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
 	
     protected VEPNodeDialog() {
 
-    	super();
+    	addPrefPageSetting(veppl, IBISKNIMENodesPlugin.VEP);
+    	addPrefPageSetting(samtools_path, IBISKNIMENodesPlugin.SAMTOOLS);
     	
     	createNewGroup("Path to variant_effect_predictor.pl");
     	addDialogComponent(new DialogComponentFileChooser(veppl, "his_id_VEP_VEPPL", 0, ".pl"));
@@ -100,40 +98,40 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("Samtools PATH");
     	addDialogComponent(new DialogComponentFileChooser(samtools_path, "his_id_VEP_SAMTOOLSPATH", 0, ""));
   
-    	use_loftee.addChangeListener(new ChangeListener () {
-
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				updatePrefs();
-				
-			}
-    		
-    	});
+//    	use_loftee.addChangeListener(new ChangeListener () {
+//
+//			@Override
+//			public void stateChanged(ChangeEvent e) {
+//				updatePrefs();
+//				
+//			}
+//    		
+//    	});
     }
 
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String vep_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("variant_effect_predictor.pl");
-	    	if(vep_path != null && !vep_path.equals("")) {
-	    		veppl.setStringValue(vep_path);
-	    		veppl.setEnabled(false);
-			} else {
-				veppl.setEnabled(true);
-			}
-	    	if(use_loftee.getBooleanValue()){
-		    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-		    	if(toolPath != null && !toolPath.equals("")) {
-		    		samtools_path.setStringValue(toolPath);
-		    		samtools_path.setEnabled(false);
-		    	} else {
-		    		samtools_path.setEnabled(true);
-		    	}
-	    	}
-		} else {
-			veppl.setEnabled(true);
-			samtools_path.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String vep_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("variant_effect_predictor.pl");
+//	    	if(vep_path != null && !vep_path.equals("")) {
+//	    		veppl.setStringValue(vep_path);
+//	    		veppl.setEnabled(false);
+//			} else {
+//				veppl.setEnabled(true);
+//			}
+//	    	if(use_loftee.getBooleanValue()){
+//		    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+//		    	if(toolPath != null && !toolPath.equals("")) {
+//		    		samtools_path.setStringValue(toolPath);
+//		    		samtools_path.setEnabled(false);
+//		    	} else {
+//		    		samtools_path.setEnabled(true);
+//		    	}
+//	    	}
+//		} else {
+//			veppl.setEnabled(true);
+//			samtools_path.setEnabled(true);
+//		}
+//	}
 }
 

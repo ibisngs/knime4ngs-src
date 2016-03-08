@@ -69,7 +69,6 @@ public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
 		trimbyqual.setEnabled(false);
 		otherFilterSettingsfile.setEnabled(false);*/
     	
-    	
     	createNewGroup("Filter-settings file (from modified FastQC)");
     	addDialogComponent(new DialogComponentBoolean(filterfileexists, "Use filter-settings calculated by FastQC (in-port)"));
     	setHorizontalPlacement(true);
@@ -229,11 +228,5 @@ public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
 		 
 
     }
-
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
 }
 

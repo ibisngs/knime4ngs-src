@@ -37,7 +37,7 @@ public class FastSam2BamNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the FastSam2Bam node.
      */
     protected FastSam2BamNodeDialog() {
-        
+    	
         // create open file/folder components
         DialogComponentFileChooser dcPathSamtools 	= new DialogComponentFileChooser(SET_PATH_SAMTOOLS, "his_id_fs2b_samtools", 0, false);
 //        DialogComponentFileChooser dcPathPictools 	= new DialogComponentFileChooser(SET_PATH_PICTOOLS, "his_id_fs2b_pictools", 0, true);
@@ -49,7 +49,7 @@ public class FastSam2BamNodeDialog extends HTExecutorNodeDialog {
      	DialogComponentBoolean dcUseRamAsTmp 		= new DialogComponentBoolean(SET_USE_RAM_AS_TMP, "use RAM (" + FastSam2BamNodeModel.DEFAULT_USE_RAM_PATH + ") as temp folder");
      	DialogComponentBoolean dcDeleteSam			= new DialogComponentBoolean(SET_DELETE_SAM, "delete sam file after conversion");
       
-    	
+    	addPrefPageSetting(SET_PATH_SAMTOOLS, IBISKNIMENodesPlugin.SAMTOOLS);
      	
        	// set a new title to them
      	dcOutputFolder.setBorderTitle("path to output folder");
@@ -101,20 +101,20 @@ public class FastSam2BamNodeDialog extends HTExecutorNodeDialog {
         });
     }
     
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
-	    	if(toolPath != null && !toolPath.equals("")) {
-	    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
-	    		SET_PATH_SAMTOOLS.setEnabled(false);
-	    	} else {
-	    		SET_PATH_SAMTOOLS.setEnabled(true);
-	    	}
-	    	
-		} else {
-			SET_PATH_SAMTOOLS.setEnabled(true);
-		}
-	}
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");
+//	    	if(toolPath != null && !toolPath.equals("")) {
+//	    		SET_PATH_SAMTOOLS.setStringValue(toolPath);
+//	    		SET_PATH_SAMTOOLS.setEnabled(false);
+//	    	} else {
+//	    		SET_PATH_SAMTOOLS.setEnabled(true);
+//	    	}
+//	    	
+//		} else {
+//			SET_PATH_SAMTOOLS.setEnabled(true);
+//		}
+//	}
     
 //    public void onOpen() {
 //    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("samtools");

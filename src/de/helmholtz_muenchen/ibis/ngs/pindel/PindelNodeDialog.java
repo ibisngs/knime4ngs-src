@@ -111,6 +111,8 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
     protected PindelNodeDialog() {
         super();
         
+        addPrefPageSetting(pindel, IBISKNIMENodesPlugin.PINDEL);
+        addPrefPageSetting(pindel2vcf, IBISKNIMENodesPlugin.PINDEL2VCF);
         GeneralOptions();
         PindelParams();
         Pindel2VCFParams();
@@ -268,30 +270,30 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
     	
     }
 
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String pindel_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel");
-	    	if(pindel_path != null && !pindel_path.equals("")) {
-	    		pindel.setStringValue(pindel_path);
-	    		pindel.setEnabled(false);
-			} else {
-				pindel.setEnabled(true);
-			}
-
-		    String pindel2vcfPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel2vcf");
-		    	if(pindel2vcfPath != null && !pindel2vcfPath.equals("")) {
-		    		pindel2vcf.setStringValue(pindel2vcfPath);
-		    		pindel2vcf.setEnabled(false);
-		    	} else {
-		    		pindel2vcf.setEnabled(true);
-		    	}
-	    	
-		} else {
-			pindel.setEnabled(true);
-			pindel2vcf.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String pindel_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel");
+//	    	if(pindel_path != null && !pindel_path.equals("")) {
+//	    		pindel.setStringValue(pindel_path);
+//	    		pindel.setEnabled(false);
+//			} else {
+//				pindel.setEnabled(true);
+//			}
+//
+//		    String pindel2vcfPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel2vcf");
+//		    	if(pindel2vcfPath != null && !pindel2vcfPath.equals("")) {
+//		    		pindel2vcf.setStringValue(pindel2vcfPath);
+//		    		pindel2vcf.setEnabled(false);
+//		    	} else {
+//		    		pindel2vcf.setEnabled(true);
+//		    	}
+//	    	
+//		} else {
+//			pindel.setEnabled(true);
+//			pindel2vcf.setEnabled(true);
+//		}
+//	}
     
     
     /* 

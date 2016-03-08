@@ -22,14 +22,7 @@ public class FastQCNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the FastQC node.
      */
     protected FastQCNodeDialog() {
-    	
-    	
-    }
 
-	@Override
-	protected void updatePrefs() {
-		// TODO Auto-generated method stub
-		
-	}
+    }
 }
 

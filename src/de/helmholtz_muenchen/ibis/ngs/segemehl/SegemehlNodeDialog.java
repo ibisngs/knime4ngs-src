@@ -1,7 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.segemehl;
 
-import java.io.File;
-
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -31,14 +29,15 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 public class SegemehlNodeDialog extends HTExecutorNodeDialog {
 
 	private final SettingsModelString segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
-	
-	
+	private final SettingsModelString refseq = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,null);
 	
     /**
      * New pane for configuring the Segemehl node.
      */
     protected SegemehlNodeDialog() {
-
+    	
+    	super();
+    	
     	final SettingsModelBoolean clip5adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP5ADAPTER, false);
     	final SettingsModelBoolean clip3adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP3ADAPTER, false);
     	final SettingsModelBoolean autoadapter3seq = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_AUTOADAPTER3SEQ, false);
@@ -49,24 +48,26 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     	final SettingsModelString softhardclipping= new SettingsModelString(SegemehlNodeModel.CFGKEY_SOFTHARDCLIPPING,"Soft (Default)");
     	final SettingsModelBoolean checkBisulfiteMapping = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CHECKSBISULFITEMAPPING, false);
     	final SettingsModelString bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"methylC-seq/Lister et al.");
-    	final SettingsModelString refseq = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,null);
-    	final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CHECKINDEX, true);
+//    	final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CHECKINDEX, true);
     	final SettingsModelIntegerBounded accuracy = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_ACCURACY, 90, 0, 100);
 
+    	addPrefPageSetting(segemehlfile, IBISKNIMENodesPlugin.SEGEMEHL);
+    	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
+    	
     	autoadapter3seq.setEnabled(false);
     	adapter3seq.setEnabled(false);
     	adapter5seq.setEnabled(false);
     	clippingaccuracy.setEnabled(false);
     	softhardclipping.setEnabled(false);
     	bisulfiteMappingType.setEnabled(false);
-    	checkBisulfiteMapping.setEnabled(false);
+//    	checkBisulfiteMapping.setEnabled(false);
     	
     	createNewGroup("Segemehl");
     	addDialogComponent(new DialogComponentFileChooser(segemehlfile, "his_id_Segemehl", 0, ""));
     	createNewGroup("Reference (e.g. genome) sequence: FastA file.");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_Segemehl", 0, ""));
     	createNewGroup("General");
-    	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
+//    	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
 
     	addDialogComponent(new DialogComponentNumber(new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_THREADS, 4, 1, 250), "Number of threads/ cores to use:", 1));
     	createNewTab("Further Options");
@@ -129,62 +130,20 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
 			}
 		});
 
-    	refseq.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-    	    	String path2refSeq = refseq.getStringValue();
-    			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx"); 
-    			
-    			if(file.exists()){
-    				indexrefseq.setBooleanValue(false);
-    				indexrefseq.setEnabled(true);
-    			} else {
-    				indexrefseq.setBooleanValue(true);
-    				indexrefseq.setEnabled(false);
-    			}
-			}
-		});
-    	
-    	usePrefPage.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent arg0) {
-				segemehlfile.setEnabled(!usePrefPage.getBooleanValue());
-				if(usePrefPage.getBooleanValue()) {
-					String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
-			    	if(toolPath.equals("")) {
-			    		toolPath = "Segemehl binary not found!";
-			    	}
-			    	segemehlfile.setStringValue(toolPath);
-				}
-			}
-    	});
-    }
-    
-    public void onOpen() {
-    	super.onOpen();
-    	if(usePrefPage.getBooleanValue()){
-	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
-	    	if(toolPath == null) {
-	    		toolPath = "Segemehl binary not found!";
-	    	}
-	    	segemehlfile.setStringValue(toolPath);
-    	}
-    }
-
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-			String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("segemehl.x");
-	    	if(toolPath != null && !toolPath.equals("")) {
-	    		segemehlfile.setStringValue(toolPath);
-	    		segemehlfile.setEnabled(false);
-	    	} else {
-	    		segemehlfile.setEnabled(true);
-	    	}
-		} else {
-			segemehlfile.setEnabled(true);
-		}
-		
-	}	
-    
+//    	refseq.addChangeListener(new ChangeListener() {
+//			public void stateChanged(ChangeEvent e) {
+//    	    	String path2refSeq = refseq.getStringValue();
+//    			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx"); 
+//    			
+//    			if(file.exists()){
+//    				indexrefseq.setBooleanValue(false);
+//    				indexrefseq.setEnabled(true);
+//    			} else {
+//    				indexrefseq.setBooleanValue(true);
+//    				indexrefseq.setEnabled(false);
+//    			}
+//			}
+//		});
+    }	
 }
 

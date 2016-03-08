@@ -4,7 +4,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -20,7 +19,8 @@ public abstract class BinaryWrapperNodeDialog extends HTExecutorNodeDialog {
 //    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_PARAMETER_FILE, BinaryWrapperNodeModel.DEFAULT_PARAMETER_FILE);
    
 	protected BinaryWrapperNodeDialog() {
-		super();
+		
+		addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
 		// rename default tab
 		setDefaultTabTitle("General Options");
 		
@@ -43,20 +43,20 @@ public abstract class BinaryWrapperNodeDialog extends HTExecutorNodeDialog {
 //        createNewTab("level 2 options");
 	}
 	
-	@Override
-	protected void updatePrefs() {
-		if(usePrefPage.getBooleanValue()) {
-	    	String bin_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference(getNameOfBinary());
-	    	if(bin_path != null && !bin_path.equals("")) {
-	    		SET_BINARY_PATH.setStringValue(bin_path);
-	    		SET_BINARY_PATH.setEnabled(false);
-			} else {
-				SET_BINARY_PATH.setEnabled(true);
-			}
-		} else {
-			SET_BINARY_PATH.setEnabled(true);
-		}
-	}
+//	@Override
+//	protected void updatePrefs() {
+//		if(usePrefPage.getBooleanValue()) {
+//	    	String bin_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference(getNameOfBinary());
+//	    	if(bin_path != null && !bin_path.equals("")) {
+//	    		SET_BINARY_PATH.setStringValue(bin_path);
+//	    		SET_BINARY_PATH.setEnabled(false);
+//			} else {
+//				SET_BINARY_PATH.setEnabled(true);
+//			}
+//		} else {
+//			SET_BINARY_PATH.setEnabled(true);
+//		}
+//	}
 	
 	/**
 	 * Should return the name of the binary for the GUI
