@@ -41,7 +41,7 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 		
 		createNewTab("CombineVariants");
 		createNewGroup("GenotypeMergeType");
-        addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNSORTED","UNIQUIFY","REQUIRE_UNIQUE"));
+        addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNIQUIFY","PRIORITIZE","UNSORTED","REQUIRE_UNIQUE"));
         addDialogComponent(new DialogComponentString(INPUT1, "Input VCF file 1"));
     	addDialogComponent(new DialogComponentString(INPUT2, "Input VCF file 2"));
     	addDialogComponent(new DialogComponentString(PRIORITIZE, "Prioritize input"));

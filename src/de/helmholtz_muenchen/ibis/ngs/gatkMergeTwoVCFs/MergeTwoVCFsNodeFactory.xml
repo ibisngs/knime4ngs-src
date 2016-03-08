@@ -43,6 +43,9 @@
     			Make all sample genotypes unique by file.
     			Each sample shared across RODs gets named sample.ROD.
     			<br />
+    			<b>PRIORITIZE:</b>
+    			Take the genotypes in priority order.
+    			<br />
 				<b>UNSORTED:</b>
     			Take the genotypes in any order.
     			<br />
