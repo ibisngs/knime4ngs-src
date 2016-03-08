@@ -67,12 +67,6 @@ public class EdgeRNodeModel extends RNodeModel {
      */
 	protected EdgeRNodeModel() {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
-		this.init();
-	}
-	
-	@Override
-	public void init() {
-		super.init();
 		this.addSetting(SET_CORRECTION);
 		this.addSetting(SET_NORM_FACTOR);
 	}

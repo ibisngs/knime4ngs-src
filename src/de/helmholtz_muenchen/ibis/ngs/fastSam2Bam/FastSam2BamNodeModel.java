@@ -97,15 +97,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
      */
     protected FastSam2BamNodeModel() {
         super(1, 1);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {    	
-    	addSetting(SET_GENOME);
+        addSetting(SET_GENOME);
     	addSetting(SET_OUTPUT_PATH);
     	addSetting(SET_CORE_NUMBER);
     	addSetting(SET_SPLIT_SIZE);

@@ -82,16 +82,11 @@ public class FastqSplitterNodeModel extends SettingsStorageNodeModel {
      */
     protected FastqSplitterNodeModel() {
         super(1, 1);
-        this.init();
-    }
-
-	@Override
-	public void init() {
-		this.addSetting(SET_MIN);
+        this.addSetting(SET_MIN);
 		this.addSetting(SET_MAX);
 		this.addSetting(SET_NAME);
 		this.addSetting(SET_OUTPUT_FOLDER);
-	}
+    }
 	
     /**
      * {@inheritDoc}

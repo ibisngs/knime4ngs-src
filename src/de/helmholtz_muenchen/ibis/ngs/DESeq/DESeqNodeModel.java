@@ -62,12 +62,6 @@ public class DESeqNodeModel extends RNodeModel {
      */
 	protected DESeqNodeModel() {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
-		this.init();
-	}
-	
-	@Override
-	public void init() {
-		super.init();
 		this.addSetting(SET_METHOD);
 		this.addSetting(SET_SHEARING);
 	}

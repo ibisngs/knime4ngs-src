@@ -68,21 +68,13 @@ public class MatsResultPlotterNodeModel extends ExecutorNodeModel {
 	 */
 	protected MatsResultPlotterNodeModel() {
 		super(1, 1, true, true);
-		init();
-	}
-	 
-	 /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {    	
-    	this.addSetting(SET_INPUT_FILE);
+		this.addSetting(SET_INPUT_FILE);
     	this.addSetting(SET_BINARY_PATH);
     	this.addSetting(SET_OUTPUT_FILE);
     	this.addSetting(SET_SETTINGS_FILE);
     	this.addSetting(SET_FDR);
     	this.addSetting(SET_INCLUDE_READS);
-    }
+	}
     
 	@Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {

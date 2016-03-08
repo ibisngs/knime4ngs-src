@@ -17,8 +17,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -69,9 +67,12 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected Bcl2FastQNodeModel() {
-    
-        // TODO: Specify the amount of input and output ports needed.
         super(0, 1);
+        addSetting(m_ToolPath);
+        addSetting(m_InputPath);
+    	addSetting(m_outfolder);
+    	addSetting(m_IsPaired);
+    	addSetting(m_threads);
     }
     
     
@@ -197,60 +198,60 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
     }
    
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-         // TODO: generated method stub
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-    	m_ToolPath.saveSettingsTo(settings);
-    	m_InputPath.saveSettingsTo(settings);
-    	m_outfolder.saveSettingsTo(settings);
-    	m_IsPaired.saveSettingsTo(settings);
-    	m_threads.saveSettingsTo(settings);
-    	//m_interop.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        // TODO: generated method stub
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_ToolPath.loadSettingsFrom(settings);
-    	m_InputPath.loadSettingsFrom(settings);
-    	m_outfolder.loadSettingsFrom(settings);
-    	m_IsPaired.loadSettingsFrom(settings);
-    	m_threads.loadSettingsFrom(settings);
-    	//m_interop.loadSettingsFrom(settings);
-    	
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        // TODO: generated method stub
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-    	m_ToolPath.validateSettings(settings);
-    	m_InputPath.validateSettings(settings);
-    	m_outfolder.validateSettings(settings);
-    	m_IsPaired.validateSettings(settings);
-    	m_threads.validateSettings(settings);
-    	//m_interop.validateSettings(settings);
-    	
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//         // TODO: generated method stub
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_ToolPath.saveSettingsTo(settings);
+//    	m_InputPath.saveSettingsTo(settings);
+//    	m_outfolder.saveSettingsTo(settings);
+//    	m_IsPaired.saveSettingsTo(settings);
+//    	m_threads.saveSettingsTo(settings);
+//    	//m_interop.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        // TODO: generated method stub
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_ToolPath.loadSettingsFrom(settings);
+//    	m_InputPath.loadSettingsFrom(settings);
+//    	m_outfolder.loadSettingsFrom(settings);
+//    	m_IsPaired.loadSettingsFrom(settings);
+//    	m_threads.loadSettingsFrom(settings);
+//    	//m_interop.loadSettingsFrom(settings);
+//    	
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        // TODO: generated method stub
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//    	m_ToolPath.validateSettings(settings);
+//    	m_InputPath.validateSettings(settings);
+//    	m_outfolder.validateSettings(settings);
+//    	m_IsPaired.validateSettings(settings);
+//    	m_threads.validateSettings(settings);
+//    	//m_interop.validateSettings(settings);
+//    	
+//    }
     
     /**
      * {@inheritDoc}

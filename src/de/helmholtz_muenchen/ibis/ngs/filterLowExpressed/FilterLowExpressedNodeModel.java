@@ -51,16 +51,10 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      */
 	protected FilterLowExpressedNodeModel() {
 		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
-		this.init();
-	}
-	
-	@Override
-	public void init() {
-		super.init();
 		this.addSetting(SET_MODE);
 		this.addSetting(SET_KEEP_READS);
 		this.addSetting(SET_KEEP_FRACTION);
-		this.addSetting(SET_BOTH_SEP);
+		this.addSetting(SET_BOTH_SEP);;
 	}
 	
     /**

@@ -17,8 +17,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -120,6 +118,14 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     protected BcftoolsNodeModel() {
     
         super(1,1);
+        
+        addSetting(m_bcfmethod);
+   	 	addSetting(m_path2bcftools);
+   	 	addSetting(m_vcfsampleheader);
+   	 	addSetting(m_furtherOptions);
+	   	//Concat
+	   	addSetting(m_concat_outfile_type);
+	    addSetting(m_concat_overlap);
         
 //        m_bedfile.setEnabled(false);
 //        m_samplelist.setEnabled(false);
@@ -513,18 +519,18 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     
     
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	 m_bcfmethod.saveSettingsTo(settings);
-    	 m_path2bcftools.saveSettingsTo(settings);
-    	 m_vcfsampleheader.saveSettingsTo(settings);
-    	 m_furtherOptions.saveSettingsTo(settings);
-    	 //Concat
-    	 m_concat_outfile_type.saveSettingsTo(settings);
-    	 m_concat_overlap.saveSettingsTo(settings);
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	 m_bcfmethod.saveSettingsTo(settings);
+//    	 m_path2bcftools.saveSettingsTo(settings);
+//    	 m_vcfsampleheader.saveSettingsTo(settings);
+//    	 m_furtherOptions.saveSettingsTo(settings);
+//    	 //Concat
+//    	 m_concat_outfile_type.saveSettingsTo(settings);
+//    	 m_concat_overlap.saveSettingsTo(settings);
     	
  	   	//Call
 //         m_bedfile.saveSettingsTo(settings);
@@ -538,21 +544,21 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 //         m_ifbedfile.saveSettingsTo(settings);
          
         
-    }
+//    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	m_bcfmethod.loadSettingsFrom(settings);
-   	 	m_path2bcftools.loadSettingsFrom(settings);
-   	 	m_vcfsampleheader.loadSettingsFrom(settings);
-   	 	m_furtherOptions.loadSettingsFrom(settings);
-	   	//Concat
-	   	m_concat_outfile_type.loadSettingsFrom(settings);
-	   	m_concat_overlap.loadSettingsFrom(settings);
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	m_bcfmethod.loadSettingsFrom(settings);
+//   	 	m_path2bcftools.loadSettingsFrom(settings);
+//   	 	m_vcfsampleheader.loadSettingsFrom(settings);
+//   	 	m_furtherOptions.loadSettingsFrom(settings);
+//	   	//Concat
+//	   	m_concat_outfile_type.loadSettingsFrom(settings);
+//	   	m_concat_overlap.loadSettingsFrom(settings);
 	   	
 	   	//Call
 //    	m_bedfile.loadSettingsFrom(settings);
@@ -565,21 +571,21 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 //        m_snpcalling.loadSettingsFrom(settings);
 //        m_ifbedfile.loadSettingsFrom(settings);
 
-    }
+//    }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-   	 	m_bcfmethod.validateSettings(settings);
-   	 	m_path2bcftools.validateSettings(settings);
-   	 	m_vcfsampleheader.validateSettings(settings);
-   	 	m_furtherOptions.validateSettings(settings);
-	   	//Concat
-	   	m_concat_outfile_type.validateSettings(settings);
-	   	m_concat_overlap.validateSettings(settings);
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//   	 	m_bcfmethod.validateSettings(settings);
+//   	 	m_path2bcftools.validateSettings(settings);
+//   	 	m_vcfsampleheader.validateSettings(settings);
+//   	 	m_furtherOptions.validateSettings(settings);
+//	   	//Concat
+//	   	m_concat_outfile_type.validateSettings(settings);
+//	   	m_concat_overlap.validateSettings(settings);
    	 	
 	   	//Call
 //    	m_bedfile.validateSettings(settings);
@@ -592,7 +598,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 //        m_snpcalling.validateSettings(settings);
 //        m_ifbedfile.validateSettings(settings);
 
-    }
+//    }
     
     /**
      * {@inheritDoc}

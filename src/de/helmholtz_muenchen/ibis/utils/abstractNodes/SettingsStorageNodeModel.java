@@ -40,7 +40,7 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 	 * in order to save and load ModelSettings automatically
 	 * MUST BE CALLED IN CONSTRUCTOR explicitly! 
 	 */
-	public abstract void init();
+//	public abstract void init();
 	
 	public void addSetting(SettingsModel model) {
 		if(model != null) {

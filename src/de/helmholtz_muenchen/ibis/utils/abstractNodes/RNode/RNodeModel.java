@@ -70,10 +70,6 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		}
 		return("Rscript");
 	}
-	
-	// not used in childs of this class
-	@Override
-	public void init() {};
 
 
 	protected void prepareInputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{

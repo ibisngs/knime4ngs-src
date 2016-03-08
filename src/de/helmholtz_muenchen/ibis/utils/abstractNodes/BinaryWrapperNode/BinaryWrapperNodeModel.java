@@ -78,10 +78,11 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 		
 		this.catchStderr = catchStderr;
 		this.catchStdout = catchStdout;
+		init();
 	}
-	
 
 	public void init() {
+		super.init();
 		addSetting(SET_BINARY_PATH);
 		addSetting(SET_ADDITIONAL_PARAMETER);
 //		addSetting(SET_PARAMETER_FILE);

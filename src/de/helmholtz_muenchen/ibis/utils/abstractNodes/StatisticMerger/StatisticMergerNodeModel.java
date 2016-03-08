@@ -55,15 +55,7 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
      */
     protected StatisticMergerNodeModel() {
         super(0, 2);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	addSetting(SET_INPUT_FOLDER);
+        addSetting(SET_INPUT_FOLDER);
     	addSetting(SET_OUTPUT_FOLDER);
     	
     	// add only, if more than one module is there

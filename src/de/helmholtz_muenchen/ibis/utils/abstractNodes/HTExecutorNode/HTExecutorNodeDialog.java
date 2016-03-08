@@ -38,7 +38,6 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	protected final HashMap<SettingsModelString, String> model2pref = new HashMap<>();;
 	
 	protected HTExecutorNodeDialog() {
-		super(); 
 		
 		createNewGroup("HTE");
 		

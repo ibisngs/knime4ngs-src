@@ -60,15 +60,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
      */
     protected FeatureCountsMergerNodeModel() {
         super(1, 1);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	addSetting(SET_OUTPUT_FILE);
+        addSetting(SET_OUTPUT_FILE);
     	addSetting(SET_REMOVE_ENDING);
     	addSetting(SET_REMOVE_PATH);
     }

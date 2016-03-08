@@ -20,6 +20,7 @@ import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
@@ -30,7 +31,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  * 
  * @author Tim Jeske
  */
-public abstract class HTExecutorNodeModel extends NodeModel {
+public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(HTExecutorNodeModel.class);
 	
@@ -64,10 +65,17 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
 			PortType[] outPortTypes) {
 		super(inPortTypes, outPortTypes);
+		init();
 	}
 
 	protected HTExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts) {
 		super(nrInDataPorts, nrOutDataPorts);
+		init();
+	}
+	
+	public void init() {
+		addSetting(m_use_pref);
+		addSetting(threshold);
 	}
 	
 	private void recExecuteCommand(String[] command, ExecutionContext exec,
@@ -255,32 +263,32 @@ public abstract class HTExecutorNodeModel extends NodeModel {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveSettingsTo(final NodeSettingsWO settings) {
-		threshold.saveSettingsTo(settings);
-		m_use_pref.saveSettingsTo(settings);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		threshold.loadSettingsFrom(settings);
-		m_use_pref.loadSettingsFrom(settings);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void validateSettings(final NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		threshold.validateSettings(settings);
-		m_use_pref.validateSettings(settings);
-	}
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	@Override
+//	protected void saveSettingsTo(final NodeSettingsWO settings) {
+//		threshold.saveSettingsTo(settings);
+//		m_use_pref.saveSettingsTo(settings);
+//	}
+//
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	@Override
+//	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		threshold.loadSettingsFrom(settings);
+//		m_use_pref.loadSettingsFrom(settings);
+//	}
+//
+//	/**
+//	 * {@inheritDoc}
+//	 */
+//	@Override
+//	protected void validateSettings(final NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		threshold.validateSettings(settings);
+//		m_use_pref.validateSettings(settings);
+//	}
 }

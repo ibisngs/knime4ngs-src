@@ -60,18 +60,10 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
      */
     protected FileSelectorNodeModel() {
         super(0, 1);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-	@Override
-	public void init() {
-		addSetting(SET_FILE_DIR);
+        addSetting(SET_FILE_DIR);
 		addSetting(SET_FILE_FILE);
 		addSetting(SET_NAME_REGEX);
-	}
+    }
     
     /**
      * {@inheritDoc}
