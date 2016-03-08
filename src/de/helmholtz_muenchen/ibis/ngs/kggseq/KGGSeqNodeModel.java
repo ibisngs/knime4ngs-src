@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -131,6 +129,33 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
      */
     protected KGGSeqNodeModel() {
         super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(1));
+        
+        addSetting(m_BUILDVER);
+        addSetting(m_CANDIDATE_GENES);
+        addSetting(m_CANDIDATE_PATHWAYS);
+        addSetting(m_CANDIDATE_PPI);
+        addSetting(m_COMPOSITESUBJECTID);
+        addSetting(m_DISEASE_CAUSING_PRED);
+        addSetting(m_FILTER_COMMON);
+        addSetting(m_GENE_FEATURES);
+        addSetting(m_GENOTYPE_FILTER);
+        addSetting(m_GTY_AF_ALT);
+        addSetting(m_GTY_AF_HET);
+        addSetting(m_GTY_AF_REF);
+        addSetting(m_GTY_DP);
+        addSetting(m_GTY_QUAL);
+        addSetting(m_GTY_SEC_PL);
+        addSetting(m_IGNORE_HOMO);
+        addSetting(m_INFILE);
+        addSetting(m_KGGSEQ);
+        addSetting(m_OMIM_ANNO);
+        addSetting(m_OUTFORMAT);
+        addSetting(m_OUTPREFIX);
+        addSetting(m_PEDFILE);
+        addSetting(m_PUBMED);
+        addSetting(m_SEQ_MQ);
+        addSetting(m_SEQ_QUAL);
+        addSetting(m_SEQ_SB);
     }
 
     /**
@@ -263,106 +288,106 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-         m_BUILDVER.saveSettingsTo(settings);
-         m_CANDIDATE_GENES.saveSettingsTo(settings);
-         m_CANDIDATE_PATHWAYS.saveSettingsTo(settings);
-         m_CANDIDATE_PPI.saveSettingsTo(settings);
-         m_COMPOSITESUBJECTID.saveSettingsTo(settings);
-         m_DISEASE_CAUSING_PRED.saveSettingsTo(settings);
-         m_FILTER_COMMON.saveSettingsTo(settings);
-         m_GENE_FEATURES.saveSettingsTo(settings);
-         m_GENOTYPE_FILTER.saveSettingsTo(settings);
-         m_GTY_AF_ALT.saveSettingsTo(settings);
-         m_GTY_AF_HET.saveSettingsTo(settings);
-         m_GTY_AF_REF.saveSettingsTo(settings);
-         m_GTY_DP.saveSettingsTo(settings);
-         m_GTY_QUAL.saveSettingsTo(settings);
-         m_GTY_SEC_PL.saveSettingsTo(settings);
-         m_IGNORE_HOMO.saveSettingsTo(settings);
-         m_INFILE.saveSettingsTo(settings);
-         m_KGGSEQ.saveSettingsTo(settings);
-         m_OMIM_ANNO.saveSettingsTo(settings);
-         m_OUTFORMAT.saveSettingsTo(settings);
-         m_OUTPREFIX.saveSettingsTo(settings);
-         m_PEDFILE.saveSettingsTo(settings);
-         m_PUBMED.saveSettingsTo(settings);
-         m_SEQ_MQ.saveSettingsTo(settings);
-         m_SEQ_QUAL.saveSettingsTo(settings);
-         m_SEQ_SB.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_BUILDVER.loadSettingsFrom(settings);
-        m_CANDIDATE_GENES.loadSettingsFrom(settings);
-        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
-        m_CANDIDATE_PPI.loadSettingsFrom(settings);
-        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
-        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
-        m_FILTER_COMMON.loadSettingsFrom(settings);
-        m_GENE_FEATURES.loadSettingsFrom(settings);
-        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
-        m_GTY_AF_ALT.loadSettingsFrom(settings);
-        m_GTY_AF_HET.loadSettingsFrom(settings);
-        m_GTY_AF_REF.loadSettingsFrom(settings);
-        m_GTY_DP.loadSettingsFrom(settings);
-        m_GTY_QUAL.loadSettingsFrom(settings);
-        m_GTY_SEC_PL.loadSettingsFrom(settings);
-        m_IGNORE_HOMO.loadSettingsFrom(settings);
-        m_INFILE.loadSettingsFrom(settings);
-        m_KGGSEQ.loadSettingsFrom(settings);
-        m_OMIM_ANNO.loadSettingsFrom(settings);
-        m_OUTFORMAT.loadSettingsFrom(settings);
-        m_OUTPREFIX.loadSettingsFrom(settings);
-        m_PEDFILE.loadSettingsFrom(settings);
-        m_PUBMED.loadSettingsFrom(settings);
-        m_SEQ_MQ.loadSettingsFrom(settings);
-        m_SEQ_QUAL.loadSettingsFrom(settings);
-        m_SEQ_SB.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_BUILDVER.loadSettingsFrom(settings);
-        m_CANDIDATE_GENES.loadSettingsFrom(settings);
-        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
-        m_CANDIDATE_PPI.loadSettingsFrom(settings);
-        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
-        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
-        m_FILTER_COMMON.loadSettingsFrom(settings);
-        m_GENE_FEATURES.loadSettingsFrom(settings);
-        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
-        m_GTY_AF_ALT.loadSettingsFrom(settings);
-        m_GTY_AF_HET.loadSettingsFrom(settings);
-        m_GTY_AF_REF.loadSettingsFrom(settings);
-        m_GTY_DP.loadSettingsFrom(settings);
-        m_GTY_QUAL.loadSettingsFrom(settings);
-        m_GTY_SEC_PL.loadSettingsFrom(settings);
-        m_IGNORE_HOMO.loadSettingsFrom(settings);
-        m_INFILE.loadSettingsFrom(settings);
-        m_KGGSEQ.loadSettingsFrom(settings);
-        m_OMIM_ANNO.loadSettingsFrom(settings);
-        m_OUTFORMAT.loadSettingsFrom(settings);
-        m_OUTPREFIX.loadSettingsFrom(settings);
-        m_PEDFILE.loadSettingsFrom(settings);
-        m_PUBMED.loadSettingsFrom(settings);
-        m_SEQ_MQ.loadSettingsFrom(settings);
-        m_SEQ_QUAL.loadSettingsFrom(settings);
-        m_SEQ_SB.loadSettingsFrom(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//         m_BUILDVER.saveSettingsTo(settings);
+//         m_CANDIDATE_GENES.saveSettingsTo(settings);
+//         m_CANDIDATE_PATHWAYS.saveSettingsTo(settings);
+//         m_CANDIDATE_PPI.saveSettingsTo(settings);
+//         m_COMPOSITESUBJECTID.saveSettingsTo(settings);
+//         m_DISEASE_CAUSING_PRED.saveSettingsTo(settings);
+//         m_FILTER_COMMON.saveSettingsTo(settings);
+//         m_GENE_FEATURES.saveSettingsTo(settings);
+//         m_GENOTYPE_FILTER.saveSettingsTo(settings);
+//         m_GTY_AF_ALT.saveSettingsTo(settings);
+//         m_GTY_AF_HET.saveSettingsTo(settings);
+//         m_GTY_AF_REF.saveSettingsTo(settings);
+//         m_GTY_DP.saveSettingsTo(settings);
+//         m_GTY_QUAL.saveSettingsTo(settings);
+//         m_GTY_SEC_PL.saveSettingsTo(settings);
+//         m_IGNORE_HOMO.saveSettingsTo(settings);
+//         m_INFILE.saveSettingsTo(settings);
+//         m_KGGSEQ.saveSettingsTo(settings);
+//         m_OMIM_ANNO.saveSettingsTo(settings);
+//         m_OUTFORMAT.saveSettingsTo(settings);
+//         m_OUTPREFIX.saveSettingsTo(settings);
+//         m_PEDFILE.saveSettingsTo(settings);
+//         m_PUBMED.saveSettingsTo(settings);
+//         m_SEQ_MQ.saveSettingsTo(settings);
+//         m_SEQ_QUAL.saveSettingsTo(settings);
+//         m_SEQ_SB.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_BUILDVER.loadSettingsFrom(settings);
+//        m_CANDIDATE_GENES.loadSettingsFrom(settings);
+//        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
+//        m_CANDIDATE_PPI.loadSettingsFrom(settings);
+//        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
+//        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
+//        m_FILTER_COMMON.loadSettingsFrom(settings);
+//        m_GENE_FEATURES.loadSettingsFrom(settings);
+//        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
+//        m_GTY_AF_ALT.loadSettingsFrom(settings);
+//        m_GTY_AF_HET.loadSettingsFrom(settings);
+//        m_GTY_AF_REF.loadSettingsFrom(settings);
+//        m_GTY_DP.loadSettingsFrom(settings);
+//        m_GTY_QUAL.loadSettingsFrom(settings);
+//        m_GTY_SEC_PL.loadSettingsFrom(settings);
+//        m_IGNORE_HOMO.loadSettingsFrom(settings);
+//        m_INFILE.loadSettingsFrom(settings);
+//        m_KGGSEQ.loadSettingsFrom(settings);
+//        m_OMIM_ANNO.loadSettingsFrom(settings);
+//        m_OUTFORMAT.loadSettingsFrom(settings);
+//        m_OUTPREFIX.loadSettingsFrom(settings);
+//        m_PEDFILE.loadSettingsFrom(settings);
+//        m_PUBMED.loadSettingsFrom(settings);
+//        m_SEQ_MQ.loadSettingsFrom(settings);
+//        m_SEQ_QUAL.loadSettingsFrom(settings);
+//        m_SEQ_SB.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_BUILDVER.loadSettingsFrom(settings);
+//        m_CANDIDATE_GENES.loadSettingsFrom(settings);
+//        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
+//        m_CANDIDATE_PPI.loadSettingsFrom(settings);
+//        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
+//        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
+//        m_FILTER_COMMON.loadSettingsFrom(settings);
+//        m_GENE_FEATURES.loadSettingsFrom(settings);
+//        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
+//        m_GTY_AF_ALT.loadSettingsFrom(settings);
+//        m_GTY_AF_HET.loadSettingsFrom(settings);
+//        m_GTY_AF_REF.loadSettingsFrom(settings);
+//        m_GTY_DP.loadSettingsFrom(settings);
+//        m_GTY_QUAL.loadSettingsFrom(settings);
+//        m_GTY_SEC_PL.loadSettingsFrom(settings);
+//        m_IGNORE_HOMO.loadSettingsFrom(settings);
+//        m_INFILE.loadSettingsFrom(settings);
+//        m_KGGSEQ.loadSettingsFrom(settings);
+//        m_OMIM_ANNO.loadSettingsFrom(settings);
+//        m_OUTFORMAT.loadSettingsFrom(settings);
+//        m_OUTPREFIX.loadSettingsFrom(settings);
+//        m_PEDFILE.loadSettingsFrom(settings);
+//        m_PUBMED.loadSettingsFrom(settings);
+//        m_SEQ_MQ.loadSettingsFrom(settings);
+//        m_SEQ_QUAL.loadSettingsFrom(settings);
+//        m_SEQ_SB.loadSettingsFrom(settings);
+//    }
     
     /**
      * {@inheritDoc}

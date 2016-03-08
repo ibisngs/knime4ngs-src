@@ -8,8 +8,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.CheckUtils;
@@ -62,6 +60,11 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 
     	 //Specify the amount of input and output ports needed.
     	super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1));
+    	addSetting(m_GENOTYPEMERGEOPTION);
+		addSetting(m_INPUT1_TAG);
+		addSetting(m_INPUT2_TAG);
+		addSetting(m_PRIORITIZE);
+		addSetting(m_OUTFOLDER);
     }
 
     
@@ -140,37 +143,37 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	}
 
 
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
-		m_INPUT1_TAG.saveSettingsTo(settings);
-		m_INPUT2_TAG.saveSettingsTo(settings);
-		m_PRIORITIZE.saveSettingsTo(settings);
-		m_OUTFOLDER.saveSettingsTo(settings);
-		
-	}
-
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
-		m_INPUT1_TAG.loadSettingsFrom(settings);
-		m_INPUT2_TAG.loadSettingsFrom(settings);
-		m_PRIORITIZE.loadSettingsFrom(settings);
-		m_OUTFOLDER.loadSettingsFrom(settings);
-	}
-
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_GENOTYPEMERGEOPTION.validateSettings(settings);
-		m_INPUT1_TAG.validateSettings(settings);
-		m_INPUT2_TAG.validateSettings(settings);
-		m_PRIORITIZE.validateSettings(settings);
-		m_OUTFOLDER.validateSettings(settings);
-	}
+//	@Override
+//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
+//		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
+//		m_INPUT1_TAG.saveSettingsTo(settings);
+//		m_INPUT2_TAG.saveSettingsTo(settings);
+//		m_PRIORITIZE.saveSettingsTo(settings);
+//		m_OUTFOLDER.saveSettingsTo(settings);
+//		
+//	}
+//
+//
+//	@Override
+//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
+//		m_INPUT1_TAG.loadSettingsFrom(settings);
+//		m_INPUT2_TAG.loadSettingsFrom(settings);
+//		m_PRIORITIZE.loadSettingsFrom(settings);
+//		m_OUTFOLDER.loadSettingsFrom(settings);
+//	}
+//
+//
+//	@Override
+//	protected void validateExtraSettings(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_GENOTYPEMERGEOPTION.validateSettings(settings);
+//		m_INPUT1_TAG.validateSettings(settings);
+//		m_INPUT2_TAG.validateSettings(settings);
+//		m_PRIORITIZE.validateSettings(settings);
+//		m_OUTFOLDER.validateSettings(settings);
+//	}
 
 
 	@Override

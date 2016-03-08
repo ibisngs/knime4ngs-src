@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -131,6 +129,34 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected VQSRNodeModel() {
     
         super(1, 1);
+        
+        addSetting(m_AN);
+        addSetting(m_GATK);
+        addSetting(m_MODE);
+        addSetting(m_NT);
+        addSetting(m_GAUSSIANS);
+        addSetting(m_REF_GENOME);
+        addSetting(m_TRANCHE);
+        
+        addSetting(m_RESOURCES_BOOLEAN_1);
+        addSetting(m_RESOURCES_BOOLEAN_2);
+        addSetting(m_RESOURCES_BOOLEAN_3);
+        addSetting(m_RESOURCES_BOOLEAN_4);
+        addSetting(m_RESOURCES_BOOLEAN_5);
+        addSetting(m_RESOURCES_FILE_1);
+        addSetting(m_RESOURCES_FILE_2);
+        addSetting(m_RESOURCES_FILE_3);
+        addSetting(m_RESOURCES_FILE_4);
+        addSetting(m_RESOURCES_FILE_5);
+        addSetting(m_RESOURCES_STRING_1);
+        addSetting(m_RESOURCES_STRING_2);
+        addSetting(m_RESOURCES_STRING_3);
+        addSetting(m_RESOURCES_STRING_4);
+        addSetting(m_RESOURCES_STRING_5);
+        addSetting(m_TS_FILTER);
+        
+        addSetting(m_OPT_VAR_RECAL);
+        addSetting(m_OPT_APPLY_RECAL);
     }
 
     /**
@@ -371,113 +397,113 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	super.saveSettingsTo(settings);
-         m_AN.saveSettingsTo(settings);
-         m_GATK.saveSettingsTo(settings);
-         m_MODE.saveSettingsTo(settings);
-         m_NT.saveSettingsTo(settings);
-         m_GAUSSIANS.saveSettingsTo(settings);
-         m_REF_GENOME.saveSettingsTo(settings);
-         m_TRANCHE.saveSettingsTo(settings);
-         
-         m_RESOURCES_BOOLEAN_1.saveSettingsTo(settings);
-         m_RESOURCES_BOOLEAN_2.saveSettingsTo(settings);
-         m_RESOURCES_BOOLEAN_3.saveSettingsTo(settings);
-         m_RESOURCES_BOOLEAN_4.saveSettingsTo(settings);
-         m_RESOURCES_BOOLEAN_5.saveSettingsTo(settings);
-         m_RESOURCES_FILE_1.saveSettingsTo(settings);
-         m_RESOURCES_FILE_2.saveSettingsTo(settings);
-         m_RESOURCES_FILE_3.saveSettingsTo(settings);
-         m_RESOURCES_FILE_4.saveSettingsTo(settings);
-         m_RESOURCES_FILE_5.saveSettingsTo(settings);
-         m_RESOURCES_STRING_1.saveSettingsTo(settings);
-         m_RESOURCES_STRING_2.saveSettingsTo(settings);
-         m_RESOURCES_STRING_3.saveSettingsTo(settings);
-         m_RESOURCES_STRING_4.saveSettingsTo(settings);
-         m_RESOURCES_STRING_5.saveSettingsTo(settings);
-         m_TS_FILTER.saveSettingsTo(settings);
-         
-         m_OPT_VAR_RECAL.saveSettingsTo(settings);
-         m_OPT_APPLY_RECAL.saveSettingsTo(settings);
-        
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.loadValidatedSettingsFrom(settings);
-        m_AN.loadSettingsFrom(settings);
-        m_GATK.loadSettingsFrom(settings);
-        m_MODE.loadSettingsFrom(settings);
-        m_NT.loadSettingsFrom(settings);
-        m_GAUSSIANS.loadSettingsFrom(settings);
-        m_REF_GENOME.loadSettingsFrom(settings);
-        m_TRANCHE.loadSettingsFrom(settings);
-        
-        m_RESOURCES_BOOLEAN_1.loadSettingsFrom(settings);
-        m_RESOURCES_BOOLEAN_2.loadSettingsFrom(settings);
-        m_RESOURCES_BOOLEAN_3.loadSettingsFrom(settings);
-        m_RESOURCES_BOOLEAN_4.loadSettingsFrom(settings);
-        m_RESOURCES_BOOLEAN_5.loadSettingsFrom(settings);
-        m_RESOURCES_FILE_1.loadSettingsFrom(settings);
-        m_RESOURCES_FILE_2.loadSettingsFrom(settings);
-        m_RESOURCES_FILE_3.loadSettingsFrom(settings);
-        m_RESOURCES_FILE_4.loadSettingsFrom(settings);
-        m_RESOURCES_FILE_5.loadSettingsFrom(settings);
-        m_RESOURCES_STRING_1.loadSettingsFrom(settings);
-        m_RESOURCES_STRING_2.loadSettingsFrom(settings);
-        m_RESOURCES_STRING_3.loadSettingsFrom(settings);
-        m_RESOURCES_STRING_4.loadSettingsFrom(settings);
-        m_RESOURCES_STRING_5.loadSettingsFrom(settings);
-        m_TS_FILTER.loadSettingsFrom(settings);
-        
-        m_OPT_VAR_RECAL.loadSettingsFrom(settings);
-        m_OPT_APPLY_RECAL.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.validateSettings(settings);
-        m_AN.validateSettings(settings);
-        m_GATK.validateSettings(settings);
-        m_MODE.validateSettings(settings);
-        m_NT.validateSettings(settings);
-        m_GAUSSIANS.validateSettings(settings);
-        m_REF_GENOME.validateSettings(settings);
-        m_TRANCHE.validateSettings(settings);
-        
-        m_RESOURCES_BOOLEAN_1.validateSettings(settings);
-        m_RESOURCES_BOOLEAN_2.validateSettings(settings);
-        m_RESOURCES_BOOLEAN_3.validateSettings(settings);
-        m_RESOURCES_BOOLEAN_4.validateSettings(settings);
-        m_RESOURCES_BOOLEAN_5.validateSettings(settings);
-        m_RESOURCES_FILE_1.validateSettings(settings);
-        m_RESOURCES_FILE_2.validateSettings(settings);
-        m_RESOURCES_FILE_3.validateSettings(settings);
-        m_RESOURCES_FILE_4.validateSettings(settings);
-        m_RESOURCES_FILE_5.validateSettings(settings);
-        m_RESOURCES_STRING_1.validateSettings(settings);
-        m_RESOURCES_STRING_2.validateSettings(settings);
-        m_RESOURCES_STRING_3.validateSettings(settings);
-        m_RESOURCES_STRING_4.validateSettings(settings);
-        m_RESOURCES_STRING_5.validateSettings(settings);
-        m_TS_FILTER.validateSettings(settings);
-        
-        m_OPT_VAR_RECAL.validateSettings(settings);
-        m_OPT_APPLY_RECAL.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	super.saveSettingsTo(settings);
+//         m_AN.saveSettingsTo(settings);
+//         m_GATK.saveSettingsTo(settings);
+//         m_MODE.saveSettingsTo(settings);
+//         m_NT.saveSettingsTo(settings);
+//         m_GAUSSIANS.saveSettingsTo(settings);
+//         m_REF_GENOME.saveSettingsTo(settings);
+//         m_TRANCHE.saveSettingsTo(settings);
+//         
+//         m_RESOURCES_BOOLEAN_1.saveSettingsTo(settings);
+//         m_RESOURCES_BOOLEAN_2.saveSettingsTo(settings);
+//         m_RESOURCES_BOOLEAN_3.saveSettingsTo(settings);
+//         m_RESOURCES_BOOLEAN_4.saveSettingsTo(settings);
+//         m_RESOURCES_BOOLEAN_5.saveSettingsTo(settings);
+//         m_RESOURCES_FILE_1.saveSettingsTo(settings);
+//         m_RESOURCES_FILE_2.saveSettingsTo(settings);
+//         m_RESOURCES_FILE_3.saveSettingsTo(settings);
+//         m_RESOURCES_FILE_4.saveSettingsTo(settings);
+//         m_RESOURCES_FILE_5.saveSettingsTo(settings);
+//         m_RESOURCES_STRING_1.saveSettingsTo(settings);
+//         m_RESOURCES_STRING_2.saveSettingsTo(settings);
+//         m_RESOURCES_STRING_3.saveSettingsTo(settings);
+//         m_RESOURCES_STRING_4.saveSettingsTo(settings);
+//         m_RESOURCES_STRING_5.saveSettingsTo(settings);
+//         m_TS_FILTER.saveSettingsTo(settings);
+//         
+//         m_OPT_VAR_RECAL.saveSettingsTo(settings);
+//         m_OPT_APPLY_RECAL.saveSettingsTo(settings);
+//        
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.loadValidatedSettingsFrom(settings);
+//        m_AN.loadSettingsFrom(settings);
+//        m_GATK.loadSettingsFrom(settings);
+//        m_MODE.loadSettingsFrom(settings);
+//        m_NT.loadSettingsFrom(settings);
+//        m_GAUSSIANS.loadSettingsFrom(settings);
+//        m_REF_GENOME.loadSettingsFrom(settings);
+//        m_TRANCHE.loadSettingsFrom(settings);
+//        
+//        m_RESOURCES_BOOLEAN_1.loadSettingsFrom(settings);
+//        m_RESOURCES_BOOLEAN_2.loadSettingsFrom(settings);
+//        m_RESOURCES_BOOLEAN_3.loadSettingsFrom(settings);
+//        m_RESOURCES_BOOLEAN_4.loadSettingsFrom(settings);
+//        m_RESOURCES_BOOLEAN_5.loadSettingsFrom(settings);
+//        m_RESOURCES_FILE_1.loadSettingsFrom(settings);
+//        m_RESOURCES_FILE_2.loadSettingsFrom(settings);
+//        m_RESOURCES_FILE_3.loadSettingsFrom(settings);
+//        m_RESOURCES_FILE_4.loadSettingsFrom(settings);
+//        m_RESOURCES_FILE_5.loadSettingsFrom(settings);
+//        m_RESOURCES_STRING_1.loadSettingsFrom(settings);
+//        m_RESOURCES_STRING_2.loadSettingsFrom(settings);
+//        m_RESOURCES_STRING_3.loadSettingsFrom(settings);
+//        m_RESOURCES_STRING_4.loadSettingsFrom(settings);
+//        m_RESOURCES_STRING_5.loadSettingsFrom(settings);
+//        m_TS_FILTER.loadSettingsFrom(settings);
+//        
+//        m_OPT_VAR_RECAL.loadSettingsFrom(settings);
+//        m_OPT_APPLY_RECAL.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.validateSettings(settings);
+//        m_AN.validateSettings(settings);
+//        m_GATK.validateSettings(settings);
+//        m_MODE.validateSettings(settings);
+//        m_NT.validateSettings(settings);
+//        m_GAUSSIANS.validateSettings(settings);
+//        m_REF_GENOME.validateSettings(settings);
+//        m_TRANCHE.validateSettings(settings);
+//        
+//        m_RESOURCES_BOOLEAN_1.validateSettings(settings);
+//        m_RESOURCES_BOOLEAN_2.validateSettings(settings);
+//        m_RESOURCES_BOOLEAN_3.validateSettings(settings);
+//        m_RESOURCES_BOOLEAN_4.validateSettings(settings);
+//        m_RESOURCES_BOOLEAN_5.validateSettings(settings);
+//        m_RESOURCES_FILE_1.validateSettings(settings);
+//        m_RESOURCES_FILE_2.validateSettings(settings);
+//        m_RESOURCES_FILE_3.validateSettings(settings);
+//        m_RESOURCES_FILE_4.validateSettings(settings);
+//        m_RESOURCES_FILE_5.validateSettings(settings);
+//        m_RESOURCES_STRING_1.validateSettings(settings);
+//        m_RESOURCES_STRING_2.validateSettings(settings);
+//        m_RESOURCES_STRING_3.validateSettings(settings);
+//        m_RESOURCES_STRING_4.validateSettings(settings);
+//        m_RESOURCES_STRING_5.validateSettings(settings);
+//        m_TS_FILTER.validateSettings(settings);
+//        
+//        m_OPT_VAR_RECAL.validateSettings(settings);
+//        m_OPT_APPLY_RECAL.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

@@ -1,7 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller;
 
-
-
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,8 +7,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -66,26 +62,6 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 	@Override
 	protected String getOutfile() {
 		return this.OUTFILE;
-	}
-
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		
-		
-	}
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-	
-		
-	}
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		
-		
 	}
 
 	@Override

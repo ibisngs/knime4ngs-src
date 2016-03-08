@@ -8,8 +8,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 
@@ -78,6 +76,21 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
      */
     protected GATKVariantFiltrationNodeModel() {
         super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        
+        addSetting(m_DP);
+        addSetting(m_GQ);
+        addSetting(m_FS);
+        addSetting(m_HS);
+        addSetting(m_MQ);
+        addSetting(m_MQR);
+        addSetting(m_QD);
+        addSetting(m_QUAL);
+        addSetting(m_RPR);
+        addSetting(m_INFOFilterString);
+        addSetting(m_INFOFilterName);
+        addSetting(m_FORMATFilterString);
+        addSetting(m_FORMATFilterName);
+        addSetting(m_NOCALL);
     }
 
     /**
@@ -181,70 +194,70 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	return StringUtils.join(command, " ");
 	}
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
-         m_DP.saveSettingsTo(settings);
-         m_GQ.saveSettingsTo(settings);
-         m_FS.saveSettingsTo(settings);
-         m_HS.saveSettingsTo(settings);
-         m_MQ.saveSettingsTo(settings);
-         m_MQR.saveSettingsTo(settings);
-         m_QD.saveSettingsTo(settings);
-         m_QUAL.saveSettingsTo(settings);
-         m_RPR.saveSettingsTo(settings);
-         m_INFOFilterString.saveSettingsTo(settings);
-         m_INFOFilterName.saveSettingsTo(settings);
-         m_FORMATFilterString.saveSettingsTo(settings);
-         m_FORMATFilterName.saveSettingsTo(settings);
-         m_NOCALL.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_DP.loadSettingsFrom(settings);
-        m_GQ.loadSettingsFrom(settings);
-        m_FS.loadSettingsFrom(settings);
-        m_HS.loadSettingsFrom(settings);
-        m_MQ.loadSettingsFrom(settings);
-        m_MQR.loadSettingsFrom(settings);
-        m_QD.loadSettingsFrom(settings);
-        m_QUAL.loadSettingsFrom(settings);
-        m_RPR.loadSettingsFrom(settings);
-        m_INFOFilterString.loadSettingsFrom(settings);
-        m_INFOFilterName.loadSettingsFrom(settings);
-        m_FORMATFilterString.loadSettingsFrom(settings);
-        m_FORMATFilterName.loadSettingsFrom(settings);
-        m_NOCALL.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateExtraSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_DP.validateSettings(settings);
-        m_GQ.validateSettings(settings);
-        m_FS.validateSettings(settings);
-        m_HS.validateSettings(settings);
-        m_MQ.validateSettings(settings);
-        m_MQR.validateSettings(settings);
-        m_QD.validateSettings(settings);
-        m_QUAL.validateSettings(settings);
-        m_RPR.validateSettings(settings);
-        m_INFOFilterString.validateSettings(settings);
-        m_INFOFilterName.validateSettings(settings);
-        m_FORMATFilterString.validateSettings(settings);
-        m_FORMATFilterName.validateSettings(settings);
-        m_NOCALL.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
+//         m_DP.saveSettingsTo(settings);
+//         m_GQ.saveSettingsTo(settings);
+//         m_FS.saveSettingsTo(settings);
+//         m_HS.saveSettingsTo(settings);
+//         m_MQ.saveSettingsTo(settings);
+//         m_MQR.saveSettingsTo(settings);
+//         m_QD.saveSettingsTo(settings);
+//         m_QUAL.saveSettingsTo(settings);
+//         m_RPR.saveSettingsTo(settings);
+//         m_INFOFilterString.saveSettingsTo(settings);
+//         m_INFOFilterName.saveSettingsTo(settings);
+//         m_FORMATFilterString.saveSettingsTo(settings);
+//         m_FORMATFilterName.saveSettingsTo(settings);
+//         m_NOCALL.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_DP.loadSettingsFrom(settings);
+//        m_GQ.loadSettingsFrom(settings);
+//        m_FS.loadSettingsFrom(settings);
+//        m_HS.loadSettingsFrom(settings);
+//        m_MQ.loadSettingsFrom(settings);
+//        m_MQR.loadSettingsFrom(settings);
+//        m_QD.loadSettingsFrom(settings);
+//        m_QUAL.loadSettingsFrom(settings);
+//        m_RPR.loadSettingsFrom(settings);
+//        m_INFOFilterString.loadSettingsFrom(settings);
+//        m_INFOFilterName.loadSettingsFrom(settings);
+//        m_FORMATFilterString.loadSettingsFrom(settings);
+//        m_FORMATFilterName.loadSettingsFrom(settings);
+//        m_NOCALL.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateExtraSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_DP.validateSettings(settings);
+//        m_GQ.validateSettings(settings);
+//        m_FS.validateSettings(settings);
+//        m_HS.validateSettings(settings);
+//        m_MQ.validateSettings(settings);
+//        m_MQR.validateSettings(settings);
+//        m_QD.validateSettings(settings);
+//        m_QUAL.validateSettings(settings);
+//        m_RPR.validateSettings(settings);
+//        m_INFOFilterString.validateSettings(settings);
+//        m_INFOFilterName.validateSettings(settings);
+//        m_FORMATFilterString.validateSettings(settings);
+//        m_FORMATFilterName.validateSettings(settings);
+//        m_NOCALL.validateSettings(settings);
+//    }
 
 	@Override
 	protected String getCommandWalker() {

@@ -10,8 +10,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -96,6 +94,27 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
     protected VCFutilsNodeModel() {
     	
         super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0));
+        
+    	addSetting(m_adjacentgaps);
+    	addSetting(m_baseqpval);
+    	addSetting(m_enddistpval);
+    	addSetting(m_gapfilter);
+    	addSetting(m_hapmapfile);
+    	addSetting(m_hwepval);
+    	addSetting(m_indelfw);
+    	addSetting(m_mapqpval);
+    	addSetting(m_maxreaddepth);
+    	addSetting(m_minaltbase);
+    	addSetting(m_minreaddepth);
+    	addSetting(m_minrms);
+    	addSetting(m_printfiltered);
+    	addSetting(m_qstatusref);
+    	addSetting(m_refvcffile);
+    	addSetting(m_snpfile);
+    	addSetting(m_strandpval);
+    	addSetting(m_utility);
+    	addSetting(m_vcf);
+    	addSetting(m_vcffile);
         
         m_qstatusref.setEnabled(false);
         m_refvcffile.setEnabled(false);
@@ -397,100 +416,100 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
         return new DataTableSpec[]{};
     }
 
-	/**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-    	m_adjacentgaps.saveSettingsTo(settings);
-    	m_baseqpval.saveSettingsTo(settings);
-    	m_enddistpval.saveSettingsTo(settings);
-    	m_gapfilter.saveSettingsTo(settings);
-    	m_hapmapfile.saveSettingsTo(settings);
-    	m_hwepval.saveSettingsTo(settings);
-    	m_indelfw.saveSettingsTo(settings);
-    	m_mapqpval.saveSettingsTo(settings);
-    	m_maxreaddepth.saveSettingsTo(settings);
-    	m_minaltbase.saveSettingsTo(settings);
-    	m_minreaddepth.saveSettingsTo(settings);
-    	m_minrms.saveSettingsTo(settings);
-    	m_printfiltered.saveSettingsTo(settings);
-    	m_qstatusref.saveSettingsTo(settings);
-    	m_refvcffile.saveSettingsTo(settings);
-    	m_snpfile.saveSettingsTo(settings);
-    	m_strandpval.saveSettingsTo(settings);
-    	m_utility.saveSettingsTo(settings);
-    	m_vcf.saveSettingsTo(settings);
-    	m_vcffile.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_adjacentgaps.loadSettingsFrom(settings);
-    	m_baseqpval.loadSettingsFrom(settings);
-    	m_enddistpval.loadSettingsFrom(settings);
-    	m_gapfilter.loadSettingsFrom(settings);
-    	m_hapmapfile.loadSettingsFrom(settings);
-    	m_hwepval.loadSettingsFrom(settings);
-    	m_indelfw.loadSettingsFrom(settings);
-    	m_mapqpval.loadSettingsFrom(settings);
-    	m_maxreaddepth.loadSettingsFrom(settings);
-    	m_minaltbase.loadSettingsFrom(settings);
-    	m_minreaddepth.loadSettingsFrom(settings);
-    	m_minrms.loadSettingsFrom(settings);
-    	m_printfiltered.loadSettingsFrom(settings);
-    	m_qstatusref.loadSettingsFrom(settings);
-    	m_refvcffile.loadSettingsFrom(settings);
-    	m_snpfile.loadSettingsFrom(settings);
-    	m_strandpval.loadSettingsFrom(settings);
-    	m_utility.loadSettingsFrom(settings);
-    	m_vcf.loadSettingsFrom(settings);
-    	m_vcffile.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-    	m_adjacentgaps.validateSettings(settings);
-    	m_baseqpval.validateSettings(settings);
-    	m_enddistpval.validateSettings(settings);
-    	m_gapfilter.validateSettings(settings);
-    	m_hapmapfile.validateSettings(settings);
-    	m_hwepval.validateSettings(settings);
-    	m_indelfw.validateSettings(settings);
-    	m_mapqpval.validateSettings(settings);
-    	m_maxreaddepth.validateSettings(settings);
-    	m_minaltbase.validateSettings(settings);
-    	m_minreaddepth.validateSettings(settings);
-    	m_minrms.validateSettings(settings);
-    	m_printfiltered.validateSettings(settings);
-    	m_qstatusref.validateSettings(settings);
-    	m_refvcffile.validateSettings(settings);
-    	m_snpfile.validateSettings(settings);
-    	m_strandpval.validateSettings(settings);
-    	m_utility.validateSettings(settings);
-    	m_vcf.validateSettings(settings);
-    	m_vcffile.validateSettings(settings);
-    }
+//	/**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_adjacentgaps.saveSettingsTo(settings);
+//    	m_baseqpval.saveSettingsTo(settings);
+//    	m_enddistpval.saveSettingsTo(settings);
+//    	m_gapfilter.saveSettingsTo(settings);
+//    	m_hapmapfile.saveSettingsTo(settings);
+//    	m_hwepval.saveSettingsTo(settings);
+//    	m_indelfw.saveSettingsTo(settings);
+//    	m_mapqpval.saveSettingsTo(settings);
+//    	m_maxreaddepth.saveSettingsTo(settings);
+//    	m_minaltbase.saveSettingsTo(settings);
+//    	m_minreaddepth.saveSettingsTo(settings);
+//    	m_minrms.saveSettingsTo(settings);
+//    	m_printfiltered.saveSettingsTo(settings);
+//    	m_qstatusref.saveSettingsTo(settings);
+//    	m_refvcffile.saveSettingsTo(settings);
+//    	m_snpfile.saveSettingsTo(settings);
+//    	m_strandpval.saveSettingsTo(settings);
+//    	m_utility.saveSettingsTo(settings);
+//    	m_vcf.saveSettingsTo(settings);
+//    	m_vcffile.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_adjacentgaps.loadSettingsFrom(settings);
+//    	m_baseqpval.loadSettingsFrom(settings);
+//    	m_enddistpval.loadSettingsFrom(settings);
+//    	m_gapfilter.loadSettingsFrom(settings);
+//    	m_hapmapfile.loadSettingsFrom(settings);
+//    	m_hwepval.loadSettingsFrom(settings);
+//    	m_indelfw.loadSettingsFrom(settings);
+//    	m_mapqpval.loadSettingsFrom(settings);
+//    	m_maxreaddepth.loadSettingsFrom(settings);
+//    	m_minaltbase.loadSettingsFrom(settings);
+//    	m_minreaddepth.loadSettingsFrom(settings);
+//    	m_minrms.loadSettingsFrom(settings);
+//    	m_printfiltered.loadSettingsFrom(settings);
+//    	m_qstatusref.loadSettingsFrom(settings);
+//    	m_refvcffile.loadSettingsFrom(settings);
+//    	m_snpfile.loadSettingsFrom(settings);
+//    	m_strandpval.loadSettingsFrom(settings);
+//    	m_utility.loadSettingsFrom(settings);
+//    	m_vcf.loadSettingsFrom(settings);
+//    	m_vcffile.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//    	m_adjacentgaps.validateSettings(settings);
+//    	m_baseqpval.validateSettings(settings);
+//    	m_enddistpval.validateSettings(settings);
+//    	m_gapfilter.validateSettings(settings);
+//    	m_hapmapfile.validateSettings(settings);
+//    	m_hwepval.validateSettings(settings);
+//    	m_indelfw.validateSettings(settings);
+//    	m_mapqpval.validateSettings(settings);
+//    	m_maxreaddepth.validateSettings(settings);
+//    	m_minaltbase.validateSettings(settings);
+//    	m_minreaddepth.validateSettings(settings);
+//    	m_minrms.validateSettings(settings);
+//    	m_printfiltered.validateSettings(settings);
+//    	m_qstatusref.validateSettings(settings);
+//    	m_refvcffile.validateSettings(settings);
+//    	m_snpfile.validateSettings(settings);
+//    	m_strandpval.validateSettings(settings);
+//    	m_utility.validateSettings(settings);
+//    	m_vcf.validateSettings(settings);
+//    	m_vcffile.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

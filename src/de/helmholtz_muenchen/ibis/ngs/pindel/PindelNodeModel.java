@@ -28,8 +28,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
@@ -213,6 +211,38 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         // one incoming port and one outgoing port
     	super(1, 1);
         
+        addSetting(m_pindel);
+        addSetting(m_interval);
+        addSetting(m_chrom); 
+        addSetting(m_start);
+        addSetting(m_end);
+        addSetting(m_config_file);
+        addSetting(m_create_config);
+        addSetting(m_vcf_out);
+        addSetting(m_pindel2vcf);
+        addSetting(m_threads);
+        addSetting(m_bin_size);
+        
+        addSetting(m_min_match_bases);
+        addSetting(m_additional_mismatch);
+        addSetting(m_min_match_breakpoint);
+        addSetting(m_seq_err);
+        addSetting(m_max_mismatch_rate);
+        
+        addSetting(m_use_ref_filename);
+        addSetting(m_refname);
+        addSetting(m_use_cur_date);
+        addSetting(m_refdate);
+        addSetting(m_min_reads);
+        addSetting(m_hetero_frac);
+        addSetting(m_homo_frac);
+        addSetting(m_gatk_comp);
+        addSetting(m_min_supp_reads);
+        addSetting(m_both_strands);
+        addSetting(m_min_size);
+        addSetting(m_limit_size);
+        addSetting(m_max_size);
+    	
         // disable dialog components from beginning on
     	m_chrom.setEnabled(false);
     	m_start.setEnabled(false);
@@ -474,7 +504,25 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	//check interval
+    	if (m_interval.getBooleanValue()){
+    		//check chromosome name
+    		if(m_chrom.getStringValue().equals("")){
+    			throw new InvalidSettingsException("You have to enter a chromosome name");
+    		}
+    		//check if start>=end
+        	if(m_end.getIntValue()<m_start.getIntValue()){
+        		throw new InvalidSettingsException("Invalid interval "+m_chrom.getStringValue()+":"+m_start.getIntValue()+"-"+m_end.getIntValue()+": end < start!");
+        	}
+    	}
     	
+    	if(m_hetero_frac.getDoubleValue()>= m_homo_frac.getDoubleValue()){
+    		throw new InvalidSettingsException("Fraction for heterozygosity has to be smaller than fraction for homozygosity!");
+    	}
+    	
+    	if(m_min_size.getIntValue()> m_max_size.getIntValue()){
+    		throw new InvalidSettingsException("Minimum variant size has to be samller than maximum variant size");
+    	}
     	    	
     	String [] cols = inSpecs[0].getColumnNames();
     	
@@ -535,150 +583,133 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         return new DataTableSpec[]{outspec};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-    	super.saveSettingsTo(settings);
-    	
-        m_pindel.saveSettingsTo(settings);
-        m_interval.saveSettingsTo(settings);
-        m_chrom.saveSettingsTo(settings); 
-        m_start.saveSettingsTo(settings);
-        m_end.saveSettingsTo(settings);
-        m_config_file.saveSettingsTo(settings);
-        m_create_config.saveSettingsTo(settings);
-        m_vcf_out.saveSettingsTo(settings);
-        m_pindel2vcf.saveSettingsTo(settings);
-        m_threads.saveSettingsTo(settings);
-        m_bin_size.saveSettingsTo(settings);
-        
-        m_min_match_bases.saveSettingsTo(settings);
-        m_additional_mismatch.saveSettingsTo(settings);
-        m_min_match_breakpoint.saveSettingsTo(settings);
-        m_seq_err.saveSettingsTo(settings);
-        m_max_mismatch_rate.saveSettingsTo(settings);
-        
-        m_use_ref_filename.saveSettingsTo(settings);
-        m_refname.saveSettingsTo(settings);
-        m_use_cur_date.saveSettingsTo(settings);
-        m_refdate.saveSettingsTo(settings);
-        m_min_reads.saveSettingsTo(settings);
-        m_hetero_frac.saveSettingsTo(settings);
-        m_homo_frac.saveSettingsTo(settings);
-        m_gatk_comp.saveSettingsTo(settings);
-        m_min_supp_reads.saveSettingsTo(settings);
-        m_both_strands.saveSettingsTo(settings);
-        m_min_size.saveSettingsTo(settings);
-        m_limit_size.saveSettingsTo(settings);
-        m_max_size.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_pindel.loadSettingsFrom(settings);
-    	m_interval.loadSettingsFrom(settings);
-    	m_chrom.loadSettingsFrom(settings);
-    	m_start.loadSettingsFrom(settings);
-    	m_end.loadSettingsFrom(settings);
-    	m_config_file.loadSettingsFrom(settings);
-    	m_create_config.loadSettingsFrom(settings);
-    	m_vcf_out.loadSettingsFrom(settings);
-    	m_pindel2vcf.loadSettingsFrom(settings);
-    	m_threads.loadSettingsFrom(settings);
-    	m_bin_size.loadSettingsFrom(settings);
-    	
-    	m_min_match_bases.loadSettingsFrom(settings);
-    	m_additional_mismatch.loadSettingsFrom(settings);
-    	m_min_match_breakpoint.loadSettingsFrom(settings);
-    	m_seq_err.loadSettingsFrom(settings);
-    	m_max_mismatch_rate.loadSettingsFrom(settings);
-    	
-    	m_use_ref_filename.loadSettingsFrom(settings);
-    	m_refname.loadSettingsFrom(settings);
-    	m_use_cur_date.loadSettingsFrom(settings);
-    	m_refdate.loadSettingsFrom(settings);
-    	m_min_reads.loadSettingsFrom(settings);
-    	m_homo_frac.loadSettingsFrom(settings);
-    	m_hetero_frac.loadSettingsFrom(settings);
-    	m_gatk_comp.loadSettingsFrom(settings);
-    	m_min_supp_reads.loadSettingsFrom(settings);
-    	m_both_strands.loadSettingsFrom(settings);
-    	m_min_size.loadSettingsFrom(settings);
-    	m_limit_size.loadSettingsFrom(settings);
-    	m_max_size.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-    	super.validateSettings(settings);
-    	
-    	m_pindel.validateSettings(settings);
-    	m_interval.validateSettings(settings);
-    	m_chrom.validateSettings(settings);
-    	m_start.validateSettings(settings);
-    	m_end.validateSettings(settings);
-    	m_config_file.validateSettings(settings);
-    	m_create_config.validateSettings(settings);
-    	m_vcf_out.validateSettings(settings);
-    	m_pindel2vcf.validateSettings(settings);
-    	m_threads.validateSettings(settings);
-    	m_bin_size.validateSettings(settings);
-    	
-    	m_min_match_bases.validateSettings(settings);
-    	m_additional_mismatch.validateSettings(settings);
-    	m_min_match_breakpoint.validateSettings(settings);
-    	m_seq_err.validateSettings(settings);
-    	m_max_mismatch_rate.validateSettings(settings);
-    	
-    	//check interval
-    	if (settings.getBoolean(CFGKEY_INTERVAL)){
-    		//check chromosome name
-    		if(settings.getString(CFGKEY_CHROM).equals("")){
-    			throw new InvalidSettingsException("You have to enter a chromosome name");
-    		}
-    		//check if start>=end
-        	if(settings.getInt(CFGKEY_END)<settings.getInt(CFGKEY_START)){
-        		throw new InvalidSettingsException("Invalid interval "+settings.getString(CFGKEY_CHROM)+":"+settings.getInt(CFGKEY_START)+"-"+settings.getInt(CFGKEY_END)+": end < start!");
-        	}
-    	}
-    	
-    	m_use_ref_filename.validateSettings(settings);
-    	m_refname.validateSettings(settings);
-    	m_use_cur_date.validateSettings(settings);
-    	m_refdate.validateSettings(settings);
-    	m_min_reads.validateSettings(settings);
-    	m_homo_frac.validateSettings(settings);
-    	m_hetero_frac.validateSettings(settings);
-    	m_gatk_comp.validateSettings(settings);
-    	m_min_supp_reads.validateSettings(settings);
-    	m_both_strands.validateSettings(settings);
-    	m_min_size.validateSettings(settings);
-    	m_limit_size.validateSettings(settings);
-    	m_max_size.validateSettings(settings);
-    	
-    	if(settings.getDouble(CFGKEY_HETERO_FRAC)>= settings.getDouble(CFGKEY_HOMO_FRAC)){
-    		throw new InvalidSettingsException("Fraction for heterozygosity has to be smaller than fraction for homozygosity!");
-    	}
-    	
-    	if(settings.getInt(CFGKEY_MIN_SIZE)> settings.getInt(CFGKEY_MAX_SIZE)){
-    		throw new InvalidSettingsException("Minimum variant size has to be samller than maximum variant size");
-    	}
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//
+//    	super.saveSettingsTo(settings);
+//    	
+//        m_pindel.saveSettingsTo(settings);
+//        m_interval.saveSettingsTo(settings);
+//        m_chrom.saveSettingsTo(settings); 
+//        m_start.saveSettingsTo(settings);
+//        m_end.saveSettingsTo(settings);
+//        m_config_file.saveSettingsTo(settings);
+//        m_create_config.saveSettingsTo(settings);
+//        m_vcf_out.saveSettingsTo(settings);
+//        m_pindel2vcf.saveSettingsTo(settings);
+//        m_threads.saveSettingsTo(settings);
+//        m_bin_size.saveSettingsTo(settings);
+//        
+//        m_min_match_bases.saveSettingsTo(settings);
+//        m_additional_mismatch.saveSettingsTo(settings);
+//        m_min_match_breakpoint.saveSettingsTo(settings);
+//        m_seq_err.saveSettingsTo(settings);
+//        m_max_mismatch_rate.saveSettingsTo(settings);
+//        
+//        m_use_ref_filename.saveSettingsTo(settings);
+//        m_refname.saveSettingsTo(settings);
+//        m_use_cur_date.saveSettingsTo(settings);
+//        m_refdate.saveSettingsTo(settings);
+//        m_min_reads.saveSettingsTo(settings);
+//        m_hetero_frac.saveSettingsTo(settings);
+//        m_homo_frac.saveSettingsTo(settings);
+//        m_gatk_comp.saveSettingsTo(settings);
+//        m_min_supp_reads.saveSettingsTo(settings);
+//        m_both_strands.saveSettingsTo(settings);
+//        m_min_size.saveSettingsTo(settings);
+//        m_limit_size.saveSettingsTo(settings);
+//        m_max_size.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_pindel.loadSettingsFrom(settings);
+//    	m_interval.loadSettingsFrom(settings);
+//    	m_chrom.loadSettingsFrom(settings);
+//    	m_start.loadSettingsFrom(settings);
+//    	m_end.loadSettingsFrom(settings);
+//    	m_config_file.loadSettingsFrom(settings);
+//    	m_create_config.loadSettingsFrom(settings);
+//    	m_vcf_out.loadSettingsFrom(settings);
+//    	m_pindel2vcf.loadSettingsFrom(settings);
+//    	m_threads.loadSettingsFrom(settings);
+//    	m_bin_size.loadSettingsFrom(settings);
+//    	
+//    	m_min_match_bases.loadSettingsFrom(settings);
+//    	m_additional_mismatch.loadSettingsFrom(settings);
+//    	m_min_match_breakpoint.loadSettingsFrom(settings);
+//    	m_seq_err.loadSettingsFrom(settings);
+//    	m_max_mismatch_rate.loadSettingsFrom(settings);
+//    	
+//    	m_use_ref_filename.loadSettingsFrom(settings);
+//    	m_refname.loadSettingsFrom(settings);
+//    	m_use_cur_date.loadSettingsFrom(settings);
+//    	m_refdate.loadSettingsFrom(settings);
+//    	m_min_reads.loadSettingsFrom(settings);
+//    	m_homo_frac.loadSettingsFrom(settings);
+//    	m_hetero_frac.loadSettingsFrom(settings);
+//    	m_gatk_comp.loadSettingsFrom(settings);
+//    	m_min_supp_reads.loadSettingsFrom(settings);
+//    	m_both_strands.loadSettingsFrom(settings);
+//    	m_min_size.loadSettingsFrom(settings);
+//    	m_limit_size.loadSettingsFrom(settings);
+//    	m_max_size.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//            
+//    	super.validateSettings(settings);
+//    	
+//    	m_pindel.validateSettings(settings);
+//    	m_interval.validateSettings(settings);
+//    	m_chrom.validateSettings(settings);
+//    	m_start.validateSettings(settings);
+//    	m_end.validateSettings(settings);
+//    	m_config_file.validateSettings(settings);
+//    	m_create_config.validateSettings(settings);
+//    	m_vcf_out.validateSettings(settings);
+//    	m_pindel2vcf.validateSettings(settings);
+//    	m_threads.validateSettings(settings);
+//    	m_bin_size.validateSettings(settings);
+//    	
+//    	m_min_match_bases.validateSettings(settings);
+//    	m_additional_mismatch.validateSettings(settings);
+//    	m_min_match_breakpoint.validateSettings(settings);
+//    	m_seq_err.validateSettings(settings);
+//    	m_max_mismatch_rate.validateSettings(settings);
+//    	
+//    	
+//    	m_use_ref_filename.validateSettings(settings);
+//    	m_refname.validateSettings(settings);
+//    	m_use_cur_date.validateSettings(settings);
+//    	m_refdate.validateSettings(settings);
+//    	m_min_reads.validateSettings(settings);
+//    	m_homo_frac.validateSettings(settings);
+//    	m_hetero_frac.validateSettings(settings);
+//    	m_gatk_comp.validateSettings(settings);
+//    	m_min_supp_reads.validateSettings(settings);
+//    	m_both_strands.validateSettings(settings);
+//    	m_min_size.validateSettings(settings);
+//    	m_limit_size.validateSettings(settings);
+//    	m_max_size.validateSettings(settings);
+//    	
+//    	
+//    }
     
     /**
      * {@inheritDoc}

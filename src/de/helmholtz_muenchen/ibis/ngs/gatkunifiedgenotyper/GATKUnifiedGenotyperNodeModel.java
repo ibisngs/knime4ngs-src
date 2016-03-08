@@ -25,8 +25,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
@@ -183,23 +181,23 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
 	private int posDbsnp;
 	
 	//Network/Proxy options
-	public static final String CFGKEY_USEPROXY="useproxy";
-	public static final String CFGKEY_PROXYHOST="proxyhost";
-	public static final String CFGKEY_PROXYPORT="proxyport";
-	public static final String CFGKEY_USEPROXYAUTH="useproxyauth";
-	public static final String CFGKEY_PROXYUSER="proxyuser";
-	public static final String CFGKEY_PROXYPASSWORD="proxypassword";
+//	public static final String CFGKEY_USEPROXY="useproxy";
+//	public static final String CFGKEY_PROXYHOST="proxyhost";
+//	public static final String CFGKEY_PROXYPORT="proxyport";
+//	public static final String CFGKEY_USEPROXYAUTH="useproxyauth";
+//	public static final String CFGKEY_PROXYUSER="proxyuser";
+//	public static final String CFGKEY_PROXYPASSWORD="proxypassword";
 	
-	private final SettingsModelBoolean m_useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
-	private final SettingsModelString m_proxyhost = new SettingsModelString(
-			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST,"");
-	private final SettingsModelString m_proxyport = new SettingsModelString(
-			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT,"");
-	private final SettingsModelBoolean m_useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
-	private final SettingsModelString m_proxyuser = new SettingsModelString(
-			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER,"");
-	private final SettingsModelString m_proxypassword = new SettingsModelString(
-			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD,"");
+//	private final SettingsModelBoolean m_useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
+//	private final SettingsModelString m_proxyhost = new SettingsModelString(
+//			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST,"");
+//	private final SettingsModelString m_proxyport = new SettingsModelString(
+//			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT,"");
+//	private final SettingsModelBoolean m_useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
+//	private final SettingsModelString m_proxyuser = new SettingsModelString(
+//			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER,"");
+//	private final SettingsModelString m_proxypassword = new SettingsModelString(
+//			GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD,"");
 	
 	static final String CFGKEY_OPT_FLAGS = "opt_flags";
 	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
@@ -212,13 +210,41 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         // #in ports, #out ports
         super(1, 1);
         
+        addSetting(m_gatk);
+        addSetting(m_ref_genome);
+        addSetting(m_use_dbsnp);
+        addSetting(m_dbsnp_file);
+        addSetting(m_use_interval);
+        addSetting(m_interval_file);
+        addSetting(m_variant_type);
+        addSetting(m_num_threads);
+    	addSetting(m_GATK_JAVA_MEMORY);
+        
+        addSetting(m_call_min_confidence);
+        addSetting(m_emit_min_confidence);
+        addSetting(m_pcr_error);
+        addSetting(m_contamination);
+        addSetting(m_heterozygosity);
+        addSetting(m_max_deletion_fraction);
+        addSetting(m_min_base_qual);
+        addSetting(m_indel_heterozygosity);
+        addSetting(m_min_indel_count);
+        addSetting(m_min_indel_frac);
+        addSetting(m_gap_open_pen);
+        addSetting(m_gap_cont_pen);
+        addSetting(m_baq);
+        addSetting(m_mbq);
+        
+
+    	addSetting(m_opt_flags);
+        
         m_interval_file.setEnabled(false);
         //Proxy options
-    	m_proxyhost.setEnabled(false);
-    	m_proxyport.setEnabled(false);
-    	m_useproxyauth.setEnabled(false);
-    	m_proxyuser.setEnabled(false);
-    	m_proxypassword.setEnabled(false);
+//    	m_proxyhost.setEnabled(false);
+//    	m_proxyport.setEnabled(false);
+//    	m_useproxyauth.setEnabled(false);
+//    	m_proxyuser.setEnabled(false);
+//    	m_proxypassword.setEnabled(false);
     }
 
     /**
@@ -413,19 +439,19 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         
 		//Enable proxy if needed
 		String proxyOptions = "";
-		if(m_useproxy.getBooleanValue()){
-			
-			proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
-			proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
-			
-			if(m_useproxyauth.getBooleanValue()){
-				
-    			proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
-    			proxyOptions += " -Dhttp.proxyPassword=" + m_proxypassword.getStringValue();
-			}
-			
-			proxyOptions += " ";
-		}
+//		if(m_useproxy.getBooleanValue()){
+//			
+//			proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
+//			proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
+//			
+//			if(m_useproxyauth.getBooleanValue()){
+//				
+//    			proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
+//    			proxyOptions += " -Dhttp.proxyPassword=" + m_proxypassword.getStringValue();
+//			}
+//			
+//			proxyOptions += " ";
+//		}
         
 		int GATK_MEMORY_USAGE = m_GATK_JAVA_MEMORY.getIntValue();
         
@@ -624,141 +650,141 @@ public class GATKUnifiedGenotyperNodeModel extends HTExecutorNodeModel {
         return new DataTableSpec[]{null};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-        m_gatk.saveSettingsTo(settings);
-        m_ref_genome.saveSettingsTo(settings);
-        m_use_dbsnp.saveSettingsTo(settings);
-        m_dbsnp_file.saveSettingsTo(settings);
-        m_use_interval.saveSettingsTo(settings);
-        m_interval_file.saveSettingsTo(settings);
-        m_variant_type.saveSettingsTo(settings);
-        m_num_threads.saveSettingsTo(settings);
-    	m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
-        
-        m_call_min_confidence.saveSettingsTo(settings);
-        m_emit_min_confidence.saveSettingsTo(settings);
-        m_pcr_error.saveSettingsTo(settings);
-        m_contamination.saveSettingsTo(settings);
-        m_heterozygosity.saveSettingsTo(settings);
-        m_max_deletion_fraction.saveSettingsTo(settings);
-        m_min_base_qual.saveSettingsTo(settings);
-        m_indel_heterozygosity.saveSettingsTo(settings);
-        m_min_indel_count.saveSettingsTo(settings);
-        m_min_indel_frac.saveSettingsTo(settings);
-        m_gap_open_pen.saveSettingsTo(settings);
-        m_gap_cont_pen.saveSettingsTo(settings);
-        m_baq.saveSettingsTo(settings);
-        m_mbq.saveSettingsTo(settings);
-        
-    	//Proxy options
-    	m_useproxy.saveSettingsTo(settings);
-    	m_proxyhost.saveSettingsTo(settings);
-    	m_proxyport.saveSettingsTo(settings);
-    	m_useproxyauth.saveSettingsTo(settings);
-    	m_proxyuser.saveSettingsTo(settings);
-    	m_proxypassword.saveSettingsTo(settings);
-
-    	m_opt_flags.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_gatk.loadSettingsFrom(settings);
-    	m_ref_genome.loadSettingsFrom(settings);
-    	m_use_dbsnp.loadSettingsFrom(settings);
-    	m_dbsnp_file.loadSettingsFrom(settings);
-    	m_use_interval.loadSettingsFrom(settings);
-    	m_interval_file.loadSettingsFrom(settings);
-    	m_variant_type.loadSettingsFrom(settings);
-    	m_num_threads.loadSettingsFrom(settings);
-    	m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
-    	
-    	m_call_min_confidence.loadSettingsFrom(settings);
-    	m_emit_min_confidence.loadSettingsFrom(settings);
-    	m_pcr_error.loadSettingsFrom(settings);
-    	m_contamination.loadSettingsFrom(settings);
-    	m_heterozygosity.loadSettingsFrom(settings);
-    	m_max_deletion_fraction.loadSettingsFrom(settings);
-    	m_min_base_qual.loadSettingsFrom(settings);
-    	m_indel_heterozygosity.loadSettingsFrom(settings);
-    	m_min_indel_count.loadSettingsFrom(settings);
-    	m_min_indel_frac.loadSettingsFrom(settings);
-    	m_gap_open_pen.loadSettingsFrom(settings);
-    	m_gap_cont_pen.loadSettingsFrom(settings);
-    	m_baq.loadSettingsFrom(settings);
-    	m_mbq.loadSettingsFrom(settings);
-    	
-    	//Proxy options
-    	m_useproxy.loadSettingsFrom(settings);
-    	m_proxyhost.loadSettingsFrom(settings);
-    	m_proxyport.loadSettingsFrom(settings);
-    	m_useproxyauth.loadSettingsFrom(settings);
-    	m_proxyuser.loadSettingsFrom(settings);
-    	m_proxypassword.loadSettingsFrom(settings);
-     
-    	m_opt_flags.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-    	m_gatk.validateSettings(settings);
-    	m_ref_genome.validateSettings(settings);
-    	m_use_dbsnp.validateSettings(settings);
-    	m_dbsnp_file.validateSettings(settings);
-    	m_use_interval.validateSettings(settings);
-    	m_interval_file.validateSettings(settings);
-    	m_variant_type.validateSettings(settings);
-    	m_num_threads.validateSettings(settings);
-    	m_GATK_JAVA_MEMORY.validateSettings(settings);
-    	
-    	m_call_min_confidence.validateSettings(settings);
-    	m_emit_min_confidence.validateSettings(settings);
-    	m_pcr_error.validateSettings(settings);
-    	m_contamination.validateSettings(settings);
-    	m_heterozygosity.validateSettings(settings);
-    	m_max_deletion_fraction.validateSettings(settings);
-    	m_min_base_qual.validateSettings(settings);
-    	m_indel_heterozygosity.validateSettings(settings);
-    	m_min_indel_count.validateSettings(settings);
-    	m_min_indel_frac.validateSettings(settings);
-    	m_gap_open_pen.validateSettings(settings);
-    	m_gap_cont_pen.validateSettings(settings);    	
-    	m_baq.validateSettings(settings);
-    	m_mbq.validateSettings(settings);
-    	
-    	//Proxy options
-    	m_useproxy.validateSettings(settings);
-    	m_proxyhost.validateSettings(settings);
-    	m_proxyport.validateSettings(settings);
-    	m_useproxyauth.validateSettings(settings);
-    	m_proxyuser.validateSettings(settings);
-    	m_proxypassword.validateSettings(settings);
-
-    	m_opt_flags.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//        m_gatk.saveSettingsTo(settings);
+//        m_ref_genome.saveSettingsTo(settings);
+//        m_use_dbsnp.saveSettingsTo(settings);
+//        m_dbsnp_file.saveSettingsTo(settings);
+//        m_use_interval.saveSettingsTo(settings);
+//        m_interval_file.saveSettingsTo(settings);
+//        m_variant_type.saveSettingsTo(settings);
+//        m_num_threads.saveSettingsTo(settings);
+//    	m_GATK_JAVA_MEMORY.saveSettingsTo(settings);
+//        
+//        m_call_min_confidence.saveSettingsTo(settings);
+//        m_emit_min_confidence.saveSettingsTo(settings);
+//        m_pcr_error.saveSettingsTo(settings);
+//        m_contamination.saveSettingsTo(settings);
+//        m_heterozygosity.saveSettingsTo(settings);
+//        m_max_deletion_fraction.saveSettingsTo(settings);
+//        m_min_base_qual.saveSettingsTo(settings);
+//        m_indel_heterozygosity.saveSettingsTo(settings);
+//        m_min_indel_count.saveSettingsTo(settings);
+//        m_min_indel_frac.saveSettingsTo(settings);
+//        m_gap_open_pen.saveSettingsTo(settings);
+//        m_gap_cont_pen.saveSettingsTo(settings);
+//        m_baq.saveSettingsTo(settings);
+//        m_mbq.saveSettingsTo(settings);
+//        
+//    	//Proxy options
+////    	m_useproxy.saveSettingsTo(settings);
+////    	m_proxyhost.saveSettingsTo(settings);
+////    	m_proxyport.saveSettingsTo(settings);
+////    	m_useproxyauth.saveSettingsTo(settings);
+////    	m_proxyuser.saveSettingsTo(settings);
+////    	m_proxypassword.saveSettingsTo(settings);
+//
+//    	m_opt_flags.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_gatk.loadSettingsFrom(settings);
+//    	m_ref_genome.loadSettingsFrom(settings);
+//    	m_use_dbsnp.loadSettingsFrom(settings);
+//    	m_dbsnp_file.loadSettingsFrom(settings);
+//    	m_use_interval.loadSettingsFrom(settings);
+//    	m_interval_file.loadSettingsFrom(settings);
+//    	m_variant_type.loadSettingsFrom(settings);
+//    	m_num_threads.loadSettingsFrom(settings);
+//    	m_GATK_JAVA_MEMORY.loadSettingsFrom(settings);
+//    	
+//    	m_call_min_confidence.loadSettingsFrom(settings);
+//    	m_emit_min_confidence.loadSettingsFrom(settings);
+//    	m_pcr_error.loadSettingsFrom(settings);
+//    	m_contamination.loadSettingsFrom(settings);
+//    	m_heterozygosity.loadSettingsFrom(settings);
+//    	m_max_deletion_fraction.loadSettingsFrom(settings);
+//    	m_min_base_qual.loadSettingsFrom(settings);
+//    	m_indel_heterozygosity.loadSettingsFrom(settings);
+//    	m_min_indel_count.loadSettingsFrom(settings);
+//    	m_min_indel_frac.loadSettingsFrom(settings);
+//    	m_gap_open_pen.loadSettingsFrom(settings);
+//    	m_gap_cont_pen.loadSettingsFrom(settings);
+//    	m_baq.loadSettingsFrom(settings);
+//    	m_mbq.loadSettingsFrom(settings);
+//    	
+//    	//Proxy options
+////    	m_useproxy.loadSettingsFrom(settings);
+////    	m_proxyhost.loadSettingsFrom(settings);
+////    	m_proxyport.loadSettingsFrom(settings);
+////    	m_useproxyauth.loadSettingsFrom(settings);
+////    	m_proxyuser.loadSettingsFrom(settings);
+////    	m_proxypassword.loadSettingsFrom(settings);
+//     
+//    	m_opt_flags.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//            
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//    	m_gatk.validateSettings(settings);
+//    	m_ref_genome.validateSettings(settings);
+//    	m_use_dbsnp.validateSettings(settings);
+//    	m_dbsnp_file.validateSettings(settings);
+//    	m_use_interval.validateSettings(settings);
+//    	m_interval_file.validateSettings(settings);
+//    	m_variant_type.validateSettings(settings);
+//    	m_num_threads.validateSettings(settings);
+//    	m_GATK_JAVA_MEMORY.validateSettings(settings);
+//    	
+//    	m_call_min_confidence.validateSettings(settings);
+//    	m_emit_min_confidence.validateSettings(settings);
+//    	m_pcr_error.validateSettings(settings);
+//    	m_contamination.validateSettings(settings);
+//    	m_heterozygosity.validateSettings(settings);
+//    	m_max_deletion_fraction.validateSettings(settings);
+//    	m_min_base_qual.validateSettings(settings);
+//    	m_indel_heterozygosity.validateSettings(settings);
+//    	m_min_indel_count.validateSettings(settings);
+//    	m_min_indel_frac.validateSettings(settings);
+//    	m_gap_open_pen.validateSettings(settings);
+//    	m_gap_cont_pen.validateSettings(settings);    	
+//    	m_baq.validateSettings(settings);
+//    	m_mbq.validateSettings(settings);
+//    	
+//    	//Proxy options
+////    	m_useproxy.validateSettings(settings);
+////    	m_proxyhost.validateSettings(settings);
+////    	m_proxyport.validateSettings(settings);
+////    	m_useproxyauth.validateSettings(settings);
+////    	m_proxyuser.validateSettings(settings);
+////    	m_proxypassword.validateSettings(settings);
+//
+//    	m_opt_flags.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

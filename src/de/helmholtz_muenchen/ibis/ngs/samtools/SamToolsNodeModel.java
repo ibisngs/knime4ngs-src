@@ -11,9 +11,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-//import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -141,6 +138,50 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     
         super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0));
        
+       	addSetting(m_utility);
+    	addSetting(m_samtools);
+    	addSetting(m_bamfile);
+    	addSetting(m_refseqfile);
+    	
+    	//calmd
+    	addSetting(m_changeIdentBases);
+    	addSetting(m_compression);
+    	addSetting(m_useCompression);
+    	addSetting(m_inputIsSAM);
+    	addSetting(m_modifyQual); 
+    	addSetting(m_bqTag); 
+    	addSetting(m_extendedBAQ); 
+
+    	//remdup
+    	addSetting(m_removeDup);
+    	addSetting(m_treatPE);
+    	//cat
+    	addSetting(m_useHeaderSAM);
+    	addSetting(m_headerSAM);
+    	addSetting(m_inBAM1);
+
+    	//reheader
+    	addSetting(m_rehInSAM);
+
+    	//merge
+    	addSetting(m_mcompression);
+    	addSetting(m_mforce);
+    	addSetting(m_usemhfile);
+    	addSetting(m_mhfile);
+    	addSetting(m_msorted);
+    	addSetting(m_mregion);
+    	addSetting(m_usemregion);
+    	addSetting(m_mrgtag);
+    	addSetting(m_muncompressed);
+    	addSetting(m_minbam1);
+
+    	//phase
+    	addSetting(m_blocklength);
+    	addSetting(m_prefix);
+    	addSetting(m_hetphred);
+    	addSetting(m_minqual);
+    	addSetting(m_maxdepth);
+    	addSetting(m_fixchimeras);
 
         //calmd
         m_changeIdentBases.setEnabled(false);
@@ -518,179 +559,179 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
         return new DataTableSpec[]{};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-    	super.saveSettingsTo(settings);
-    	
-    	m_utility.saveSettingsTo(settings);
-    	m_samtools.saveSettingsTo(settings);
-    	m_bamfile.saveSettingsTo(settings);
-    	m_refseqfile.saveSettingsTo(settings);
-    	//calmd
-    	m_changeIdentBases.saveSettingsTo(settings);
-    	m_compression.saveSettingsTo(settings);
-    	m_useCompression.saveSettingsTo(settings);
-    	m_inputIsSAM.saveSettingsTo(settings);
-    	m_modifyQual.saveSettingsTo(settings); 
-    	m_bqTag.saveSettingsTo(settings); 
-    	m_extendedBAQ.saveSettingsTo(settings); 
-    	//m_doCapMapQual.saveSettingsTo(settings); 
-    	//m_capMapQual.saveSettingsTo(settings); 
-    	//remdup
-    	m_removeDup.saveSettingsTo(settings);
-    	m_treatPE.saveSettingsTo(settings);
-    	//cat
-    	m_useHeaderSAM.saveSettingsTo(settings);
-    	m_headerSAM.saveSettingsTo(settings);
-    	m_inBAM1.saveSettingsTo(settings);
-    	//m_inBAM2.saveSettingsTo(settings);
-    	//reheader
-    	m_rehInSAM.saveSettingsTo(settings);
-    	//m_rehInBAM.saveSettingsTo(settings);
-    	//merge
-    	m_mcompression.saveSettingsTo(settings);
-    	m_mforce.saveSettingsTo(settings);
-    	m_usemhfile.saveSettingsTo(settings);
-    	m_mhfile.saveSettingsTo(settings);
-    	m_msorted.saveSettingsTo(settings);
-    	m_mregion.saveSettingsTo(settings);
-    	m_usemregion.saveSettingsTo(settings);
-    	m_mrgtag.saveSettingsTo(settings);
-    	m_muncompressed.saveSettingsTo(settings);
-    	m_minbam1.saveSettingsTo(settings);
-    	//m_minbam2.saveSettingsTo(settings);
-    	//faidx
-    	//m_infasta.saveSettingsTo(settings);
-    	//phase
-    	m_blocklength.saveSettingsTo(settings);
-    	m_prefix.saveSettingsTo(settings);
-    	m_hetphred.saveSettingsTo(settings);
-    	m_minqual.saveSettingsTo(settings);
-    	m_maxdepth.saveSettingsTo(settings);
-    	m_fixchimeras.saveSettingsTo(settings);
-    	//m_dropambig.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_utility.loadSettingsFrom(settings);
-    	m_samtools.loadSettingsFrom(settings);
-    	m_bamfile.loadSettingsFrom(settings);
-    	m_refseqfile.loadSettingsFrom(settings);
-    	//calmd
-    	m_changeIdentBases.loadSettingsFrom(settings);
-    	m_compression.loadSettingsFrom(settings);
-    	m_useCompression.loadSettingsFrom(settings); 
-    	m_inputIsSAM.loadSettingsFrom(settings);
-    	m_modifyQual.loadSettingsFrom(settings); 
-    	m_bqTag.loadSettingsFrom(settings); 
-    	m_extendedBAQ.loadSettingsFrom(settings);
-    	//m_doCapMapQual.loadSettingsFrom(settings);
-    	//m_capMapQual.loadSettingsFrom(settings);
-    	//remdup
-    	m_removeDup.loadSettingsFrom(settings);
-    	m_treatPE.loadSettingsFrom(settings);
-    	//cat
-    	m_useHeaderSAM.loadSettingsFrom(settings);
-    	m_headerSAM.loadSettingsFrom(settings);
-    	m_inBAM1.loadSettingsFrom(settings);
-    	//m_inBAM2.loadSettingsFrom(settings);
-    	//reheader
-    	m_rehInSAM.loadSettingsFrom(settings);
-    	//m_rehInBAM.loadSettingsFrom(settings);
-    	//merge
-    	m_mcompression.loadSettingsFrom(settings);
-    	m_mforce.loadSettingsFrom(settings);
-    	m_usemhfile.loadSettingsFrom(settings);
-    	m_mhfile.loadSettingsFrom(settings);
-    	m_msorted.loadSettingsFrom(settings);
-    	m_mregion.loadSettingsFrom(settings);
-    	m_usemregion.loadSettingsFrom(settings);
-    	m_mrgtag.loadSettingsFrom(settings);
-    	m_muncompressed.loadSettingsFrom(settings);
-    	m_minbam1.loadSettingsFrom(settings);
-    	//m_minbam2.loadSettingsFrom(settings);
-    	//faidx
-    	//m_infasta.loadSettingsFrom(settings);
-    	//phase
-    	m_blocklength.loadSettingsFrom(settings);
-    	m_prefix.loadSettingsFrom(settings);
-    	m_hetphred.loadSettingsFrom(settings);
-    	m_minqual.loadSettingsFrom(settings);
-    	m_maxdepth.loadSettingsFrom(settings);
-    	m_fixchimeras.loadSettingsFrom(settings);
-    	//m_dropambig.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.validateSettings(settings);
-    	
-    	m_utility.validateSettings(settings);
-    	m_samtools.validateSettings(settings);
-    	m_bamfile.validateSettings(settings);
-    	m_refseqfile.validateSettings(settings);
-    	//calmd
-    	m_changeIdentBases.validateSettings(settings);
-    	m_compression.validateSettings(settings);
-    	m_useCompression.validateSettings(settings); 
-    	m_inputIsSAM.validateSettings(settings);
-    	m_modifyQual.validateSettings(settings); 
-    	m_bqTag.validateSettings(settings); 
-    	m_extendedBAQ.validateSettings(settings); 
-      	//m_doCapMapQual.validateSettings(settings); 
-    	//m_capMapQual.validateSettings(settings);
-    	//remdup
-    	m_removeDup.validateSettings(settings);
-    	m_treatPE.validateSettings(settings);
-    	//cat
-    	m_useHeaderSAM.validateSettings(settings);
-    	m_headerSAM.validateSettings(settings);
-    	m_inBAM1.validateSettings(settings);
-    	//m_inBAM2.validateSettings(settings);
-    	//reheader
-    	m_rehInSAM.validateSettings(settings);
-    	//m_rehInBAM.validateSettings(settings);
-    	//merge
-    	m_mcompression.validateSettings(settings);
-    	m_mforce.validateSettings(settings);
-    	m_usemhfile.validateSettings(settings);
-    	m_mhfile.validateSettings(settings);
-    	m_msorted.validateSettings(settings);
-    	m_mregion.validateSettings(settings);
-    	m_usemregion.validateSettings(settings);
-    	m_mrgtag.validateSettings(settings);
-    	m_muncompressed.validateSettings(settings);
-    	m_minbam1.validateSettings(settings);
-    	//m_minbam2.validateSettings(settings);
-    	//faidx
-    	//m_infasta.validateSettings(settings);
-    	//phase
-    	m_blocklength.validateSettings(settings);
-    	m_prefix.validateSettings(settings);
-    	m_hetphred.validateSettings(settings);
-    	m_minqual.validateSettings(settings);
-    	m_maxdepth.validateSettings(settings);
-    	m_fixchimeras.validateSettings(settings);
-    	//m_dropambig.validateSettings(settings);
-    	
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_utility.saveSettingsTo(settings);
+//    	m_samtools.saveSettingsTo(settings);
+//    	m_bamfile.saveSettingsTo(settings);
+//    	m_refseqfile.saveSettingsTo(settings);
+//    	//calmd
+//    	m_changeIdentBases.saveSettingsTo(settings);
+//    	m_compression.saveSettingsTo(settings);
+//    	m_useCompression.saveSettingsTo(settings);
+//    	m_inputIsSAM.saveSettingsTo(settings);
+//    	m_modifyQual.saveSettingsTo(settings); 
+//    	m_bqTag.saveSettingsTo(settings); 
+//    	m_extendedBAQ.saveSettingsTo(settings); 
+//    	//m_doCapMapQual.saveSettingsTo(settings); 
+//    	//m_capMapQual.saveSettingsTo(settings); 
+//    	//remdup
+//    	m_removeDup.saveSettingsTo(settings);
+//    	m_treatPE.saveSettingsTo(settings);
+//    	//cat
+//    	m_useHeaderSAM.saveSettingsTo(settings);
+//    	m_headerSAM.saveSettingsTo(settings);
+//    	m_inBAM1.saveSettingsTo(settings);
+//    	//m_inBAM2.saveSettingsTo(settings);
+//    	//reheader
+//    	m_rehInSAM.saveSettingsTo(settings);
+//    	//m_rehInBAM.saveSettingsTo(settings);
+//    	//merge
+//    	m_mcompression.saveSettingsTo(settings);
+//    	m_mforce.saveSettingsTo(settings);
+//    	m_usemhfile.saveSettingsTo(settings);
+//    	m_mhfile.saveSettingsTo(settings);
+//    	m_msorted.saveSettingsTo(settings);
+//    	m_mregion.saveSettingsTo(settings);
+//    	m_usemregion.saveSettingsTo(settings);
+//    	m_mrgtag.saveSettingsTo(settings);
+//    	m_muncompressed.saveSettingsTo(settings);
+//    	m_minbam1.saveSettingsTo(settings);
+//    	//m_minbam2.saveSettingsTo(settings);
+//    	//faidx
+//    	//m_infasta.saveSettingsTo(settings);
+//    	//phase
+//    	m_blocklength.saveSettingsTo(settings);
+//    	m_prefix.saveSettingsTo(settings);
+//    	m_hetphred.saveSettingsTo(settings);
+//    	m_minqual.saveSettingsTo(settings);
+//    	m_maxdepth.saveSettingsTo(settings);
+//    	m_fixchimeras.saveSettingsTo(settings);
+//    	//m_dropambig.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_utility.loadSettingsFrom(settings);
+//    	m_samtools.loadSettingsFrom(settings);
+//    	m_bamfile.loadSettingsFrom(settings);
+//    	m_refseqfile.loadSettingsFrom(settings);
+//    	//calmd
+//    	m_changeIdentBases.loadSettingsFrom(settings);
+//    	m_compression.loadSettingsFrom(settings);
+//    	m_useCompression.loadSettingsFrom(settings); 
+//    	m_inputIsSAM.loadSettingsFrom(settings);
+//    	m_modifyQual.loadSettingsFrom(settings); 
+//    	m_bqTag.loadSettingsFrom(settings); 
+//    	m_extendedBAQ.loadSettingsFrom(settings);
+//    	//m_doCapMapQual.loadSettingsFrom(settings);
+//    	//m_capMapQual.loadSettingsFrom(settings);
+//    	//remdup
+//    	m_removeDup.loadSettingsFrom(settings);
+//    	m_treatPE.loadSettingsFrom(settings);
+//    	//cat
+//    	m_useHeaderSAM.loadSettingsFrom(settings);
+//    	m_headerSAM.loadSettingsFrom(settings);
+//    	m_inBAM1.loadSettingsFrom(settings);
+//    	//m_inBAM2.loadSettingsFrom(settings);
+//    	//reheader
+//    	m_rehInSAM.loadSettingsFrom(settings);
+//    	//m_rehInBAM.loadSettingsFrom(settings);
+//    	//merge
+//    	m_mcompression.loadSettingsFrom(settings);
+//    	m_mforce.loadSettingsFrom(settings);
+//    	m_usemhfile.loadSettingsFrom(settings);
+//    	m_mhfile.loadSettingsFrom(settings);
+//    	m_msorted.loadSettingsFrom(settings);
+//    	m_mregion.loadSettingsFrom(settings);
+//    	m_usemregion.loadSettingsFrom(settings);
+//    	m_mrgtag.loadSettingsFrom(settings);
+//    	m_muncompressed.loadSettingsFrom(settings);
+//    	m_minbam1.loadSettingsFrom(settings);
+//    	//m_minbam2.loadSettingsFrom(settings);
+//    	//faidx
+//    	//m_infasta.loadSettingsFrom(settings);
+//    	//phase
+//    	m_blocklength.loadSettingsFrom(settings);
+//    	m_prefix.loadSettingsFrom(settings);
+//    	m_hetphred.loadSettingsFrom(settings);
+//    	m_minqual.loadSettingsFrom(settings);
+//    	m_maxdepth.loadSettingsFrom(settings);
+//    	m_fixchimeras.loadSettingsFrom(settings);
+//    	//m_dropambig.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.validateSettings(settings);
+//    	
+//    	m_utility.validateSettings(settings);
+//    	m_samtools.validateSettings(settings);
+//    	m_bamfile.validateSettings(settings);
+//    	m_refseqfile.validateSettings(settings);
+//    	//calmd
+//    	m_changeIdentBases.validateSettings(settings);
+//    	m_compression.validateSettings(settings);
+//    	m_useCompression.validateSettings(settings); 
+//    	m_inputIsSAM.validateSettings(settings);
+//    	m_modifyQual.validateSettings(settings); 
+//    	m_bqTag.validateSettings(settings); 
+//    	m_extendedBAQ.validateSettings(settings); 
+//      	//m_doCapMapQual.validateSettings(settings); 
+//    	//m_capMapQual.validateSettings(settings);
+//    	//remdup
+//    	m_removeDup.validateSettings(settings);
+//    	m_treatPE.validateSettings(settings);
+//    	//cat
+//    	m_useHeaderSAM.validateSettings(settings);
+//    	m_headerSAM.validateSettings(settings);
+//    	m_inBAM1.validateSettings(settings);
+//    	//m_inBAM2.validateSettings(settings);
+//    	//reheader
+//    	m_rehInSAM.validateSettings(settings);
+//    	//m_rehInBAM.validateSettings(settings);
+//    	//merge
+//    	m_mcompression.validateSettings(settings);
+//    	m_mforce.validateSettings(settings);
+//    	m_usemhfile.validateSettings(settings);
+//    	m_mhfile.validateSettings(settings);
+//    	m_msorted.validateSettings(settings);
+//    	m_mregion.validateSettings(settings);
+//    	m_usemregion.validateSettings(settings);
+//    	m_mrgtag.validateSettings(settings);
+//    	m_muncompressed.validateSettings(settings);
+//    	m_minbam1.validateSettings(settings);
+//    	//m_minbam2.validateSettings(settings);
+//    	//faidx
+//    	//m_infasta.validateSettings(settings);
+//    	//phase
+//    	m_blocklength.validateSettings(settings);
+//    	m_prefix.validateSettings(settings);
+//    	m_hetphred.validateSettings(settings);
+//    	m_minqual.validateSettings(settings);
+//    	m_maxdepth.validateSettings(settings);
+//    	m_fixchimeras.validateSettings(settings);
+//    	//m_dropambig.validateSettings(settings);
+//    	
+//    }
     
     /**
      * {@inheritDoc}

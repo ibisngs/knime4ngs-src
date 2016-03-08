@@ -8,8 +8,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -52,6 +50,8 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
      */
     protected GATKPhaseByTransmissionNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	addSetting(m_PED_FILE);
+	   	addSetting(m_DENOVO_PRIOR);
     }
 
 	@Override
@@ -82,34 +82,34 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 	}
 	
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
-		   	 m_PED_FILE.saveSettingsTo(settings);
-		   	 m_DENOVO_PRIOR.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-		   	 m_PED_FILE.loadSettingsFrom(settings);
-		   	 m_DENOVO_PRIOR.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateExtraSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-		   	 m_PED_FILE.validateSettings(settings);
-		     m_DENOVO_PRIOR.validateSettings(settings);
-    } 
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
+//		   	 m_PED_FILE.saveSettingsTo(settings);
+//		   	 m_DENOVO_PRIOR.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//		   	 m_PED_FILE.loadSettingsFrom(settings);
+//		   	 m_DENOVO_PRIOR.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateExtraSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//		   	 m_PED_FILE.validateSettings(settings);
+//		     m_DENOVO_PRIOR.validateSettings(settings);
+//    } 
 
 	@Override
 	protected String getCommandWalker() {

@@ -17,8 +17,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
@@ -93,6 +91,19 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 	
     protected VCFToolsFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	
+    	addSetting(m_filter_by_DP);
+    	addSetting(m_filter_by_AD);
+    	addSetting(m_DP_threshold);
+    	addSetting(m_filter_by_GQ);
+    	addSetting(m_GQ_threshold);
+    	addSetting(m_filter_pass);
+    	addSetting(m_filter_by_callRate);
+    	addSetting(m_callRate_threshold);
+    	addSetting(m_filter_by_GQ_MEAN);
+    	addSetting(m_GQ_mean_threshold);
+    	addSetting(m_vcf_tools);
+        addSetting(m_fill_an_ac); 
     }
 
     /**
@@ -359,67 +370,67 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-	protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	super.saveSettingsTo(settings);
-    	m_filter_by_DP.saveSettingsTo(settings);
-    	m_filter_by_AD.saveSettingsTo(settings);
-    	m_DP_threshold.saveSettingsTo(settings);
-    	m_filter_by_GQ.saveSettingsTo(settings);
-    	m_GQ_threshold.saveSettingsTo(settings);
-    	m_filter_pass.saveSettingsTo(settings);
-    	m_filter_by_callRate.saveSettingsTo(settings);
-    	m_callRate_threshold.saveSettingsTo(settings);
-    	m_filter_by_GQ_MEAN.saveSettingsTo(settings);
-    	m_GQ_mean_threshold.saveSettingsTo(settings);
-    	m_vcf_tools.saveSettingsTo(settings);
-		m_fill_an_ac.saveSettingsTo(settings);
-	}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.loadValidatedSettingsFrom(settings);
-    	m_filter_by_DP.loadSettingsFrom(settings);
-    	m_filter_by_AD.loadSettingsFrom(settings);
-    	m_DP_threshold.loadSettingsFrom(settings);
-    	m_filter_by_GQ.loadSettingsFrom(settings);
-    	m_GQ_threshold.loadSettingsFrom(settings);
-    	m_filter_pass.loadSettingsFrom(settings);
-    	m_filter_by_callRate.loadSettingsFrom(settings);
-    	m_callRate_threshold.loadSettingsFrom(settings);
-    	m_filter_by_GQ_MEAN.loadSettingsFrom(settings);
-    	m_GQ_mean_threshold.loadSettingsFrom(settings);
-    	m_vcf_tools.loadSettingsFrom(settings);
-        m_fill_an_ac.loadSettingsFrom(settings); 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.validateSettings(settings);
-    	m_filter_by_DP.validateSettings(settings);
-    	m_filter_by_AD.validateSettings(settings);
-    	m_DP_threshold.validateSettings(settings);
-    	m_filter_by_GQ.validateSettings(settings);
-    	m_GQ_threshold.validateSettings(settings);
-    	m_filter_by_callRate.validateSettings(settings);
-    	m_callRate_threshold.validateSettings(settings);
-    	m_filter_pass.validateSettings(settings);
-    	m_filter_by_GQ_MEAN.validateSettings(settings);
-    	m_GQ_mean_threshold.validateSettings(settings);
-    	m_vcf_tools.validateSettings(settings);
-        m_fill_an_ac.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//	protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	super.saveSettingsTo(settings);
+//    	m_filter_by_DP.saveSettingsTo(settings);
+//    	m_filter_by_AD.saveSettingsTo(settings);
+//    	m_DP_threshold.saveSettingsTo(settings);
+//    	m_filter_by_GQ.saveSettingsTo(settings);
+//    	m_GQ_threshold.saveSettingsTo(settings);
+//    	m_filter_pass.saveSettingsTo(settings);
+//    	m_filter_by_callRate.saveSettingsTo(settings);
+//    	m_callRate_threshold.saveSettingsTo(settings);
+//    	m_filter_by_GQ_MEAN.saveSettingsTo(settings);
+//    	m_GQ_mean_threshold.saveSettingsTo(settings);
+//    	m_vcf_tools.saveSettingsTo(settings);
+//		m_fill_an_ac.saveSettingsTo(settings);
+//	}
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.loadValidatedSettingsFrom(settings);
+//    	m_filter_by_DP.loadSettingsFrom(settings);
+//    	m_filter_by_AD.loadSettingsFrom(settings);
+//    	m_DP_threshold.loadSettingsFrom(settings);
+//    	m_filter_by_GQ.loadSettingsFrom(settings);
+//    	m_GQ_threshold.loadSettingsFrom(settings);
+//    	m_filter_pass.loadSettingsFrom(settings);
+//    	m_filter_by_callRate.loadSettingsFrom(settings);
+//    	m_callRate_threshold.loadSettingsFrom(settings);
+//    	m_filter_by_GQ_MEAN.loadSettingsFrom(settings);
+//    	m_GQ_mean_threshold.loadSettingsFrom(settings);
+//    	m_vcf_tools.loadSettingsFrom(settings);
+//        m_fill_an_ac.loadSettingsFrom(settings); 
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.validateSettings(settings);
+//    	m_filter_by_DP.validateSettings(settings);
+//    	m_filter_by_AD.validateSettings(settings);
+//    	m_DP_threshold.validateSettings(settings);
+//    	m_filter_by_GQ.validateSettings(settings);
+//    	m_GQ_threshold.validateSettings(settings);
+//    	m_filter_by_callRate.validateSettings(settings);
+//    	m_callRate_threshold.validateSettings(settings);
+//    	m_filter_pass.validateSettings(settings);
+//    	m_filter_by_GQ_MEAN.validateSettings(settings);
+//    	m_GQ_mean_threshold.validateSettings(settings);
+//    	m_vcf_tools.validateSettings(settings);
+//        m_fill_an_ac.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

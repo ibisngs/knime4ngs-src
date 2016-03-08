@@ -98,7 +98,8 @@ public class VCFMergerNodeModel extends GATKNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+    	 super.saveSettingsTo(settings);
          m_OUTFOLDER.saveSettingsTo(settings);
          m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
          m_OUTFILETAG.saveSettingsTo(settings);  
@@ -113,8 +114,9 @@ public class VCFMergerNodeModel extends GATKNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	super.loadValidatedSettingsFrom(settings);
         m_OUTFOLDER.loadSettingsFrom(settings);
         m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
         m_OUTFILETAG.loadSettingsFrom(settings); 
@@ -140,8 +142,9 @@ public class VCFMergerNodeModel extends GATKNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void validateExtraSettings(final NodeSettingsRO settings)
+    protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
+    	super.validateSettings(settings);
         m_OUTFOLDER.validateSettings(settings);
         m_GENOTYPEMERGEOPTION.validateSettings(settings);
         m_OUTFILETAG.validateSettings(settings);     

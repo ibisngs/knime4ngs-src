@@ -16,8 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
@@ -56,6 +54,8 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
      */
     protected PlotDepthOfCoverageNodeModel() {
     	super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(0), SCRIPT_PATH, new String[]{"--infile"}, new String[]{});
+    	addSetting(m_filesuffix);
+    	addSetting(m_infolder);
     }
 
     
@@ -176,34 +176,34 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-        	m_filesuffix.saveSettingsTo(settings);
-        	m_infolder.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_filesuffix.loadSettingsFrom(settings);
-        m_infolder.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        m_filesuffix.validateSettings(settings);
-        m_infolder.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//        	m_filesuffix.saveSettingsTo(settings);
+//        	m_infolder.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_filesuffix.loadSettingsFrom(settings);
+//        m_infolder.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        m_filesuffix.validateSettings(settings);
+//        m_infolder.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

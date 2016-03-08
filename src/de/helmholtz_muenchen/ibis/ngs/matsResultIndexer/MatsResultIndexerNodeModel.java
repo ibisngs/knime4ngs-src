@@ -52,17 +52,7 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 	
 	 protected MatsResultIndexerNodeModel() {
         super(0, 1, false, false);
-        init();
-    }
-	 
-	 /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	super.init();
-    	
-    	this.addSetting(SET_INPUT_FILE);
+        this.addSetting(SET_INPUT_FILE);
     	this.addSetting(SET_OUTPUT_FILE);
     	this.addSetting(SET_INCLUDE_NOVEL);
     }

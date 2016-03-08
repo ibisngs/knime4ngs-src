@@ -22,8 +22,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -72,7 +70,8 @@ public class SnpEffGetDBNodeModel extends HTExecutorNodeModel {
     
     	super(0,1);
     	
-        // TODO: Specify the amount of input and output ports needed.
+    	addSetting(m_snpeff_folder);
+    	addSetting(m_database);
 
     }
 
@@ -211,49 +210,49 @@ public class SnpEffGetDBNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	super.saveSettingsTo(settings);
-    	    	
-        m_snpeff_folder.saveSettingsTo(settings);
-    	m_database.saveSettingsTo(settings);
-    	//m_database_folder.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        
-    	super.loadValidatedSettingsFrom(settings);
-    	
-        m_snpeff_folder.loadSettingsFrom(settings);
-    	m_database.loadSettingsFrom(settings);
-    	//m_database_folder.loadSettingsFrom(settings);
-    	
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.validateSettings(settings);
-    	
-        m_snpeff_folder.validateSettings(settings);
-    	m_database.validateSettings(settings);
-    	//m_database_folder.validateSettings(settings);
-    }
-    
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	
+//    	super.saveSettingsTo(settings);
+//    	    	
+//        m_snpeff_folder.saveSettingsTo(settings);
+//    	m_database.saveSettingsTo(settings);
+//    	//m_database_folder.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//        m_snpeff_folder.loadSettingsFrom(settings);
+//    	m_database.loadSettingsFrom(settings);
+//    	//m_database_folder.loadSettingsFrom(settings);
+//    	
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.validateSettings(settings);
+//    	
+//        m_snpeff_folder.validateSettings(settings);
+//    	m_database.validateSettings(settings);
+//    	//m_database_folder.validateSettings(settings);
+//    }
+//    
     /**
      * {@inheritDoc}
      */

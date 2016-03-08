@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
@@ -130,6 +128,30 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     protected RawReadManipulatorNodeModel() {
     
         super(1, 1);
+        
+    	addSetting(m_removeadapters);
+    	addSetting(m_adapters);
+    	addSetting(m_dotrimpolyat);
+    	addSetting(m_trimpolyat);
+    	addSetting(m_filterfileexists);
+    	addSetting(m_ifbarcodefile);
+    	addSetting(m_barcodefile);
+    	addSetting(m_lengthcutoff);
+    	addSetting(m_minlength);
+    	addSetting(m_preserve);
+    	addSetting(m_threadcount);
+    	addSetting(m_isillumina);
+    	addSetting(m_ifillumina);
+    	addSetting(m_convtophred);
+    	addSetting(m_removen);
+    	addSetting(m_usequalthreshold);
+    	addSetting(m_qualthreshold);
+    	addSetting(m_usetrimbyqual);
+    	addSetting(m_trimbyqual);
+    	addSetting(m_otherfiltersettingsfile);
+    	addSetting(m_useotherfilterfile);
+    	addSetting(m_trimbothends);
+    	addSetting(m_outputfolder);
 
     	m_adapters.setEnabled(false);
 		m_trimpolyat.setEnabled(false);
@@ -351,103 +373,103 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     }
     
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	super.saveSettingsTo(settings);
-    	m_removeadapters.saveSettingsTo(settings);
-    	m_adapters.saveSettingsTo(settings);
-    	m_dotrimpolyat.saveSettingsTo(settings);
-    	m_trimpolyat.saveSettingsTo(settings);
-    	m_filterfileexists.saveSettingsTo(settings);
-    	m_ifbarcodefile.saveSettingsTo(settings);
-    	m_barcodefile.saveSettingsTo(settings);
-    	m_lengthcutoff.saveSettingsTo(settings);
-    	m_minlength.saveSettingsTo(settings);
-    	m_preserve.saveSettingsTo(settings);
-    	m_threadcount.saveSettingsTo(settings);
-    	m_isillumina.saveSettingsTo(settings);
-    	m_ifillumina.saveSettingsTo(settings);
-    	m_convtophred.saveSettingsTo(settings);
-    	m_removen.saveSettingsTo(settings);
-    	m_usequalthreshold.saveSettingsTo(settings);
-    	m_qualthreshold.saveSettingsTo(settings);
-    	m_usetrimbyqual.saveSettingsTo(settings);
-    	m_trimbyqual.saveSettingsTo(settings);
-    	m_otherfiltersettingsfile.saveSettingsTo(settings);
-    	m_useotherfilterfile.saveSettingsTo(settings);
-    	m_trimbothends.saveSettingsTo(settings);
-    	m_outputfolder.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.loadValidatedSettingsFrom(settings);
-    	m_removeadapters.loadSettingsFrom(settings);
-    	m_adapters.loadSettingsFrom(settings);
-    	m_dotrimpolyat.loadSettingsFrom(settings);
-    	m_trimpolyat.loadSettingsFrom(settings);
-    	m_filterfileexists.loadSettingsFrom(settings);
-    	m_ifbarcodefile.loadSettingsFrom(settings);
-    	m_barcodefile.loadSettingsFrom(settings);
-    	m_lengthcutoff.loadSettingsFrom(settings);
-    	m_minlength.loadSettingsFrom(settings);
-    	m_preserve.loadSettingsFrom(settings);
-    	m_threadcount.loadSettingsFrom(settings);
-    	m_isillumina.loadSettingsFrom(settings);
-    	m_ifillumina.loadSettingsFrom(settings);
-    	m_convtophred.loadSettingsFrom(settings);
-    	m_removen.loadSettingsFrom(settings);
-    	m_usequalthreshold.loadSettingsFrom(settings);
-    	m_qualthreshold.loadSettingsFrom(settings);
-    	m_usetrimbyqual.loadSettingsFrom(settings);
-    	m_trimbyqual.loadSettingsFrom(settings);
-    	m_useotherfilterfile.loadSettingsFrom(settings);
-    	m_otherfiltersettingsfile.loadSettingsFrom(settings);
-    	m_trimbothends.loadSettingsFrom(settings);
-    	m_outputfolder.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-   
-    	super.validateSettings(settings);
-    	m_removeadapters.validateSettings(settings);
-    	m_adapters.validateSettings(settings);
-    	m_dotrimpolyat.validateSettings(settings);
-    	m_trimpolyat.validateSettings(settings);
-    	m_filterfileexists.validateSettings(settings);
-    	m_ifbarcodefile.validateSettings(settings);
-    	m_barcodefile.validateSettings(settings);
-    	m_lengthcutoff.validateSettings(settings);
-    	m_minlength.validateSettings(settings);
-    	m_preserve.validateSettings(settings);
-    	m_threadcount.validateSettings(settings);
-    	m_isillumina.validateSettings(settings);
-    	m_ifillumina.validateSettings(settings);
-    	m_convtophred.validateSettings(settings);
-    	m_removen.validateSettings(settings);
-    	m_usequalthreshold.validateSettings(settings);
-    	m_qualthreshold.validateSettings(settings);
-    	m_usetrimbyqual.validateSettings(settings);
-    	m_trimbyqual.validateSettings(settings);
-    	m_useotherfilterfile.validateSettings(settings);
-    	m_otherfiltersettingsfile.validateSettings(settings);
-    	m_trimbothends.validateSettings(settings);
-    	m_outputfolder.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	
+//    	super.saveSettingsTo(settings);
+//    	m_removeadapters.saveSettingsTo(settings);
+//    	m_adapters.saveSettingsTo(settings);
+//    	m_dotrimpolyat.saveSettingsTo(settings);
+//    	m_trimpolyat.saveSettingsTo(settings);
+//    	m_filterfileexists.saveSettingsTo(settings);
+//    	m_ifbarcodefile.saveSettingsTo(settings);
+//    	m_barcodefile.saveSettingsTo(settings);
+//    	m_lengthcutoff.saveSettingsTo(settings);
+//    	m_minlength.saveSettingsTo(settings);
+//    	m_preserve.saveSettingsTo(settings);
+//    	m_threadcount.saveSettingsTo(settings);
+//    	m_isillumina.saveSettingsTo(settings);
+//    	m_ifillumina.saveSettingsTo(settings);
+//    	m_convtophred.saveSettingsTo(settings);
+//    	m_removen.saveSettingsTo(settings);
+//    	m_usequalthreshold.saveSettingsTo(settings);
+//    	m_qualthreshold.saveSettingsTo(settings);
+//    	m_usetrimbyqual.saveSettingsTo(settings);
+//    	m_trimbyqual.saveSettingsTo(settings);
+//    	m_otherfiltersettingsfile.saveSettingsTo(settings);
+//    	m_useotherfilterfile.saveSettingsTo(settings);
+//    	m_trimbothends.saveSettingsTo(settings);
+//    	m_outputfolder.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.loadValidatedSettingsFrom(settings);
+//    	m_removeadapters.loadSettingsFrom(settings);
+//    	m_adapters.loadSettingsFrom(settings);
+//    	m_dotrimpolyat.loadSettingsFrom(settings);
+//    	m_trimpolyat.loadSettingsFrom(settings);
+//    	m_filterfileexists.loadSettingsFrom(settings);
+//    	m_ifbarcodefile.loadSettingsFrom(settings);
+//    	m_barcodefile.loadSettingsFrom(settings);
+//    	m_lengthcutoff.loadSettingsFrom(settings);
+//    	m_minlength.loadSettingsFrom(settings);
+//    	m_preserve.loadSettingsFrom(settings);
+//    	m_threadcount.loadSettingsFrom(settings);
+//    	m_isillumina.loadSettingsFrom(settings);
+//    	m_ifillumina.loadSettingsFrom(settings);
+//    	m_convtophred.loadSettingsFrom(settings);
+//    	m_removen.loadSettingsFrom(settings);
+//    	m_usequalthreshold.loadSettingsFrom(settings);
+//    	m_qualthreshold.loadSettingsFrom(settings);
+//    	m_usetrimbyqual.loadSettingsFrom(settings);
+//    	m_trimbyqual.loadSettingsFrom(settings);
+//    	m_useotherfilterfile.loadSettingsFrom(settings);
+//    	m_otherfiltersettingsfile.loadSettingsFrom(settings);
+//    	m_trimbothends.loadSettingsFrom(settings);
+//    	m_outputfolder.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//   
+//    	super.validateSettings(settings);
+//    	m_removeadapters.validateSettings(settings);
+//    	m_adapters.validateSettings(settings);
+//    	m_dotrimpolyat.validateSettings(settings);
+//    	m_trimpolyat.validateSettings(settings);
+//    	m_filterfileexists.validateSettings(settings);
+//    	m_ifbarcodefile.validateSettings(settings);
+//    	m_barcodefile.validateSettings(settings);
+//    	m_lengthcutoff.validateSettings(settings);
+//    	m_minlength.validateSettings(settings);
+//    	m_preserve.validateSettings(settings);
+//    	m_threadcount.validateSettings(settings);
+//    	m_isillumina.validateSettings(settings);
+//    	m_ifillumina.validateSettings(settings);
+//    	m_convtophred.validateSettings(settings);
+//    	m_removen.validateSettings(settings);
+//    	m_usequalthreshold.validateSettings(settings);
+//    	m_qualthreshold.validateSettings(settings);
+//    	m_usetrimbyqual.validateSettings(settings);
+//    	m_trimbyqual.validateSettings(settings);
+//    	m_useotherfilterfile.validateSettings(settings);
+//    	m_otherfiltersettingsfile.validateSettings(settings);
+//    	m_trimbothends.validateSettings(settings);
+//    	m_outputfolder.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

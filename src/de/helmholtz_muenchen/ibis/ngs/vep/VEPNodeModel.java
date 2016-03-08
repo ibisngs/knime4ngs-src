@@ -16,8 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -109,6 +107,23 @@ public class VEPNodeModel extends HTExecutorNodeModel {
      */
     protected VEPNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	
+    	addSetting(m_veppl);
+        addSetting(m_fasta);
+        addSetting(m_outfolder);
+        addSetting(m_stats_type);
+        addSetting(m_coding_only);
+        addSetting(m_use_cache);
+        addSetting(m_cache_dir);
+        addSetting(m_plugin_dir);
+        addSetting(m_further_plugins);
+        addSetting(m_use_loftee);
+        addSetting(m_human_ancestor);
+        addSetting(m_conservation_file);
+        addSetting(m_samtools_path);
+        addSetting(m_forks);
+        addSetting(m_transcript_set);
+        addSetting(m_overwrite);
     }
 
     /**
@@ -330,79 +345,79 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	super.saveSettingsTo(settings);
-        m_veppl.saveSettingsTo(settings);
-        m_fasta.saveSettingsTo(settings);
-        m_outfolder.saveSettingsTo(settings);
-        m_stats_type.saveSettingsTo(settings);
-        m_coding_only.saveSettingsTo(settings);
-        m_use_cache.saveSettingsTo(settings);
-        m_cache_dir.saveSettingsTo(settings);
-        m_plugin_dir.saveSettingsTo(settings);
-        m_further_plugins.saveSettingsTo(settings);
-        m_use_loftee.saveSettingsTo(settings);
-        m_human_ancestor.saveSettingsTo(settings);
-        m_conservation_file.saveSettingsTo(settings);
-        m_samtools_path.saveSettingsTo(settings);
-        m_forks.saveSettingsTo(settings);
-        m_transcript_set.saveSettingsTo(settings);
-        m_overwrite.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.loadValidatedSettingsFrom(settings);
-        m_veppl.loadSettingsFrom(settings);
-        m_fasta.loadSettingsFrom(settings);
-        m_outfolder.loadSettingsFrom(settings);
-        m_stats_type.loadSettingsFrom(settings);
-        m_coding_only.loadSettingsFrom(settings);
-        m_use_cache.loadSettingsFrom(settings);
-        m_cache_dir.loadSettingsFrom(settings);
-        m_plugin_dir.loadSettingsFrom(settings);
-        m_further_plugins.loadSettingsFrom(settings);
-        m_use_loftee.loadSettingsFrom(settings);
-        m_human_ancestor.loadSettingsFrom(settings);
-        m_conservation_file.loadSettingsFrom(settings);
-        m_samtools_path.loadSettingsFrom(settings);
-        m_forks.loadSettingsFrom(settings);
-        m_transcript_set.loadSettingsFrom(settings);
-        m_overwrite.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.validateSettings(settings);
-        m_veppl.validateSettings(settings);
-        m_fasta.validateSettings(settings);
-        m_outfolder.validateSettings(settings);
-        m_stats_type.validateSettings(settings);
-        m_coding_only.validateSettings(settings);
-        m_use_cache.validateSettings(settings);
-        m_cache_dir.validateSettings(settings);
-        m_plugin_dir.validateSettings(settings);
-        m_further_plugins.validateSettings(settings);
-        m_use_loftee.validateSettings(settings);
-        m_human_ancestor.validateSettings(settings);
-        m_conservation_file.validateSettings(settings);
-        m_samtools_path.validateSettings(settings);
-        m_forks.validateSettings(settings);
-        m_transcript_set.validateSettings(settings);
-        m_overwrite.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	super.saveSettingsTo(settings);
+//        m_veppl.saveSettingsTo(settings);
+//        m_fasta.saveSettingsTo(settings);
+//        m_outfolder.saveSettingsTo(settings);
+//        m_stats_type.saveSettingsTo(settings);
+//        m_coding_only.saveSettingsTo(settings);
+//        m_use_cache.saveSettingsTo(settings);
+//        m_cache_dir.saveSettingsTo(settings);
+//        m_plugin_dir.saveSettingsTo(settings);
+//        m_further_plugins.saveSettingsTo(settings);
+//        m_use_loftee.saveSettingsTo(settings);
+//        m_human_ancestor.saveSettingsTo(settings);
+//        m_conservation_file.saveSettingsTo(settings);
+//        m_samtools_path.saveSettingsTo(settings);
+//        m_forks.saveSettingsTo(settings);
+//        m_transcript_set.saveSettingsTo(settings);
+//        m_overwrite.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.loadValidatedSettingsFrom(settings);
+//        m_veppl.loadSettingsFrom(settings);
+//        m_fasta.loadSettingsFrom(settings);
+//        m_outfolder.loadSettingsFrom(settings);
+//        m_stats_type.loadSettingsFrom(settings);
+//        m_coding_only.loadSettingsFrom(settings);
+//        m_use_cache.loadSettingsFrom(settings);
+//        m_cache_dir.loadSettingsFrom(settings);
+//        m_plugin_dir.loadSettingsFrom(settings);
+//        m_further_plugins.loadSettingsFrom(settings);
+//        m_use_loftee.loadSettingsFrom(settings);
+//        m_human_ancestor.loadSettingsFrom(settings);
+//        m_conservation_file.loadSettingsFrom(settings);
+//        m_samtools_path.loadSettingsFrom(settings);
+//        m_forks.loadSettingsFrom(settings);
+//        m_transcript_set.loadSettingsFrom(settings);
+//        m_overwrite.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.validateSettings(settings);
+//        m_veppl.validateSettings(settings);
+//        m_fasta.validateSettings(settings);
+//        m_outfolder.validateSettings(settings);
+//        m_stats_type.validateSettings(settings);
+//        m_coding_only.validateSettings(settings);
+//        m_use_cache.validateSettings(settings);
+//        m_cache_dir.validateSettings(settings);
+//        m_plugin_dir.validateSettings(settings);
+//        m_further_plugins.validateSettings(settings);
+//        m_use_loftee.validateSettings(settings);
+//        m_human_ancestor.validateSettings(settings);
+//        m_conservation_file.validateSettings(settings);
+//        m_samtools_path.validateSettings(settings);
+//        m_forks.validateSettings(settings);
+//        m_transcript_set.validateSettings(settings);
+//        m_overwrite.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

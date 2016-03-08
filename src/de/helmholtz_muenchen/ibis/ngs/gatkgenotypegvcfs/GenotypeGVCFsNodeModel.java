@@ -1,7 +1,5 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkgenotypegvcfs;
 
-
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,8 +10,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
@@ -42,6 +38,8 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
 		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
+		addSetting(m_NT);
+		addSetting(m_OUTFOLDER);
    	}
 
 	@Override
@@ -74,27 +72,27 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	}
 
 
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_NT.saveSettingsTo(settings);
-		m_OUTFOLDER.saveSettingsTo(settings);
-		
-	}
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_NT.loadSettingsFrom(settings);
-		m_OUTFOLDER.loadSettingsFrom(settings);
-		
-	}
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_NT.validateSettings(settings);
-		m_OUTFOLDER.validateSettings(settings);
-	}
+//	@Override
+//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
+//		m_NT.saveSettingsTo(settings);
+//		m_OUTFOLDER.saveSettingsTo(settings);
+//		
+//	}
+//
+//	@Override
+//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_NT.loadSettingsFrom(settings);
+//		m_OUTFOLDER.loadSettingsFrom(settings);
+//		
+//	}
+//
+//	@Override
+//	protected void validateExtraSettings(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_NT.validateSettings(settings);
+//		m_OUTFOLDER.validateSettings(settings);
+//	}
 	
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

@@ -18,8 +18,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -85,6 +83,22 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     protected SegemehlNodeModel() {
     
         super(1, 1);
+        
+    	addSetting(m_segemehlfile);
+    	addSetting(m_refseqfile);
+    	addSetting(m_adapter3seq);
+    	addSetting(m_adapter5seq);
+    	addSetting(m_autoadapter3seq);
+    	addSetting(m_clip3adapter);
+    	addSetting(m_clip5adapter);
+    	addSetting(m_clippolya);
+    	addSetting(m_softhardclipping);
+    	addSetting(m_threads);
+    	addSetting(m_clippingaccuracy);
+    	addSetting(m_checkSplitReadMapping);
+    	addSetting(m_checkBisulfiteMapping);
+    	addSetting(m_bisulfiteMappingType);
+    	addSetting(m_accuracy);
         
         m_autoadapter3seq.setEnabled(false);
         m_adapter3seq.setEnabled(false);
@@ -303,85 +317,85 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-    	m_segemehlfile.saveSettingsTo(settings);
-    	m_refseqfile.saveSettingsTo(settings);
-    	m_adapter3seq.saveSettingsTo(settings);
-    	m_adapter5seq.saveSettingsTo(settings);
-    	m_autoadapter3seq.saveSettingsTo(settings);
-    	m_clip3adapter.saveSettingsTo(settings);
-    	m_clip5adapter.saveSettingsTo(settings);
-    	m_clippolya.saveSettingsTo(settings);
-    	m_softhardclipping.saveSettingsTo(settings);
-    	m_threads.saveSettingsTo(settings);
-    	m_clippingaccuracy.saveSettingsTo(settings);
-//    	m_checkIndexRefSeq.saveSettingsTo(settings);
-    	m_checkSplitReadMapping.saveSettingsTo(settings);
-    	m_checkBisulfiteMapping.saveSettingsTo(settings);
-    	m_bisulfiteMappingType.saveSettingsTo(settings);
-    	m_accuracy.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_segemehlfile.loadSettingsFrom(settings);
-    	m_refseqfile.loadSettingsFrom(settings);
-    	m_adapter3seq.loadSettingsFrom(settings);
-    	m_adapter5seq.loadSettingsFrom(settings);
-    	m_autoadapter3seq.loadSettingsFrom(settings);
-    	m_clip3adapter.loadSettingsFrom(settings);
-    	m_clip5adapter.loadSettingsFrom(settings);
-    	m_clippolya.loadSettingsFrom(settings);
-    	m_softhardclipping.loadSettingsFrom(settings);
-    	m_threads.loadSettingsFrom(settings);
-    	m_clippingaccuracy.loadSettingsFrom(settings);
-//    	m_checkIndexRefSeq.loadSettingsFrom(settings);
-    	m_checkSplitReadMapping.loadSettingsFrom(settings);
-    	m_checkBisulfiteMapping.loadSettingsFrom(settings);
-    	m_bisulfiteMappingType.loadSettingsFrom(settings);
-    	m_accuracy.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-    	m_segemehlfile.validateSettings(settings);
-    	m_refseqfile.validateSettings(settings);
-    	m_adapter3seq.validateSettings(settings);
-    	m_adapter5seq.validateSettings(settings);
-    	m_autoadapter3seq.validateSettings(settings);
-    	m_clip3adapter.validateSettings(settings);
-    	m_clip5adapter.validateSettings(settings);
-    	m_clippolya.validateSettings(settings);
-    	m_softhardclipping.validateSettings(settings);
-    	m_threads.validateSettings(settings);
-    	m_clippingaccuracy.validateSettings(settings);
-//    	m_checkIndexRefSeq.validateSettings(settings);
-    	m_checkSplitReadMapping.validateSettings(settings);
-    	m_checkBisulfiteMapping.validateSettings(settings);
-    	m_bisulfiteMappingType.validateSettings(settings);
-    	m_accuracy.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_segemehlfile.saveSettingsTo(settings);
+//    	m_refseqfile.saveSettingsTo(settings);
+//    	m_adapter3seq.saveSettingsTo(settings);
+//    	m_adapter5seq.saveSettingsTo(settings);
+//    	m_autoadapter3seq.saveSettingsTo(settings);
+//    	m_clip3adapter.saveSettingsTo(settings);
+//    	m_clip5adapter.saveSettingsTo(settings);
+//    	m_clippolya.saveSettingsTo(settings);
+//    	m_softhardclipping.saveSettingsTo(settings);
+//    	m_threads.saveSettingsTo(settings);
+//    	m_clippingaccuracy.saveSettingsTo(settings);
+////    	m_checkIndexRefSeq.saveSettingsTo(settings);
+//    	m_checkSplitReadMapping.saveSettingsTo(settings);
+//    	m_checkBisulfiteMapping.saveSettingsTo(settings);
+//    	m_bisulfiteMappingType.saveSettingsTo(settings);
+//    	m_accuracy.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_segemehlfile.loadSettingsFrom(settings);
+//    	m_refseqfile.loadSettingsFrom(settings);
+//    	m_adapter3seq.loadSettingsFrom(settings);
+//    	m_adapter5seq.loadSettingsFrom(settings);
+//    	m_autoadapter3seq.loadSettingsFrom(settings);
+//    	m_clip3adapter.loadSettingsFrom(settings);
+//    	m_clip5adapter.loadSettingsFrom(settings);
+//    	m_clippolya.loadSettingsFrom(settings);
+//    	m_softhardclipping.loadSettingsFrom(settings);
+//    	m_threads.loadSettingsFrom(settings);
+//    	m_clippingaccuracy.loadSettingsFrom(settings);
+////    	m_checkIndexRefSeq.loadSettingsFrom(settings);
+//    	m_checkSplitReadMapping.loadSettingsFrom(settings);
+//    	m_checkBisulfiteMapping.loadSettingsFrom(settings);
+//    	m_bisulfiteMappingType.loadSettingsFrom(settings);
+//    	m_accuracy.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//    	m_segemehlfile.validateSettings(settings);
+//    	m_refseqfile.validateSettings(settings);
+//    	m_adapter3seq.validateSettings(settings);
+//    	m_adapter5seq.validateSettings(settings);
+//    	m_autoadapter3seq.validateSettings(settings);
+//    	m_clip3adapter.validateSettings(settings);
+//    	m_clip5adapter.validateSettings(settings);
+//    	m_clippolya.validateSettings(settings);
+//    	m_softhardclipping.validateSettings(settings);
+//    	m_threads.validateSettings(settings);
+//    	m_clippingaccuracy.validateSettings(settings);
+////    	m_checkIndexRefSeq.validateSettings(settings);
+//    	m_checkSplitReadMapping.validateSettings(settings);
+//    	m_checkBisulfiteMapping.validateSettings(settings);
+//    	m_bisulfiteMappingType.validateSettings(settings);
+//    	m_accuracy.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

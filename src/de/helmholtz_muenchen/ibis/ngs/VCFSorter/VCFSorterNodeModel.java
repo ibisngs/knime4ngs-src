@@ -53,8 +53,8 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
      */
     protected VCFSorterNodeModel() {
     
-        // TODO: Specify the amount of input and output ports needed.
         super(1, 1);
+        addSetting(m_refseqfile);
     }
 
     /**

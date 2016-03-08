@@ -4,6 +4,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -26,6 +27,8 @@ public class VCFSorterNodeDialog extends HTExecutorNodeDialog {
 	
 	
     protected VCFSorterNodeDialog() {
+    	
+    	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
     	
     	createNewGroup("Reference sequence: FastA file (e.g. genome)");
     	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ".fa|.fasta"));

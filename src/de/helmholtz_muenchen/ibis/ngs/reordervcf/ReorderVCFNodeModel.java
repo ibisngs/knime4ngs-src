@@ -16,8 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -48,6 +46,8 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
      */
     protected ReorderVCFNodeModel() {
         super(1, 1);
+        addSetting(m_REFERENCE_VCF);
+        addSetting(m_VCFTOOLS);
     }
 
     /**
@@ -180,43 +180,43 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-         m_REFERENCE_VCF.saveSettingsTo(settings);
-         m_VCFTOOLS.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-        m_REFERENCE_VCF.loadSettingsFrom(settings);
-        m_VCFTOOLS.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-        m_REFERENCE_VCF.validateSettings(settings);
-        m_VCFTOOLS.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//         m_REFERENCE_VCF.saveSettingsTo(settings);
+//         m_VCFTOOLS.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//        m_REFERENCE_VCF.loadSettingsFrom(settings);
+//        m_VCFTOOLS.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//        m_REFERENCE_VCF.validateSettings(settings);
+//        m_VCFTOOLS.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

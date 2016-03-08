@@ -15,8 +15,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -140,6 +138,37 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     protected SnpEffNodeModel() {
     
         super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(1));
+        
+        /*Mandatory options*/
+    	addSetting(m_snpeff_folder);
+    	addSetting(m_database);
+    	addSetting(m_vcf_file);
+    	
+    	/*Sequence change filter options*/
+    	addSetting(m_use_minq);
+    	addSetting(m_minq);
+    	addSetting(m_use_minc);
+    	addSetting(m_minc);
+    	
+    	addSetting(m_del);
+    	addSetting(m_ins);
+    	addSetting(m_hom);
+    	addSetting(m_het);
+    	addSetting(m_mnp);
+    	addSetting(m_snp);
+    	
+    	/*Results filter options*/
+    	addSetting(m_usebedfile);
+    	addSetting(m_bed_file);
+    	
+    	addSetting(m_no_downstream);
+    	addSetting(m_no_intergenic);
+    	addSetting(m_no_intronic);
+    	addSetting(m_no_upstream);
+    	addSetting(m_no_utr);
+    	
+    	/*Annotations options*/
+    	addSetting(m_lof);
         
         m_bed_file.setEnabled(false);
         
@@ -315,127 +344,127 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	super.saveSettingsTo(settings);
-    	
-    	/*Mandatory options*/
-    	m_snpeff_folder.saveSettingsTo(settings);
-    	m_database.saveSettingsTo(settings);
-    	m_vcf_file.saveSettingsTo(settings);
-    	
-    	/*Sequence change filter options*/
-    	m_use_minq.saveSettingsTo(settings);
-    	m_minq.saveSettingsTo(settings);
-    	m_use_minc.saveSettingsTo(settings);
-    	m_minc.saveSettingsTo(settings);
-    	
-    	m_del.saveSettingsTo(settings);
-    	m_ins.saveSettingsTo(settings);
-    	m_hom.saveSettingsTo(settings);
-    	m_het.saveSettingsTo(settings);
-    	m_mnp.saveSettingsTo(settings);
-    	m_snp.saveSettingsTo(settings);
-    	
-    	/*Results filter options*/
-    	m_usebedfile.saveSettingsTo(settings);
-    	m_bed_file.saveSettingsTo(settings);
-    	
-    	m_no_downstream.saveSettingsTo(settings);
-    	m_no_intergenic.saveSettingsTo(settings);
-    	m_no_intronic.saveSettingsTo(settings);
-    	m_no_upstream.saveSettingsTo(settings);
-    	m_no_utr.saveSettingsTo(settings);
-    	
-    	/*Annotations options*/
-    	m_lof.saveSettingsTo(settings);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-        
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	/*Mandatory options*/
-    	m_snpeff_folder.loadSettingsFrom(settings);
-    	m_database.loadSettingsFrom(settings);
-    	m_vcf_file.loadSettingsFrom(settings);
-    	
-    	/*Sequence change filter options*/
-    	m_use_minq.loadSettingsFrom(settings);
-    	m_minq.loadSettingsFrom(settings);
-    	m_use_minc.loadSettingsFrom(settings);
-    	m_minc.loadSettingsFrom(settings);
-    	m_mnp.loadSettingsFrom(settings);
-    	m_snp.loadSettingsFrom(settings);
-    	
-    	m_del.loadSettingsFrom(settings);
-    	m_ins.loadSettingsFrom(settings);
-    	m_hom.loadSettingsFrom(settings);
-    	m_het.loadSettingsFrom(settings);
-    	
-    	/*Results filter options*/
-    	m_usebedfile.loadSettingsFrom(settings);
-    	m_bed_file.loadSettingsFrom(settings);
-    	m_no_downstream.loadSettingsFrom(settings);
-    	m_no_intergenic.loadSettingsFrom(settings);
-    	m_no_intronic.loadSettingsFrom(settings);
-    	m_no_upstream.loadSettingsFrom(settings);
-    	m_no_utr.loadSettingsFrom(settings);
-    	
-    	/*Annotations options*/
-    	m_lof.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-
-    	super.validateSettings(settings);
-    	
-    	/*Mandatory options*/
-    	m_snpeff_folder.validateSettings(settings);
-    	m_database.validateSettings(settings);
-    	m_vcf_file.validateSettings(settings);
-    	
-    	/*Sequence change filter options*/
-    	m_use_minq.validateSettings(settings);
-    	m_minq.validateSettings(settings);
-    	m_use_minc.validateSettings(settings);
-    	m_minc.validateSettings(settings);
-    	
-    	m_del.validateSettings(settings);
-    	m_ins.validateSettings(settings);
-    	m_hom.validateSettings(settings);
-    	m_het.validateSettings(settings);
-    	m_mnp.validateSettings(settings);
-    	m_snp.validateSettings(settings);
-    	
-    	/*Results filter options*/
-    	m_usebedfile.validateSettings(settings);
-    	m_bed_file.validateSettings(settings);
-    	m_no_downstream.validateSettings(settings);
-    	m_no_intergenic.validateSettings(settings);
-    	m_no_intronic.validateSettings(settings);
-    	m_no_upstream.validateSettings(settings);
-    	m_no_utr.validateSettings(settings);
-    	
-    	/*Annotations options*/
-    	m_lof.validateSettings(settings);
-    	
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	
+//    	super.saveSettingsTo(settings);
+//    	
+//    	/*Mandatory options*/
+//    	m_snpeff_folder.saveSettingsTo(settings);
+//    	m_database.saveSettingsTo(settings);
+//    	m_vcf_file.saveSettingsTo(settings);
+//    	
+//    	/*Sequence change filter options*/
+//    	m_use_minq.saveSettingsTo(settings);
+//    	m_minq.saveSettingsTo(settings);
+//    	m_use_minc.saveSettingsTo(settings);
+//    	m_minc.saveSettingsTo(settings);
+//    	
+//    	m_del.saveSettingsTo(settings);
+//    	m_ins.saveSettingsTo(settings);
+//    	m_hom.saveSettingsTo(settings);
+//    	m_het.saveSettingsTo(settings);
+//    	m_mnp.saveSettingsTo(settings);
+//    	m_snp.saveSettingsTo(settings);
+//    	
+//    	/*Results filter options*/
+//    	m_usebedfile.saveSettingsTo(settings);
+//    	m_bed_file.saveSettingsTo(settings);
+//    	
+//    	m_no_downstream.saveSettingsTo(settings);
+//    	m_no_intergenic.saveSettingsTo(settings);
+//    	m_no_intronic.saveSettingsTo(settings);
+//    	m_no_upstream.saveSettingsTo(settings);
+//    	m_no_utr.saveSettingsTo(settings);
+//    	
+//    	/*Annotations options*/
+//    	m_lof.saveSettingsTo(settings);
+//
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//        
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	/*Mandatory options*/
+//    	m_snpeff_folder.loadSettingsFrom(settings);
+//    	m_database.loadSettingsFrom(settings);
+//    	m_vcf_file.loadSettingsFrom(settings);
+//    	
+//    	/*Sequence change filter options*/
+//    	m_use_minq.loadSettingsFrom(settings);
+//    	m_minq.loadSettingsFrom(settings);
+//    	m_use_minc.loadSettingsFrom(settings);
+//    	m_minc.loadSettingsFrom(settings);
+//    	m_mnp.loadSettingsFrom(settings);
+//    	m_snp.loadSettingsFrom(settings);
+//    	
+//    	m_del.loadSettingsFrom(settings);
+//    	m_ins.loadSettingsFrom(settings);
+//    	m_hom.loadSettingsFrom(settings);
+//    	m_het.loadSettingsFrom(settings);
+//    	
+//    	/*Results filter options*/
+//    	m_usebedfile.loadSettingsFrom(settings);
+//    	m_bed_file.loadSettingsFrom(settings);
+//    	m_no_downstream.loadSettingsFrom(settings);
+//    	m_no_intergenic.loadSettingsFrom(settings);
+//    	m_no_intronic.loadSettingsFrom(settings);
+//    	m_no_upstream.loadSettingsFrom(settings);
+//    	m_no_utr.loadSettingsFrom(settings);
+//    	
+//    	/*Annotations options*/
+//    	m_lof.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//
+//    	super.validateSettings(settings);
+//    	
+//    	/*Mandatory options*/
+//    	m_snpeff_folder.validateSettings(settings);
+//    	m_database.validateSettings(settings);
+//    	m_vcf_file.validateSettings(settings);
+//    	
+//    	/*Sequence change filter options*/
+//    	m_use_minq.validateSettings(settings);
+//    	m_minq.validateSettings(settings);
+//    	m_use_minc.validateSettings(settings);
+//    	m_minc.validateSettings(settings);
+//    	
+//    	m_del.validateSettings(settings);
+//    	m_ins.validateSettings(settings);
+//    	m_hom.validateSettings(settings);
+//    	m_het.validateSettings(settings);
+//    	m_mnp.validateSettings(settings);
+//    	m_snp.validateSettings(settings);
+//    	
+//    	/*Results filter options*/
+//    	m_usebedfile.validateSettings(settings);
+//    	m_bed_file.validateSettings(settings);
+//    	m_no_downstream.validateSettings(settings);
+//    	m_no_intergenic.validateSettings(settings);
+//    	m_no_intronic.validateSettings(settings);
+//    	m_no_upstream.validateSettings(settings);
+//    	m_no_utr.validateSettings(settings);
+//    	
+//    	/*Annotations options*/
+//    	m_lof.validateSettings(settings);
+//    	
+//    }
     
     /**
      * {@inheritDoc}

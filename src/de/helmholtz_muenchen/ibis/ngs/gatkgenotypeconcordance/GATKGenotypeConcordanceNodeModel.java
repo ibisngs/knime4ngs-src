@@ -5,8 +5,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -72,22 +70,6 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
 	protected String getOutfile() {
 		return OUTFILE;
 	}
-
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-	
-	}
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings) throws InvalidSettingsException {
-	
-	}
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings) throws InvalidSettingsException {
-	
-	}
-
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

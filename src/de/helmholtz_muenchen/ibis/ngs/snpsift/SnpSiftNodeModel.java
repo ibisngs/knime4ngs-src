@@ -11,8 +11,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -105,6 +103,24 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	
     protected SnpSiftNodeModel() {
         super(1, 0);
+        
+		addSetting(m_invcf);
+		addSetting(m_method);
+		addSetting(m_snpeff_folder);
+		addSetting(m_filtercoverage);
+		addSetting(m_filterqual);
+		addSetting(m_filterstring);
+		addSetting(m_filtercoveragebool);
+		addSetting(m_filterqualbool);
+		addSetting(m_annid);
+		addSetting(m_anninfo);
+		addSetting(m_annvcfdb);
+		addSetting(m_tstvhom);
+		addSetting(m_interbed);
+		addSetting(m_interx);
+		addSetting(m_dbnsfp);
+		addSetting(m_dbnsfpfields);
+		addSetting(m_dbnsfpfieldsall);
     }
 
     /**
@@ -229,89 +245,89 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	super.saveSettingsTo(settings);
-    	
-    	m_invcf.saveSettingsTo(settings);
-    	m_method.saveSettingsTo(settings);
-    	m_snpeff_folder.saveSettingsTo(settings);
-         m_filtercoverage.saveSettingsTo(settings);
-         m_filterqual.saveSettingsTo(settings);
-         m_filterstring.saveSettingsTo(settings);
-         m_filtercoveragebool.saveSettingsTo(settings);
-         m_filterqualbool.saveSettingsTo(settings);
-         m_annid.saveSettingsTo(settings);
-         m_anninfo.saveSettingsTo(settings);
-         m_annvcfdb.saveSettingsTo(settings);
-         m_tstvhom.saveSettingsTo(settings);
-         m_interbed.saveSettingsTo(settings);
-         m_interx.saveSettingsTo(settings);
-         m_dbnsfp.saveSettingsTo(settings);
-         m_dbnsfpfields.saveSettingsTo(settings);
-         m_dbnsfpfieldsall.saveSettingsTo(settings);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.loadValidatedSettingsFrom(settings);
-    	
-        m_filtercoveragebool.loadSettingsFrom(settings);
-        m_filterqualbool.loadSettingsFrom(settings);
-        m_filtercoverage.loadSettingsFrom(settings);
-        m_filterqual.loadSettingsFrom(settings);
-        m_filterstring.loadSettingsFrom(settings);
-        m_invcf.loadSettingsFrom(settings);
-        m_method.loadSettingsFrom(settings);
-        m_snpeff_folder.loadSettingsFrom(settings);
-        m_annid.loadSettingsFrom(settings);
-        m_anninfo.loadSettingsFrom(settings);
-        m_annvcfdb.loadSettingsFrom(settings);
-        m_tstvhom.loadSettingsFrom(settings);
-        m_interbed.loadSettingsFrom(settings);
-        m_interx.loadSettingsFrom(settings);
-        m_dbnsfp.loadSettingsFrom(settings);
-        m_dbnsfpfields.loadSettingsFrom(settings);
-        m_dbnsfpfieldsall.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	super.validateSettings(settings);
-    	
-        m_filtercoverage.validateSettings(settings);
-        m_filterqual.validateSettings(settings);
-        m_filtercoveragebool.validateSettings(settings);
-        m_filterqualbool.validateSettings(settings);
-        m_filterstring.validateSettings(settings);
-        m_invcf.validateSettings(settings);
-        m_method.validateSettings(settings);
-        m_snpeff_folder.validateSettings(settings);
-        m_annid.validateSettings(settings);
-        m_anninfo.validateSettings(settings);
-        m_annvcfdb.validateSettings(settings);
-        m_tstvhom.validateSettings(settings);
-        m_interx.validateSettings(settings);
-        m_interbed.validateSettings(settings);
-        m_dbnsfp.validateSettings(settings);
-        m_dbnsfpfields.validateSettings(settings);
-        m_dbnsfpfieldsall.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_invcf.saveSettingsTo(settings);
+//    	m_method.saveSettingsTo(settings);
+//    	m_snpeff_folder.saveSettingsTo(settings);
+//         m_filtercoverage.saveSettingsTo(settings);
+//         m_filterqual.saveSettingsTo(settings);
+//         m_filterstring.saveSettingsTo(settings);
+//         m_filtercoveragebool.saveSettingsTo(settings);
+//         m_filterqualbool.saveSettingsTo(settings);
+//         m_annid.saveSettingsTo(settings);
+//         m_anninfo.saveSettingsTo(settings);
+//         m_annvcfdb.saveSettingsTo(settings);
+//         m_tstvhom.saveSettingsTo(settings);
+//         m_interbed.saveSettingsTo(settings);
+//         m_interx.saveSettingsTo(settings);
+//         m_dbnsfp.saveSettingsTo(settings);
+//         m_dbnsfpfields.saveSettingsTo(settings);
+//         m_dbnsfpfieldsall.saveSettingsTo(settings);
+//
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//        m_filtercoveragebool.loadSettingsFrom(settings);
+//        m_filterqualbool.loadSettingsFrom(settings);
+//        m_filtercoverage.loadSettingsFrom(settings);
+//        m_filterqual.loadSettingsFrom(settings);
+//        m_filterstring.loadSettingsFrom(settings);
+//        m_invcf.loadSettingsFrom(settings);
+//        m_method.loadSettingsFrom(settings);
+//        m_snpeff_folder.loadSettingsFrom(settings);
+//        m_annid.loadSettingsFrom(settings);
+//        m_anninfo.loadSettingsFrom(settings);
+//        m_annvcfdb.loadSettingsFrom(settings);
+//        m_tstvhom.loadSettingsFrom(settings);
+//        m_interbed.loadSettingsFrom(settings);
+//        m_interx.loadSettingsFrom(settings);
+//        m_dbnsfp.loadSettingsFrom(settings);
+//        m_dbnsfpfields.loadSettingsFrom(settings);
+//        m_dbnsfpfieldsall.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	
+//    	super.validateSettings(settings);
+//    	
+//        m_filtercoverage.validateSettings(settings);
+//        m_filterqual.validateSettings(settings);
+//        m_filtercoveragebool.validateSettings(settings);
+//        m_filterqualbool.validateSettings(settings);
+//        m_filterstring.validateSettings(settings);
+//        m_invcf.validateSettings(settings);
+//        m_method.validateSettings(settings);
+//        m_snpeff_folder.validateSettings(settings);
+//        m_annid.validateSettings(settings);
+//        m_anninfo.validateSettings(settings);
+//        m_annvcfdb.validateSettings(settings);
+//        m_tstvhom.validateSettings(settings);
+//        m_interx.validateSettings(settings);
+//        m_interbed.validateSettings(settings);
+//        m_dbnsfp.validateSettings(settings);
+//        m_dbnsfpfields.validateSettings(settings);
+//        m_dbnsfpfieldsall.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

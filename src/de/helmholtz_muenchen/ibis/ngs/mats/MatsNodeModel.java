@@ -93,16 +93,6 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
      */
     protected MatsNodeModel() {
     	super(2, 1, true, true);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	super.init();
-    	
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
     	addSetting(SET_READ_LENGTH);

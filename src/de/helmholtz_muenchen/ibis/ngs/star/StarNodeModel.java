@@ -75,17 +75,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      */
     protected StarNodeModel() {
         super(1, 1, true, true);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	super.init();
-    	
-    	addSetting(SET_RUN_MODE);
+        addSetting(SET_RUN_MODE);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_GENOME_FOLDER);
     }
