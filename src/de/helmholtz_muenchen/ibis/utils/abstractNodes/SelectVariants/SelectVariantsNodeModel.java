@@ -8,8 +8,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -48,6 +46,7 @@ public abstract class SelectVariantsNodeModel extends GATKNodeModel {
      */
     protected SelectVariantsNodeModel(int INPORTS, int OUTPORTS) {
         super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        addSetting(m_FILTERSTRING);
     }
 
     protected String getCommandParameters(final BufferedDataTable[] inData) throws InvalidSettingsException {
@@ -83,19 +82,19 @@ public abstract class SelectVariantsNodeModel extends GATKNodeModel {
     	return "SelectVariants";
     }
 
-    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
-   	 m_FILTERSTRING.saveSettingsTo(settings);
-    }
-
-    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-       	 m_FILTERSTRING.loadSettingsFrom(settings);
-    }
-
-    protected void validateExtraSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-       	 m_FILTERSTRING.validateSettings(settings);
-    }
+//    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
+//   	 m_FILTERSTRING.saveSettingsTo(settings);
+//    }
+//
+//    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//       	 m_FILTERSTRING.loadSettingsFrom(settings);
+//    }
+//
+//    protected void validateExtraSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//       	 m_FILTERSTRING.validateSettings(settings);
+//    }
 
     protected SettingsModelString getFILTERSTRINGModel(){
     	return m_FILTERSTRING;

@@ -11,8 +11,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -46,6 +44,8 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
     protected CombineVCFsNodeModel() {
     
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	addSetting(m_GENOTYPEMERGEOPTION);
+		addSetting(m_OUTFOLDER);
     }
 
     
@@ -114,28 +114,28 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	}
 
 	
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
-		m_OUTFOLDER.saveSettingsTo(settings);
-		
-	}
-
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
-		m_OUTFOLDER.loadSettingsFrom(settings);
-	}
-
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_GENOTYPEMERGEOPTION.validateSettings(settings);
-		m_OUTFOLDER.validateSettings(settings);
-	}
+//	@Override
+//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
+//		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
+//		m_OUTFOLDER.saveSettingsTo(settings);
+//		
+//	}
+//
+//
+//	@Override
+//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
+//		m_OUTFOLDER.loadSettingsFrom(settings);
+//	}
+//
+//
+//	@Override
+//	protected void validateExtraSettings(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_GENOTYPEMERGEOPTION.validateSettings(settings);
+//		m_OUTFOLDER.validateSettings(settings);
+//	}
 
 	@Override
 	protected String getOutfile() {

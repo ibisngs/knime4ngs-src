@@ -19,8 +19,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
@@ -74,6 +72,14 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
         if(OUTPORTS.length==0) {
         	outtable = false;
         }
+        
+        addSetting(m_GATK);
+   	 	addSetting(m_REF_GENOME);
+   	 	addSetting(m_GATK_MEM);
+   	 	addSetting(m_path2bed);
+   	 	addSetting(m_bed_file_checkbox);
+   	 	addSetting(m_OPT_FLAGS);
+        
     }
     /**
      * {@inheritDoc}
@@ -179,53 +185,53 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 		return new DataTableSpec[] { outSpecTable1 };
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	super.saveSettingsTo(settings);
-   	 	m_GATK.saveSettingsTo(settings);
-   	 	m_REF_GENOME.saveSettingsTo(settings);
-   	 	m_GATK_MEM.saveSettingsTo(settings);
-   	 	m_path2bed.saveSettingsTo(settings);
-   	 	m_bed_file_checkbox.saveSettingsTo(settings);
-   	 	m_OPT_FLAGS.saveSettingsTo(settings);
-   	 	saveExtraSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.loadValidatedSettingsFrom(settings);
-		m_GATK.loadSettingsFrom(settings);
-		m_REF_GENOME.loadSettingsFrom(settings);
-		m_GATK_MEM.loadSettingsFrom(settings);
-		m_path2bed.loadSettingsFrom(settings);
-		m_bed_file_checkbox.loadSettingsFrom(settings);
-		m_OPT_FLAGS.loadSettingsFrom(settings);
-		loadExtraValidatedSettingsFrom(settings);
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.validateSettings(settings);
-		m_GATK.validateSettings(settings);
-		m_REF_GENOME.validateSettings(settings);
-		m_GATK_MEM.validateSettings(settings);
-		m_path2bed.validateSettings(settings);
-		m_bed_file_checkbox.validateSettings(settings);
-		m_OPT_FLAGS.validateSettings(settings);
-		validateExtraSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	super.saveSettingsTo(settings);
+//   	 	m_GATK.saveSettingsTo(settings);
+//   	 	m_REF_GENOME.saveSettingsTo(settings);
+//   	 	m_GATK_MEM.saveSettingsTo(settings);
+//   	 	m_path2bed.saveSettingsTo(settings);
+//   	 	m_bed_file_checkbox.saveSettingsTo(settings);
+//   	 	m_OPT_FLAGS.saveSettingsTo(settings);
+//   	 	saveExtraSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.loadValidatedSettingsFrom(settings);
+//		m_GATK.loadSettingsFrom(settings);
+//		m_REF_GENOME.loadSettingsFrom(settings);
+//		m_GATK_MEM.loadSettingsFrom(settings);
+//		m_path2bed.loadSettingsFrom(settings);
+//		m_bed_file_checkbox.loadSettingsFrom(settings);
+//		m_OPT_FLAGS.loadSettingsFrom(settings);
+//		loadExtraValidatedSettingsFrom(settings);
+//
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	super.validateSettings(settings);
+//		m_GATK.validateSettings(settings);
+//		m_REF_GENOME.validateSettings(settings);
+//		m_GATK_MEM.validateSettings(settings);
+//		m_path2bed.validateSettings(settings);
+//		m_bed_file_checkbox.validateSettings(settings);
+//		m_OPT_FLAGS.validateSettings(settings);
+//		validateExtraSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}
@@ -263,8 +269,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     protected abstract DataType getOutColType();
     protected abstract void extraConfig() throws InvalidSettingsException;
     
-    protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);
-    protected abstract void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException;
-    protected abstract void validateExtraSettings(final NodeSettingsRO settings) throws InvalidSettingsException;
+//    protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);
+//    protected abstract void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException;
+//    protected abstract void validateExtraSettings(final NodeSettingsRO settings) throws InvalidSettingsException;
     
 }

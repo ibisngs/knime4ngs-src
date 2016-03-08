@@ -108,17 +108,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
      */
     protected FeatureCountsNodeModel() {
         super(1, 1, true, true);
-        init();
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() {
-    	super.init();
-    	
-    	addSetting(SET_FEATURE_TYPE);
+        addSetting(SET_FEATURE_TYPE);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
     	addSetting(SET_ANNOTATION_TYPE);

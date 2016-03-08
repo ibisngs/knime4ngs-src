@@ -11,8 +11,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -42,6 +40,7 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
     protected CombineGVCFsNodeModel() {
     
         super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        addSetting(m_OUTFOLDER);
     }
 
    
@@ -76,28 +75,6 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 	protected String getCommandWalker() {
 		return "CombineGVCFs";
 	}
-
-
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_OUTFOLDER.saveSettingsTo(settings);
-	
-	}
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_OUTFOLDER.loadSettingsFrom(settings);
-	
-	}
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_OUTFOLDER.validateSettings(settings);
-	}
-
-
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

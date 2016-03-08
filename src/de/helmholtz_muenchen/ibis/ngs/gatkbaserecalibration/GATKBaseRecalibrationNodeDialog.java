@@ -10,7 +10,6 @@ import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
-import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -110,12 +109,12 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 	private boolean dbsnp;
 	
 	//Proxy options
-	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXY, false);
-	final SettingsModelString proxyhost = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYHOST, null);
-	final SettingsModelString proxyport = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPORT, null);
-	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXYAUTH, false);
-	final SettingsModelString proxyuser = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYUSER, null);
-	final SettingsModelString proxypassword = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD, null);
+//	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXY, false);
+//	final SettingsModelString proxyhost = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYHOST, null);
+//	final SettingsModelString proxyport = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPORT, null);
+//	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXYAUTH, false);
+//	final SettingsModelString proxyuser = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYUSER, null);
+//	final SettingsModelString proxypassword = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
 	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKBaseRecalibrationNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
@@ -127,7 +126,7 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
         addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
         generateGeneralOptions();
         generateBaseRecalOptions();
-        generateProxyOptions();
+//        generateProxyOptions();
         
 
     }
@@ -291,45 +290,45 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
         addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
     }
     
-    private void generateProxyOptions(){
-	  	createNewTab("Proxy options");
-	  	createNewGroup("General");
-	  	addDialogComponent(new DialogComponentBoolean(useproxy, "Enable proxy"));
-	  	addDialogComponent(new DialogComponentString(proxyhost, "Proxy host"));
-	  	addDialogComponent(new DialogComponentString(proxyport, "Proxy port"));
-	  	createNewGroup("Authentication");
-	  	addDialogComponent(new DialogComponentBoolean(useproxyauth, "Enable authentication"));
-	  	addDialogComponent(new DialogComponentString(proxyuser, "Proxy username"));
-	  	addDialogComponent(new DialogComponentString(proxypassword, "Proxy password"));
-	
-	  	
-	  	useproxy.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-						if(useproxy.getBooleanValue()){
-							proxyhost.setEnabled(true);
-							proxyport.setEnabled(true);
-							useproxyauth.setEnabled(true);
-						}else{
-							proxyhost.setEnabled(false);
-							proxyport.setEnabled(false);
-							proxyuser.setEnabled(false);
-							proxypassword.setEnabled(false);
-							useproxyauth.setEnabled(false);
-						}
-				}
-			});
-	  	
-	  	useproxyauth.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-						if(useproxy.getBooleanValue() && useproxyauth.getBooleanValue()){
-							proxyuser.setEnabled(true);
-							proxypassword.setEnabled(true);
-						}else{
-							proxypassword.setEnabled(false);
-							proxyuser.setEnabled(false);
-						}
-				}
-			});
+//    private void generateProxyOptions(){
+//	  	createNewTab("Proxy options");
+//	  	createNewGroup("General");
+//	  	addDialogComponent(new DialogComponentBoolean(useproxy, "Enable proxy"));
+//	  	addDialogComponent(new DialogComponentString(proxyhost, "Proxy host"));
+//	  	addDialogComponent(new DialogComponentString(proxyport, "Proxy port"));
+//	  	createNewGroup("Authentication");
+//	  	addDialogComponent(new DialogComponentBoolean(useproxyauth, "Enable authentication"));
+//	  	addDialogComponent(new DialogComponentString(proxyuser, "Proxy username"));
+//	  	addDialogComponent(new DialogComponentString(proxypassword, "Proxy password"));
+//	
+//	  	
+//	  	useproxy.addChangeListener(new ChangeListener() {
+//				public void stateChanged(ChangeEvent e) {
+//						if(useproxy.getBooleanValue()){
+//							proxyhost.setEnabled(true);
+//							proxyport.setEnabled(true);
+//							useproxyauth.setEnabled(true);
+//						}else{
+//							proxyhost.setEnabled(false);
+//							proxyport.setEnabled(false);
+//							proxyuser.setEnabled(false);
+//							proxypassword.setEnabled(false);
+//							useproxyauth.setEnabled(false);
+//						}
+//				}
+//			});
+//	  	
+//	  	useproxyauth.addChangeListener(new ChangeListener() {
+//				public void stateChanged(ChangeEvent e) {
+//						if(useproxy.getBooleanValue() && useproxyauth.getBooleanValue()){
+//							proxyuser.setEnabled(true);
+//							proxypassword.setEnabled(true);
+//						}else{
+//							proxypassword.setEnabled(false);
+//							proxyuser.setEnabled(false);
+//						}
+//				}
+//			});
 	  	
 //    	usePrefPage.addChangeListener(new ChangeListener() {
 //			@Override
@@ -343,9 +342,8 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 //			    	gatk.setStringValue(toolPath);
 //				}
 //			}
-//    	});
-	  	
-  }
+//    	}); 	
+//  }
     
 //    public void onOpen() {
 //    	super.onOpen();

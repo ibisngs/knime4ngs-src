@@ -55,7 +55,7 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
 				SETTINGS_MAP.put(configName, model);
 			}
 			catch(Exception e) {
-				e.printStackTrace();
+//				e.printStackTrace();
 			}
 		}
 		else {

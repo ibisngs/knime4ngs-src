@@ -9,8 +9,6 @@ import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -54,6 +52,8 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
      */
     protected DepthOfCoverageNodeModel() {
         super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        addSetting(m_extrafilters);
+        addSetting(m_filesuffix);
     }
 
     @Override
@@ -107,25 +107,25 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		return this.OUTFILE;
 	}
 
-	@Override
-	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-		m_extrafilters.saveSettingsTo(settings);
-        m_filesuffix.saveSettingsTo(settings);
-	}
-
-	@Override
-	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_extrafilters.loadSettingsFrom(settings);
-        m_filesuffix.loadSettingsFrom(settings);
-	}
-
-	@Override
-	protected void validateExtraSettings(NodeSettingsRO settings)
-			throws InvalidSettingsException {
-		m_extrafilters.validateSettings(settings);
-        m_filesuffix.validateSettings(settings);
-	}
+//	@Override
+//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
+//		m_extrafilters.saveSettingsTo(settings);
+//        m_filesuffix.saveSettingsTo(settings);
+//	}
+//
+//	@Override
+//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_extrafilters.loadSettingsFrom(settings);
+//        m_filesuffix.loadSettingsFrom(settings);
+//	}
+//
+//	@Override
+//	protected void validateExtraSettings(NodeSettingsRO settings)
+//			throws InvalidSettingsException {
+//		m_extrafilters.validateSettings(settings);
+//        m_filesuffix.validateSettings(settings);
+//	}
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

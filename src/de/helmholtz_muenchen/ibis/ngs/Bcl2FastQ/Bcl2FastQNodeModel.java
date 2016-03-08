@@ -75,8 +75,6 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
     	addSetting(m_threads);
     }
     
-    
-    
     /**
      * {@inheritDoc}
      */

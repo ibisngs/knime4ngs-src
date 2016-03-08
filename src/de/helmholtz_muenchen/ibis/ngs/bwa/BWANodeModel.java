@@ -16,8 +16,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
@@ -76,7 +74,16 @@ public class BWANodeModel extends HTExecutorNodeModel {
      */
     protected BWANodeModel() {
     	
-    	super(1, 1);    	
+    	super(1, 1);
+    	addSetting(m_bwafile);
+    	addSetting(m_refseqfile);
+    	addSetting(m_bwtIndex);
+    	addSetting(m_checkColorSpaced);
+    	addSetting(m_checkIndexRefSeq);
+    	addSetting(m_readGroup);
+    	addSetting(m_readGroupBoolean);
+    	addSetting(m_alnalgo);
+    	addSetting(m_ALN_THREADS);
     }
 
 //    static SettingsModelString createSettingsModelSelection() {
@@ -443,64 +450,64 @@ public class BWANodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	/** added for HTE **/
-    	super.saveSettingsTo(settings);
-    	
-    	m_bwafile.saveSettingsTo(settings);
-    	m_refseqfile.saveSettingsTo(settings);
-    	m_bwtIndex.saveSettingsTo(settings);
-    	m_checkColorSpaced.saveSettingsTo(settings);
-    	m_checkIndexRefSeq.saveSettingsTo(settings);
-    	m_readGroup.saveSettingsTo(settings);
-    	m_readGroupBoolean.saveSettingsTo(settings);
-    	m_alnalgo.saveSettingsTo(settings);
-    	m_ALN_THREADS.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	m_bwafile.loadSettingsFrom(settings);
-    	m_refseqfile.loadSettingsFrom(settings);
-    	m_bwtIndex.loadSettingsFrom(settings);
-    	m_checkColorSpaced.loadSettingsFrom(settings);
-    	m_checkIndexRefSeq.loadSettingsFrom(settings);
-    	m_readGroup.loadSettingsFrom(settings);
-    	m_readGroupBoolean.loadSettingsFrom(settings);
-    	m_alnalgo.loadSettingsFrom(settings);
-    	m_ALN_THREADS.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	/** added for HTE **/
-    	super.validateSettings(settings);
-    	
-    	m_bwafile.validateSettings(settings);
-    	m_refseqfile.validateSettings(settings);
-    	m_bwtIndex.validateSettings(settings);
-    	m_checkColorSpaced.validateSettings(settings);
-    	m_checkIndexRefSeq.validateSettings(settings);
-    	m_readGroup.validateSettings(settings);
-    	m_readGroupBoolean.validateSettings(settings);
-    	m_alnalgo.validateSettings(settings);
-    	m_ALN_THREADS.validateSettings(settings);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	/** added for HTE **/
+//    	super.saveSettingsTo(settings);
+//    	
+//    	m_bwafile.saveSettingsTo(settings);
+//    	m_refseqfile.saveSettingsTo(settings);
+//    	m_bwtIndex.saveSettingsTo(settings);
+//    	m_checkColorSpaced.saveSettingsTo(settings);
+//    	m_checkIndexRefSeq.saveSettingsTo(settings);
+//    	m_readGroup.saveSettingsTo(settings);
+//    	m_readGroupBoolean.saveSettingsTo(settings);
+//    	m_alnalgo.saveSettingsTo(settings);
+//    	m_ALN_THREADS.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.loadValidatedSettingsFrom(settings);
+//    	
+//    	m_bwafile.loadSettingsFrom(settings);
+//    	m_refseqfile.loadSettingsFrom(settings);
+//    	m_bwtIndex.loadSettingsFrom(settings);
+//    	m_checkColorSpaced.loadSettingsFrom(settings);
+//    	m_checkIndexRefSeq.loadSettingsFrom(settings);
+//    	m_readGroup.loadSettingsFrom(settings);
+//    	m_readGroupBoolean.loadSettingsFrom(settings);
+//    	m_alnalgo.loadSettingsFrom(settings);
+//    	m_ALN_THREADS.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	/** added for HTE **/
+//    	super.validateSettings(settings);
+//    	
+//    	m_bwafile.validateSettings(settings);
+//    	m_refseqfile.validateSettings(settings);
+//    	m_bwtIndex.validateSettings(settings);
+//    	m_checkColorSpaced.validateSettings(settings);
+//    	m_checkIndexRefSeq.validateSettings(settings);
+//    	m_readGroup.validateSettings(settings);
+//    	m_readGroupBoolean.validateSettings(settings);
+//    	m_alnalgo.validateSettings(settings);
+//    	m_ALN_THREADS.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}
