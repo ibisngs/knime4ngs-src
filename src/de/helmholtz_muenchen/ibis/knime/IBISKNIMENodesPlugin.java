@@ -51,6 +51,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String VEP = "variant_effect_predictor.pl";
 	public static final String VEP_FILTER = "filter_vep.pl";
 	
+//	tool dependencies
+	public static final String BOWTIE2_BUILD = "bowtie2-build";
+	
 //	exluded binaries: integrate binaries by adding them to PATHS and TOOLS in the KNIMEPreferencePage
 //	public static final String BFAST = "bfast";
 	

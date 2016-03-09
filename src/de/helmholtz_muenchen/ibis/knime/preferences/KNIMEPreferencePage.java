@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -70,6 +71,15 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
 		TOOLS.put(IBISKNIMENodesPlugin.VEP_FILTER, false);
 //		TOOLS.put(IBISKNIMENodesPlugin.BFAST,true);
+	}
+	
+	//define all dependencies for each tool (recursive dependencies are not checked!)
+	public static final HashMap<String, HashSet<String>> DEPENDENCIES;
+	static {
+		DEPENDENCIES = new HashMap<>();
+		HashSet<String> bowtie2_dep = new HashSet<>();
+		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_BUILD);
+		DEPENDENCIES.put(IBISKNIMENodesPlugin.BOWTIE2, bowtie2_dep);
 	}
 	
 	public static String REF_GENOME;
@@ -482,11 +492,21 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			if (TOOLS.get(tool)) {
 				if (IBISKNIMENodesPlugin.getStringPreference(tool).equals("")) {
 					try {
-						File f = new File(dir + "/" + tool);
+						File f = new File(dir + File.separatorChar + tool);
 						if (!f.exists()) {
 							FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + tool), f);
 							f.setExecutable(true, false);
 							IBISKNIMENodesPlugin.setStringPreference(tool, dir + "/"+ tool);
+							
+							HashSet<String> deps = DEPENDENCIES.get(tool);
+							if(deps == null) continue;
+							for(String dep: deps) {
+								f = new File(dir + File.separatorChar + dep);
+								if (!f.exists()) {
+									FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + tool), f);
+									f.setExecutable(true, false);
+								}
+							}
 						}
 					} catch (IOException e) {
 						LOGGER.error("Downloading " + tool+ " failed! Message: " + e.getMessage());
@@ -586,7 +606,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	
 	private void selectDBFile(Shell shell) {
 		FileDialog fdl = new FileDialog(shell);
-		fdl.setText("Selecte HTE database file");
+		fdl.setText("Select HTE database file");
 		fdl.setFilterExtensions(new String[]{"*.db","*.sql"});
 		fdl.setFilterPath("~/");
 		String path = fdl.open();
