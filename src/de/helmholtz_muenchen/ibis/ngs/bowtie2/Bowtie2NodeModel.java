@@ -15,20 +15,18 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
-import de.helmholtz_muenchen.ibis.utils.ngs.ShowOutput;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
  * This is the model implementation of Bowtie2.
@@ -36,7 +34,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author 
  */
-public class Bowtie2NodeModel extends NodeModel {
+public class Bowtie2NodeModel extends HTExecutorNodeModel {
     
     	public static final String CFGKEY_INSTALLPATH = "installpath";
     	public static final String CFGKEY_REFSEQFILE = "refseqfile";
@@ -48,7 +46,7 @@ public class Bowtie2NodeModel extends NodeModel {
     	public static final String CFGKEY_OFFRATE = "offrate";
     	public static final String CFGKEY_FTABCHARS = "ftabchars";
     	public static final String CFGKEY_USECUTOFF = "usecutoff";
-    	public static final String CFGKEY_CUTOFF = "cutoff";
+
     	public static final String CFGKEY_USESKIP = "useskip";
     	public static final String CFGKEY_SKIP = "skip";
     	public static final String CFGKEY_USEUPTO = "useupto";
@@ -87,7 +85,7 @@ public class Bowtie2NodeModel extends NodeModel {
     	public static final String CFGKEY_MAXINS = "maxins";
     	public static final String CFGKEY_FF = "ff";
     	public static final String CFGKEY_NOMIXED = "nomixed";
-    	public static final String CFGKEY_NODISCORDAND = "nodiscordand";
+    	public static final String CFGKEY_NODISCORDANT = "nodiscordant";
     	public static final String CFGKEY_NODOVETAIL = "nodovetail";
     	public static final String CFGKEY_NOCONTAIN = "nocontain";
     	public static final String CFGKEY_NOOVERLAP = "nooverlap";
@@ -95,7 +93,7 @@ public class Bowtie2NodeModel extends NodeModel {
     	public static final String CFGKEY_RECORDER = "recorder";
     	public static final String CFGKEY_MM = "mm";
     	public static final String CFGKEY_QCFILTER = "qcfilter";
-    	public static final String CFGKEY_READTYPE = "readtype";
+
 
     	public static final int DEFAULT_BMAX = 4;
     	public static final int DEFAULT_DCV = 1024;
@@ -139,8 +137,6 @@ public class Bowtie2NodeModel extends NodeModel {
     	private final SettingsModelBoolean m_nodc = new SettingsModelBoolean(CFGKEY_NODC, false);
     	private final SettingsModelIntegerBounded m_offrate = new SettingsModelIntegerBounded(CFGKEY_OFFRATE,DEFAULT_OFFRATE,0,Integer.MAX_VALUE);
     	private final SettingsModelIntegerBounded m_ftabchars = new SettingsModelIntegerBounded(CFGKEY_FTABCHARS,DEFAULT_FTABCHARS,1,Integer.MAX_VALUE);
-    	private final SettingsModelBoolean m_usecutoff = new SettingsModelBoolean(CFGKEY_USECUTOFF, false);
-    	private final SettingsModelIntegerBounded m_cutoff = new SettingsModelIntegerBounded(CFGKEY_CUTOFF,DEFAULT_CUTOFF,1,Integer.MAX_VALUE);
     	private final SettingsModelBoolean m_useskip = new SettingsModelBoolean(CFGKEY_USESKIP, false);
     	private final SettingsModelIntegerBounded m_skip = new SettingsModelIntegerBounded(CFGKEY_SKIP,DEFAULT_SKIP,0,Integer.MAX_VALUE);
     	private final SettingsModelBoolean m_useupto = new SettingsModelBoolean(CFGKEY_USEUPTO, false);
@@ -179,7 +175,7 @@ public class Bowtie2NodeModel extends NodeModel {
     	private final SettingsModelIntegerBounded m_maxins = new SettingsModelIntegerBounded(CFGKEY_MAXINS,DEFAULT_MAXINS,0,Integer.MAX_VALUE);
     	private final SettingsModelString m_ff = new SettingsModelString(CFGKEY_FF,"");
     	private final SettingsModelBoolean m_nomixed = new SettingsModelBoolean(CFGKEY_NOMIXED, false);
-    	private final SettingsModelBoolean m_nodiscordand = new SettingsModelBoolean(CFGKEY_NODISCORDAND, false);
+    	private final SettingsModelBoolean m_nodiscordant = new SettingsModelBoolean(CFGKEY_NODISCORDANT, false);
     	private final SettingsModelBoolean m_nodovetail = new SettingsModelBoolean(CFGKEY_NODOVETAIL, false);
     	private final SettingsModelBoolean m_nocontain = new SettingsModelBoolean(CFGKEY_NOCONTAIN, false);
     	private final SettingsModelBoolean m_nooverlap = new SettingsModelBoolean(CFGKEY_NOOVERLAP, false);
@@ -187,15 +183,13 @@ public class Bowtie2NodeModel extends NodeModel {
     	private final SettingsModelBoolean m_recorder = new SettingsModelBoolean(CFGKEY_RECORDER, false);
     	private final SettingsModelBoolean m_mm = new SettingsModelBoolean(CFGKEY_MM, true);
     	private final SettingsModelBoolean m_qcfilter = new SettingsModelBoolean(CFGKEY_QCFILTER, false);
-    	private final SettingsModelString m_readType = new SettingsModelString(CFGKEY_READTYPE,"single-end");
 
-    	
-    	private static final NodeLogger LOGGER = NodeLogger.getLogger(Bowtie2NodeModel.class);
 		
     	//The Output Col Names
     	public static final String OUT_COL1 = "Path2SAMFile";
     	public static final String OUT_COL2 = "Path2RefFile";
     	
+    	private static String readType = "";
     	
     /**
      * Constructor for the node model.
@@ -207,7 +201,6 @@ public class Bowtie2NodeModel extends NodeModel {
         m_packed.setEnabled(false);
         m_bmax.setEnabled(false);
         m_dcv.setEnabled(false);
-        m_cutoff.setEnabled(false);
         m_skip.setEnabled(false);
     	m_upto.setEnabled(false);
     	m_n.setEnabled(false);
@@ -224,11 +217,66 @@ public class Bowtie2NodeModel extends NodeModel {
     	m_maxins.setEnabled(false);
     	m_ff.setEnabled(false);
     	m_nomixed.setEnabled(false);
-    	m_nodiscordand.setEnabled(false);
+    	m_nodiscordant.setEnabled(false);
     	m_nodovetail.setEnabled(false);
     	m_nocontain.setEnabled(false);
     	m_nooverlap.setEnabled(false);
-    	m_readType.setStringValue("single-end");
+    	
+    	
+    	addSetting(m_d);
+    	addSetting(m_dcv);
+    	addSetting(m_dpad);
+    	addSetting(m_ff);
+    	addSetting(m_ftabchars);
+    	addSetting(m_gbar);
+    	addSetting(m_i1);
+    	addSetting(m_i2);
+    	addSetting(m_ignorequals);
+    	addSetting(m_installpath);
+    	addSetting(m_l);
+    	addSetting(m_ma);
+    	addSetting(m_maxins);
+    	addSetting(m_minins);
+    	addSetting(m_mm);
+    	addSetting(m_mp);
+    	addSetting(m_n);
+    	addSetting(m_nceil1);
+    	addSetting(m_nceil2);
+    	addSetting(m_noauto);
+    	addSetting(m_nocontain);
+    	addSetting(m_nodc);
+    	addSetting(m_nodiscordant);
+    	addSetting(m_nodovetail);
+    	addSetting(m_nofw);
+    	addSetting(m_nomixed);
+    	addSetting(m_nooverlap);
+    	addSetting(m_norc);
+    	addSetting(m_np);
+    	addSetting(m_offrate);
+    	addSetting(m_packed);
+    	addSetting(m_preset);
+    	addSetting(m_qcfilter);
+    	addSetting(m_quals);
+    	addSetting(m_r);
+    	addSetting(m_rdg1);
+    	addSetting(m_rdg2);
+    	addSetting(m_recorder);
+    	addSetting(m_refseqfile);
+    	addSetting(m_reporting1);
+    	addSetting(m_reporting2);
+    	addSetting(m_rfg1);
+    	addSetting(m_rfg2);
+    	addSetting(m_scoremin1);
+    	addSetting(m_scoremin2);
+    	addSetting(m_skip);
+    	addSetting(m_threads);
+    	addSetting(m_trim3);
+    	addSetting(m_trim5);
+    	addSetting(m_upto);
+    	addSetting(m_usepreset);
+    	addSetting(m_useskip);
+    	addSetting(m_useupto);
+
     	
     }
 
@@ -239,43 +287,22 @@ public class Bowtie2NodeModel extends NodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-    	ArrayList<String> command = new ArrayList<String>();
-    	
-    	/**Initialize logfile**/
-    	String fle = inData[0].iterator().next().getCell(0).toString();
-    	String logfile = fle.substring(0,fle.lastIndexOf("/")+1)+"logfile.txt";
-    	ShowOutput.setLogFile(logfile);
-    	StringBuffer logBuffer = new StringBuffer(50);
-    	logBuffer.append(ShowOutput.getNodeStartTime("Bowtie2"));
-    	/**end initializing logfile**/
-    	
-    // General Options
-    	String installpath = m_installpath.getStringValue() + "/";
-    	String path2refFile = m_refseqfile.getStringValue();
+    	//Prepare File
+    	String path2refFile 	 = m_refseqfile.getStringValue();
     	String path2baseFileName = path2refFile.substring(0,path2refFile.lastIndexOf("."));
-    	String path2readFile = inData[0].iterator().next().getCell(0).toString();
-    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
-    	String basePath = path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
-    	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
-    	String outBaseName = outBaseName1;
-    	String outBaseName2 = outBaseName1;
-    	if(path2readFile2.length() > 1) {
-    		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
-	    	if(!path2readFile.equals(path2readFile2)) {
-	    		outBaseName = outBaseName1 + "_" + outBaseName2;
-	    	}
+    	String path2readFile 	 = inData[0].iterator().next().getCell(0).toString();
+    	String path2readFile2 	 = "NA";
+    	if(readType.equals("paired-end")){
+    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
     	}
-    	String path2outfile = basePath + outBaseName + "_map.sam";
 
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
-    		readType = readTypePrevious;
-    	}
+    	//Prepare Outfile Name
+    	String basePath 	= path2readFile.substring(0,path2readFile.lastIndexOf("."));
+    	String path2outfile = basePath+".sam";
     	
-    // Options for Indexing
-    	Boolean buildIndex = false;
-    	String bowtieBuild = installpath + "bowtie2-build";
+    	/**
+    	 * INDEX REFGENOME
+    	 */
     	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
     	Boolean f2 = !new File(path2baseFileName + ".2.bt2").exists();
     	Boolean f3 = !new File(path2baseFileName + ".3.bt2").exists();
@@ -283,59 +310,156 @@ public class Bowtie2NodeModel extends NodeModel {
     	Boolean f5 = !new File(path2baseFileName + ".rev.1.bt2").exists();
     	Boolean f6 = !new File(path2baseFileName + ".rev.2.bt2").exists();
     	if(f1 && f2 && f3 && f4 && f5 && f6) {
-    		buildIndex = true;
+    		createIndex(exec);
     	}
+   
+    	//execute
+    	generateAlignment(exec,path2refFile,path2readFile,path2readFile2,path2outfile);
+     	
+    	/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()}));
     	
-    // Indexing
-    	if(buildIndex) {
-    // bowtie2-build [options]* <reference_in> <bt2_base>
-    		LOGGER.info("Build index\n");
-    		
-    		command.add(bowtieBuild);
-    		
-    		if(!m_noauto.getBooleanValue()) {
-    			command.add("--noauto");
-    			if(m_packed.getBooleanValue()) {
-    				command.add("--packed");
-    			}
-    			command.add("--bmaxdivn " + m_bmax.getIntValue());
-    			command.add("--dcv " + m_dcv.getIntValue());
-    		}
-    		if(m_nodc.getBooleanValue()) {
-    			command.add("--nodc");
-    		}
-    		command.add("--offrate " + m_offrate.getIntValue());
-    		command.add("--ftabchars " + m_ftabchars.getIntValue());
-    		if(m_usecutoff.getBooleanValue()) {
-    			command.add("--cutoff " + m_cutoff.getIntValue());
-    		}
-    		command.add(path2refFile);
-    		command.add(path2baseFileName);
-         	/**
-         	 * Execute
-         	 */
-         	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-         	logBuffer.append(ShowOutput.getNodeEndTime());
-         	ShowOutput.writeLogFile(logBuffer);
-         	command = new ArrayList<String>();	//Clear Array
-         	
-    	} else {
-    		LOGGER.info("Build index SKIPPED\n");
-    	}
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(path2outfile)};
     	
-    	LOGGER.info("Mapping Reads\n");
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+    	
+        return new BufferedDataTable[]{outTable};
+    }
 
-    	String bowtieAlign = installpath + "bowtie2-align";
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void reset() {
     	
-    	command.add(bowtieAlign);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
+            throws InvalidSettingsException {
     	
-    	String reads = "";
-    	if(readType.equals("single-end")) {
-    		reads = "-U " + path2readFile;
-    	} else {
-    		reads = "-1 " + path2readFile + " -2 " + path2readFile2;
+
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
+    	}
+    	if(readType.equals("paired-end")){
+    		m_minins.setEnabled(true);
+        	m_maxins.setEnabled(true);
+        	m_ff.setEnabled(true);
+        	m_nomixed.setEnabled(true);
+        	m_nodiscordant.setEnabled(true);
+        	m_nodovetail.setEnabled(true);
+        	m_nocontain.setEnabled(true);
+        	m_nooverlap.setEnabled(true);
+    	}else{
+    		m_minins.setEnabled(false);
+        	m_maxins.setEnabled(false);
+        	m_ff.setEnabled(false);
+        	m_nomixed.setEnabled(false);
+        	m_nodiscordant.setEnabled(false);
+        	m_nodovetail.setEnabled(false);
+        	m_nocontain.setEnabled(false);
+        	m_nooverlap.setEnabled(false);
+    	}
+
+    	
+    	if(m_refseqfile.getStringValue().length() > 1) {
+    		if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
+	            throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
+	    	}
+    	}
+    	String path2baseFileName = m_refseqfile.getStringValue().substring(0,m_refseqfile.getStringValue().lastIndexOf("."));
+    	//Check for bowtie2-align
+    	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
+    	Boolean f2 = !new File(path2baseFileName + ".2.bt2").exists();
+    	Boolean f3 = !new File(path2baseFileName + ".3.bt2").exists();
+    	Boolean f4 = !new File(path2baseFileName + ".4.bt2").exists();
+    	Boolean f5 = !new File(path2baseFileName + ".rev.1.bt2").exists();
+    	Boolean f6 = !new File(path2baseFileName + ".rev.2.bt2").exists();
+    	if(f1 && f2 && f3 && f4 && f5 && f6) {
+        	String bowtie2_align = m_installpath.getStringValue().replaceAll("bowtie2$", "bowtie2-build");
+        	if(!new File(bowtie2_align).exists()){
+        		throw new InvalidSettingsException("bowtie2-build binary is missing. However it should be located at "+bowtie2_align);
+        	}
     	}
     	
+    	
+
+    	
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()})};
+    }
+
+    /**
+     * Build bowtie2 index
+     * @param exec
+     * @throws Exception
+     */
+    protected void createIndex(ExecutionContext exec) throws Exception{
+    	
+    	// Usage: bowtie2-build [options]* <reference_in> <bt2_index_base>
+    	
+    	ArrayList<String> command = new ArrayList<String>();
+    	String path2refFile = m_refseqfile.getStringValue();
+    	String path2baseFileName = path2refFile.substring(path2refFile.lastIndexOf("/"),path2refFile.lastIndexOf("."));
+    	String bowtieBuild = m_installpath.getStringValue().replace("bowtie2", "bowtie2-build");
+
+    	command.add(bowtieBuild);
+   
+    	if(!m_noauto.getBooleanValue()) {
+    		command.add("--noauto");
+    		if(m_packed.getBooleanValue()) {
+    			command.add("--packed");
+    		}
+    		command.add("--bmaxdivn " + m_bmax.getIntValue());
+    		command.add("--dcv " + m_dcv.getIntValue());
+    		}
+    	
+    	if(m_nodc.getBooleanValue()) {
+    		command.add("--nodc");
+    	}
+    	command.add("--offrate " + m_offrate.getIntValue());
+    	command.add("--ftabchars " + m_ftabchars.getIntValue());
+
+    	command.add(path2refFile);
+    	command.add(path2baseFileName);
+
+    	/**Execute**/
+    	String lockFile = path2refFile + "_index_" + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));        	
+    }
+    
+    /**
+     * Generates bowtie2 alignment
+     * @param exec
+     * @param path2refFile
+     * @param path2readFile
+     * @param path2readFile2
+     * @param path2outfile
+     * @throws Exception
+     */
+    protected void generateAlignment(ExecutionContext exec, String path2refFile, String path2readFile, String path2readFile2, String path2outfile) throws Exception{
+    	ArrayList<String> command = new ArrayList<String>();
+    	String bowtieAlign = m_installpath.getStringValue() + "/bowtie2";
+    	String path2baseFileName = path2refFile.substring(path2refFile.lastIndexOf("/"),path2refFile.lastIndexOf("."));
+
+
+    	command.add(bowtieAlign);
     	
     	if(m_useskip.getBooleanValue()) {
     		command.add("--skip " + m_skip.getIntValue());
@@ -351,11 +475,10 @@ public class Bowtie2NodeModel extends NodeModel {
     	}
     	if(m_quals.getStringValue().equals("Phred+64")) {
     		command.add("--phred64");
-    	} else if(m_quals.getStringValue().equals("Convert from Solexa to Phred")) {
-    		command.add("--solexa-quals");
     	} else if(m_quals.getStringValue().equals("Encoded as space-delimited integers")) {
     		command.add("--int-quals");
     	}
+    	
     	if(m_usepreset.getBooleanValue()) {
     		String ps = m_preset.getStringValue();
     		String preset = "";
@@ -420,6 +543,7 @@ public class Bowtie2NodeModel extends NodeModel {
     	if(m_r.isEnabled()) {
     		command.add("-R " + m_r.getIntValue());
     	}
+    	
     	if(readType.equals("paired-end")) {
     		command.add("--minins " + m_minins.getIntValue());
     		command.add("--maxins " + m_maxins.getIntValue());
@@ -432,7 +556,7 @@ public class Bowtie2NodeModel extends NodeModel {
 	    	if(m_nomixed.getBooleanValue()) {
 	    		command.add("--no-mixed");
 	    	}
-	    	if(m_nodiscordand.getBooleanValue()) {
+	    	if(m_nodiscordant.getBooleanValue()) {
 	    		command.add("--no-discordant");
 	    	}
 	    	if(m_nodovetail.getBooleanValue()) {
@@ -457,279 +581,213 @@ public class Bowtie2NodeModel extends NodeModel {
     		command.add("--qc-filter");
     	}
     	  
+    	String reads = "";
+    	if(readType.equals("single-end")) {
+    		reads = "-U " + path2readFile;
+    	} else {
+    		reads = "-1 " + path2readFile + " -2 " + path2readFile2;
+    	}
+    	
     	command.add("-x " + path2baseFileName);
     	command.add(reads);
     	command.add("-S " + path2outfile);
-    	
-    // Aligning
-    // bowtie2 [options]* -x <bt2-idx> {-1 <m1> -2 <m2> | -U <r>} [-S <sam>]
 
-     	/**
-     	 * Execute
-     	 */
-     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-     	logBuffer.append(ShowOutput.getNodeEndTime());
-     	ShowOutput.writeLogFile(logBuffer);
-     	command = new ArrayList<String>();	//Clear Array
-     	
-    	/**
-    	 * OUTPUT
-    	 */
-    	BufferedDataContainer cont = exec.createDataContainer(
-    			new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
-    	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(path2outfile),
-    			(FileCell) FileCellFactory.create(path2refFile)};
-    	
-    	cont.addRowToTable(new DefaultRow("Row0",c));
-    	cont.close();
-    	BufferedDataTable outTable = cont.getTable();
-    	
-    	pushFlowVariableString("BAMSAMINFILE",path2outfile);
-
-    	logBuffer.append(ShowOutput.getNodeEndTime());
-    	ShowOutput.writeLogFile(logBuffer);
-    	
-        return new BufferedDataTable[]{outTable};
+    	/**Execute**/
+    	String lockFile = path2outfile + "_bowtie2" + SuccessfulRunChecker.LOCK_ENDING;
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));  
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    	
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-    	
-    // Warning if there is a problem with readType
-    	String readTypePrevious = getAvailableInputFlowVariables().get("readType").getStringValue();
-    	String readType = m_readType.getStringValue();
-    	if(!readTypePrevious.equals("") && !readTypePrevious.equals(readType)) {
-    		setWarningMessage("The previous node indicates that you have " + readTypePrevious + " reads, but you have chosen " + readType + ". Bowtie2 will use " + readTypePrevious + " mapping.");
-    	}
-    	
-    	if(m_refseqfile.getStringValue().length() > 1) {
-    		if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
-	            throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
-	    	}
-    	}
-    	
-    	// Check input ports
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
-    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-    	}
-    	
-        return new DataTableSpec[]{null};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	m_alignmenttype.saveSettingsTo(settings);
-    	m_bmax.saveSettingsTo(settings);
-    	m_cutoff.saveSettingsTo(settings);
-    	m_d.saveSettingsTo(settings);
-    	m_dcv.saveSettingsTo(settings);
-    	m_dpad.saveSettingsTo(settings);
-    	m_ff.saveSettingsTo(settings);
-    	m_ftabchars.saveSettingsTo(settings);
-    	m_gbar.saveSettingsTo(settings);
-    	m_i1.saveSettingsTo(settings);
-    	m_i2.saveSettingsTo(settings);
-    	m_ignorequals.saveSettingsTo(settings);
-    	m_installpath.saveSettingsTo(settings);
-    	m_l.saveSettingsTo(settings);
-    	m_ma.saveSettingsTo(settings);
-    	m_maxins.saveSettingsTo(settings);
-    	m_minins.saveSettingsTo(settings);
-    	m_mm.saveSettingsTo(settings);
-    	m_mp.saveSettingsTo(settings);
-    	m_n.saveSettingsTo(settings);
-    	m_nceil1.saveSettingsTo(settings);
-    	m_nceil2.saveSettingsTo(settings);
-    	m_noauto.saveSettingsTo(settings);
-    	m_nocontain.saveSettingsTo(settings);
-    	m_nodc.saveSettingsTo(settings);
-    	m_nodiscordand.saveSettingsTo(settings);
-    	m_nodovetail.saveSettingsTo(settings);
-    	m_nofw.saveSettingsTo(settings);
-    	m_nomixed.saveSettingsTo(settings);
-    	m_nooverlap.saveSettingsTo(settings);
-    	m_norc.saveSettingsTo(settings);
-    	m_np.saveSettingsTo(settings);
-    	m_offrate.saveSettingsTo(settings);
-    	m_packed.saveSettingsTo(settings);
-    	m_preset.saveSettingsTo(settings);
-    	m_qcfilter.saveSettingsTo(settings);
-    	m_quals.saveSettingsTo(settings);
-    	m_r.saveSettingsTo(settings);
-    	m_rdg1.saveSettingsTo(settings);
-    	m_rdg2.saveSettingsTo(settings);
-    	m_readType.saveSettingsTo(settings);
-    	m_recorder.saveSettingsTo(settings);
-    	m_refseqfile.saveSettingsTo(settings);
-    	m_reporting1.saveSettingsTo(settings);
-    	m_reporting2.saveSettingsTo(settings);
-    	m_rfg1.saveSettingsTo(settings);
-    	m_rfg2.saveSettingsTo(settings);
-    	m_scoremin1.saveSettingsTo(settings);
-    	m_scoremin2.saveSettingsTo(settings);
-    	m_skip.saveSettingsTo(settings);
-    	m_threads.saveSettingsTo(settings);
-    	m_trim3.saveSettingsTo(settings);
-    	m_trim5.saveSettingsTo(settings);
-    	m_upto.saveSettingsTo(settings);
-    	m_usecutoff.saveSettingsTo(settings);
-    	m_usepreset.saveSettingsTo(settings);
-    	m_useskip.saveSettingsTo(settings);
-    	m_useupto.saveSettingsTo(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	m_alignmenttype.loadSettingsFrom(settings);
-    	m_bmax.loadSettingsFrom(settings);
-    	m_cutoff.loadSettingsFrom(settings);
-    	m_d.loadSettingsFrom(settings);
-    	m_dcv.loadSettingsFrom(settings);
-    	m_dpad.loadSettingsFrom(settings);
-    	m_ff.loadSettingsFrom(settings);
-    	m_ftabchars.loadSettingsFrom(settings);
-    	m_gbar.loadSettingsFrom(settings);
-    	m_i1.loadSettingsFrom(settings);
-    	m_i2.loadSettingsFrom(settings);
-    	m_ignorequals.loadSettingsFrom(settings);
-    	m_installpath.loadSettingsFrom(settings);
-    	m_l.loadSettingsFrom(settings);
-    	m_ma.loadSettingsFrom(settings);
-    	m_maxins.loadSettingsFrom(settings);
-    	m_minins.loadSettingsFrom(settings);
-    	m_mm.loadSettingsFrom(settings);
-    	m_mp.loadSettingsFrom(settings);
-    	m_n.loadSettingsFrom(settings);
-    	m_nceil1.loadSettingsFrom(settings);
-    	m_nceil2.loadSettingsFrom(settings);
-    	m_noauto.loadSettingsFrom(settings);
-    	m_nocontain.loadSettingsFrom(settings);
-    	m_nodc.loadSettingsFrom(settings);
-    	m_nodiscordand.loadSettingsFrom(settings);
-    	m_nodovetail.loadSettingsFrom(settings);
-    	m_nofw.loadSettingsFrom(settings);
-    	m_nomixed.loadSettingsFrom(settings);
-    	m_nooverlap.loadSettingsFrom(settings);
-    	m_norc.loadSettingsFrom(settings);
-    	m_np.loadSettingsFrom(settings);
-    	m_offrate.loadSettingsFrom(settings);
-    	m_packed.loadSettingsFrom(settings);
-    	m_preset.loadSettingsFrom(settings);
-    	m_qcfilter.loadSettingsFrom(settings);
-    	m_quals.loadSettingsFrom(settings);
-    	m_r.loadSettingsFrom(settings);
-    	m_rdg1.loadSettingsFrom(settings);
-    	m_rdg2.loadSettingsFrom(settings);
-    	m_readType.loadSettingsFrom(settings);
-    	m_recorder.loadSettingsFrom(settings);
-    	m_refseqfile.loadSettingsFrom(settings);
-    	m_reporting1.loadSettingsFrom(settings);
-    	m_reporting2.loadSettingsFrom(settings);
-    	m_rfg1.loadSettingsFrom(settings);
-    	m_rfg2.loadSettingsFrom(settings);
-    	m_scoremin1.loadSettingsFrom(settings);
-    	m_scoremin2.loadSettingsFrom(settings);
-    	m_skip.loadSettingsFrom(settings);
-    	m_threads.loadSettingsFrom(settings);
-    	m_trim3.loadSettingsFrom(settings);
-    	m_trim5.loadSettingsFrom(settings);
-    	m_upto.loadSettingsFrom(settings);
-    	m_usecutoff.loadSettingsFrom(settings);
-    	m_usepreset.loadSettingsFrom(settings);
-    	m_useskip.loadSettingsFrom(settings);
-    	m_useupto.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	m_alignmenttype.validateSettings(settings);
-    	m_bmax.validateSettings(settings);
-    	m_cutoff.validateSettings(settings);
-    	m_d.validateSettings(settings);
-    	m_dcv.validateSettings(settings);
-    	m_dpad.validateSettings(settings);
-    	m_ff.validateSettings(settings);
-    	m_ftabchars.validateSettings(settings);
-    	m_gbar.validateSettings(settings);
-    	m_i1.validateSettings(settings);
-    	m_i2.validateSettings(settings);
-    	m_ignorequals.validateSettings(settings);
-    	m_installpath.validateSettings(settings);
-    	m_l.validateSettings(settings);
-    	m_ma.validateSettings(settings);
-    	m_maxins.validateSettings(settings);
-    	m_minins.validateSettings(settings);
-    	m_mm.validateSettings(settings);
-    	m_mp.validateSettings(settings);
-    	m_n.validateSettings(settings);
-    	m_nceil1.validateSettings(settings);
-    	m_nceil2.validateSettings(settings);
-    	m_noauto.validateSettings(settings);
-    	m_nocontain.validateSettings(settings);
-    	m_nodc.validateSettings(settings);
-    	m_nodiscordand.validateSettings(settings);
-    	m_nodovetail.validateSettings(settings);
-    	m_nofw.validateSettings(settings);
-    	m_nomixed.validateSettings(settings);
-    	m_nooverlap.validateSettings(settings);
-    	m_norc.validateSettings(settings);
-    	m_np.validateSettings(settings);
-    	m_offrate.validateSettings(settings);
-    	m_packed.validateSettings(settings);
-    	m_preset.validateSettings(settings);
-    	m_qcfilter.validateSettings(settings);
-    	m_quals.validateSettings(settings);
-    	m_r.validateSettings(settings);
-    	m_rdg1.validateSettings(settings);
-    	m_rdg2.validateSettings(settings);
-    	m_readType.validateSettings(settings);
-    	m_recorder.validateSettings(settings);
-    	m_refseqfile.validateSettings(settings);
-    	m_reporting1.validateSettings(settings);
-    	m_reporting2.validateSettings(settings);
-    	m_rfg1.validateSettings(settings);
-    	m_rfg2.validateSettings(settings);
-    	m_scoremin1.validateSettings(settings);
-    	m_scoremin2.validateSettings(settings);
-    	m_skip.validateSettings(settings);
-    	m_threads.validateSettings(settings);
-    	m_trim3.validateSettings(settings);
-    	m_trim5.validateSettings(settings);
-    	m_upto.validateSettings(settings);
-    	m_usecutoff.validateSettings(settings);
-    	m_usepreset.validateSettings(settings);
-    	m_useskip.validateSettings(settings);
-    	m_useupto.validateSettings(settings);
-    }
+    
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void saveSettingsTo(final NodeSettingsWO settings) {
+//    	m_alignmenttype.saveSettingsTo(settings);
+//    	m_bmax.saveSettingsTo(settings);
+//
+//    	m_d.saveSettingsTo(settings);
+//    	m_dcv.saveSettingsTo(settings);
+//    	m_dpad.saveSettingsTo(settings);
+//    	m_ff.saveSettingsTo(settings);
+//    	m_ftabchars.saveSettingsTo(settings);
+//    	m_gbar.saveSettingsTo(settings);
+//    	m_i1.saveSettingsTo(settings);
+//    	m_i2.saveSettingsTo(settings);
+//    	m_ignorequals.saveSettingsTo(settings);
+//    	m_installpath.saveSettingsTo(settings);
+//    	m_l.saveSettingsTo(settings);
+//    	m_ma.saveSettingsTo(settings);
+//    	m_maxins.saveSettingsTo(settings);
+//    	m_minins.saveSettingsTo(settings);
+//    	m_mm.saveSettingsTo(settings);
+//    	m_mp.saveSettingsTo(settings);
+//    	m_n.saveSettingsTo(settings);
+//    	m_nceil1.saveSettingsTo(settings);
+//    	m_nceil2.saveSettingsTo(settings);
+//    	m_noauto.saveSettingsTo(settings);
+//    	m_nocontain.saveSettingsTo(settings);
+//    	m_nodc.saveSettingsTo(settings);
+//    	m_nodiscordant.saveSettingsTo(settings);
+//    	m_nodovetail.saveSettingsTo(settings);
+//    	m_nofw.saveSettingsTo(settings);
+//    	m_nomixed.saveSettingsTo(settings);
+//    	m_nooverlap.saveSettingsTo(settings);
+//    	m_norc.saveSettingsTo(settings);
+//    	m_np.saveSettingsTo(settings);
+//    	m_offrate.saveSettingsTo(settings);
+//    	m_packed.saveSettingsTo(settings);
+//    	m_preset.saveSettingsTo(settings);
+//    	m_qcfilter.saveSettingsTo(settings);
+//    	m_quals.saveSettingsTo(settings);
+//    	m_r.saveSettingsTo(settings);
+//    	m_rdg1.saveSettingsTo(settings);
+//    	m_rdg2.saveSettingsTo(settings);
+//    	m_recorder.saveSettingsTo(settings);
+//    	m_refseqfile.saveSettingsTo(settings);
+//    	m_reporting1.saveSettingsTo(settings);
+//    	m_reporting2.saveSettingsTo(settings);
+//    	m_rfg1.saveSettingsTo(settings);
+//    	m_rfg2.saveSettingsTo(settings);
+//    	m_scoremin1.saveSettingsTo(settings);
+//    	m_scoremin2.saveSettingsTo(settings);
+//    	m_skip.saveSettingsTo(settings);
+//    	m_threads.saveSettingsTo(settings);
+//    	m_trim3.saveSettingsTo(settings);
+//    	m_trim5.saveSettingsTo(settings);
+//    	m_upto.saveSettingsTo(settings);
+//    	m_usecutoff.saveSettingsTo(settings);
+//    	m_usepreset.saveSettingsTo(settings);
+//    	m_useskip.saveSettingsTo(settings);
+//    	m_useupto.saveSettingsTo(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	m_alignmenttype.loadSettingsFrom(settings);
+//    	m_bmax.loadSettingsFrom(settings);
+//    	m_d.loadSettingsFrom(settings);
+//    	m_dcv.loadSettingsFrom(settings);
+//    	m_dpad.loadSettingsFrom(settings);
+//    	m_ff.loadSettingsFrom(settings);
+//    	m_ftabchars.loadSettingsFrom(settings);
+//    	m_gbar.loadSettingsFrom(settings);
+//    	m_i1.loadSettingsFrom(settings);
+//    	m_i2.loadSettingsFrom(settings);
+//    	m_ignorequals.loadSettingsFrom(settings);
+//    	m_installpath.loadSettingsFrom(settings);
+//    	m_l.loadSettingsFrom(settings);
+//    	m_ma.loadSettingsFrom(settings);
+//    	m_maxins.loadSettingsFrom(settings);
+//    	m_minins.loadSettingsFrom(settings);
+//    	m_mm.loadSettingsFrom(settings);
+//    	m_mp.loadSettingsFrom(settings);
+//    	m_n.loadSettingsFrom(settings);
+//    	m_nceil1.loadSettingsFrom(settings);
+//    	m_nceil2.loadSettingsFrom(settings);
+//    	m_noauto.loadSettingsFrom(settings);
+//    	m_nocontain.loadSettingsFrom(settings);
+//    	m_nodc.loadSettingsFrom(settings);
+//    	m_nodiscordant.loadSettingsFrom(settings);
+//    	m_nodovetail.loadSettingsFrom(settings);
+//    	m_nofw.loadSettingsFrom(settings);
+//    	m_nomixed.loadSettingsFrom(settings);
+//    	m_nooverlap.loadSettingsFrom(settings);
+//    	m_norc.loadSettingsFrom(settings);
+//    	m_np.loadSettingsFrom(settings);
+//    	m_offrate.loadSettingsFrom(settings);
+//    	m_packed.loadSettingsFrom(settings);
+//    	m_preset.loadSettingsFrom(settings);
+//    	m_qcfilter.loadSettingsFrom(settings);
+//    	m_quals.loadSettingsFrom(settings);
+//    	m_r.loadSettingsFrom(settings);
+//    	m_rdg1.loadSettingsFrom(settings);
+//    	m_rdg2.loadSettingsFrom(settings);
+//    	m_recorder.loadSettingsFrom(settings);
+//    	m_refseqfile.loadSettingsFrom(settings);
+//    	m_reporting1.loadSettingsFrom(settings);
+//    	m_reporting2.loadSettingsFrom(settings);
+//    	m_rfg1.loadSettingsFrom(settings);
+//    	m_rfg2.loadSettingsFrom(settings);
+//    	m_scoremin1.loadSettingsFrom(settings);
+//    	m_scoremin2.loadSettingsFrom(settings);
+//    	m_skip.loadSettingsFrom(settings);
+//    	m_threads.loadSettingsFrom(settings);
+//    	m_trim3.loadSettingsFrom(settings);
+//    	m_trim5.loadSettingsFrom(settings);
+//    	m_upto.loadSettingsFrom(settings);
+//    	m_usecutoff.loadSettingsFrom(settings);
+//    	m_usepreset.loadSettingsFrom(settings);
+//    	m_useskip.loadSettingsFrom(settings);
+//    	m_useupto.loadSettingsFrom(settings);
+//    }
+//
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    protected void validateSettings(final NodeSettingsRO settings)
+//            throws InvalidSettingsException {
+//    	m_alignmenttype.validateSettings(settings);
+//    	m_bmax.validateSettings(settings);
+//    	m_d.validateSettings(settings);
+//    	m_dcv.validateSettings(settings);
+//    	m_dpad.validateSettings(settings);
+//    	m_ff.validateSettings(settings);
+//    	m_ftabchars.validateSettings(settings);
+//    	m_gbar.validateSettings(settings);
+//    	m_i1.validateSettings(settings);
+//    	m_i2.validateSettings(settings);
+//    	m_ignorequals.validateSettings(settings);
+//    	m_installpath.validateSettings(settings);
+//    	m_l.validateSettings(settings);
+//    	m_ma.validateSettings(settings);
+//    	m_maxins.validateSettings(settings);
+//    	m_minins.validateSettings(settings);
+//    	m_mm.validateSettings(settings);
+//    	m_mp.validateSettings(settings);
+//    	m_n.validateSettings(settings);
+//    	m_nceil1.validateSettings(settings);
+//    	m_nceil2.validateSettings(settings);
+//    	m_noauto.validateSettings(settings);
+//    	m_nocontain.validateSettings(settings);
+//    	m_nodc.validateSettings(settings);
+//    	m_nodiscordant.validateSettings(settings);
+//    	m_nodovetail.validateSettings(settings);
+//    	m_nofw.validateSettings(settings);
+//    	m_nomixed.validateSettings(settings);
+//    	m_nooverlap.validateSettings(settings);
+//    	m_norc.validateSettings(settings);
+//    	m_np.validateSettings(settings);
+//    	m_offrate.validateSettings(settings);
+//    	m_packed.validateSettings(settings);
+//    	m_preset.validateSettings(settings);
+//    	m_qcfilter.validateSettings(settings);
+//    	m_quals.validateSettings(settings);
+//    	m_r.validateSettings(settings);
+//    	m_rdg1.validateSettings(settings);
+//    	m_rdg2.validateSettings(settings);
+//    	m_recorder.validateSettings(settings);
+//    	m_refseqfile.validateSettings(settings);
+//    	m_reporting1.validateSettings(settings);
+//    	m_reporting2.validateSettings(settings);
+//    	m_rfg1.validateSettings(settings);
+//    	m_rfg2.validateSettings(settings);
+//    	m_scoremin1.validateSettings(settings);
+//    	m_scoremin2.validateSettings(settings);
+//    	m_skip.validateSettings(settings);
+//    	m_threads.validateSettings(settings);
+//    	m_trim3.validateSettings(settings);
+//    	m_trim5.validateSettings(settings);
+//    	m_upto.validateSettings(settings);
+//    	m_usecutoff.validateSettings(settings);
+//    	m_usepreset.validateSettings(settings);
+//    	m_useskip.validateSettings(settings);
+//    	m_useupto.validateSettings(settings);
+//    }
     
     /**
      * {@inheritDoc}

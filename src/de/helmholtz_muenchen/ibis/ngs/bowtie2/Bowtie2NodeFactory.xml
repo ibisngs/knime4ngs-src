@@ -16,12 +16,11 @@
         	Source: <a href="http://bowtie-bio.sourceforge.net/bowtie2/">http://bowtie-bio.sourceforge.net/bowtie2/</a>
         </intro>
         
-        <option name="############### Options ###############"></option>
+		<tab name="Options">
         <option name="Bowtie2">Set path of executable Bowtie.</option>
         <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome seqeunce, to map the reads on (file type: FastA).</option>
-        <option name="*************** Read types ***************"></option>
-        <option name="Type of reads/ mapping">Choose between single-end and paired-end read mapping.</option>
-        <option name="*************** Indexing parameters ***************"></option>
+		</tab>
+		<tab name="Indexing parameters">  
         <option name="Automatically select value for parameters according to available memory">Disable the default behavior whereby bowtie2-build automatically selects 
         		values for the 'The maximum number of suffixes allowed in a block', 'Use &lt;int&gt; as the period for the difference-cover sample' and 'Use a packed 
         		representation for DNA strings' parameters according to available memory.</option>
@@ -39,23 +38,24 @@
         		Burrows-Wheeler range with respect to the first &lt;int&gt; characters of the query. A larger &lt;int&gt; yields a larger lookup table but faster query 
         		times. The ftab has size 4^(&lt;int&gt;+1) bytes.</option>
         <option name="Index only the first &lt;int&gt; bases of the reference sequences and ignore the rest">(cumulative across sequences)</option>
-        <option name="############### Alignment Parameters ###############"></option>
-        <option name="*************** Input ***************"></option>
+		</tab>
+		<tab name="Input">   
         <option name="Skip the first &lt;int&gt; reads/pairs in the input">Skip (i.e. do not align) the first &lt;int&gt; reads or pairs in the input.</option>
         <option name="Stop after first &lt;int&gt; reads/pairs">Align the first &lt;int&gt; reads or read pairs from the input then stop.</option>
         <option name="Trim &lt;int&gt; bases from 5'/left end of reads">Trim &lt;int&gt; bases from 5' (left) end of each read before alignment</option>
         <option name="Trim &lt;int&gt; bases from 3'/right end of reads">Trim &lt;int&gt; bases from 3' (right) end of each read before alignment</option>
         <option name="Select quality score type"><ul><li>Phred+33: Input qualities are ASCII chars equal to the Phred quality plus 33. This is also called the 'Phred+33' 
         		encoding, which is used by the very latest Illumina pipelines.</li><li>Phred+64: Input qualities are ASCII chars equal to the Phred quality plus 64. This 
-        		is also called the "Phred+64" encoding.</li><li>Convert from Solexa to Phred: Convert input qualities from Solexa (which can be negative) to Phred (which 
-        		can't). This scheme was used in older Illumina GA Pipeline versions (prior to 1.3).</li><li>Encoded as space-delimited integers: Quality values are 
+        		is also called the "Phred+64" encoding.</li><li>Encoded as space-delimited integers: Quality values are 
         		represented in the read input file as space-separated ASCII integers, e.g., 40 40 30 40..., rather than ASCII characters, e.g., II?I.... Integers are 
         		treated as being on the Phred quality scale.</li></ul></option>
-        <option name="*************** Presets ***************"></option>
+        		</tab>
+        <tab name="Presets">  
         <option name="Use a set of preselected parameters">It is possible to use one of four preselected parameter sets: very-fast, fast, sensitive, very-sensitive. This 
         		option concerns the parameters: 'Max &lt;int&gt; in seed alignment', 'Length of seed substrings', 'Interval between seed substrings w/r/t read len', 'Give 
         		up extending after &lt;int&gt; failed extends in a row', 'For reads with repetitive seeds, try &lt;int&gt; sets of seeds'.</option>
-        <option name="*************** Alignment ***************"></option>
+       			</tab>
+       	<tab name="Alignment"> 
         <option name="Max &lt;int&gt; mismatches in seed alignment">Sets the number of mismatches to allowed in a seed alignment during multiseed alignment. Can be set to 0 
         		or 1. Setting this higher makes alignment slower (often much slower) but increases sensitivity.</option>
         <option name="Length of seed substrings">Sets the length of the seed substrings to align during multiseed alignment. Smaller values make alignment slower but more 
@@ -78,8 +78,8 @@
         		the other, without any trimming (or "soft clipping") of characters from either end.</li><li>local alignment (ends might be soft clipped): In this mode, 
         		Bowtie 2 does not require that the entire read align from one end to the other. Rather, some characters may be omitted ("soft clipped") from the ends in 
         		order to achieve the greatest possible alignment score.</li></ul></option>
-        <option name="############### Further parameters ###############"></option>
-        <option name="*************** Scoring ***************"></option>
+        </tab>
+       	<tab name="Scoring"> 
         <option name="Set the match bonus">Sets the match bonus. In 'local' mode &lt;int&gt; is added to the alignment score for each position where a read character aligns 
         		to a reference character and the characters match. Not used in 'end-to-end' mode.</option>
         <option name="Max penalty for mismatch">Sets the maximum (MX) and minimum (MN) mismatch penalties, both integers. A number less than or equal to MX and greater than 
@@ -93,7 +93,8 @@
         <option name="Min acceptable alignment score w/r/t read length">Sets a function governing the minimum alignment score needed for an alignment to be considered 'valid' 
         		(i.e. good enough to report). This is a function of read length. For instance, specifying L,0,-0.6 sets the minimum-score function f to f(x) = 0 + -0.6 * x, 
         		where x is the read length.</option>
-        <option name="*************** Reporting ***************"></option>
+        </tab>
+       	<tab name="Reporting">
         <option name="Choose an alignment type"><ul><li>Look for multiple alignments, report best, with MAPQ: bowtie2 searches for distinct, valid alignments for each read. 
         		When it finds a valid alignment, it continues looking for alignments that are nearly as good or better. The best alignment found is reported (randomly selected 
         		from among best if tied). Information about the best alignments is used to estimate mapping quality and to set SAM optional fields.</li><li>Report up to 
@@ -105,14 +106,16 @@
         		with large values for this option in mind, and when aligning reads to long, repetitive genomes large &lt;int&gt; can be very, very slow.</li><li>Report all alignments; 
         		very slow, MAPQ not meaningful: Like 'Report up to &lt;int&gt; alns per read; MAPQ not meaningful' but with no upper limit on number of alignments to search 
         		for. Note: Bowtie 2 is not designed with this mode in mind, and when aligning reads to long, repetitive genomes this mode can be very, very slow.</li></ul></option>
-        <option name="*************** Effort ***************"></option>
+        </tab>
+       	<tab name="Effort">
         <option name="Give up extending after &lt;int&gt; failed extends in a row">Up to &lt;int&gt; consecutive seed extension attempts can 'fail' before Bowtie 2 moves on, 
         		using the alignments found so far. A seed extension 'fails' if it does not yield a new best or a new second-best alignment.</option>
         <option name="For reads with repetitive seeds, try &lt;int&gt; sets of seeds">&lt;int&gt; is the maximum number of times Bowtie 2 will 're-seed' reads with repetitive 
         		seeds. When 're-seeding', Bowtie 2 simply chooses a new set of reads (same length, same number of mismatches allowed) at different offsets and searches for 
         		more alignments. A read is considered to have repetitive seeds if the total number of seed hits divided by the number of seeds that aligned at least once is 
         		greater than 300.</option>
-        <option name="*************** Paired-end ***************">These options can only be modified if paired-end mapping is used.</option>
+        </tab>
+       	<tab name="Paired-end">
         <option name="Minimum fragment length">The minimum fragment length for valid paired-end alignments. E.g. if 60 is specified and a paired-end alignment consists of 
         		two 20-bp alignments in the appropriate orientation with a 20-bp gap between them, that alignment is considered valid (as long as 'Maximum fragment length' 
         		is also satisfied). A 19-bp gap would not be valid in that case.</option>
@@ -134,7 +137,8 @@
         		that the wrong mate begins upstream, consider that to be concordant.</option>
         <option name="Not concordant when one mate alignment contains other">If one mate alignment contains the other, consider that to be non-concordant.</option>
         <option name="Not concordant when mates overlap at all">If one mate alignment overlaps the other at all, consider that to be non-concordant.</option>
-        <option name="*************** Performance ***************"></option>
+        </tab>
+       	<tab name="Performance">
         <option name="Number of alignment threads to launch">Launch &lt;int&gt; parallel search threads. Threads will run on separate processors/cores and synchronize when 
         		parsing reads and outputting alignments. Searching for alignments is highly parallel, and speedup is close to linear. Increasing &lt;int&gt; increases Bowtie 2's 
         		memory footprint. E.g. when aligning to a human genome index, increasing &lt;int&gt; from 1 to 8 increases the memory footprint by a few hundred megabytes. Please
@@ -145,18 +149,16 @@
         <option name="Use memory-mapped I/O for index">Use memory-mapped I/O to load the index, rather than typical file I/O. Memory-mapping allows many concurrent bowtie 
         		processes on the same computer to share the same memory image of the index (i.e. you pay the memory overhead just once). This facilitates memory-efficient 
         		parallelization of bowtie in situations where using 'Number of alignment threads to launch' is not possible or not preferable.</option>
-        <option name="*************** Other ***************"></option>
+        </tab>
+       	<tab name="Other">
         <option name="Filter out reads that are bad according to QSEQ filter"></option>
-        
+        </tab>
     </fullDescription>
    
     <ports>
         <inPort index="0" name="In-Port">Cell 0: Path2ReadFile1<br></br>Cell 1 (Optional): Path2ReadFile2 (if paired end mapping is used)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br>Cell 1: Path2RefFile</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile</outPort>
     </ports>
-    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+
     
 </knimeNode>
