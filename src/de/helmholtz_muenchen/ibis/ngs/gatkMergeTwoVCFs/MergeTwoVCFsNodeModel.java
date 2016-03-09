@@ -65,6 +65,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		addSetting(m_INPUT2_TAG);
 		addSetting(m_PRIORITIZE);
 		addSetting(m_OUTFOLDER);
+		addSetting(m_FILTEREDRECORDSMERGETYPE);
     }
 
     
@@ -80,9 +81,6 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(vcf1).getName();
 		outfile = IO.replaceFileExtension(outfile, "MERGED.vcf"); 
 		
-		String filterOption = m_FILTEREDRECORDSMERGETYPE.getStringValue();
-		command.add("--filteredrecordsmergetype "+filterOption);
-		
 		
 		String mergeOption = m_GENOTYPEMERGEOPTION.getStringValue();
 		command.add("--genotypemergeoption "+mergeOption);
@@ -94,6 +92,9 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 			command.add("--variant "+vcf1);
 			command.add("--variant "+vcf2);
 		}
+		
+		command.add("--filteredrecordsmergetype "+m_FILTEREDRECORDSMERGETYPE.getStringValue());
+		
 		return StringUtils.join(command, " ");
 	}
 		
@@ -143,6 +144,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	}
 
 
+
 //	@Override
 //	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
 //		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
@@ -174,6 +176,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 //		m_PRIORITIZE.validateSettings(settings);
 //		m_OUTFOLDER.validateSettings(settings);
 //	}
+
 
 
 	@Override
