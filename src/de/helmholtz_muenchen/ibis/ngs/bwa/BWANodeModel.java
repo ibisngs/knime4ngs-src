@@ -38,30 +38,27 @@ import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
  */
 public class BWANodeModel extends HTExecutorNodeModel {
     
-	public static final String CFGKEY_REFSEQFILE = "refseqfile";
-	public static final String CFGKEY_BWAFILE = "bwafile";
-	public static final String CFGKEY_CHECKCOLORSPACED = "checkColorSpaced";
-	public static final String CFGKEY_BWTINDEX = "bwtIndex";
-	public static final String CFGKEY_CHECKINDEX = "checkIndexRefSeq";
-	public static final String CFGKEY_READGROUP = "readgroup";
-	public static final String CFGKEY_READGROUPBOOLEAN = "readgroupboolean";
-	public static final String CFGKEY_ALNALGO = "alnalgo";
-	public static final String CFGKEY_THREADS = "alnthreads";
+	public static final String CFGKEY_REFSEQFILE 		= "refseqfile";
+	public static final String CFGKEY_BWAFILE 	 		= "bwafile";
+	public static final String CFGKEY_CHECKCOLORSPACED  = "checkColorSpaced";
+	public static final String CFGKEY_BWTINDEX 			= "bwtIndex";
+	public static final String CFGKEY_CHECKINDEX 		= "checkIndexRefSeq";
+	public static final String CFGKEY_READGROUP 		= "readgroup";
+	public static final String CFGKEY_READGROUPBOOLEAN  = "readgroupboolean";
+	public static final String CFGKEY_ALNALGO 			= "alnalgo";
+	public static final String CFGKEY_THREADS 			= "alnthreads";
 	
-	
-    // definition of SettingsModel
-	private final SettingsModelString m_refseqfile = new SettingsModelString(CFGKEY_REFSEQFILE,"");
-	private final SettingsModelString m_bwafile = new SettingsModelString(CFGKEY_BWAFILE,"");
-	private final SettingsModelBoolean m_checkIndexRefSeq = new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
-	private final SettingsModelBoolean m_checkColorSpaced = new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
-	private final SettingsModelString m_bwtIndex = new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
-	private final SettingsModelString m_alnalgo = new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
-	private final SettingsModelString m_readGroup = new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar");
-	private final SettingsModelBoolean m_readGroupBoolean = new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
+	private final SettingsModelString m_refseqfile 			= new SettingsModelString(CFGKEY_REFSEQFILE,"");
+	private final SettingsModelString m_bwafile 			= new SettingsModelString(CFGKEY_BWAFILE,"");
+	private final SettingsModelBoolean m_checkIndexRefSeq 	= new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
+	private final SettingsModelBoolean m_checkColorSpaced	= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
+	private final SettingsModelString m_bwtIndex 			= new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
+	private final SettingsModelString m_alnalgo 			= new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
+	private final SettingsModelString m_readGroup 			= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar");
+	private final SettingsModelBoolean m_readGroupBoolean 	= new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
 	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
-	
 	private static String readType = "";
 	
 	//The Output Col Names
@@ -100,74 +97,46 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	/**
 		 * Get the Parameters
 		 */
-    	String path2refFile = m_refseqfile.getStringValue();
-    	String path2readFile = inData[0].iterator().next().getCell(0).toString();
-    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-//    	String readType = getAvailableInputFlowVariables().get("readType").getStringValue();
+    	String path2refFile 	= m_refseqfile.getStringValue();
+    	String path2readFile 	= inData[0].iterator().next().getCell(0).toString();
+    	String path2readFile2 	= inData[0].iterator().next().getCell(1).toString();	
+    	String basePath 		= path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
+    	String outBaseName1 	= path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
+    	String outBaseName 		= outBaseName1;
+    	String outBaseName2 	= outBaseName1;
+    	String memOut 			= basePath+outBaseName1+"_mem.sam";
+    	String path2bwa 		= m_bwafile.getStringValue();
+    	int threads 			= m_ALN_THREADS.getIntValue();
     	
-    	String basePath = path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
-    	String outBaseName1 = path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
-    	String outBaseName = outBaseName1;
-    	String outBaseName2 = outBaseName1;
-    	String memOut = basePath+outBaseName1+"_mem.sam";
-    	
-    	if(path2readFile2.length() > 1 && !path2readFile2.equals("na")) {
+    	if(readType.equals("paired-end")){
     		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
 	    	if(!path2readFile.equals(path2readFile2)) {
 	    		outBaseName = outBaseName1 + "_" + outBaseName2;
 	    	}
-    	}else{
-    		
     	}
-    	
-    	String out2Name = basePath+outBaseName+"_aln.sam";
-    	String out1Name = basePath+outBaseName+"_aln_sa.sai";
+    	String out2Name  = basePath+outBaseName+"_aln.sam";
+    	String out1Name  = basePath+outBaseName+"_aln_sa.sai";
     	String out11Name = basePath+outBaseName1+"_aln_sa_1.sai";
     	String out12Name = basePath+outBaseName2+"_aln_sa_2.sai";
 
-    	Boolean isBam = false;
-    	    	
-    	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {isBam = true;}
-    	if(isBam) {path2readFile2 = path2readFile;}
-    	
-    	String path2bwa = m_bwafile.getStringValue();
-    	int threads = m_ALN_THREADS.getIntValue();
-    	
-    	if(path2readFile2.length() > 1 && !path2readFile2.equals("na")) {
-    		outBaseName2 = path2readFile2.substring(path2readFile2.lastIndexOf("/")+1,path2readFile2.lastIndexOf("."));
-	    	if(!path2readFile.equals(path2readFile2)) {
-	    		outBaseName = outBaseName1 + "_" + outBaseName2;
-	    	}
-    	}
-    	String colorSpaced = "-c ";
-
-    	
+    	Boolean isBam = false;	
     	if(path2readFile.substring(path2readFile.length()-3, path2readFile.length()) == "bam") {
-    		isBam = true;
-    	}
-    	/*******************************************************************************************/   	
-    	
-    	/**
-    	 * Create Index for Read Files
-    	 */
+    		path2readFile2 	= path2readFile;
+    		isBam 			= true;
+    	}	
 
-    	bwa_index(exec, colorSpaced, path2bwa, path2refFile, path2readFile2);
+    	//Prepare Index
+    	bwa_index(exec,path2bwa, path2refFile, path2readFile2);
 
-    	/**
-    	 * Run bwa aln
-    	 */
-    	
-    	
+    	//BWA aln
     	if(!m_alnalgo.getStringValue().equals("BWA-MEM")){
         	LOGGER.info("Find the SA coordinates of the input reads.\n");
         	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, path2readFile2, isBam,threads);
         	LOGGER.info("Finished BWA aln...");
     	}
-    	
-    	/**
-    	 * Map Reads
-    	 */
+    	//BWA Mapping
     	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut,threads);
+    	
     	
     	/**
     	 * OUTPUT
@@ -190,8 +159,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
     	
-    	pushFlowVariableString("BAMSAMINFILE",out2Name);
-
 		return new BufferedDataTable[]{outTable};
     }
     
@@ -211,7 +178,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
      * @param path2readFile
      * @throws Exception 
      */
-    private void bwa_index(ExecutionContext exec, String colorSpaced, String path2bwa, String path2refFile, String path2readFile) throws Exception{
+    private void bwa_index(ExecutionContext exec,String path2bwa, String path2refFile, String path2readFile) throws Exception{
     	/**Only execute if Index needs to be created**/
     	if(m_checkIndexRefSeq.getBooleanValue()) {
     		
@@ -231,7 +198,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	}
 	    	// Colorspace
 	    	if(m_checkColorSpaced.getBooleanValue()) {
-	    		command.add(colorSpaced);
+	    		command.add("-c");
 	    	}
 	    	
 	    	//Add Reference genome
@@ -304,13 +271,12 @@ public class BWANodeModel extends HTExecutorNodeModel {
   		ArrayList<String> command = new ArrayList<String>();
   		String alnalgo = m_alnalgo.getStringValue(); 	
     	
-// ### BWA-Backtrack ###
+  		// ### BWA-Backtrack ###
     	if(alnalgo.equals("BWA-backtrack")) {
     		
         	if(readType.equals("single-end")) {
         		// bwa samse sequence.fasta aln_sa.sai s_1_1_sequence.txt > aln.sam
         		LOGGER.info("Generate alignments in the SAM format given single-end reads.\n");
-
         		command.add(path2bwa+" samse");
         		
         		/**Other Options**/
@@ -326,7 +292,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	} else {
         		// bwa sampe sequence.fasta aln_sa_1.sai aln_sa_2.sai s_1_1_sequence.fq s_1_2_sequence.fq > aln.sam
         		LOGGER.info("Generate alignments in the SAM format given paired-end reads.\n");
-        		
         		command.add(path2bwa+" sampe");
         		
         		/**Other Options**/
@@ -400,17 +365,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 //	    	}
 //	    	m_bwafile.setStringValue(toolPath);
 //    	}
-    	
-    	//FlowVariable Control
-//    	if(!getAvailableFlowVariables().containsKey("readType")){
-//            throw new InvalidSettingsException("FlowVariable 'readType' is missing as input! Please add the FlowVariable or use the 'RunAligner' node.");
-//    	}else{
-//    		String value = getAvailableInputFlowVariables().get("readType").getStringValue();
-//    		if(!value.equals("single-end") & !value.equals("paired-end") ){
-//                throw new InvalidSettingsException("FlowVariable 'readType' has a wrong value: '"+value+"' . Allowed values: 'single-end' or 'paired-end'");
-//    		}
-//    	}
-    	
+    	   	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
     	if(CC.getWarningStatus()){
@@ -438,11 +393,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	}
     	}
     	
-    	// Check input ports
-//    	String[] cn=inSpecs[0].getColumnNames();
-//    	if(!cn[0].equals("") && !cn[0].equals("Path2ReadFile1")) {
-//    		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-//    	}
 
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{

@@ -94,30 +94,6 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 					}
 			}
 		});
-    }
-    
-//	@Override
-//	protected void updatePrefs() {
-//		if(usePrefPage.getBooleanValue()) {
-//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
-//	    	if(toolPath != null && !toolPath.equals("")) {
-//	    		bwa.setStringValue(toolPath);
-//	    		bwa.setEnabled(false);
-//	    	} else {
-//	    		bwa.setEnabled(true);
-//	    	}
-//	    	
-//	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-//	    	if(refGenome != null && !refGenome.equals("")) {
-//	    		refseq.setStringValue(refGenome);
-//	    		refseq.setEnabled(false);
-//	    	} else {
-//	    		refseq.setEnabled(true);
-//	    	}
-//		} else {
-//			bwa.setEnabled(true);
-//			refseq.setEnabled(true);
-//		}
-//	}		
+    }	
 }
 
