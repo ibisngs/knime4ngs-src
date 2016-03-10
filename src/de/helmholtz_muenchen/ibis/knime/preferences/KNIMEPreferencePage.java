@@ -82,17 +82,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		DEPENDENCIES.put(IBISKNIMENodesPlugin.BOWTIE2, bowtie2_dep);
 	}
 	
-	public static String REF_GENOME;
-	
+	public static String REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G, RES_DBSNP, RES_MILLS;
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
-	public static String EMAILSENDER;
-	public static String EMAILHOST;
-	public static String EMAILRECEIVER;
+	public static String EMAILSENDER, EMAILHOST, EMAILRECEIVER;
 	
-	private Text refGenome;
+	private Text refGenome, res_hapmap, res_omni, res_1000G, res_dbsnp, res_mills; 
 	private Text thresholdText;
 	private Text dbFile;
 	private Text email_sender, email_host, email_receiver;
@@ -118,6 +115,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		
+		final Shell shell = new Shell(parent.getDisplay());
 		
 		Composite top = new Composite(parent, SWT.LEFT);
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -166,56 +165,93 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Button browseSearchDir = new Button(searchDownloadEdit, SWT.NONE);
 		browseSearchDir.setText("Search in directory");
-		final Shell shell = new Shell(parent.getDisplay());
-		browseSearchDir.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				selectSearchDir(shell);
-			}
-		});
 		
 		Button downloader = new Button(searchDownloadEdit, SWT.NONE);
 		downloader.setText("Download missing binaries");
-		final Shell shell1 = new Shell(parent.getDisplay());
-		downloader.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				downloadBinaries(shell1);
-			}
-		});
-		
+
 		Button edit = new Button(searchDownloadEdit, SWT.NONE);
 		edit.setText("Edit binary");
-		final Shell shell2 = new Shell(parent.getDisplay());
-		edit.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				editBinary(shell2);
-			}
-		});
 		
-		//Reference genome
-		Group ref_genome = new Group(top,SWT.NONE);
-		ref_genome.setText("Reference (genome) sequence");
-		ref_genome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		//Reference genome and resource files
 		GridLayout refLayout = new GridLayout();
 		refLayout.numColumns = 3;
-		ref_genome.setLayout(refLayout);
+		
+		Group ref_res_group = new Group(top,SWT.NONE);
+		ref_res_group.setText("Reference sequence and resource data sets");
+		ref_res_group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		ref_res_group.setLayout(refLayout);
 		
 		REF_GENOME = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.REF_GENOME);
 		
-		Label refGenomeLabel = new Label(ref_genome,SWT.LEFT);
-		refGenomeLabel.setText("File path:");
+		Label refGenomeLabel = new Label(ref_res_group,SWT.LEFT);
+		refGenomeLabel.setText("Reference sequence:");
 		
-		refGenome = new Text(ref_genome,SWT.BORDER);
+		refGenome = new Text(ref_res_group,SWT.BORDER);
 		refGenome.setText(REF_GENOME);
 		refGenome.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		Button browseRefGenome = new Button(ref_genome, SWT.RIGHT);
+		Button browseRefGenome = new Button(ref_res_group, SWT.RIGHT);
 		browseRefGenome.setText("Browse");
-		final Shell shell5 = new Shell(parent.getDisplay());
-		browseRefGenome.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				selectRefGenome(shell5);
-			}
-		});
+		
+		RES_HAPMAP = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_HAPMAP);
+
+		Label resHapmapLabel = new Label(ref_res_group,SWT.LEFT);
+		resHapmapLabel.setText("HapMap dataset:");
+		
+		res_hapmap = new Text(ref_res_group,SWT.BORDER);
+		res_hapmap.setText(RES_HAPMAP);
+		res_hapmap.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseResHapmap = new Button(ref_res_group, SWT.RIGHT);
+		browseResHapmap.setText("Browse");
+		
+		RES_OMNI = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_OMNI);
+
+		Label resOmniLabel = new Label(ref_res_group,SWT.LEFT);
+		resOmniLabel.setText("Omni dataset:");
+		
+		res_omni = new Text(ref_res_group,SWT.BORDER);
+		res_omni.setText(RES_OMNI);
+		res_omni.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseResOmni = new Button(ref_res_group, SWT.RIGHT);
+		browseResOmni.setText("Browse");
+		
+		RES_1000G = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_1000G);
+		
+		Label res1000GLabel = new Label(ref_res_group,SWT.LEFT);
+		res1000GLabel.setText("1000G dataset:");
+		
+		res_1000G = new Text(ref_res_group,SWT.BORDER);
+		res_1000G.setText(RES_1000G);
+		res_1000G.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseRes1000G = new Button(ref_res_group, SWT.RIGHT);
+		browseRes1000G.setText("Browse");
+		
+		RES_DBSNP = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_DBSNP);
+		
+		Label resDbsnpLabel = new Label(ref_res_group,SWT.LEFT);
+		resDbsnpLabel.setText("dbSNP dataset:");
+		
+		res_dbsnp = new Text(ref_res_group,SWT.BORDER);
+		res_dbsnp.setText(RES_DBSNP);
+		res_dbsnp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseResDbsnp = new Button(ref_res_group, SWT.RIGHT);
+		browseResDbsnp.setText("Browse");
+		
+		RES_MILLS = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_MILLS);
+		
+		Label resMillsLabel = new Label(ref_res_group,SWT.LEFT);
+		resMillsLabel.setText("Mills dataset:");
+		
+		res_mills = new Text(ref_res_group,SWT.BORDER);
+		res_mills.setText(RES_MILLS);
+		res_mills.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseResMills = new Button(ref_res_group, SWT.RIGHT);
+		browseResMills.setText("Browse");
 		
 		//HTE preferences
 		Group htePrefs = new Group(top,SWT.NONE);
@@ -258,22 +294,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Button browseDBFile = new Button(use_hte, SWT.RIGHT);
 		browseDBFile.setText("Browse");
 		browseDBFile.setEnabled(USE_HTE);
-		final Shell shell3 = new Shell(parent.getDisplay());
-		browseDBFile.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				selectDBFile(shell3);
-			}
-		});
 		
 		Button createDBFile = new Button(use_hte, SWT.NONE);
 		createDBFile.setText("Create new db file");
 		createDBFile.setEnabled(USE_HTE);
-		final Shell shell4 = new Shell(parent.getDisplay());
-		createDBFile.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				createDBFile(shell4);
-			}
-		});
 		
 		checkHTE.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -340,7 +364,100 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		email_receiver.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		email_receiver.setEnabled(NOTIFY);
 
+		
+		/* event handles */
+		browseSearchDir.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String path = getDirPath(shell, "Select search directory");
+				selectSearchDir(path);
+			}
+		});
+		
+		downloader.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String path = getDirPath(shell, "Select download directory");
+				downloadBinaries(path);
+			}
+		});
+		
+		edit.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				
+				if(table.getSelectionCount()==0) {
+					return;
+				}
+				TableItem item = table.getSelection()[0];
+				
+				String file = getFilePath(shell, "Select directory path to "+item.getText(0),null);
+				editBinary(item, file);
+			}
+		});
+		
+		browseRefGenome.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select reference genome","*.fa;*.fasta");
+				REF_GENOME = file;
+				refGenome.setText(REF_GENOME);
+			}
+		});
+		
+		browseResHapmap.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select HapMap dataset","*.vcf");
+				RES_HAPMAP = file;
+				res_hapmap.setText(RES_HAPMAP);
+			}
+		});
+		
+		browseResOmni.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select Omni dataset","*.vcf");
+				RES_OMNI = file;
+				res_omni.setText(RES_OMNI);
+			}
+		});
+		
+		browseRes1000G.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select 1000G dataset","*.vcf");
+				RES_1000G = file;
+				res_1000G.setText(RES_1000G);
+			}
+		});
+		
+		browseResDbsnp.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select dbSNP dataset","*.vcf");
+				RES_DBSNP = file;
+				res_dbsnp.setText(RES_DBSNP);
+			}
+		});
+		
+		browseResMills.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select Mills dataset","*.vcf");
+				RES_MILLS = file;
+				res_mills.setText(RES_MILLS);
+			}
+		});
+		
+		browseDBFile.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select HTE database file","*.db;*.sql");
+				selectDBFile(file);
+			}
+		});
+		
+		createDBFile.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String path = getDirPath(shell,"Choose directory in which database file will be stored");
+				createDBFile(path);
+			}
+		});
+		
 		return top;
+		
+		
 	}
 
 	/**
@@ -377,8 +494,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * this page's values appropriately.
 	 */	
 	public boolean performOk() {
-		
-		
 		REF_GENOME = refGenome.getText();
 		if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
 			JOptionPane.showMessageDialog(null,
@@ -388,10 +503,23 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return false;
 		}
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.REF_GENOME, REF_GENOME);
-		LOGGER.debug("Setting REF_GENOME to: "+REF_GENOME);
+		
+		RES_HAPMAP = res_hapmap.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_HAPMAP, RES_HAPMAP);
+		
+		RES_OMNI = res_omni.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_OMNI, RES_OMNI);
+		
+		RES_1000G = res_1000G.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G, RES_1000G);
+		
+		RES_DBSNP = res_dbsnp.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_DBSNP, RES_DBSNP);
+		
+		RES_MILLS = res_mills.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_MILLS, RES_MILLS);
 		
 		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.USE_HTE, USE_HTE);
-		LOGGER.debug("Setting USE_HTE to: "+USE_HTE);
 		
 		if(!USE_HTE) {
 			IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, USE_HTE);
@@ -412,7 +540,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return false;
 		}
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.THRESHOLD, THRESHOLD);
-		LOGGER.debug("Setting THREHOLD to: "+THRESHOLD);
 		
 		if(DB_FILE.equals("")) {
 			JOptionPane.showMessageDialog(null,
@@ -421,9 +548,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.DB_FILE, DB_FILE);
-		LOGGER.debug("Setting DB_FILE to: "+DB_FILE);
-		
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.DB_FILE, DB_FILE);		
 		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, NOTIFY);
 
 		EMAILHOST = email_host.getText();
@@ -467,14 +592,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		return super.performOk();
 	}
 	
-	private void downloadBinaries(Shell shell){
-		
-		DirectoryDialog dlg = new DirectoryDialog(shell);
-		dlg.setText("Choose directory in which tool binaries will be stored");
-		dlg.setFilterPath("~/");
-		String dir = dlg.open();
-		
-		//do nothing if DirectoryDialog was cancelled
+	private void downloadBinaries(String dir){
 		if(dir==null) return;
 		
 		try {
@@ -486,7 +604,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				    JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		
 			
 		for (String tool : TOOLS.keySet()) {
 			if (TOOLS.get(tool)) {
@@ -520,14 +637,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	private void selectSearchDir(Shell shell){
-		
-		DirectoryDialog dirlg = new DirectoryDialog(shell);
-		dirlg.setText("Choose directory in which tool binaries shall be searched");
-		dirlg.setFilterPath("~/");
-		String dir = dirlg.open();
-		
-		//do nothing if DirectoryDialog was cancelled
+	private void selectSearchDir(String dir){
 		if(dir==null) return;
 
 	    Thread t = new Thread(new Runnable() {
@@ -555,26 +665,31 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			}
 		}
 		
-		
 		for(TableItem i: table.getItems()) {
 			i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
 		}
 	}
 	
-	private void editBinary(Shell shell) {
-		
-		if(table.getSelectionCount()==0) {
-			return;
+	private String getFilePath(Shell shell, String text, String ext) {
+		FileDialog fdl = new FileDialog(shell);
+		fdl.setText(text);
+		if(ext == null) {
+			fdl.setFilterExtensions(new String[]{ext});
 		}
-		TableItem item = table.getSelection()[0];
-		
-		FileDialog dlg = new FileDialog(shell);
-		dlg.setText("Select directory path to "+item.getText(0));
-		String path = System.getProperty("user.home");
-		dlg.setFilterPath(path);
-		String file = dlg.open();
-		
-		//do nothing if FileDialog was cancelled
+		fdl.setFilterPath(System.getProperty("user.home"));
+		String path = fdl.open();
+		return path;
+	}
+	
+	private String getDirPath(Shell shell, String text) {
+		DirectoryDialog dl = new DirectoryDialog(shell);
+		dl.setText("Select reference genome");
+		dl.setFilterPath("~/");
+		String path = dl.open();
+		return path;
+	}
+	
+	private void editBinary(TableItem item, String file) {
 		if(file==null) return;
 		
 		try {
@@ -590,28 +705,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	private void selectRefGenome(Shell shell) {
-		FileDialog fdl = new FileDialog(shell);
-		fdl.setText("Select reference genome");
-		fdl.setFilterExtensions(new String[]{"*.fa;*.fasta"});
-		fdl.setFilterPath("~/");
-		String path = fdl.open();
-		
-		//do nothing if FileDialog was cancelled
-		if(path==null) return;
-		
-		REF_GENOME = path;
-		refGenome.setText(REF_GENOME);
-	}
-	
-	private void selectDBFile(Shell shell) {
-		FileDialog fdl = new FileDialog(shell);
-		fdl.setText("Select HTE database file");
-		fdl.setFilterExtensions(new String[]{"*.db","*.sql"});
-		fdl.setFilterPath("~/");
-		String path = fdl.open();
-		
-		//do nothing if FileDialog was cancelled
+	private void selectDBFile(String path) {
 		if(path==null) return;
 		
 		HTEDBHandler htedb;
@@ -638,15 +732,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	public void createDBFile(Shell shell) {
-		DirectoryDialog dlg = new DirectoryDialog(shell);
-		dlg.setText("Choose directory in which database file will be stored");
-		dlg.setFilterPath("~/");
-		String dir = dlg.open();
-		
-		//do nothing if DirectoryDialog was cancelled
+	public void createDBFile(String dir) {
 		if(dir==null) return;
-		
 		try {
 			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db",null);
 			htedb.createDB();

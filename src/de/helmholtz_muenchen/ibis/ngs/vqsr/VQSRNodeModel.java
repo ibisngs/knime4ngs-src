@@ -54,23 +54,23 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     public static final String CFGKEY_GAUSS						= "Gaussians";
     public static final String CFGKEY_NT						= "NT";
 
-    public static final String CFGKEY_RESOURCES_STRING_1		= "resources_1";
-    public static final String CFGKEY_RESOURCES_STRING_2		= "resources_2";
-    public static final String CFGKEY_RESOURCES_STRING_3		= "resources_3";
-    public static final String CFGKEY_RESOURCES_STRING_4		= "resources_4";
-    public static final String CFGKEY_RESOURCES_STRING_5		= "resources_5";
+    public static final String CFGKEY_RESOURCE_HAPMAP			= "resource_hapmap";
+    public static final String CFGKEY_RESOURCE_OMNI				= "resource_omni";
+    public static final String CFGKEY_RESOURCE_1000G			= "resource_1000G";
+    public static final String CFGKEY_RESOURCE_DBSNP			= "resource_dbSNP";
+    public static final String CFGKEY_RESOURCE_MILLS			= "resource_mills";
 
-    public static final String CFGKEY_RESOURCES_BOOLEAN_1		= "resources_BOOLEAN_1";
-    public static final String CFGKEY_RESOURCES_BOOLEAN_2		= "resources_BOOLEAN_2";
-    public static final String CFGKEY_RESOURCES_BOOLEAN_3		= "resources_BOOLEAN_3";
-    public static final String CFGKEY_RESOURCES_BOOLEAN_4		= "resources_BOOLEAN_4";
-    public static final String CFGKEY_RESOURCES_BOOLEAN_5		= "resources_BOOLEAN_5";
+    public static final String CFGKEY_RESOURCES_BOOLEAN_HAPMAP	= "resources_BOOLEAN_HAPMAP";
+    public static final String CFGKEY_RESOURCES_BOOLEAN_OMNI	= "resources_BOOLEAN_OMNI";
+    public static final String CFGKEY_RESOURCES_BOOLEAN_1000G	= "resources_BOOLEAN_1000G";
+    public static final String CFGKEY_RESOURCES_BOOLEAN_DBSNP	= "resources_BOOLEAN_DBSNP";
+    public static final String CFGKEY_RESOURCES_BOOLEAN_MILLS	= "resources_BOOLEAN_MILLS";
 
-    public static final String CFGKEY_RESOURCES_FILE_1			= "resources_FILE_1";
-    public static final String CFGKEY_RESOURCES_FILE_2			= "resources_FILE_2";
-    public static final String CFGKEY_RESOURCES_FILE_3			= "resources_FILE_3";
-    public static final String CFGKEY_RESOURCES_FILE_4			= "resources_FILE_4";
-    public static final String CFGKEY_RESOURCES_FILE_5			= "resources_FILE_5";
+    public static final String CFGKEY_RESOURCES_FILE_HAPMAP			= "resources_FILE_HAPMAP";
+    public static final String CFGKEY_RESOURCES_FILE_OMNI			= "resources_FILE_OMNI";
+    public static final String CFGKEY_RESOURCES_FILE_1000G			= "resources_FILE_1000G";
+    public static final String CFGKEY_RESOURCES_FILE_DBSNP			= "resources_FILE_DBSNP";
+    public static final String CFGKEY_RESOURCES_FILE_MILLS			= "resources_FILE_5";
 
     public static final String CFGKEY_TS_FILTER					= "TS_FILTER";
     
@@ -96,24 +96,24 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     private final SettingsModelIntegerBounded m_GAUSSIANS = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_GAUSS,8,1,Integer.MAX_VALUE);
     private final SettingsModelIntegerBounded m_NT = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_NT,1,1,Integer.MAX_VALUE);
 
-    private final SettingsModelString m_RESOURCES_STRING_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_1, "hapmap,known=false,training=true,truth=true,prior=15.0");
-    private final SettingsModelString m_RESOURCES_STRING_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_2, "omni,known=false,training=true,truth=true,prior=12.0");
-    private final SettingsModelString m_RESOURCES_STRING_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_3, "1000G,known=false,training=true,truth=false,prior=10.0");
-    private final SettingsModelString m_RESOURCES_STRING_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_4, "dbsnp,known=true,training=false,truth=false,prior=2.0");
-    private final SettingsModelString m_RESOURCES_STRING_5 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_STRING_5, "mills,known=false,training=true,truth=true,prior=12.0");
+    private final SettingsModelString m_RESOURCES_STRING_HAPMAP = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCE_HAPMAP, "hapmap,known=false,training=true,truth=true,prior=15.0");
+    private final SettingsModelString m_RESOURCES_STRING_OMNI = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCE_OMNI, "omni,known=false,training=true,truth=true,prior=12.0");
+    private final SettingsModelString m_RESOURCES_STRING_1000G = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCE_1000G, "1000G,known=false,training=true,truth=false,prior=10.0");
+    private final SettingsModelString m_RESOURCES_STRING_DBSNP = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCE_DBSNP, "dbsnp,known=true,training=false,truth=false,prior=2.0");
+    private final SettingsModelString m_RESOURCES_STRING_MILLS = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCE_MILLS, "mills,known=false,training=true,truth=true,prior=12.0");
     
     //TODO remove for publication
-    private final SettingsModelString m_RESOURCES_FILE_1 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_1, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/hapmap_3.3.hg19.vcf");
-    private final SettingsModelString m_RESOURCES_FILE_2 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_2, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_omni2.5.hg19.vcf");
-    private final SettingsModelString m_RESOURCES_FILE_3 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_3, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_phase1.snps.high_confidence.hg19.vcf");
-    private final SettingsModelString m_RESOURCES_FILE_4 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_4, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/dbsnp_138.hg19.vcf");
-    private final SettingsModelString m_RESOURCES_FILE_5 = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_5, "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/Mills_and_1000G_gold_standard.indels.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_HAPMAP = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_HAPMAP,"");// "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/hapmap_3.3.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_OMNI = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_OMNI,"");    // "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_omni2.5.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_1000G = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_1000G,"");  // "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/1000G_phase1.snps.high_confidence.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_DBSNP = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_DBSNP,"");  // "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/dbsnp_138.hg19.vcf");
+    private final SettingsModelString m_RESOURCES_FILE_MILLS = new SettingsModelString(VQSRNodeModel.CFGKEY_RESOURCES_FILE_MILLS,"");  // "/storageNGS/ngs1/genomes/mammalian/H_sapiens/hg19_GRCh37/annotation/Mills_and_1000G_gold_standard.indels.hg19.vcf");
 
-    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_1 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_1, true);
-    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_2 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_2, true);
-    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_3 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_3, true);
-    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_4 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_4, true);
-    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_5 = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_5, false);
+    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_HAPMAP = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_HAPMAP, true);
+    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_OMNI = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_OMNI, true);
+    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_1000G = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_1000G, true);
+    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_DBSNP = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_DBSNP, true);
+    private final SettingsModelBoolean m_RESOURCES_BOOLEAN_MILLS = new SettingsModelBoolean(VQSRNodeModel.CFGKEY_RESOURCES_BOOLEAN_MILLS, false);
 
     private final SettingsModelDoubleBounded m_TS_FILTER = new SettingsModelDoubleBounded(VQSRNodeModel.CFGKEY_TS_FILTER,VQSRNodeModel.DEFAULT_TS_FILTER_SNP,1,100);
 
@@ -138,21 +138,21 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
         addSetting(m_REF_GENOME);
         addSetting(m_TRANCHE);
         
-        addSetting(m_RESOURCES_BOOLEAN_1);
-        addSetting(m_RESOURCES_BOOLEAN_2);
-        addSetting(m_RESOURCES_BOOLEAN_3);
-        addSetting(m_RESOURCES_BOOLEAN_4);
-        addSetting(m_RESOURCES_BOOLEAN_5);
-        addSetting(m_RESOURCES_FILE_1);
-        addSetting(m_RESOURCES_FILE_2);
-        addSetting(m_RESOURCES_FILE_3);
-        addSetting(m_RESOURCES_FILE_4);
-        addSetting(m_RESOURCES_FILE_5);
-        addSetting(m_RESOURCES_STRING_1);
-        addSetting(m_RESOURCES_STRING_2);
-        addSetting(m_RESOURCES_STRING_3);
-        addSetting(m_RESOURCES_STRING_4);
-        addSetting(m_RESOURCES_STRING_5);
+        addSetting(m_RESOURCES_BOOLEAN_HAPMAP);
+        addSetting(m_RESOURCES_BOOLEAN_OMNI);
+        addSetting(m_RESOURCES_BOOLEAN_1000G);
+        addSetting(m_RESOURCES_BOOLEAN_DBSNP);
+        addSetting(m_RESOURCES_BOOLEAN_MILLS);
+        addSetting(m_RESOURCES_FILE_HAPMAP);
+        addSetting(m_RESOURCES_FILE_OMNI);
+        addSetting(m_RESOURCES_FILE_1000G);
+        addSetting(m_RESOURCES_FILE_DBSNP);
+        addSetting(m_RESOURCES_FILE_MILLS);
+        addSetting(m_RESOURCES_STRING_HAPMAP);
+        addSetting(m_RESOURCES_STRING_OMNI);
+        addSetting(m_RESOURCES_STRING_1000G);
+        addSetting(m_RESOURCES_STRING_DBSNP);
+        addSetting(m_RESOURCES_STRING_MILLS);
         addSetting(m_TS_FILTER);
         
         addSetting(m_OPT_VAR_RECAL);
@@ -273,21 +273,21 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	command.add("-input "+infile);
     	
     	//Add resources
-    	if(m_RESOURCES_BOOLEAN_1.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_1.getStringValue()+" "+m_RESOURCES_FILE_1.getStringValue());
+    	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue()){
+    		command.add("-resource:"+m_RESOURCES_STRING_HAPMAP.getStringValue()+" "+m_RESOURCES_FILE_HAPMAP.getStringValue());
     	}
-    	if(m_RESOURCES_BOOLEAN_2.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_2.getStringValue()+" "+m_RESOURCES_FILE_2.getStringValue());
+    	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue()){
+    		command.add("-resource:"+m_RESOURCES_STRING_OMNI.getStringValue()+" "+m_RESOURCES_FILE_OMNI.getStringValue());
     	}
-    	if(m_RESOURCES_BOOLEAN_3.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_3.getStringValue()+" "+m_RESOURCES_FILE_3.getStringValue());
+    	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue()){
+    		command.add("-resource:"+m_RESOURCES_STRING_1000G.getStringValue()+" "+m_RESOURCES_FILE_1000G.getStringValue());
     	}
-    	if(m_RESOURCES_BOOLEAN_4.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_4.getStringValue()+" "+m_RESOURCES_FILE_4.getStringValue());
+    	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue()){
+    		command.add("-resource:"+m_RESOURCES_STRING_DBSNP.getStringValue()+" "+m_RESOURCES_FILE_DBSNP.getStringValue());
     	}
     	
-    	if(m_RESOURCES_BOOLEAN_5.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_5.getStringValue()+" "+m_RESOURCES_FILE_5.getStringValue());
+    	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue()){
+    		command.add("-resource:"+m_RESOURCES_STRING_MILLS.getStringValue()+" "+m_RESOURCES_FILE_MILLS.getStringValue());
     	}
     	
     	command.add(m_AN.getStringValue());

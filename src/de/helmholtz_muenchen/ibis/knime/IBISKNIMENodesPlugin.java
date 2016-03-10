@@ -27,6 +27,11 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String EMAIL_SENDER = "sender";
 	public static final String EMAIL_RECEIVER = "receiver";
 	public static final String REF_GENOME = "ref_genome";
+	public static final String RES_HAPMAP = "hapmap";
+	public static final String RES_OMNI = "omni";
+	public static final String RES_1000G = "1000G";
+	public static final String RES_DBSNP = "dbsnp";
+	public static final String RES_MILLS = "mills";
 	
 //	default values
 	public static final boolean HTE_DEFAULT = false;
@@ -51,14 +56,14 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String VEP = "variant_effect_predictor.pl";
 	public static final String VEP_FILTER = "filter_vep.pl";
 	
-//	tool dependencies
+//	tool dependencies, neither in FIELDS nor in PATHS
 	public static final String BOWTIE2_BUILD = "bowtie2-build";
 	
 //	exluded binaries: integrate binaries by adding them to PATHS and TOOLS in the KNIMEPreferencePage
 //	public static final String BFAST = "bfast";
 	
 	public static String [] FIELDS = {USE_HTE, THRESHOLD, DB_FILE, NOTIFY, EMAIL_HOST, EMAIL_SENDER, EMAIL_RECEIVER};
-	public static String [] PATHS = {REF_GENOME, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, STAR, VCFTOOLS, VEP, VEP_FILTER};
+	public static String [] PATHS = {REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G, RES_DBSNP, RES_MILLS, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, STAR, VCFTOOLS, VEP, VEP_FILTER};
 	
 	/**
      * The shared instance.
