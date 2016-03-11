@@ -5,7 +5,6 @@ import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
@@ -34,7 +33,10 @@ public class Bowtie2NodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the Bowtie2 node.
      */
     protected Bowtie2NodeDialog() {
+    
+    }
     	
+    public void addToolDialogComponents() {
         	
     	final SettingsModelString installpath = new SettingsModelString(Bowtie2NodeModel.CFGKEY_INSTALLPATH,"");
     	final SettingsModelString refseqfile = new SettingsModelString(Bowtie2NodeModel.CFGKEY_REFSEQFILE,"");
@@ -121,10 +123,10 @@ public class Bowtie2NodeDialog extends HTExecutorNodeDialog {
     	nocontain.setEnabled(false);
     	nooverlap.setEnabled(false);
     	
-    	createNewGroup("Bowtie2 binary");
-    	addDialogComponent(new DialogComponentFileChooser(installpath, "his_bow_id", 0, ""));
-    	createNewGroup("Reference sequence: FastA file (e.g. genome)");
-    	addDialogComponent(new DialogComponentFileChooser(refseqfile, "his1_bow_id", 0, ""));
+//    	createNewGroup("Bowtie2 binary");
+//    	addDialogComponent(new DialogComponentFileChooser(installpath, "his_bow_id", 0, ""));
+//    	createNewGroup("Reference sequence: FastA file (e.g. genome)");
+//    	addDialogComponent(new DialogComponentFileChooser(refseqfile, "his1_bow_id", 0, ""));
     	createNewGroup("Indexing parameters");
     	addDialogComponent(new DialogComponentBoolean(noauto, "Automatically select value for parameters according to available memory."));
     	addDialogComponent(new DialogComponentBoolean(packed, "Use a packed (2-bits-per-nucleotide) representation for DNA strings."));

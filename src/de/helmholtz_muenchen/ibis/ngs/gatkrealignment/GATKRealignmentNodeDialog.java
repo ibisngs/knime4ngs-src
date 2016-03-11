@@ -32,6 +32,21 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 
+	// indicate that files are available form previous node
+	private boolean phase1;
+	private boolean mills;
+	
+	protected GATKRealignmentNodeDialog() {
+		
+//		createGeneralOptions();
+//		createTargetCreatorOptions();
+//		createIndelRealignmentOptions();
+//		createProxyOptions();
+
+	}
+	
+	public void addToolDialogComponents() {
+	
 	// options tab
 	/*
 	 * String path to gatk boolean use 1000G phase1 indels set String path to
@@ -166,9 +181,7 @@ public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 			GATKRealignmentNodeModel.CFGKEY_ALIGNMENT_TAG,
 			GATKRealignmentNodeModel.DEF_ALIGNMENT_TAG);
 
-	// indicate that files are available form previous node
-	private boolean phase1;
-	private boolean mills;
+
 
 	// Proxy options
 //	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(
@@ -184,35 +197,27 @@ public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 //	final SettingsModelString proxypassword = new SettingsModelString(
 //			GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD, null);
 
-	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(
+	final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(
 			GATKRealignmentNodeModel.CFGKEY_OPT_FLAGS, "", false);
 
-	protected GATKRealignmentNodeDialog() {
-		super();
+	addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
+	addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
 
-		addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
-		addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
-		createGeneralOptions();
-		createTargetCreatorOptions();
-		createIndelRealignmentOptions();
-//		createProxyOptions();
 
-	}
+//	private void createGeneralOptions() {
 
-	private void createGeneralOptions() {
-
-		createNewGroup("Path to GATK jar file");
-		DialogComponentFileChooser gatkf = new DialogComponentFileChooser(gatk,
-				"gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
-		gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
-		addDialogComponent(gatkf);
+//		createNewGroup("Path to GATK jar file");
+//		DialogComponentFileChooser gatkf = new DialogComponentFileChooser(gatk,
+//				"gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
+//		gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
+//		addDialogComponent(gatkf);
 
 		// reffile
-		createNewGroup("Path to reference genome");
-		DialogComponentFileChooser reff = new DialogComponentFileChooser(
-				reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
-		reff.setBorderTitle("Choose File (disabled if file available from previous node)");
-		addDialogComponent(reff);
+//		createNewGroup("Path to reference genome");
+//		DialogComponentFileChooser reff = new DialogComponentFileChooser(
+//				reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
+//		reff.setBorderTitle("Choose File (disabled if file available from previous node)");
+//		addDialogComponent(reff);
 
 		// sets of known indels from database for realignment
 		createNewGroup("Sets of known indels");
@@ -294,9 +299,9 @@ public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 		createNewGroup("Java Memory");
 		addDialogComponent(new DialogComponentNumber(memory_usage,
 				"Java Memory (GB) per thread", 1));
-	}
+//	}
 
-	private void createTargetCreatorOptions() {
+//	private void createTargetCreatorOptions() {
 
 		createNewTab("TargetCreator Options");
 
@@ -317,9 +322,9 @@ public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 		createNewGroup("Window size for clustering SNPs");
 		addDialogComponent(new DialogComponentNumber(window, "Window size", 1,
 				5));
-	}
+//	}
 
-	private void createIndelRealignmentOptions() {
+//	private void createIndelRealignmentOptions() {
 
 		createNewTab("Realignment Options");
 

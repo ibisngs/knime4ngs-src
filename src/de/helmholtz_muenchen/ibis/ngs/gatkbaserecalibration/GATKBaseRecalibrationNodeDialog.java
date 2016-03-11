@@ -32,7 +32,18 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author 
  */
 public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
-		
+	
+	private boolean phase1;
+	private boolean mills;
+	private boolean dbsnp;
+	
+	 protected GATKBaseRecalibrationNodeDialog() {
+//       generateGeneralOptions();
+//       generateBaseRecalOptions();
+//       generateProxyOptions();
+	 }
+	
+	public void addToolDialogComponents() {
 	// general options
 	/* 
 	 * String path to gatk
@@ -104,9 +115,7 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 	final SettingsModelIntegerBounded max_cycles= new SettingsModelIntegerBounded(GATKBaseRecalibrationNodeModel.CFGKEY_MAX_CYCLES, GATKBaseRecalibrationNodeModel.DEF_MAX_CYCLES, GATKBaseRecalibrationNodeModel.MIN_MAX_CYCLES, GATKBaseRecalibrationNodeModel.MAX_MAX_CYCLES);
 	final SettingsModelBoolean simplify_out=new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_SIMPLIFY_OUT, GATKBaseRecalibrationNodeModel.DEF_SIMPLIY_OUT);
 	
-	private boolean phase1;
-	private boolean mills;
-	private boolean dbsnp;
+
 	
 	//Proxy options
 //	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKBaseRecalibrationNodeModel.CFGKEY_USEPROXY, false);
@@ -116,32 +125,28 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
 //	final SettingsModelString proxyuser = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYUSER, null);
 //	final SettingsModelString proxypassword = new SettingsModelString(GATKBaseRecalibrationNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
-	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKBaseRecalibrationNodeModel.CFGKEY_OPT_FLAGS,"",false);
+	final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKBaseRecalibrationNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
 	
-    protected GATKBaseRecalibrationNodeDialog() {
-        super();
+   
            
-        addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
-        addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
-        generateGeneralOptions();
-        generateBaseRecalOptions();
-//        generateProxyOptions();
+    addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
+    addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
+
         
 
-    }
     
-    private void generateGeneralOptions(){
-    	createNewGroup("Path to GATK jar file");
-    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk2", JFileChooser.OPEN_DIALOG, false, ".jar");
-    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
-    	addDialogComponent(gatkf);
+//    private void generateGeneralOptions(){
+//    	createNewGroup("Path to GATK jar file");
+//    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk2", JFileChooser.OPEN_DIALOG, false, ".jar");
+//    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
+//    	addDialogComponent(gatkf);
         
     	// reffile
-    	createNewGroup("Path to reference genome");
-    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
-    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
-    	addDialogComponent(reff);
+//    	createNewGroup("Path to reference genome");
+//    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
+//    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
+//    	addDialogComponent(reff);
     	
     	// sets of known indels from database for realignment
         createNewGroup("Sets of known polymorphisms (at least one set has to be chosen)");
@@ -235,9 +240,9 @@ public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
         createNewGroup("Java Memory");
         addDialogComponent(new DialogComponentNumber(memory_usage, "Shared Java Memory (GB) for all CPU threads", 1));
         
-    }
+//    }
         
-    private void generateBaseRecalOptions(){
+//    private void generateBaseRecalOptions(){
         createNewTab("BaseRecalibrator");
         
         createNewGroup("Calculation of covariates");

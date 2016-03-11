@@ -122,6 +122,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     
 	//The Output Col Names
 	public static final String OUT_COL1 = "VQSR VARIANTS";
+	private int vcf_index;
     
     /**
      * Constructor for the node model.
@@ -373,24 +374,17 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-
     	
-//    	if(inSpecs[0].containsName("Path2GATKFile")){
-//    		m_GATK.setEnabled(false);
-//    		m_GATK.setStringValue("GATK Path already set");
-//    		LOGGER.info("Found GATK Path in inData");
-//    	}else{
-//    		LOGGER.warn("No path to GATK found in inData. User input required.");
-//    	}
-//    	
-//    	if(inSpecs[0].containsName("Path2SEQFile")){
-//    		m_REF_GENOME.setEnabled(false);
-//    		m_REF_GENOME.setStringValue("Reference Sequence already set");
-//    		LOGGER.info("Found Reference Sequence in inData");
-//    	}else{
-//    		LOGGER.warn("No path to Reference Sequence found in inData. User input required.");
-//    	}
+    	vcf_index = -1;
+    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    			vcf_index = i;
+    		}
+    	}
     	
+    	if(vcf_index==-1) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	}
 
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{

@@ -2,13 +2,9 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
@@ -17,9 +13,6 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
@@ -35,31 +28,31 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 
     // keys for SettingsModels
 	protected static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
-	protected static final String CFGKEY_ADDITIONAL_PARAMETER 	= "AdditionalParameter";
+//	protected static final String CFGKEY_ADDITIONAL_PARAMETER 	= "AdditionalParameter";
 //    protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
 	
 	// initial default values for SettingsModels    
     protected static final String DEFAULT_BINARY_PATH 			= "";
-    protected static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
+//    protected static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
 //    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     
     // definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
-    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
+//    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
 //    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
     
 	// logger class
 //	private static final NodeLogger LOGGER = NodeLogger.getLogger(ExecutorNodeModel.class);
 	
 	// regex for additional parameter
-	private static final String PARAMETER_REGEX 	= "(-{1,2}\\w+)\\s*(([^-]|(?<=\\w)-)*)";
-	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
+//	private static final String PARAMETER_REGEX 	= "(-{1,2}\\w+)\\s*(([^-]|(?<=\\w)-)*)";
+//	private static final Pattern PARAMETER_PATTERN 	= Pattern.compile(PARAMETER_REGEX);
 //	private static final String REGEX_WHITESPACE	= "\\s+";
 	
 
 	// stores the defined SettingsModels objects
-	private final HashMap<String, SettingsModel> SETTINGS_MAP = new HashMap<String, SettingsModel>();
-	private final ArrayList<SettingsModel> SETTINGS = new ArrayList<SettingsModel>();
+//	private final HashMap<String, SettingsModel> SETTINGS_MAP = new HashMap<String, SettingsModel>();
+//	private final ArrayList<SettingsModel> SETTINGS = new ArrayList<SettingsModel>();
 	
 	//Catch Stdout/err streams
 	private boolean catchStdout;
@@ -78,14 +71,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 		
 		this.catchStderr = catchStderr;
 		this.catchStdout = catchStdout;
-		init();
-	}
-
-	public void init() {
-		super.init();
 		addSetting(SET_BINARY_PATH);
-		addSetting(SET_ADDITIONAL_PARAMETER);
-//		addSetting(SET_PARAMETER_FILE);
 	}
 	
 	@Override
@@ -180,12 +166,12 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	protected ArrayList<String> getSetParameters(final BufferedDataTable[] inData) {
 		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();			// merged parameter set
 //		LinkedHashMap<String, String> parsFile = getParametersFromParameterFile();			// get parameter from file
-		LinkedHashMap<String, String> parsAdditional = getAdditionalParameter();			// get parameter from input field
+//		LinkedHashMap<String, String> parsAdditional = getAdditionalParameter();			// get parameter from input field
 		LinkedHashMap<String, String> parsGUI = getGUIParameters(inData);					// get parameter from GUI
 		
 		// merge them all together
 //		pars.putAll(parsFile);
-		pars.putAll(parsAdditional);
+//		pars.putAll(parsAdditional);
 		pars.putAll(parsGUI);
 		
 		// build the command list
@@ -227,18 +213,18 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * Returns the parameter which were set in the additional parameter input field.
 	 * @return
 	 */
-	private LinkedHashMap<String, String> getAdditionalParameter() {
-		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
-		String parameter = SET_ADDITIONAL_PARAMETER.getStringValue();
-		
-		// split at REGEX
-		Matcher m = PARAMETER_PATTERN.matcher(parameter);
-		
-		while(m.find())
-			pars.put(m.group(1), m.group(2));
-		
-		return pars;
-	}
+//	private LinkedHashMap<String, String> getAdditionalParameter() {
+//		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
+//		String parameter = SET_ADDITIONAL_PARAMETER.getStringValue();
+//		
+//		// split at REGEX
+//		Matcher m = PARAMETER_PATTERN.matcher(parameter);
+//		
+//		while(m.find())
+//			pars.put(m.group(1), m.group(2));
+//		
+//		return pars;
+//	}
 	
 	/**
 	 * Returns the values, which are stored in the parameter file, if one is given
@@ -310,38 +296,6 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 
     	return filenPath;
     }
-    
-    
-	public void addSetting(SettingsModel model) {
-		if(model != null) {
-			SETTINGS.add(model);
-			// get protected config name
-			try {
-				Method m = model.getClass().getDeclaredMethod("getConfigName");
-				m.setAccessible(true);
-				String configName = m.invoke(model, new Object[]{}).toString();
-				
-				// add it to the settings map
-				SETTINGS_MAP.put(configName, model);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
-		}
-		else {
-			throw new IllegalArgumentException("SettingsModel can not be null if it should be added!");
-		}
-	}
-    
-	/**
-	 * gets a saved settings or null, if not there
-	 * @param name
-	 */
-	public SettingsModel getSetting(String name) {
-		return this.SETTINGS_MAP.get(name);
-	}
-	
-	
 	
 	private void runHTExecute(String[] command, ExecutionContext exec, File lockFile) throws Exception{
 	
@@ -366,41 +320,6 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	/**************************************** KNIME METHODS ****************************************/
 	/***********************************************************************************************/
     
-    /**
-     * {@inheritDoc}
-     */
-    protected void validateSettings(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	
-    	super.validateSettings(settings);
-    	
-    	// get all models and validate them
-    	for(SettingsModel set : SETTINGS)
-    		set.validateSettings(settings);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException {
-    	
-    	super.loadValidatedSettingsFrom(settings);
-    	
-    	// get all models and load them
-    	for(SettingsModel set : SETTINGS)
-    		set.loadSettingsFrom(settings);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	
-    	super.saveSettingsTo(settings);
-    	
-    	// get all models and save them
-    	for(SettingsModel set : SETTINGS)
-    		set.saveSettingsTo(settings);
-    }
 	
 	@Override
 	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec)

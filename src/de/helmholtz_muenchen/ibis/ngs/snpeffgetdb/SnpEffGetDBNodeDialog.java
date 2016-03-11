@@ -14,18 +14,20 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 public class SnpEffGetDBNodeDialog extends HTExecutorNodeDialog {
 
 	
-	final SettingsModelString snpeff_folder = new SettingsModelString(
-			SnpEffGetDBNodeModel.CFGKEY_SNPEFF_FOLDER, null);
-	final SettingsModelString database = new SettingsModelString(
-			SnpEffGetDBNodeModel.CFGKEY_DATABASE, null);
+	
 	//final SettingsModelString database_folder = new SettingsModelString(
 	//		SnpEffGetDBNodeModel.CFGKEY_DATABASE_FOLDER, null);
     /**
      * New pane for configuring the SnpEffGetDB node.
      */
-    protected SnpEffGetDBNodeDialog() {
+    protected SnpEffGetDBNodeDialog() {}
+    
+    public void addToolDialogComponents() {
     	
-    	super();
+    	final SettingsModelString snpeff_folder = new SettingsModelString(
+    			SnpEffGetDBNodeModel.CFGKEY_SNPEFF_FOLDER, null);
+    	final SettingsModelString database = new SettingsModelString(
+    			SnpEffGetDBNodeModel.CFGKEY_DATABASE, null);
     	
     	createNewGroup("snpEff directory");
     	addDialogComponent(new DialogComponentFileChooser(snpeff_folder, "par_1", 0, true));

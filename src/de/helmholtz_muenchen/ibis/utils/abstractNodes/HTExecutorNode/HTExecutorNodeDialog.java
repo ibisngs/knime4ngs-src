@@ -1,12 +1,13 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -35,17 +36,21 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
 	
-	protected final HashMap<SettingsModelString, String> model2pref = new HashMap<>();;
+	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
+	private boolean firstOpened;
 	
 	protected HTExecutorNodeDialog() {
 		
-		createNewGroup("HTE");
+		addToolDialogComponents();
+		
+		createNewTab("Preference page");
 		
 		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
 		
-		DialogComponentNumber dcn = new DialogComponentNumber(threshold, "Threshold", HTExecutorNodeModel.DEFAULT_THRESHOLD);
+		DialogComponentNumber dcn = new DialogComponentNumber(threshold, "HTE threshold", HTExecutorNodeModel.DEFAULT_THRESHOLD);
 		addDialogComponent(dcn);
 		threshold.setEnabled(false);
+		
 		usePrefPage.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
@@ -57,9 +62,22 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 				updatePrefs();
 			}
     	});
+		
+		firstOpened = false;
+		
 	}
 	
     public void onOpen() {
+    	if(!firstOpened) {
+    		DialogComponentFileChooser dcfc;
+    		for(SettingsModelString sm: model2pref.keySet()) {
+    			createNewGroup("Path to "+model2pref.get(sm));
+    			dcfc = new DialogComponentFileChooser(sm,model2pref.get(sm),0);
+    			addDialogComponent(dcfc);
+    		}
+    		firstOpened = true;
+    	}
+    	
     	if(usePrefPage.getBooleanValue()) {
 			String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 	    	threshold.setIntValue(Integer.parseInt(n));
@@ -88,5 +106,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
     public void addPrefPageSetting(SettingsModelString sms, String v) {
     	this.model2pref.put(sms, v);
     }
+    
+    public abstract void addToolDialogComponents();
     
 }

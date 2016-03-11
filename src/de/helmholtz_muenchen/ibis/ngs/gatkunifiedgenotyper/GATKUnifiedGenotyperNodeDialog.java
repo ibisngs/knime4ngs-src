@@ -35,6 +35,16 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 	
+	private boolean dbsnp=false;
+	
+	protected GATKUnifiedGenotyperNodeDialog() {
+//        generalOptions();
+//        UGOptions();
+//        proxyOptions();
+     
+    }
+	
+	public void addToolDialogComponents() {
 	
 	/* main options
 	 * 
@@ -93,7 +103,7 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 	final SettingsModelIntegerBounded gap_cont_pen= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.DEF_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MIN_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MAX_GAP_CONT_PEN);
 	
 	
-	private boolean dbsnp=false;
+
 	
 	
 	//Proxy options
@@ -104,24 +114,14 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 //	final SettingsModelString proxyuser = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER, null);
 //	final SettingsModelString proxypassword = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD, null);
 	
-	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKUnifiedGenotyperNodeModel.CFGKEY_OPT_FLAGS,"",false);
+	final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKUnifiedGenotyperNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
-    /**
-     * New pane for configuring GATKUnifiedGenotyper node dialog.
-     * This is just a suggestion to demonstrate possible default dialog
-     * components.
-     */
-    protected GATKUnifiedGenotyperNodeDialog() {
-        super();
-        addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
-        addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
-        generalOptions();
-        UGOptions();
-//        proxyOptions();
-     
-    }
+
     
-    private void UGOptions() {
+	addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
+    addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
+    
+//    private void UGOptions() {
     	
         createNewTab("UnifiedGenotyper");
         createNewGroup("Phred-scaled confidence threshold");
@@ -158,20 +158,20 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 		
         createNewGroup("Further options");
         addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
-	}
+//	}
 
-	private void generalOptions(){
+//	private void generalOptions(){
         // gatk executable
-        createNewGroup("Path to GATK jar file");
-    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk3", JFileChooser.OPEN_DIALOG, false, ".jar");
-    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
-    	addDialogComponent(gatkf);
+//        createNewGroup("Path to GATK jar file");
+//    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk3", JFileChooser.OPEN_DIALOG, false, ".jar");
+//    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
+//    	addDialogComponent(gatkf);
     	
     	// reffile
-    	createNewGroup("Path to reference genome");
-    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
-    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
-    	addDialogComponent(reff);
+//    	createNewGroup("Path to reference genome");
+//    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
+//    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
+//    	addDialogComponent(reff);
     	
     	// dbsnp set for annotation
     	createNewGroup("Variants from dbSNP");

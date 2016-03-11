@@ -5,7 +5,6 @@ import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
@@ -28,15 +27,17 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class SegemehlNodeDialog extends HTExecutorNodeDialog {
 
-	private final SettingsModelString segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
-	private final SettingsModelString refseq = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,null);
+	
 	
     /**
      * New pane for configuring the Segemehl node.
      */
-    protected SegemehlNodeDialog() {
+    protected SegemehlNodeDialog() {}
+    
+    public void addToolDialogComponents() {
     	
-    	super();
+    	final SettingsModelString segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
+    	final SettingsModelString refseq = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,null);
     	
     	final SettingsModelBoolean clip5adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP5ADAPTER, false);
     	final SettingsModelBoolean clip3adapter = new SettingsModelBoolean(SegemehlNodeModel.CFGKEY_CLIP3ADAPTER, false);
@@ -62,10 +63,10 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     	bisulfiteMappingType.setEnabled(false);
 //    	checkBisulfiteMapping.setEnabled(false);
     	
-    	createNewGroup("Segemehl");
-    	addDialogComponent(new DialogComponentFileChooser(segemehlfile, "his_id_Segemehl", 0, ""));
-    	createNewGroup("Reference (e.g. genome) sequence: FastA file.");
-    	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_Segemehl", 0, ""));
+//    	createNewGroup("Segemehl");
+//    	addDialogComponent(new DialogComponentFileChooser(segemehlfile, "his_id_Segemehl", 0, ""));
+//    	createNewGroup("Reference (e.g. genome) sequence: FastA file.");
+//    	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_Segemehl", 0, ""));
     	createNewGroup("General");
 //    	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
 

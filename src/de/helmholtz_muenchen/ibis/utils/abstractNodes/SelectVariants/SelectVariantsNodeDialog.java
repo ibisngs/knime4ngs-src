@@ -28,7 +28,7 @@ public abstract class SelectVariantsNodeDialog extends GATKNodeDialog {
     
     protected void addDialogComponent() {
     	
-    	createNewTab("SelectVariants");
+//    	createNewTab("SelectVariants");
         addFilterDialogComponent();
     }
     

@@ -24,52 +24,54 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
 
-	private final SettingsModelString snpeff_folder = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_SNPEFF_FOLDER,"");
-	private final SettingsModelString invcf = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_INVCF,"");
-	private final SettingsModelString method = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_METHOD,"");
-	
-	/**Filter**/
-	private final SettingsModelString filterstring = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_FILTERSTRING,"");
-	private final SettingsModelDoubleBounded filterqual = new SettingsModelDoubleBounded(SnpSiftNodeModel.CFGKEY_FILTERQUAL, 20, 0, Double.MAX_VALUE);
-	private final SettingsModelIntegerBounded filtercoverage = new SettingsModelIntegerBounded(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGE, 10, 0, Integer.MAX_VALUE);
-	private final SettingsModelBoolean filterqualbool = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGEBOOL, false);
-	private final SettingsModelBoolean filtercoveragebool = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGEBOOL, false);
-	
-	/**Annotate**/
-	private final SettingsModelOptionalString anninfo = new SettingsModelOptionalString(
-			SnpSiftNodeModel.CFGKEY_ANNINFO,"",false);
-	private final SettingsModelBoolean annid = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_ANNID, false);
-	private final SettingsModelString annvcfdb = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_ANNVCFDB,"");
-	
-	/**TvTs**/
-	private final SettingsModelString tstvhom = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_TSTVHOM,"");
-	
-	
-	/**Intervals**/
-	private final SettingsModelString interbed = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_INTERBED,"");
-	private final SettingsModelBoolean interx = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_INTERX, false);
 
-	/**dbnsfp**/
-	private final SettingsModelString dbnsfp = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_DBNSFP,"");
-	private final SettingsModelOptionalString dbnsfpfields = new SettingsModelOptionalString(
-			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,"",false);
-	private final SettingsModelBoolean dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
 
 	
     /**
      * New pane for configuring the SnpSift node.
      */
-    protected SnpSiftNodeDialog() {
+    protected SnpSiftNodeDialog() {}
+    
+    public void addToolDialogComponents() {
 
-    	super();
+    	final SettingsModelString snpeff_folder = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_SNPEFF_FOLDER,"");
+    	final SettingsModelString invcf = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_INVCF,"");
+    	final SettingsModelString method = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_METHOD,"");
+    	
+    	/**Filter**/
+    	final SettingsModelString filterstring = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_FILTERSTRING,"");
+    	final SettingsModelDoubleBounded filterqual = new SettingsModelDoubleBounded(SnpSiftNodeModel.CFGKEY_FILTERQUAL, 20, 0, Double.MAX_VALUE);
+    	final SettingsModelIntegerBounded filtercoverage = new SettingsModelIntegerBounded(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGE, 10, 0, Integer.MAX_VALUE);
+    	final SettingsModelBoolean filterqualbool = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGEBOOL, false);
+    	final SettingsModelBoolean filtercoveragebool = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGEBOOL, false);
+    	
+    	/**Annotate**/
+    	final SettingsModelOptionalString anninfo = new SettingsModelOptionalString(
+    			SnpSiftNodeModel.CFGKEY_ANNINFO,"",false);
+    	final SettingsModelBoolean annid = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_ANNID, false);
+    	final SettingsModelString annvcfdb = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_ANNVCFDB,"");
+    	
+    	/**TvTs**/
+    	final SettingsModelString tstvhom = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_TSTVHOM,"");
+    	
+    	
+    	/**Intervals**/
+    	final SettingsModelString interbed = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_INTERBED,"");
+    	final SettingsModelBoolean interx = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_INTERX, false);
+
+    	/**dbnsfp**/
+    	final SettingsModelString dbnsfp = new SettingsModelString(
+    			SnpSiftNodeModel.CFGKEY_DBNSFP,"");
+    	final SettingsModelOptionalString dbnsfpfields = new SettingsModelOptionalString(
+    			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,"",false);
+    	final SettingsModelBoolean dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
     	
     	createNewGroup("snpEff/snpSIFT directory");
     	addDialogComponent(new DialogComponentFileChooser(snpeff_folder, "par_1", 0, true));

@@ -31,7 +31,9 @@ public class VCFutilsNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the VCFutils node.
      */
-    protected VCFutilsNodeDialog() {
+    protected VCFutilsNodeDialog() {}
+    
+    public void addToolDialogComponents() {
     	
     	final SettingsModelString vcf = new SettingsModelString(VCFutilsNodeModel.CFGKEY_VCFFILE,null);
     	final SettingsModelString refvcf = new SettingsModelString(VCFutilsNodeModel.CFGKEY_REFVCFFILE,null);

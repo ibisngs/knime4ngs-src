@@ -13,11 +13,8 @@
         Source: <a href="http://samtools.sourceforge.net/">https://samtools.github.io/bcftools/bcftools.html</a> 
         </intro>
         
-		<tab name="Options">    
+		<tab name="Options">
 		
-		<option name="HTE">Set threshold for repeated execution. Only used if HTE is enabled in the preference page.</option>
-		
-        <option name="Path to Bcftools">Select bcftools executable in the Samtools/Bcftools folder. This option is disabled if the path is set using the preference page.</option>
 		<option name="Method Selection">Select method for execution. Currently the node includes:
 		   <ul>
         		<li>
@@ -33,19 +30,30 @@
         		stats: Parses VCF or BCF and produces text file stats which is suitable for machine processing and can be plotted using plot-vcfstats. 
         		</li>
         	</ul>
-		 </option>
+		</option>
 		<option name="Sample Name File"> File with new sample names, one name per line, in the same order as they appear in the VCF file. Alternatively, only samples which need to be renamed can be listed as "old_name new_name\n" pairs separated by whitespaces, each on separate line. </option>
 		<option name="Further Parameters"> Further parameters can be added to the execution command if necessary.</option>
 		
 		</tab>    
  		<tab name="Concat">
+ 			<option name="Overlap">
+ 				First coordinate of the next file can precede last record of the current file. 
+			</option>
+ 			<option name="Output format">
+ 				Select output format.
+ 			</option>
+ 		</tab>
  		
- 		<option name="Overlap"> First coordinate of the next file can precede last record of the current file. 
-</option>
- 		<option name="Output format">Select output format.</option>
- 		
- 		
- 		</tab>  
+ 		<tab name="Preference page">
+ 			<option name="HTE">
+ 				Set threshold for repeated execution.
+ 				Only used if HTE is enabled in the preference page.
+ 			</option>
+ 			<option name="Path to bcftools">
+ 				Select bcftools executable in the Samtools/Bcftools folder.
+ 				This option is disabled if the path is set using the preference page.
+ 			</option>
+ 		</tab>
       
     </fullDescription>
     

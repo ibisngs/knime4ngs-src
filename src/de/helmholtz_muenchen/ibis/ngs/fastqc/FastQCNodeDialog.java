@@ -24,5 +24,11 @@ public class FastQCNodeDialog extends HTExecutorNodeDialog {
     protected FastQCNodeDialog() {
 
     }
+
+	@Override
+	public void addToolDialogComponents() {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

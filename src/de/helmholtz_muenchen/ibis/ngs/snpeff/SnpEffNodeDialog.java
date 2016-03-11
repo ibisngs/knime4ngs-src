@@ -28,64 +28,66 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class SnpEffNodeDialog extends HTExecutorNodeDialog {
 
-	/*Mandatory options*/
-	final SettingsModelString snpeff_folder = new SettingsModelString(
-			SnpEffNodeModel.CFGKEY_SNPEFF_FOLDER, null);
-	final SettingsModelString database = new SettingsModelString(
-			SnpEffNodeModel.CFGKEY_DATABASE, null);
-	final SettingsModelString vcf_file = new SettingsModelString(
-			
-			SnpEffNodeModel.CFGKEY_VCF_FILE, null);
-	/*Sequence change filter options*/
-	final SettingsModelBoolean useminq = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_USEMINQ, false);
-	final SettingsModelDoubleBounded minq = new SettingsModelDoubleBounded(
-			SnpEffNodeModel.CFGKEY_MINQ, 0.0, 0.0, Double.MAX_VALUE);
-	final SettingsModelBoolean useminc = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_USEMINC, false);
-	final SettingsModelIntegerBounded minc = new SettingsModelIntegerBounded(
-			SnpEffNodeModel.CFGKEY_MINC, 1, 1, Integer.MAX_VALUE);
-	
-	final SettingsModelBoolean del = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_DEL, false);
-	final SettingsModelBoolean ins = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_INS, false);
-	final SettingsModelBoolean hom = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_HOM, false);
-	final SettingsModelBoolean het = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_HET, false);
-	final SettingsModelBoolean mnp = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_MNP, false);
-	final SettingsModelBoolean snp = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_SNP, false);
-	
-	
-	/*Results filter options*/
-	final SettingsModelBoolean usebedfile = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_USEBEDFILE, false);
-	final SettingsModelString bed_file = new SettingsModelString(
-			SnpEffNodeModel.CFGKEY_BED_FILE, null);
-	final SettingsModelBoolean no_downstream = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_NO_DOWNSTREAM, false);
-	final SettingsModelBoolean no_intergenic = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_NO_INTERGENIC, false);
-	final SettingsModelBoolean no_intronic = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_NO_INTRONIC, false);
-	final SettingsModelBoolean no_upstream = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_NO_UPSTREAM, false);
-	final SettingsModelBoolean no_utr = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_NO_UTR, false);
-	
-	/*Annotations options*/
-	final SettingsModelBoolean lof = new SettingsModelBoolean(
-			SnpEffNodeModel.CFGKEY_LOF, false);
+
 	
     /**
      * New pane for configuring the SnpEff node.
      */
-    protected SnpEffNodeDialog() {
+    protected SnpEffNodeDialog() {}
+    
+    public void addToolDialogComponents() {
     	
-    	super();
+    	/*Mandatory options*/
+    	final SettingsModelString snpeff_folder = new SettingsModelString(
+    			SnpEffNodeModel.CFGKEY_SNPEFF_FOLDER, null);
+    	final SettingsModelString database = new SettingsModelString(
+    			SnpEffNodeModel.CFGKEY_DATABASE, null);
+    	final SettingsModelString vcf_file = new SettingsModelString(
+    			
+    			SnpEffNodeModel.CFGKEY_VCF_FILE, null);
+    	/*Sequence change filter options*/
+    	final SettingsModelBoolean useminq = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_USEMINQ, false);
+    	final SettingsModelDoubleBounded minq = new SettingsModelDoubleBounded(
+    			SnpEffNodeModel.CFGKEY_MINQ, 0.0, 0.0, Double.MAX_VALUE);
+    	final SettingsModelBoolean useminc = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_USEMINC, false);
+    	final SettingsModelIntegerBounded minc = new SettingsModelIntegerBounded(
+    			SnpEffNodeModel.CFGKEY_MINC, 1, 1, Integer.MAX_VALUE);
+    	
+    	final SettingsModelBoolean del = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_DEL, false);
+    	final SettingsModelBoolean ins = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_INS, false);
+    	final SettingsModelBoolean hom = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_HOM, false);
+    	final SettingsModelBoolean het = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_HET, false);
+    	final SettingsModelBoolean mnp = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_MNP, false);
+    	final SettingsModelBoolean snp = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_SNP, false);
+    	
+    	
+    	/*Results filter options*/
+    	final SettingsModelBoolean usebedfile = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_USEBEDFILE, false);
+    	final SettingsModelString bed_file = new SettingsModelString(
+    			SnpEffNodeModel.CFGKEY_BED_FILE, null);
+    	final SettingsModelBoolean no_downstream = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_NO_DOWNSTREAM, false);
+    	final SettingsModelBoolean no_intergenic = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_NO_INTERGENIC, false);
+    	final SettingsModelBoolean no_intronic = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_NO_INTRONIC, false);
+    	final SettingsModelBoolean no_upstream = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_NO_UPSTREAM, false);
+    	final SettingsModelBoolean no_utr = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_NO_UTR, false);
+    	
+    	/*Annotations options*/
+    	final SettingsModelBoolean lof = new SettingsModelBoolean(
+    			SnpEffNodeModel.CFGKEY_LOF, false);
     	
     	createNewGroup("snpEff directory");
     	addDialogComponent(new DialogComponentFileChooser(snpeff_folder, "par_1", 0, true));

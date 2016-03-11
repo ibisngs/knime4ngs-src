@@ -13,9 +13,6 @@
         </intro>
         
      <tab name="Options">
-        <option name="HTE">
-        	Use HTE settings from preference page or set an individual threshold.
-        </option>
         <option name="Path to tool">
         	Select the path to the tool.
         </option>
@@ -25,19 +22,22 @@
         <option name="Path to output files">
         	Select a folder to store the output files.
         </option>
-        </tab>
-        <tab name="Further options">
-        	<option name="Paired end reads">
-        		Chose whether you have paired ends or not.
-        	</option>
-        	<option name="Number of threads">
-        		Set number of threads for the execution of the Bcl2FastQ.
-        	</option>
-        	<option name="Optional Flags">
-        		E.g. "Do not split fastq files by lane."
-        	</option>
-        			
-        </tab>
+        <option name="Paired end reads">
+        	Chose whether you have paired ends or not.
+        </option>
+        <option name="Number of threads">
+        	Set number of threads for the execution of the Bcl2FastQ.
+        </option>
+        <option name="Optional Flags">
+        	E.g. "Do not split fastq files by lane."
+        </option>
+     </tab>
+        <tab name="Preference page">
+ 			<option name="HTE">
+ 				Set threshold for repeated execution.
+ 				Only used if HTE is enabled in the preference page.
+ 			</option>
+ 		</tab>
     </fullDescription>
     
     <ports>

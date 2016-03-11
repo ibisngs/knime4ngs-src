@@ -16,15 +16,18 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
 public class MatsResultIndexerNodeDialog extends BinaryWrapperNodeDialog {
 
 	private final static String BINARY_NAME = "index_gff";
-	
-    private final SettingsModelString SET_OUTPUT_FILE = new SettingsModelString(MatsResultIndexerNodeModel.CFGKEY_OUTPUT_FILE, MatsResultIndexerNodeModel.DEFAULT_OUTPUT_FOLDER);
-    private final SettingsModelString SET_INPUT_FILE = new SettingsModelString(MatsResultIndexerNodeModel.CFGKEY_INPUT_FILE, MatsResultIndexerNodeModel.DEFAULT_INPUT_FOLDER);
-    private final SettingsModelBoolean SET_INCLUDE_NOVEL = new SettingsModelBoolean(MatsResultIndexerNodeModel.CFGKEY_INCLUDE_NOVEL, MatsResultIndexerNodeModel.DEFAULT_INCLUDE_NOVEL);
     
     /**
      * New pane for configuring the MatsResultIndexer node.
      */
-    protected MatsResultIndexerNodeDialog() {
+    protected MatsResultIndexerNodeDialog() {}
+    
+    public void addToolDialogComponents() {
+    	
+    	final SettingsModelString SET_OUTPUT_FILE = new SettingsModelString(MatsResultIndexerNodeModel.CFGKEY_OUTPUT_FILE, MatsResultIndexerNodeModel.DEFAULT_OUTPUT_FOLDER);
+        final SettingsModelString SET_INPUT_FILE = new SettingsModelString(MatsResultIndexerNodeModel.CFGKEY_INPUT_FILE, MatsResultIndexerNodeModel.DEFAULT_INPUT_FOLDER);
+        final SettingsModelBoolean SET_INCLUDE_NOVEL = new SettingsModelBoolean(MatsResultIndexerNodeModel.CFGKEY_INCLUDE_NOVEL, MatsResultIndexerNodeModel.DEFAULT_INCLUDE_NOVEL);
+    	
 		DialogComponentFileChooser dcInputFile 	= new DialogComponentFileChooser(SET_INPUT_FILE, "his_id_INPUT_FILE_MatsResultIndexer", 0, true);
 		DialogComponentFileChooser dcOutputFile 	= new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_OUTPUT_FILE_MatsResultIndexer", 0, true);
 		DialogComponentBoolean dcIncludeNovel	 	= new DialogComponentBoolean(SET_INCLUDE_NOVEL, "include novel events found by MATS");

@@ -34,7 +34,9 @@ public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the RawReadManipulator node.
      */
- protected RawReadManipulatorNodeDialog() {
+ protected RawReadManipulatorNodeDialog() {}
+ 
+ public void addToolDialogComponents() {
 	
 	 	final SettingsModelBoolean removeadapters = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_REMOVEADAPTERS, false);
 		final SettingsModelString adapters = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_ADAPTERS,"");

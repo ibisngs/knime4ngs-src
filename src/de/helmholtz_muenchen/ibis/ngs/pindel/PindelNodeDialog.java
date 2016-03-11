@@ -35,6 +35,14 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class PindelNodeDialog extends HTExecutorNodeDialog {	
 	
+    protected PindelNodeDialog() {
+
+//        GeneralOptions();
+//        PindelParams();
+//        Pindel2VCFParams();
+    }
+	
+	public void addToolDialogComponents() {
 	/*
 	 * executables
 	 * String path to pindel
@@ -108,17 +116,105 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
 	final SettingsModelIntegerBounded max_size = new SettingsModelIntegerBounded(PindelNodeModel.CFGKEY_MAX_SIZE, PindelNodeModel.DEF_MAX_SIZE, PindelNodeModel.MIN_MAX_SIZE, PindelNodeModel.MAX_MAX_SIZE);
 	
 	
-    protected PindelNodeDialog() {
-        super();
-        
-        addPrefPageSetting(pindel, IBISKNIMENodesPlugin.PINDEL);
-        addPrefPageSetting(pindel2vcf, IBISKNIMENodesPlugin.PINDEL2VCF);
-        GeneralOptions();
-        PindelParams();
-        Pindel2VCFParams();
-    }
+
     
-    private void Pindel2VCFParams(){
+//    private void GeneralOptions(){
+    	
+    
+    	addPrefPageSetting(pindel, IBISKNIMENodesPlugin.PINDEL);
+        addPrefPageSetting(pindel2vcf, IBISKNIMENodesPlugin.PINDEL2VCF);
+//      createNewGroup("Path to Pindel executable");
+//      addDialogComponent(new DialogComponentFileChooser(pindel, "pindel", JFileChooser.OPEN_DIALOG, false));
+      
+      createNewGroup("Interval for variant calling");
+      addDialogComponent(new DialogComponentBoolean(interval, "Restrict variant calling to a certain genomic region"));
+      setHorizontalPlacement(true);
+      addDialogComponent(new DialogComponentString(chrom, "Chromosome"));
+      addDialogComponent(new DialogComponentNumberEdit(start, "Start", 8));
+      addDialogComponent(new DialogComponentNumberEdit(end, "End", 8));
+      chrom.setEnabled(false);
+      start.setEnabled(false);
+      end.setEnabled(false);
+      setHorizontalPlacement(false);
+      addDialogComponent(new DialogComponentLabel("(Chromosome name has to match reference and BAM file header)"));
+      
+      // text/number fields for chromosome, start and end only active if interval is used
+      interval.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				chrom.setEnabled(interval.getBooleanValue());
+				start.setEnabled(interval.getBooleanValue());
+				end.setEnabled(interval.getBooleanValue());
+			}
+		});
+      
+      createNewGroup("Path to Pindel config file");
+      addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, true));
+      create_config.setEnabled(true);
+      addDialogComponent(new DialogComponentBoolean(create_config, "Create config file (requires PicardTools: CollectInsertMetrics as previous node)"));
+      
+      // disables file chooser if config file is create by this node
+      create_config.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				config_file.setEnabled(!create_config.getBooleanValue());
+			}
+		});
+      
+      createNewGroup("Output");
+      addDialogComponent(new DialogComponentBoolean(vcf_out, "Convert Pindel output (deletions and small insertions) to VCF format"));
+//      DialogComponentFileChooser p2vcf_fc= new DialogComponentFileChooser(pindel2vcf, "p2vcf", JFileChooser.OPEN_DIALOG);
+//      p2vcf_fc.setBorderTitle("Path to Pindel2vcf converter");
+//      addDialogComponent(p2vcf_fc);
+      
+      // disable file chooser for pindel2vcf converter if output is not converted
+//      vcf_out.addChangeListener(new ChangeListener() {
+//			
+//			@Override
+//			public void stateChanged(ChangeEvent e) {
+//				pindel2vcf.setEnabled(vcf_out.getBooleanValue());
+////				setEnabled(vcf_out.getBooleanValue(), "Pindel2vcf parameters");
+//			}
+//		});
+      
+      createNewGroup("Runtime and memeroy usage");
+      setHorizontalPlacement(true);
+      addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 1, 5));
+      addDialogComponent(new DialogComponentNumber(bin_size, "Bin size", 1, 5));
+      addDialogComponent(new DialogComponentLabel("(Mb of reference in memory)"));
+      setHorizontalPlacement(false);
+  	
+//  }
+  
+//  private void PindelParams(){
+  	
+      createNewTab("Pindel Parameters");
+      
+      createNewGroup("Minimum number of matching bases");
+      addDialogComponent(new DialogComponentLabel("Only consider reads as evidence if they map with more than this number of bases:"));
+      addDialogComponent(new DialogComponentNumber(min_match_bases, "Mismatching bases per read", 1, 5));
+      
+      createNewGroup("Mismatch threshold");
+      addDialogComponent(new DialogComponentLabel("Do not align a read if there is another mapping position below this threshold:"));
+      addDialogComponent(new DialogComponentNumber(additional_mismatch, "Mismatching bases per alignment", 1, 5));
+      
+      createNewGroup("Number of perfect matches at breakpoints");
+      addDialogComponent(new DialogComponentLabel("Number of perfectly matching bases around a breakpoint of a split read:"));
+      addDialogComponent(new DialogComponentNumber(min_match_breakpoint, "Number of perfect matches", 1, 5));
+      
+      createNewGroup("Sequencing error rate");
+      addDialogComponent(new DialogComponentLabel("Expected fraction of sequencing errors:"));
+      addDialogComponent(new DialogComponentNumber(seq_err, "Error rate", 0.01, 5));
+      createNewGroup("Maximum allowed mismatch rate");
+      
+      addDialogComponent(new DialogComponentLabel("Only consider aligned reads with mismatch rate below this fraction:"));
+      addDialogComponent(new DialogComponentNumber(max_mismatch_rate, "Fraction of mismatching bases per read", 0.01, 5));
+  	
+//  }
+    
+//    private void Pindel2VCFParams(){
     	
     	createNewTab("Pindel2vcf Parameters");
     	
@@ -177,98 +273,7 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
 		});
     }
     
-    private void GeneralOptions(){
-    	
-        createNewGroup("Path to Pindel executable");
-        addDialogComponent(new DialogComponentFileChooser(pindel, "pindel", JFileChooser.OPEN_DIALOG, false));
-        
-        createNewGroup("Interval for variant calling");
-        addDialogComponent(new DialogComponentBoolean(interval, "Restrict variant calling to a certain genomic region"));
-        setHorizontalPlacement(true);
-        addDialogComponent(new DialogComponentString(chrom, "Chromosome"));
-        addDialogComponent(new DialogComponentNumberEdit(start, "Start", 8));
-        addDialogComponent(new DialogComponentNumberEdit(end, "End", 8));
-        chrom.setEnabled(false);
-        start.setEnabled(false);
-        end.setEnabled(false);
-        setHorizontalPlacement(false);
-        addDialogComponent(new DialogComponentLabel("(Chromosome name has to match reference and BAM file header)"));
-        
-        // text/number fields for chromosome, start and end only active if interval is used
-        interval.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				chrom.setEnabled(interval.getBooleanValue());
-				start.setEnabled(interval.getBooleanValue());
-				end.setEnabled(interval.getBooleanValue());
-			}
-		});
-        
-        createNewGroup("Path to Pindel config file");
-        addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, true));
-        create_config.setEnabled(true);
-        addDialogComponent(new DialogComponentBoolean(create_config, "Create config file (requires PicardTools: CollectInsertMetrics as previous node)"));
-        
-        // disables file chooser if config file is create by this node
-        create_config.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				config_file.setEnabled(!create_config.getBooleanValue());
-			}
-		});
-        
-        createNewGroup("Output");
-        addDialogComponent(new DialogComponentBoolean(vcf_out, "Convert Pindel output (deletions and small insertions) to VCF format"));
-        DialogComponentFileChooser p2vcf_fc= new DialogComponentFileChooser(pindel2vcf, "p2vcf", JFileChooser.OPEN_DIALOG);
-        p2vcf_fc.setBorderTitle("Path to Pindel2vcf converter");
-        addDialogComponent(p2vcf_fc);
-        
-        // disable file chooser for pindel2vcf converter if output is not converted
-        vcf_out.addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				pindel2vcf.setEnabled(vcf_out.getBooleanValue());
-//				setEnabled(vcf_out.getBooleanValue(), "Pindel2vcf parameters");
-			}
-		});
-        
-        createNewGroup("Runtime and memeroy usage");
-        setHorizontalPlacement(true);
-        addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 1, 5));
-        addDialogComponent(new DialogComponentNumber(bin_size, "Bin size", 1, 5));
-        addDialogComponent(new DialogComponentLabel("(Mb of reference in memory)"));
-        setHorizontalPlacement(false);
-    	
-    }
-    
-    private void PindelParams(){
-    	
-        createNewTab("Pindel Parameters");
-        
-        createNewGroup("Minimum number of matching bases");
-        addDialogComponent(new DialogComponentLabel("Only consider reads as evidence if they map with more than this number of bases:"));
-        addDialogComponent(new DialogComponentNumber(min_match_bases, "Mismatching bases per read", 1, 5));
-        
-        createNewGroup("Mismatch threshold");
-        addDialogComponent(new DialogComponentLabel("Do not align a read if there is another mapping position below this threshold:"));
-        addDialogComponent(new DialogComponentNumber(additional_mismatch, "Mismatching bases per alignment", 1, 5));
-        
-        createNewGroup("Number of perfect matches at breakpoints");
-        addDialogComponent(new DialogComponentLabel("Number of perfectly matching bases around a breakpoint of a split read:"));
-        addDialogComponent(new DialogComponentNumber(min_match_breakpoint, "Number of perfect matches", 1, 5));
-        
-        createNewGroup("Sequencing error rate");
-        addDialogComponent(new DialogComponentLabel("Expected fraction of sequencing errors:"));
-        addDialogComponent(new DialogComponentNumber(seq_err, "Error rate", 0.01, 5));
-        createNewGroup("Maximum allowed mismatch rate");
-        
-        addDialogComponent(new DialogComponentLabel("Only consider aligned reads with mismatch rate below this fraction:"));
-        addDialogComponent(new DialogComponentNumber(max_mismatch_rate, "Fraction of mismatching bases per read", 0.01, 5));
-    	
-    }
+
 
 //	@Override
 //	protected void updatePrefs() {

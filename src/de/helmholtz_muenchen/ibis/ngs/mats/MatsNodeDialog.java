@@ -23,17 +23,22 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
 
 	private final static String BINARY_NAME = "MATS";
 	
-	private final SettingsModelString SET_OUTPUT_FOLDER			= new SettingsModelString(MatsNodeModel.CFGKEY_OUTPUT_FOLDER, MatsNodeModel.DEFAULT_OUTPUT_FOLDER);
-	private final SettingsModelString SET_ANNOTATION_FILE		= new SettingsModelString(MatsNodeModel.CFGKEY_ANNOTATION_FILE, MatsNodeModel.DEFAULT_ANNOTATION_FILE);
-	private final SettingsModelInteger SET_READ_LENGTH			= new SettingsModelInteger(MatsNodeModel.CFGKEY_READ_LENGTH, MatsNodeModel.DEFAULT_READ_LENGTH);	
-	private final SettingsModelDouble SET_CUTOFF_DIFFERENCE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_CUTOFF_DIFFERENCE, MatsNodeModel.DEFAULT_CUTOFF_DIFFERENCE);
-	private final SettingsModelBoolean SET_ANALYSIS_TYPE		= new SettingsModelBoolean(MatsNodeModel.CFGKEY_ANALYSIS_TYPE, MatsNodeModel.DEFAULT_PAIRED_ANALYSIS);
-	private final SettingsModelDouble SET_EXPRESSION_CHANGE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_EXPRESSION_CHANGE, MatsNodeModel.DEFAULT_EXPRESSION_CHANGE);
+	
 	
     /**
      * New pane for configuring the Mats node.
      */
-    protected MatsNodeDialog() {
+    protected MatsNodeDialog() {}
+    
+    public void addToolDialogComponents() {
+    	
+    	final SettingsModelString SET_OUTPUT_FOLDER			= new SettingsModelString(MatsNodeModel.CFGKEY_OUTPUT_FOLDER, MatsNodeModel.DEFAULT_OUTPUT_FOLDER);
+    	final SettingsModelString SET_ANNOTATION_FILE		= new SettingsModelString(MatsNodeModel.CFGKEY_ANNOTATION_FILE, MatsNodeModel.DEFAULT_ANNOTATION_FILE);
+    	final SettingsModelInteger SET_READ_LENGTH			= new SettingsModelInteger(MatsNodeModel.CFGKEY_READ_LENGTH, MatsNodeModel.DEFAULT_READ_LENGTH);	
+    	final SettingsModelDouble SET_CUTOFF_DIFFERENCE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_CUTOFF_DIFFERENCE, MatsNodeModel.DEFAULT_CUTOFF_DIFFERENCE);
+    	final SettingsModelBoolean SET_ANALYSIS_TYPE		= new SettingsModelBoolean(MatsNodeModel.CFGKEY_ANALYSIS_TYPE, MatsNodeModel.DEFAULT_PAIRED_ANALYSIS);
+    	final SettingsModelDouble SET_EXPRESSION_CHANGE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_EXPRESSION_CHANGE, MatsNodeModel.DEFAULT_EXPRESSION_CHANGE);
+    	
     	DialogComponentFileChooser dcAnnotationFile = new DialogComponentFileChooser(SET_ANNOTATION_FILE, "his_id_INPUT_ANNOTATION_MATS", 0, ".gtf", ".GTF");
 		DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER_Mats", 0, true);
 		DialogComponentBoolean dcAnalysisType		= new DialogComponentBoolean(SET_ANALYSIS_TYPE, "paired analysis");

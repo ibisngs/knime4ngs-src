@@ -43,42 +43,46 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the VCFFilter node.
      */
-	
-	private final SettingsModelString vep_script = new SettingsModelString(VEPFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
-	
-	//annotation filter
-	private final SettingsModelString so_term = new SettingsModelString(VEPFilterNodeModel.CFGKEY_SO_TERM,"");
-	private final SettingsModelStringArray chosen_terms = new SettingsModelStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST, VEPFilterNodeModel.DEFAULT_TERMS);
-	
-	private static final String NO_SELECTION_MADE = VEPFilterNodeModel.DEFAULT_TERMS[0];
-	private final DialogComponentStringListSelection DC_TERM_DISPLAY = new DialogComponentStringListSelection(chosen_terms, "Chosen terms:",NO_SELECTION_MADE);
-	private final DialogComponentButton ADD_TERM_BUTTON = new DialogComponentButton("Add selected term");
-	private final DialogComponentButton REMOVE_TERM_BUTTON = new DialogComponentButton("Remove selected term");
-	private final DialogComponentButton RESTORE_DEFAULTS_BUTTON = new DialogComponentButton("Restore default");
-	
-	private final SettingsModelOptionalString filter = new SettingsModelOptionalString(VEPFilterNodeModel.CFGKEY_FILTER,"",false);
-	private final DialogComponentOptionalString DC_FILTER = new DialogComponentOptionalString(filter,"Conditions");
-	
-	private final SettingsModelString outfolder = new SettingsModelString(VEPFilterNodeModel.CFGKEY_OUTFOLDER,"");
-	private final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPFilterNodeModel.CFGKEY_OVERWRITE,false);
-	
-	HashSet<String> terms = new HashSet<>();
+	HashSet<String> terms;
+	static final String NO_SELECTION_MADE = VEPFilterNodeModel.DEFAULT_TERMS[0];
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VEPFilterNodeModel.class);
+	private DialogComponentStringListSelection DC_TERM_DISPLAY;
+
 	
     protected VEPFilterNodeDialog() {
+
+	}
+    
+    public void addToolDialogComponents() {
+    	
+    	final SettingsModelString vep_script = new SettingsModelString(VEPFilterNodeModel.CFGKEY_VEP_SCRIPT,"");
+    	final SettingsModelOptionalString filter = new SettingsModelOptionalString(VEPFilterNodeModel.CFGKEY_FILTER,"",false);
+    	final SettingsModelString outfolder = new SettingsModelString(VEPFilterNodeModel.CFGKEY_OUTFOLDER,"");
+    	final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPFilterNodeModel.CFGKEY_OVERWRITE,false);
+    	
+    	//annotation filter
+    	final SettingsModelString so_term = new SettingsModelString(VEPFilterNodeModel.CFGKEY_SO_TERM,"");
+    	final SettingsModelStringArray chosen_terms = new SettingsModelStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST, VEPFilterNodeModel.DEFAULT_TERMS);
+    	
+    	DC_TERM_DISPLAY = new DialogComponentStringListSelection(chosen_terms, "Chosen terms:",NO_SELECTION_MADE);
+    	DialogComponentButton ADD_TERM_BUTTON = new DialogComponentButton("Add selected term");
+    	DialogComponentButton REMOVE_TERM_BUTTON = new DialogComponentButton("Remove selected term");
+    	DialogComponentButton RESTORE_DEFAULTS_BUTTON = new DialogComponentButton("Restore default");
+    	
+    	DialogComponentOptionalString DC_FILTER = new DialogComponentOptionalString(filter,"Conditions");
     	
     	addPrefPageSetting(vep_script, IBISKNIMENodesPlugin.VEP_FILTER);
     	
-    	createNewGroup("Path to filter_vep.pl");
-    	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
+//    	createNewGroup("Path to filter_vep.pl");
+//    	addDialogComponent(new DialogComponentFileChooser(vep_script, "his_id_vepscript",0, ".pl"));
     	
     	createNewGroup("Select variants");
 		addDialogComponent(new DialogComponentStringSelection(so_term,
 				"SO terms", VEPFilterNodeModel.SO_TERMS));
 		addDialogComponent(ADD_TERM_BUTTON);
 		
-		
+		terms = new HashSet<>();
 		
 		DC_TERM_DISPLAY.setVisibleRowCount(5);
 		for(String t: VEPFilterNodeModel.DEFAULT_TERMS) {

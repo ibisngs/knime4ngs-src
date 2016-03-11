@@ -26,12 +26,12 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String EMAIL_HOST = "host";
 	public static final String EMAIL_SENDER = "sender";
 	public static final String EMAIL_RECEIVER = "receiver";
-	public static final String REF_GENOME = "ref_genome";
-	public static final String RES_HAPMAP = "hapmap";
-	public static final String RES_OMNI = "omni";
+	public static final String REF_GENOME = "reference sequence";
+	public static final String RES_HAPMAP = "HapMap";
+	public static final String RES_OMNI = "Omni";
 	public static final String RES_1000G = "1000G";
-	public static final String RES_DBSNP = "dbsnp";
-	public static final String RES_MILLS = "mills";
+	public static final String RES_DBSNP = "dbSNP";
+	public static final String RES_MILLS = "Mills";
 	
 //	default values
 	public static final boolean HTE_DEFAULT = false;

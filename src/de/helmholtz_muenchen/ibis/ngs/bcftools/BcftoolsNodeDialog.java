@@ -32,6 +32,9 @@ public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the Bcftools node.
      */
     protected BcftoolsNodeDialog() {
+    }
+    
+    public void addToolDialogComponents() {
     	
     	final SettingsModelString bcfpath = new SettingsModelString(BcftoolsNodeModel.CFGKEY_PATH2BCFTOOLS, "");
     	final SettingsModelString bcfmethod = new SettingsModelString(BcftoolsNodeModel.CFGKEY_BCFMETHOD,"");
@@ -65,8 +68,8 @@ public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
 //    			BcftoolsNodeModel.CFGKEY_CALL_OUTFILE_TYPE, "");
     	
     	//Main Tab 
-    	createNewGroup("Path to Bcftools");
-    	addDialogComponent(new DialogComponentFileChooser(bcfpath,"his_bcft_ID5",""));
+//    	createNewGroup("Path to Bcftools");
+//    	addDialogComponent(new DialogComponentFileChooser(bcfpath,"his_bcft_ID5",""));
     	createNewGroup("");
     	addDialogComponent(new DialogComponentStringSelection(bcfmethod,"Select method","index", "concat","reheader","stats"));
     	createNewGroup("Select file that includes the new sample names");

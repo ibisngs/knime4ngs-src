@@ -31,7 +31,7 @@ public class DepthOfCoverageNodeDialog extends GATKNodeDialog {
 		final SettingsModelOptionalString m_extrafilters = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_EXTRAFILTERS,"",false);
 		final SettingsModelString m_filesuffix = new SettingsModelString(DepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"");
 		
-		createNewTab("DoC options");
+//		createNewTab("DoC options");
     	
     	addDialogComponent(new DialogComponentString(m_filesuffix, "Outfile Suffix"));
     	addDialogComponent(new DialogComponentOptionalString(m_extrafilters, "GATK Filter Terms (separated by ',')"));

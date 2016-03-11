@@ -21,13 +21,15 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
 
 	private final static String BINARY_NAME = "STAR";
 	
-	// definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_RUN_MODE			= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
-    private final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
-    private final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
+	
     
-    protected StarNodeDialog() {
-        super();
+    protected StarNodeDialog() {}
+    
+    public void addToolDialogComponents() {
+    	// definition of SettingsModel (all prefixed with SET)
+        final SettingsModelString SET_RUN_MODE			= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
+        final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
+        final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
        
         // create open file/folder components
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);

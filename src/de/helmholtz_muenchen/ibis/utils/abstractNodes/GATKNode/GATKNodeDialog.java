@@ -1,6 +1,5 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode;
 
-import javax.swing.JFileChooser;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -22,37 +21,48 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 
 public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
 
-	
-	
-    private final SettingsModelString GATK = new SettingsModelString(GATKNodeModel.CFGKEY_GATK_PATH, "");
-    private final SettingsModelString REF_GENOME = new SettingsModelString(GATKNodeModel.CFGKEY_REF_GENOME, "");
-    private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(GATKNodeModel.CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
-	final SettingsModelString m_path2bed = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_PATH2BED,"",true);
-	final SettingsModelBoolean m_bed_file_check = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX,false);
-    private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_OPT_FLAGS,"",false);
+//    private final SettingsModelString GATK = new SettingsModelString(GATKNodeModel.CFGKEY_GATK_PATH, "");
+//    private final SettingsModelString REF_GENOME = new SettingsModelString(GATKNodeModel.CFGKEY_REF_GENOME, "");
+//    private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(GATKNodeModel.CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
+//	  private final SettingsModelString m_path2bed = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_PATH2BED,"",true);
+//	  private final SettingsModelBoolean m_bed_file_check = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX,false);
+//    private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
     protected GATKNodeDialog() {
+    }
+    
+    public void addToolDialogComponents() {
+    	addDialogComponent();
     	
-    	addPrefPageSetting(GATK, IBISKNIMENodesPlugin.GATK);
+    	final SettingsModelString GATK = new SettingsModelString(GATKNodeModel.CFGKEY_GATK_PATH, "");
+        final SettingsModelString REF_GENOME = new SettingsModelString(GATKNodeModel.CFGKEY_REF_GENOME, "");
+        final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(GATKNodeModel.CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
+    	final SettingsModelString m_path2bed = new SettingsModelOptionalString(DepthOfCoverageNodeModel.CFGKEY_PATH2BED,"",true);
+    	final SettingsModelBoolean m_bed_file_check = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX,false);
+        final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_OPT_FLAGS,"",false);
+    	
     	addPrefPageSetting(REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
+    	addPrefPageSetting(GATK, IBISKNIMENodesPlugin.GATK);
     	
-    	createNewGroup("Path to GATK jar file");
-    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(GATK, "gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
-    	addDialogComponent(gatkf);
+    	createNewTab("GATK");
+//    	createNewGroup("Path to GATK jar file");
+//    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(GATK, "gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
+//    	addDialogComponent(gatkf);
     	addDialogComponent(new DialogComponentNumber(m_GATK_MEM, "GATK Memory", 1));
-    	createNewGroup("Reference Genome");
-    	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
-    	addDialogComponent(ref_genome);
+//    	createNewGroup("Reference Genome");
+//    	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
+//    	addDialogComponent(ref_genome);
     	
-    	createNewGroup("Path to BED file");
     	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use BED file?"));
     	m_path2bed.setEnabled(false);
+    	
+    	createNewGroup("Path to BED file");
     	addDialogComponent(new DialogComponentFileChooser(m_path2bed, "his_id_GATK_DoC", 0, ".bed"));
     	
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentOptionalString(m_OPT_FLAGS,"Optional flags"));
     	
-    	addDialogComponent();
+//    	addDialogComponent();
     	
     	m_bed_file_check.addChangeListener(new ChangeListener () {
     		

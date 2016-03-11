@@ -50,7 +50,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     private final SettingsModelString m_GATK = new SettingsModelString(CFGKEY_GATK_PATH, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(CFGKEY_REF_GENOME, "");
     private final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
-    private final SettingsModelString m_path2bed = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_PATH2BED,"",true);
+    private final SettingsModelString m_path2bed = new SettingsModelString(GATKNodeModel.CFGKEY_PATH2BED,"");
     private final SettingsModelBoolean m_bed_file_checkbox = new SettingsModelBoolean(GATKNodeModel.CFGKEY_BED_FILE_CHECKBOX, false);
     private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
 
@@ -80,6 +80,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
    	 	addSetting(m_bed_file_checkbox);
    	 	addSetting(m_OPT_FLAGS);
         
+   	 	m_path2bed.setEnabled(false);
     }
     /**
      * {@inheritDoc}
