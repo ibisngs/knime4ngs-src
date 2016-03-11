@@ -19,6 +19,7 @@ import org.knime.core.node.InvalidSettingsException;
 
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -53,6 +54,10 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 	static final String CFGKEY_THREADS = "threads";
 	final SettingsModelIntegerBounded m_threads = new SettingsModelIntegerBounded(CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
 	
+	static final String CFGKEY_OPT_FLAGS = "OptionalFlags";
+	final SettingsModelOptionalString m_OptionalFlags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS,"",false);
+	
+	
 	//static final String CFGKEY_INTEROP = "interop";
 	//final SettingsModelString m_interop = new SettingsModelString(CFGKEY_INTEROP, "");
 	
@@ -73,6 +78,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
     	addSetting(m_outfolder);
     	addSetting(m_IsPaired);
     	addSetting(m_threads);
+    	addSetting(m_OptionalFlags);
     }
     
     /**
@@ -115,6 +121,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 		cmd += " --demultiplexing-threads " + d;
 		cmd += " --processing-threads " + p;
 		cmd += " --writing-threads " + w;
+		cmd += " --no-lane-splitting "; 
 		// cmd += " --interop-dir="+ interop;
 
 		String lockFile = outfiles + File.separatorChar + "bcl2fastq" + SuccessfulRunChecker.LOCK_ENDING;
@@ -138,6 +145,8 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 				fastqFiles.add(curr.getAbsolutePath());
 			}
 		}
+		
+		cmd += " "+m_OptionalFlags.getStringValue();
 
 		// Create Output Table
 		BufferedDataContainer cont = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] { out1 }));

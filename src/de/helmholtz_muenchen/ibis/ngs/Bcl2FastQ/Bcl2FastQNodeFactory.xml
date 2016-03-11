@@ -32,7 +32,11 @@
         	</option>
         	<option name="Number of threads">
         		Set number of threads for the execution of the Bcl2FastQ.
-        	</option>	
+        	</option>
+        	<option name="Optional Flags">
+        		E.g. "Do not split fastq files by lane."
+        	</option>
+        			
         </tab>
     </fullDescription>
     
