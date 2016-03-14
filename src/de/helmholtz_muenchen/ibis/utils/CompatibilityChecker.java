@@ -1,5 +1,8 @@
 package de.helmholtz_muenchen.ibis.utils;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.InvalidSettingsException;
 
@@ -74,8 +77,15 @@ public class CompatibilityChecker {
 		}
 	}
 	
+	public static boolean inputFileNotOk(String path) {
+		return path.equals("") || Files.notExists(Paths.get(path));
+	}
 	
 	public static boolean checkInputCellType(DataTableSpec inSpecs, String CellType) {
+		return (getIndexCellType(inSpecs,CellType)>-1);
+	}
+	
+	public static int getIndexCellType(DataTableSpec inSpecs, String CellType) {
 		int index = -1;
 		
 		for(int i = 0; i < inSpecs.getNumColumns(); i++) {
@@ -83,7 +93,7 @@ public class CompatibilityChecker {
     			index = i;
     		}
     	}
-		return (index>-1);
+		return index;
 	}
 	
 }

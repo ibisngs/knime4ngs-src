@@ -48,6 +48,7 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VEPFilterNodeModel.class);
 	private DialogComponentStringListSelection DC_TERM_DISPLAY;
+	private SettingsModelBoolean my_overwrite;
 
 	
     protected VEPFilterNodeDialog() {
@@ -60,6 +61,7 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
     	final SettingsModelOptionalString filter = new SettingsModelOptionalString(VEPFilterNodeModel.CFGKEY_FILTER,"",false);
     	final SettingsModelString outfolder = new SettingsModelString(VEPFilterNodeModel.CFGKEY_OUTFOLDER,"");
     	final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPFilterNodeModel.CFGKEY_OVERWRITE,false);
+    	my_overwrite = overwrite;
     	
     	//annotation filter
     	final SettingsModelString so_term = new SettingsModelString(VEPFilterNodeModel.CFGKEY_SO_TERM,"");
@@ -181,6 +183,19 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
     
     public void saveAdditionalSettingsTo(NodeSettingsWO settings) {
     	settings.addStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST, terms.toArray(new String[terms.size()]));
+    }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
+    	
+    	if(use_hte) {
+    		my_overwrite.setBooleanValue(true);
+    		my_overwrite.setEnabled(false);
+    	} else {
+    		my_overwrite.setBooleanValue(false);
+    		my_overwrite.setEnabled(true);
+    	}
     }
     
 //	@Override

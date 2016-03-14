@@ -25,6 +25,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -69,6 +70,14 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 	
     protected VEPFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	
+    	boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
+    	
+    	if(use_hte) {
+    		m_overwrite.setBooleanValue(true);
+    		m_overwrite.setEnabled(false);
+    	}
+    	
         for(String t: DEFAULT_TERMS) {
         	this.TERMS.add(t);
         }

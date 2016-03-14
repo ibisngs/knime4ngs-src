@@ -27,6 +27,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class VEPNodeDialog extends HTExecutorNodeDialog {
 
+	private SettingsModelBoolean my_overwrite;
     /**
      * New pane for configuring the VEP node.
      */
@@ -39,6 +40,7 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	final SettingsModelString fasta = new SettingsModelString(VEPNodeModel.CFGKEY_FASTA_FILE,VEPNodeModel.DEF_CACHE_DIR);
     	final SettingsModelString outfolder = new SettingsModelString(VEPNodeModel.CFGKEY_OUTFOLDER,"");
     	final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPNodeModel.CFGKEY_OVERWRITE,false);
+    	my_overwrite = overwrite;
     	final SettingsModelBoolean use_cache = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_CACHE,true);
     	final SettingsModelInteger forks = new SettingsModelInteger(VEPNodeModel.CFGKEY_FORKS,1);
     	final SettingsModelBoolean coding_only = new SettingsModelBoolean(VEPNodeModel.CFGKEY_CODING_ONLY, true);
@@ -108,6 +110,19 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
 //			}
 //    		
 //    	});
+    }
+    
+    public void onOpen() {
+    	super.onOpen();
+    	boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
+    	
+    	if(use_hte) {
+    		my_overwrite.setBooleanValue(true);
+    		my_overwrite.setEnabled(false);
+    	} else {
+    		my_overwrite.setBooleanValue(false);
+    		my_overwrite.setEnabled(true);
+    	}
     }
 
 //	@Override

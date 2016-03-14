@@ -81,30 +81,16 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	addPrefPageSetting(m_RESOURCES_FILE_DBSNP, IBISKNIMENodesPlugin.RES_DBSNP);
     	addPrefPageSetting(m_RESOURCES_FILE_MILLS, IBISKNIMENodesPlugin.RES_MILLS);
     	
-//    	createNewGroup("Path to GATK jar file");
-//    	addDialogComponent(new DialogComponentFileChooser(m_GATK, "gatk_vqsr", 0, ".jar"));
-    	
-//    	createNewGroup("Reference Genome");
-//    	addDialogComponent(new DialogComponentFileChooser(m_REF_GENOME, "gatk_vqsr_ref_genome", 0, ".fa",".fasta",".txt"));
-    	
-//    	createNewGroup("General Options");
     	addDialogComponent(new DialogComponentStringSelection(m_MODE, "Recalibration Mode", "SNP","INDEL"));
     	
-    	createNewGroup("ApplyRecalibration");
-    	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentNumber(m_TS_FILTER, "TS Filter Level", 0.1,6));
-    	addDialogComponent(new DialogComponentOptionalString(m_OPT_APPLY_RECAL,"Optional flags"));
-    	setHorizontalPlacement(false);
-    	
-//    	createNewTab("VariantRecalibrator");
-    	createNewGroup("General Options");
+    	createNewGroup("VariantRecalibration");
     	addDialogComponent(new DialogComponentString(m_TRANCHE, "Tranche Levels"));
     	addDialogComponent(new DialogComponentString(m_AN, "Annotation"));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentNumber(m_GAUSSIANS, "Gaussians",1,4));
     	addDialogComponent(new DialogComponentNumber(m_NT, "Threads", 1,4));
-    	addDialogComponent(new DialogComponentOptionalString(m_OPT_VAR_RECAL,"Optional flags"));
     	setHorizontalPlacement(false);
+    	addDialogComponent(new DialogComponentOptionalString(m_OPT_VAR_RECAL,"Optional flags"));
     	
     	createNewGroup("Resources");
     	setHorizontalPlacement(true);
@@ -136,6 +122,14 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentString(m_RESOURCES_STRING_MILLS, ""));
 //    	addDialogComponent(new DialogComponentFileChooser(m_RESOURCES_FILE_MILLS, "gatk_vqsr_resource_file5", 0, ".vcf"));
     	setHorizontalPlacement(false);
+    	
+    	createNewGroup("ApplyRecalibration");
+    	setHorizontalPlacement(true);
+    	addDialogComponent(new DialogComponentNumber(m_TS_FILTER, "TS Filter Level", 0.1,6));
+    	setHorizontalPlacement(false);
+    	addDialogComponent(new DialogComponentOptionalString(m_OPT_APPLY_RECAL,"Optional flags"));
+    	
+//    	createNewTab("VariantRecalibrator");
     	
     	m_RESOURCES_BOOLEAN_HAPMAP.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {

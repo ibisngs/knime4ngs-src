@@ -1,7 +1,6 @@
 package de.helmholtz_muenchen.ibis.ngs.vqsr;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,9 +10,7 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
@@ -21,6 +18,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -167,23 +165,12 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-    	//Check if path to GATK is available
-    	String PATH2GATK = "";
-    	int GATK_INDEX = inData[0].getDataTableSpec().findColumnIndex("Path2GATKFile");
-    	if(GATK_INDEX!=-1){
-    		PATH2GATK = inData[0].iterator().next().getCell(GATK_INDEX).toString();
-    	}
-    	//Check if path to GATK is available
-    	String PATH2REFSEQ = "";
-    	int REFSEQ_INDEX = inData[0].getDataTableSpec().findColumnIndex("Path2SEQFile");
-    	if(REFSEQ_INDEX!=-1){
-    		PATH2REFSEQ = inData[0].iterator().next().getCell(REFSEQ_INDEX).toString();
-    	}
+    	String PATH2GATK = m_GATK.getStringValue();
+    	String PATH2REFSEQ = m_REF_GENOME.getStringValue();
     	
-    	//Check Infile
     	String INFILE;
     	try{
-    		INFILE = inData[0].iterator().next().getCell(0).toString();
+    		INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
     		if(!INFILE.endsWith(".vcf")){
     			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
     		}
@@ -191,12 +178,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
     	}
     	
-    	String outFile;
-    	if(INFILE.endsWith(".vcf")){
-    		outFile = INFILE.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.vcf");
-    	}else{
-    		outFile = INFILE+"_"+m_MODE.getStringValue()+"_VQSR.vcf";
-    	}
+    	String outFile = IO.replaceFileExtension(INFILE, "_"+m_MODE.getStringValue()+"_VQSR.vcf");
     	
     	File lockFile1 = new File(IO.replaceFileExtension(outFile,"var_recal" + SuccessfulRunChecker.LOCK_ENDING));
     	File lockFile2 = new File(IO.replaceFileExtension(outFile,"apply_recal" + SuccessfulRunChecker.LOCK_ENDING));
@@ -205,14 +187,9 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String stdOut2 = IO.replaceFileExtension(outFile,"apply_recal.stdOut");
     	String stdErr2 = IO.replaceFileExtension(outFile,"apply_recal.stdErr");
     	
-    	//Execute
-//    	Executor.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
     	super.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,lockFile1,stdOut1,stdErr1);
-
-//    	Executor.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,LOGGER,stdOut,stdErr);
     	super.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,lockFile2,stdOut2,stdErr2);
 
-    	
     	/**
     	 * OUTPUT
     	 */
@@ -238,40 +215,16 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     private String[] createRecalibrationCommand(String PATH2GATK, String PATH2REFSEQ, String INFILE){
     	
     	ArrayList<String> command = new ArrayList<String>();
-    	
-    	String GATK;
-    	if(!PATH2GATK.equals("")){
-    		GATK = PATH2GATK;
-    	}else{
-    		GATK = m_GATK.getStringValue();
-    	}
-    	
-    	String REFSEQ;
-    	if(!PATH2REFSEQ.equals("")){
-    		REFSEQ = PATH2REFSEQ;
-    	}else{
-    		REFSEQ = m_REF_GENOME.getStringValue();
-    	}
     
-    	String infile		= INFILE;
-    	String recalFile 	= "";
-    	String tranchesFile	= "";
-    	String plotFile		= "";
-    	if(infile.endsWith(".vcf")){
-    		recalFile = infile.replace(".vcf","_"+m_MODE.getStringValue()+ "_VQSR.recal");
-    		tranchesFile = infile.replace(".vcf","_"+m_MODE.getStringValue() +"_VQSR.tranches");
-    		plotFile = infile.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.plots.R");
-    	}else{
-    		recalFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.recal";
-    		tranchesFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.tranches";
-    		plotFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.plots.R";
-    	}
+    	String recalFile 	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+ "_VQSR.recal");
+    	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
+    	String plotFile		= IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.plots.R");
     	
     	command.add("java -jar");
-    	command.add(GATK);
+    	command.add(PATH2GATK);
     	command.add("-T VariantRecalibrator");
-    	command.add("-R "+REFSEQ);
-    	command.add("-input "+infile);
+    	command.add("-R "+PATH2REFSEQ);
+    	command.add("-input "+INFILE);
     	
     	//Add resources
     	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue()){
@@ -314,38 +267,16 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
-    	String GATK;
-    	if(!PATH2GATK.equals("")){
-    		GATK = PATH2GATK;
-    	}else{
-    		GATK = m_GATK.getStringValue();
-    	}
-    	String REFSEQ;
-    	if(!PATH2REFSEQ.equals("")){
-    		REFSEQ = PATH2REFSEQ;
-    	}else{
-    		REFSEQ = m_REF_GENOME.getStringValue();
-    	}
-    	
     	//Process Infile Name to obtain output file names
     	String infile 		= INFILE;
-    	String recalFile 	= "";
-    	String tranchesFile	= "";
-    	String outFile		= "";
-    	if(infile.endsWith(".vcf")){
-    		recalFile = infile.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.recal");
-    		tranchesFile = infile.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.tranches");
-    		outFile = infile.replace(".vcf","_"+m_MODE.getStringValue()+"_VQSR.vcf");
-    	}else{
-    		recalFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.recal";
-    		tranchesFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.tranches";
-    		outFile = infile+"_"+m_MODE.getStringValue()+"_VQSR.vcf";
-    	}
-    	
+    	String recalFile 	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+ "_VQSR.recal");
+    	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
+    	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
+
     	command.add("java -jar");
-    	command.add(GATK);
+    	command.add(PATH2GATK);
     	command.add("-T ApplyRecalibration");
-    	command.add("-R "+REFSEQ);
+    	command.add("-R "+PATH2REFSEQ);
     	command.add("-input "+infile); 	
        	command.add("-mode "+m_MODE.getStringValue());
     	
@@ -358,15 +289,6 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	    	
     	return new String[]{StringUtils.join(command, " ")};
     }
-    
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO: generated method stub
-    }
 
     /**
      * {@inheritDoc}
@@ -375,149 +297,34 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	vcf_index = -1;
-    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
-    		}
+    	vcf_index = CompatibilityChecker.getIndexCellType(inSpecs[0], "VCFCell");
+    	if(!(vcf_index>-1)) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
-    	if(vcf_index==-1) {
-    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	if(CompatibilityChecker.inputFileNotOk(m_REF_GENOME.getStringValue())) {
+    		throw new InvalidSettingsException("Set reference genome!");
+    	}
+    	
+    	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_HAPMAP.getStringValue())){
+    		throw new InvalidSettingsException("Set HapMap reference dataset!");
+    	}
+    	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_OMNI.getStringValue())){
+    		throw new InvalidSettingsException("Set Omni reference dataset!");
+    	}
+    	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_1000G.getStringValue())){
+    		throw new InvalidSettingsException("Set 1000G reference dataset!");
+    	}
+    	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_DBSNP.getStringValue())){
+    		throw new InvalidSettingsException("Set dbSNP reference dataset!");
+    	}
+    	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_MILLS.getStringValue())){
+    		throw new InvalidSettingsException("Set Mills reference dataset!");
     	}
 
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	super.saveSettingsTo(settings);
-//         m_AN.saveSettingsTo(settings);
-//         m_GATK.saveSettingsTo(settings);
-//         m_MODE.saveSettingsTo(settings);
-//         m_NT.saveSettingsTo(settings);
-//         m_GAUSSIANS.saveSettingsTo(settings);
-//         m_REF_GENOME.saveSettingsTo(settings);
-//         m_TRANCHE.saveSettingsTo(settings);
-//         
-//         m_RESOURCES_BOOLEAN_1.saveSettingsTo(settings);
-//         m_RESOURCES_BOOLEAN_2.saveSettingsTo(settings);
-//         m_RESOURCES_BOOLEAN_3.saveSettingsTo(settings);
-//         m_RESOURCES_BOOLEAN_4.saveSettingsTo(settings);
-//         m_RESOURCES_BOOLEAN_5.saveSettingsTo(settings);
-//         m_RESOURCES_FILE_1.saveSettingsTo(settings);
-//         m_RESOURCES_FILE_2.saveSettingsTo(settings);
-//         m_RESOURCES_FILE_3.saveSettingsTo(settings);
-//         m_RESOURCES_FILE_4.saveSettingsTo(settings);
-//         m_RESOURCES_FILE_5.saveSettingsTo(settings);
-//         m_RESOURCES_STRING_1.saveSettingsTo(settings);
-//         m_RESOURCES_STRING_2.saveSettingsTo(settings);
-//         m_RESOURCES_STRING_3.saveSettingsTo(settings);
-//         m_RESOURCES_STRING_4.saveSettingsTo(settings);
-//         m_RESOURCES_STRING_5.saveSettingsTo(settings);
-//         m_TS_FILTER.saveSettingsTo(settings);
-//         
-//         m_OPT_VAR_RECAL.saveSettingsTo(settings);
-//         m_OPT_APPLY_RECAL.saveSettingsTo(settings);
-//        
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	super.loadValidatedSettingsFrom(settings);
-//        m_AN.loadSettingsFrom(settings);
-//        m_GATK.loadSettingsFrom(settings);
-//        m_MODE.loadSettingsFrom(settings);
-//        m_NT.loadSettingsFrom(settings);
-//        m_GAUSSIANS.loadSettingsFrom(settings);
-//        m_REF_GENOME.loadSettingsFrom(settings);
-//        m_TRANCHE.loadSettingsFrom(settings);
-//        
-//        m_RESOURCES_BOOLEAN_1.loadSettingsFrom(settings);
-//        m_RESOURCES_BOOLEAN_2.loadSettingsFrom(settings);
-//        m_RESOURCES_BOOLEAN_3.loadSettingsFrom(settings);
-//        m_RESOURCES_BOOLEAN_4.loadSettingsFrom(settings);
-//        m_RESOURCES_BOOLEAN_5.loadSettingsFrom(settings);
-//        m_RESOURCES_FILE_1.loadSettingsFrom(settings);
-//        m_RESOURCES_FILE_2.loadSettingsFrom(settings);
-//        m_RESOURCES_FILE_3.loadSettingsFrom(settings);
-//        m_RESOURCES_FILE_4.loadSettingsFrom(settings);
-//        m_RESOURCES_FILE_5.loadSettingsFrom(settings);
-//        m_RESOURCES_STRING_1.loadSettingsFrom(settings);
-//        m_RESOURCES_STRING_2.loadSettingsFrom(settings);
-//        m_RESOURCES_STRING_3.loadSettingsFrom(settings);
-//        m_RESOURCES_STRING_4.loadSettingsFrom(settings);
-//        m_RESOURCES_STRING_5.loadSettingsFrom(settings);
-//        m_TS_FILTER.loadSettingsFrom(settings);
-//        
-//        m_OPT_VAR_RECAL.loadSettingsFrom(settings);
-//        m_OPT_APPLY_RECAL.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	super.validateSettings(settings);
-//        m_AN.validateSettings(settings);
-//        m_GATK.validateSettings(settings);
-//        m_MODE.validateSettings(settings);
-//        m_NT.validateSettings(settings);
-//        m_GAUSSIANS.validateSettings(settings);
-//        m_REF_GENOME.validateSettings(settings);
-//        m_TRANCHE.validateSettings(settings);
-//        
-//        m_RESOURCES_BOOLEAN_1.validateSettings(settings);
-//        m_RESOURCES_BOOLEAN_2.validateSettings(settings);
-//        m_RESOURCES_BOOLEAN_3.validateSettings(settings);
-//        m_RESOURCES_BOOLEAN_4.validateSettings(settings);
-//        m_RESOURCES_BOOLEAN_5.validateSettings(settings);
-//        m_RESOURCES_FILE_1.validateSettings(settings);
-//        m_RESOURCES_FILE_2.validateSettings(settings);
-//        m_RESOURCES_FILE_3.validateSettings(settings);
-//        m_RESOURCES_FILE_4.validateSettings(settings);
-//        m_RESOURCES_FILE_5.validateSettings(settings);
-//        m_RESOURCES_STRING_1.validateSettings(settings);
-//        m_RESOURCES_STRING_2.validateSettings(settings);
-//        m_RESOURCES_STRING_3.validateSettings(settings);
-//        m_RESOURCES_STRING_4.validateSettings(settings);
-//        m_RESOURCES_STRING_5.validateSettings(settings);
-//        m_TS_FILTER.validateSettings(settings);
-//        
-//        m_OPT_VAR_RECAL.validateSettings(settings);
-//        m_OPT_APPLY_RECAL.validateSettings(settings);
-//    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-
 }
 

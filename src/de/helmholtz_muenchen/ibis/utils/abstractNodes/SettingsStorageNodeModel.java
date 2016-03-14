@@ -1,9 +1,13 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
@@ -103,5 +107,33 @@ public abstract class SettingsStorageNodeModel extends NodeModel {
     	// get all models and save them
     	for(SettingsModel set : SETTINGS)
     		set.saveSettingsTo(settings);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+        // TODO: generated method stub
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+        // TODO: generated method stub
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void reset() {
+        // TODO: generated method stub
     }
 }

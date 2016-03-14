@@ -21,7 +21,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
-
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -57,6 +57,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	
 	static final String CFGKEY_OVERWRITE = "overwrite";
 	private final SettingsModelBoolean m_overwrite = new SettingsModelBoolean(CFGKEY_OVERWRITE, false);
+	
 	
 	static final String CFGKEY_USE_CACHE = "use_cache";
 	final SettingsModelBoolean m_use_cache = new SettingsModelBoolean(CFGKEY_USE_CACHE,true);
@@ -107,6 +108,13 @@ public class VEPNodeModel extends HTExecutorNodeModel {
      */
     protected VEPNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	
+    	boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
+    	
+    	if(use_hte) {
+    		m_overwrite.setBooleanValue(true);
+    		m_overwrite.setEnabled(false);
+    	}
     	
     	addSetting(m_veppl);
         addSetting(m_fasta);
