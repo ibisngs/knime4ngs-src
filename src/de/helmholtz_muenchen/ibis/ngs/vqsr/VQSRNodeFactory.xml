@@ -10,8 +10,8 @@
         <intro>
         	The purpose of the variant recalibrator is to assign a well-calibrated probability to each variant call in a call set.
         	You can then create highly accurate call sets by filtering based on this single estimate for the accuracy of each call.
-        	The approach taken by variant quality score recalibration is to develop a continuous, covarying estimate of the relationship between SNP call annotations (QD, MQ, HaplotypeScore, and ReadPosRankSum, for example) and the probability that a SNP is a true genetic variant versus a sequencing or data processing artifact.
-        	This model is determined adaptively based on "true sites" provided as input, typically HapMap 3 sites and those sites found to be polymorphic on the Omni 2.5M SNP chip array.
+        	The approach taken by variant quality score recalibration is to develop a continuous, covarying estimate of the relationship between SNP/Indel call annotations (QD, MQ, HaplotypeScore, and ReadPosRankSum, for example) and the probability that a SNP/Indel is a true genetic variant versus a sequencing or data processing artifact.
+        	This model is determined adaptively based on known, truth and training reference data sets.
         	This adaptive error model can then be applied to both known and novel variation discovered in the call set of interest to evaluate the probability that each call is real.
         	The score that gets added to the INFO field of each variant is called the VQSLOD.
         	It is the log odds ratio of being a true variant versus being false under the trained Gaussian mixture model.
@@ -22,26 +22,9 @@
         </intro>
         
         <tab name="Options">
-        	<option name="HTE">
-        		Set threshold for repeated execution.
-        		Only used if HTE is enabled in the preference page.
-        	</option>
-        	<option name="Path to GATK jar file">
-        		Set path GenomeAnalysisTK.jar.
-        	</option>
-        	<option name="Reference Genome">
-        		Set path to reference genome.
-        	</option>
         	<option name="Recalibration Mode">
         		Recalibration mode to employ, SNPs or Indels.
         	</option>
-        	<option name="ApplyRecalibration">
-        		Set the truth sensitivity level at which ApplyRecalibration starts to filter.
-        		You can further set optional flags.
-        	</option>
-        </tab>
-        
-        <tab name="VariantRecalibrator">
         	<option name="Tranche levels ">
         		The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
         		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).
@@ -50,30 +33,52 @@
         		The names of the annotations which should be used for calculations.
         		<b>DP</b> (Depth of Coverage) should not be used when working with exome datasets.
         		The <b>InbreedingCoeff</b> is a population level statistic that requires at least 10 samples in order to be computed.
-        		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the command line. 
+        		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the annotation field. 
         	</option>
         	<option name="Gaussians">
         		This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm.  
         	</option>
         	<option name="Threads">
-        		Set number of threads for the execution of the VariantRecalibrator.
+        		Set the number of threads for the execution of the VariantRecalibrator.
         	</option>
         	<option name="Optional flags">
-        		Set individual command line flags.
+        		Set individual command line flags for the VariantRecalibrator.
         	</option>
         	<option name="Resources">
         		A list of sites for which to apply a prior probability of being correct but which aren't used by the algorithm (training and truth sets are required to run).
         		Example: dbsnp,known=true,training=false,truth=false,prior=6.0
         	</option>
+        	<option name="ApplyRecalibration">
+        		Set the truth sensitivity level at which ApplyRecalibration starts to filter.
+        	</option>
+        	<option name="Optional flags">
+        		Set individual command line flags for the ApplyRecalibration walker.
+        	</option>
+        </tab>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set path GenomeAnalysisTK.jar.
+        	</option>
+        	<option name="Path to reference genome">
+        		Set path to reference genome.
+        	</option>
+        	<option name="Path to ...">
+        		Set path to corresponding reference data set used for variant recalibration.
+        	</option>
         </tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input VCF">
-        	Path to input VCF file.
+        <inPort index="0" name="Input VCF file.">
+        	Cell 0: Path to input VCF file.
         </inPort>
-        <outPort index="0" name="Output file">
-        	Path to VQSR variants file.
+        <outPort index="0" name="Output VCF file">
+        	Cell 0: Path to VQSR variants file.
         </outPort>
     </ports>
 </knimeNode>

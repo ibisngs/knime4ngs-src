@@ -178,7 +178,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
     	}
     	
-    	String outFile = IO.replaceFileExtension(INFILE, "_"+m_MODE.getStringValue()+"_VQSR.vcf");
+    	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
     	
     	File lockFile1 = new File(IO.replaceFileExtension(outFile,"var_recal" + SuccessfulRunChecker.LOCK_ENDING));
     	File lockFile2 = new File(IO.replaceFileExtension(outFile,"apply_recal" + SuccessfulRunChecker.LOCK_ENDING));
@@ -322,6 +322,10 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("Set Mills reference dataset!");
     	}
 
+    	if(m_AN.getStringValue().equals("")) {
+    		throw new InvalidSettingsException("Annotation field must not be empty!");
+    	}
+    	
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
