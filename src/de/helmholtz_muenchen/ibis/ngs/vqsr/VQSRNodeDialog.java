@@ -77,7 +77,7 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	addPrefPageSetting(m_REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
     	addPrefPageSetting(m_RESOURCES_FILE_HAPMAP, IBISKNIMENodesPlugin.RES_HAPMAP);
     	addPrefPageSetting(m_RESOURCES_FILE_OMNI, IBISKNIMENodesPlugin.RES_OMNI);
-    	addPrefPageSetting(m_RESOURCES_FILE_1000G, IBISKNIMENodesPlugin.RES_1000G);
+    	addPrefPageSetting(m_RESOURCES_FILE_1000G, IBISKNIMENodesPlugin.RES_1000G_SNPS);
     	addPrefPageSetting(m_RESOURCES_FILE_DBSNP, IBISKNIMENodesPlugin.RES_DBSNP);
     	addPrefPageSetting(m_RESOURCES_FILE_MILLS, IBISKNIMENodesPlugin.RES_MILLS);
     	

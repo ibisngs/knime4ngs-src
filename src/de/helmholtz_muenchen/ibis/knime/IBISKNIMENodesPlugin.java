@@ -29,7 +29,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String REF_GENOME = "reference sequence";
 	public static final String RES_HAPMAP = "HapMap";
 	public static final String RES_OMNI = "Omni";
-	public static final String RES_1000G = "1000G";
+	public static final String RES_1000G_SNPS = "1000G SNPs";
+	public static final String RES_1000G_INDELS ="1000G Indels";
 	public static final String RES_DBSNP = "dbSNP";
 	public static final String RES_MILLS = "Mills";
 	
@@ -63,7 +64,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 //	public static final String BFAST = "bfast";
 	
 	public static String [] FIELDS = {USE_HTE, THRESHOLD, DB_FILE, NOTIFY, EMAIL_HOST, EMAIL_SENDER, EMAIL_RECEIVER};
-	public static String [] PATHS = {REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G, RES_DBSNP, RES_MILLS, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, STAR, VCFTOOLS, VEP, VEP_FILTER};
+	public static String [] PATHS = {REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS , RES_DBSNP, RES_MILLS, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, STAR, VCFTOOLS, VEP, VEP_FILTER};
 	
 	/**
      * The shared instance.

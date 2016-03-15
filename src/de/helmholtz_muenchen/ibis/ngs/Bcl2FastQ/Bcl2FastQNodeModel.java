@@ -121,7 +121,8 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 		cmd += " --demultiplexing-threads " + d;
 		cmd += " --processing-threads " + p;
 		cmd += " --writing-threads " + w;
-		cmd += " --no-lane-splitting "; 
+//		cmd += " --no-lane-splitting "; 
+		cmd += " "+m_OptionalFlags.getStringValue();
 		// cmd += " --interop-dir="+ interop;
 
 		String lockFile = outfiles + File.separatorChar + "bcl2fastq" + SuccessfulRunChecker.LOCK_ENDING;
@@ -146,7 +147,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 			}
 		}
 		
-		cmd += " "+m_OptionalFlags.getStringValue();
+
 
 		// Create Output Table
 		BufferedDataContainer cont = exec.createDataContainer(new DataTableSpec(new DataColumnSpec[] { out1 }));

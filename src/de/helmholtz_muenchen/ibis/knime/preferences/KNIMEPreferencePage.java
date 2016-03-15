@@ -82,14 +82,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		DEPENDENCIES.put(IBISKNIMENodesPlugin.BOWTIE2, bowtie2_dep);
 	}
 	
-	public static String REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G, RES_DBSNP, RES_MILLS;
+	public static String REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS, RES_DBSNP, RES_MILLS;
 	public static boolean USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
 	public static String EMAILSENDER, EMAILHOST, EMAILRECEIVER;
 	
-	private Text refGenome, res_hapmap, res_omni, res_1000G, res_dbsnp, res_mills; 
+	private Text refGenome, res_hapmap, res_omni, res_1000G_SNPS, res_1000G_Indels, res_dbsnp, res_mills; 
 	private Text thresholdText;
 	private Text dbFile;
 	private Text email_sender, email_host, email_receiver;
@@ -194,9 +194,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		browseRefGenome.setText("Browse");
 		
 		RES_HAPMAP = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_HAPMAP);
-
 		Label resHapmapLabel = new Label(ref_res_group,SWT.LEFT);
-		resHapmapLabel.setText("HapMap dataset:");
+		resHapmapLabel.setText("HapMap data set:");
 		
 		res_hapmap = new Text(ref_res_group,SWT.BORDER);
 		res_hapmap.setText(RES_HAPMAP);
@@ -208,7 +207,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		RES_OMNI = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_OMNI);
 
 		Label resOmniLabel = new Label(ref_res_group,SWT.LEFT);
-		resOmniLabel.setText("Omni dataset:");
+		resOmniLabel.setText("Omni data set:");
 		
 		res_omni = new Text(ref_res_group,SWT.BORDER);
 		res_omni.setText(RES_OMNI);
@@ -217,22 +216,34 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Button browseResOmni = new Button(ref_res_group, SWT.RIGHT);
 		browseResOmni.setText("Browse");
 		
-		RES_1000G = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_1000G);
+		RES_1000G_SNPS = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_1000G_SNPS);
 		
-		Label res1000GLabel = new Label(ref_res_group,SWT.LEFT);
-		res1000GLabel.setText("1000G dataset:");
+		Label res1000GsnpsLabel = new Label(ref_res_group,SWT.LEFT);
+		res1000GsnpsLabel.setText("1000G SNPs data set:");
 		
-		res_1000G = new Text(ref_res_group,SWT.BORDER);
-		res_1000G.setText(RES_1000G);
-		res_1000G.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		res_1000G_SNPS = new Text(ref_res_group,SWT.BORDER);
+		res_1000G_SNPS.setText(RES_1000G_SNPS);
+		res_1000G_SNPS.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		Button browseRes1000G = new Button(ref_res_group, SWT.RIGHT);
-		browseRes1000G.setText("Browse");
+		Button browseRes1000Gsnps = new Button(ref_res_group, SWT.RIGHT);
+		browseRes1000Gsnps.setText("Browse");
+		
+		RES_1000G_INDELS = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_1000G_INDELS);
+		
+		Label res1000GIndelsLabel = new Label(ref_res_group,SWT.LEFT);
+		res1000GIndelsLabel.setText("1000G Indels data set:");
+		
+		res_1000G_Indels = new Text(ref_res_group,SWT.BORDER);
+		res_1000G_Indels.setText(RES_1000G_INDELS);
+		res_1000G_Indels.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		Button browseRes1000GIndels = new Button(ref_res_group, SWT.RIGHT);
+		browseRes1000GIndels.setText("Browse");
 		
 		RES_DBSNP = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_DBSNP);
 		
 		Label resDbsnpLabel = new Label(ref_res_group,SWT.LEFT);
-		resDbsnpLabel.setText("dbSNP dataset:");
+		resDbsnpLabel.setText("dbSNP data set:");
 		
 		res_dbsnp = new Text(ref_res_group,SWT.BORDER);
 		res_dbsnp.setText(RES_DBSNP);
@@ -244,7 +255,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		RES_MILLS = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.RES_MILLS);
 		
 		Label resMillsLabel = new Label(ref_res_group,SWT.LEFT);
-		resMillsLabel.setText("Mills dataset:");
+		resMillsLabel.setText("Mills data set:");
 		
 		res_mills = new Text(ref_res_group,SWT.BORDER);
 		res_mills.setText(RES_MILLS);
@@ -417,11 +428,19 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			}
 		});
 		
-		browseRes1000G.addSelectionListener(new SelectionAdapter() {
+		browseRes1000Gsnps.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select 1000G dataset","*.vcf");
-				RES_1000G = file;
-				res_1000G.setText(RES_1000G);
+				String file = getFilePath(shell, "Select 1000G SNPs data set","*.vcf");
+				RES_1000G_SNPS = file;
+				res_1000G_SNPS.setText(RES_1000G_SNPS);
+			}
+		});
+		
+		browseRes1000GIndels.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String file = getFilePath(shell, "Select 1000G Indels data set","*.vcf");
+				RES_1000G_INDELS = file;
+				res_1000G_Indels.setText(RES_1000G_INDELS);
 			}
 		});
 		
@@ -510,8 +529,11 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		RES_OMNI = res_omni.getText();
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_OMNI, RES_OMNI);
 		
-		RES_1000G = res_1000G.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G, RES_1000G);
+		RES_1000G_SNPS = res_1000G_SNPS.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_SNPS, RES_1000G_SNPS);
+		
+		RES_1000G_INDELS = res_1000G_Indels.getText();
+		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_INDELS, RES_1000G_INDELS);
 		
 		RES_DBSNP = res_dbsnp.getText();
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_DBSNP, RES_DBSNP);
@@ -749,4 +771,18 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		dbFile.setText(DB_FILE);	
 	}
+	
+//	private Button addBrowsePathComp(Group parent, Text text, String content, String label) {
+//		Label lab = new Label(parent,SWT.LEFT);
+//		lab.setText(label);
+//		
+//		text = new Text(parent,SWT.BORDER);
+//		text.setText(content);
+//		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+//		
+//		Button browse = new Button(parent, SWT.RIGHT);
+//		browse.setText("Browse");
+//		
+//		return browse;
+//	}
 }
