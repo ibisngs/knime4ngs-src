@@ -46,6 +46,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
 	
     public static final String CFGKEY_GATK						= "gatk";
     public static final String CFGKEY_REF_GENOME				= "refgenome";
+    public static final String CFGKEY_XMX						= "xmx";
     public static final String CFGKEY_MODE						= "MODE";
     public static final String CFGKEY_AN						= "AN";
     public static final String CFGKEY_TRANCHE					= "Tranche";
@@ -88,6 +89,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     
     private final SettingsModelString m_GATK = new SettingsModelString(VQSRNodeModel.CFGKEY_GATK, "");
     private final SettingsModelString m_REF_GENOME = new SettingsModelString(VQSRNodeModel.CFGKEY_REF_GENOME, "");
+    private final SettingsModelIntegerBounded m_XMX = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_XMX, 8, 1, Integer.MAX_VALUE);
     private final SettingsModelString m_MODE = new SettingsModelString(VQSRNodeModel.CFGKEY_MODE, VQSRNodeModel.DEFAULT_MODE);
     private final SettingsModelString m_TRANCHE = new SettingsModelString(VQSRNodeModel.CFGKEY_TRANCHE, VQSRNodeModel.DEFAULT_TRANCHES);
     private final SettingsModelString m_AN = new SettingsModelString(VQSRNodeModel.CFGKEY_AN, VQSRNodeModel.DEFAULT_SNP_AN);
@@ -118,7 +120,6 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     private final SettingsModelOptionalString m_OPT_VAR_RECAL = new SettingsModelOptionalString(VQSRNodeModel.CFGKEY_OPT_VAR_RECAL,"",false);
     private final SettingsModelOptionalString m_OPT_APPLY_RECAL = new SettingsModelOptionalString(VQSRNodeModel.CFGKEY_OPT_APPLY_RECAL,"",false);
     
-	//The Output Col Names
 	public static final String OUT_COL1 = "VQSR VARIANTS";
 	private int vcf_index;
     
@@ -136,6 +137,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
         addSetting(m_GAUSSIANS);
         addSetting(m_REF_GENOME);
         addSetting(m_TRANCHE);
+        addSetting(m_XMX);
         
         addSetting(m_RESOURCES_BOOLEAN_HAPMAP);
         addSetting(m_RESOURCES_BOOLEAN_OMNI);
@@ -168,14 +170,9 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String PATH2GATK = m_GATK.getStringValue();
     	String PATH2REFSEQ = m_REF_GENOME.getStringValue();
     	
-    	String INFILE;
-    	try{
-    		INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
-    		if(!INFILE.endsWith(".vcf")){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is "+INFILE);
-    		}
-    	}catch(IndexOutOfBoundsException e){
-    			throw new InvalidSettingsException("First Cell of input table has to be the path to VCF Infile but it is empty.");
+    	String INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
+    	if(CompatibilityChecker.inputFileNotOk(INFILE)) {
+    		throw new InvalidSettingsException("No VCF file in the input table or VCF file does not exist!");
     	}
     	
     	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
@@ -220,7 +217,9 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
     	String plotFile		= IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.plots.R");
     	
-    	command.add("java -jar");
+    	int memory = m_XMX.getIntValue() * m_NT.getIntValue();
+    	
+    	command.add("java -jar -Xmx"+memory+"G");
     	command.add(PATH2GATK);
     	command.add("-T VariantRecalibrator");
     	command.add("-R "+PATH2REFSEQ);
@@ -254,7 +253,10 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	command.add("-nt "+m_NT.getIntValue());
     	command.add(m_TRANCHE.getStringValue());
     	command.add("--maxGaussians "+m_GAUSSIANS.getIntValue());
-    	command.add(m_OPT_VAR_RECAL.getStringValue());
+    	
+    	if(m_OPT_VAR_RECAL.isActive()) {
+    		command.add(m_OPT_VAR_RECAL.getStringValue());
+    	}
     	
     	return new String[]{StringUtils.join(command, " ")};
     }
@@ -273,7 +275,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
     	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
 
-    	command.add("java -jar");
+    	command.add("java -jar -Xmx "+m_XMX.getIntValue()+"G");
     	command.add(PATH2GATK);
     	command.add("-T ApplyRecalibration");
     	command.add("-R "+PATH2REFSEQ);
@@ -285,7 +287,9 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	command.add("-o "+outFile);
 
     	command.add("-ts_filter_level "+m_TS_FILTER.getDoubleValue());
-    	command.add(m_OPT_APPLY_RECAL.getStringValue());
+    	if(m_OPT_APPLY_RECAL.isActive()) {
+    		command.add(m_OPT_APPLY_RECAL.getStringValue());
+    	}
     	    	
     	return new String[]{StringUtils.join(command, " ")};
     }
@@ -302,24 +306,28 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
+    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
+    		throw new InvalidSettingsException("Set path to the GenomeAnalysisTK.jar!");
+    	}
+    	
     	if(CompatibilityChecker.inputFileNotOk(m_REF_GENOME.getStringValue())) {
     		throw new InvalidSettingsException("Set reference genome!");
     	}
     	
     	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_HAPMAP.getStringValue())){
-    		throw new InvalidSettingsException("Set HapMap reference dataset!");
+    		throw new InvalidSettingsException("Set HapMap reference data set!");
     	}
     	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_OMNI.getStringValue())){
-    		throw new InvalidSettingsException("Set Omni reference dataset!");
+    		throw new InvalidSettingsException("Set Omni reference data set!");
     	}
     	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_1000G.getStringValue())){
-    		throw new InvalidSettingsException("Set 1000G reference dataset!");
+    		throw new InvalidSettingsException("Set 1000G reference data set!");
     	}
     	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_DBSNP.getStringValue())){
-    		throw new InvalidSettingsException("Set dbSNP reference dataset!");
+    		throw new InvalidSettingsException("Set dbSNP reference data set!");
     	}
     	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_MILLS.getStringValue())){
-    		throw new InvalidSettingsException("Set Mills reference dataset!");
+    		throw new InvalidSettingsException("Set Mills reference data set!");
     	}
 
     	if(m_AN.getStringValue().equals("")) {

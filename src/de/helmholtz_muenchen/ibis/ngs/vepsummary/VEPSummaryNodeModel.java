@@ -388,7 +388,7 @@ public class VEPSummaryNodeModel extends NodeModel {
 		        }
 		        if(!check) continue;
 		        
-		        if(fields[1].equals("protein_coding")) {
+//		        if(fields[1].equals("protein_coding")) {
 		        	if(fields[8].contains("gene_id") && fields[8].contains("transcript_id") && fields[8].contains("gene_name")) {
 						info_fields = fields[8].split(";");
 						for (String i : info_fields) {
@@ -411,7 +411,7 @@ public class VEPSummaryNodeModel extends NodeModel {
 						}
 		        	}
 		        }
-		    }
+//		    }
 		    // note that Scanner suppresses exceptions
 		    if (sc.ioException() != null) {
 		        throw sc.ioException();

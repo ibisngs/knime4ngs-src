@@ -3,32 +3,25 @@
     <name>GATKRealignment</name>
     
     <shortDescription>
-        Realignment around insertions and deletions
+        Realignment around insertions and deletions.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	This is a wrapper node for TargetCreator and IndelRealigner from the Genome Analysis Toolkit (GATK). 
-        	It is designed for GATK version 2.8.1. 
-        	The aim of the node is to perform a realignment around putative insertions and deletions in a BAM file to reduce mapping errors and to avoid false positive variant calls. This is achieved in two steps. 
-        	First, the TargetCreator walker generates a list of candidate regions for realignment. In the second step IndelRealigner performs the realignment for all candidate regions. 
+        	This is a wrapper node for RealignerTargetCreator and the IndelRealigner walker of the Genome Analysis Toolkit (GATK). 
+        	The aim of the node is to perform a realignment around putative insertions and deletions in a BAM file to reduce mapping errors and to avoid false positive variant calls.
+        	This is achieved in two steps. 
+        	First, the RealignerTargetCreator walker generates a list of candidate regions for realignment.
+        	In the second step the IndelRealigner performs the realignment for all candidate regions. 
         	To increase the accuracy of realignment both walkers can be provided with sites of known indels.
-			<br />
-			Manual page of TargetCreator at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_RealignerTargetCreator"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_RealignerTargetCreator </a>
-			<br />
-			Manual page of IndelRealigner at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_IndelRealigner"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_indels_IndelRealigner </a>
-			<br />
-			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
+			For further information, see the GATK documentation of the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_indels_RealignerTargetCreator.php">RealignerTargetCreator</a> and
+			the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_indels_IndelRealigner.php">IndelRealigner</a>.
     	</intro>
         
         <tab name="Options">
-            <option name="Path to GATK jar file">
-            	Set the path to the GATK executable. 
-            	This option is disabled if the path is already defined in the inport.
-        	</option>
             <option name="Sets of known indels">
             	By choosing to support the realignment with a site of known indels (indels from 1000 Genomes project or Mills and 1000 Genomes gold standard indel set) you increase the realignment accuracy. 
-            	You do not have to select any path if the file is already defined in the inport.
+            	File paths can be set via the preference page.
         	</option>
             <option name="Interval for realignment">
             	You can check this option to perform realignment in certain genomic regions. 
@@ -36,28 +29,32 @@
         	</option>
             <option name="Number of threads">
             	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
+            	Only the RealignerTargetCreator tool can be run in multi-threaded mode.
         	</option>
         </tab>
         
-        <tab name="TargetCreator">
+        <tab name="RealignerTargetCreator">
             <option name="Maximum length of realignment interval">
             	This option serves to limit the interval length for realignment. 
             	Note, that the realignment algorithm has quadratic complexity and therefore longer intervals heavily impact the runtime.
         	</option>
             <option name="Minimum number of reads for entropy calculations">
-            	If a locus is covered by at least that many reads TargetCreator caculates an entropy value for the site.
+            	If a locus is covered by at least that many reads TargetCreator calculates an entropy value for the site.
         	</option>
             <option name="Fraction of mismatching base qualities">
             	This option refers to the minimal fraction of mismatches at a locus that is defined as high entropy. 
             	Setting this value to 0 disables the option. 
             	You should only enable this option in case of an ungapped primary alignment.
         	</option>
-            <option name="Window size">
+            <option name="Window size for clustering SNPs">
             	All SNPs and regions of high entropy are defined as cluster if they lie in the same window.
+        	</option>
+        	<option name="Optional flags">
+        		Set additional command line flags for the RealignerTargetCreator.
         	</option>
         </tab>
         
-        <tab name="Realignment Options">
+        <tab name="IndelRealigner">
             <option name="Consensus determination model">
             	You can choose between three different models to calculate the alternate consensus sequence. 
             	USE_READS is the recommended option. 
@@ -104,45 +101,39 @@
             	Usually, if you do not tick this option, the tool will add the original coordinates as tag. 
             	You can prevent this behaviour and reduce the size of your output BAM file by checking this option.
         	</option>
+        	<option name="Optional flags">
+        		Set additional command line flags for the IndelRealigner walker.
+        	</option>
+        </tab>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set the path to the GenomeAnalysisTK.jar.
+        	</option>
+        	<option name="Path to reference genome">
+        		Set the path to the reference genome.
+        	</option>
+        	<option name="Path to 1000G Indels">
+        		Set the path to the 1000G project indels data set.
+        	</option>
+        	<option name="Path to Mills">
+        		Set the path to the Mills and 1000G reference data set.
+        	</option>
         </tab>
 
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">
-        	Cell 0: Path2BAMFile (BAM file for variant calling, it has to be indexed)
-			<br />
-			Cell 1: Path2SEQFile (Reference sequence used for mapping the BAM file, a sequence index and sequence dictionary are required)
-    		<br />
-			Cell 2 (optional): Path2GATKFile (GATK executable)
-			<br />
-			Cell 3 (optional): Path2phase1 (Indel set from 1000 Genomes project)
-    		<br />
-			Cell 4 (optional): Path2mills (Indel set from Mills and 1000 Genomes project)
-    		<br />
-			Cell 5 (optional): Path2dbsnp (Set of known variants from dbSNP, the node just passes the cell on to the outport)
-			<br />
-			The cell position does not matter. Additional columns are ignored.
+        <inPort index="0" name="Input BAM">
+        	Cell 0: BAM file for variant calling, it has to be indexed.
     	</inPort>
     	
-        <outPort index="0" name="Out-Port">
-        	Cell 0: Path2BAMFile (realigned BAM file)
-			<br />
-    		Cell 1: Path2SEQFile    (Reference sequence used for mapping the BAM file)
-    		<br />
-			Cell 2: Path2GATKFile (GATK executable)
-    		<br />
-			Cell 3 (optional): Path2phase1 (Indel set from 1000 Genomes project, if available from inport or node options)
-    		<br />
-			Cell 4 (optional): Path2mills (Indel set from Mills and 1000 Genomes project, if available from inport or node options)
-    		<br />
-			Cell 5 (optional): Path2dbsnp (Variant set from dbSNP, this column is passed from the inport to the next node)
-    		<br />
-			The cell positions are not fix. If one cell is absent (because it is optional), the following cell will take its position and the other cells will move along with it.
+        <outPort index="0" name="Output">
+        	Cell 0: Realigned BAM file.
     	</outPort>
     </ports> 
-       
-    <views>
-        <view index="0" name=""></view>
-    </views>
 </knimeNode>

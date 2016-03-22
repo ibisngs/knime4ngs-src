@@ -9,6 +9,7 @@ import de.helmholtz_muenchen.ibis.ngs.vepsummary.Annotation;
 public interface AnnotationParser {
 	
 	public String getAnnId();
+	public double getExACAF(int allele_id, String anno);
 	public LinkedList<Annotation> getAnnotations(int allele_id, String anno);
 	public HashSet<String> getAnnotatedAlleleIds(String anno);
 	public HashMap<String, HashSet<Integer>> getEntity2AlleleIds (String anno, BioEntity entitiy);

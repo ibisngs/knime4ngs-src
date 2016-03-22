@@ -15,6 +15,7 @@ public class VEPAnnotationParser implements AnnotationParser {
 	int transcript_id_index = -1;
 	int consequence_index = -1;
 	int symbol_index = -1;
+	int exac_af_NFE_index = -1;
 	
 	/**
 	 * 
@@ -41,6 +42,8 @@ public class VEPAnnotationParser implements AnnotationParser {
     			this.consequence_index = i;
     		} else if(part.equals("SYMBOL")) {
     			this.symbol_index = i;
+    		} else if(part.equals("ExAC_AF_NFE")) {
+    			this.exac_af_NFE_index = i;
     		}
     	}	
 	}
@@ -148,5 +151,25 @@ public class VEPAnnotationParser implements AnnotationParser {
 			}
 		}
 		return res;
+	}
+	
+	public double getExACAF(int allele_id, String anno) {
+		if(allele_id_index == -1 || exac_af_NFE_index == -1) {
+			return 0.0;
+		}
+		String [] fields;
+		int allele_num;
+		for(String a: anno.split(",")) {
+			fields = a.split("\\|");
+			allele_num = Integer.parseInt(fields[allele_id_index]);
+			if(allele_num == allele_id) {
+				try {
+					return Double.parseDouble(fields[exac_af_NFE_index]);
+				} catch (Exception e) {
+					return 0.0;
+				}
+			}
+		}
+		return 0.0;
 	}
 }

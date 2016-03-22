@@ -25,6 +25,9 @@
         	<option name="Recalibration Mode">
         		Recalibration mode to employ, SNPs or Indels.
         	</option>
+        	<option name="Java Memory in GB">
+        		Set the maximum Java heap size per thread.
+        	</option>
         	<option name="Tranche levels ">
         		The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
         		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).
@@ -52,7 +55,7 @@
         		Set the truth sensitivity level at which ApplyRecalibration starts to filter.
         	</option>
         	<option name="Optional flags">
-        		Set individual command line flags for the ApplyRecalibration walker.
+        		Set additional command line flags for the ApplyRecalibration.
         	</option>
         </tab>
         
@@ -62,13 +65,13 @@
         		Only used if HTE is enabled in the preference page.
         	</option>
         	<option name="Path to GATK jar file">
-        		Set path GenomeAnalysisTK.jar.
+        		Set the path to the GenomeAnalysisTK.jar.
         	</option>
         	<option name="Path to reference genome">
-        		Set path to reference genome.
+        		Set the path to the reference genome.
         	</option>
         	<option name="Path to ...">
-        		Set path to corresponding reference data set used for variant recalibration.
+        		Set the paths to reference data sets used for variant recalibration.
         	</option>
         </tab>
     </fullDescription>

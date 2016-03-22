@@ -1,30 +1,27 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkrealignment;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -123,6 +120,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	static final double MAX_MISMATCH = 1.0;
 	private final SettingsModelDoubleBounded m_mismatch = new SettingsModelDoubleBounded(CFGKEY_MISMATCH, DEF_MISMATCH,
 			MIN_MISMATCH, MAX_MISMATCH);
+	static final String CFGKEY_TC_OPT_FLAGS = "opt_flags";
+	public final SettingsModelOptionalString m_tc_opt_flags = new SettingsModelOptionalString(CFGKEY_TC_OPT_FLAGS, "", false);
 
 	// indel realignment
 
@@ -186,20 +185,12 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	static final boolean DEF_ALIGNMENT_TAG = false;
 	private final SettingsModelBoolean m_alignment_tag = new SettingsModelBoolean(CFGKEY_ALIGNMENT_TAG,
 			DEF_ALIGNMENT_TAG);
+	static final String CFGKEY_IR_OPT_FLAGS = "opt_flags";
+	public final SettingsModelOptionalString m_ir_opt_flags = new SettingsModelOptionalString(CFGKEY_IR_OPT_FLAGS, "", false);
 
 	// position of input files in input table
 	private int posBam;
-	private int posRef;
-
-	// variables are only used when previous node is a gatk node
-	public static boolean gatk = false;
-	public static boolean p1 = false;
-	public static boolean mills = false;
-	public static boolean dbsnp = false;
-	private int posGatk;
-	private int posP1;
-	private int posMills;
-	private int posDbsnp;
+	public static final String OUT_COL1 = "Path2RealignedBAM";
 
 	// Network/Proxy options
 	// public static final String CFGKEY_USEPROXY="useproxy";
@@ -224,15 +215,10 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	// SettingsModelString(
 	// GATKRealignmentNodeModel.CFGKEY_PROXYPASSWORD,"");
 
-	static final String CFGKEY_OPT_FLAGS = "opt_flags";
-	public final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(CFGKEY_OPT_FLAGS, "", false);
-
 	/**
      * Constructor for the node model.
      */
     protected GATKRealignmentNodeModel() {
-    	
-    	// 1 in port, 1 out port
         super(1, 1);
         
     	addSetting(m_gatk);
@@ -251,6 +237,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	addSetting(m_min_reads);
     	addSetting(m_mismatch);
     	addSetting(m_window);
+    	addSetting(m_tc_opt_flags);
        
        //indel realignment
     	addSetting(m_consensus_model);
@@ -262,9 +249,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	addSetting(m_max_reads_cons);
     	addSetting(m_max_reads_realign);
     	addSetting(m_alignment_tag);
-
-    	addSetting(m_opt_flags);
-
+    	addSetting(m_ir_opt_flags);
+    	
         // file chooser for interval file is disabled from the beginning
         m_interval_file.setEnabled(false);
         
@@ -283,279 +269,63 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
 			throws Exception {
 
-		// retrieve information
-		DataRow r = inData[0].iterator().next();
-
-		// bam file
-
-		String inputfile = r.getCell(posBam).toString();
-
-		// check if path is null
-		if (inputfile.equals("")) {
-			throw new Exception("No bam file available, something went wrong with the previous node!");
-		}
-
-		// check path to bam file
-		if (!Files.exists(Paths.get(inputfile))) {
-			throw new Exception("Path to input bam file: " + inputfile + " does not exist");
+		String inputfile = inData[0].iterator().next().getCell(posBam).toString();
+		if(CompatibilityChecker.inputFileNotOk(inputfile)) {
+			throw new InvalidSettingsException("No BAM file in input table or BAM file does not exist!");
 		}
 
 		// process path to input file -> location and base name of output file
-		String base = PathProcessor.getBase(inputfile);
-		String fileextension = PathProcessor.getExt(inputfile);
+		String index_file = IO.replaceFileExtension(inputfile, "bai");
 
 		// check bam file index
-		if (!Files.exists(Paths.get(base + ".bai"))) {
-			throw new Exception("Missing bam file index: " + base + ".bai");
+		if (!Files.exists(Paths.get(index_file))) {
+			throw new InvalidSettingsException("Missing BAM file index: " + index_file + "!");
 		}
 
-		// check bam format
-		if (!fileextension.equals("bam")) {
-			throw new Exception("Input file is not in bam format!");
-		}
+//		String outint = PathProcessor.createOutputFile(base, "intervals", "realigned");
+		String outint = IO.replaceFileExtension(inputfile, "realigned.intervals");
+//		String outbam = PathProcessor.createOutputFile(base, "bam", "realigned");
+		String outbam = IO.replaceFileExtension(inputfile, "realigned.bam");
 
-		// reference file
-		String reffile = "";
-		if (gatk) {
-			reffile = r.getCell(posRef).toString();
-		} else {
-			reffile = m_ref_genome.getStringValue();
-		}
-
-		// path to reference should not be null
-		if (reffile.equals("")) {
-			throw new Exception("No reference file available, something went wrong with the previous node!");
-		}
-
-		// check path to reference path
-		if (!Files.exists(Paths.get(reffile))) {
-			throw new Exception("Reference sequence file: " + reffile + " does not exist");
-		}
-
-		// check path to reference index
-		if (!Files.exists(Paths.get(reffile + ".fai"))) {
-			throw new Exception("Reference sequence index: " + reffile + ".fai does not exist");
-		}
-
-		// process path to reference file
-		String refbase = PathProcessor.getBase(reffile);
-
-		// check path to reference sequence dictionary
-		if (!Files.exists(Paths.get(refbase + ".dict"))) {
-			throw new Exception("Reference seuqnece dictionary: " + refbase + ".dict does not exist");
-		}
-
-		// gatk executable
-
-		String gatkfile;
-		// info from previous node
-		if (gatk) {
-			gatkfile = r.getCell(posGatk).toString();
-			if (gatkfile.equals("")) {
-				throw new Exception("No gatk executable available, something went wrong with the previous node!");
-			}
-		}
-		// info from node dialog
-		else {
-			gatkfile = m_gatk.getStringValue();
-			if (gatkfile.equals("")) {
-				throw new Exception("Missing GATK executable: You have to configure the node before executing it!");
-			}
-		}
-
-		if (!Files.exists(Paths.get(gatkfile))) {
-			throw new Exception("GATK executable: " + gatkfile + " does not exist");
-		}
-
-		// phase1 indels
-
-		String phase1file = "";
-		if (m_use_phase1_1000G.getBooleanValue()) {
-			// from previous node
-			if (p1) {
-				phase1file = r.getCell(posP1).toString();
-				if (phase1file.equals("")) {
-					throw new Exception(
-							"No file with 1000 genomes phase1 indels available, something went wrong with the previous node!");
-				}
-			}
-			// from node dialog
-			else {
-				phase1file = m_phase1_1000G_file.getStringValue();
-				if (phase1file.equals("")) {
-					throw new Exception(
-							"Missing 1000 genomes phase1 indel set: You have to configure the node before executing it!");
-				}
-			}
-
-			// check path and index
-			if (!Files.exists(Paths.get(phase1file))) {
-				throw new Exception("1000 genomes phase1 indel file: " + phase1file + " does not exist");
-			}
-			if (!Files.exists(Paths.get(phase1file + ".idx"))) {
-				throw new Exception("1000 genomes phase1 indel index file: " + phase1file + ".idx does not exist");
-			}
-		}
-
-		// mills indels
-
-		String millsfile = "";
-		if (m_use_mills_1000G.getBooleanValue()) {
-			// from previous node
-			if (mills) {
-				millsfile = r.getCell(posMills).toString();
-				if (millsfile.equals("")) {
-					throw new Exception(
-							"No file with mills and 1000 genomes gold standard indels available, something went wrong with the previous node!");
-				}
-			}
-			// from node dialog
-			else {
-				millsfile = m_mills_1000G_file.getStringValue();
-				if (millsfile.equals("")) {
-					throw new Exception(
-							"Missing mills and 1000 genomes gold standard indel set: You have to configure the node before executing it!");
-				}
-			}
-
-			// check path and index
-			if (!Files.exists(Paths.get(millsfile))) {
-				throw new Exception(
-						"Mills and 1000 genomes gold standard indel file: " + millsfile + " does not exist");
-			}
-			if (!Files.exists(Paths.get(millsfile + ".idx"))) {
-				throw new Exception(
-						"Mills and 1000 genomes gold standard indel index file: " + millsfile + ".idx does not exist");
-			}
-		}
-
-		// interval file
-
-		String intfile = "";
-		if (m_use_interval.getBooleanValue()) {
-			intfile = m_interval_file.getStringValue();
-			if (intfile.equals("")) {
-				throw new Exception("Missing interval file: You have to configure the node properly!");
-			}
-			// check path
-			if (!Files.exists(Paths.get(intfile))) {
-				throw new Exception("Interval file: " + intfile + " does not exist");
-			}
-		}
-
-		// create paths to output files
-		String outint = PathProcessor.createOutputFile(base, "intervals", "realigned");
-		String outbam = PathProcessor.createOutputFile(base, "bam", "realigned");
-
-		// Enable proxy if needed
-		String proxyOptions = "";
-		// if(m_useproxy.getBooleanValue()){
-		//
-		// proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
-		// proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
-		//
-		// if(m_useproxyauth.getBooleanValue()){
-		//
-		// proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
-		// proxyOptions += " -Dhttp.proxyPassword=" +
-		// m_proxypassword.getStringValue();
-		// }
-		//
-		// proxyOptions += " ";
-		// }
-
-		// GATK Memory Usage
-		int GATK_MEMORY_USAGE = m_gatk_java_memory.getIntValue();
-
-		logger.info("Start GATK Realignment");
+//		 Enable proxy if needed
+//		 String proxyOptions = "";
+//		 if(m_useproxy.getBooleanValue()){
+//		
+//		 proxyOptions += " -Dhttp.proxyHost=" + m_proxyhost.getStringValue();
+//		 proxyOptions += " -Dhttp.proxyPort=" + m_proxyport.getStringValue();
+//		
+//		 if(m_useproxyauth.getBooleanValue()){
+//		
+//		 proxyOptions += " -Dhttp.proxyUser=" + m_proxyuser.getStringValue();
+//		 proxyOptions += " -Dhttp.proxyPassword=" +
+//		 m_proxypassword.getStringValue();
+//		 }
+//		
+//		 proxyOptions += " ";
+//		 }
 
 		// run target creator
-		new RunGATKRealignment().targetcreator(exec, outint, inputfile, reffile, gatkfile, phase1file, millsfile,
-				intfile, m_num_threads.getIntValue(), m_max_interval.getIntValue(), m_min_reads.getIntValue(),
-				m_mismatch.getDoubleValue(), m_window.getIntValue(), proxyOptions, GATK_MEMORY_USAGE);
+		this.targetcreator(exec, inputfile, outint);
 
 		// run realignment
-		new RunGATKRealignment().realign(exec, outint, outbam, inputfile, reffile, gatkfile, phase1file, millsfile,
-				intfile, m_consensus_model.getStringValue(), m_lod_threshold.getDoubleValue(),
-				m_entropy.getDoubleValue(), m_max_consensuses.getIntValue(), m_max_isize.getIntValue(),
-				m_max_pos_move.getIntValue(), m_max_reads_cons.getIntValue(), m_max_reads_realign.getIntValue(),
-				m_alignment_tag.getBooleanValue(), proxyOptions, GATK_MEMORY_USAGE, m_opt_flags.getStringValue());
+		this.realign(exec, outint, outbam, inputfile);
 
-		// write output table
-		/*
-		 * output table path to bam path to refseq path to gatk if set path to
-		 * 100G phase1 indels if set path to mills and 1000G gold standard
-		 * indels if from previous node available path to dbsnp
-		 */
-
-		// determine number of output columns
-		int colcount = 3;
-		if (p1 || m_use_phase1_1000G.getBooleanValue()) {
-			colcount++;
-		}
-		if (mills || m_use_mills_1000G.getBooleanValue()) {
-			colcount++;
-		}
-		if (dbsnp) {
-			colcount++;
-		}
-
-		// create column specifications
-		DataColumnSpec[] colspec = new DataColumnSpec[colcount];
-		int count = 0;
-		colspec[count++] = new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
-		colspec[count++] = new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
-		colspec[count++] = new DataColumnSpecCreator("Path2GATKFile", FileCell.TYPE).createSpec();
-		if (p1 || m_use_phase1_1000G.getBooleanValue()) {
-			colspec[count++] = new DataColumnSpecCreator("Path2phase1", FileCell.TYPE).createSpec();
-		}
-		if (mills || m_use_mills_1000G.getBooleanValue()) {
-			colspec[count++] = new DataColumnSpecCreator("Path2mills", FileCell.TYPE).createSpec();
-		}
-		if (dbsnp) {
-			colspec[count++] = new DataColumnSpecCreator("Path2dbsnp", FileCell.TYPE).createSpec();
-		}
-
-		// create table
-		DataTableSpec outspec = new DataTableSpec(colspec);
-		BufferedDataContainer c = exec.createDataContainer(outspec);
-
-		// fill string cells
-		DataCell[] row = new FileCell[colcount];
-		count = 0;
-		row[count++] = (FileCell) FileCellFactory.create(outbam);
-		row[count++] = (FileCell) FileCellFactory.create(reffile);
-		row[count++] = (FileCell) FileCellFactory.create(gatkfile);
-		if (p1) {
-			row[count++] = (FileCell) FileCellFactory.create(r.getCell(posP1).toString());
-		} else if (m_use_phase1_1000G.getBooleanValue()) {
-			row[count++] = (FileCell) FileCellFactory.create(phase1file);
-		}
-		if (mills) {
-			row[count++] = (FileCell) FileCellFactory.create(r.getCell(posMills).toString());
-		} else if (m_use_mills_1000G.getBooleanValue()) {
-			row[count++] = (FileCell) FileCellFactory.create(millsfile);
-		}
-		if (dbsnp) {
-			row[count++] = (FileCell) FileCellFactory.create(r.getCell(posDbsnp).toString());
-		}
-
-		// create row and add it to the container
-		c.addRowToTable(new DefaultRow("row0", row));
-
-		// create final table
-		c.close();
-		BufferedDataTable out = c.getTable();
-
-		return new BufferedDataTable[] { out };
-
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void reset() {
+		/**
+    	 * OUTPUT
+    	 */
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(outbam)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+        return new BufferedDataTable[]{outTable};
 	}
 
 	/**
@@ -564,263 +334,144 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	@Override
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
-		// input port: BAMLoader, PicardTools
-		// reference file: "Sequence file", "Path2SEQFile", "Path2RefFile"
-		// input sam/bam file: "Path2BAMFile"
+		posBam = CompatibilityChecker.getIndexCellType(inSpecs[0], "BAMCell");
+    	if(!(posBam>-1)) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
+    	}
+    	
+    	if(CompatibilityChecker.inputFileNotOk(m_gatk.getStringValue())) {
+    		throw new InvalidSettingsException("Set path to the GenomeAnalysisTK.jar!");
+    	}
+    	
+    	//check reference file
+    	String reffile =  m_ref_genome.getStringValue();
+    	if(CompatibilityChecker.inputFileNotOk(m_ref_genome.getStringValue())) {
+    		throw new InvalidSettingsException("Set reference genome!");
+    	}
 
-		String[] cols = inSpecs[0].getColumnNames();
-
-		// check if path to bam file is available
-		if (!CompatibilityChecker.checkInputCellType(inSpecs[0], "BAMCell")) {
-			if (CompatibilityChecker.checkInputCellType(inSpecs[0], "SAMCell")) {
-				throw new InvalidSettingsException(
-						"Your input file is in sam format! GATK requires an indexed bam file which is sorted by genomic coordinate. Try out the PicardTools node.");
-			} else {
-				throw new InvalidSettingsException("Previous node is incompatible! Missing path to bam file!");
-			}
-		}
-		//
-		// //check if path to reference sequence file is available
-		// if(!inSpecs[0].containsName("Path2SEQFile")){
-		// throw new InvalidSettingsException("Previous node is incompatible!
-		// Missing path to reference sequence!");
-		// }
-
-		// if previous node is a gatk node -> pass informations/files on to this
-		// node
-		if (inSpecs[0].containsName("Path2GATKFile")) {
-			logger.info("Previous node is a gatk node");
-
-			gatk = true;
-			m_gatk.setEnabled(false);
-			m_gatk.setStringValue("TableInput");
-
-			if (inSpecs[0].containsName("Path2phase1")) {
-				p1 = true;
-				m_phase1_1000G_file.setEnabled(false);
-			}
-
-			if (inSpecs[0].containsName("Path2mills")) {
-				mills = true;
-				m_mills_1000G_file.setEnabled(false);
-			}
-
-			if (inSpecs[0].containsName("Path2dbsnp")) {
-				dbsnp = true;
-			}
+		if (!Files.exists(Paths.get(reffile + ".fai"))) {
+			throw new InvalidSettingsException("Reference sequence index: " + reffile + ".fai does not exist!");
 		}
 
-		// get positions of input columns
-		for (int i = 0; i < cols.length; i++) {
-			if (cols[i].equals("Path2BAMFile")) {
-				posBam = i;
-			}
-			if (cols[i].equals("Path2SEQFile")) {
-				posRef = i;
-			}
-			if (cols[i].equals("Path2GATKFile")) {
-				posGatk = i;
-			}
-			if (cols[i].equals("Path2phase1")) {
-				posP1 = i;
-			}
-			if (cols[i].equals("Path2mills")) {
-				posMills = i;
-			}
-			if (cols[i].equals("Path2dbsnp")) {
-				posDbsnp = i;
-			}
+		String refbase = PathProcessor.getBase(reffile);
+		if (!Files.exists(Paths.get(refbase + ".dict"))) {
+			throw new InvalidSettingsException("Reference sequence dictionary: " + refbase + ".dict does not exist!");
+		}
+		
+		//check data sets
+		String phase1 = m_phase1_1000G_file.getStringValue();
+		if(m_use_phase1_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(phase1)) {
+			throw new InvalidSettingsException("Set 1000G Indel data set!");
+		}
+		
+		if (!Files.exists(Paths.get(phase1 + ".idx"))) {
+			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
+		}
+		
+		String mills = m_mills_1000G_file.getStringValue();
+		if(m_use_mills_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(mills)) {
+			throw new InvalidSettingsException("Set Mills data set!");
+		}
+		
+		if (!Files.exists(Paths.get(mills + ".idx"))) {
+			throw new InvalidSettingsException("Mills index file: " + mills + ".idx does not exist!");
+		}
+		
+		if(m_use_interval.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_interval_file.getStringValue())) {
+			throw new InvalidSettingsException("Interval file not specified or does not exist!");
 		}
 
-		// determine number of output columns
-		int colcount = 3;
-		if (p1 || m_use_phase1_1000G.getBooleanValue()) {
-			colcount++;
-		}
-		if (mills || m_use_mills_1000G.getBooleanValue()) {
-			colcount++;
-		}
-		if (dbsnp) {
-			colcount++;
-		}
-
-		DataColumnSpec[] colspec = new DataColumnSpec[colcount];
-		int count = 0;
-		colspec[count++] = new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
-		colspec[count++] = new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
-		colspec[count++] = new DataColumnSpecCreator("Path2GATKFile", FileCell.TYPE).createSpec();
-		if (p1 || m_use_phase1_1000G.getBooleanValue()) {
-			colspec[count++] = new DataColumnSpecCreator("Path2phase1", FileCell.TYPE).createSpec();
-		}
-		if (mills || m_use_mills_1000G.getBooleanValue()) {
-			colspec[count++] = new DataColumnSpecCreator("Path2mills", FileCell.TYPE).createSpec();
-		}
-		if (dbsnp) {
-			colspec[count++] = new DataColumnSpecCreator("Path2dbsnp", FileCell.TYPE).createSpec();
-		}
-
+		DataColumnSpec[] colspec = {new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec()};
 		return new DataTableSpec[] { new DataTableSpec(colspec) };
 	}
+	
+	private void targetcreator(ExecutionContext exec, String inputbam, String outputint) throws Exception{
+		
+		String lockFile = outputint + SuccessfulRunChecker.LOCK_ENDING;
+		
+		//create command string
+		
+		// each data thread requires 2 GB of memory
+		int threads = m_num_threads.getIntValue();
+		int memory = m_gatk_java_memory.getIntValue()*threads;
 
-	// /**
-	// * {@inheritDoc}
-	// */
-	// @Override
-	// protected void saveSettingsTo(final NodeSettingsWO settings) {
-	// /** added for HTE **/
-	// super.saveSettingsTo(settings);
-	// //general options
-	// m_gatk.saveSettingsTo(settings);
-	// m_ref_genome.saveSettingsTo(settings);
-	// m_use_phase1_1000G.saveSettingsTo(settings);
-	// m_phase1_1000G_file.saveSettingsTo(settings);
-	// m_use_mills_1000G.saveSettingsTo(settings);
-	// m_mills_1000G_file.saveSettingsTo(settings);
-	// m_use_interval.saveSettingsTo(settings);
-	// m_interval_file.saveSettingsTo(settings);
-	// m_num_threads.saveSettingsTo(settings);
-	// m_gatk_java_memory.saveSettingsTo(settings);
-	//
-	// //target creator
-	// m_max_interval.saveSettingsTo(settings);
-	// m_min_reads.saveSettingsTo(settings);
-	// m_mismatch.saveSettingsTo(settings);
-	// m_window.saveSettingsTo(settings);
-	//
-	// //indel realignment
-	// m_consensus_model.saveSettingsTo(settings);
-	// m_lod_threshold.saveSettingsTo(settings);
-	// m_entropy.saveSettingsTo(settings);
-	// m_max_consensuses.saveSettingsTo(settings);
-	// m_max_isize.saveSettingsTo(settings);
-	// m_max_pos_move.saveSettingsTo(settings);
-	// m_max_reads_cons.saveSettingsTo(settings);
-	// m_max_reads_realign.saveSettingsTo(settings);
-	// m_alignment_tag.saveSettingsTo(settings);
-	//
-	// //Proxy options
-	//// m_useproxy.saveSettingsTo(settings);
-	//// m_proxyhost.saveSettingsTo(settings);
-	//// m_proxyport.saveSettingsTo(settings);
-	//// m_useproxyauth.saveSettingsTo(settings);
-	//// m_proxyuser.saveSettingsTo(settings);
-	//// m_proxypassword.saveSettingsTo(settings);
-	//
-	// m_opt_flags.saveSettingsTo(settings);
-	// }
-	//
-	// /**
-	// * {@inheritDoc}
-	// */
-	// @Override
-	// protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-	// throws InvalidSettingsException {
-	// /** added for HTE **/
-	// super.loadValidatedSettingsFrom(settings);
-	// // general options
-	// m_gatk.loadSettingsFrom(settings);
-	// m_ref_genome.loadSettingsFrom(settings);
-	// m_use_phase1_1000G.loadSettingsFrom(settings);
-	// m_phase1_1000G_file.loadSettingsFrom(settings);
-	// m_use_mills_1000G.loadSettingsFrom(settings);
-	// m_mills_1000G_file.loadSettingsFrom(settings);
-	// m_use_interval.loadSettingsFrom(settings);
-	// m_interval_file.loadSettingsFrom(settings);
-	// m_num_threads.loadSettingsFrom(settings);
-	// m_gatk_java_memory.loadSettingsFrom(settings);
-	//
-	// // target creator
-	// m_max_interval.loadSettingsFrom(settings);
-	// m_min_reads.loadSettingsFrom(settings);
-	// m_mismatch.loadSettingsFrom(settings);
-	// m_window.loadSettingsFrom(settings);
-	//
-	// // indel realignment
-	// m_consensus_model.loadSettingsFrom(settings);
-	// m_lod_threshold.loadSettingsFrom(settings);
-	// m_entropy.loadSettingsFrom(settings);
-	// m_max_consensuses.loadSettingsFrom(settings);
-	// m_max_isize.loadSettingsFrom(settings);
-	// m_max_pos_move.loadSettingsFrom(settings);
-	// m_max_reads_cons.loadSettingsFrom(settings);
-	// m_max_reads_realign.loadSettingsFrom(settings);
-	// m_alignment_tag.loadSettingsFrom(settings);
-	//
-	// //Proxy options
-	//// m_useproxy.loadSettingsFrom(settings);
-	//// m_proxyhost.loadSettingsFrom(settings);
-	//// m_proxyport.loadSettingsFrom(settings);
-	//// m_useproxyauth.loadSettingsFrom(settings);
-	//// m_proxyuser.loadSettingsFrom(settings);
-	//// m_proxypassword.loadSettingsFrom(settings);
-	//
-	// m_opt_flags.loadSettingsFrom(settings);
-	// }
-	//
-	// /**
-	// * {@inheritDoc}
-	// */
-	// @Override
-	// protected void validateSettings(final NodeSettingsRO settings)
-	// throws InvalidSettingsException {
-	// /** added for HTE **/
-	// super.validateSettings(settings);
-	// //general options
-	//
-	// m_gatk.validateSettings(settings);
-	// m_ref_genome.validateSettings(settings);
-	// m_use_phase1_1000G.validateSettings(settings);
-	// m_phase1_1000G_file.validateSettings(settings);
-	// m_use_mills_1000G.validateSettings(settings);
-	// m_mills_1000G_file.validateSettings(settings);
-	// m_use_interval.validateSettings(settings);
-	// m_interval_file.validateSettings(settings);
-	// m_num_threads.validateSettings(settings);
-	// m_gatk_java_memory.validateSettings(settings);
-	//
-	// //target creator
-	// m_max_interval.validateSettings(settings);
-	// m_min_reads.validateSettings(settings);
-	// m_mismatch.validateSettings(settings);
-	// m_window.validateSettings(settings);
-	//
-	// // indel realignment
-	// m_consensus_model.validateSettings(settings);
-	// m_lod_threshold.validateSettings(settings);
-	// m_entropy.validateSettings(settings);
-	// m_max_consensuses.validateSettings(settings);
-	// m_max_isize.validateSettings(settings);
-	// m_max_pos_move.validateSettings(settings);
-	// m_max_reads_cons.validateSettings(settings);
-	// m_max_reads_realign.validateSettings(settings);
-	// m_alignment_tag.validateSettings(settings);
-	//
-	// //Proxy options
-	//// m_useproxy.validateSettings(settings);
-	//// m_proxyhost.validateSettings(settings);
-	//// m_proxyport.validateSettings(settings);
-	//// m_useproxyauth.validateSettings(settings);
-	//// m_proxyuser.validateSettings(settings);
-	//// m_proxypassword.validateSettings(settings);
-	//
-	// m_opt_flags.validateSettings(settings);
-	// }
+		String cmd="java -jar -Xmx"+memory+"G " + m_gatk.getStringValue();
+		cmd+=" -T RealignerTargetCreator";
+		cmd+=" -nt "+threads;
+		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -I "+inputbam;
+		cmd+=" -o "+outputint;
+		
+		if(m_use_phase1_1000G.getBooleanValue()){
+			cmd+=" -known "+m_phase1_1000G_file.getStringValue();
+		}
+		
+		if(m_use_mills_1000G.getBooleanValue()){
+			cmd+=" -known "+m_mills_1000G_file.getStringValue();
+		}
+		
+		if(m_use_interval.getBooleanValue()){
+			cmd+=" -L "+m_interval_file.getStringValue();
+		}
+		
+		cmd+=" -maxInterval "+m_max_interval.getIntValue();
+		cmd+=" -minReads "+m_min_reads.getIntValue();
+		cmd+=" -mismatch "+m_mismatch.getDoubleValue();
+		cmd+=" -window "+m_window.getIntValue();
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadInternals(final File internDir, final ExecutionMonitor exec)
-			throws IOException, CanceledExecutionException {
-
+		if(m_tc_opt_flags.isActive()) {
+			cmd+=" "+m_tc_opt_flags.getStringValue();
+		}
+		
+		GATKRealignmentNodeModel.logger.info("Running GATK TargetCreator...");
+		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".out.log and "+outputint+".err.log");
+		
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputint+".out.log", outputint+".err.log");
 	}
+	
+	private void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam) throws Exception{
+    	
+		String lockFile = outputbam + SuccessfulRunChecker.LOCK_ENDING;
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveInternals(final File internDir, final ExecutionMonitor exec)
-			throws IOException, CanceledExecutionException {
-
+		String cmd="java -jar -Xmx"+m_gatk_java_memory.getIntValue()+"G " + m_gatk.getStringValue();
+		cmd+=" -T IndelRealigner";
+		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -I "+inputbam;
+		cmd+=" -o "+outputbam;
+		cmd+=" -targetIntervals "+outputint;
+		
+		if(m_use_phase1_1000G.getBooleanValue()){
+			cmd+=" -known "+m_phase1_1000G_file.getStringValue();
+		}
+		
+		if(m_use_mills_1000G.getBooleanValue()){
+			cmd+=" -known "+m_mills_1000G_file.getStringValue();
+		}
+		
+		if(m_use_interval.getBooleanValue()){
+			cmd+=" -L "+m_interval_file.getStringValue();
+		}
+		
+		cmd+=" -model "+m_consensus_model.getStringValue();
+		cmd+=" -LOD "+m_lod_threshold.getDoubleValue();
+		cmd+=" -entropy "+m_entropy.getDoubleValue();
+		cmd+=" -maxConsensuses "+m_max_consensuses.getIntValue();
+		cmd+=" -maxIsize "+m_max_isize.getIntValue();
+		cmd+=" -maxPosMove "+m_max_pos_move.getIntValue();
+		cmd+=" -greedy "+m_max_reads_cons.getIntValue();
+		cmd+=" -maxReads "+m_max_reads_realign.getIntValue();
+		
+		if(m_alignment_tag.getBooleanValue()){
+			cmd+=" -noTags ";
+		}
+		
+		if(m_ir_opt_flags.isActive()) {
+			cmd+= " " + m_ir_opt_flags.getStringValue();
+		}
+		
+		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
+		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".out.log and "+outputbam+".err.log");
+		
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputbam+".out.log", outputbam+".err.log");
 	}
 }

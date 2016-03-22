@@ -44,6 +44,7 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
         
         final SettingsModelString m_GATK = new SettingsModelString(VQSRNodeModel.CFGKEY_GATK, "");
         final SettingsModelString m_REF_GENOME = new SettingsModelString(VQSRNodeModel.CFGKEY_REF_GENOME, "");
+        final SettingsModelIntegerBounded m_XMX = new SettingsModelIntegerBounded(VQSRNodeModel.CFGKEY_XMX, 8, 1, Integer.MAX_VALUE);
         final SettingsModelString m_MODE = new SettingsModelString(VQSRNodeModel.CFGKEY_MODE, VQSRNodeModel.DEFAULT_MODE);
         final SettingsModelString m_TRANCHE = new SettingsModelString(VQSRNodeModel.CFGKEY_TRANCHE, VQSRNodeModel.DEFAULT_TRANCHES);
         final SettingsModelString m_AN = new SettingsModelString(VQSRNodeModel.CFGKEY_AN, VQSRNodeModel.DEFAULT_SNP_AN);
@@ -81,7 +82,11 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	addPrefPageSetting(m_RESOURCES_FILE_DBSNP, IBISKNIMENodesPlugin.RES_DBSNP);
     	addPrefPageSetting(m_RESOURCES_FILE_MILLS, IBISKNIMENodesPlugin.RES_MILLS);
     	
+    	createNewGroup("General Options");
+    	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentStringSelection(m_MODE, "Recalibration Mode", "SNP","INDEL"));
+    	addDialogComponent(new DialogComponentNumber(m_XMX, "Java Memory in GB",1,4));
+    	setHorizontalPlacement(false);
     	
     	createNewGroup("VariantRecalibration");
     	addDialogComponent(new DialogComponentString(m_TRANCHE, "Tranche Levels"));

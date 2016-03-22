@@ -30,7 +30,7 @@ public class VEPSummarizer {
 		}
 		
 		//initialize header
-		String header = "chr\tpos\tid\tref_allele\talt_allele\tAF\tobs_het\tobs_hom\tgene_id\tgene_symbol\teffect\tlof_trans\tall_trans\tconsequence\tobs_hom_case\tobs_hom_ctrl";
+		String header = "chr\tpos\tid\tref_allele\talt_allele\tAF\tobs_het\tobs_hom\tgene_id\tgene_symbol\teffect\tlof_trans\tall_trans\tconsequence\tobs_hom_case\tobs_hom_ctrl\tExAC_NFE_AF";
 		
 		//initialize writer
 		BufferedWriter bw = Files.newBufferedWriter(Paths.get(outfile));
@@ -64,6 +64,7 @@ public class VEPSummarizer {
 					gene2transcripts = ap.getGene2TranscriptIds(i, anno);
 					for(String g: gene2transcripts.keySet()) {
 						gene_ids+=","+g;
+						if(genes.get(g)==null) continue;
 						gene_symbols+=","+genes.get(g).getSymbol();
 						lof_trans+=","+gene2transcripts.get(g).size();
 						all_trans+=","+genes.get(g).getTranscripts().size();
@@ -82,7 +83,7 @@ public class VEPSummarizer {
 					all_trans = all_trans.replaceFirst(",", "");
 					
 					annos = ap.getAnnotations(i, anno);
-					alt_line = alt_alleles[i-1]+"\t"+af+"\t"+var.getHetCount(i)+"\t"+var.getHomCount(i)+"\t"+gene_ids+"\t"+gene_symbols+"\t"+effects+"\t"+lof_trans+"\t"+all_trans+"\t"+annos.toString()+"\t"+var.getHomCount(i,cases)+"\t"+var.getHomCount(i,ctrls);
+					alt_line = alt_alleles[i-1]+"\t"+af+"\t"+var.getHetCount(i)+"\t"+var.getHomCount(i)+"\t"+gene_ids+"\t"+gene_symbols+"\t"+effects+"\t"+lof_trans+"\t"+all_trans+"\t"+annos.toString()+"\t"+var.getHomCount(i,cases)+"\t"+var.getHomCount(i,ctrls)+"\t"+ap.getExACAF(i, anno);
 					bw.write(var_line + alt_line);
 					bw.newLine();	
 				}
