@@ -3,13 +3,13 @@
     <name>GATKBaseRecalibration</name>
     
     <shortDescription>
-        Recalibration of sequencing quality scores
+        Recalibration of sequencing quality scores.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	This is a wrapper node for AnalyzeCovariates, BaseRecalibrator and PrintReads from the Genome Analysis Toolkit (GATK). 
-        	It is designed for GATK version 2.8.1. This node addresses the problem of systematic errors in the base quality score emitted by sequencing machines. 
+        	This is a wrapper node for AnalyzeCovariates, BaseRecalibrator and PrintReads of the Genome Analysis Toolkit (GATK). 
+        	This node addresses the problem of systematic errors in the base quality score emitted by sequencing machines. 
         	As these base qualities are used by many variant calling tools removing the bias leads to more accurate variant calls. 
         	The process of recalibration consists of 3 steps.
 			<br />
@@ -23,20 +23,12 @@
 			<b>Step 3:</b> Finally, the model is applied to the alignment data and the base qualities are adapted to the biases found. 
 			(walkers: PrintReads)
 			<br />
-			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
-			<br />
-			Manual page of BaseRecalibrator at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_BaseRecalibrator"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_BaseRecalibrator </a>
-			<br />
-			Manual page of AnalyzeCovariates at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_AnalyzeCovariates"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_bqsr_AnalyzeCovariates </a>
-			<br />
-			Manual page of PrintReads at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_readutils_PrintReads"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_readutils_PrintReads </a>
+			For further information, see the GATK documentation of the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_bqsr_BaseRecalibrator.php">BaseRecalibrator</a>,
+			the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_bqsr_AnalyzeCovariates.php">AnalyzeCovariates</a> and
+			the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_readutils_PrintReads.php">PrintReads</a> walkers.
     	</intro>
         
         <tab name="Options">
-            <option name="Path to GATK jar file">
-            	Set the path to the GATK executable. 
-            	This option is disabled if the path is already defined in the inport.
-        	</option>
             <option name="Sets of known polymorphisms">
             	You have to provide the node with at least one of the three named sets: 
             	Indels from 1000 Genomes project, indels from Mills and 1000 Genomes project, variants from dbSNP. 
@@ -49,25 +41,41 @@
             <option name="Before/after plots">
             	Tick this option to generate before/after plots of the base quality score.
         	</option>
+        	<option name="Optional flags">
+        		Set additional command line flags for the AnalyzeCovariates walker.
+        	</option>
+        	<option name="Remove all...">
+            	By ticking this option you remove all additional information from the output BAM file except the read group tag. 
+            	The option reduces the output file size.
+        	</option>
+        	<option name="Optional flags">
+        		Set additional command line flags for the PrintReads walker.
+        	</option>
             <option name="Number of CPU threads">
             	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
+            	The BaseRecalibrator and the PrintReads walker run in multi-threaded mode.
+        	</option>
+        	<option name="Shared Java Memory">
+        		Set the maximum Java heap size shared by all CPU threads.
         	</option>
         </tab>
         <tab name="BaseRecalibrator">
+        	<option name="Cycle threshold">
+            	This threshold applies to the cycle covariate. 
+            	When BaseRecalibrator finds a greater cycle it reports an error. 
+            	BaseRecalibrator ignores this value if it does not analyze cycle covariate.
+        	</option>
+        	<option name="Gap open penalty">
+            	Gap open penalty for calculating BAQ (par-base alignment quality, probability that a base is not correctly aligned). 
+            	For whole-genome data, it is recommended to use a value around 30 as gap open penalty.
+        	</option>
             <option name="Calculation of covariates">
             	Select the covariates you want to analyse. 
             	Quality score covariate, read group covariate are always calculated. Context covariate and cycle covariate are optional but recommended covariates. 
             	Additionally, it is possible to examine repeat length covariate and repeat unit covariate.
         	</option>
-            <option name="Gap open penalty">
-            	Gap open penalty for calculating BAQ (par-base alignment quality, probability that a base is not correctly aligned). 
-            	For whole-genome data, it is recommended to use a value around 30 as gap open penalty.
-        	</option>
-            <option name="Quality threshold for read tails">
-            	Beginning and end of reads often have low quality values. 
-            	These values should not be considered in the context covariate. 
-            	This option defines the quality value which marks the beginning of the low-quality read edges.
-        	</option>
+           
+            
             <option name="Default quality for insertions">
             	Set the default quality for the base insertion covariate model. 
             	To disable to the option, set this value to -1.
@@ -88,53 +96,46 @@
             	Set the context size around base mismatches to calculate the context covariate. 
             	Increasing the context size requires more memory and runtime.
         	</option>
-            <option name="Cycle threshold">
-            	This threshold applies to the cycle covariate. 
-            	When BaseRecalibrator finds a greater cycle it reports an error. 
-            	BaseRecalibrator ignores this value if it does not analyze cycle covariate.
+            <option name="Quality threshold for read tails">
+            	Beginning and end of reads often have low quality values. 
+            	These values should not be considered in the context covariate. 
+            	This option defines the quality value which marks the beginning of the low-quality read edges.
         	</option>
-            <option name="Simplify output">
-            	By ticking this option you remove all additional information from the output BAM file except the read group tag. 
-            	The option reduces the output file size.
+            <option name="Optional flags">
+        		Set additional command line flags for the BaseRecalibrator walker.
         	</option>
         </tab>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set the path to the GenomeAnalysisTK.jar.
+        	</option>
+        	<option name="Path to reference genome">
+        		Set the path to the reference genome.
+        	</option>
+        	<option name="Path to 1000G Indels">
+        		Set the path to the 1000G project indels data set.
+        	</option>
+        	<option name="Path to Mills">
+        		Set the path to the Mills and 1000G reference data set.
+        	</option>
+        	<option name="Path to dbSNP">
+        		Set the path to the dbSNP reference data set.
+        	</option>
+        </tab>
+        
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">
-        	Cell 0: Path2BAMFile (BAM file for recalibration, it has to be indexed)
-			<br />
-			Cell 1: Path2SEQFile (Reference sequence used for mapping the BAM file, a sequence index and sequence dictionary are required)
-    		<br />
-    		Cell 2 (optional): Path2GATKFile (GATK executable)
-    		<br />
-			Cell 3 (optional): Path2phase1 (Indel set from 1000 Genomes project)
-    		<br />
-			Cell 4 (optional): Path2mills (Indel set from Mills and 1000 Genomes project)
-    		<br />
-			Cell 5 (optional): Path2dbsnp (Set of known variants from dbSNP)
-			<br />
-			The cell position does not matter. Additional columns are ignored.
+        <inPort index="0" name="Input BAM">
+        	Cell 0: Path to input BAM file.
     	</inPort>
-        <outPort index="0" name="Out-Port">
-        	Cell 0: Path2BAMFile (recalibrated BAM file)
-    		<br />
-    		Cell 1: Path2SEQFile    (Reference sequence used for mapping the BAM file)
-    		<br />
-			Cell 2: Path2GATKFile (GATK executable)
-    		<br />
-			Cell 3 (optional): Path2phase1 (Indel set from 1000 Genomes project, if available from inport or node options)
-    		<br />
-			Cell 4 (optional): Path2mills (Indel set from Mills and 1000 Genomes project, if available from inport or node options)
-			<br />
-			Cell 5 (optional): Path2dbsnp (Variant set from dbSNP, if available from inport or node options)
-			<br />
-			The cell positions are not fix. 
-			If one cell is absent (because it is optional), the following cell will take its position and the other cells will move along with it.
+        <outPort index="0" name="Output">
+        	Cell 0: Path to recalibrated BAM file.
     	</outPort>
-    </ports>    
-    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+    </ports>
 </knimeNode>

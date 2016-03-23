@@ -24,8 +24,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
-import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -164,15 +164,22 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     		new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
     	}
     	
-    	String gatk_warning = CheckUtils.checkSourceFile(m_GATK.getStringValue());
-    	if(gatk_warning != null) {
-    		setWarningMessage(gatk_warning);
+    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
+    		new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
+    	}
+//    	String gatk_warning = CheckUtils.checkSourceFile(m_GATK.getStringValue());
+//    	if(gatk_warning != null) {
+//    		setWarningMessage(gatk_warning);
+//    	}
+    	
+    	if(CompatibilityChecker.inputFileNotOk(m_REF_GENOME.getStringValue())) {
+    		new InvalidSettingsException("Set path to reference genome!");
     	}
     	
-    	String ref_warning = CheckUtils.checkSourceFile(m_REF_GENOME.getStringValue());
-    	if(ref_warning != null) {
-    		setWarningMessage(ref_warning);
-    	}
+//    	String ref_warning = CheckUtils.checkSourceFile(m_REF_GENOME.getStringValue());
+//    	if(ref_warning != null) {
+//    		setWarningMessage(ref_warning);
+//    	}
     	
 		if (!outtable) {
 			return null;

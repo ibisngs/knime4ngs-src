@@ -381,7 +381,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 			throw new InvalidSettingsException("Interval file not specified or does not exist!");
 		}
 
-		DataColumnSpec[] colspec = {new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec()};
+		DataColumnSpec[] colspec = {new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec()};
 		return new DataTableSpec[] { new DataTableSpec(colspec) };
 	}
 	
@@ -424,9 +424,9 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 		}
 		
 		GATKRealignmentNodeModel.logger.info("Running GATK TargetCreator...");
-		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".out.log and "+outputint+".err.log");
+		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".stdOut and "+outputint+".stdErr");
 		
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputint+".out.log", outputint+".err.log");
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputint+".stdOut", outputint+".stdErr");
 	}
 	
 	private void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam) throws Exception{
@@ -470,8 +470,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 		}
 		
 		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
-		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".out.log and "+outputbam+".err.log");
+		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".stdOut and "+outputbam+".stdErr");
 		
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputbam+".out.log", outputbam+".err.log");
+		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputbam+".stdOut", outputbam+".stdErr");
 	}
 }

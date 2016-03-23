@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class FileValidator {
 	
-	public static final String SAMTOOLS_VERSION = "1.2";
+	public static final String SAMTOOLS_VERSION = "1.3";
 	public static final String BWA_VERSION = "0.7.12";
 	public static final String BFAST_VERSION = "0.7.0";
 	

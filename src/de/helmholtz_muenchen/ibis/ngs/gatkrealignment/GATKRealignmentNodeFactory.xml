@@ -31,6 +31,9 @@
             	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
             	Only the RealignerTargetCreator tool can be run in multi-threaded mode.
         	</option>
+        	<option name="Java Memory in GB">
+        		Set the maximum Java heap size per thread.
+        	</option>
         </tab>
         
         <tab name="RealignerTargetCreator">
@@ -129,11 +132,11 @@
     
     <ports>
         <inPort index="0" name="Input BAM">
-        	Cell 0: BAM file for variant calling, it has to be indexed.
+        	Cell 0: Path to input BAM file.
     	</inPort>
     	
         <outPort index="0" name="Output">
-        	Cell 0: Realigned BAM file.
+        	Cell 0: Path to realigned BAM file.
     	</outPort>
     </ports> 
 </knimeNode>
