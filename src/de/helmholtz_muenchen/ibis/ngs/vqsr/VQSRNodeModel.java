@@ -219,7 +219,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	
     	int memory = m_XMX.getIntValue() * m_NT.getIntValue();
     	
-    	command.add("java -jar -Xmx"+memory+"G");
+    	command.add("java -Xmx"+memory+"G -jar");
     	command.add(PATH2GATK);
     	command.add("-T VariantRecalibrator");
     	command.add("-R "+PATH2REFSEQ);
@@ -275,7 +275,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
     	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
 
-    	command.add("java -jar -Xmx "+m_XMX.getIntValue()+"G");
+    	command.add("java -Xmx "+m_XMX.getIntValue()+"G  -jar");
     	command.add(PATH2GATK);
     	command.add("-T ApplyRecalibration");
     	command.add("-R "+PATH2REFSEQ);
