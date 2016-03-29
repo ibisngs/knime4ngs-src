@@ -275,7 +275,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String tranchesFile	= IO.replaceFileExtension(INFILE, m_MODE.getStringValue() +"_VQSR.tranches");
     	String outFile = IO.replaceFileExtension(INFILE, m_MODE.getStringValue()+"_VQSR.vcf");
 
-    	command.add("java -Xmx "+m_XMX.getIntValue()+"G  -jar");
+    	command.add("java -Xmx"+m_XMX.getIntValue()+"G  -jar");
     	command.add(PATH2GATK);
     	command.add("-T ApplyRecalibration");
     	command.add("-R "+PATH2REFSEQ);
