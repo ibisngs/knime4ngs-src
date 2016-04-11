@@ -8,25 +8,25 @@
     
     <fullDescription>
         <intro>
-        	This node loads one or two input file(s) and serves as a starting point for any NGS workflow.
+        	The FileLoader loads one or two input files and serves as a starting point for any NGS workflow.
         </intro>
         
         
         <option name="Input file">
         	Choose an input file in BAM/SAM, fastQ, VCF or BED format.
-        	You can also load a list of files (as .csv, .tsv or .list) with one file path per line.
-        	FastQ files of paired-end read experiments can be loaded in two columns separated by tabs, white-spaces or commas.
+        	A list of files (as .csv, .tsv or .list) with one file path per line can also be loaded.
+        	In this way several fastQ files of paired-end read experiments can be loaded. Pairs of fastQ files should be in the same row, but different columns, separated by tabs, white-spaces or commas.
         </option>
         <option name="Second optional fastQ file">
-        	A second fastQ file can be given for the analysis of paired end reads.
+        	In the case of paired end reads, a second fastQ file can be loaded.
         </option>
     </fullDescription>
     
     <ports>
         <outPort index="0" name="Loaded files">
-        	Cell 0: loaded file
+        	Cell 0: The loaded file
         	<br />
-        	Cell 1 (optional): second fastQ file
+        	Cell 1 (optional): The second fastQ file (if existing)
         </outPort>
     </ports>    
 </knimeNode>

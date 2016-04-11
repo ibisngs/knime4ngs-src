@@ -3,26 +3,26 @@
     <name>FastSam2Bam</name>
     
     <shortDescription>
-        Converts sam to bam files in parallel.
+        Converts SAM files into BAM files in parallel.
     </shortDescription>
     
     <fullDescription>
-        <intro>Converts efficiently SAM files into the compressed BAM format using multiple threads in parallel and creates an index file.</intro>
+        <intro>The FastSam2Bam node converts efficiently SAM files into the compressed BAM format by using multiple threads in parallel and by creating an index file.</intro>
         
         
-        <option name="path to samtool binaries">path to the samtools installation</option>
-        <option name="path to picard tool binaries">dpath to the picard tools installation</option>
-        <option name="path to output folder">path to the output folder</option>
-        <option name="path to genome in fasta format">path to the genome which was used for alignment</option>
-        <option name="number of cores">number of cores which should be used for conversion</option>
-        <option name="number of reads per split">number of reads per junk</option>
-        <option name="temp path">path where the temp files should be stored (must be fast)</option>
-        <option name="use RAM (/dev/shm/) as temp folder">uses /dev/shm which is a memory device in some unix distributions as temp folder</option>
-        <option name="delete sam file after conversion">deletes the SAM file after conversion; dangerous option because if conversion fails and is not correctly detected the sam file is lost!</option>
+        <option name="Path to samtool binaries">Set the path to the samtools installation.</option>
+        <option name="Path to picard tool binaries">Set the path to the picard tools installation.</option>
+        <option name="Path to output folder">Set the path to the output folder where the output files should be stored.</option>
+        <option name="Path to genome in fasta format">Set the path to the reference genome which was used for the alignment.</option>
+        <option name="Number of cores">Set the number of cores to be used.</option>
+        <option name="Number of reads per split">Set the number of reads per junk.</option>
+        <option name="Temp path">Set the path to the folder where the temp files should be stored (must be fast).</option>
+        <option name="Use RAM (/dev/shm/) as temp folder">Choose whether to uses /dev/shm, which is a memory device in some unix distributions, as temp folder.</option>
+        <option name="Delete SAM file after conversion">Choose whether to delete the SAM file after conversion. This is a dangerous option because if the conversion fails and is not correctly detected, the sam file will be lost!</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="SAMFile">Path to the SAM file</inPort>
+        <inPort index="0" name="SAMFile"> Path to SAM file</inPort>
         <outPort index="0" name="Out-Port name"><b>Cell 0:</b> Path to BAM file<br /><b>Cell 1:</b> Path to index file</outPort>
     </ports>    
     <views>

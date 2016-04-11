@@ -8,23 +8,26 @@
     
     <fullDescription>
         <intro>
-        	PhaseByTransmission is a GATK tool that 
-        	1) computes the most likely genotype combination and phases trios and parent/child pairs given their genotype likelihoods and a mutation prior and 
-        	2) phases all sites were parent/child transmission can be inferred unambiguously.
-        	It reports the genotype combination (and hence phasing) probability.
+        	This node is based on the PhaseByTransmission tool of GATK and performs two functions: 
+        	<br />
+        	1. Computes the most likely genotype combination and phases trios and parent/child pairs given their genotype likelihoods and a mutation prior and 
+        	<br />
+        	2. Phases all sites were parent/child transmission can be inferred unambiguously.
+        	<br />
+        	It reports the genotype combination (and hence phasing) probability.<br />
         	For further information, see the GATK online documentation of the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_phasing_PhaseByTransmission.php">PhaseByTransmission</a> walker.
         </intro>
         
         <tab name="Options">
         	<option name="HTE">
-        		Set threshold for repeated execution.
+        		Set a threshold for repeated execution.
         		Only used if HTE is enabled in the preference page.
         	</option>
         	<option name="Path to GATK jar file">
-        		Set path GenomeAnalysisTK.jar and memory usage.
+        		Set the path to GenomeAnalysisTK.jar and memory usage.
         	</option>
         	<option name="Reference Genome">
-        		Set path to reference genome.
+        		Set the path to a reference genome.
         	</option>
         	<option name="Path to BED file">
         		Coverage analysis can be restricted to genomic regions defined in a BED file.
@@ -46,10 +49,10 @@
     
     <ports>
         <inPort index="0" name="Input VCF">
-        	Path to input VCF file.
+        	Path to input VCF file
         </inPort>
         <outPort index="0" name="Phased VCF">
-        	Cell 0: Path to the phased VCF file.
+        	Cell 0: Path to the phased VCF file
         </outPort>
     </ports>    
 </knimeNode>

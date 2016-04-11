@@ -16,7 +16,7 @@
         	Source: <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
         	<br />
         	<br />
-        	LOFTEE is a VEP plugin to identify LOF (loss-of-function) variation.
+        	LOFTEE is a VEP plugin to identify LOF (loss-of-function) variants.
         	It implements a set of filters to deem stop-gained, splice site disrupting and frameshift variants as low-confidence LOFs.
         	<br />
         	Source: <a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
@@ -37,41 +37,42 @@
         
         <tab name="Options">
             <option name="HTE">
-            	Use HTE settings from preference page or set an individual threshold.
-            </option>
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
             <option name="Path to variant_effect_predictor.pl">
-            	Select the VEP perl script which can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
+            	Set the path to the VEP perl script. It can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
             </option>
-            <option name="Path to VCF file">
-            	Select an input file in vcf format.
-            </option>
-            <option name="Path to fasta file">
-            	The selected fasta file used for looking up reference sequence.
-            	The plugin LOFTEE won't work properly if no fasta file is given.
-            	In general, the fasta file is downloaded while the installation of VEP and can be found in the cache directory.
+            <option name="Path to fastA file">
+            	Set the path to the reference file (fastA format)
+            	The plugin LOFTEE won't work properly if no fasta file is given!
+            	In general, the fastA file is downloaded at the same time as VEP is installed. It can be found in the cache directory.
             </option>
             <option name="Folder for output files">
-            	Select a folder to store the output files.
+            	Set the path to a folder where the output files should be stored.<br />
             	If "Overwrite" is checked, existing files will be overwritten.
             </option>
-            <option name="Use cache?">
-            	It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
+            <option name="Further options"> <br />
+            <li>
+            Use cache: It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
             	The cache is usually build during the installation of the Ensembl API. 
             	Otherwise, you can find information in the VEP documentation (see VEP link above). 
-            </option>
-            <option name="Number of forks">
-            	If the number is number is higher than 1, forking is enabled.
-            	Forking can dramatically improve the runtime of VEP.
-         		If LOFTEE is used, it will run ignoring the conservation file as there occur errors when it is accessed by multiple threads.
-            </option>
-            <option name="Coding only?">
-            	If this checkbox is checked, VEP will only return consequences that fall in the coding regions of transcripts.
-            </option>
-            <option name="Choose transcript set">
-            	VEP uses Ensembl transcripts (=GENCODE Comprehensive) by default.
-            	By choosing GENCODE basic your analysis is limited to transcripts belonging to the GENCODE basic set.
+            </li>
+            <li>
+            Number of forks: Set the number of forks to be used.<br />
+            Forking can dramatically improve the runtime of VEP. <br />
+            If LOFTEE is used, it will run ignoring the conservation file as there occur errors when it is accessed by multiple threads.
+            </li>
+            <li>
+           	Coding only: If this checkbox is checked, VEP will only return consequences that affect coding regions of transcripts.
+            </li>
+            <li>
+            Choose transcript set:
+            	VEP uses <b>Ensembl transcripts</b> (=GENCODE Comprehensive) by default.
+            	By choosing <b>GENCODE</b> basic your analysis is limited to transcripts belonging to the GENCODE basic set.
             	This set has fragmented or problematic transcripts removed.
-            	Alternatively, you can choose the RefSeq transcript set.
+            	Alternatively, you can choose the <b>RefSeq</b> transcript set.
+            </li>
             </option>
 		</tab>
 		
@@ -80,18 +81,19 @@
             	VEP can create a statistic file in html or plain text format. 
             </option>
             <option name="Cache directory">
-            	Set the cache directory. Default = "$HOME/.vep/".
+            	Set the path to the cache directory.<br />
+            	(Default: "$HOME/.vep/")
             </option>
             <option name="Plugin directory">
-            	Set the plugin directory. Default = "$HOME/.vep/Plugins".
+            	Set the path to the plugin directory.<br />
+            	(Default: "$HOME/.vep/Plugins")
             </option>
-            <!--<option name="Tabix PATH">
-            	Tabix is required by the plugins CADD and ExAC.
-            	The path can be found by typing "which tabix" in terminal.
-            </option>-->
+            <option name="Specify further plugin/options">
+            	Commit further options/plugins to VEP.
+            </option>
         </tab>
         <tab name="LOFTEE">
-            <option name="Use LOFTEE?">
+            <option name="Use LOFTEE">
             	Check this box if you want to use LOFTEE.
             	Requires the plugin file in the plugin directory.
             </option>

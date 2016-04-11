@@ -52,7 +52,7 @@
         		Set additional command line flags for the PrintReads walker.
         	</option>
             <option name="Number of CPU threads">
-            	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
+            	Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
             	The BaseRecalibrator and the PrintReads walker run in multi-threaded mode.
         	</option>
         	<option name="Shared Java Memory">
@@ -131,10 +131,10 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input BAM">
+        	<inPort index="0" name="Input BAM">
         	Cell 0: Path to input BAM file.
     	</inPort>
-        <outPort index="0" name="Output">
+        	<outPort index="0" name="Output">
         	Cell 0: Path to recalibrated BAM file.
     	</outPort>
     </ports>

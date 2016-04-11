@@ -19,15 +19,20 @@
         </intro>
         
         
-        <option name=""></option>
+        <tab name="Options">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        </tab>
         
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Cell 0: Path2ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path2ReadFile2
+        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to ReadFile2
         (fastQ or fastA).</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path2ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path2ReadFile2
-        (fastQ or fastA).<br></br>Cell 2: Path2filterfile</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to ReadFile2
+        (fastQ or fastA).<br></br>Cell 2: Path to FilterFile</outPort>
     </ports>    
 
 </knimeNode>

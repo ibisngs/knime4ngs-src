@@ -7,18 +7,25 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node can be used to merge the mapping statistics of multiple RawReadManipulator runs into one file in order to post-process that data.</intro>
+        <intro>
+        The RawReadManipulatorStatisticMerger can be used to merge the mapping statistics of multiple RawReadManipulator runs into one file in order to post-process that data.
+        </intro>
         
-        
-        <option name="path to folder with RawReadManipulator Outputs">The node searches recursively all folders and sub-folders of the input directory for output files of a RawReadManipulator run.</option>
-        <option name="path to output folder">Output files with the name of each selected module will be created there.</option>
-		<option name="modules to merge">Modules for which the data should be merged must be selected here. At least one module must be selected.</option>
+        <option name="Path to folder with RawReadManipulator Outputs"> 
+        The node searches recursively all folders and sub-folders of the input directory for output files of a RawReadManipulator run.
+        </option>
+        <option name="Path to output folder">
+        Set the path to the folder where the output files, named after the selected module, should be stored.
+        </option>
+		<option name="Modules to merge">
+		Select whether module statistics should be used for merging.
+		</option>
        
     </fullDescription>
     
     <ports>
-        <outPort index="0" name="module files">Cell 0: name of module<br />Cell 1: path to the merged file</outPort>
-        <outPort index="1" name="RawReadManipulator files">Cell 0: path to the RawReadManipulator output files which were merged</outPort>
+        <outPort index="0" name="module files">Cell 0: Name of the module<br />Cell 1: Path to the merged file</outPort>
+        <outPort index="1" name="RawReadManipulator files">Cell 0: Path to the RawReadManipulator output files which were merged</outPort>
     </ports>    
     <views>
     	<view index="0" name="">No view implemented.</view>

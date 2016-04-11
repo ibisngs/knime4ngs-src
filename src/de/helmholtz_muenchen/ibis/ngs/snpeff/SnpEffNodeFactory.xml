@@ -4,35 +4,65 @@
     <name>SnpEff</name>
     
     <shortDescription>
-        
+       SnpEff annotates and predicts the effects of variants on genes. 
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
-        
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <intro>
+        	SnpEff annotates and predicts the effects of variants on genes (such as amino acid changes).<br />
+        	Source: <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
+         </intro>
+        <tab name="Options">
+        	<option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page.
+       	 	</option>
+       	 	<option name="snpEff directory"> Set the path to the snpEff installation.
+       	 	</option>
+       	 	<option name="Database name"> In order to produce the annotation, SnpEff requires a database.<br />
+       	 	For more information, see <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
+       	 	</option>
+       	 	<option name="Input vcf file"> Set the path to the input vcf file.
+       	 	</option>
+       	 	<option name="Annotation option"> 
+       	 	Specify whether to add loss of function (LOF) and Nonsense mediated decay (NMD) tags.
+       	 	<li>
+       	 	Loss of function assessment: SnpEff can estimate if a variant is deemed to have a LOF on the protein.
+       	 	</li>
+       	 	<li>
+       	 	Nonsense mediated decay (NMD) assessment: Some mutations may cause mRNA to be degraded thus not translated into protein.
+       	 	NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.
+       	 	</li>
+       		</option>  
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        <tab name="Sequence change filter">
+        	<option name="Set thresholds"> 
+        	By settings thresholds for minimum quality value and for minimum coverage, variants with a bad quality value and/or a low coverage can be removed.
+        	</option>
+        	<option name="Filter by mutation type">
+        	This option allows you to filter variants by the following mutation types:
+        		<li>
+        		Analyze deletion only
+        		</li>
+        		<li>
+        		Analyze insertion only
+        		</li>
+        		<li>
+        		Analyze homozygous variants only
+        		</li>
+        		<li>
+        		Analyze heterozygous variants only
+        		</li>
+        		<li>
+        		Analyze SNPs only
+        		</li>
+        		<li>
+        		Analyze MNPs only
+        		</li>
+        		</option>
         </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="In-Port"> Input VCF file</inPort>
+        <outPort index="0" name="Out-Port"> Output VCF file</outPort>
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
 </knimeNode>

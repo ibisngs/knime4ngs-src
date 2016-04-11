@@ -3,61 +3,68 @@
     <name>FeatureCounts</name>
     
     <shortDescription>
-        featureCounts: an efficient general purpose program for assigning sequence reads to genomic features
+        featureCounts: an efficient general purpose program for assigning sequence reads to genomic features.
     </shortDescription>
     
     <fullDescription>
-        <intro>featureCounts: an efficient general purpose program for assigning sequence reads to genomic features<br /><br />For details, please see paper:<br />
-       Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656<br />
+        <intro>
+        FeatureCounts is a highly efficient general-purpose read summarizing program that counts mapped reads to genomic features such as genes, exons, promoter, gene bodies, genomic bins and chromosomal locations.
+        It can be used to count both RNA-seq and genomic DNA-seq reads.<br />
+        FeatureCounts takes as input SAM/BAM files and an annotation file including chromosomal coordinates of features.
+        featureCounts: an efficient general purpose program for assigning sequence reads to genomic features.<br />
+        Source: <a href="http://bioinf.wehi.edu.au/featureCounts/">http://bioinf.wehi.edu.au/featureCounts/</a> <br /><br />
+        For more details, see:
+       	Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656<br />
        <a href="http://bioinformatics.oxfordjournals.org/content/early/2013/11/30/bioinformatics.btt656.full.pdf">featureCounts: an efficient general purpose program for assigning sequence reads to genomic features</a></intro>
         
         <tab name="General options">
         	<option name="Path to featureCounts binary">
-        		Path to the compiled featureCounts binary.
+        		Set the path to the compiled featureCounts binary.
         		Theoretically all versions starting from <i>1.4.3</i> should be supported.
         	</option>
 			<option name="Additional parameters">
-				Parameters can be set like you would normally use them on the command line for this binary.
+				Set parameters analogous to how you would normally use them on the command line for this binary.
 			</option>
         </tab>
         <tab name="FeatureCounts">
         	<option name="Path to annotation file">
-        		GTF or SAF annotation file.
+        		Set the path to the GTF or SAF annotation file.
         	</option>
         	<option name="Path to output folder">
-        		Path where the output file should be stored.
+        		Set the path to the folder where the output file should be stored.
         	</option>
-        	<option name="file type">
-        		GTF or SAF annotation files are supported.
+        	<option name="File type">
+        		Choose whether to use a GTF or a SAF annotation file.
         	</option>
-        	<option name="feature type used for counting">
-        		Feature type which is used for counting when GTF file is used. Default: exon
+        	<option name="Feature type used for counting">
+        		Choose which feature type should be used for counting in the case a GTF file is used.<br />
+        		(Default: 'exon')
         	</option>
-        	<option name="count multimapped reads">
-        		Counts also reads, which do not map uniquely.
+        	<option name="Count multimapped reads">
+        		Choose whether also not uniquely mapped reads should be counted.
         	</option>
-        	<option name="perform read summarization at the feature level">
+        	<option name="Perform read summarization at the feature level">
         		If specified, read summarization will be performed at the feature level (eg. exon level).
         		Otherwise, it is performed at meta-feature level (eg. gene level)
         	</option>
-        	<option name="feature type used for grouping results">
-        		Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.
-        		`gene_id' by default. This attribute type is usually the gene identifier.
+        	<option name="Feature type used for grouping results">
+        		Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.<br />
+        		(Default: 'gene_id'; This attribute type is usually the gene identifier.)<br />
         		This argument is useful for the meta-feature level summarization.
         	</option>
-        	<option name="thread number">
-        		Number of threads which are used for counting. [1-16]
+        	<option name="Thread number">
+        		Set the number of threads to be used. [1-16]
         	</option>
         </tab>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="In-Port">
-        	Cell 0: One or more SAM or BAM files.
+        	Cell 0: One or more SAM or BAM files
         </inPort>
         <outPort index="0" name="Out-Port">
-        	Cell 0: path to output file<br />
-        	Cell 1: command which was used to call the binary.
+        	Cell 0: Path to output file<br />
+        	Cell 1: Command which was used to call the binary
         </outPort>
     </ports> 
 </knimeNode>

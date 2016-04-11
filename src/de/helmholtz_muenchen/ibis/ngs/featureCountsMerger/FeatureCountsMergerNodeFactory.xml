@@ -3,20 +3,22 @@
     <name>FeatureCountsMerger</name>
     
     <shortDescription>
-		This node can be used to merge the results of multiple feature count runs.
+		The FeatureCountsMerger can be used to merge the results of multiple feature count runs.
     </shortDescription>
     
     <fullDescription>
-        <intro>This node can be used to merge the results of multiple feature count runs. As input it expects a list of feature count files and returns a table with the merged counts.</intro>
+        <intro>The FeatureCountsMerger can be used to merge the results of multiple feature count runs.<br />
+        The node takes as input a list of feature count files and returns a table with the merged counts.
+        </intro>
         
-        <option name="path to output file">path where the merged file should be stored</option>
-        <option name="remove the path of the file in the header">takes only the name of the file as header caption</option>
-        <option name="remove the ending of the file in the header">removes the ending of the file for the header caption</option>
+        <option name="Path to output file"> Set the path to the folder where the merged file should be stored.</option>
+        <option name="Remove the path of the file in the header"> Choose whether to only take the name of the file as header caption.</option>
+        <option name="Remove the ending of the file in the header"> Choose whether to remove the ending of the file in the header caption</option>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="featureCountFiles">In the first column the path to feature count files are expected.</inPort>
-        <outPort index="0" name="merged count file">Contains the merged feature count file.</outPort>
+        <inPort index="0" name="FeatureCountFiles"> Paths to FeatureCountFiles are expected to be in the first column.</inPort>
+        <outPort index="0" name="Merged count file"> Merged FeatureCountFile.</outPort>
     </ports>    
     <views>
         <view index="0" name="no view implemented">no view implemented</view>

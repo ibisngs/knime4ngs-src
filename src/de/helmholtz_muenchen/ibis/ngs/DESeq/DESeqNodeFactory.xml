@@ -3,31 +3,66 @@
     <name>DESeq</name>
     
 	<shortDescription>
-    	This node can detect differential expressed genes using the DESeq package.
+    	This node uses the DESeq package to test for differential expression based on a model using the negative binomial distribution.
     </shortDescription>
     
     <fullDescription>
-        <intro>This node can find differential expressed genes using the DESeq package. It takes as input a count table and a annotation file.</intro>
+        <intro>
+        This node uses the DESeq package of R to test for differential expression based on a model using the negative binomial distribution.<br />
+        DESeq takes as input a count table and an annotation file.
+        </intro>
         
-        <option name="empirical dispersion calculation">method which is used for calculation of the empirical dispersion (default: pooled)</option>
-        <option name="sharing mode">sharing mode after empirical dispersion was calculated (default: maximum)</option>
+        <option name="Empirical Dispersion Calculation"> This method obtains dispersion estimates for a count data set. For each condition (or collectively for all conditions) it first computes for each gene an empirical dispersion value (a.k.a. a raw SCV value), then fits by regression a dispersion-mean relationship and finally chooses for each gene a dispersion parameter that will be used in subsequent tests from the empirical and the fitted value according to the 'sharingMode' argument. 
+        <br />
+        There are three ways how to empirical dispersion can be computed:
+			<ul>
+			<li>
+	        <b>pooled</b> - Use the samples from all conditions with replicates to estimate a single pooled empirical dispersion value, and assign it to all samples.
+	        </li>
+	        <li>
+	        <b>pooled-CR</b> - Estimate the dispersion by maximizing a Cox-Reid adjusted profile likelihood (CR-ALP).
+	        </li>
+	        <li>
+	        <b>per-condition</b> - For each condition with replicates, compute a gene's empirical dispersion value by considering the data from samples for this condition. For samples of unreplicated conditions, the maximum of empirical dispersion values from the other conditions is used.
+	        </li>
+	        <li>
+	        <b>blind</b> - Ignore the sample lables and compute a gene's empirical dispersion value as if all samples were replicates of a single condition. This can be done even if there are no biological replicates.
+	        </li>
+	        </ul>
+        	(default: pooled)
+        </option>
+        <option name="Sharing Mode">After the empirical dispersion values have been computed for each gene, a dispersion-mean relationship is fitted for sharing information across genes in oder to reduce variability of the dispersion estimates. After that, for each gene, we have two values: the empirical values (derived only from this gene's data), and the fitted value (i.e., the dispersion value typical for genes with an average expression similar to those of this gene).
+        The sharingModel argument specifies which of these two values will be written to the featureData's disp_columns.
+	        <ul>
+	        <li>
+	        <b>fit-only</b> - use only the fitted value, i.e., the empirical value is used only as input to the fitting, and then ignored. Use this only with very few replicates, and when your are not too concerned about false positives from dispersion outliers, i.e. genes with an unusually high variability.
+	        </li>
+	        <li>
+	        <b>maximum</b> - take the maximum of the two values. This is the conservative or prudent choice, recommended once you have at least three or four replicates and maybe even with only two replicates. 
+	        </li>
+	        <li>
+	        <b>gene-est-only</b> - No fitting or sharing, use only the empirical value. This method is preferable when the number of replicates is large and the empirical dispersion values are sufficiently reliable. If a number of replicates is small, this option may lead to many cases where the dispersion of a gene is accidentally underestimated and a false positive arises in the subsequent testing.          
+	        </li>
+	        </ul>
+	        (default: maximum)
+        </option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Row names: ID of feature
-        <br />Cell 1...n: count of feature in sample
-        <br />Must contain a header line with the names of the samples
+        <inPort index="0" name="count table">Row names: IDs of features.
+        <br />Cell 1...n: Count of features in the samples.
+        <br />The table must contain a header line with the names of the samples.
         </inPort>
-        <inPort index="1" name="condition table">Row names: Name of the sample like it is named in the count table
-        <br />Cell 1: condition (should only contain two conditions)
+        <inPort index="1" name="condition table">Row names: Names of the samples as they are named in the count table.
+        <br />Cell 1: Condition (should only contain two conditions)
         </inPort>
         <outPort index="0" name="DE expressed genes">Cell 0: ID of feature
-        <br />Cell 1: average log2 CPM expression
-        <br />Cell 2: log2 CPM A expression
-        <br />Cell 3: log2 CPM B expression
-        <br />Cell 4: foldchange 
-        <br />Cell 5: log2 foldchange 
-        <br />Cell 6: P-Value
-        <br />Cell 7: adjusted P-Value (corrected with BH)
+        <br />Cell 1: Average log2 CPM expression
+        <br />Cell 2: Log2 CPM A expression
+        <br />Cell 3: Log2 CPM B expression
+        <br />Cell 4: Foldchange 
+        <br />Cell 5: Log2 foldchange 
+        <br />Cell 6: P value
+        <br />Cell 7: Adjusted p value (corrected with BH)
         </outPort>
     </ports>    
     <views>

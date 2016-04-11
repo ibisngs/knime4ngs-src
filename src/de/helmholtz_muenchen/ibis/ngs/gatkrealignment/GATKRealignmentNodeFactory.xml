@@ -100,7 +100,7 @@
             	When dealing with deep sequencing data, you can increase this value.
         	</option>
             <option name="Output">
-            	ndelRealigner resets mapping position and cigar string for all realigned reads of the output BAM file. 
+            	IndelRealigner resets mapping position and cigar string for all realigned reads of the output BAM file. 
             	Usually, if you do not tick this option, the tool will add the original coordinates as tag. 
             	You can prevent this behaviour and reduce the size of your output BAM file by checking this option.
         	</option>
@@ -131,11 +131,11 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Input BAM">
+			<inPort index="0" name="Input BAM">
         	Cell 0: Path to input BAM file.
     	</inPort>
     	
-        <outPort index="0" name="Output">
+        	<outPort index="0" name="Output">
         	Cell 0: Path to realigned BAM file.
     	</outPort>
     </ports> 

@@ -23,12 +23,11 @@
         	Source: <a href="http://bio-bwa.sourceforge.net/bwa.shtml">http://bio-bwa.sourceforge.net/bwa.shtml</a>
 		</intro>
         
-        <option name="BWA">Set path to executable BWA.</option>
-        <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome sequence, to map the reads on (file type: FastA).</option>
+        <option name="BWA">Set the path to BWA executable.</option>
+        <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome sequence, to map the reads (file type: FastA).</option>
         <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using bwa). In this case the reference sequence 
         		will not be indexed again.</option>
         <option name="Algorithm for constructing BWT index">
-        	Option:
         	<ul>
         		<li>
         		IS: IS linear-time algorithm for constructing suffix array.
@@ -44,7 +43,7 @@
         	</ul>
         </option>
         <option name="Algorithm for mapping">See description above.</option>
-        <option name="Build color-space index">Build color-space index. The input fast should be in nucleotide space.</option>
+        <option name="Build color-space index">Build a color-space index. The input fast should be in nucleotide space.</option>
         <option name="Specify read group header">
         	GATK requires a read group identifier (ID) and sample information (SM), e.g. specified by ’@RG\tID:foo\tSM:bar’.
         	All reads within a read group are assumed to come from the same instrument run and to therefore share the same error model.
@@ -61,8 +60,8 @@
     </fullDescription>
     
     <ports>
-    	<inPort index="0" name="In-Port">Cell 0: Path2ReadFile1<br></br>Cell 1 (Optional): Path2ReadFile1 (if paired end mapping is used)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br>Cell 1: Path2RefFile</outPort>
+    	<inPort index="0" name="In-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2 (if paired end mapping is used)</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to SAM file<br></br>Cell 1: Path to RefFile</outPort>
     </ports>
     
 </knimeNode>

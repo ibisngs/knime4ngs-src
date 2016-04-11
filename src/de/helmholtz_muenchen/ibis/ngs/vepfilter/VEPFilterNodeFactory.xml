@@ -8,25 +8,29 @@
     
     <fullDescription>
         <intro>
-        	This nodes enables the filtering of VCF files based on VEP annotations.
+        	The VEPFilter enables the filtering of VCF files based on VEP annotations.
         	The output is a VCF file containing the variants that have passed the filters.
         </intro>
         
         <tab name="Options">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
         	<option name="Path to filter_vep.pl">
         		This script is used to filter VEP annotations.
         		It can be found in the VEP installation in ensembl-tools-release../scripts/variant_effect_predictor.
        	 	</option>
 			<option name="Select variants">
-        		Choose some SO terms to define variants in which you are interested.
+        		This option enables to select SO terms.
         		Variants that match at least one of the default terms are generally considered as Loss-of-Function variants. 
         	</option>
         	<option name="Filter Conditions">
-        		Further filters can be defined for VCF files annotated by VEP.
-        		If you want to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 you would type:
-        		LoF is HC,ExAC_AF>0.05 (requires the usage of the VEP plugins LOFTEE and ExAC).
-        		More information can be found at:
-        		<a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
+        		Further filters can be specified. E.g.to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 (LoF is HC,ExAC_AF>0.05).
+        		(This requires the usage of the VEP plugins LOFTEE and ExAC).<br />
+        		For more information, see <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
+        	</option>
+        	<option name="Overwrite, if output files exist">
         	</option>
         </tab>
     </fullDescription>

@@ -9,20 +9,20 @@
     <fullDescription>
         <intro>
         	Combines VCF records from different sources using GATK's CombineVariants.
-        	The tool reads in variant records from separate ROD (Reference-Ordered Data) sources and combines them into a single VCF.
+        	The tool reads in variant records from separate ROD (Reference-Ordered Data) sources and combines them into a single VCF.<br />
         	For further information, see the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineVariants.php">GATK documentation</a>.
         </intro>
         
         <tab name="Options">
         	<option name="HTE">
-        		Set threshold for repeated execution.
+        		Set a threshold for repeated execution.
         		Only used if HTE is enabled in the preference page.
         	</option>
         	<option name="Path to GATK jar file">
-        		Set path GenomeAnalysisTK.jar and memory usage.
+        		Set the path GenomeAnalysisTK.jar and memory usage.
         	</option>
         	<option name="Reference Genome">
-        		Set path to reference genome.
+        		Set the path to a reference genome.
         	</option>
         	<option name="Path to BED file">
         		Coverage analysis can be restricted to genomic regions defined in a BED file.
@@ -34,26 +34,36 @@
         
         <tab name="CombineVariants options">
         	
-        	<option name="add VCF file">
-        		It is possible to add input VCF files one by one by setting the path to each VCF file or by adding all files in a folder that match the given regular expression (regex).
+        	<option name="Add VCF files">
+        		This option enables to either add one single input VCF file by setting its path or several VCF files, which are located in the same folder and match the given regular expression (regex).
+        		In the latter case you have to set the path to the folder.
         	</option>
-        	<option name="currently selected VCF files">
-        		The file list shows the files that are going to be merged.
-        		It is possible to select some files and remove them from the list.
+        	<option name="Currently selected VCF files">
+        		Selected VCF files are listed in the box and will to be merged. This option allows you to remove undesired files.
         	</option>
-        	<option name="GenotypeMergeOption">
-				<b>UNIQUIFY:</b>
+        	<option name="Genotype Merge Type"> Determine how genotype records for samples shared across the ROD file should be merged.
+        		<li>
+        		Uniquify:
     			Make all sample genotypes unique by file.
     			Each sample shared across RODs gets named sample.ROD.
-    			<br />
-				<b>UNSORTED:</b>
+    			</li>
+    			<li>
+    			Prioritize:
+    			Take the genotypes in priority order.
+    			</li>
+    			<li>
+				Usorted:
     			Take the genotypes in any order.
-    			<br />
-				<b>REQUIRE_UNIQUE:</b>
+    			</li>
+    			<li>
+				Require unique:
     			Require that all samples/genotypes be unique between all inputs.
+    			</li>
     		</option>
     		<option name="Output">
-        		Set a folder were the merged VCF file is stored.
+        		Set the path to a folder were the merged VCF file should be stored.
+        	</option>
+        	<option name="Name of merged VCF file"> Define how the merged VCF file should be named.
         	</option>
         </tab>
     </fullDescription>

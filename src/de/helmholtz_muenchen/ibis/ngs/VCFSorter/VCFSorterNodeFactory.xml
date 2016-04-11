@@ -8,14 +8,20 @@
     
     <fullDescription>
         <intro>
-        	This node sorts the chromosomes of an input VCF file analogous to a reference sequence. This step is required in order to merge two VCF files with the MergeTwoVCFs node.
+        	The VCFSorter sorts the chromosomes of an input VCF file analogous to a reference sequence. This step is required in order to merge two VCF files with the MergeTwoVCFs node.
         </intro>
         
-        <option name="Reference sequence file">
-        	Reference sequence file should be in DICT format.
+        <tab name="Options">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        <option name="Reference sequence">
+        	Set the path to the reference sequence. It should have fastA format.
         </option>	
+      </tab>
     </fullDescription>
-    
+
     <ports>
         <inPort index="0" name="VCF file">
         	Cell 0: Path to VCF file.

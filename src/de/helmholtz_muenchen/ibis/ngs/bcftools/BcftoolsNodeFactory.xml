@@ -13,21 +13,21 @@
         Source: <a href="http://samtools.sourceforge.net/">https://samtools.github.io/bcftools/bcftools.html</a> 
         </intro>
         
-		<tab name="Options">
+		<tab name="Options">    
 		
-		<option name="Method Selection">Select method for execution. Currently the node includes:
+		<option name="Method Selection">Select a method for execution. Currently the node includes:
 		   <ul>
         		<li>
-        		index: Creates index for bgzip compressed VCF/BCF files for random access.
+        		<b>index</b>: Creates an index for bgzip compressed VCF/BCF files for random access.
         		</li>
         		<li>
-        		concat: Concatenate or combine VCF/BCF files.
+        		<b>concat</b>: Concatenate or combine VCF/BCF files.
         		</li>
         		<li>
-        		reheader: Modify header of VCF/BCF files, change sample names.
+        		<b>reheader</b>: Modify header of VCF/BCF files, change sample names.
         		</li>
         		<li>
-        		stats: Parses VCF or BCF and produces text file stats which is suitable for machine processing and can be plotted using plot-vcfstats. 
+        		<b>stats</b>: Parses VCF or BCF and produces text file stats which is suitable for machine processing and can be plotted using plot-vcfstats. 
         		</li>
         	</ul>
 		</option>

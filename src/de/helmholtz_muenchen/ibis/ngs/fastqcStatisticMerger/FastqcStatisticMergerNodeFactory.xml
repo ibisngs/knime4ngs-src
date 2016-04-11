@@ -7,19 +7,34 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>FastQC outputs statistics for each of its modules. This node can be used to merge the statistics into one file in order to post-process that data.</intro>
+        <intro>FastQC outputs statistics for each of its modules. The FastqcStatisticMerger can be used to merge the statistics into one file in order to post-process the data.</intro>
         
         
-        <option name="path to folder with FastQC Outputs">The node searches recursively all folders and sub-folders of the input directory for output files of a FastQC run.</option>
-        <option name="path to output folder">Output files with the name of each selected module will be created there.</option>
-		<option name="modules to merge">Modules for which the data should be merged must be selected here. At least one module must be selected.<br /><br />
-		Special modules:<br /> - "Merge Status of all Modules": merges the status of all modules (pass, warn or fail are possible FastQC status values)<br />"Merge ALL Modules": selects or de-selects all modules</option>
+        <option name="Path to folder with FastQC Outputs">The node searches recursively all folders and sub-folders of the input directory for output files of a FastQC run.
+        </option>
+        <option name="Path to output folder"> Set the path to the folder where the output files should be stored. The files will be named after the selected modules.
+        </option>
+		<option name="Modules to merge"> Select by which modules the data should be merged. At least one module must be selected.
+		<li>Basic Statistics</li>
+		<li>Per base sequence quality</li>
+		<li>Per sequence quality score</li>
+		<li>Per base sequence content</li>
+		<li>Per base GC content</li>
+		<li>Per sequence GC content</li>
+		<li>Per base N content</li>
+		<li>Sequence Length Distribution</li>
+		<li>Sequence Duplication Levels</li>
+		<li>Overrepresented sequences</li>
+		<li>Filter-Options Collector</li>
+		<li>Merge Status of all Modules - merges the status of all modules (pass, warn or fail are possible FastQC status values)</li>
+		<li>Merge ALL Modules - selects or de-selects all modules</li>
+		</option>
        
     </fullDescription>
     
     <ports>
-        <outPort index="0" name="module files">Cell 0: name of module<br />Cell 1: path to the merged file</outPort>
-        <outPort index="1" name="FastQC files">Cell 0: path to the FastQC output files which were merged</outPort>
+        <outPort index="0" name="module files">Cell 0: Name of the module<br />Cell 1: Path to merged file</outPort>
+        <outPort index="1" name="FastQC files">Cell 0: Path to FastQC output files which were merged</outPort>
     </ports>    
     <views>
     	<view index="0" name="">No view implemented.</view>
