@@ -3,6 +3,7 @@ package de.helmholtz_muenchen.ibis.ngs.bwa;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
 
 /**
  * <code>NodeFactory</code> for the "BWA" Node.
@@ -35,7 +36,7 @@ public class BWANodeFactory
     @Override
     public NodeView<BWANodeModel> createNodeView(final int viewIndex,
             final BWANodeModel nodeModel) {
-        return new BWANodeView(nodeModel);
+        return new HTENodeView<BWANodeModel>(nodeModel);
     }
 
     /**

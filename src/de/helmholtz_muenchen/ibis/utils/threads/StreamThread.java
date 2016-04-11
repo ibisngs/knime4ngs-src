@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class StreamThread extends Thread {
 
@@ -89,7 +90,9 @@ public class StreamThread extends Thread {
 			while ((read = this.stream.read(bytes)) != -1){
 				if(this.fillSB)
 					{
-						this.sb.append(new String(bytes));
+						byte[] printByte = Arrays.copyOfRange(bytes, 0, read);
+						this.sb.append(new String(printByte));
+//						System.out.print(new String(printByte));
 					}
 				if(this.fillFile)
 					{

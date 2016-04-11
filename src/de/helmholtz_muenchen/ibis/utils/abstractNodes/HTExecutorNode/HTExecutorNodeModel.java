@@ -33,7 +33,10 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  */
 public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(HTExecutorNodeModel.class);
+	private static final NodeLogger LOGGER  = NodeLogger.getLogger(HTExecutorNodeModel.class);
+	private final StringBuffer HTEOUT 		= new StringBuffer("");
+	private StringBuffer HTEERR 			= new StringBuffer("");
+	
 	
 	//variables characterizing the HTExecution
 	private int exec_id = -1;
@@ -83,6 +86,13 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile, SuccessfulRunChecker checker, HTEDBHandler htedb) throws Exception {
 
+		if(stdErr==null){
+			this.HTEERR = new StringBuffer();
+			stdErr		= this.HTEERR;
+		}else{
+			this.HTEERR=stdErr;
+		}
+		
 		int exitcode = 0;
 		String err_msg = "";
 		
@@ -91,7 +101,7 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			htedb.updateCount(exec_id, count);
 			exitcode = Executor.executeCommandWithExitCode(command, exec,
 					environment,LOGGER, stdOutFile, stdErrFile, stdOut,
-					stdErr, StdInFile);
+					stdErr, StdInFile,HTEOUT);
 			err_msg = stdErr.toString();
 			
 			for(String c: command) {
@@ -110,7 +120,8 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 				checker.finalize();
 				return;
 			} else {
-				LOGGER.error(err_msg);
+				writeHTELog(err_msg,"Error");
+				
 				htedb.writeError(exec_id, err_msg);
 			}
 		}
@@ -173,6 +184,13 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
 		
+		if(stdErr==null){
+			this.HTEERR = new StringBuffer();
+			stdErr		= this.HTEERR;
+		}else{
+			this.HTEERR=stdErr;
+		}
+		
 		use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
 		threshold_value = threshold.getIntValue();
 		db_file = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.DB_FILE);
@@ -194,16 +212,16 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			lockCommand += s;
 		}
 
-		LOGGER.info(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value+" Host"+host_name);
-		
+		writeHTELog(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value+" Host"+host_name,"Info");
 		
 		if(lockFile == null) {
 			lockFile = new File(defaultLockFile);
 		}
-		LOGGER.info("klock file can be found in "+lockFile);
+		
+		writeHTELog("klock file can be found in "+lockFile,"Info");
 		boolean terminationState = SuccessfulRunChecker
 				.hasTerminatedSuccessfully(lockFile, lockCommand);
-		LOGGER.info("Successful termination state: " + terminationState);
+		writeHTELog("Successful termination state: " + terminationState,"Info");
 
 		//abort execution if node has been executed successfully
 		if (terminationState) {
@@ -221,7 +239,7 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 				htedb = new HTEDBHandler(db_file, LOGGER);
 				if(!htedb.checkSchema()) throw new SQLException();
 			} catch (SQLException e) {
-				LOGGER.error("Connection to database could not be established: "+e.getMessage());
+				writeHTELog("Connection to database could not be established: "+e.getMessage(),"Error");
 				use_hte = false;
 			}
 		}
@@ -236,9 +254,9 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			htedb.closeConnection();
 		} else {
 			//HTE is not used
-			LOGGER.info("HTE is not used");
+			writeHTELog("HTE is not used","Info");
 			Executor.executeCommand(command, exec, environment, LOGGER,
-					stdOutFile, stdErrFile, stdOut, stdErr, StdInFile);
+					stdOutFile, stdErrFile, stdOut, stdErr, StdInFile,HTEOUT);
 			checker.writeOK();
 			checker.finalize();
 		}
@@ -263,6 +281,26 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		}
 	}
 
+	public String getHTEOUT() {
+		return HTEOUT.toString();
+	}
+	public String getHTEERR() {
+		return HTEERR.toString();
+	}
+	
+	private void writeHTELog(String Log, String Type){
+		if(Type.equals("Info")){
+			LOGGER.info(Log);
+		}else if(Type.equals("Error")){
+			LOGGER.error(Log);
+		}else{
+			throw new InternalError("Incorrect call of writeHTELog. Unknown Log Type: "+Type);
+		}
+		
+		HTEOUT.append(Log+"\n");
+	}
+	
+	
 //	/**
 //	 * {@inheritDoc}
 //	 */

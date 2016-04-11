@@ -31,7 +31,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, NodeLogger logger) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException {
-		Executor.executeCommand(command, exec, null, logger, null, null, null, null, null);
+		Executor.executeCommand(command, exec, null, logger, null, null, null, null, null,null);
 	}
 
 
@@ -49,7 +49,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, NodeLogger logger, String stdOutFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, null, logger, stdOutFile, null, null, null, null);
+		Executor.executeCommand(command, exec, null, logger, stdOutFile, null, null, null, null,null);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec,String[] environment, NodeLogger logger, String stdOutFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, stdOutFile, null, null, null, null);
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, null, null, null, null,null);
 	}
 	
 
@@ -85,7 +85,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, NodeLogger logger, StringBuffer stdOut, StringBuffer stdErr) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, null, logger, null, null, stdOut, stdErr, null);
+		Executor.executeCommand(command, exec, null, logger, null, null, stdOut, stdErr, null,null);
 	}
 	
 	
@@ -105,7 +105,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, StringBuffer stdOut, StringBuffer stdErr) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, null, null, stdOut, stdErr, null);
+		Executor.executeCommand(command, exec, environment, logger, null, null, stdOut, stdErr, null,null);
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, stdOut, stdErr, null);
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, stdOut, stdErr, null,null);
 	}
 	
 	/**
@@ -145,7 +145,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, null);
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, null,null);
 	}
 	
 	
@@ -166,7 +166,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 */
 	public static void executeCommand(String[] command, ExecutionContext exec, String [] environment, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException{
-		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, stdInFile);
+		Executor.executeCommand(command, exec, environment, logger, stdOutFile, stdErrFile, null, null, stdInFile,null);
 	}
 
 
@@ -187,12 +187,12 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 * @throws Exception
 	 */
-	public static void executeCommand(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException  {
+	public static void executeCommand(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile,StringBuffer HTEOUT) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException  {
 		exec.checkCanceled();
 		//Create Threadpool + the execution and monitoring threads 
 		ExecutorService pool = Executors.newSingleThreadExecutor();
 		
-		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment);
+		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment,HTEOUT);
 		Future<Boolean> executorResult = pool.submit(executorThread);
 
 		// wait for executorThread to finish and meanwhile monitor if node was cancled
@@ -230,7 +230,7 @@ public class Executor {
 	}
 	
 	public static int executeCommandWithExitCode(String [] command, ExecutionContext exec, NodeLogger logger) throws CanceledExecutionException, InterruptedException, ExecutionException {
-		return executeCommandWithExitCode(command, exec, null, logger, null, null, null, null,null);
+		return executeCommandWithExitCode(command, exec, null, logger, null, null, null, null,null,null);
 	}
 	
 	/**
@@ -249,12 +249,12 @@ public class Executor {
 	 * @throws ExecutionException 
 	 * @throws InterruptedException 
 	 */
-	public static int executeCommandWithExitCode(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile) throws CanceledExecutionException, InterruptedException, ExecutionException{
+	public static int executeCommandWithExitCode(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile,StringBuffer HTEOUT) throws CanceledExecutionException, InterruptedException, ExecutionException{
 		exec.checkCanceled();
 		//Create Threadpool + the execution and monitoring threads 
 		ExecutorService pool = Executors.newSingleThreadExecutor();
 		
-		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment);
+		ExecuteThread executorThread   = new ExecuteThread(command, logger, stdOutFile, stdErrFile, StdInFile, stdOut, stdErr, environment,HTEOUT);
 		Future<Boolean> executorResult = pool.submit(executorThread);
 
 		// wait for executorThread to finish and meanwhile monitor if node was cancled

@@ -32,6 +32,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	private InputThread stdInStream;
 	private final NodeLogger LOGGER;
 	private final String[] ENVIRONMENT;
+	private final StringBuffer HTEOutStr;
 	
 	/**
 	 * ExecuteThread starts process to execute command in a new thread. STDOUT and STDERR are redirected to files or StringBuffers
@@ -43,7 +44,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	 * @param stdErrStr if not null STDERR is redirected to this StringBuffer
 	 * @param enableEscape enables parameter escaping
 	 */
-	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment) {
+	public ExecuteThread(String[] command, NodeLogger logger, String stdOutFile, String stdErrFile, String stdInFile, StringBuffer stdOutStr, StringBuffer stdErrStr, String[] Environment,StringBuffer HTEOUT) {
 		this.command = command;
 
 		this.stdErrFile=stdErrFile;
@@ -51,6 +52,7 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdInFile=stdInFile;
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
+		this.HTEOutStr=HTEOUT;
 
 		this.LOGGER = logger;
 		
@@ -68,6 +70,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	@Override
 	public Boolean call() throws Exception{
 		LOGGER.info("Running command: " + getCommandEscaped(this.command));
+		HTEOutStr.append("Running command: " + getCommandEscaped(this.command)+"\n");
 		
 		//Start the process
 		if(this.command.length==1){
@@ -99,7 +102,8 @@ public class ExecuteThread implements Callable<Boolean> {
 		stdOutStream.interrupt();
 		
 		LOGGER.info("finished command "+ command[0]);
-
+		HTEOutStr.append("finished command "+ command[0]+"\n");
+		
 		return new Boolean(p.exitValue()==0);
 	}
 

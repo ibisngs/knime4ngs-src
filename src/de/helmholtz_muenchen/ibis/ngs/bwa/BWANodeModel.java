@@ -22,6 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -64,7 +65,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
 	public static final String OUT_COL2 = "Path2RefFile";
-
+	
 	
     /**
      * Constructor for the node model.
@@ -81,6 +82,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	addSetting(m_readGroupBoolean);
     	addSetting(m_alnalgo);
     	addSetting(m_ALN_THREADS);
+    	
     }
 
 //    static SettingsModelString createSettingsModelSelection() {
@@ -93,6 +95,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
+    	
     	
     	/**
 		 * Get the Parameters
@@ -137,7 +140,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	//BWA Mapping
     	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut,threads);
     	
-    	
+     	
     	/**
     	 * OUTPUT
     	 */
@@ -158,6 +161,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
+    	   	
     	
 		return new BufferedDataTable[]{outTable};
     }
@@ -342,15 +346,15 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	String lockFile = out2Name + SuccessfulRunChecker.LOCK_ENDING;
 		/** Execute **/
 		if (alnalgo.equals("BWA-MEM")) {
-			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec,new File(lockFile), memOut);
+			String stdErr = IO.replaceFileExtension(memOut,"stdErr");
+			
+			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec, null, new File(lockFile), memOut,stdErr, null, null, null);
 		} else {
 			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec,new File(lockFile));
 		}
 	}
 
-    
-    
-    
+        
     /**
      * {@inheritDoc}
      */
@@ -358,14 +362,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-//    	if(m_usePrefPage.getBooleanValue()) {
-//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("bwa");
-//	    	if(toolPath == null) {
-//	    		toolPath = "BWA binary not found!";
-//	    	}
-//	    	m_bwafile.setStringValue(toolPath);
-//    	}
-    	   	
+   	   	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
     	if(CC.getWarningStatus()){
@@ -458,6 +455,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 //    	m_alnalgo.validateSettings(settings);
 //    	m_ALN_THREADS.validateSettings(settings);
 //    }
+    
     
     /**
      * {@inheritDoc}

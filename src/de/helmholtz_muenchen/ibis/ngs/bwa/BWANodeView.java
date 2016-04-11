@@ -6,7 +6,6 @@ import org.knime.core.node.NodeView;
  * <code>NodeView</code> for the "BWA" Node.
  * 
  *
- * @author Jan
  */
 public class BWANodeView extends NodeView<BWANodeModel> {
 
@@ -17,7 +16,6 @@ public class BWANodeView extends NodeView<BWANodeModel> {
      */
     protected BWANodeView(final BWANodeModel nodeModel) {
         super(nodeModel);
-        // TODO: generated method stub
     }
 
     /**
@@ -25,7 +23,6 @@ public class BWANodeView extends NodeView<BWANodeModel> {
      */
     @Override
     protected void modelChanged() {
-        // TODO: generated method stub
     }
 
     /**
@@ -33,7 +30,6 @@ public class BWANodeView extends NodeView<BWANodeModel> {
      */
     @Override
     protected void onClose() {
-        // TODO: generated method stub
     }
 
     /**
@@ -41,7 +37,6 @@ public class BWANodeView extends NodeView<BWANodeModel> {
      */
     @Override
     protected void onOpen() {
-        // TODO: generated method stub
     }
 
 }

@@ -171,7 +171,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 					partsBam.add(bamFile);
 					String command = SET_PATH_SAMTOOLS.getStringValue()+ " view -b -S -T " + SET_GENOME.getStringValue() + " -o " + bamFile + " " + parFile;
 					String outFile = parFile + ".log";
-					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null);
+					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null,null);
 					pool.submit(task);
 					tasks.add(task);
 				}
@@ -211,7 +211,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
 					partsBamSorted.add(sortedBamFile);
 					String command = SET_PATH_SAMTOOLS.getStringValue() + " sort -m 10000000000 -o" + sortedBamFile + " " + bamFile;
 					String outFile = partsBam + ".log";
-					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null);
+					ExecuteThread task = new ExecuteThread(new String[] {command}, LOGGER, outFile, outFile, null, null, null, null,null);
 					pool.submit(task);
 					tasks.add(task);
 				}
