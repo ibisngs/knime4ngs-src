@@ -17,45 +17,13 @@
 			<br />
 			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
     	</intro>
-        
-        <tab name="Options">
-        	<option name="HTE">
-        		Set a threshold for repeated execution.
-        		Only used if HTE is enabled in the preference page.
-        	</option>
-        	<option name="Path to reference genome">
-        		Set the path to a reference genome.
-        	</option>
-            <option name="Path to GATK jar file">
-            	Set the path to a executable GATK. 
-            	This option is disabled if the path is already defined in the inport.
-        	</option>
-            <option name="Variants from dbSNP">
-            	Tick this option in order to annotate a variant with its ID from dbSNP and set the path to the dbSNP VCF file. 
-            	If the dbSNP file is already defined in the inport you don't have to set the path.
-        	</option>
-            <option name="Interval for variant calling">
-            	Tick this option in order to call variants in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
-        	</option>
-            <option name="Variants">
-            	This option enables you can choose whether to call only SNPs, only indels or both. 
-            	If you decide to call SNPs and indels you can choose whether the variants should be be written into the same or into separate VCF files.
-        	</option>
-            <option name="Number of threads">
-            	Set the number of threads to be used.<br />
-            	Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
-        	</option>
-        </tab>
         <tab name="UnifiedGenotyper">
-            <option name="Confidence threshold for calling">
-            	This threshold refers to the GATK variant quality score. 
-            	GATK will consider all variants with a score equal or above this threshold as high-confidence variants.
-        	</option>
-            <option name="Confidence threshold for emitting">
-            	This threshold refers to the GATK variant quality score. 
-            	GATK will output all variants with a score equal or above this threshold. 
-            	All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
+        	<option name="Phred-scale confidence threshold">
+            <b>Confidence threshold for calling</b>: This threshold refers to the GATK variant quality score. 
+            GATK will consider all variants with a score equal or above this threshold as high-confidence variants.<br />
+            <b>Confidence threshold for emitting</b>: This threshold refers to the GATK variant quality score. 
+             GATK will output all variants with a score equal or above this threshold. 
+            All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
         	</option>
             <option name="PCR error">
             	Estimate the expected probability of a PCR error. 
@@ -72,32 +40,29 @@
             	This value is a threshold for the maximum fraction of overall reads with a deletion at a locus. 
             	All loci below this threshold are examined for additional variants.
         	</option>
-            <option name="Minimum base quality score for calling">
-            	This is a threshold concerning the sequencing quality. 
-            	The tool does not call SNPs at positions with a lower score.
+            <option name="SNP calling"> 
+            Define the minimum base quality score for calling.
+            This is a threshold concerning the sequencing quality. 
+            The tool does not call SNPs at positions with a lower score.
         	</option>
-            <option name="Indel heterozygosity value">
-            	The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.
-        	</option>
-            <option name="Minimum count of indel reads">
-            	The option allows to set the minimum number of supporting reads for an indel. 
-            	Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.
-        	</option>
-            <option name="Minimum fraction of indel reads">
-            	This option is similar to the option <i> minimum count of indel reads </i>. 
-            	It is about the fraction of all supporting reads for variant that are required for considering the variant.
-        	</option>
-            <option name="Indel gap open penalty">
-            	The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
-            	It is used for calculating alignment scores.
-        	</option>
-            <option name="Indel gap continuation penalty">
-            	The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
-            	It is used for calculating alignment scores.
-        	</option>
-            <option name="BAQ mode">
-            	The BAQ mode determines how to calculate the per-base alignment quality (BAQ). 
-            	You can choose between RECALCULATE (which always calculates BAQ), CALCULATE_AS_NECESSARY (which calculates BAQ sometimes) and OFF (which does not calculate BAQ).
+        	<option name="Indel calling">
+            <b>Indel heterozygosity value</b>: The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.<br />
+            <b>Minimum count of indel reads</b>: The option allows to set the minimum number of supporting reads for an indel. 
+            Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.<br />
+            <b>Minimum fraction of indel reads</b>: This option is similar to the option <i> minimum count of indel reads </i>. 
+            	It is about the fraction of all supporting reads for variant that are required for considering the variant.<br />
+            <b> Indel gap open penalty</b>: The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
+            	It is used for calculating alignment scores.<br />
+            <b>Indel gap continuation penalty</b>: The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
+            	It is used for calculating alignment scores.<br />
+        	</option> 
+            <option name="Per-base alignment quality (BAQ)">
+            	The BAQ mode determines how to calculate the per-base alignment quality (BAQ).
+            	<ul>
+            	<li>Recalculate: Calculates BAQ always</li>
+            	<li>Calculate as necessary: Calculates BAQ only when it is necessary.</li>
+            	<li>Off: BAQ is not calculated. </li> 
+            	</ul>
         	</option>
             <option name="Malformed read filter">
             	When the length of the read does not match the length of the base quality score, GATK will report an error. 
@@ -106,7 +71,40 @@
         	<option name="Further options">
         		Commit further options to GATK.
         	</option>
+        	<option name="Variants from dbSNP">
+            	Tick this option in order to annotate a variant with its ID from dbSNP and set the path to the dbSNP VCF file. 
+            	If the dbSNP file is already defined in the inport you don't have to set the path.
+        	</option>
+        	<option name="Interval for variant calling">
+            	Tick this option in order to call variants in certain genomic regions. 
+            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+        	</option>
+        	<option name="Variants">
+            	This option enables you can choose whether to call only SNPs, only indels or both. 
+            	If you decide to call SNPs and indels you can choose whether the variants should be be written into the same or into separate VCF files.
+        	</option>
+            <option name="Number of threads">
+            	Set the number of threads to be used.<br />
+            	Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
+        	</option>
+        	<option name="Jave Memory">
+        		Set the Java Memory (GB) per thread.
+        	</option>
         </tab>
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to GATK jar file">
+        	Set the path to GenomeAnalysisTK.jar.
+        	This will be done automatically if the path is already defined in the preference page.  
+       		</option>
+       		<option name="Path to reference sequence">
+        	Set the path to the reference sequence.
+        	</option>
+        </tab>
+        
     </fullDescription>
     
     <ports>

@@ -23,12 +23,15 @@
         	Source: <a href="http://bio-bwa.sourceforge.net/bwa.shtml">http://bio-bwa.sourceforge.net/bwa.shtml</a>
 		</intro>
         
-        <option name="BWA">Set the path to BWA executable.</option>
-        <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome sequence, to map the reads (file type: FastA).</option>
-        <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using bwa). In this case the reference sequence 
+        <tab name="Options">
+           <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using bwa). In this case the reference sequence 
         		will not be indexed again.</option>
-        <option name="Algorithm for constructing BWT index">
+        	<option name="Algorithm for constructing BWT index">
         	<ul>
+        		<li>
+        		BWT-SW: Algorithm implemented in BWT-SW.
+        		This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually slower than IS.
+        		</li>
         		<li>
         		IS: IS linear-time algorithm for constructing suffix array.
         		It requires 5.37N memory where N is the size of the database.
@@ -36,12 +39,8 @@
         		IS is the default algorithm due to its simplicity.
         		The current codes for IS algorithm are reimplemented by Yuta Mori.
         		</li>
-        		<li>
-        		BWT-SW: Algorithm implemented in BWT-SW.
-        		This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually slower than IS.
-        		</li>
-        	</ul>
-        </option>
+        		</ul>
+        		 </option>
         <option name="Algorithm for mapping">See description above.</option>
         <option name="Build color-space index">Build a color-space index. The input fast should be in nucleotide space.</option>
         <option name="Specify read group header">
@@ -50,13 +49,19 @@
         	SM defines the name of the sample sequenced in a read group.
         	Read group header will not be added if BWA-SW is used.
         </option>
-        <option name="Type of reads/mapping">Choose between single-end and paired-end read mapping.</option>
         <option name="Number of threads">
         	BWA aln (sub-command of BWA-backtrack), BWA-SW and BWA-MEM can be run in multi-threading mode.
-        </option>
-        <!--<option name="Do not keep temporary files">If this option is checked all temporarily stored files, such as the index of the reference sequence or the SA
-        		coordinates, will be deleted as soon as possible during the run of BWA.</option>-->
-    
+        </option>	
+        </tab>
+        <tab name="Preference page">
+        	<option name="HTE">
+ 				Set threshold for repeated execution.
+ 				Only used if HTE is enabled in the preference page.
+ 			</option>
+        	<option name="Path to bwa">Set the path to BWA executable.</option>
+        	<option name="Path to reference sequence">Choose a reference sequence, such as a genome sequence, to map the reads (file type: FastA).</option>
+		</tab>       
+
     </fullDescription>
     
     <ports>

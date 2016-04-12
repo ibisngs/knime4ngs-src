@@ -9,10 +9,12 @@
     <fullDescription>
         <intro>The FilterLowExpressed node can be used to filter low expressed genes before differential expression analysis.<br /> 
         It takes as input a count table and an annotation file.</intro>
-        
+    <tab name="Options">
+    	<option name="Filtering Mode"> Specify whether to use the sum cut off of all samples or the minimum cut off per sample.</option>    
         <option name="Minimum read number">Set the minimum number of reads per sample. (default: 10)</option>
         <option name="Fraction of samples">Set the fraction of samples which must have the minimum read number. (default: 0.5)</option>
         <option name="Test for both conditions separately">Choose whether the conditions should be tested and be fulfilled in both cases separately. (default: true)</option>
+        </tab>
     </fullDescription>
     <ports>
         <inPort index="0" name="count table">Row names: IDs of features.

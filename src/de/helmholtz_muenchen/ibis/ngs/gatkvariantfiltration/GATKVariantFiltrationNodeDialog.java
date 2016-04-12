@@ -40,7 +40,8 @@ public class GATKVariantFiltrationNodeDialog extends GATKNodeDialog {
 		SettingsModelOptionalString FORMATFilterString = new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_FORMATFilterString, "",false);
 		SettingsModelOptionalString FORMATFilterName = new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_FORMATFilterName, "GATKVariantFiltration",false);
 		
-		createNewTab("VariantFiltration");
+		setDefaultTabTitle("VariantFiltration");	
+//createNewTab("VariantFiltration");
     	
     	createNewGroup("Filter INFO field (variants)");
     	

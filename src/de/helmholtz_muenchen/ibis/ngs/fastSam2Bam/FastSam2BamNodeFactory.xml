@@ -7,18 +7,35 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>The FastSam2Bam node converts efficiently SAM files into the compressed BAM format by using multiple threads in parallel and by creating an index file.</intro>
-        
-        
-        <option name="Path to samtool binaries">Set the path to the samtools installation.</option>
-        <option name="Path to picard tool binaries">Set the path to the picard tools installation.</option>
-        <option name="Path to output folder">Set the path to the output folder where the output files should be stored.</option>
-        <option name="Path to genome in fasta format">Set the path to the reference genome which was used for the alignment.</option>
-        <option name="Number of cores">Set the number of cores to be used.</option>
-        <option name="Number of reads per split">Set the number of reads per junk.</option>
-        <option name="Temp path">Set the path to the folder where the temp files should be stored (must be fast).</option>
-        <option name="Use RAM (/dev/shm/) as temp folder">Choose whether to uses /dev/shm, which is a memory device in some unix distributions, as temp folder.</option>
-        <option name="Delete SAM file after conversion">Choose whether to delete the SAM file after conversion. This is a dangerous option because if the conversion fails and is not correctly detected, the sam file will be lost!</option>
+     <intro>
+        The FastSam2Bam node converts efficiently SAM files into the compressed BAM format by using multiple threads in parallel and by creating an index file.
+      </intro>
+      <tab name="Options">
+        <option name="Path to output folder">
+        	Set the path to the output folder where the output files should be stored.
+        </option>
+        <option name="Further options">
+        	<b>Number of cores</b>: Set the number of cores to be used. <br />
+       		<b>Number of reads per split</b>: Set the number of reads per junk. <br />
+        	<b>Temp path</b>: Set the path to the folder where the temp files should be stored.
+        </option>
+        <option name="Delete SAM file after conversion">
+        	Choose whether to delete the SAM file after conversion.
+        	This is a dangerous option because if the conversion fails and is not correctly detected, the SAM file will be lost!
+        </option>
+     </tab>
+     <tab name="Preference page">
+  		<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        </option>
+       	<option name="Path to samtools">
+       		Set the path to the samtools installation.
+       	</option>
+        <option name="Path to reference sequence">
+        	Set the path to the reference reference sequence.
+        </option>
+     </tab> 
     </fullDescription>
     
     <ports>

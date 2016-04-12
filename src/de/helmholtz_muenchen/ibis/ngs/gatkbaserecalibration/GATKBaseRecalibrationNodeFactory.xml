@@ -37,26 +37,19 @@
             <option name="Interval for recalibration">
             	You can check this option to perform recalibration in certain genomic regions. 
             	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+            </option>	
+        	<option name="Analyze Covariates">
+    		Before/after plots of the base quality score can be generated.<br />
+        		<b>Optional flags</b>: Set additional command line flags for the AnalyzeCovariates walker.
         	</option>
-            <option name="Before/after plots">
-            	Tick this option to generate before/after plots of the base quality score.
-        	</option>
-        	<option name="Optional flags">
-        		Set additional command line flags for the AnalyzeCovariates walker.
-        	</option>
-        	<option name="Remove all...">
-            	By ticking this option you remove all additional information from the output BAM file except the read group tag. 
-            	The option reduces the output file size.
-        	</option>
-        	<option name="Optional flags">
-        		Set additional command line flags for the PrintReads walker.
-        	</option>
-            <option name="Number of CPU threads">
-            	Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
-            	The BaseRecalibrator and the PrintReads walker run in multi-threaded mode.
-        	</option>
-        	<option name="Shared Java Memory">
-        		Set the maximum Java heap size shared by all CPU threads.
+        	<option name="Print Reads">
+			Specify whether to remove all additional information from the output BAM file except of the read group tag. The option reduces the output file size.<br />
+        	<b>Optional flags</b>: Set additional command line flags for the PrintReads walker.
+			</option>
+			<option name="General options">
+            <b>Number of CPU threads</b>: Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
+            	The BaseRecalibrator and the PrintReads walker run in multi-threaded mode.<br />
+            <b>Shared Java Memory</b>: Set the maximum Java heap size shared by all CPU threads.<br />
         	</option>
         </tab>
         <tab name="BaseRecalibrator">
@@ -69,13 +62,15 @@
             	Gap open penalty for calculating BAQ (par-base alignment quality, probability that a base is not correctly aligned). 
             	For whole-genome data, it is recommended to use a value around 30 as gap open penalty.
         	</option>
+        	
+        	
             <option name="Calculation of covariates">
             	Select the covariates you want to analyse. 
             	Quality score covariate, read group covariate are always calculated. Context covariate and cycle covariate are optional but recommended covariates. 
             	Additionally, it is possible to examine repeat length covariate and repeat unit covariate.
         	</option>
-           
-            
+
+
             <option name="Default quality for insertions">
             	Set the default quality for the base insertion covariate model. 
             	To disable to the option, set this value to -1.
@@ -88,11 +83,11 @@
             	Set the default quality for the base mismatch covariate model. 
             	To disable to the option, set this value to -1.
         	</option>
-            <option name="k-mer Context size for indels">
+            <option name="k-mer context size for indels">
             	Set the context size around indels to calculate the context covariate. 
             	Increasing the context size requires more memory and runtime.
         	</option>
-            <option name="k-mer Context size for mismatches">
+            <option name="k-mer context size for mismatches">
             	Set the context size around base mismatches to calculate the context covariate. 
             	Increasing the context size requires more memory and runtime.
         	</option>
@@ -113,6 +108,7 @@
         	</option>
         	<option name="Path to GATK jar file">
         		Set the path to the GenomeAnalysisTK.jar.
+        		This will be done automatically if the path is already defined in the preference page. 
         	</option>
         	<option name="Path to reference genome">
         		Set the path to the reference genome.

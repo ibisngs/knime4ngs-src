@@ -10,10 +10,13 @@
         <intro>The FeatureCountsMerger can be used to merge the results of multiple feature count runs.<br />
         The node takes as input a list of feature count files and returns a table with the merged counts.
         </intro>
-        
-        <option name="Path to output file"> Set the path to the folder where the merged file should be stored.</option>
-        <option name="Remove the path of the file in the header"> Choose whether to only take the name of the file as header caption.</option>
-        <option name="Remove the ending of the file in the header"> Choose whether to remove the ending of the file in the header caption</option>
+        <tab name="Options">
+        <option name="Output"> Set the path to the folder where the merged file should be stored.</option>
+        <option name="Header format options">
+        <b>Remove the path of the file in the header</b>: Choose whether to only take the name of the file as header caption.<br />
+        <b>Remove the ending of the file in the header</b>: Choose whether to remove the ending of the file in the header caption.<br />
+        </option>
+        </tab>
     </fullDescription>
     
     <ports>

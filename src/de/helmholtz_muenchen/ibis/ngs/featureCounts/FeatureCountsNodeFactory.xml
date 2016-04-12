@@ -17,43 +17,33 @@
        	Liao et al, Bioinformatics 2013; doi: 10.1093/bioinformatics/btt656<br />
        <a href="http://bioinformatics.oxfordjournals.org/content/early/2013/11/30/bioinformatics.btt656.full.pdf">featureCounts: an efficient general purpose program for assigning sequence reads to genomic features</a></intro>
         
-        <tab name="General options">
-        	<option name="Path to featureCounts binary">
-        		Set the path to the compiled featureCounts binary.
-        		Theoretically all versions starting from <i>1.4.3</i> should be supported.
-        	</option>
-			<option name="Additional parameters">
-				Set parameters analogous to how you would normally use them on the command line for this binary.
-			</option>
-        </tab>
-        <tab name="FeatureCounts">
-        	<option name="Path to annotation file">
+        <tab name="Options">
+        	<option name="Input">
         		Set the path to the GTF or SAF annotation file.
         	</option>
-        	<option name="Path to output folder">
+        	<option name="Output">
         		Set the path to the folder where the output file should be stored.
         	</option>
-        	<option name="File type">
-        		Choose whether to use a GTF or a SAF annotation file.
-        	</option>
-        	<option name="Feature type used for counting">
-        		Choose which feature type should be used for counting in the case a GTF file is used.<br />
-        		(Default: 'exon')
-        	</option>
-        	<option name="Count multimapped reads">
-        		Choose whether also not uniquely mapped reads should be counted.
-        	</option>
-        	<option name="Perform read summarization at the feature level">
-        		If specified, read summarization will be performed at the feature level (eg. exon level).
-        		Otherwise, it is performed at meta-feature level (eg. gene level)
-        	</option>
-        	<option name="Feature type used for grouping results">
-        		Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.<br />
+        	<option name= "Further options">
+        	<b>File type</b>: Choose whether to use a GTF or a SAF annotation file.<br />
+        	<b>Feature type used for counting</b>: Choose which feature type should be used for counting in the case a GTF file is used.<br />
+        		(Default: 'exon') <br />
+        	<b>Count multimapped reads</b>: Choose whether also not uniquely mapped reads should be counted. <br />
+        	<b>Thread number</b>: Set the number of threads to be used. [1-16] <br />
+        	<b>Perform read summarization at the feature level</b>: If specified, read summarization will be performed at the feature level (eg. exon level).
+        		Otherwise, it is performed at meta-feature level (eg. gene level) <br />
+        	<b>Feature type used for grouping results</b>: Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.<br />
         		(Default: 'gene_id'; This attribute type is usually the gene identifier.)<br />
-        		This argument is useful for the meta-feature level summarization.
+        		This argument is useful for the meta-feature level summarization.<br />
         	</option>
-        	<option name="Thread number">
-        		Set the number of threads to be used. [1-16]
+        	</tab>
+        	<tab name="Preference page">
+        	<option name="HTE"> Set a threshold for repeated execution.
+        	Only used if HTE is enabled in the preference page.
+        	</option>
+			<option name="Path to featureCounts">
+        		Set the path to the compiled featureCounts binary.
+        		Theoretically all versions starting from <i>1.4.3</i> should be supported.
         	</option>
         </tab>
     </fullDescription>

@@ -19,7 +19,7 @@
         </intro>
         
         
-        <tab name="Options">
+        <tab name="Preference page">
         	<option name="HTE">
         		Set a threshold for repeated execution.
         		Only used if HTE is enabled in the preference page.

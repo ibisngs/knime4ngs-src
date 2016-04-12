@@ -8,13 +8,13 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>Node for access to  several SAMtools utilities. The node can be used alone or by connecting a BAMLoader node to the inport.
-        Descriptions are taken from the
+        <intro>The SamTools node enables the access to  several SAMtools utilities. The node can be used alone or by connecting a BAMLoader node to the inport.<br />
+        For more information, see the
 		       SAMtools help pages and <a href="http://samtools.sourceforge.net/samtools.shtml">http://samtools.sourceforge.net/samtools.shtml</a></intro>
         
         
         <option name="Select utility">Choose which of the SAMtools utilities you want to use:
-        <ul><li>cat:Concatenate BAMs. The sequence dictionary of each input BAM must be identical, although this command does not check this. </li>
+        <ul><li>cat: Concatenate BAMs. The sequence dictionary of each input BAM must be identical, although this command does not check this. </li>
         <li>faidx: Index reference sequence in the FASTA format</li>
         <li>fillmd: Generate the MD tag</li>
         <li>fixmate: Fill in mate coordinates, ISIZE and mate related flags from a name-sorted alignment. </li>
@@ -27,13 +27,20 @@
 			mapping quality. In the paired-end mode, this command ONLY works with FR orientation and requires ISIZE is correctly set. It does not work for unpaired reads</li>
         	 </ul>
          </option>
-        <option name="SamTools">Path to the SAMtools executable (only if no inport is available)</option>
-        <option name="Input (sorted) BAM file">Path to (sorted) input BAM file (only if no inport is available)</option>
-        <option name="Reference sequence fasta file">Path to the reference sequence as fasta file (only if no inport is available)</option>
-        <option name="############### cat ###############"></option>
-        <option name="Header SAM file">Give a SAM file of which to use the header</option>
-        <option name="Second input BAM file">Second BAM file to concatenate (first file comes from inport)</option>
-        <option name="############### fillmd ###############"></option>  
+         <option name="Input (sorted) BAM file"> Set the path to the (sorted) input BAM file (only if no inport is available)</option>
+        <tab name="cat">
+        <option name="Header SAM file"> Set the path to a SAM file whose header should be used </option>
+        <option name="Second input BAM file"> Set the path to a second BAM file to be concatenated (first file comes from inport)</option>
+        </tab>
+        <tab name="Preference page">
+        <option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page. </option>
+        <option name="Path to samtools"> Set the path to the SAMtools executable (only if no inport is available)</option>
+        <option name="Path to reference sequence">Set the path to the reference sequence (only if no inport is available)</option>
+ 		</tab>
+        
+        
+       
+       <!-- <option name="############### fillmd ###############"></option>  
         <option name="Change identical bases to '='">Convert a read base to = if it is identical to the aligned reference base.</option>  
         <option name="Output as BAM file">Specify as outputfile should be written as (un)compressed BAM file</option> 
         <option name="Modify quality string">When used jointly with the following option, this option overwrites the original base quality.</option>
@@ -66,7 +73,7 @@
         
         <option name="############### rmdup ###############"></option>
         <option name="remove duplicate for single-end reads">Remove duplicate for single-end reads. By default, the command works for paired-end reads only. </option>
-        <option name="treat paired-end reads as single-end reads"></option>
+        <option name="treat paired-end reads as single-end reads"></option> -->
                 
         
     </fullDescription>

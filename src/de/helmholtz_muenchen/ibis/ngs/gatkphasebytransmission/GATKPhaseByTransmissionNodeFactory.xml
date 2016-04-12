@@ -18,25 +18,6 @@
         	For further information, see the GATK online documentation of the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_phasing_PhaseByTransmission.php">PhaseByTransmission</a> walker.
         </intro>
         
-        <tab name="Options">
-        	<option name="HTE">
-        		Set a threshold for repeated execution.
-        		Only used if HTE is enabled in the preference page.
-        	</option>
-        	<option name="Path to GATK jar file">
-        		Set the path to GenomeAnalysisTK.jar and memory usage.
-        	</option>
-        	<option name="Reference Genome">
-        		Set the path to a reference genome.
-        	</option>
-        	<option name="Path to BED file">
-        		Coverage analysis can be restricted to genomic regions defined in a BED file.
-        	</option>
-        	<option name="Further options">
-        		Commit further options to GATK.
-        	</option>
-        </tab>
-        
         <tab name="PhaseByTransmission">
         	<option name="PED File">
         		PED file defining trios and parent/child paires.
@@ -45,6 +26,33 @@
         		Prior for de novo mutations
         	</option>
 		</tab>
+        <tab name= "GATK">
+        <option name="GATK Memory">
+        The GATK memory usage can be defined.
+        </option>
+        <option name="Path to BED file">
+        Coverage analysis can be restricted to genomic regions defined in a BED file.
+        </option>
+        <option name="Further options">
+        Commit further options to GATK.
+        </option>
+        </tab>
+         <tab name="Preference page">
+        <option name="HTE">
+        	Set a threshold for repeated execution.
+        	Only used if HTE is enabled in the preference page.
+        </option>
+        <option name="Path to reference sequence">
+        	Set the path to the reference reference sequence.
+        </option>	
+        <option name="Path to GATK jar file">
+        	Set the path to GenomeAnalysisTK.jar.
+        	This will be done automatically if the path is already defined in the preference page.  
+       	</option>
+       	</tab>
+
+        
+        
     </fullDescription>
     
     <ports>

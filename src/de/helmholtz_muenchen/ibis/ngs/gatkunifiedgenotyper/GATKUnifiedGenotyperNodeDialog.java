@@ -122,8 +122,8 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
     addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
     
 //    private void UGOptions() {
-    	
-        createNewTab("UnifiedGenotyper");
+    	setDefaultTabTitle("UnifiedGenotyper");
+//        createNewTab("UnifiedGenotyper");
         createNewGroup("Phred-scaled confidence threshold");
         addDialogComponent(new DialogComponentNumber(call_min_confidence, "Confidence threshold for calling", 1, 5));
         addDialogComponent(new DialogComponentNumber(emit_min_confidence, "Confidence threshold for emitting", 1, 5));

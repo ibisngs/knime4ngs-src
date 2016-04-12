@@ -14,18 +14,16 @@
 	</intro>
 	
     <tab name="Options">
-        <option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page.
-        </option>
-        <option name="Filter settings file">
+    <option name="Filter settings file">
         Choose whether to use filter settings calculated by FASTQC (in-port) or to specify your own filter settings file.
         If you decide to use your own filter settings, you have to set the path to the filter settings file.
-        </option>
-        <option name="Barcode file"> 
+    </option>
+    <option name="Barcode file"> 
         Choose whether to split and trim reads by barcode. The barcodes must be specified in a BARCODE file<br />
     	Barcodes should have the following format:<br />
     	ID BARCODE(line End)<br />
     	'#' marks a commentline
-    	</option>
+    </option>
     </tab>
     <tab name="Parameters">   
         <option name="Remove Adapters"> This option enables you to remove adapters from reads (start and end only). Specify adapters in a
@@ -56,12 +54,17 @@
 		In case of Illumina data: Specify the quality encoding, if known. If its set to 'auto', the node will make an educated guess.<br />
 		Define whether the quality encoding should be converted to phred-based qualities.
 		</option>
-		<option name="Thread number"> Set the number of threads be used
+		<option name="Thread number"> Set the number of threads be used.
 		</option>
 		<option name="Optional output folder for RRM"> Choose whether the output files should be stored in a separate output folder.
 		In this case set the path to the folder.
 		</option>
 	</tab>
+	<tab name="Preference page">
+        <option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page.
+        </option>
+    </tab>
+   
     </fullDescription>
     
     <ports>

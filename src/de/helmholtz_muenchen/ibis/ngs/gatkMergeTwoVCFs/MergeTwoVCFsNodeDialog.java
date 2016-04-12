@@ -39,7 +39,8 @@ public class MergeTwoVCFsNodeDialog extends GATKNodeDialog {
 		OUTFOLDER = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_OUTFOLDER, "");
 		FILTEREDRECORDSMERGETYPE = new SettingsModelString(MergeTwoVCFsNodeModel.CFGKEY_FILTEREDRECORDSMERGETYPE, "");
 		
-		createNewTab("CombineVariants");
+		setDefaultTabTitle("CombineVariants");
+//createNewTab("CombineVariants");
 		createNewGroup("GenotypeMergeType");
         addDialogComponent(new DialogComponentStringSelection(GENOTYPEMERGEOPTION, "Genotype Merge Strategy","UNIQUIFY","PRIORITIZE","UNSORTED","REQUIRE_UNIQUE"));
         addDialogComponent(new DialogComponentString(INPUT1, "Input VCF file 1"));

@@ -10,9 +10,9 @@
         <intro>The FeatureCountsStatisticMerger can be used to merge the statistics of multiple featureCounts runs into one file in order to post-process that data.</intro>
         
         
-        <option name="Path to folder with featureCounts Outputs">The node searches recursively all folders and sub-folders of the input directory for output files of a featureCounts run.</option>
-        <option name="Path to output folder">Set the path to the output folder, where the output files should be stored. The output files will be named after the selected modules.</option>
-		<option name="Modules to merge">Select by which modules the data should be merged. At least one module must be selected.</option>
+        <option name="Input">The node searches recursively all folders and sub-folders of the input directory for output files of a featureCounts run.</option>
+        <option name="Output">Set the path to the output folder, where the output files should be stored. The output files will be named after the selected modules.</option>
+		<option name="Modules to merge"> Decide whether statistical modules should be used for merging the data. </option>
        
     </fullDescription>
     

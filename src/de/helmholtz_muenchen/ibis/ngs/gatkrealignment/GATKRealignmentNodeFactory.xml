@@ -116,6 +116,7 @@
         	</option>
         	<option name="Path to GATK jar file">
         		Set the path to the GenomeAnalysisTK.jar.
+        		This will be done automatically if the path is already defined in the preference page.
         	</option>
         	<option name="Path to reference genome">
         		Set the path to the reference genome.
