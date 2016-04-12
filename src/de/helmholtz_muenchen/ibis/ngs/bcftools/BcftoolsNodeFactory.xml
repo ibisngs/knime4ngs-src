@@ -61,4 +61,9 @@
             <inPort index="0" name="In-Port">Cell 0..n: Path to Input file(s)</inPort>
         	<outPort index="0" name="Out-Port">Cell 0: Path to Output file</outPort>
     </ports>    
+    
+            <views>
+       <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+    </views>
+    
 </knimeNode>

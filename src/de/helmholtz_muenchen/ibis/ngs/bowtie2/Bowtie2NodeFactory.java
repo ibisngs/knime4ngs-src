@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "Bowtie2" Node.
  * 
@@ -35,7 +37,7 @@ public class Bowtie2NodeFactory
     @Override
     public NodeView<Bowtie2NodeModel> createNodeView(final int viewIndex,
             final Bowtie2NodeModel nodeModel) {
-        return new Bowtie2NodeView(nodeModel);
+        return new HTENodeView<Bowtie2NodeModel>(nodeModel);
     }
 
     /**
