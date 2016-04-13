@@ -134,7 +134,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	}	
 
     	//Prepare Index
-    	bwa_index(exec,path2bwa, path2refFile, path2readFile2);
+    	bwa_index(exec,path2bwa, path2refFile);
 
     	//BWA aln
     	if(!m_alnalgo.getStringValue().equals("BWA-MEM")){
@@ -187,7 +187,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
      * @param path2readFile
      * @throws Exception 
      */
-    private void bwa_index(ExecutionContext exec,String path2bwa, String path2refFile, String path2readFile) throws Exception{
+    private void bwa_index(ExecutionContext exec,String path2bwa, String path2refFile) throws Exception{
     	/**Only execute if Index needs to be created**/
     	if(m_checkIndexRefSeq.getBooleanValue()) {
     		
