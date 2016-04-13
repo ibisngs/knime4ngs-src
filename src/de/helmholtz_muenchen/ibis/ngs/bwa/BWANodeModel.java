@@ -102,7 +102,12 @@ public class BWANodeModel extends HTExecutorNodeModel {
 		 */
     	String path2refFile 	= m_refseqfile.getStringValue();
     	String path2readFile 	= inData[0].iterator().next().getCell(0).toString();
-    	String path2readFile2 	= inData[0].iterator().next().getCell(1).toString();	
+    	String path2readFile2 	= "";
+ 
+    	if(readType.equals("paired-end")){
+    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();	
+    	}
+ 
     	String basePath 		= path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
     	String outBaseName1 	= path2readFile.substring(path2readFile.lastIndexOf("/")+1,path2readFile.lastIndexOf("."));
     	String outBaseName 		= outBaseName1;
