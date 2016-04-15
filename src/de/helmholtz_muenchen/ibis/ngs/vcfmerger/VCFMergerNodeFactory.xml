@@ -42,6 +42,7 @@
         		Selected VCF files are listed in the box and will to be merged. This option allows you to remove undesired files.
         	</option>
         	<option name="Genotype Merge Type"> Determine how genotype records for samples shared across the ROD file should be merged.
+        		<ul>
         		<li>
         		Uniquify:
     			Make all sample genotypes unique by file.
@@ -59,6 +60,7 @@
 				Require unique:
     			Require that all samples/genotypes be unique between all inputs.
     			</li>
+    			</ul>
     		</option>
     		<option name="Output">
         		Set the path to a folder were the merged VCF file should be stored.

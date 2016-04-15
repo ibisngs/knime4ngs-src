@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "GATKBaseRecalibration" Node.
  * 
@@ -35,7 +37,7 @@ public class GATKBaseRecalibrationNodeFactory
     @Override
     public NodeView<GATKBaseRecalibrationNodeModel> createNodeView(final int viewIndex,
             final GATKBaseRecalibrationNodeModel nodeModel) {
-        return new GATKBaseRecalibrationNodeView(nodeModel);
+        return new HTENodeView<GATKBaseRecalibrationNodeModel>(nodeModel);
     }
 
     /**

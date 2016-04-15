@@ -101,6 +101,12 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
     	    	}
     		}
 		}
+    	
+    	for(SettingsModelString sm: model2pref.keySet()) {
+    		if(sm.getStringValue().equals("")) {
+    			sm.setStringValue("Path is required!");
+    		}
+    	}
     }
     
     public void addPrefPageSetting(SettingsModelString sms, String v) {

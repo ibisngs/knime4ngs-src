@@ -104,12 +104,12 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 					stdErr, StdInFile,HTEOUT);
 			err_msg = stdErr.toString();
 			
-			for(String c: command) {
-				if(c.contains(IBISKNIMENodesPlugin.GATK)) {
-					err_msg = parseGATKError(err_msg);
-					break;
-				}
-			}
+//			for(String c: command) {
+//				if(c.contains(IBISKNIMENodesPlugin.GATK)) {
+//					err_msg = parseGATKError(err_msg);
+//					break;
+//				}
+//			}
 			
 			err_msg = err_msg.trim();
 
@@ -156,16 +156,16 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		}
 	}
 	
-	private String parseGATKError(String err) {
-		String result = "";
-		
-		for(String line: err.split(System.getProperty("line.separator"))) {
-			if(line.contains("ERROR MESSAGE")) {
-				result += line + System.getProperty("line.separator");
-			}
-		}
-		return result;
-	}
+//	private String parseGATKError(String err) {
+//		String result = "";
+//		
+//		for(String line: err.split(System.getProperty("line.separator"))) {
+//			if(line.contains("ERROR MESSAGE")) {
+//				result += line + System.getProperty("line.separator");
+//			}
+//		}
+//		return result;
+//	}
 
 	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile) throws Exception {
 		this.executeCommand(command, exec, null, lockFile, null, null, null, null, null);

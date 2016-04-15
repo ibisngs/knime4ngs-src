@@ -15,6 +15,7 @@
         <option name="Path to output folder"> Set the path to the folder where the output files should be stored. The files will be named after the selected modules.
         </option>
 		<option name="Modules to merge"> Select by which modules the data should be merged. At least one module must be selected.
+		<ul>
 		<li>Basic Statistics</li>
 		<li>Per base sequence quality</li>
 		<li>Per sequence quality score</li>
@@ -28,6 +29,7 @@
 		<li>Filter-Options Collector</li>
 		<li>Merge Status of all Modules - merges the status of all modules (pass, warn or fail are possible FastQC status values)</li>
 		<li>Merge ALL Modules - selects or de-selects all modules</li>
+		</ul>
 		</option>
        
     </fullDescription>

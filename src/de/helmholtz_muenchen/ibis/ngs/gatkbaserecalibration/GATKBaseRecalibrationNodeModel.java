@@ -263,8 +263,8 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		String index_file = IO.replaceFileExtension(inputfile, "bai");
 
 		// check bam file index
-		if (!Files.exists(Paths.get(index_file))) {
-			throw new InvalidSettingsException("Missing BAM file index: " + index_file + "!");
+		if (Files.notExists(Paths.get(index_file)) && Files.notExists(Paths.get(inputfile+".bai"))) {
+			throw new InvalidSettingsException("Missing BAM file index for "+inputfile);
 		}
        
 //        boolean [] covariates ={true, true, true, true, false, false};

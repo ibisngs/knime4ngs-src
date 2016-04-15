@@ -13,55 +13,60 @@
         Source: <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html/">https://bioconductor.org/packages/release/bioc/html/edgeR.html</a> 
         </intro>
         
-        <option name="Method for calculation of normalization factors"> Choose which normalization method should be used for calculating normalization factors to scale the raw library size.
+        <option name="Method for calculation of normalization factors">
+        Choose which normalization method should be used for calculating normalization factors to scale the raw library size.
         <br />
         There are four different normalization methods that can be used:
         	<ul>
-        	<li>
-        	<b>RLE</b> - is the scaling factor method proposed by Anders and Huber (2010). It is called 'relative log expression', as median library is calculated from the geometric mean of all columns and the median ratio of each sample to the median library is taken as the scale factor. 
-        	</li>
-        	<li>
-        	<b>TMM</b> - is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta methods on Binomial data.
-        	The library whose upper quartile is closest to the mean upper quartile is used.
-   			</li>
-   			<li>
-   			<b>upperquartile</b> - is the upper-quartile normalization method of Bullard et al (2010), in which the scale factors are calculated from the 75% quantile of the counts for each library, after removing genes which are zero in all libraries.
-   			This idea is generalized here to allow scaling by any quantile of the distribution.
-   			</li>
-   			<li>
-   			<b>none</b> - then the normalization factors are set to 1.
-   			</li>       
+        		<li>
+        			<b>RLE</b> - is the scaling factor method proposed by Anders and Huber (2010). It is called 'relative log expression', as median library is calculated from the geometric mean of all columns and the median ratio of each sample to the median library is taken as the scale factor. 
+        		</li>
+        		<li>
+        			<b>TMM</b> - is the weighted trimmed mean of M-values (to the reference) proposed by Robinson and Oshlack (2010), where the weights are from the delta methods on Binomial data.
+        			The library whose upper quartile is closest to the mean upper quartile is used.
+   				</li>
+   				<li>
+   					<b>upperquartile</b> - is the upper-quartile normalization method of Bullard et al (2010), in which the scale factors are calculated from the 75% quantile of the counts for each library, after removing genes which are zero in all libraries.
+   					This idea is generalized here to allow scaling by any quantile of the distribution.
+   				</li>
+   				<li>
+   					<b>none</b> - then the normalization factors are set to 1.
+   				</li>       
  			</ul>       
         	(default: TMM)
-        	</option>
+        </option>
         <option name="P value correction method"> Choose which correction method should be used for adjusting p values for multiple comparisons. 
 	       	<ul>
-	       	<li>
-	       	<b>bonferroni</b> - in the Bonferroni correction the p values are multiplied by the number of comparisons. This is a more conservative correction compared to the other adjustment methods.
-	       	</li>
-	       	<li>
-	       	<b>holm</b> - Holm (1979)
-	       	</li>
-	       	<li>
-	       	<b>hochberg</b> - Hochberg (1988)
-	       	</li>
-	       	<li>
-	       	<b>hommel</b> - Hommel (1988)
-	       	</li>
+	       		<li>
+	       			<b>bonferroni</b> - in the Bonferroni correction the p values are multiplied by the number of comparisons. This is a more conservative correction compared to the other adjustment methods.
+	       		</li>
+	       		<li>
+	       			<b>holm</b> - Holm (1979)
+	       		</li>
+	       		<li>
+	       			<b>hochberg</b> - Hochberg (1988)
+	       		</li>
+	       		<li>
+	       			<b>hommel</b> - Hommel (1988)
+	       		</li>
+	       	</ul>
 	       	The Hochberg's and Hommel's methods are valid when the hypothesis tests are independent or when they are non-negative associated (Sarkar, 1998; Sarkar and Chang, 1997).
 	       	Hommel's method is more powerful than Hochberg's, but the difference is usually small and the Hochberg p values are faster to compute.
 	       	<br />
 	       	The Bonferroni's, Holm's, Hochberg's and Hommel's methods are designed to give strong control of the family-wise error rate. There seems no reason to use the unmodified correction because it is dominated by Holm's method, which is also valid under arbitrary assumptions. 
-	       	<li>
-	       	<b>BH</b> - Benjamini and Hochberg (1995)
-	       	</li>
-	       	<li>
-	       	<b>BY</b> - Benjamini and Yekutieli (2001)
-	       	</li>
+	       	<ul>
+	       		<li>
+	       			<b>BH</b> - Benjamini and Hochberg (1995)
+	       		</li>
+	       		<li>
+	       			<b>BY</b> - Benjamini and Yekutieli (2001)
+	       		</li>
+	       	</ul>
 	       	The 'BH'(aka 'fdr') and 'BY' method control the false discovery rate, the expected proportion of false discoveries amongst the rejected hypotheses. The false discovery rate is a less stringent condition than the family-wise error rate, so these methods are more powerful than the others.
-        	<li>
-        	<b>none</b> - a pass-through option 
-        	</li>
+        	<ul>
+        		<li>
+        			<b>none</b> - a pass-through option 
+        		</li>
         	</ul>
         	(default: BH)
         </option>

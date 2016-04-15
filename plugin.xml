@@ -6,6 +6,7 @@
    		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory"/>
    	
    		<!--Preprocessing-->
+   		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory"/>
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqc.FastQCNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeFactory"/>
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqcStatisticMerger.FastqcStatisticMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqcStatisticMerger.FastqcStatisticMergerNodeFactory"/>
@@ -37,6 +38,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.pindel.PindelNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory"/>
 		<!--Samtools-->
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.samtools.SamToolsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.samtools.SamToolsNodeFactory"/>
@@ -87,14 +89,12 @@
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper.GATKUnifiedGenotyperNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeFactory"/>	
+		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post/gatk" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory"/>
 		<!--CaseControlAnalysis-->
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
 		
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkCombineVCFs.CombineVCFsNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.gatkMergeTwoVCFs.MergeTwoVCFsNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory"/>
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">

@@ -15,6 +15,7 @@
         
         <tab name="Options">
         <option name="GenotypeMergeType">
+        	<ul>
         		<li>
         		Uniquify:
     			Make all sample genotypes unique by file.
@@ -28,10 +29,11 @@
 				Require unique:
     			Require that all samples/genotypes be unique between all inputs.
     			</li>
-			</option>
-			<option name="Folder for output files">
-        		Set the path to the folder where the combined gvcf files should be stored.
-        	</option> 
+    		</ul>
+		</option>
+		<option name="Folder for output files">
+        	Set the path to the folder where the combined gvcf files should be stored.
+        </option> 
         </tab>
         <tab name="GATK">
         <option name="GATK Memory">

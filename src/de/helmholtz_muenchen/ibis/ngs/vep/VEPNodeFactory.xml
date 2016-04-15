@@ -53,6 +53,7 @@
             	If "Overwrite" is checked, existing files will be overwritten.
             </option>
             <option name="Further options"> <br />
+            <ul>
             <li>
             Use cache: It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
             	The cache is usually build during the installation of the Ensembl API. 
@@ -73,6 +74,7 @@
             	This set has fragmented or problematic transcripts removed.
             	Alternatively, you can choose the <b>RefSeq</b> transcript set.
             </li>
+            </ul>
             </option>
 		</tab>
 		

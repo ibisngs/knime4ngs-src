@@ -134,4 +134,7 @@
         	Cell 0: Path to recalibrated BAM file.
     	</outPort>
     </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+    </views>
 </knimeNode>
