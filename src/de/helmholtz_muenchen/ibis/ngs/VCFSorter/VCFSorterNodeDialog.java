@@ -25,10 +25,13 @@ public class VCFSorterNodeDialog extends HTExecutorNodeDialog {
 	
 	
     protected VCFSorterNodeDialog() {}
+   
     
     public void addToolDialogComponents() {
     	final SettingsModelString refseq = new SettingsModelString(VCFSorterNodeModel.CFGKEY_REFSEQFILE,"");
 
+    	setDefaultTabTitle("Preference page");
+    	
     	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
     	
 //    	createNewGroup("Reference sequence: FastA file (e.g. genome)");

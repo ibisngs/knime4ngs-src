@@ -13,6 +13,20 @@
         </intro>
         
         <tab name="Options">
+        	<option name="Select variants">
+        		This option enables to select SO terms.
+        		Variants that match at least one of the default terms are generally considered as Loss-of-Function variants. 
+        	</option>
+        	<option name="Filter">
+        		Further filters can be specified. E.g.to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 (LoF is HC,ExAC_AF>0.05).
+        		(This requires the usage of the VEP plugins LOFTEE and ExAC).<br />
+        		For more information, see <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
+        	</option>
+        	<option name="Folder for output files">
+        	Set the path to the folder where the combined gvcf files should be stored.
+        	</option>
+        </tab>		
+        <tab name="Preference page">
         	<option name="HTE">
         		Set a threshold for repeated execution.
         		Only used if HTE is enabled in the preference page.
@@ -21,18 +35,9 @@
         		This script is used to filter VEP annotations.
         		It can be found in the VEP installation in ensembl-tools-release../scripts/variant_effect_predictor.
        	 	</option>
-			<option name="Select variants">
-        		This option enables to select SO terms.
-        		Variants that match at least one of the default terms are generally considered as Loss-of-Function variants. 
-        	</option>
-        	<option name="Filter Conditions">
-        		Further filters can be specified. E.g.to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 (LoF is HC,ExAC_AF>0.05).
-        		(This requires the usage of the VEP plugins LOFTEE and ExAC).<br />
-        		For more information, see <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
-        	</option>
-        	<option name="Overwrite, if output files exist">
-        	</option>
-        </tab>
+       	 </tab>	
+			
+
     </fullDescription>
     
     <ports>

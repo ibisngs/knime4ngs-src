@@ -7,60 +7,32 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>
-        	Analogous to the CombineGVCFs the CombineVCFs can be used for hierarchical merging of individual VCF lists of different samples.
-        	The resulting VCF file can then be further processed by filtering nodes.<br />
-        	For further information, see: <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineGVCFs.php">GATK documentation of CombineGVCFs</a>
-       	 </intro>
+    <intro>
+       Analogous to the CombineGVCFs the CombineVCFs can be used for hierarchical merging of individual VCF lists of different samples.
+       The resulting VCF file can then be further processed by filtering nodes.<br />
+       For further information, see: <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineGVCFs.php">GATK documentation of CombineGVCFs</a>
+    </intro>
         
-        <tab name="Options">
-        <option name="GenotypeMergeType">
-        	<ul>
-        		<li>
-        		Uniquify:
-    			Make all sample genotypes unique by file.
-    			Each sample shared across RODs gets named sample.ROD.
-    			</li>
-    			<li>
-				Unsorted:
-    			Take the genotypes in any order.
-    			</li>
-				<li>
-				Require unique:
-    			Require that all samples/genotypes be unique between all inputs.
-    			</li>
-    		</ul>
-		</option>
-		<option name="Folder for output files">
-        	Set the path to the folder where the combined gvcf files should be stored.
-        </option> 
-        </tab>
-        <tab name="GATK">
-        <option name="GATK Memory">
-        The GATK memory usage can be defined.
-        </option>
-        <option name="Path to BED file">
-        	Coverage analysis can be restricted to genomic regions defined in a BED file.
-        </option>
-        <option name="Further options">
-        	Commit further options to GATK.
-        </option>
-        </tab>
-        <tab name="Preference page">
-        <option name="HTE">
-        	Set a threshold for repeated execution.
-        	Only used if HTE is enabled in the preference page.
-        </option>
-        <option name="Path to reference sequence">
-        	Set the path to the reference reference sequence.
-        </option>	
-        <option name="Path to GATK jar file">
-        	Set the path to GenomeAnalysisTK.jar.
-        	This will be done automatically if the path is already defined in the preference page.  
-       	</option>
-       	</tab>	
+    <tab name="Options">
+    <option name="GenotypeMergeType">
+    <ul><li> Uniquify:Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
+    	<li> Unsorted: Take the genotypes in any order.</li>
+		<li> Require unique: Require that all samples/genotypes be unique between all inputs.</li></ul>
+	</option>
+	<option name="Folder for output files"> Set the path to the folder where the combined gvcf files should be stored.</option> 
+    </tab>
+    <tab name="GATK">
+    <option name="GATK Memory"> The GATK memory usage can be defined.</option>
+    <option name="Path to BED file"> Coverage analysis can be restricted to genomic regions defined in a BED file.</option>
+    <option name="Further options"> Commit further options to GATK.</option>
+    </tab>
+    <tab name="Preference page">
+    <option name="HTE"> Set a threshold for repeated execution. Only used if HTE is enabled in the preference page.</option>
+    <option name="Path to reference sequence"> Set the path to the reference reference sequence.</option> 
+    <option name="Path to GATK jar file"> Set the path to GenomeAnalysisTK.jar. This will be done automatically if the path is already defined in the preference page.</option>
+    </tab>	
 
-    </fullDescription>
+	</fullDescription>
     
     <ports>
         <inPort index="0" name="VCF Inport">VCF files in the first column</inPort>

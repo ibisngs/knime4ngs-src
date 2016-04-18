@@ -22,40 +22,30 @@
         </intro>
         
         <tab name="Options">
-        	<option name="Recalibration Mode">
-        		Recalibration mode to employ, SNPs or Indels.
+        	<option name="General Options">
+        	<b>Recalibration Mode</b>: Specify which recalibration mode (SNP/indel) should be employed. <br />
+			<b>Java Memory in GB</b>: Set the maximum Java heap size per thread.
         	</option>
-        	<option name="Java Memory in GB">
-        		Set the maximum Java heap size per thread.
-        	</option>
-        	<option name="Tranche levels ">
-        		The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
-        		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).
-        	</option>
-        	<option name="Annotation">
-        		The names of the annotations which should be used for calculations.
-        		<b>DP</b> (Depth of Coverage) should not be used when working with exome datasets.
-        		The <b>InbreedingCoeff</b> is a population level statistic that requires at least 10 samples in order to be computed.
-        		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the annotation field. 
-        	</option>
-        	<option name="Gaussians">
-        		This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm.  
-        	</option>
-        	<option name="Threads">
-        		Set the number of threads for the execution of the VariantRecalibrator.
-        	</option>
-        	<option name="Optional flags">
-        		Set individual command line flags for the VariantRecalibrator.
+        	<option name="Variant Recalibration">
+        	<b>Tranche levels</b>: The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
+        		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).<br />
+        	<b>Annotation</b>: The names of the annotations which should be used for calculations.
+        	<ul> <li>
+        	DP (Depth of Coverage) - should not be used when working with exome datasets.</li>
+        	<li>InbreedingCoeff - is a population level statistic that requires at least 10 samples in order to be computed.
+        		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the annotation field.</li> 
+        	</ul>
+        	<b>Gaussians</b>: This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm. <br />
+        	<b>Threads</b>: Set the number of threads for the execution of the VariantRecalibrator. <br />
+        	<b>Optional flags</b>: Set individual command line flags for the VariantRecalibrator.
         	</option>
         	<option name="Resources">
         		A list of sites for which to apply a prior probability of being correct but which aren't used by the algorithm (training and truth sets are required to run).
         		Example: dbsnp,known=true,training=false,truth=false,prior=6.0
         	</option>
         	<option name="ApplyRecalibration">
-        		Set the truth sensitivity level at which ApplyRecalibration starts to filter.
-        	</option>
-        	<option name="Optional flags">
-        		Set additional command line flags for the ApplyRecalibration.
+        	<b>TS Filter Level</b>: Set the truth sensitivity level at which ApplyRecalibration starts to filter. <br />
+        	<b>Optional flags</b>: Set additional command line flags for the ApplyRecalibration.
         	</option>
         </tab>
         
@@ -65,13 +55,20 @@
         		Only used if HTE is enabled in the preference page.
         	</option>
         	<option name="Path to GATK jar file">
-        		Set the path to the GenomeAnalysisTK.jar.
+        		Set the path to the GenomeAnalysisTK.jar. 
+        		This will be done automatically if the path is already defined in the preference page.
         	</option>
-        	<option name="Path to reference genome">
-        		Set the path to the reference genome.
+        	<option name="Path to reference sequence">
+        		Set the path to the reference sequence.
         	</option>
         	<option name="Path to ...">
         		Set the paths to reference data sets used for variant recalibration.
+        	<ul>
+        	<li>Omni</li>
+        	<li>1000G SNPs</li>
+        	<li>dbSNP</li>
+        	<li>Mills</li>
+        	</ul>
         	</option>
         </tab>
     </fullDescription>
