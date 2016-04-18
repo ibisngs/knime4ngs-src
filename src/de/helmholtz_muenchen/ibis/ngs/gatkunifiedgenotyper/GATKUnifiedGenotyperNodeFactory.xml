@@ -9,141 +9,107 @@
     <fullDescription>
         <intro>
         	This is a wrapper node for UnifiedGenotyper which is part of the Genome Analysis Toolkit (GATK). 
-        	It is designed for GATK version 2.8.1. UnifiedGenotyper is based on a Bayesian genotype likelihood model and can identify SNPs and indels. 
+        	UnifiedGenotyper is based on a Bayesian genotype likelihood model and can identify SNPs and indels. 
         	Furthermore, it is possible to annotate all found variants with their corresponding dbSNP ID. 
-        	UnifiedGenotyper is a very sensitive caller, but it is known to produce about 10 % false positive variant calls. GATKUnifiedGenotyper produces up to two files with variants in VCF format (Format explained at <a href="http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42"> http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42 </a>)
-			<br />
-			The UnifiedGenotyper manual page can be found at <a href="http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html"> http://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_sting_gatk_walkers_genotyper_UnifiedGenotyper.html </a>
-			<br />
-			GATK and sites of known variants can be downloaded at <a href="http://www.broadinstitute.org/gatk/download"> http://www.broadinstitute.org/gatk/download </a>
+        	Please note, that this tool has been deprecated in favor of HaplotypeCaller, a much more sophisticated variant caller that produces much better calls, especially on indels, and includes features that allow it to scale to much larger cohort sizes.
+        	For further information, see the online documentation of the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php">UnifiedGenotyper</a>.
     	</intro>
-        <tab name="UnifiedGenotyper">
-        	<option name="Phred-scale confidence threshold">
-            <b>Confidence threshold for calling</b>: This threshold refers to the GATK variant quality score. 
-            GATK will consider all variants with a score equal or above this threshold as high-confidence variants.<br />
-            <b>Confidence threshold for emitting</b>: This threshold refers to the GATK variant quality score. 
-             GATK will output all variants with a score equal or above this threshold. 
-            All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
+        <tab name="Options">
+        	<option name="Choose variant type(s)">
+            	This option enables you can choose whether to call only SNPs, only indels or both.
         	</option>
-            <option name="PCR error">
-            	Estimate the expected probability of a PCR error. 
-            	This probability is independent of the sequencing error rate. 
-            	The PCR error rate is required for computing fragment-based likelihoods.
+        	<option name="Variants from dbSNP">
+            	Tick this option in order to annotate a variant with its ID from dbSNP.
+            	The path to the dbSNP VCF file can be set in the preference page (tab). 
         	</option>
-            <option name="Sample contamination">
-            	By setting this value above zero you force UnifiedGenotyper to ignore this fraction of reads for each genomic position.
+        	<option name="Output folder">
+        		You can choose an output folder for the resulting VCF file.
+        		Leave this field empty, if you want to use the folder of the input BAM files.
         	</option>
-            <option name="Heterozygosity">
-            	The probabilistic model of UnifiedGenotyper uses the heterozygosity value for calculating the prior likelihood for a mutation at a locus.
-        	</option>
-            <option name="Fraction of deletions">
-            	This value is a threshold for the maximum fraction of overall reads with a deletion at a locus. 
-            	All loci below this threshold are examined for additional variants.
-        	</option>
-            <option name="SNP calling"> 
-            Define the minimum base quality score for calling.
-            This is a threshold concerning the sequencing quality. 
-            The tool does not call SNPs at positions with a lower score.
+         	<option name="SNP calling"> 
+            	Define the minimum base quality score for calling.
+            	This is a threshold concerning the sequencing quality. 
+            	The tool does not call SNPs at positions with a lower score.
         	</option>
         	<option name="Indel calling">
-            <b>Indel heterozygosity value</b>: The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.<br />
-            <b>Minimum count of indel reads</b>: The option allows to set the minimum number of supporting reads for an indel. 
-            Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.<br />
-            <b>Minimum fraction of indel reads</b>: This option is similar to the option <i> minimum count of indel reads </i>. 
+            	<b>Indel heterozygosity value</b>: The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.<br />
+            	<b>Minimum count of indel reads</b>: The option allows to set the minimum number of supporting reads for an indel. 
+           		Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.<br />
+            	<b>Minimum fraction of indel reads</b>: This option is similar to the option <i> minimum count of indel reads </i>. 
             	It is about the fraction of all supporting reads for variant that are required for considering the variant.<br />
-            <b> Indel gap open penalty</b>: The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
+            	<b> Indel gap open penalty</b>: The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
             	It is used for calculating alignment scores.<br />
-            <b>Indel gap continuation penalty</b>: The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
+            	<b>Indel gap continuation penalty</b>: The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
             	It is used for calculating alignment scores.<br />
         	</option> 
-            <option name="Per-base alignment quality (BAQ)">
-            	The BAQ mode determines how to calculate the per-base alignment quality (BAQ).
-            	<ul>
-            	<li>Recalculate: Calculates BAQ always</li>
-            	<li>Calculate as necessary: Calculates BAQ only when it is necessary.</li>
-            	<li>Off: BAQ is not calculated. </li> 
-            	</ul>
+        
+        	<option name="Further parameters">
+        		<b>Sample contamination</b>: By setting this value above zero you force UnifiedGenotyper to ignore this fraction of reads for each genomic position.<br />
+        		<b>Heterozygosity</b>: The probabilistic model of UnifiedGenotyper uses the heterozygosity value for calculating the prior likelihood for a mutation at a locus.<br />
+        		<b>Fraction of deletions</b>: This value is a threshold for the maximum fraction of overall reads with a deletion at a locus. 
+            	All loci below this threshold are examined for additional variants. <br />
+        		<b>PCR error</b>: Estimate the expected probability of a PCR error. 
+            	This probability is independent of the sequencing error rate. 
+            	The PCR error rate is required for computing fragment-based likelihoods. <br />
+            	<b>Confidence threshold for calling</b>: This threshold refers to the GATK variant quality score. 
+           	 	GATK will consider all variants with a score equal or above this threshold as high-confidence variants.<br />
+            	<b>Confidence threshold for emitting</b>: This threshold refers to the GATK variant quality score. 
+             	GATK will output all variants with a score equal or above this threshold. 
+            	All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
         	</option>
             <option name="Malformed read filter">
             	When the length of the read does not match the length of the base quality score, GATK will report an error. 
             	By ticking this option you force GATK to skip such reads.
         	</option>
-        	<option name="Further options">
-        		Commit further options to GATK.
-        	</option>
-        	<option name="Variants from dbSNP">
-            	Tick this option in order to annotate a variant with its ID from dbSNP and set the path to the dbSNP VCF file. 
-            	If the dbSNP file is already defined in the inport you don't have to set the path.
-        	</option>
-        	<option name="Interval for variant calling">
-            	Tick this option in order to call variants in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
-        	</option>
-        	<option name="Variants">
-            	This option enables you can choose whether to call only SNPs, only indels or both. 
-            	If you decide to call SNPs and indels you can choose whether the variants should be be written into the same or into separate VCF files.
-        	</option>
             <option name="Number of threads">
             	Set the number of threads to be used.<br />
             	Increasing the number of threads speeds up the node, but it also increases the memory required for the calculations.
         	</option>
+        	
+        </tab>
+        <tab name="GATK">
         	<option name="Jave Memory">
-        		Set the Java Memory (GB) per thread.
+        		Set the Java Memory (GB) for all threads.
+        	</option>
+        	<option name="Use BED file?">
+            	Tick this option in order to call variants in certain genomic regions. 
+            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+        	</option>
+        	<option name="Further options">
+        		You can add further flags which will be added to the executed command.
         	</option>
         </tab>
+        
         <tab name="Preference page">
         	<option name="HTE">
         		Set a threshold for repeated execution.
         		Only used if HTE is enabled in the preference page.
         	</option>
-        	<option name="Path to GATK jar file">
-        	Set the path to GenomeAnalysisTK.jar.
-        	This will be done automatically if the path is already defined in the preference page.  
-       		</option>
-       		<option name="Path to reference sequence">
-        	Set the path to the reference sequence.
+        	<option name="Path to dbSNP">
+        		Set the path to the dbSNP data set file.
+        		This will be done automatically if the path is already defined in the preference page. 
         	</option>
+        	<option name="Path to reference sequence">
+        		Set the path to the reference sequence.
+        		This will be done automatically if the path is already defined in the preference page. 
+        	</option>
+        	<option name="Path to GATK jar file">
+        		Set the path to GenomeAnalysisTK.jar.
+        		This will be done automatically if the path is already defined in the preference page.  
+       		</option>
         </tab>
         
     </fullDescription>
     
     <ports>
         <inPort index="0" name="In-Port">
-        	Cell 0: Path to BAM file (BAM file for variant calling; it has to be indexed)
-			<br />
-			Cell 1: Path to SEQ file (Reference sequence used for mapping the BAM file; a sequence index and sequence dictionary are required)
-    		<br />
-			Cell 2 (optional): Path to GATK file (GATK executable)
-    		<br />
-			Cell 3 (optional): Path to phase1 (Indel set from 1000 Genomes project; the node just  passes the cell on to the outport)
-    		<br />
-			Cell 4 (optional): Path to Mills (Indel set from Mills and 1000 Genomes project; the node just passes the cell on to the outport)
-			<br />
-			Cell 5 (optional): Path to dbsnp (Set of known variants from dbSNP)
-    		<br />
-			The cell position does not matter. Additional columns are ignored.
+        	Cell 0: Path to BAM file (BAM file for variant calling; it has to be indexed).
     	</inPort>
         <outPort index="0" name="Out-Port">
-        	Cell 0: Path to VCFsnp file (File with all identified SNPs; only available if any SNPs were called)
-    		<br />
-			Cell 1: Path to VCFindel file (File with all identified indels; only available if any indels were called)
-			<br />
-    		Cell 2: Path to BAM file (BAM file used for variant calling)
-    		<br />
-    		Cell 3: Path to SEQ file (Reference sequence used for mapping the BAM file)
-    		<br />
-    		Cell 4: Path to GATK file (GATK executable)
-    		<br />
-			Cell 5 (optional): Path to phase1 (Indel set from 1000 Genomes project; this column is passed from the inport to the next node)
-    		<br />
-			Cell 6 (optional): Path to Mills (Indel set from Mills and 1000 Genomes project; this column is passed from the inport to the next node)
-			<br />
-			Cell 7 (optional): Path to dbsnp (Variant set from dbSNP; if the variants were annotated with dbSNP data)
-    		<br />
-			The cell positions are not fix. If one cell is absent (because it is optional), the following cell will take its position and the other cells will move along with it.
+        	Cell 0: Path to VCF file.
     	</outPort>
     </ports>    
     <views>
-        <view index="0" name=""></view>
+        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
     </views>
 </knimeNode>

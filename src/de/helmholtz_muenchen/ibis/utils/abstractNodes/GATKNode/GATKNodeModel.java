@@ -1,7 +1,6 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,9 +13,7 @@ import org.knime.core.data.DataType;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
@@ -30,6 +27,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 public abstract class GATKNodeModel extends HTExecutorNodeModel{
 
@@ -96,7 +94,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	command.add("-jar "+m_GATK.getStringValue());
     	command.add("-T "+getCommandWalker());
     	command.add("-R "+m_REF_GENOME.getStringValue());    	
-    	command.add(getCommandParameters(inData));
+    	command.add(getCommandParameters(inData)); //must be called before getOutfile() !!
    
     	String OUTFILE = getOutfile(); 	
     	command.add("-o "+OUTFILE);
@@ -167,19 +165,21 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
     		new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
     	}
-//    	String gatk_warning = CheckUtils.checkSourceFile(m_GATK.getStringValue());
-//    	if(gatk_warning != null) {
-//    		setWarningMessage(gatk_warning);
-//    	}
-    	
-    	if(CompatibilityChecker.inputFileNotOk(m_REF_GENOME.getStringValue())) {
+
+    	//check reference genome
+    	String reffile = m_REF_GENOME.getStringValue();
+    	if(CompatibilityChecker.inputFileNotOk(reffile)) {
     		new InvalidSettingsException("Set path to reference genome!");
     	}
     	
-//    	String ref_warning = CheckUtils.checkSourceFile(m_REF_GENOME.getStringValue());
-//    	if(ref_warning != null) {
-//    		setWarningMessage(ref_warning);
-//    	}
+    	if (!Files.exists(Paths.get(reffile + ".fai"))) {
+			throw new InvalidSettingsException("Reference sequence index: " + reffile + ".fai does not exist!");
+		}
+
+		String refbase = PathProcessor.getBase(reffile);
+		if (!Files.exists(Paths.get(refbase + ".dict"))) {
+			throw new InvalidSettingsException("Reference sequence dictionary: " + refbase + ".dict does not exist!");
+		}
     	
 		if (!outtable) {
 			return null;
@@ -192,72 +192,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 						OUT_COL1_TABLE1, getOutColType()).createSpec() });
 		return new DataTableSpec[] { outSpecTable1 };
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	super.saveSettingsTo(settings);
-//   	 	m_GATK.saveSettingsTo(settings);
-//   	 	m_REF_GENOME.saveSettingsTo(settings);
-//   	 	m_GATK_MEM.saveSettingsTo(settings);
-//   	 	m_path2bed.saveSettingsTo(settings);
-//   	 	m_bed_file_checkbox.saveSettingsTo(settings);
-//   	 	m_OPT_FLAGS.saveSettingsTo(settings);
-//   	 	saveExtraSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	super.loadValidatedSettingsFrom(settings);
-//		m_GATK.loadSettingsFrom(settings);
-//		m_REF_GENOME.loadSettingsFrom(settings);
-//		m_GATK_MEM.loadSettingsFrom(settings);
-//		m_path2bed.loadSettingsFrom(settings);
-//		m_bed_file_checkbox.loadSettingsFrom(settings);
-//		m_OPT_FLAGS.loadSettingsFrom(settings);
-//		loadExtraValidatedSettingsFrom(settings);
-//
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	super.validateSettings(settings);
-//		m_GATK.validateSettings(settings);
-//		m_REF_GENOME.validateSettings(settings);
-//		m_GATK_MEM.validateSettings(settings);
-//		m_path2bed.validateSettings(settings);
-//		m_bed_file_checkbox.validateSettings(settings);
-//		m_OPT_FLAGS.validateSettings(settings);
-//		validateExtraSettings(settings);
-//    }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-    }
 
     /****************************** ABSTRACT METHODS **********************************/
     /**
@@ -271,14 +206,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
      * @return
      */
     protected abstract String getCommandWalker();
-//    protected abstract File getLockFile();
     protected abstract String getOutfile();
     protected abstract boolean checkInputCellType(DataTableSpec[] inSpecs);
     protected abstract DataType getOutColType();
     protected abstract void extraConfig() throws InvalidSettingsException;
-    
-//    protected abstract void saveExtraSettingsTo(final NodeSettingsWO settings);
-//    protected abstract void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings) throws InvalidSettingsException;
-//    protected abstract void validateExtraSettings(final NodeSettingsRO settings) throws InvalidSettingsException;
-    
 }

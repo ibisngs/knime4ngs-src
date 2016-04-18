@@ -1,25 +1,17 @@
 package de.helmholtz_muenchen.ibis.ngs.gatkunifiedgenotyper;
 
-import javax.swing.JFileChooser;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
-import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
-import org.knime.core.node.defaultnodesettings.DialogComponentLabel;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
 
 
 /**
@@ -33,200 +25,72 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * 
  * @author 
  */
-public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
+public class GATKUnifiedGenotyperNodeDialog extends GATKNodeDialog {
 	
-	private boolean dbsnp=false;
-	
-	protected GATKUnifiedGenotyperNodeDialog() {
-//        generalOptions();
-//        UGOptions();
-//        proxyOptions();
-     
-    }
-	
-	public void addToolDialogComponents() {
-	
-	/* main options
-	 * 
-	 * path to gatk
-	 * dbsnp file
-	 * interval file
-	 * SNP vs. INDEL -> genotype-likelihoods model
-	 * #threads
-	 */
-	
-	
-	final SettingsModelString gatk = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_GATK, "");
-	final SettingsModelString reffile = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_REF_GENOME, "");
-	final SettingsModelBoolean use_dbsnp=new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USE_DBSNP, GATKUnifiedGenotyperNodeModel.DEF_USE_DBSNP);
-	final SettingsModelString dbsnp_file=new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_DBSNP_FILE, GATKUnifiedGenotyperNodeModel.DEF_DBSNP_FILE);
-	final SettingsModelBoolean use_interval = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USE_INTERVAL, GATKUnifiedGenotyperNodeModel.DEF_USE_INTERVAL);
-	final SettingsModelString interval_file = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_INTERVAL_FILE, GATKUnifiedGenotyperNodeModel.DEF_INTERVAL_FILE);
-	final SettingsModelString variant_type= new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_VARIANT_TYPE, GATKUnifiedGenotyperNodeModel.DEF_VARIANT_TYPE);
-	final SettingsModelIntegerBounded num_threads = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_NUM_THREADS, GATKUnifiedGenotyperNodeModel.DEF_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MIN_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MAX_NUM_THREADS);
-	final SettingsModelIntegerBounded memory_usage = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.DEF_NUM_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.MIN_NUM_JAVAMEMORY, GATKUnifiedGenotyperNodeModel.MAX_NUM_JAVAMEMORY);
-	
-	/* other options
-	 * 
-	 * !!!double stand_call_conf (30)
-	 * !!!double stand_emit_conf (30)
-	 *  
-	 *  snps only
-	 *  int minimum base quality required for calling (17)
-	 *  
-	 *  double pcr error rate (1.0e-4)
-	 *  double contamination (0.0) -> tries to remove reads
-	 *  double heterozygosity (0.001)
-	 *  double max_deletion_fraction : more than this fraction reads with deletion -> base is not called (0.05)
-	 *  
-	 *  indels only
-	 *  double indel_heterozygosity (1.25e-4)
-	 *  int minindelcount (5)  
-	 *  int minindelfrac (0.25)	 * 
-	 *  byte indel gap open penalty (45)
-	 *  byte indel gap extension penalty (10)
-	 */
-	
-	final SettingsModelBoolean mbq = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_MBQ, GATKUnifiedGenotyperNodeModel.DEF_MBQ);
-	final SettingsModelString baq = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_BAQ, GATKUnifiedGenotyperNodeModel.DEF_BAQ);
-	final SettingsModelDoubleBounded call_min_confidence= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.DEF_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MIN_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MAX_CALL_MIN_CONFIDENCE);
-	final SettingsModelDoubleBounded emit_min_confidence = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.DEF_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MIN_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MAX_EMIT_MIN_CONFIDENCE);
-	final SettingsModelDoubleBounded pcr_error = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_PCR_ERR, GATKUnifiedGenotyperNodeModel.DEF_PCR_ERR, GATKUnifiedGenotyperNodeModel.MIN_PCR_ERR, GATKUnifiedGenotyperNodeModel.MAX_PCR_ERR);
-	final SettingsModelDoubleBounded contamination = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_CONTAMINATION, GATKUnifiedGenotyperNodeModel.DEF_CONTAMINATION, GATKUnifiedGenotyperNodeModel.MIN_CONTAMINATION, GATKUnifiedGenotyperNodeModel.MAX_CONTAMINATION);
-	final SettingsModelDoubleBounded heterozygosity= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_HET, GATKUnifiedGenotyperNodeModel.DEF_HET, GATKUnifiedGenotyperNodeModel.MIN_HET, GATKUnifiedGenotyperNodeModel.MAX_HET);
-	final SettingsModelDoubleBounded max_deletion_fraction= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.DEF_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.MIN_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.MAX_MAX_DELETION_FRAC);
-	final SettingsModelIntegerBounded min_base_qual= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.DEF_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.MIN_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.MAX_MIN_BASE_QUAL);
-	final SettingsModelDoubleBounded indel_heterozygosity= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_INDEL_HET, GATKUnifiedGenotyperNodeModel.DEF_INDEL_HET, GATKUnifiedGenotyperNodeModel.MIN_INDEL_HET, GATKUnifiedGenotyperNodeModel.MAX_INDEL_HET);
-	final SettingsModelIntegerBounded min_indel_count = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.DEF_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.MIN_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.MAX_MIN_INDEL_CNT);
-	final SettingsModelDoubleBounded min_indel_frac = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.DEF_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.MIN_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.MAX_MIN_INDEL_FRAC);
-	final SettingsModelIntegerBounded gap_open_pen= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.DEF_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.MIN_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.MAX_GAP_OPEN_PEN);
-	final SettingsModelIntegerBounded gap_cont_pen= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.DEF_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MIN_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MAX_GAP_CONT_PEN);
-	
-	
+	public void addDialogComponent() {
+		
+		final SettingsModelString outfolder = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_OUTFOLDER, "");
+		final SettingsModelString variant_type= new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_VARIANT_TYPE, GATKUnifiedGenotyperNodeModel.DEF_VARIANT_TYPE);
 
+		final SettingsModelBoolean use_dbsnp=new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USE_DBSNP, GATKUnifiedGenotyperNodeModel.DEF_USE_DBSNP);
+		final SettingsModelString dbsnp_file=new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_DBSNP_FILE, GATKUnifiedGenotyperNodeModel.DEF_DBSNP_FILE);
+		final SettingsModelIntegerBounded num_threads = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_NUM_THREADS, GATKUnifiedGenotyperNodeModel.DEF_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MIN_NUM_THREADS, GATKUnifiedGenotyperNodeModel.MAX_NUM_THREADS);
 	
+		final SettingsModelBoolean mbq = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_MBQ, GATKUnifiedGenotyperNodeModel.DEF_MBQ);
+		final SettingsModelDoubleBounded call_min_confidence= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.DEF_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MIN_CALL_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MAX_CALL_MIN_CONFIDENCE);
+		final SettingsModelDoubleBounded emit_min_confidence = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.DEF_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MIN_EMIT_MIN_CONFIDENCE, GATKUnifiedGenotyperNodeModel.MAX_EMIT_MIN_CONFIDENCE);
+		final SettingsModelDoubleBounded pcr_error = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_PCR_ERR, GATKUnifiedGenotyperNodeModel.DEF_PCR_ERR, GATKUnifiedGenotyperNodeModel.MIN_PCR_ERR, GATKUnifiedGenotyperNodeModel.MAX_PCR_ERR);
+		final SettingsModelDoubleBounded contamination = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_CONTAMINATION, GATKUnifiedGenotyperNodeModel.DEF_CONTAMINATION, GATKUnifiedGenotyperNodeModel.MIN_CONTAMINATION, GATKUnifiedGenotyperNodeModel.MAX_CONTAMINATION);
+		final SettingsModelDoubleBounded heterozygosity= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_HET, GATKUnifiedGenotyperNodeModel.DEF_HET, GATKUnifiedGenotyperNodeModel.MIN_HET, GATKUnifiedGenotyperNodeModel.MAX_HET);
+		final SettingsModelDoubleBounded max_deletion_fraction= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.DEF_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.MIN_MAX_DELETION_FRAC, GATKUnifiedGenotyperNodeModel.MAX_MAX_DELETION_FRAC);
+		final SettingsModelIntegerBounded min_base_qual= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.DEF_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.MIN_MIN_BASE_QUAL, GATKUnifiedGenotyperNodeModel.MAX_MIN_BASE_QUAL);
+		final SettingsModelDoubleBounded indel_heterozygosity= new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_INDEL_HET, GATKUnifiedGenotyperNodeModel.DEF_INDEL_HET, GATKUnifiedGenotyperNodeModel.MIN_INDEL_HET, GATKUnifiedGenotyperNodeModel.MAX_INDEL_HET);
+		final SettingsModelIntegerBounded min_indel_count = new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.DEF_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.MIN_MIN_INDEL_CNT, GATKUnifiedGenotyperNodeModel.MAX_MIN_INDEL_CNT);
+		final SettingsModelDoubleBounded min_indel_frac = new SettingsModelDoubleBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.DEF_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.MIN_MIN_INDEL_FRAC, GATKUnifiedGenotyperNodeModel.MAX_MIN_INDEL_FRAC);
+		final SettingsModelIntegerBounded gap_open_pen= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.DEF_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.MIN_GAP_OPEN_PEN, GATKUnifiedGenotyperNodeModel.MAX_GAP_OPEN_PEN);
+		final SettingsModelIntegerBounded gap_cont_pen= new SettingsModelIntegerBounded(GATKUnifiedGenotyperNodeModel.CFGKEY_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.DEF_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MIN_GAP_CONT_PEN, GATKUnifiedGenotyperNodeModel.MAX_GAP_CONT_PEN);
 	
-	//Proxy options
-//	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
-//	final SettingsModelString proxyhost = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST, null);
-//	final SettingsModelString proxyport = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT, null);
-//	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
-//	final SettingsModelString proxyuser = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER, null);
-//	final SettingsModelString proxypassword = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD, null);
-	
-	final SettingsModelOptionalString m_opt_flags = new SettingsModelOptionalString(GATKUnifiedGenotyperNodeModel.CFGKEY_OPT_FLAGS,"",false);
+		//Proxy options
+		//	private final SettingsModelBoolean useproxy = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXY, false);
+		//	final SettingsModelString proxyhost = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYHOST, null);
+		//	final SettingsModelString proxyport = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPORT, null);
+		//	private final SettingsModelBoolean useproxyauth = new SettingsModelBoolean(GATKUnifiedGenotyperNodeModel.CFGKEY_USEPROXYAUTH, false);
+		//	final SettingsModelString proxyuser = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYUSER, null);
+		//	final SettingsModelString proxypassword = new SettingsModelString(GATKUnifiedGenotyperNodeModel.CFGKEY_PROXYPASSWORD, null);
+	    
+		addPrefPageSetting(dbsnp_file, IBISKNIMENodesPlugin.RES_DBSNP);
 
-
-    
-	addPrefPageSetting(gatk, IBISKNIMENodesPlugin.GATK);
-    addPrefPageSetting(reffile, IBISKNIMENodesPlugin.REF_GENOME);
-    
-//    private void UGOptions() {
-    	setDefaultTabTitle("UnifiedGenotyper");
-//        createNewTab("UnifiedGenotyper");
-        createNewGroup("Phred-scaled confidence threshold");
-        addDialogComponent(new DialogComponentNumber(call_min_confidence, "Confidence threshold for calling", 1, 5));
-        addDialogComponent(new DialogComponentNumber(emit_min_confidence, "Confidence threshold for emitting", 1, 5));
-        
-        createNewGroup("PCR error");
-        addDialogComponent(new DialogComponentNumber(pcr_error, "Error rate", 0.0001, 5));
-        
-        createNewGroup("Sample contamination");
-        addDialogComponent(new DialogComponentNumber(contamination, "Contamination fraction of reads", 0.0001, 5));
-        
-        createNewGroup("Heterozygosity");
-        addDialogComponent(new DialogComponentNumber(heterozygosity, "Heterozygosity value", 0.0001, 5));
-        
-        createNewGroup("Fraction of deletions");
-        addDialogComponent(new DialogComponentNumber(max_deletion_fraction, "Maximum fraction of deletions for locus to be callable", 0.001, 5));
+        addDialogComponent(new DialogComponentStringSelection(variant_type, "Choose variant type(s) to be called", GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
+		addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Use dbSNP file to populate ID column?"));
+		
+		createNewGroup("Output folder");
+		addDialogComponent(new DialogComponentFileChooser(outfolder, "his_ID_outfolder",0, true));
          
         createNewGroup("SNP calling");
         addDialogComponent(new DialogComponentNumber(min_base_qual, "Minimum base quality score for calling", 1, 5));
         
         createNewGroup("Indel calling");
-        addDialogComponent(new DialogComponentNumber(indel_heterozygosity, "Heterozygosity value",0.00001 , 5));
+        addDialogComponent(new DialogComponentNumber(indel_heterozygosity, "Heterozygosity for indel calling",0.00001 , 5));
         addDialogComponent(new DialogComponentNumber(min_indel_count, "Minimum count of indel reads", 1, 5));
         addDialogComponent(new DialogComponentNumber(min_indel_frac, "Minimum fraction of indel reads ", 0.01, 5));
         addDialogComponent(new DialogComponentNumber(gap_open_pen, "Indel gap open penalty", 1, 5));
         addDialogComponent(new DialogComponentNumber(gap_cont_pen, "Indel continuation penalty", 1, 5));
         
-        createNewGroup("Per-base alignment qualities (BAQ)");
-        addDialogComponent(new DialogComponentStringSelection(baq, "Choose BAQ mode ", GATKUnifiedGenotyperNodeModel.AVAIL_BAQ));
+        createNewGroup("Further parameters");
+        addDialogComponent(new DialogComponentNumber(contamination, "Fraction of contamination in sequencing data", 0.0001, 5));
+        addDialogComponent(new DialogComponentNumber(heterozygosity, "Heterozygosity", 0.0001, 5));
+        addDialogComponent(new DialogComponentNumber(max_deletion_fraction, "Maximum fraction of deletions for locus to be callable", 0.001, 5));
+        addDialogComponent(new DialogComponentNumber(pcr_error, "PCR error rate", 0.0001, 5));
+		addDialogComponent(new DialogComponentNumber(call_min_confidence, "Confidence threshold for calling", 1, 5));
+        addDialogComponent(new DialogComponentNumber(emit_min_confidence, "Confidence threshold for emitting", 1, 5));
         
         createNewGroup("Malformed read filter");
         addDialogComponent(new DialogComponentBoolean(mbq, "Filter reads with mismatching number of bases and base qualities"));
-		
-        createNewGroup("Further options");
-        addDialogComponent(new DialogComponentOptionalString(m_opt_flags,"Further flags"));
-//	}
-
-//	private void generalOptions(){
-        // gatk executable
-//        createNewGroup("Path to GATK jar file");
-//    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(gatk, "gatk3", JFileChooser.OPEN_DIALOG, false, ".jar");
-//    	gatkf.setBorderTitle("Choose File (disabled if file available from previous node)");
-//    	addDialogComponent(gatkf);
-    	
-    	// reffile
-//    	createNewGroup("Path to reference genome");
-//    	DialogComponentFileChooser reff= new DialogComponentFileChooser(reffile, "ref", JFileChooser.OPEN_DIALOG, false, ".fa|.fasta");
-//    	reff.setBorderTitle("Choose File (disabled if file available from previous node)");
-//    	addDialogComponent(reff);
-    	
-    	// dbsnp set for annotation
-    	createNewGroup("Variants from dbSNP");
-        addDialogComponent(new DialogComponentBoolean(use_dbsnp, "Annotate Variants with ID from dbSNP"));
-        DialogComponentFileChooser dbsnpf=new DialogComponentFileChooser(dbsnp_file, "dbsnpset2", JFileChooser.OPEN_DIALOG, false, ".vcf");
-        dbsnpf.setBorderTitle("Choose File (disabled if file available from previous node)");
-        addDialogComponent(dbsnpf);
-        
-        use_dbsnp.addChangeListener(new ChangeListener() {
-			
-			public void stateChanged(ChangeEvent e) {
-				
-				if(!dbsnp){
-					if(!use_dbsnp.getBooleanValue() && !dbsnp_file.isEnabled()){
-						dbsnp=true;
-					}
-					else{
-						dbsnp_file.setEnabled(use_dbsnp.getBooleanValue());
-					}
-				}
-				
-			}
-		});
-        
-        // interval file for realignment
-        createNewGroup("Interval for variant calling");
-        addDialogComponent(new DialogComponentBoolean(use_interval, "Restrict variant discovery to certain genomic regions"));
-        interval_file.setEnabled(false);
-        addDialogComponent(new DialogComponentFileChooser(interval_file, "ifile3", JFileChooser.OPEN_DIALOG, false, ".bed", ".intervals"));
-        
-        // add change listener that enables file chooser for interval file
-        use_interval.addChangeListener(new ChangeListener(){
-        	
-        	public void stateChanged(ChangeEvent e){
-        		
-        		interval_file.setEnabled(use_interval.getBooleanValue());
-        	}
-        	
-        });
-        
-        // variant types
-        createNewGroup("Variants");
-        addDialogComponent(new DialogComponentLabel("Choose the variant types to be called"));
-        addDialogComponent(new DialogComponentButtonGroup(variant_type, "", true, new String[] {"SNPs","Indels","SNPs and Indels (separate files)","SNPs and Indels (one file)"}, GATKUnifiedGenotyperNodeModel.AVAIL_VARIANT_TYPE));
-        
+		        
         //#threads
         createNewGroup("Number of threads");
-        addDialogComponent(new DialogComponentNumber(num_threads, "Threads", 1));
-        
-        //#Memory
-        createNewGroup("Java Memory");
-        addDialogComponent(new DialogComponentNumber(memory_usage, "Java Memory (GB) per thread", 1));
-        
+        addDialogComponent(new DialogComponentNumber(num_threads, "Threads", 1)); 
     }
-	
 	
 //    private void proxyOptions(){
 //	  	createNewTab("Proxy options");
@@ -268,29 +132,5 @@ public class GATKUnifiedGenotyperNodeDialog extends HTExecutorNodeDialog {
 //				}
 //			});
 //  }
-
-//	@Override
-//	protected void updatePrefs() {
-//		if(usePrefPage.getBooleanValue()) {
-//	    	String toolPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-//	    	if(toolPath != null && !toolPath.equals("")) {
-//	    		gatk.setStringValue(toolPath);
-//	    		gatk.setEnabled(false);
-//	    	} else {
-//	    		gatk.setEnabled(true);
-//	    	}
-//	    	String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-//	    	if(refGenome != null && !refGenome.equals("")) {
-//	    		reffile.setStringValue(refGenome);
-//	    		reffile.setEnabled(false);
-//	    	} else {
-//	    		reffile.setEnabled(true);
-//	    	}
-//		} else {
-//			gatk.setEnabled(true);
-//			reffile.setEnabled(true);
-//		}
-//		
-//	} 
 }
 
