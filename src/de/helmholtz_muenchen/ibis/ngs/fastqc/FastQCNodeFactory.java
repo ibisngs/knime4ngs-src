@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "FastQC" Node.
  * 
@@ -35,7 +37,7 @@ public class FastQCNodeFactory
     @Override
     public NodeView<FastQCNodeModel> createNodeView(final int viewIndex,
             final FastQCNodeModel nodeModel) {
-        return new FastQCNodeView(nodeModel);
+        return new HTENodeView<FastQCNodeModel>(nodeModel);
     }
 
     /**

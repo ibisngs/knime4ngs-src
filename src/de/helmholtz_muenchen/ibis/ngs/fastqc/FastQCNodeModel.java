@@ -24,8 +24,6 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.threads.Executor;
-
 
 /**
  * This is the model implementation of FastQC.
@@ -120,8 +118,14 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	        	commandMerge.add(outfile2);
 	        	commandMerge.add(outfileMerged);
 	        	        
-	        	//No HTE, Merge is performed each time
-	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr);
+	        	//No HTE, Merge is performed each time => strange null pointer exception
+//	        	Executor.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,LOGGER,sysErr,sysErr);
+	        	
+	        	//Set new lock file for merging
+	        	lockFile = new File(outfileMerged+SuccessfulRunChecker.LOCK_ENDING);
+	        	super.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,
+	        			null, lockFile, null, null , null, sysErr, null);
+
 	        	
 //	        	//Show FastQC Output
 	        	LOGGER.info(sysErr);
