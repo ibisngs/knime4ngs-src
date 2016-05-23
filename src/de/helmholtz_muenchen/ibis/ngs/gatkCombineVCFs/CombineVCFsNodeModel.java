@@ -15,6 +15,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -52,6 +53,9 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData) throws InvalidSettingsException {
 		
+		
+		
+		
 		/**
     	 * Check INFILE
     	 */
@@ -62,6 +66,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		while(it.hasNext()){
 			DataRow row = it.next();
 			String INFILE = row.getCell(vcf_index).toString();
+			
 			
 			if(first){
 				outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName();
@@ -113,6 +118,10 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		}
 	}
 
+	
+
+	 
+	
 	
 //	@Override
 //	protected void saveExtraSettingsTo(NodeSettingsWO settings) {

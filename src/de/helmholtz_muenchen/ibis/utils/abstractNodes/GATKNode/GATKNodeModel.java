@@ -159,17 +159,17 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
             throws InvalidSettingsException {
     	
     	if(!checkInputCellType(inSpecs)) {
-    		new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
+    		throw new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
     	}
     	
     	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
-    		new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
+    		throw new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
     	}
 
     	//check reference genome
     	String reffile = m_REF_GENOME.getStringValue();
     	if(CompatibilityChecker.inputFileNotOk(reffile)) {
-    		new InvalidSettingsException("Set path to reference genome!");
+    		throw new InvalidSettingsException("Set path to reference genome!");
     	}
     	
     	if (!Files.exists(Paths.get(reffile + ".fai"))) {
