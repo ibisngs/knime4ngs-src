@@ -72,7 +72,7 @@
             	VEP uses <b>Ensembl transcripts</b> (=GENCODE Comprehensive) by default.
             	By choosing <b>GENCODE</b> basic your analysis is limited to transcripts belonging to the GENCODE basic set.
             	This set has fragmented or problematic transcripts removed.
-            	Alternatively, you can choose the <b>RefSeq</b> transcript set.
+            	Alternatively, you can choose the <b>RefSeq</b> transcript set (requires the RefSeq cache or the database flag).
             </li>
             </ul>
             </option>

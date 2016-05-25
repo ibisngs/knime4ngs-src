@@ -28,21 +28,19 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 public class VEPNodeDialog extends HTExecutorNodeDialog {
 
 	private SettingsModelBoolean my_overwrite;
-    /**
-     * New pane for configuring the VEP node.
-     */
-    protected VEPNodeDialog() {}
     
     public void addToolDialogComponents() {
 
     	//VEP options tab
     	final SettingsModelString veppl = new SettingsModelString(VEPNodeModel.CFGKEY_VEP_PL,"-");
     	final SettingsModelString fasta = new SettingsModelString(VEPNodeModel.CFGKEY_FASTA_FILE,VEPNodeModel.DEF_CACHE_DIR);
+        final SettingsModelString m_out_format = new SettingsModelString(VEPNodeModel.CFGKEY_OUT_FORMAT,VEPNodeModel.DEF_FORMAT);
     	final SettingsModelString outfolder = new SettingsModelString(VEPNodeModel.CFGKEY_OUTFOLDER,"");
     	final SettingsModelBoolean overwrite = new SettingsModelBoolean(VEPNodeModel.CFGKEY_OVERWRITE,false);
     	my_overwrite = overwrite;
     	final SettingsModelBoolean use_cache = new SettingsModelBoolean(VEPNodeModel.CFGKEY_USE_CACHE,true);
     	final SettingsModelInteger forks = new SettingsModelInteger(VEPNodeModel.CFGKEY_FORKS,1);
+    	final SettingsModelInteger buffer = new SettingsModelInteger(VEPNodeModel.CFGKEY_BUFFER, 5000);
     	final SettingsModelBoolean coding_only = new SettingsModelBoolean(VEPNodeModel.CFGKEY_CODING_ONLY, true);
     	final SettingsModelString transcript_set = new SettingsModelString(VEPNodeModel.CFGKEY_TRANSCRIPT_SET,"GENCODE Basic");
 
@@ -61,8 +59,10 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	addPrefPageSetting(veppl, IBISKNIMENodesPlugin.VEP);
     	addPrefPageSetting(samtools_path, IBISKNIMENodesPlugin.SAMTOOLS);
     	
-    	createNewGroup("Path to variant_effect_predictor.pl");
-    	addDialogComponent(new DialogComponentFileChooser(veppl, "his_id_VEP_VEPPL", 0, ".pl"));
+    	addDialogComponent(new DialogComponentStringSelection(m_out_format, "Select output format" ,VEPNodeModel.OUT_FORMATS));
+    	
+//    	createNewGroup("Path to variant_effect_predictor.pl");
+//    	addDialogComponent(new DialogComponentFileChooser(veppl, "his_id_VEP_VEPPL", 0, ".pl"));
     	
     	createNewGroup("Path to fasta file");
     	addDialogComponent(new DialogComponentFileChooser(fasta, "his_id_FASTA", 0, ".fa|.fasta"));
@@ -74,6 +74,7 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentBoolean(use_cache, "Use cache?"));
     	addDialogComponent(new DialogComponentNumber(forks, "Number of forks",1));
+    	addDialogComponent(new DialogComponentNumber(buffer, "Buffer size",1000));
     	addDialogComponent(new DialogComponentBoolean(coding_only, "Coding only?"));
     	addDialogComponent(new DialogComponentStringSelection(transcript_set,"Choose transcript set", VEPNodeModel.TRANSCRIPT_SETS));
 
@@ -98,18 +99,7 @@ public class VEPNodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("Path to phylocsf.sql");
     	addDialogComponent(new DialogComponentFileChooser(conservation_file, "his_id_VEP_CONSERVATIONFILE", 0, ".sql"));
     	
-    	createNewGroup("Samtools PATH");
-    	addDialogComponent(new DialogComponentFileChooser(samtools_path, "his_id_VEP_SAMTOOLSPATH", 0, ""));
-  
-//    	use_loftee.addChangeListener(new ChangeListener () {
-//
-//			@Override
-//			public void stateChanged(ChangeEvent e) {
-//				updatePrefs();
-//				
-//			}
-//    		
-//    	});
+
     }
     
     public void onOpen() {

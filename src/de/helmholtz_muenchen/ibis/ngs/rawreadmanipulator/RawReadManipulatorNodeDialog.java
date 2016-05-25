@@ -45,7 +45,7 @@ public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
 	 	final SettingsModelBoolean filterfileexists = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_FILTERFILEEXISTS, true);
 	 	final SettingsModelBoolean lengthcutoff = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_LENGTHCUTOFF, false);
     	final SettingsModelIntegerBounded minlength = new SettingsModelIntegerBounded(RawReadManipulatorNodeModel.CFGKEY_MINLENGTH, 30, 1, Integer.MAX_VALUE);
-		final SettingsModelString preserve = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_PRESERVE,"No");
+		final SettingsModelString preserve = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_PRESERVE,"Yes");
 		final SettingsModelBoolean ifillumina = new SettingsModelBoolean(RawReadManipulatorNodeModel.CFGKEY_IFILLUMINA, false);
 		final SettingsModelString isillumina = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_ISILLUMINA,"");
 		final SettingsModelString convtophred = new SettingsModelString(RawReadManipulatorNodeModel.CFGKEY_CONVTOPHRED,"");

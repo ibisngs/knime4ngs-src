@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "SnpEff" Node.
  * 
@@ -35,7 +37,7 @@ public class SnpEffNodeFactory
     @Override
     public NodeView<SnpEffNodeModel> createNodeView(final int viewIndex,
             final SnpEffNodeModel nodeModel) {
-        return new SnpEffNodeView(nodeModel);
+        return new HTENodeView<SnpEffNodeModel>(nodeModel);
     }
 
     /**

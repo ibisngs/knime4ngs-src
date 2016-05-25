@@ -98,7 +98,7 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelIntegerBounded m_minlength = new SettingsModelIntegerBounded(CFGKEY_MINLENGTH, 30, 1, Integer.MAX_VALUE);
 
 	private final SettingsModelString m_preserve = new SettingsModelString(
-			RawReadManipulatorNodeModel.CFGKEY_PRESERVE,"");
+			RawReadManipulatorNodeModel.CFGKEY_PRESERVE,"Yes");
 	private final SettingsModelIntegerBounded m_threadcount = new SettingsModelIntegerBounded(CFGKEY_THREADCOUNT, 4, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelBoolean m_ifillumina = new SettingsModelBoolean(CFGKEY_IFILLUMINA, false);
@@ -205,9 +205,10 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	}
     	
     	if(m_filterfileexists.getBooleanValue()){
-    		command.add("--filtersettings="+inData[0].iterator().next().getCell(1).toString());
     		if(readType.equals("paired-end")) {
     			command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
+    		} else {
+        		command.add("--filtersettings="+inData[0].iterator().next().getCell(1).toString());
     		}
     	}
     	

@@ -15,7 +15,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeModel;
-import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -53,9 +52,6 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	@Override
 	protected String getCommandParameters(BufferedDataTable[] inData) throws InvalidSettingsException {
 		
-		
-		
-		
 		/**
     	 * Check INFILE
     	 */
@@ -81,8 +77,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		
 		return StringUtils.join(command, " ");
 	}
-		
-	
+
 
 	@Override
 	protected String getCommandWalker() {
@@ -90,7 +85,6 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	}
 
 	
-
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		vcf_index = -1;
@@ -109,7 +103,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		return VCFCell.TYPE;
 	}
 
-
+	
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
 		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
@@ -118,38 +112,9 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 		}
 	}
 
-	
-
-	 
-	
-	
-//	@Override
-//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-//		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
-//		m_OUTFOLDER.saveSettingsTo(settings);
-//		
-//	}
-//
-//
-//	@Override
-//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
-//		m_OUTFOLDER.loadSettingsFrom(settings);
-//	}
-//
-//
-//	@Override
-//	protected void validateExtraSettings(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_GENOTYPEMERGEOPTION.validateSettings(settings);
-//		m_OUTFOLDER.validateSettings(settings);
-//	}
-
 	@Override
 	protected String getOutfile() {
 		return outfile;
 	}
 
 }
-

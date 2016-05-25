@@ -66,6 +66,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
 		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
 		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
 		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);

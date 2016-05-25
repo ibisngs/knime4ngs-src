@@ -4,65 +4,53 @@
     <name>SnpEff</name>
     
     <shortDescription>
-       SnpEff annotates and predicts the effects of variants on genes. 
+       SnpEff annotates and predicts the effects of genetic variants. 
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	SnpEff annotates and predicts the effects of variants on genes (such as amino acid changes).<br />
+        	SnpEff annotates and predicts the effects of genetic variants.<br />
         	Source: <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
-         </intro>
+        </intro>
         <tab name="Options">
-        	<option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page.
+        	<option name="Database name">
+        		In order to produce the annotation, SnpEff requires a database.<br />
+       	 		For more information, see <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
        	 	</option>
-       	 	<option name="snpEff directory"> Set the path to the snpEff installation.
+       	 	<option name="Path to BED file">
+       	 		Only analyze changes that intersect with the intervals specified in this BED file.
        	 	</option>
-       	 	<option name="Database name"> In order to produce the annotation, SnpEff requires a database.<br />
-       	 	For more information, see <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
+       	 	<option name="Java Memory">
+       	 		Set the maximum Java heap size in GB.
        	 	</option>
-       	 	<option name="Input vcf file"> Set the path to the input vcf file.
+       	 	<option name="Further options">
+       	 		Set additional command line flags.
        	 	</option>
-       	 	<option name="Annotation option"> 
-       	 	Specify whether to add loss of function (LOF) and Nonsense mediated decay (NMD) tags.
-       	 	<li>
-       	 	Loss of function assessment: SnpEff can estimate if a variant is deemed to have a LOF on the protein.
-       	 	</li>
-       	 	<li>
-       	 	Nonsense mediated decay (NMD) assessment: Some mutations may cause mRNA to be degraded thus not translated into protein.
-       	 	NMD analysis marks mutations that are estimated to trigger nonsense mediated decay.
-       	 	</li>
-       		</option>  
         </tab>
-        <tab name="Sequence change filter">
-        	<option name="Set thresholds"> 
-        	By settings thresholds for minimum quality value and for minimum coverage, variants with a bad quality value and/or a low coverage can be removed.
+        <tab name="Results filter">
+        	<option name="Do not show ... changes">
+        		Choose regions in which variants will not be annotated.
         	</option>
-        	<option name="Filter by mutation type">
-        	This option allows you to filter variants by the following mutation types:
-        		<li>
-        		Analyze deletion only
-        		</li>
-        		<li>
-        		Analyze insertion only
-        		</li>
-        		<li>
-        		Analyze homozygous variants only
-        		</li>
-        		<li>
-        		Analyze heterozygous variants only
-        		</li>
-        		<li>
-        		Analyze SNPs only
-        		</li>
-        		<li>
-        		Analyze MNPs only
-        		</li>
-        		</option>
         </tab>
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+       	 	</option>
+       	 	<option name="Path to snpEff.jar">
+       	 		Set the path to the snpEff jar file.
+       	 	</option>
+       	</tab>
+       	 	
+
     </fullDescription>
+    
+    <views>
+       <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+    </views>
     
     <ports>
         <inPort index="0" name="In-Port"> Input VCF file</inPort>
-        <outPort index="0" name="Out-Port"> Output VCF file</outPort>
+        <outPort index="0" name="Out-Port"> Annotated VCF file</outPort>
     </ports>    
 </knimeNode>
