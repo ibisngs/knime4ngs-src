@@ -12,7 +12,6 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -53,7 +52,14 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
-				OUTFILE = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName();
+				String outfolder = m_OUTFOLDER.getStringValue();
+				if(outfolder.equals("") || outfolder == null) {
+					outfolder = new File(INFILE).getParent();
+				}
+				if(!outfolder.endsWith(System.getProperty("file.separator"))) {
+					outfolder = outfolder  + System.getProperty("file.separator");
+				}
+				OUTFILE = outfolder + new File(INFILE).getName();
 				OUTFILE = IO.replaceFileExtension(OUTFILE, ".GenotypedVariants.vcf");
 				first=false;
 			}
@@ -112,10 +118,10 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
-		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
-		if(outfolder_warning!=null) {
-			setWarningMessage(outfolder_warning);
-		}
+//		String outfolder_warning = CheckUtils.checkDestinationDirectory(m_OUTFOLDER.getStringValue());
+//		if(outfolder_warning!=null) {
+//			setWarningMessage(outfolder_warning);
+//		}
 	}
 	
 	@Override

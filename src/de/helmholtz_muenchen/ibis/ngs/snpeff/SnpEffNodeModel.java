@@ -110,24 +110,15 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
     	
-    	
     	String snpEffBin = m_snpeff_bin.getStringValue();
-
-    	String dbName = m_database.getStringValue();
-    	if(dbName.equals("") || dbName == null) {
-    		throw new InvalidSettingsException("Choose a database for annotation!");
-    	}
-
     	String out_file = IO.replaceFileExtension(vcf_infile, "snpEff.vcf");
     	String stats_file = IO.replaceFileExtension(vcf_infile, "summary.html");
-
     	   	
     	ArrayList<String> command = new ArrayList<String>();
     	
     	command.add("java");
     	command.add("-Xmx"+m_memory.getIntValue()+"G -jar "+snpEffBin);
         command.add("-s "+stats_file);
-    	
     	
     	//Result filter options
     	if(m_usebedfile.getBooleanValue()){
@@ -150,7 +141,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	}
     	
     	command.add(m_opt_flags.getStringValue());
-    	command.add("-v "+dbName);
+    	command.add("-v "+m_database.getStringValue());
     	command.add(vcf_infile);
     	
     	/**Execute**/
@@ -195,6 +186,11 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	
     	if(CompatibilityChecker.inputFileNotOk(m_snpeff_bin.getStringValue())) {
     		throw new InvalidSettingsException("Set a valid path to the snpEff directory!");
+    	}
+    	
+    	String db = m_database.getStringValue();
+    	if(db.equals("") || db == null) {
+    		throw new InvalidSettingsException("Specify an annotation database!");
     	}
     	
         return new DataTableSpec[]{new DataTableSpec(

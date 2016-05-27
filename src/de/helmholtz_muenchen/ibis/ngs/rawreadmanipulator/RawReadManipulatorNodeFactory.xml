@@ -9,7 +9,7 @@
     
 <fullDescription>
 	<intro>
-		This node is based on the RawReadManipulator toll (written by Jonathan Hoser).
+		This node is based on the RawReadManipulator tool (written by Jonathan Hoser).
 		It filter reads from a fastQ or fastA file and creates a new fastQ/fastA file in the same directory, unless otherwise specified.
 	</intro>
 	

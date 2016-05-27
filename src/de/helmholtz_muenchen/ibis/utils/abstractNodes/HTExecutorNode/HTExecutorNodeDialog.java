@@ -1,5 +1,7 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
+import java.awt.Component;
+import java.awt.Dimension;
 import java.util.LinkedHashMap;
 
 import javax.swing.event.ChangeEvent;
@@ -43,7 +45,11 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 		
 		addToolDialogComponents();
 		
-		createNewTab("Preference page");
+		if(optionsTabIsEmpty()) {
+			setDefaultTabTitle("Preference page");
+		} else {
+			createNewTab("Preference page");
+		}
 		
 		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
 		
@@ -114,5 +120,14 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
     }
     
     public abstract void addToolDialogComponents();
+    
+    public boolean optionsTabIsEmpty() {
+    	Component c = this.getTab("Options");
+    	if(c == null) {
+    		return false;
+    	} 
+    	Dimension d = c.getPreferredSize();
+    	return (d.getWidth()== 0 && d.getHeight() == 0);
+    }
     
 }

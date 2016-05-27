@@ -706,7 +706,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	
 	private String getDirPath(Shell shell, String text) {
 		DirectoryDialog dl = new DirectoryDialog(shell);
-		dl.setText("Select reference genome");
+		dl.setText(text);
 		dl.setFilterPath("~/");
 		String path = dl.open();
 		return path;

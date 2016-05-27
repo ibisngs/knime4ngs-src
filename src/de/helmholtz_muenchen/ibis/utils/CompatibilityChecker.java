@@ -1,5 +1,6 @@
 package de.helmholtz_muenchen.ibis.utils;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -78,7 +79,15 @@ public class CompatibilityChecker {
 	}
 	
 	public static boolean inputFileNotOk(String path) {
-		return path.equals("") || Files.notExists(Paths.get(path));
+		boolean isEmpty = false;;
+		try {
+			isEmpty = (Files.newBufferedReader(Paths.get(path)).readLine() == null);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return path.equals("") || Files.notExists(Paths.get(path)) || isEmpty;
 	}
 	
 	public static boolean checkInputCellType(DataTableSpec inSpecs, String CellType) {

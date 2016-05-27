@@ -18,6 +18,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
@@ -148,8 +149,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	int end = checkEnding(in1);
     	
     	//check first input file
-    	if(Files.notExists(Paths.get(in1)) || in1.equals("")) {
-    		throw new InvalidSettingsException("First input file does not exist");
+    	if(CompatibilityChecker.inputFileNotOk(in1)) {
+    		throw new InvalidSettingsException("First input file does not exist or is empty!");
     	}
     	
     	if(m_isList.getBooleanValue()) {
@@ -180,7 +181,7 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
     	
     	if(in2.length()>0) {
-    		if(Files.notExists(Paths.get(in2)) || !TYPES[checkEnding(in2)].toString().equals("FastQCell")) {
+    		if(CompatibilityChecker.inputFileNotOk(in2) || !TYPES[checkEnding(in2)].toString().equals("FastQCell")) {
     			setWarningMessage("Second input file does not exist or has disallowed ending and will be ignored!");
     		} else {
     			secondOk = true;

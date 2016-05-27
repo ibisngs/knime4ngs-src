@@ -34,6 +34,12 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     public void addToolDialogComponents() {
     	addDialogComponent();
     	
+    	if(optionsTabIsEmpty()) {
+			setDefaultTabTitle("GATK");
+		} else {
+			createNewTab("GATK");
+		}
+    	
     	final SettingsModelString GATK = new SettingsModelString(GATKNodeModel.CFGKEY_GATK_PATH, "");
         final SettingsModelString REF_GENOME = new SettingsModelString(GATKNodeModel.CFGKEY_REF_GENOME, "");
         final SettingsModelIntegerBounded m_GATK_MEM = new SettingsModelIntegerBounded(GATKNodeModel.CFGKEY_GATK_MEM, 4, 1, Integer.MAX_VALUE);
@@ -44,15 +50,7 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	addPrefPageSetting(REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
     	addPrefPageSetting(GATK, IBISKNIMENodesPlugin.GATK);
     	
-    	createNewTab("GATK");
-//    	createNewGroup("Path to GATK jar file");
-//    	DialogComponentFileChooser gatkf= new DialogComponentFileChooser(GATK, "gatk", JFileChooser.OPEN_DIALOG, false, ".jar");
-//    	addDialogComponent(gatkf);
     	addDialogComponent(new DialogComponentNumber(m_GATK_MEM, "GATK Memory", 1));
-//    	createNewGroup("Reference Genome");
-//    	DialogComponentFileChooser ref_genome= new DialogComponentFileChooser(REF_GENOME, "ref_genome_variant_filter", JFileChooser.OPEN_DIALOG, false, ".txt|.fa|.fasta");
-//    	addDialogComponent(ref_genome);
-    	
     	addDialogComponent(new DialogComponentBoolean(m_bed_file_check,"Use BED file?"));
     	m_path2bed.setEnabled(false);
     	
@@ -62,7 +60,6 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	createNewGroup("Further options");
     	addDialogComponent(new DialogComponentOptionalString(m_OPT_FLAGS,"Optional flags"));
     	
-//    	addDialogComponent();
     	
     	m_bed_file_check.addChangeListener(new ChangeListener () {
     		
@@ -73,28 +70,6 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
     	});
 
     }
-    
-//    protected void updatePrefs() {
-//    	if(usePrefPage.getBooleanValue()) {
-//    		String gatkPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("GenomeAnalysisTK.jar");
-//    		if(gatkPath != null && !gatkPath.equals("")) {
-//    			GATK.setStringValue(gatkPath);
-//    			GATK.setEnabled(false);
-//    		} else {
-//    			GATK.setEnabled(true);
-//    		}
-//    		String refGenome = IBISKNIMENodesPlugin.getDefault().getRefGenomePreference();
-//    		if(refGenome != null && !refGenome.equals("")) {
-//    			REF_GENOME.setStringValue(refGenome);
-//    			REF_GENOME.setEnabled(false);
-//    		} else {
-//    			REF_GENOME.setEnabled(true);
-//    		}
-//    	} else {
-//    		GATK.setEnabled(true);
-//    		REF_GENOME.setEnabled(true);
-//    	}
-//    }
 	
     protected abstract void addDialogComponent();
     

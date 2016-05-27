@@ -364,7 +364,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 			throw new InvalidSettingsException("Set 1000G Indel data set!");
 		}
 		
-		if (!Files.exists(Paths.get(phase1 + ".idx"))) {
+		if (m_use_phase1_1000G.getBooleanValue() && !Files.exists(Paths.get(phase1 + ".idx"))) {
 			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
 		}
 		
@@ -373,7 +373,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 			throw new InvalidSettingsException("Set Mills data set!");
 		}
 		
-		if (!Files.exists(Paths.get(mills + ".idx"))) {
+		if (m_use_mills_1000G.getBooleanValue() && !Files.exists(Paths.get(mills + ".idx"))) {
 			throw new InvalidSettingsException("Mills index file: " + mills + ".idx does not exist!");
 		}
 		
