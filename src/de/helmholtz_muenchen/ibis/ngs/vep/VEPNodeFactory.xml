@@ -43,10 +43,12 @@
             <option name="Path to variant_effect_predictor.pl">
             	Set the path to the VEP perl script. It can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
             </option>
-            <option name="Path to fastA file">
-            	Set the path to the reference file (fastA format)
-            	The plugin LOFTEE won't work properly if no fasta file is given!
-            	In general, the fastA file is downloaded at the same time as VEP is installed. It can be found in the cache directory.
+            <option name="Path to FastA file">
+            	Specify a FastA file or a directory containing FastA files to use to look up reference sequence.
+            	The file is required for the flags --hgvs or --check_ref in offline mode (when using cache).	
+            	Moreover, the plugin LOFTEE won't work properly if no FastA file is given!
+            	The FastA can be downladed using the VEP installation script.
+            	In general, it is located in the cache directory.
             </option>
             <option name="Folder for output files">
             	Set the path to a folder where the output files should be stored.<br />

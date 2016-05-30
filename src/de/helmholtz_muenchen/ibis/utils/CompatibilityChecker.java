@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.utils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -79,11 +80,10 @@ public class CompatibilityChecker {
 	}
 	
 	public static boolean inputFileNotOk(String path) {
-		boolean isEmpty = false;;
+		boolean isEmpty = false;
 		try {
-			isEmpty = (Files.newBufferedReader(Paths.get(path)).readLine() == null);
+			isEmpty = (Files.newBufferedReader(Paths.get(path),StandardCharsets.ISO_8859_1).readLine() == null);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

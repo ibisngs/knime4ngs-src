@@ -193,7 +193,7 @@ public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
     		my_overwrite.setBooleanValue(true);
     		my_overwrite.setEnabled(false);
     	} else {
-    		my_overwrite.setBooleanValue(false);
+//    		my_overwrite.setBooleanValue(false);
     		my_overwrite.setEnabled(true);
     	}
     }

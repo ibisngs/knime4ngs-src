@@ -15,6 +15,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
@@ -39,15 +40,26 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	// the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(VEPNodeModel.class);
     
-    //general options
+    //annotation
+    
 	static final String [] TRANSCRIPT_SETS = {"GENCODE Basic","Ensembl","RefSeq"};
 	static final String DEF_TRANS_SET = TRANSCRIPT_SETS[0];
-    
+	
     static final String CFGKEY_TRANSCRIPT_SET ="transcript_set";
     static final String CFGKEY_CODING_ONLY = "coding_only";
-	
+    static final String CFGKEY_FURTHER_OPTIONS = "further_options";
+    static final String CFGKEY_SIFT = "sift";
+    static final String CFGKEY_POLYPHEN = "polyphen";
+    static final String CFGKEY_SYMBOL = "symbol";
+    static final String CFGKEY_BIOTYPE = "biotype";
+    
 	final SettingsModelString m_transcript_set = new SettingsModelString(CFGKEY_TRANSCRIPT_SET,VEPNodeModel.DEF_TRANS_SET);
     final SettingsModelBoolean m_coding_only = new SettingsModelBoolean(CFGKEY_CODING_ONLY,true);
+    final SettingsModelBoolean m_sift = new SettingsModelBoolean(VEPNodeModel.CFGKEY_SIFT, true);
+    final SettingsModelBoolean m_polyphen = new SettingsModelBoolean(VEPNodeModel.CFGKEY_POLYPHEN, true);
+    final SettingsModelBoolean m_symbol = new SettingsModelBoolean(VEPNodeModel.CFGKEY_SYMBOL, true);
+    final SettingsModelBoolean m_biotype = new SettingsModelBoolean(VEPNodeModel.CFGKEY_BIOTYPE, true);
+    final SettingsModelOptionalString m_further_options = new SettingsModelOptionalString(VEPNodeModel.CFGKEY_FURTHER_OPTIONS, "", false);
     
     //output options
     static final String [] OUT_FORMATS = new String[]{"default","vcf","json","gvf"};
@@ -103,7 +115,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	final SettingsModelString m_samtools_path = new SettingsModelString(CFGKEY_SAMTOOLS_PATH,"");
 	
 	static final String CFGKEY_FURTHER_PLUGINS = "further_plugins";
-	final SettingsModelString m_further_plugins = new SettingsModelString(CFGKEY_FURTHER_PLUGINS, "");
+	final SettingsModelOptionalString m_further_plugins = new SettingsModelOptionalString(CFGKEY_FURTHER_PLUGINS, "", false);
 	
 	static final String CFGKEY_PLUGIN_DIR = "plugin_dir";
 	final SettingsModelString m_plugin_dir = new SettingsModelString(CFGKEY_PLUGIN_DIR, DEF_PLUGIN_DIR);
@@ -131,6 +143,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         addSetting(m_outfolder);
         addSetting(m_stats_type);
         addSetting(m_coding_only);
+        addSetting(m_further_options);
         addSetting(m_use_cache);
         addSetting(m_cache_dir);
         addSetting(m_plugin_dir);
@@ -143,6 +156,10 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         addSetting(m_transcript_set);
         addSetting(m_overwrite);
         addSetting(m_buffer);
+        addSetting(m_sift);
+        addSetting(m_polyphen);
+        addSetting(m_symbol);
+        addSetting(m_biotype);
     }
 
     /**
@@ -227,26 +244,50 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		cmd += " --database";
     	}
     	
-    	//fasta file
-    	String fasta_file = m_fasta.getStringValue();
-    	if(fasta_file.equals("")|| Files.notExists(Paths.get(fasta_file))) {
-			setWarningMessage("No fasta file specified for looking up reference sequence!");
-		} else {
-			cmd += " --fasta "+fasta_file;
-		}
     	
     	//default VEP parameters
     	cmd += " --no_progress";
     	cmd += " --allele_number";
-    	cmd += " --sift b";
-    	cmd += " --polyphen b";
-    	cmd += " --symbol";
-//    	cmd += " --numbers";
-    	cmd += " --biotype";
-//    	cmd += " --total_length";
-    	cmd += " --canonical";
-    	cmd += " --ccds";
-//    	cmd += " --fields Consequence,ALLELE_NUM,Codons,Amino_acids,Gene,SYMBOL,Feature,EXON,PolyPhen,SIFT,Protein_position,BIOTYPE,CANONICAL,CCDS,LoF,LoF_filter,LoF_flags";
+    	
+    	if(m_sift.getBooleanValue()) {
+    		cmd += " --sift b";
+    	}
+    	
+    	if(m_polyphen.getBooleanValue()) {
+    		cmd += " --polyphen b";
+    	}
+    	
+    	if(m_symbol.getBooleanValue()) {
+        	cmd += " --symbol";
+    	}
+    	
+    	if(m_biotype.getBooleanValue()) {
+        	cmd += " --biotype";
+    	}
+    	
+    	if(m_further_options.isActive()) {
+    		cmd += " " + m_further_options.getStringValue().trim();
+    	}    	
+    	
+    	//fasta file
+    	String fasta_file = m_fasta.getStringValue();
+    	String [] flagsRequiringFastAFile = {"--hgvs", "--check_ref"};
+    	boolean requireFastA = false;
+    	for(String s: flagsRequiringFastAFile) {
+    		if(cmd.contains(s)) {
+    			requireFastA = true;
+    			break;
+    		}
+    	}
+    	if(CompatibilityChecker.inputFileNotOk(fasta_file) && (requireFastA  || m_use_loftee.getBooleanValue())) {
+			throw new InvalidSettingsException("Chosen settings require FastA file for looking up reference sequence!");
+		} 
+    	
+    	if(CompatibilityChecker.inputFileNotOk(fasta_file)) {
+    		setWarningMessage("Given path to FastA file invalid!");
+    	} else {
+			cmd += " --fasta "+fasta_file;
+		}
     	
     	//plugin parameters
     	String plugin_dir = m_plugin_dir.getStringValue();
@@ -287,8 +328,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}
     	
     	//user defined plugins
-    	
-    	cmd += " " + m_further_plugins.getStringValue().trim();
+    	if(m_further_plugins.isActive()) {
+    		cmd += " " + m_further_plugins.getStringValue().trim();
+    	}
     	
     	String stdOutFile = outfileBase + ".vep.stdout";
     	
