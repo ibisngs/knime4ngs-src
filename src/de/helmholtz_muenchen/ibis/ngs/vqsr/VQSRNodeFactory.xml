@@ -24,24 +24,40 @@
         <tab name="Options">
         	<option name="General Options">
         	<b>Recalibration Mode</b>: Specify which recalibration mode (SNP/indel) should be employed. <br />
-			<b>Java Memory in GB</b>: Set the maximum Java heap size per thread.
+			<b>Java Memory in GB</b>: Set the maximum Java heap size (in GB) per thread.
         	</option>
         	<option name="Variant Recalibration">
         	<b>Tranche levels</b>: The levels of novel false discovery rate (FDR, implied by ti/tv) at which to slice the data (in percent, that is 1.0 for 1 percent).
         		By default, the values of the Best Practice Guidelines are used according to the chosen mode (SNP or INDEL).<br />
-        	<b>Annotation</b>: The names of the annotations which should be used for calculations.
+        	<b>Annotation</b>: Define which annotations should be used for calculations.
         	<ul> <li>
         	DP (Depth of Coverage) - should not be used when working with exome datasets.</li>
         	<li>InbreedingCoeff - is a population level statistic that requires at least 10 samples in order to be computed.
         		For projects with fewer samples, or that includes many closely related samples (such as a family) please omit this annotation from the annotation field.</li> 
         	</ul>
-        	<b>Gaussians</b>: This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm. <br />
-        	<b>Threads</b>: Set the number of threads for the execution of the VariantRecalibrator. <br />
-        	<b>Optional flags</b>: Set individual command line flags for the VariantRecalibrator.
+        	<b>Gaussians</b>: This parameter determines the maximum number of Gaussians that should be used when building a positive model using the variational Bayes algorithm. (Defualt value = 8) <br />
+        	<b>Threads</b>:
+        	Set the number of threads to be used.
+        	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.<br />
+        	<b>Optional flags</b>: Set additional command line flags for the VariantRecalibrator.
         	</option>
         	<option name="Resources">
-        		A list of sites for which to apply a prior probability of being correct but which aren't used by the algorithm (training and truth sets are required to run).
-        		Example: dbsnp,known=true,training=false,truth=false,prior=6.0
+        		Select which resource datasets should be used for the VariantRecalibrator.
+        		The variant quality score recalibrator builds an adaptive error model using known variant sites and then applies this model to estimate the probability that each variant is a true genetic variant or a machine artifact
+        		All filtering criteria are learned from the data itself.<br /><br />
+        		<b>Resources for SNPs</b>:
+        		<ul>
+        		<li><i>HapMap</i>: True sites training resource</li>
+        		<li><i>Omim</i>: True sites training resource</li>
+        		<li><i>1000G</i>: Non-true sites trainig resource</li>
+        		<li><i>dbSNPS</i>: Known, sites resource, not used in training</li>
+        		</ul>
+        		Example: resource:hapmap,known=false,training=true,truth=true,prior=15.0<br /><br />
+        		<b>Resources for Indels</b>:
+        		<ul>
+        		<li><i>Mills</i>: Known and true sites training resources.</li>
+        		</ul>
+        		Example: resource:mills,known=false,training=true,truth=false,prior=2.0
         	</option>
         	<option name="ApplyRecalibration">
         	<b>TS Filter Level</b>: Set the truth sensitivity level at which ApplyRecalibration starts to filter. <br />
@@ -60,10 +76,13 @@
         	</option>
         	<option name="Path to reference sequence">
         		Set the path to the reference sequence.
+        		This will be done automatically if the path is already defined in the preference page.
         	</option>
         	<option name="Path to ...">
         		Set the paths to reference data sets used for variant recalibration.
+        		This will be done automatically if the path is already defined in the preference page. 
         	<ul>
+        	<li>HapMap</li>
         	<li>Omni</li>
         	<li>1000G SNPs</li>
         	<li>dbSNP</li>
@@ -75,10 +94,13 @@
     
     <ports>
         <inPort index="0" name="Input VCF file.">
-        	Cell 0: Path to input VCF file.
+        	Cell 0: Path to input VCF file
         </inPort>
         <outPort index="0" name="Output VCF file">
-        	Cell 0: Path to VQSR variants file.
+        	Cell 0: Path to VQSR variants file
         </outPort>
     </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>
 </knimeNode>

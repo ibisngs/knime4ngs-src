@@ -47,7 +47,7 @@
         Set additional command line flags for the MergeTwoVCFs.
         </option>
         </tab>
-         <tab name="Preference page">
+        <tab name="Preference page">
         <option name="HTE">
         	Set a threshold for repeated execution.
         	Only used if HTE is enabled in the preference page.

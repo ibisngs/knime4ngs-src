@@ -85,7 +85,7 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     	createNewGroup("General Options");
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentStringSelection(m_MODE, "Recalibration Mode", "SNP","INDEL"));
-    	addDialogComponent(new DialogComponentNumber(m_XMX, "Java Memory in GB",1,4));
+    	addDialogComponent(new DialogComponentNumber(m_XMX, "Java Memory per thread in GB",1,4));
     	setHorizontalPlacement(false);
     	
     	createNewGroup("VariantRecalibration");
