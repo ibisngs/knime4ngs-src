@@ -15,14 +15,14 @@ import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.rawreadmanipulator.RawReadManipulatorNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.runaligner.RunAlignerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
@@ -45,6 +45,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     protected static final String CFGKEY_RUN_MODE 		= "RunMode";
     protected static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
     protected static final String CFGKEY_GENOME_FOLDER 	= "GenomeFolder";
+    protected static final String CFGKEY_OPTIONAL_PARA 	= "OPTIONAL_PARA";
 
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
@@ -62,9 +63,11 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
 	
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_RUN_MODE			= new SettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
-    private final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-    private final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
+    private final SettingsModelString SET_RUN_MODE					= new SettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
+    private final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
+    private final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
+    private final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(CFGKEY_OPTIONAL_PARA, "",false);
+
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -78,6 +81,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
         addSetting(SET_RUN_MODE);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_GENOME_FOLDER);
+    	addSetting(SET_OPTIONAL_PARA);
     }
     
     /**
@@ -87,12 +91,19 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
 
+    	if(SET_RUN_MODE.getStringValue().equals(DEFAULT_RUN_MODE)){
+        	CompatibilityChecker CC = new CompatibilityChecker();
+        	CC.getReadType(inSpecs, 0);
+        	if(CC.getWarningStatus()){
+        		setWarningMessage(CC.getWarningMessages());
+        	}
+    	}
+
+    	
+    	
     	// check input port
     	String[] cn=inSpecs[0].getColumnNames();
     	if(isAlignRunMode()) {
-    		if(!((cn[0].equals(RunAlignerNodeModel.OUT_COL1) && cn[1].equals(RunAlignerNodeModel.OUT_COL2) ||
-    			(cn[0].equals(RawReadManipulatorNodeModel.OUT_COL1) && cn[1].equals(RawReadManipulatorNodeModel.OUT_COL2)))))
-    			throw new InvalidSettingsException("Incompatible input: In 'alignReads' mode the node expects the output of a 'RunAligner' or 'RawReadManipulator' node.");
     		
             // validate genome dir
             validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
@@ -153,6 +164,12 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	}
     	// add the input parameter
     	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
+    	
+    	//add optional parameters
+    	if(SET_OPTIONAL_PARA.isActive()){
+    		pars.put(SET_OPTIONAL_PARA.getStringValue(), "");
+    	}
+    	
     	// return the GUI parameter
 		return pars;
 	}
@@ -225,12 +242,12 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToStderrFile() {
-		return null;
+		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "STAR.stdErr.log");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return null;
-	}
+		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "STAR.stdOut.log");
+ 	}
 }
 

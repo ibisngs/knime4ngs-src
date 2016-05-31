@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "Star" Node.
  * STAR aligns RNA-seq reads to a reference genome using uncompressed suffix arrays. 
@@ -36,7 +38,7 @@ public class StarNodeFactory
      */
     @Override
     public NodeView<StarNodeModel> createNodeView(final int viewIndex, final StarNodeModel nodeModel) {
-        return new StarNodeView(nodeModel);
+    	return new HTENodeView<StarNodeModel>(nodeModel);
     }
 
     /**

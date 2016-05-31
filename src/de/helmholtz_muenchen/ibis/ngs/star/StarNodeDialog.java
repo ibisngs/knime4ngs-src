@@ -4,7 +4,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
@@ -27,10 +29,12 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
     
     public void addToolDialogComponents() {
     	// definition of SettingsModel (all prefixed with SET)
-        final SettingsModelString SET_RUN_MODE			= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
-        final SettingsModelString SET_OUTPUT_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
-        final SettingsModelString SET_GENOME_FOLDER		= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
-       
+        final SettingsModelString SET_RUN_MODE					= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
+        final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
+        final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
+        final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(StarNodeModel.CFGKEY_OPTIONAL_PARA, "",false);
+
+        
         // create open file/folder components
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);
        	DialogComponentFileChooser dcGenomeFolder 	= new DialogComponentFileChooser(SET_GENOME_FOLDER, "his_id_GENOME_FOLDER", 0, true);
@@ -48,6 +52,7 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
 
         createNewGroup("Input");
         addDialogComponent(dcGenomeFolder);
+        addDialogComponent(new DialogComponentOptionalString(SET_OPTIONAL_PARA,"Optional parameters"));
         
         createNewGroup("Output");
         addDialogComponent(dcOutputFolder);
