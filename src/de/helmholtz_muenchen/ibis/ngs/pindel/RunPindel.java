@@ -35,15 +35,15 @@ public class RunPindel extends PindelNodeModel {
 		else{
 			
 			//add integer to file name and increment integer until the file does not exist
-			int n=1;
-			while(Files.exists(Paths.get(filebase+"."+toolextension+n+"_"+variant))){
-				n++;
-				
-				if(n==10000){
-					throw new Exception("Oops, I'm so sorry, something went wrong, there are too many files");
-				}
-			}
-			return filebase+"."+toolextension+n;
+//			int n=1;
+//			while(Files.exists(Paths.get(filebase+"."+toolextension+n+"_"+variant))){
+//				n++;
+//				
+//				if(n==10000){
+//					throw new Exception("Oops, I'm so sorry, something went wrong, there are too many files");
+//				}
+//			}
+			return filebase+"."+toolextension;
 		}
 		
 	}
