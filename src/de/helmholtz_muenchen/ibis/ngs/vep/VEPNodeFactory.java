@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "VEP" Node.
  * 
@@ -35,7 +37,7 @@ public class VEPNodeFactory
     @Override
     public NodeView<VEPNodeModel> createNodeView(final int viewIndex,
             final VEPNodeModel nodeModel) {
-        return new VEPNodeView(nodeModel);
+        return new HTENodeView<VEPNodeModel>(nodeModel);
     }
 
     /**

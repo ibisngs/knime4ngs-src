@@ -41,8 +41,6 @@
        	 		Set the path to the snpEff jar file.
        	 	</option>
        	</tab>
-       	 	
-
     </fullDescription>
     
     <views>
@@ -52,5 +50,11 @@
     <ports>
         <inPort index="0" name="In-Port"> Input VCF file</inPort>
         <outPort index="0" name="Out-Port"> Annotated VCF file</outPort>
-    </ports>    
+    </ports>
+    
+     <views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>
 </knimeNode>

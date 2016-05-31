@@ -8,94 +8,90 @@
     
     <fullDescription>
         <intro>
-        	This node is a wrapper for the Variant Effect Predictor from Ensembl.
-        	By default VEP annotates SIFT and PolyPhen scores.
-        	The format of the output file is vcf.
-        	The node allows to use the plugin LOFTEE for the annotation of LOF alleles.
-        	<br />
-        	Source: <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">http://www.ensembl.org/info/docs/tools/vep/index.html</a>
-        	<br />
-        	<br />
-        	LOFTEE is a VEP plugin to identify LOF (loss-of-function) variants.
-        	It implements a set of filters to deem stop-gained, splice site disrupting and frameshift variants as low-confidence LOFs.
-        	<br />
-        	Source: <a href="https://github.com/konradjk/loftee">https://github.com/konradjk/loftee</a>
-        	
-        	<!--
-        	<br />
-        	<br />
-        	CADD is a VEP plugin that retrieves CADD (Combined Annotation Dependent Depletion) scores for variants from one or two tabix-indexed CADD data files.
-        	<br />
-        	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/CADD.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/CADD.pm</a>
-        	<br />
-        	<br />
-        	ExAC is a VEP plugin that retrieves that retrieves ExAC (Exome Aggregation Consortium Data Set) allele frequencies
-        	<br />
-        	Source: <a href="https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm">https://github.com/ensembl-variation/VEP_plugins/blob/master/ExAC.pm</a>
-        	-->
+        	This node is a wrapper for <a href="http://www.ensembl.org/info/docs/tools/vep/index.html">Ensembl's Variant Effect Predictor (VEP)</a> which annotates genomic variants.
+        	The tool provides various annotation options and allows you to include individual plugins.
+        	The node supports the application of the <a href="https://github.com/konradjk/loftee">LOFTEE</a> plugin which assesses the confidence of loss-of-function variant.
         </intro>
         
-        <tab name="Options">
-            <option name="HTE">
-        		Set a threshold for repeated execution.
-        		Only used if HTE is enabled in the preference page.
+        <tab name="Annotation">
+        	<option name="Coding only">
+        		If this checkbox is checked, VEP will only return consequences that affect coding regions of transcripts.
         	</option>
-            <option name="Path to variant_effect_predictor.pl">
-            	Set the path to the VEP perl script. It can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
+        	<option name=" Choose transcript set">
+            	VEP uses <b>Ensembl</b> transcripts (=GENCODE Comprehensive) by default.
+            	By choosing <b>GENCODE Basic</b> your analysis is limited to transcripts without fragmented or problematic transcripts.
+            	Alternatively, you can choose the <b>RefSeq</b> transcript set (requires the RefSeq cache or not using the cache).
+        	</option>
+        	<option name="SIFT">
+        		Check this box, if you want VEP to output the prediction term and score of amino acid substitutions predicted by SIFT.
+        	</option>
+        	<option name="PolyPhen">
+        		Check this box, if you want VEP to output the prediction term and score of amino acid substitutions predicted by PolyPhen.
+        	</option>
+        	<option name="Gene symbol">
+        		VEP adds the gene symbol (where available) to the output.
+        	</option>
+        	<option name="Biotype">
+        		 Adds the biotype of the transcript or regulatory feature.
+        	</option>
+        	<option name="Further flags">
+        		Commit further options to VEP (whitespace separated).
+        	</option>
+        </tab>
+        
+        <tab name="Performance">
+        	<option name="Number of forks">
+        		 Enable forking, using the specified number of forks.
+        		 Forking can dramatically improve the runtime of the script.
+        		 If LOFTEE is used, it will run ignoring the conservation file as there occur errors when the file is accessed by multiple threads.
+        	</option>
+        	<option name="Buffer size">
+        		 Sets the internal buffer size, corresponding to the number of variations that are read in to memory simultaneously.
+        		 Set this lower to use less memory at the expense of longer run time, and higher to use more memory with a faster run time.
+        	</option>
+        	<option name="Use cache">
+        		It is recommended to use a cache as accessing data in the cache is much faster than accessing it from the database.
+            	The cache is usually build during the installation of the Ensembl API. 
+            	Otherwise, you can find information in the VEP documentation (see VEP link above).
+        	</option>
+        	<option name="Cache directory">
+            	Set the path to the cache directory.<br />
+            	(Default: "$HOME/.vep/")
             </option>
-            <option name="Path to FastA file">
+        	<option name="Path to FastA file">
             	Specify a FastA file or a directory containing FastA files to use to look up reference sequence.
-            	The file is required for the flags --hgvs or --check_ref in offline mode (when using cache).	
+            	The file is required for the flags --hgvs or --check_ref when the cache is used.	
             	Moreover, the plugin LOFTEE won't work properly if no FastA file is given!
             	The FastA can be downladed using the VEP installation script.
             	In general, it is located in the cache directory.
+            </option>
+        </tab>
+        
+        <tab name="Output">
+        	<option name="Choose format of annotation file">
+        		VEP outputs a tab separated file by default.
+        		It can also create a GVF or JSON file or add the annotations to the input VCF file. 
+        	</option>
+        	<option name="Choose format of statistics file">
+            	VEP can create a statistics file in html or plain text format. 
             </option>
             <option name="Folder for output files">
             	Set the path to a folder where the output files should be stored.<br />
             	If "Overwrite" is checked, existing files will be overwritten.
             </option>
-            <option name="Further options"> <br />
-            <ul>
-            <li>
-            Use cache: It is recommended to use a cache as accessing data in the cache is much faster than access it from the database.
-            	The cache is usually build during the installation of the Ensembl API. 
-            	Otherwise, you can find information in the VEP documentation (see VEP link above). 
-            </li>
-            <li>
-            Number of forks: Set the number of forks to be used.<br />
-            Forking can dramatically improve the runtime of VEP. <br />
-            If LOFTEE is used, it will run ignoring the conservation file as there occur errors when it is accessed by multiple threads.
-            </li>
-            <li>
-           	Coding only: If this checkbox is checked, VEP will only return consequences that affect coding regions of transcripts.
-            </li>
-            <li>
-            Choose transcript set:
-            	VEP uses <b>Ensembl transcripts</b> (=GENCODE Comprehensive) by default.
-            	By choosing <b>GENCODE</b> basic your analysis is limited to transcripts belonging to the GENCODE basic set.
-            	This set has fragmented or problematic transcripts removed.
-            	Alternatively, you can choose the <b>RefSeq</b> transcript set (requires the RefSeq cache or the database flag).
-            </li>
-            </ul>
-            </option>
-		</tab>
-		
-		<tab name = "Advanced">
-            <option name="Choose type of statistic file">
-            	VEP can create a statistic file in html or plain text format. 
-            </option>
-            <option name="Cache directory">
-            	Set the path to the cache directory.<br />
-            	(Default: "$HOME/.vep/")
-            </option>
-            <option name="Plugin directory">
+        </tab>
+        
+        <tab name="Plugins">
+        	<option name="Plugin directory">
             	Set the path to the plugin directory.<br />
             	(Default: "$HOME/.vep/Plugins")
             </option>
-            <option name="Specify further plugin/options">
-            	Commit further options/plugins to VEP.
+            <option name="Further plugins">
+            	Commit further plugins to VEP.
+            	If you want to use multiple plugins, separate each plugin by whitespace.
             </option>
         </tab>
+        
         <tab name="LOFTEE">
             <option name="Use LOFTEE">
             	Check this box if you want to use LOFTEE.
@@ -107,30 +103,21 @@
             <option name="Path to phylocsf.sql">
             	You can find a download link for this file following the LOFTEE link above.
             	The conservation file will be ignored, if forking is enabled.
+            </option>  
+        </tab>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        	<option name="Path to variant_effect_predictor.pl">
+            	Set the path to the VEP perl script. It can usually be found in ensembl-tools-release-../scripts/variant_effect_predictor.
             </option>
-            <option name="Samtools PATH">
-            	Set the path to the SAMTOOLS executable.
+        	<option name="Samtools PATH">
+            	Set the path to the SAMTOOLS executable (required by the LOFTEE plugin).
             </option>
         </tab>
-        <!--<tab name="CADD">
-        	<option name="Use CADD?">
-        		Check this box if you want to annotate CADD scores.
-        		Requires the plugin file in the plugin directory.
-        	</option>
-        	<option name="Path to CADD file(s)">
-        		You can specify two CADD files, e.g. one containing scores for SNVs and the other for InDels.
-        		CADD files can be downloaded from <a href="http://cadd.gs.washington.edu/download/">http://cadd.gs.washington.edu/download/</a>
-        	</option>
-        </tab>
-        <tab name="ExAC">
-        	<option name="Use ExAC?">
-        		Check this box if you want to annotate ExAC allele frequencies.
-        		Requires the plugin file in the plugin directory.
-        	</option>
-        	<option name="Path to ExAC file">
-        		ExAC files can be downloaded from <a href="ftp://ftp.broadinstitute.org/pub/ExAC_release/current">ftp://ftp.broadinstitute.org/pub/ExAC_release/current</a>
-        	</option>
-        </tab>-->
     </fullDescription>
     
     <ports>
@@ -138,7 +125,14 @@
         	Cell 0: Path to VCF file.
         </inPort>
         <outPort index="0" name="">
-        	Cell 0: Path2VEP_AnnotationVCF
+        	Cell 0: Path to annotation file in the specified format.
         </outPort>
-    </ports>    
+    </ports>
+    
+    <views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>
+    
 </knimeNode>

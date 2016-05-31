@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -94,7 +95,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     //preference page options
     static final String CFGKEY_VEP_PL = "vep_pl";
 	final SettingsModelString m_veppl = new SettingsModelString(CFGKEY_VEP_PL,"");
-
 	
 	//plugins
 	static final String DEF_PLUGIN_DIR = DEF_CACHE_DIR + System.getProperty("file.separator") + "Plugins";
@@ -123,6 +123,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
 	
 	private int vcf_index;
+	private DataType outType = FileCell.TYPE;
 	
     /**
      * Constructor for the node model.
@@ -180,6 +181,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String outfolder = m_outfolder.getStringValue();
     	if(outfolder.equals("") || Files.notExists(Paths.get(outfolder))) {
     		outfileBase = vcf_infile;
+    		setWarningMessage("No output folder given or invalid path! Using folder of input file!");
     	} else {
     		outfileBase = m_outfolder.getStringValue()+ System.getProperty("file.separator")+ new File(vcf_infile).getName();
     	}
@@ -350,7 +352,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, outType).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
     			(FileCell) FileCellFactory.create(res_file)};
@@ -408,8 +410,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
+    	if(m_out_format.getStringValue().equals("vcf")) {
+    		outType = VCFCell.TYPE;
+    	}
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, outType).createSpec()})};
     }
 }
