@@ -36,7 +36,7 @@
         	</option>
             <option name="Interval for recalibration">
             	You can check this option to perform recalibration in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>) and select the file in the file browser.
             </option>	
         	<option name="Analyze Covariates">
     		Before/after plots of the base quality score can be generated.<br />
@@ -54,47 +54,44 @@
         </tab>
         <tab name="BaseRecalibrator">
         	<option name="Cycle threshold">
-            	This threshold applies to the cycle covariate. 
-            	When BaseRecalibrator finds a greater cycle it reports an error. 
-            	BaseRecalibrator ignores this value if it does not analyze cycle covariate.
+            	Set the maximum cycle value permitted for the Cycle covariate. (Default value = 500)<br />
+            	The cycle covariate will generate an error if it encounters a cycle greater than this value.
+            	This argument is ignored if the Cycle covariate is not used.
         	</option>
         	<option name="Gap open penalty">
             	Gap open penalty for calculating BAQ (par-base alignment quality, probability that a base is not correctly aligned). 
-            	For whole-genome data, it is recommended to use a value around 30 as gap open penalty.
+            	Default value is 40. 30 is perhaps better for whole genome call sets.
         	</option>
-        	
-        	
-            <option name="Calculation of covariates">
-            	Select the covariates you want to analyse. 
-            	Quality score covariate, read group covariate are always calculated. Context covariate and cycle covariate are optional but recommended covariates. 
-            	Additionally, it is possible to examine repeat length covariate and repeat unit covariate.
+        	<option name="Default quality for deletions">
+            	Set the default quality to use as a prior (reported quality) in the base deletion covariate model. (Default value = 45)<br />
+            	This value will replace all base qualities in the read for this default value.
+            	A Negative value turns it off.
         	</option>
-
-
             <option name="Default quality for insertions">
-            	Set the default quality for the base insertion covariate model. 
-            	To disable to the option, set this value to -1.
-        	</option>
-            <option name="Default quality for deletions">
-            	Set the default quality for the base deletion covariate model. 
-            	To disable to the option, set this value to -1.
+            	Set the default base quality to use as a prior (reported quality) in the base insertion covariate model. (Default value = 45)<br />
+            	This parameter is used for all reads without insertion quality scores for each base. [default is on] 
+            	Setting this value to -1 disables the option.
         	</option>
             <option name="Default quality for mismatches">
-            	Set the default quality for the base mismatch covariate model. 
-            	To disable to the option, set this value to -1.
+            	Set the default quality to use as a prior (reported quality) in the base mismatch covariate model. (Default value = -1)<br />
+            	This value will replace all base qualities in the read for this default value.
+            	A negative value turns it off.
         	</option>
             <option name="k-mer context size for indels">
-            	Set the context size around indels to calculate the context covariate. 
-            	Increasing the context size requires more memory and runtime.
+            	Define the size of the k-mer context to be used for base insertions and deletions. (Default value = 3)<br />
+            	The context covariate will use a context of this size to calculate its covariate value for base insertions and deletions.
+            	The value must be between 1 and 13 (inclusive). Note that higher values will increase runtime and required java heap size. 
         	</option>
             <option name="k-mer context size for mismatches">
-            	Set the context size around base mismatches to calculate the context covariate. 
-            	Increasing the context size requires more memory and runtime.
+            	Set the size of the k-mer context to be used for base mismatches. (Default value = 2)<br />
+            	The context covariate will use a context of this size to calculate its covariate value for base mismatches.
+            	The value must be between 1 and 13 (inclusive).
+            	Note that higher values will increase runtime and required java heap size. 
         	</option>
             <option name="Quality threshold for read tails">
-            	Beginning and end of reads often have low quality values. 
-            	These values should not be considered in the context covariate. 
-            	This option defines the quality value which marks the beginning of the low-quality read edges.
+            	Define the minimum quality for tha bases in the tail of the reads to be considered. (Default value = 2)<br />
+            	Reads with low quality bases on either tail (beginning or end) will not be considered in the context.
+            	This parameter defines the quality below which (inclusive) a tail is considered low quality 
         	</option>
             <option name="Optional flags">
         		Set additional command line flags for the BaseRecalibrator walker.
@@ -128,13 +125,13 @@
     
     <ports>
         	<inPort index="0" name="Input BAM">
-        	Cell 0: Path to input BAM file.
+        	Cell 0: Path to input BAM file
     	</inPort>
         	<outPort index="0" name="Output">
-        	Cell 0: Path to recalibrated BAM file.
+        	Cell 0: Path to recalibrated BAM file
     	</outPort>
     </ports>
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
     </views>
 </knimeNode>

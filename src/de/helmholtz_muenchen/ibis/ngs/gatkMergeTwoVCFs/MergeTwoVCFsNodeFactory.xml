@@ -16,59 +16,35 @@
  
         <tab name="CombineVariants">
         <option name="Genotype Merge Type"> Determine how genotype records for samples shared across the ROD file should be merged.
-        		<ul>
-        		<li>
-        		Uniquify:
-    			Make all sample genotypes unique by file.
-    			Each sample shared across RODs gets named sample.ROD.
-    			</li>
-    			<li>
-    			Prioritize:
-    			Take the genotypes in priority order.
-    			</li>
-    			<li>
-				Usorted:
-    			Take the genotypes in any order.
-    			</li>
-    			<li>
-				Require unique:
-    			Require that all samples/genotypes be unique between all inputs.
-    			</li>
-    			<li>
-    			Prioritize input:
-    			In the case of different genotypes predicted in the two VCF files, one VCF file can be prioritized over the second.
-    			</li>
-    			</ul>
+        	<ul>
+        	<li>Uniquify: Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
+    		<li>Prioritize: Take the genotypes in priority order.</li>
+    		<li>Usorted: Take the genotypes in any order.</li>
+    		<li>Require unique: Require that all samples/genotypes be unique between all inputs.</li>
+    		<li> Prioritize input: In the case of different genotypes predicted in the two VCF files, one VCF file can be prioritized over the second.</li>
+    		</ul>
     		<b>Input VCF file 1 and 2</b>: Set the paths to the vcf files that should be merged.	  
 			</option>
-			<option name="Filtered Record Merge Type"> Determine how records at the same site in the VCF should be handled.
-        		<ul>
-        		<li>
-        		Keep if any unfiltered:
-    			Union - leaves the record if any record is unfiltered.
-        		<br />
-        		</li>
-        		<li>
-        		Keep if all unfiltered:
-        		Requires all records present at site to be unfiltered. VCF files that don't contain the record don't influence this.
-        		<br />
-        		</li>
-        		<li>
-        		Keep unconditional:
-        		If any record is present at this site (regardless of possibility being filtered), then all such records are kept and the filters are reset.
-        		</li>
-        		</ul>	
+		<option name="Filtered Record Merge Type"> Determine how records at the same site in the VCF should be handled.
+        	<ul>
+        	<li>Keep if any unfiltered: Union - leaves the record if any record is unfiltered.</li>
+        	<li>Keep if all unfiltered: Requires all records present at site to be unfiltered. VCF files that don't contain the record don't influence this.</li>
+        	<li>Keep unconditional: If any record is present at this site (regardless of possibility being filtered), then all such records are kept and the filters are reset.</li>
+        	</ul>	
         	</option>
         </tab>
         <tab name= "GATK">
         <option name="GATK Memory">
-        The GATK memory usage can be defined.
+        Set the maximum Java heap size (in GB).
         </option>
         <option name="Path to BED file">
-        Coverage analysis can be restricted to genomic regions defined in a BED file.
+        You can check this option to perform the analysis in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.
         </option>
         <option name="Further options">
-        Commit further options to GATK.
+        Set additional command line flags for the MergeTwoVCFs.
         </option>
         </tab>
          <tab name="Preference page">
@@ -78,6 +54,7 @@
         </option>
         <option name="Path to reference sequence">
         	Set the path to the reference reference sequence.
+        	This will be done automatically if the path is already defined in the preference page.
         </option>	
         <option name="Path to GATK jar file">
         	Set the path to GenomeAnalysisTK.jar.
@@ -95,5 +72,8 @@
         <outPort index="0" name="Merged VCF file">
         	Cell 0: Path to merged VCF file.
         </outPort>	
-    </ports>    
+    </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>    
 </knimeNode>

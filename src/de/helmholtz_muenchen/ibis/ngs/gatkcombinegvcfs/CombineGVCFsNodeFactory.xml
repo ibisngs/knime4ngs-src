@@ -13,23 +13,26 @@
         	instead of passing them all in to GenotypeGVCFs, one would first use CombineGVCFs on smaller batches of samples and then pass these combined gVCFs to GenotypeGVCFs.
         	Note that this tool cannot work with just any gVCF files - they must have been produced with the Haplotype Caller as part of the "single sample discovery" pipeline using the '-ERC GVCF' mode,
         	which uses a sophisticated reference model to produce accurate genotype likelihoods for every position in the target.<br />
-        	For further information, see <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineGVCFs.php">GATK documentation of CombineGVCFs</a>.
+        	For further information, see <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineGVCFs.php">GATK documentation of CombineGVCFs</a>.
         </intro>
     
     	<tab name="Options">
-        <option name="Path to output file">
-        	Set the path to the directory where the combined gvcf files should be stored.
+        <option name="Folder for output files">
+        	Set the path to the directory where the combined gvcf file should be stored.
         </option>
         </tab>
         <tab name="GATK">
         <option name="GATK Memory">
-        The GATK memory usage can be defined.
+        Set the maximum Java heap size (in GB).
         </option>
         <option name="Path to BED file">
-        	Coverage analysis can be restricted to genomic regions defined in a BED file.
+        	You can check this option to perform the analysis in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.
         </option>
         <option name="Further options">
-        	Commit further options to GATK.
+        	Set additional command line flags for the CombineGVCFs.
         </option>
         </tab>
         <tab name="Preference page">
@@ -38,7 +41,8 @@
         	Only used if HTE is enabled in the preference page.
         </option>
         <option name="Path to reference sequence">
-        	Set the path to the reference reference sequence.
+        	Set the path to the reference sequence.
+        	This will be done automatically if the path is already defined in the preference page.
         </option>	
         <option name="Path to GATK jar file">
         	Set the path to GenomeAnalysisTK.jar.
@@ -52,4 +56,7 @@
         <inPort index="0" name="GVCF In-Port">GVCF files in the first column</inPort>
         <outPort index="0" name="Out-Port">Merged gVCF in the first column</outPort>
     </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>
 </knimeNode>

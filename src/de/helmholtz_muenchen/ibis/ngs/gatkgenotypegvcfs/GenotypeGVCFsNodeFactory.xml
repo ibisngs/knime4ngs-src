@@ -11,51 +11,45 @@
         	GenotypeGVCFs merges gVCF records that were produced by the HaplotypeCaller, or result from combining such gVCF files using CombineGVCFs.
         	This tool performs the multi-sample joint aggregation step and merges the records together in a sophisticated manner:
         	at each position of the input gVCFs, this tool will combine all spanning records, produce correct genotype likelihoods, re-genotype the newly merged record, and then re-annotate it.<br />
-        	For further information, see <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_variantutils_GenotypeGVCFs.php">GATK documentation of GenotypeGVCFs</a>.
+        	For further information, see <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_GenotypeGVCFs.php">GATK documentation of GenotypeGVCFs</a>.
         </intro>
         
         
         <tab name="Options">
         <option name="Number of threads">
         	Set the number of threads to be used.
+        	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
         </option>
-        <option name="Folder for output files">
-        	Set the path to the folder where the output files should be stored.
-        </option>
+        <option name="Folder for output files">Set the path to the folder where the output files should be stored.</option>
         </tab>
         <tab name="GATK">
-        <option name="GATK Memory">
-        The GATK memory usage can be defined.
-        </option>
+        <option name="GATK Memory"> Set the maximum Java heap size (in GB).</option>
         <option name="Path to BED file">
-        	Coverage analysis can be restricted to genomic regions defined in a BED file.
-        </option>
-        <option name="Further options">
-        	Commit further options to GATK.
-        </option>
+        You can check this option to perform the analysis in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.</option>
+        <option name="Further options"> Set additional command line flags for the GenotypeGVCFs.</option>
         </tab>
         <tab name="Preference page">
-        <option name="HTE">
-        	Set a threshold for repeated execution.
-        	Only used if HTE is enabled in the preference page.
-        </option>
-        <option name="Path to reference sequence">
-        	Set the path to the reference reference sequence.
-        </option>	
-        <option name="Path to GATK jar file">
-        	Set the path to GenomeAnalysisTK.jar.
-        	This will be done automatically if the path is already defined in the preference page.  
-       	</option>
+        <option name="HTE"> Set a threshold for repeated execution. Only used if HTE is enabled in the preference page.</option>
+        <option name="Path to reference sequence"> Set the path to the reference reference sequence.
+        This will be done automatically if the path is already defined in the preference page.</option>	
+        <option name="Path to GATK jar file"> Set the path to GenomeAnalysisTK.jar.
+        This will be done automatically if the path is already defined in the preference page.</option>
        	</tab>
 
     </fullDescription>
     
     <ports>
         <inPort index="0" name="GVCF inport">
-        	Input GVCF file
+        	Input gVCF file
         </inPort>
         <outPort index="0" name="VCF file">
         	Genotyped VCF
         </outPort>
     </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>
 </knimeNode>

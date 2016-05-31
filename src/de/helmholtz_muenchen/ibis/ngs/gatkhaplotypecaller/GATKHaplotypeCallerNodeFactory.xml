@@ -10,19 +10,17 @@
         <intro>
         	This node is based on the HaplotypeCaller tool of GATK. It is capable of calling SNPs and indels simultaneously via local de-novo assembly of haplotypes in an active region.
         	In the so-called GVCF mode used for scalable variant calling in DNA sequence data, this tool runs per-sample to genrate a intermediate genomic gVCF, which can then be used for joint genotyping of multiple samples.<br />
-        	For further information, see <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php">GATK documentation of the HaplotypeCaller</a>.
+        	For further information, see <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_haplotypecaller_HaplotypeCaller.php">GATK documentation of the HaplotypeCaller</a>.
         </intro>
         
         <tab name="GATK">
-        <option name="GATK Memory">
-        The GATK memory usage can be defined.
-        </option>
+        <option name="GATK Memory"> Set the maximum Java heap size (in GB).</option>
         <option name="Path to BED file">
-        	Coverage analysis can be restricted to genomic regions defined in a BED file.
-        </option>
-        <option name="Further options">
-        	Commit further options to GATK.
-        </option>
+        You can check this option to perform the analysis in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.</option>
+        <option name="Further options">Set additional command line flags for the GATKHaplotypeCaller.</option>
         </tab>
         <tab name="Preference page">
         <option name="HTE">
@@ -31,6 +29,7 @@
         </option>
         <option name="Path to reference sequence">
         	Set the path to the reference reference sequence.
+        	This will be done automatically if the path is already defined in the preference page.
         </option>	
         <option name="Path to GATK jar file">
         	Set the path to GenomeAnalysisTK.jar.
@@ -42,5 +41,8 @@
     <ports>
         <inPort index="0" name="BAM Inport ">BAM File in the first column</inPort>
         <outPort index="0" name="Out-Port ">GVCF in the first column</outPort>
-    </ports>    
+    </ports> 
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>   
 </knimeNode>

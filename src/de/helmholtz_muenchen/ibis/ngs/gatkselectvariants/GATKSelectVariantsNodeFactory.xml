@@ -19,13 +19,16 @@
         </tab>
         <tab name= "GATK">
         <option name="GATK Memory">
-        The GATK memory usage can be defined.
+        Set the maximum Java heap size (in GB).
         </option>
         <option name="Path to BED file">
-        Coverage analysis can be restricted to genomic regions defined in a BED file.
+        You can check this option to perform the analysis in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.
         </option>
         <option name="Further options">
-        Commit further options to GATK.
+        Set additional command line flags for the GATKSelectVariants.
         </option>
         </tab>
          <tab name="Preference page">
@@ -35,6 +38,7 @@
         </option>
         <option name="Path to reference sequence">
         	Set the path to the reference reference sequence.
+        	This will be done automatically if the path is already defined in the preference page.
         </option>	
         <option name="Path to GATK jar file">
         	Set the path to GenomeAnalysisTK.jar.
@@ -47,11 +51,14 @@
     
     <ports>
         <inPort index="0" name="Input VCF">
-        	Cell [1..x]: Path to VCF input file.
+        	Cell [1..x]: Path to VCF input file
         	Exact column can be selected by using the node parameters
 		</inPort>
         <outPort index="0" name="Subset VCF">
 		        Cell 0: Path to a subset VCF file containing SNPs or indels
         </outPort>
-    </ports>    
+    </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>    
 </knimeNode>

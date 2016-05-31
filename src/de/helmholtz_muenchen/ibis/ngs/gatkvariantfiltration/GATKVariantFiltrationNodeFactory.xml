@@ -11,7 +11,7 @@
         	This node is based on the VariantFiltration tool of GATK which enables hard-filtering variant calls based on certain criteria.
         	Records are hard-filtered by changing the value in the FILTER field to something other than PASS.
         	Use the GATK ExcludeVariants node to remove the filtered variants.<br />
-        	For further information, see the GATK documentation of the <a href="https://www.broadinstitute.org/gatk/gatkdocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">VariantFiltration</a> walker.
+        	For further information, see the GATK documentation of the <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_filters_VariantFiltration.php">VariantFiltration</a> walker.
         </intro>
         
  		 <tab name="VariantFiltration">
@@ -27,16 +27,20 @@
 				If the box is checked, filtered genotypes are set to no-call.
 				Note that allele counts are not recomputed after filtering.
         	</option>
+        	For further information on how to apply hard filters, see <a href="http://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set"> http://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set</a>
 		</tab>
 		<tab name= "GATK">
         <option name="GATK Memory">
-        The GATK memory usage can be defined.
+        Set the maximum Java heap size (in GB).
         </option>
         <option name="Path to BED file">
-        Coverage analysis can be restricted to genomic regions defined in a BED file.
+        Tick this option in order to call variants in certain genomic regions. 
+        You have to specify the intervals in a text file in BED format
+        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+        and select the file in the file browser.
         </option>
         <option name="Further options">
-        Commit further options to GATK.
+        Set additional command line flags for the GATKVariantFiltration.
         </option>
         </tab>
         <tab name="Preference page">
@@ -46,6 +50,7 @@
         </option>
         <option name="Path to reference sequence">
         	Set the path to the reference reference sequence.
+        	This will be done automatically if the path is already defined in the preference page.  
         </option>	
         <option name="Path to GATK jar file">
         	Set the path to GenomeAnalysisTK.jar.
@@ -56,11 +61,14 @@
     
     <ports>
         <inPort index="0" name="Input VCF">
-        	Input VCF file.
+        	Input VCF file
         </inPort>
         <outPort index="0" name="Filtered VCF">
-        	Cell 0: VCF file with adjusted FILTER fields.
+        	Cell 0: VCF file with adjusted FILTER fields
         	Note that filtered variants can be removed using the GATK ExcludeVariants node.
         </outPort>
-    </ports>   
+    </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>   
 </knimeNode>

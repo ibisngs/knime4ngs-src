@@ -20,12 +20,12 @@
         
         <tab name="Options">
             <option name="Sets of known indels">
-            	By choosing to support the realignment with a site of known indels (indels from 1000 Genomes project or Mills and 1000 Genomes gold standard indel set) you increase the realignment accuracy. 
+            	By choosing to support the realignment with a site of known indels (indels from 1000 Genomes Project or Mills and 1000 Genomes Gold Standard Indels) you increase the realignment accuracy. 
             	File paths can be set via the preference page.
         	</option>
             <option name="Interval for realignment">
             	You can check this option to perform realignment in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>) and select the file in the file browser.
         	</option>
             <option name="Number of threads">
             	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
@@ -38,19 +38,23 @@
         
         <tab name="RealignerTargetCreator">
             <option name="Maximum length of realignment interval">
-            	This option serves to limit the interval length for realignment. 
-            	Note, that the realignment algorithm has quadratic complexity and therefore longer intervals heavily impact the runtime.
+            	This option serves to limit the interval length for realignment.
+            	By defining the maximum interval size, any intervals larger than this value will be dropped. (Default value = 500)
+            	<br />
+            	Note, that the realignment algorithm has quadratic complexity and therefore longer intervals heavily impact the runtime.	
         	</option>
             <option name="Minimum number of reads for entropy calculations">
+            	Define the minimum number of reads at a locus to enable using the entropy calculation. (Default value = 4)
+            	<br />
             	If a locus is covered by at least that many reads TargetCreator calculates an entropy value for the site.
         	</option>
             <option name="Fraction of mismatching base qualities">
             	This option refers to the minimal fraction of mismatches at a locus that is defined as high entropy. 
-            	Setting this value to 0 disables the option. 
-            	You should only enable this option in case of an ungapped primary alignment.
+            	<br />
+            	To disable this behavior, set this value to 0. This feature is really only necessary in case of an ungapped primary alignment. (Default value = 0.0)
         	</option>
             <option name="Window size for clustering SNPs">
-            	All SNPs and regions of high entropy are defined as cluster if they lie in the same window.
+            	Any two SNP calls and/or high entropy positions are considered clustered when they occur no more than this many basepairs apart. Must be > 1. (Default value = 10)
         	</option>
         	<option name="Optional flags">
         		Set additional command line flags for the RealignerTargetCreator.
@@ -59,47 +63,54 @@
         
         <tab name="IndelRealigner">
             <option name="Consensus determination model">
-            	You can choose between three different models to calculate the alternate consensus sequence. 
-            	USE_READS is the recommended option. 
-            	This model uses known indels and the indels in the original alignment for identifying a consensus. 
-            	If you have used an ungapped aligner you should select the USE_SW model. 
-            	You can also determine the consensus sequence on the base of known indels only (option KNOWNS_ONLY).
+            	You can choose between three different models to calculate the alternate consensus sequence.
+            	<ul>
+            	<li>USE_READS: Recommended option. This model uses known indels and the indels in the original alignment for identifying a consensus.</li> 
+            	<li>USE_SW: Additionally uses 'Smith-Waterman' to generate alternate consenses. If you have used an ungapped aligner you should select this model.</li> 
+            	<li>KNOWNS_ONLY: Uses only indels from a provided ROD of known indels for determining the consensus sequence.</li>
+            	</ul>
         	</option>
             <option name="LOD Threshold">
             	The LOD is a measure for significance. 
             	A region with low LOD implies that realignment of the region leads only to small improvements. 
             	Therefore only regions with LOD equal or above this threshold will be realigned. 
             	The threshold makes realignment more efficient. 
-            	Decreasing the threshold can be helpful when dealing with low coverage data or when searching for rare indels.
+            	Decreasing the threshold can be helpful when dealing with low coverage data or when searching for rare indels. (Default value = 5)
         	</option>
             <option name="Entropy threshold">
-            	The entropy threshold defines the minimum fraction of mismatches that have to be present in a locus of high entropy. 
-            	IndelRealigner performs only realignment on such loci with high entropy and only if the realignment reduces the overall entropy of the region.
+            	The entropy threshold defines the minimum  percentage of mismatches at a locus to be considered having high entropy. 
+            	IndelRealigner performs only realignment at such loci with high entropy and only if the realignment reduces the overall entropy of the region. (Default value = 0.15)
         	</option>
             <option name="Consensus threshold">
+            	Define the max alternate consensuses to try (necessary to improve performance in deep coverage). (Default value = 30)
+            	<br />
             	This option tries to reduce the overall realignment runtime. 
-            	It limits the number of mapping consensuses tried in realignment.
         	</option>
             <option name="Insert size threshold">
             	The insert size of a read pair is defined as the distance between the leftmost and the rightmost mapping position of the read edges. 
             	An extremely high insert size indicates a completely misplaced read and is likely not to represent the correct region of origin of a read.
+            	Define the maximum insert size of read pairs by setting a threshold. (Default value = 3000)
         	</option>
-            <option name="Read shift threshold">
-            	This threshold refers to a maximum number of bases to shift a read during realignment. 
-            	It serves to limit the overall runtime.
+            <option name="Read shift threshold"> 
+            	This option aims to reduce the overall runtime.
+            	Define the maximum positional move in basepairs that a read can be adjusted during realignment by setting a threshold.  (Default value = 200)
         	</option>
             <option name="Maximum number of reads used for consensus calculation">
+            	Set a threshold for the max number of reads to be used for finding the alternate consensuses. (Default value = 120)
+            	<br />
             	This option aims to reduce the overall runtime. 
             	As consensus calculation for a large number of reads is costly in terms of time, all regions exceeding this threshold will not be realigned. 
-            	Increase this value according to the depth of your data if you do not want to exclude regions of high coverage.
+            	Increase this value according to the depth of your data if you do not want to exclude regions of high coverage. 
         	</option>
             <option name="Maximum number of reads for realignment">
+            	Define the max number of reads allowed at an interval for realignment. (Default value = 20 000) 
+            	<br />
             	This option is to limit the usage of memory. 
             	IndelRealigner has to load all reads in need of realignment of an interval into memory. 
             	If the number of reads exceeds this threshold no realignment is performed. 
             	When dealing with deep sequencing data, you can increase this value.
         	</option>
-            <option name="Output">
+            <option name="Output original cigar string">
             	IndelRealigner resets mapping position and cigar string for all realigned reads of the output BAM file. 
             	Usually, if you do not tick this option, the tool will add the original coordinates as tag. 
             	You can prevent this behaviour and reduce the size of your output BAM file by checking this option.
@@ -120,6 +131,7 @@
         	</option>
         	<option name="Path to reference genome">
         		Set the path to the reference genome.
+        		This will be done automatically if the path is already defined in the preference page.
         	</option>
         	<option name="Path to 1000G Indels">
         		Set the path to the 1000G project indels data set.
@@ -133,14 +145,14 @@
     
     <ports>
 			<inPort index="0" name="Input BAM">
-        	Cell 0: Path to input BAM file.
+        	Cell 0: Path to input BAM file
     	</inPort>
     	
         	<outPort index="0" name="Output">
-        	Cell 0: Path to realigned BAM file.
+        	Cell 0: Path to realigned BAM file
     	</outPort>
     </ports> 
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
     </views>
 </knimeNode>

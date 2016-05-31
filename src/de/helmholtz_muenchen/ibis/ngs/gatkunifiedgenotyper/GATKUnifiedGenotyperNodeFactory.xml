@@ -16,44 +16,70 @@
     	</intro>
         <tab name="Options">
         	<option name="Choose variant type(s)">
-            	This option enables you can choose whether to call only SNPs, only indels or both.
+            	This option enables you to choose whether to call only SNPs, only indels or both.
         	</option>
-        	<option name="Variants from dbSNP">
+        	<option name="Use dbSNP">
             	Tick this option in order to annotate a variant with its ID from dbSNP.
             	The path to the dbSNP VCF file can be set in the preference page (tab). 
         	</option>
         	<option name="Output folder">
         		You can choose an output folder for the resulting VCF file.
-        		Leave this field empty, if you want to use the folder of the input BAM files.
+        		Leave this field empty, if you want to use the same folder where the input BAM files are located.
         	</option>
          	<option name="SNP calling"> 
-            	Define the minimum base quality score for calling.
-            	This is a threshold concerning the sequencing quality. 
-            	The tool does not call SNPs at positions with a lower score.
+            	Define the minimum base quality required to consider a base for calling. (Default value = 17)
+            	<br />
+            	Note that the base quality of a base is capped by the mapping quality so that bases on reads with low mapping quality may get filtered out depending on this value.
+            	Note too that this argument is ignored in indel calling.
+            	In indel calling, low-quality ends of reads are clipped off (with fixed threshold of Q20).
         	</option>
         	<option name="Indel calling">
-            	<b>Indel heterozygosity value</b>: The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel.<br />
-            	<b>Minimum count of indel reads</b>: The option allows to set the minimum number of supporting reads for an indel. 
+            	<b>Indel heterozygosity value</b>: 
+            	The probabilistic model of UnifiedGenotyper uses the indel heterozygosity value for calculating the prior likelihood for an indel. (Default value = 1.25E-4)<br />
+            	<b>Minimum count of indel reads</b>: Set the minimum number of consensus indels required to trigger genotyping run. (Default value = 5)<br />
+            	A candidate indel is genotyped (and potentially called) if there are this number of reads with a consensus indel at a site.
            		Decreasing this value leads to higher sensitivity, increased runtime and larger rates of false positives.<br />
-            	<b>Minimum fraction of indel reads</b>: This option is similar to the option <i> minimum count of indel reads </i>. 
-            	It is about the fraction of all supporting reads for variant that are required for considering the variant.<br />
+            	<b>Minimum fraction of indel reads</b>:
+            	Define the minimum fraction of all reads at a locus that must contain an indel (of any allele) for that sample to contribute to the indel count for alleles. (Default value = 0.25)<br />
+            	This option is complementary to the option <i> minimum count of indel reads </i>. 
+            	Only samples with at least this fraction of indel-containing reads will contribute to counting and overcome the threshold of the minimum number of consensus indels required to trigger genotyping run.
+				This parameter ensures that in deep data you don't end up summing lots of super rare errors up to overcome the 5 read default threshold.
+				Should work equally well for low-coverage and high-coverage samples, as low coverage samples with any indel containing reads should easily over come this threshold. 
+            	<br />
             	<b> Indel gap open penalty</b>: The gap open penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel start. 
-            	It is used for calculating alignment scores.<br />
+            	It is used for calculating alignment scores. (Default value = 45)<br />
             	<b>Indel gap continuation penalty</b>: The gap continuation penalty for an indel is the phred-scaled probability assumed for the occurrence of an indel continuation. 
-            	It is used for calculating alignment scores.<br />
+            	It is used for calculating alignment scores. (Default value = 10) <br />
         	</option> 
-        
         	<option name="Further parameters">
-        		<b>Sample contamination</b>: By setting this value above zero you force UnifiedGenotyper to ignore this fraction of reads for each genomic position.<br />
-        		<b>Heterozygosity</b>: The probabilistic model of UnifiedGenotyper uses the heterozygosity value for calculating the prior likelihood for a mutation at a locus.<br />
-        		<b>Fraction of deletions</b>: This value is a threshold for the maximum fraction of overall reads with a deletion at a locus. 
+        		<b>Sample contamination</b>:
+        		Define the fraction of contamination in sequence data (for all samples) to aggressively remove. (Default value = 0)<br />
+        		If this fraction is greater is than zero, the caller will aggressively attempt to remove contamination through biased down-sampling of reads.
+        		Basically, it will ignore the contamination fraction of reads for each alternate allele.
+        		So if the pileup contains N total bases, then we will try to remove (N * contamination fraction) bases for each alternate allele. 
+        		<br />
+        		<b>Heterozygosity</b>: 
+        		Set the heterozygosity value.
+        		The probabilistic model of UnifiedGenotyper uses this heterozygosity value for calculating the prior likelihood that a locus is non-reference. (Default value = 0.001)<br />
+        		That is, a heterozygosity value of 0.001 implies that two randomly chosen chromosomes from the population of organisms would differ from each other at a rate of 1 in 1000 bp.<br />
+        		<b>Fraction of deletions</b>:
+        		Set a threshold for the maximum fraction of reads with deletions spanning this locus for it to be callable. (Default value = 0.05)<br />
+        		If the fraction of reads with deletions spanning a locus is greater than this value, the site will not be considered callable and will be skipped.
+        		To disable the use of this parameter, set its value to >1.  
             	All loci below this threshold are examined for additional variants. <br />
-        		<b>PCR error</b>: Estimate the expected probability of a PCR error. 
-            	This probability is independent of the sequencing error rate. 
-            	The PCR error rate is required for computing fragment-based likelihoods. <br />
-            	<b>Confidence threshold for calling</b>: This threshold refers to the GATK variant quality score. 
-           	 	GATK will consider all variants with a score equal or above this threshold as high-confidence variants.<br />
-            	<b>Confidence threshold for emitting</b>: This threshold refers to the GATK variant quality score. 
+        		<b>PCR error</b>: 
+        		Estimate the expected PCR error rate, which is used for computing fragment-based likelihoods. (Default value = 0.0001)<br />
+        		The PCR error rate is independent of the sequencing error rate, which is necessary because the tool cannot necessarily distinguish between PCR errors vs. sequencing errors.
+        		The practical implication for this value is that it effectively acts as a cap on the base qualities. <br />
+            	<b>Confidence threshold for calling</b>: 
+            	Define the minimum phred-scaled confidence threshold at which variants should be called.<br /> 
+            	This threshold refers to the GATK variant quality score.
+            	The minimum phred-scaled Qscore threshold separates high confidence from low confidence calls.
+            	Only genotypes with confidence above or equal to this threshold are emitted as called sites. A reasonable threshold is 30 for high-pass calling (this is the default).  
+           	 	<br />
+            	<b>Confidence threshold for emitting</b>: 
+            	Set the minimum phred-scaled confidence threshold at which variants should be emitted. (Default value = 30)<br />
+            	This threshold refers to the GATK variant quality score. 
              	GATK will output all variants with a score equal or above this threshold. 
             	All low-confidence variants according to the confidence threshold will be marked in the filter field of the VCF file.
         	</option>
@@ -69,14 +95,16 @@
         </tab>
         <tab name="GATK">
         	<option name="Jave Memory">
-        		Set the Java Memory (GB) for all threads.
+        		Set the maximum Java heap size (in GB).
         	</option>
         	<option name="Use BED file?">
             	Tick this option in order to call variants in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html </a>) and select the file in the file browser.
+            	You have to specify the intervals in a text file in BED format
+            	(Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
+            	and select the file in the file browser.
         	</option>
         	<option name="Further options">
-        		You can add further flags which will be added to the executed command.
+        		Set additional command line flags for the GATKUnifiedGenotyper.
         	</option>
         </tab>
         
@@ -103,13 +131,13 @@
     
     <ports>
         <inPort index="0" name="In-Port">
-        	Cell 0: Path to BAM file (BAM file for variant calling; it has to be indexed).
+        	Cell 0: Path to BAM file (BAM file for variant calling; it has to be indexed)
     	</inPort>
         <outPort index="0" name="Out-Port">
-        	Cell 0: Path to VCF file.
+        	Cell 0: Path to VCF file
     	</outPort>
     </ports>    
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
     </views>
 </knimeNode>
