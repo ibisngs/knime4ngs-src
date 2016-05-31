@@ -94,7 +94,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
     	// add binary path as first part of the command
     	commands.add(0, getBinaryPath);
     	String[] command = commands.toArray(new String[commands.size()]);
-    	System.out.println(ExecuteThread.getCommand(command));
+//    	System.out.println(ExecuteThread.getCommand(command));
     	// check if run was already successful 
     	File lockFile = getPathToLockFile();
     	
@@ -151,7 +151,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	protected abstract File getPathToStdoutFile();
 	
 	/**
-	 * Path to lock file or null if no check should be performed if node was executed sucessfully already
+	 * Path to lock file or null if no check should be performed if node was executed successfully already
 	 * @return
 	 */
 	protected abstract File getPathToLockFile();

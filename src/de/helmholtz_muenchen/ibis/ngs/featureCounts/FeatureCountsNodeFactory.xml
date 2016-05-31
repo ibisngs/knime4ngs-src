@@ -57,4 +57,9 @@
         	Cell 1: Command which was used to call the binary
         </outPort>
     </ports> 
+    
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+</views>
+    
 </knimeNode>

@@ -34,6 +34,7 @@ public class ExecuteThread implements Callable<Boolean> {
 	private final String[] ENVIRONMENT;
 	private final StringBuffer HTEOutStr;
 	
+	
 	/**
 	 * ExecuteThread starts process to execute command in a new thread. STDOUT and STDERR are redirected to files or StringBuffers
 	 * @param command command to be executed
@@ -55,6 +56,14 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.HTEOutStr=HTEOUT;
 
 		this.LOGGER = logger;
+		
+		if(this.stdErrFile!=null){
+			createOutfiles(new File(this.stdErrFile));
+		}
+		if(this.stdOutFile!=null){
+			createOutfiles(new File(this.stdOutFile));
+		}		
+		
 		
 		// workaround for letting jar files run properly!
 		if(Environment == null && command[0].startsWith("java -jar"))
@@ -78,7 +87,7 @@ public class ExecuteThread implements Callable<Boolean> {
 		}else{
 			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
 		}
-
+		
 		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);
 		stdErrStream.start();
 		
@@ -229,4 +238,17 @@ public class ExecuteThread implements Callable<Boolean> {
 	public int getExitCode() throws IllegalThreadStateException {
 		return p.exitValue();
 	}
+	
+	private void createOutfiles(File File){
+		if (!File.exists()) {
+			try {
+				System.out.println("Created new file: "+File);
+				File.createNewFile();
+			} catch (IOException e) {
+				System.out.println("Failed to create file: "+File);
+				e.printStackTrace();
+			}
+		}
+	}
+	
 }

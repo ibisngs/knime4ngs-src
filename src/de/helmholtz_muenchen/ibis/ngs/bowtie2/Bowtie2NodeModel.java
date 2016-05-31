@@ -289,7 +289,6 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	
     	//Prepare File
     	String path2refFile 	 = m_refseqfile.getStringValue();
-    	String path2baseFileName = path2refFile.substring(0,path2refFile.lastIndexOf("."));
     	String path2readFile 	 = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 	 = "NA";
     	if(readType.equals("paired-end")){
@@ -303,15 +302,8 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	/**
     	 * INDEX REFGENOME
     	 */
-    	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
-    	Boolean f2 = !new File(path2baseFileName + ".2.bt2").exists();
-    	Boolean f3 = !new File(path2baseFileName + ".3.bt2").exists();
-    	Boolean f4 = !new File(path2baseFileName + ".4.bt2").exists();
-    	Boolean f5 = !new File(path2baseFileName + ".rev.1.bt2").exists();
-    	Boolean f6 = !new File(path2baseFileName + ".rev.2.bt2").exists();
-    	if(f1 && f2 && f3 && f4 && f5 && f6) {
-    		createIndex(exec);
-    	}
+
+    	createIndex(exec);
    
     	//execute
     	generateAlignment(exec,path2refFile,path2readFile,path2readFile2,path2outfile);
@@ -382,7 +374,9 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
 	            throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
 	    	}
     	}
+
     	String path2baseFileName = m_refseqfile.getStringValue().substring(0,m_refseqfile.getStringValue().lastIndexOf("."));
+    	
     	//Check for bowtie2-align
     	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
     	Boolean f2 = !new File(path2baseFileName + ".2.bt2").exists();
@@ -416,7 +410,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	
     	ArrayList<String> command = new ArrayList<String>();
     	String path2refFile = m_refseqfile.getStringValue();
-    	String path2baseFileName = path2refFile.substring(path2refFile.lastIndexOf("/"),path2refFile.lastIndexOf("."));
+    	String path2baseFileName = path2refFile.substring(0,path2refFile.lastIndexOf("."));
     	String bowtieBuild = m_installpath.getStringValue().replace("bowtie2", "bowtie2-build");
 
     	command.add(bowtieBuild);
@@ -440,7 +434,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	command.add(path2baseFileName);
 
     	/**Execute**/
-    	String lockFile = path2refFile + "_index_" + SuccessfulRunChecker.LOCK_ENDING;
+    	String lockFile = path2refFile + "_bowtie2_index" + SuccessfulRunChecker.LOCK_ENDING;
     	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));        	
     }
     
@@ -455,8 +449,8 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
      */
     protected void generateAlignment(ExecutionContext exec, String path2refFile, String path2readFile, String path2readFile2, String path2outfile) throws Exception{
     	ArrayList<String> command = new ArrayList<String>();
-    	String bowtieAlign = m_installpath.getStringValue() + "/bowtie2";
-    	String path2baseFileName = path2refFile.substring(path2refFile.lastIndexOf("/"),path2refFile.lastIndexOf("."));
+    	String bowtieAlign = m_installpath.getStringValue();
+    	String path2baseFileName = path2refFile.substring(0,path2refFile.lastIndexOf("."));
 
 
     	command.add(bowtieAlign);
@@ -594,7 +588,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
 
     	/**Execute**/
     	String lockFile = path2outfile + "_bowtie2" + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));  
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),null,null);  
     }
     
 //    /**

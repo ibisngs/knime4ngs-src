@@ -23,6 +23,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
@@ -128,6 +129,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
     	
+    	
+    	if(CompatibilityChecker.getIndexCellType(inSpecs[0], "BAMCell")!=0){
+    		throw new InvalidSettingsException("Invalid input. No BAMCell in first column of input table. Node requires the FileLoader as predecessor.");
+    	}
+    	
     	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
 		if(outfolder_warning!=null) {
 			setWarningMessage(outfolder_warning);
@@ -135,7 +141,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	
         validateAnnotationFile(SET_ANNOTATION_FILE.getStringValue());
 
-		return new DataTableSpec[]{null};
+		return new DataTableSpec[]{getDataOutSpec1()};
     }
     
     

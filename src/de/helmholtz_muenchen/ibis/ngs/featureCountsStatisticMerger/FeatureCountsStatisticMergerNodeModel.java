@@ -18,7 +18,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.StatisticMerger.StatisticM
  */
 public class FeatureCountsStatisticMergerNodeModel extends StatisticMergerNodeModel {
 	
-	public static final String END_FILENAME = ".counts.summary";
+	public static final String END_FILENAME = ".featureCounts.summary";
 	public static final String DATA_FILE = ".*" + END_FILENAME;
 	public static final String NEWLINE = System.lineSeparator();
 	public static final String TAB = "\t";

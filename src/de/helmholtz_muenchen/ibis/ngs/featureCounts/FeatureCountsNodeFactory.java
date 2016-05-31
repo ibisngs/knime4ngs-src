@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "FeatureCounts" Node.
  * featureCounts: an efficient general purpose program for assigning sequence reads to genomic features
@@ -36,7 +38,7 @@ public class FeatureCountsNodeFactory
      */
     @Override
     public NodeView<FeatureCountsNodeModel> createNodeView(final int viewIndex, final FeatureCountsNodeModel nodeModel) {
-        return new FeatureCountsNodeView(nodeModel);
+        return new HTENodeView<FeatureCountsNodeModel>(nodeModel);
     }
 
     /**

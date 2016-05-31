@@ -81,9 +81,15 @@ public class StreamThread extends Thread {
 			 */
 			OutputStream outstream = null;
 			
-			if(this.fillFile)
-				outstream = new BufferedOutputStream(new FileOutputStream(this.OutFile.getAbsoluteFile())); 
+			if(this.fillFile){
+				try{
+					outstream = new BufferedOutputStream(new FileOutputStream(this.OutFile.getAbsoluteFile())); 
+				}catch(IOException e){
+					System.out.println("Failed to open file: "+this.OutFile.getAbsoluteFile());
+				}
+			}
 
+			
 			int read = 0;
 			byte[] bytes = new byte[32768];
 
@@ -112,6 +118,8 @@ public class StreamThread extends Thread {
 
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
+		} catch (NullPointerException e){
+			e.printStackTrace();
 		}
 	}
 

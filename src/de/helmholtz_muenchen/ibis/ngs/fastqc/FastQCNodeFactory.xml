@@ -29,10 +29,11 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to ReadFile2
-        (fastQ or fastA).</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1 (fastQ, fastA or BAM)<br></br>Cell 1 (Optional): Path to ReadFile2
-        (fastQ or fastA).<br></br>Cell 2: Path to FilterFile</outPort>
+        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 <br></br>Cell 1 (Optional): Path to ReadFile2.</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2.<br></br>Cell 2: Path to FilterFile</outPort>
     </ports>    
 
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+</views>
 </knimeNode>
