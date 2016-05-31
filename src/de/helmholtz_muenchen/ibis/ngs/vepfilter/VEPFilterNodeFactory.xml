@@ -3,27 +3,33 @@
     <name>VEPFilter</name>
     
     <shortDescription>
-        This node filters annotated VCF files.
+        This node filters VCF files annotated by VEP.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	The VEPFilter enables the filtering of VCF files based on VEP annotations.
+        	The VEPFilter enables the filtering of VCF files annotated by VEP.
         	The output is a VCF file containing the variants that have passed the filters.
         </intro>
         
         <tab name="Options">
-        	<option name="Select variants">
-        		This option enables to select SO terms.
-        		Variants that match at least one of the default terms are generally considered as Loss-of-Function variants. 
+        	<option name="Filter by Consequence">
+        		Here, you can select Sequence Ontology (SO) terms to filter variants according to their predicted consequences.
+        		The shown SO terms are ranked by their impact, from HIGH to MODIFIER.
+        		The <a href="http://www.ensembl.org/info/genome/variation/predicted_data.html#consequences">VEP documentation</a> gives detailed descriptions for each SO term.
+        		Press the Ctrl or Shift key to select multiple consequences.
+        		If you don't want to filter by consequences, select 'NONE'.
         	</option>
-        	<option name="Filter">
-        		Further filters can be specified. E.g.to find all high confidence LoFs having an ExAC allele frequency larger than 0.05 (LoF is HC,ExAC_AF>0.05).
-        		(This requires the usage of the VEP plugins LOFTEE and ExAC).<br />
+        	<option name="Choose LOF terms">
+        		This button allows you to easily select all SO terms that define loss-of-function (LOF) variants.
+        	</option>
+        	<option name="Further filtering conditions">
+        		Further filters can be specified.
         		For more information, see <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
         	</option>
         	<option name="Folder for output files">
-        	Set the path to the folder where the combined gvcf files should be stored.
+        		Set the path to the folder where the filtered VCF file will be stored.<br />
+            	If "Overwrite" is checked, existing files will be overwritten.
         	</option>
         </tab>		
         <tab name="Preference page">
@@ -32,12 +38,10 @@
         		Only used if HTE is enabled in the preference page.
         	</option>
         	<option name="Path to filter_vep.pl">
-        		This script is used to filter VEP annotations.
-        		It can be found in the VEP installation in ensembl-tools-release../scripts/variant_effect_predictor.
+        		Set the path to the script used to filter VEP annotations.
+        		It can be found in the VEP installation in the ensembl-tools-release../scripts/variant_effect_predictor folder.
        	 	</option>
        	 </tab>	
-			
-
     </fullDescription>
     
     <ports>
@@ -47,5 +51,11 @@
         <outPort index="0" name="Filtered VCF">
         	Cell 0: Path to filtered VCF file.
         </outPort>
-    </ports>    
+    </ports>
+    
+    <views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>
 </knimeNode>

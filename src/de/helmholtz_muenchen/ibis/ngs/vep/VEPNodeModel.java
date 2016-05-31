@@ -181,7 +181,6 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	String outfolder = m_outfolder.getStringValue();
     	if(outfolder.equals("") || Files.notExists(Paths.get(outfolder))) {
     		outfileBase = vcf_infile;
-    		setWarningMessage("No output folder given or invalid path! Using folder of input file!");
     	} else {
     		outfileBase = m_outfolder.getStringValue()+ System.getProperty("file.separator")+ new File(vcf_infile).getName();
     	}

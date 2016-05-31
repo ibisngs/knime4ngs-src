@@ -1,11 +1,9 @@
 package de.helmholtz_muenchen.ibis.ngs.vepfilter;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -13,16 +11,13 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
@@ -40,7 +35,50 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
  * @author Tim Jeske
  */
 public class VEPFilterNodeModel extends HTExecutorNodeModel {
-    
+   
+	static final String DEFAULT_TERM = "NONE";
+	
+	static final String [] SO_TERMS = {
+			DEFAULT_TERM,
+			"transcript_ablation",
+			"splice_acceptor_variant",
+			"splice_donor_variant",
+	    	"stop_gained",
+	    	"frameshift_variant",
+	    	"stop_lost",
+	    	"start_lost",
+	    	"transcript_amplification",
+	    	"inframe_insertion",
+	    	"inframe_deletion",
+	    	"missense_variant",
+	    	"protein_altering_variant",
+	    	"splice_region_variant",
+	    	"incomplete_terminal_codon_variant",
+	    	"stop_retained_variant",
+	    	"synonymous_variant",
+	    	"coding_sequence_variant",
+	    	"mature_miRNA_variant",
+	    	"5_prime_UTR_variant",
+	    	"3_prime_UTR_variant",
+	    	"non_coding_transcript_exon_variant",
+	    	"intron_variant",
+	    	"NMD_transcript_variant",
+	    	"non_coding_transcript_variant",
+	    	"upstream_gene_variant",
+	    	"downstream_gene_variant",
+	    	"TFBS_ablation",
+	    	"TFBS_amplification",
+	    	"TF_binding_site_variant",
+	    	"regulatory_region_ablation",
+	    	"regulatory_region_amplification",
+	    	"feature_elongation",
+	    	"regulatory_region_variant",
+	    	"feature_truncation",
+	    	"intergenic_variant"
+	};
+	
+	static final String [] LOF_TERMS = {SO_TERMS[1], SO_TERMS[2], SO_TERMS[3], SO_TERMS[4]};
+	
 	//configuration keys
     static final String CFGKEY_VEP_SCRIPT = "vepscript";
     static final String CFGKEY_SO_TERM = "so_term"; 
@@ -54,19 +92,13 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     private final SettingsModelOptionalString m_filter = new SettingsModelOptionalString(CFGKEY_FILTER,"",false);
 	private final SettingsModelString m_outfolder = new SettingsModelString(CFGKEY_OUTFOLDER,"");
 	private final SettingsModelBoolean m_overwrite = new SettingsModelBoolean(CFGKEY_OVERWRITE, false);
+	private final SettingsModelStringArray m_chosen_terms = new SettingsModelStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST, new String[]{VEPFilterNodeModel.DEFAULT_TERM});
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(VEPFilterNodeModel.class);
 	
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
-	static final String [] SO_TERMS = {"splice_acceptor_variant", "splice_donor_variant",
-	    	"stop_gained", "frameshift_variant", "stop_lost",
-	    	"initiator_codon_variant", "inframe_insertion","inframe_deletion", "missense_variant"};
-	    
-	static final String [] DEFAULT_TERMS = {SO_TERMS[0], SO_TERMS[1], SO_TERMS[2], SO_TERMS[3]};
-	
 	private int vcf_index;
-	private final HashSet<String> TERMS	= new HashSet<String>();
 	
     protected VEPFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
@@ -78,9 +110,11 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     		m_overwrite.setEnabled(false);
     	}
     	
-        for(String t: DEFAULT_TERMS) {
-        	this.TERMS.add(t);
-        }
+    	addSetting(m_filter);
+    	addSetting(m_overwrite);
+    	addSetting(m_outfolder);
+    	addSetting(m_vepscript);
+    	addSetting(m_chosen_terms);
     }
 
     /**
@@ -119,8 +153,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 		if (infile.endsWith(".gz")) {
 			outfile = infile.replace(".vcf.gz", ".VEPfiltered.vcf");
 		} else {
-			outfile = IO.replaceFileExtension(infile,
-					".VEPfiltered.vcf");
+			outfile = IO.replaceFileExtension(infile,".VEPfiltered.vcf");
 		}
 		
 		String outfolder = m_outfolder.getStringValue();
@@ -128,7 +161,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     		outfile = outfolder + System.getProperty("file.separator") + new File(outfile).getName();
     	}
 
-		LOGGER.debug("CHOSEN TERMS: " + TERMS);
+		LOGGER.debug("CHOSEN TERMS: " + m_chosen_terms.getStringArrayValue());
 		LOGGER.debug("FILTER: " + m_filter.getStringValue());
 
 		LOGGER.info("Prepare command for filter_vep.pl");
@@ -141,8 +174,8 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 		cmd.add(outfile);
 
 		String filter_terms = "";
-		Object[] terms = TERMS.toArray();
-		if (terms.length > 0) {
+		String[] terms = m_chosen_terms.getStringArrayValue();
+		if (terms.length > 0 && !terms[0].equals(DEFAULT_TERM)) {
 			cmd.add("--filter");
 			filter_terms += "Consequence is " + terms[0];
 			for (int i = 1; i < terms.length; i++) {
@@ -151,14 +184,16 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 			cmd.add(filter_terms);
 		}
 
-		String[] filters = m_filter.getStringValue().split(",");
-		if (filters.length > 0) {
-			for (String f : filters) {
-				if (f.equals(""))
-					continue;
-				cmd.add("--filter");
-				f = f.trim();
-				cmd.add(f);
+		if(m_filter.isActive()) {
+			String[] filters = m_filter.getStringValue().split(",");
+			if (filters.length > 0) {
+				for (String f : filters) {
+					if (f.equals(""))
+						continue;
+					cmd.add("--filter");
+					f = f.trim();
+					cmd.add(f);
+				}
 			}
 		}
 
@@ -174,17 +209,12 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 		}
 
 		File lockFile = new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
-		super.executeCommand(cmd_array, exec, lockFile);
-
+		
+		String perl5lib_variable = "PERL5LIB="+System.getenv("PERL5LIB");
+		
+		super.executeCommand(cmd_array, exec, new String[]{perl5lib_variable}, lockFile, null, null, null ,null, null);
+		
 		return outfile;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    	
     }
 
     /**
@@ -211,79 +241,20 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the output table!");
     	}
     	
+    	String [] terms = m_chosen_terms.getStringArrayValue();
+    	for(String s: terms) {
+    		if(s.equals(DEFAULT_TERM) && terms.length > 1) {
+    			throw new InvalidSettingsException("SO terms including "+DEFAULT_TERM + " are selected!");
+    		}
+    	}
+    	
+    	if(terms[0].equals(DEFAULT_TERM) && (!m_filter.isActive() || m_filter.getStringValue().equals(""))) {
+    		throw new InvalidSettingsException("No valid filters given!");
+    	}
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-	protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	super.saveSettingsTo(settings);
-		m_filter.saveSettingsTo(settings);
-		m_vepscript.saveSettingsTo(settings);
-		m_outfolder.saveSettingsTo(settings);
-		m_overwrite.saveSettingsTo(settings);
-		settings.addStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST,
-				TERMS.toArray(new String[TERMS.size()]));
-	}
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.loadValidatedSettingsFrom(settings);
-        m_filter.loadSettingsFrom(settings);
-        m_vepscript.loadSettingsFrom(settings);
-        m_outfolder.loadSettingsFrom(settings);
-        m_overwrite.loadSettingsFrom(settings);
-        
-    	TERMS.clear();
-        if (settings.containsKey(VEPFilterNodeModel.CFGKEY_TERM_LIST)) {
-        	try {
-				for(String s : settings.getStringArray(VEPFilterNodeModel.CFGKEY_TERM_LIST))
-					this.TERMS.add(s);
-			} catch (InvalidSettingsException e) {
-				LOGGER.error(e.getStackTrace());
-			}
-        } 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	super.validateSettings(settings);
-        m_filter.validateSettings(settings);
-        m_vepscript.validateSettings(settings);
-        m_outfolder.validateSettings(settings);
-        m_overwrite.validateSettings(settings);
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
     }
 }
 

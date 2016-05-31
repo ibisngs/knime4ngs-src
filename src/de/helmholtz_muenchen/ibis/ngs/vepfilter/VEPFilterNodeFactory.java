@@ -4,8 +4,10 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
- * <code>NodeFactory</code> for the "LOFFilter" Node.
+ * <code>NodeFactory</code> for the "VEPFilter" Node.
  * 
  *
  * @author tim.jeske
@@ -35,7 +37,7 @@ public class VEPFilterNodeFactory
     @Override
     public NodeView<VEPFilterNodeModel> createNodeView(final int viewIndex,
             final VEPFilterNodeModel nodeModel) {
-        return new VEPFilterNodeView(nodeModel);
+        return new HTENodeView<VEPFilterNodeModel>(nodeModel);
     }
 
     /**
