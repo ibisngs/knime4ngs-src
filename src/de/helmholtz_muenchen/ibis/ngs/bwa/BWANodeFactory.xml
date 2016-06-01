@@ -69,8 +69,8 @@
         <outPort index="0" name="Out-Port">Cell 0: Path to SAM file<br></br>Cell 1: Path to RefFile</outPort>
     </ports>
     
-                <views>
-       <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
-    </views>
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+</views>
     
 </knimeNode>

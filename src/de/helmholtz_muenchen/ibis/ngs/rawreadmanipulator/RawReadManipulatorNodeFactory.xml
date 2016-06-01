@@ -68,8 +68,12 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2 <br></br>Cell 2 (Optional): Path to FilterFile<br></br>Cell 2 (Optional): Path to FilterFile</inPort>
+        <inPort index="0" name="In-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2 <br></br>Cell 2 (Optional): Path to FilterFile</inPort>
         <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1: Path to ReadFile2 (if given)</outPort>
     </ports>    
+
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+		</views>
 
 </knimeNode>
