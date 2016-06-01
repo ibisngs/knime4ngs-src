@@ -7,41 +7,47 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>KGGSeq is a software platform constituted of Bioinformatics and statistical genetics functions making use of valuable biologic resources and knowledge for sequencing-based genetic mapping of variants/genes responsible for human diseases/traits. Simply, KGGSeq is like a fishing rod facilitating geneticists to fish the genetic determinants of human diseases/traits in the big sea of DNA sequences. Compared with other genetic tools like plink/seq, KGGSeq paid more attention downstream analysis of genetic mapping. Currently, a comprehensive and efficient framework was newly implemented on KGGSeq to filter and prioritize genetic variants from whole exome sequencing data.</intro>
+        <intro>
+        	KGGSeq is a software platform constituted of Bioinformatics and statistical genetics functions making use of valuable biologic resources and knowledge for sequencing-based genetic mapping of variants/genes responsible for human diseases/traits.Simply, KGGSeq is like a fishing rod facilitating geneticists to fish the genetic determinants of human diseases/traits in the big sea of DNA sequences. Compared with other genetic tools like plink/seq, KGGSeq paid more attention downstream analysis of genetic mapping. Currently, a comprehensive and efficient framework was newly implemented on KGGSeq to filter and prioritize genetic variants from whole exome sequencing data.<br />
+        	For further information, see the online documentation of <a href="http://grass.cgs.hku.hk/limx/kggseq/index.php">KGGSeq</a>.
+		</intro>
         
-        <tab name="File Input Options">
-            <option name="KGGSeq Jar">Path to the KGGSeq Jar File</option>
-            <option name="VCF Input">Input VCF File</option>
-            <option name="PED Input File">PED file holding the pedigree information</option>
-        </tab>
-        <tab name="General Options">
-            <option name="Build Version">Specifies the database and reference genome version</option>
-            <option name="Composite Subject ID">KGGSeq uses a composite subject ID in the VCF file as "PedigreeName$IndividualID"</option> 
-            <option name="Output Prefix">Prefix for all output files of this run"</option> 
-            <option name="Output Format">File format, excel or csv"</option> 
-        </tab>
-        <tab name="Quality Cutoffs">
-            <option name="Seq Qual"> Set the minimum overall sequencing quality score (Phred Quality Score) for the variant at</option>
-            <option name="Seq MQ"> Set the minimum overall mapping quality score (Phred Quality Score) for the variant at</option>
-            <option name="Seq SB"> Set the maximal overall strand bias score for the variant at</option>
-            <option name="Gty Qual">Exclude genotypes with the minimal genotyping quality (Phred Quality Score) per genotype </option>
-            <option name="Gty DP">Exclude genotypes with the minimal read depth per genotype &lt;  </option>
-            <option name="Gty Sec Pl">Exclude genotypes with the second smallest normalized, Phred-scaled likelihoods for genotypes </option>
-            <option name="Gty Af Ref">Exclude genotypes with the fraction of the reads carrying alternative allele &gt; = x% at a reference-allele homozygous genotype</option>
-            <option name="Gty Af Het">Exclude genotypes with the fraction of the reads carrying alternative allele &lt; = x% at a heterozygous genotype.</option>
-            <option name="Gty Af Alt">Exclude variants with the fraction of the reads carrying alternative allele &lt; = x% at a alternative-allele homozygous genotype</option>
-        </tab>
-        <tab name="Annotation Options">
-        	<option name="...">For detailed explanations see: http://statgenpro.psychiatry.hku.hk/limx/kggseq/doc/UserManual.html</option>
-            
+        <tab name="Options">
+            <option name="KGGSeq Jar">
+            	Set the path to the KGGSeq Jar File.
+            </option>
+            <option name="VCF Input">
+            	Set the path to the input VCF File.
+            </option>
+            <option name="PED Input File">
+            	Set the path to the PED pedigree file containing the description of the individuals relationships.
+            </option>
+        	<option name="General Options">
+            	<b>Build Version</b>: Specify the database and reference genome version.<br />
+            	<b>Composite Subject ID</b>: By checking this option KGGSeq uses a composite subject ID in the CVF file.<br />
+            	<b>Output Prefix</b>: Define a prefix for all output files of this run.<br />
+            	<b>Output Format</b>: Choose either excel or csv as output format.
+            </option> 
+        	<option name="Quality Cutoffs">
+            	<b>Seq Qual</b>: Set the minimum overall sequencing quality score (Phred Quality Score) for the variant at x. (Default setting = 50.0)<br />
+            	<b>Seq MQ</b>: Set the minimum overall mapping quality score (Phred Quality Score) for the variant at x. (Default setting = 20)<br />
+            	<b>Seq SB</b>: Set the maximal overall strand bias score for the variant at x. (Default setting = -10.0)<br />
+            	<b>Gty Qual</b>: Exclude genotypes with the minimal genotyping quality (Phred Quality Score) per genotype &lt; x. (Default setting = 20)<br />
+            	<b>Gty DP</b>: Exclude genotypes with the minimal read depth per genotype &lt; x. (Default setting = 8)<br /> 
+            	<b>Gty Sec Pl</b>: Exclude genotypes with the second smallest normalized, Phred-scaled likelihoods for genotypes &lt; x. (Default Setting = 20)<br />
+            	<b>Gty Af Ref</b>: Exclude genotypes with the fraction of the reads carrying alternative allele &gt; = x% at a reference-allele homozygous genotype. (Default value = 0.05)<br />
+            	<b>Gty Af Het</b>: Exclude genotypes with the fraction of the reads carrying alternative allele &lt; = x% at a heterozygous genotype. (Default value = 0.25)<br />
+            	<b>Gty Af Alt</b>: Exclude variants with the fraction of the reads carrying alternative allele &lt; = x% at a alternative-allele homozygous genotype. (Default value = 0.75)<br />
+            </option>
+        	<option name="Annotation Options">
+        		Apply different annotation options.<br />
+        		For detailed explanations, see <a href="http://grass.cgs.hku.hk/limx/kggseq/doc10/UserManual.html">online KGGSeq user manual</a>.
+        	</option>
         </tab>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="In-Port name"></inPort>
         <outPort index="0" name="Out-Port name">Currently returns inData</outPort>
-    </ports>    
-        <views>
-        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
-</views>
+    </ports>
 </knimeNode>
