@@ -48,6 +48,11 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     static final String CFGKEY_FILL_AN_AC = "fill_an_ac";
     final SettingsModelBoolean m_fill_an_ac = new SettingsModelBoolean(CFGKEY_FILL_AN_AC,false);
     
+    
+    // output options
+    //static final String CFGKEY_OUTFOLDER = "outfolder";
+    //final SettingsModelString m_outfolder = new SettingsModelString(CFGKEY_OUTFOLDER,"");
+    
     //genotype filter
     static final String CFGKEY_FILTER_BY_DP = "filter_by_DP";
     final SettingsModelBoolean m_filter_by_DP = new SettingsModelBoolean(CFGKEY_FILTER_BY_DP,false);
@@ -92,6 +97,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     protected VCFToolsFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
     	
+    	//addSetting(m_outfolder);
     	addSetting(m_filter_by_DP);
     	addSetting(m_filter_by_AD);
     	addSetting(m_DP_threshold);
@@ -113,7 +119,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-
+    	//check input file
     	String infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
     	if(Files.notExists(Paths.get(infile))) {

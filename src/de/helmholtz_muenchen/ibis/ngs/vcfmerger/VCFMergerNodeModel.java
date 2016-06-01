@@ -184,7 +184,12 @@ public class VCFMergerNodeModel extends GATKNodeModel {
 	protected void extraConfig() throws InvalidSettingsException {
     	if(hasConfigureOpendOnce && FILES.size() == 0)
     		throw new InvalidSettingsException("Select at least one VCF file.");
-		
+    	for(String filename : FILES)
+    	{
+    		if (!filename.endsWith(".vcf")) {
+    			throw new InvalidSettingsException("Inputfile is not a VCF file:"+filename);
+    		}
+    	}
 	}
 
 }

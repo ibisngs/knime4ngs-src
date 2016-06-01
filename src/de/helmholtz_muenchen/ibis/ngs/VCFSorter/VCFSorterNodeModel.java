@@ -22,7 +22,7 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
-
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -128,6 +128,10 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")!=0){
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	}	
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()})};

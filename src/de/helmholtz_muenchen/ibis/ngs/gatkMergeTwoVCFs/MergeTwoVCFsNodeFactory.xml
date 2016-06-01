@@ -8,28 +8,34 @@
     
     <fullDescription>
         <intro>
-        This node merges two VCF files into one combined VCF file. You can for example merge the output VCL file from Pindel with the output VCF file from GATK. This combined VCF file can the be further processed by applying nodes, which filter the called variants.<br />
+        The MergeTwoVCFs node is based on the GATK CombineVariants tool.
+        It reads in variants records from two separate ROD (Reference-Ordered Data) sources and combines them into a single VCF.
+        This tool aims to fulfill two main possible use cases:<br />
+        1.) It combines variant records present at the same site in the different input sources into a single variant record in the output.<br />
+        2.) It assumes that each ROD source represents the same set of samples (although this is not enforced). It uses the priority list (if provided) to emit a single record instance at every position represented in the input RODs.
+        This node can for example merge the output VCLs file from two different variant calling tools (e.g. Pindel and GATKHaplotypeCaller).<br />
         For further information, see <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineVariants.php">GATK documentation of CombineVariants</a>.
         </intro>
-        
-        
- 
+
         <tab name="CombineVariants">
         <option name="Genotype Merge Type"> Determine how genotype records for samples shared across the ROD file should be merged.
         	<ul>
-        	<li>Uniquify: Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
-    		<li>Prioritize: Take the genotypes in priority order.</li>
-    		<li>Usorted: Take the genotypes in any order.</li>
-    		<li>Require unique: Require that all samples/genotypes be unique between all inputs.</li>
-    		<li> Prioritize input: In the case of different genotypes predicted in the two VCF files, one VCF file can be prioritized over the second.</li>
+        	<li>UNIQUIFY: Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
+    		<li>PRIORITIZE: Take the genotypes in priority order.</li>
+    		<li>UNSORTED: Take the genotypes in any order.</li>
+    		<li>REQUIRE_UNIQUE: Require that all samples/genotypes be unique between all inputs.</li>
     		</ul>
+    		<b>Prioritize input</b>: Specify the merging priority regarding the choice of which record gets emitted when taking the union of variants that contain genotypes. The list must be passed as a comma-separated string listing the names of the variant input files. Use name tags (defined in the fields above) for best results.
     		<b>Input VCF file 1 and 2</b>: Set the paths to the vcf files that should be merged.	  
 			</option>
-		<option name="Filtered Record Merge Type"> Determine how records at the same site in the VCF should be handled.
+		<option name="Folder for output files">
+			Set the path to the directory where the output files should be stored.
+		</option>	
+		<option name="Filtered Record Merge Type"> Determine how records seen at the same site in the VCF, but with different FILTER fields, should be handled.
         	<ul>
-        	<li>Keep if any unfiltered: Union - leaves the record if any record is unfiltered.</li>
-        	<li>Keep if all unfiltered: Requires all records present at site to be unfiltered. VCF files that don't contain the record don't influence this.</li>
-        	<li>Keep unconditional: If any record is present at this site (regardless of possibility being filtered), then all such records are kept and the filters are reset.</li>
+        	<li>KEEP_IF_ANY_UNFILTERED: Union - leaves the record if any record is unfiltered.</li>
+        	<li>KEEP_IF_ALL_UNFILTERED: Requires all records present at site to be unfiltered. VCF files that don't contain the record don't influence this.</li>
+        	<li>KEEP_UNCODITIONAL: If any record is present at this site (regardless of possibility being filtered), then all such records are kept and the filters are reset.</li>
         	</ul>	
         	</option>
         </tab>

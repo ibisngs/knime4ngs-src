@@ -229,7 +229,7 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
     
         // create dialogs
         DialogComponentFileChooser dcFastaDir 	= new DialogComponentFileChooser(m_SET_FILE_DIR, "his_id_FILE_DIR", 0, true);
-        DialogComponentFileChooser dcFastaFile 	= new DialogComponentFileChooser(m_SET_FILE_FILE, "his_id_FILE_FILE", 0);
+        DialogComponentFileChooser dcFastaFile 	= new DialogComponentFileChooser(m_SET_FILE_FILE, "his_id_FILE_FILE", 0, ".vcf");
 
         // set title text
         dcFastaDir.setBorderTitle("path to VCF folder");
