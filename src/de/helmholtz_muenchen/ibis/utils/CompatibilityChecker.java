@@ -100,12 +100,30 @@ public class CompatibilityChecker {
 		return (getIndexCellType(inSpecs,CellType)>-1);
 	}
 	
+	/**
+	 * @deprecated
+	 * @param inSpecs
+	 * @param CellType
+	 * @return
+	 */
 	public static int getIndexCellType(DataTableSpec inSpecs, String CellType) {
 		int index = -1;
 		
 		for(int i = 0; i < inSpecs.getNumColumns(); i++) {
     		if(inSpecs.getColumnSpec(i).getType().toString().equals(CellType)) {
     			index = i;
+    		}
+    	}
+		return index;
+	}
+	
+	public static int getFirstIndexCellType(DataTableSpec inSpecs, String CellType) {
+		int index = -1;
+		
+		for(int i = 0; i < inSpecs.getNumColumns(); i++) {
+    		if(inSpecs.getColumnSpec(i).getType().toString().equals(CellType)) {
+    			index = i;
+    			break;
     		}
     	}
 		return index;

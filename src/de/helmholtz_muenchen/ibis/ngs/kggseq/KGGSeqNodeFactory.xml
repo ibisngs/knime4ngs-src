@@ -16,7 +16,7 @@
         </tab>
         <tab name="General Options">
             <option name="Build Version">Specifies the database and reference genome version</option>
-            <option name="Composite Subject ID">KGGSeq uses a composite subject ID in the CVF file as "PedigreeName$IndividualID"</option> 
+            <option name="Composite Subject ID">KGGSeq uses a composite subject ID in the VCF file as "PedigreeName$IndividualID"</option> 
             <option name="Output Prefix">Prefix for all output files of this run"</option> 
             <option name="Output Format">File format, excel or csv"</option> 
         </tab>
@@ -41,7 +41,7 @@
         <inPort index="0" name="In-Port name"></inPort>
         <outPort index="0" name="Out-Port name">Currently returns inData</outPort>
     </ports>    
-    <views>
-        <view index="0" name=""></view>
-    </views>
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+</views>
 </knimeNode>

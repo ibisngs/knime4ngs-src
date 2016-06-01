@@ -48,6 +48,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String BWA = "bwa";
 	public static final String FEATURE_COUNTS = "featureCounts";
 	public static final String GATK = "GenomeAnalysisTK.jar";
+	public static final String KGGSeq = "kggseq.jar";
 	public static final String PINDEL = "pindel";
 	public static final String PINDEL2VCF = "pindel2vcf";
 	public static final String SAMTOOLS = "samtools";
@@ -65,7 +66,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 //	public static final String BFAST = "bfast";
 	
 	public static String [] FIELDS = {USE_HTE, THRESHOLD, DB_FILE, NOTIFY, EMAIL_HOST, EMAIL_SENDER, EMAIL_RECEIVER};
-	public static String [] PATHS = {REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS , RES_DBSNP, RES_MILLS, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, SNPEFF, STAR, VCFTOOLS, VEP, VEP_FILTER};
+	public static String [] PATHS = {REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS , RES_DBSNP, RES_MILLS, DB_FILE, BCFTOOLS, BOWTIE2, BWA, FEATURE_COUNTS, GATK, KGGSeq, PINDEL, PINDEL2VCF, SAMTOOLS, SEGEMEHL, SNPEFF, STAR, VCFTOOLS, VEP, VEP_FILTER};
 	
 	/**
      * The shared instance.

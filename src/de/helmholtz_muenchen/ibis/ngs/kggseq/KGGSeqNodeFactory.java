@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "KGGSeq" Node.
  * 
@@ -35,7 +37,7 @@ public class KGGSeqNodeFactory
     @Override
     public NodeView<KGGSeqNodeModel> createNodeView(final int viewIndex,
             final KGGSeqNodeModel nodeModel) {
-        return new KGGSeqNodeView(nodeModel);
+        return new HTENodeView<KGGSeqNodeModel>(nodeModel);
     }
 
     /**

@@ -62,6 +62,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put(IBISKNIMENodesPlugin.BWA,true);
 		TOOLS.put(IBISKNIMENodesPlugin.FEATURE_COUNTS,true);
 		TOOLS.put(IBISKNIMENodesPlugin.GATK,false);
+		TOOLS.put(IBISKNIMENodesPlugin.KGGSeq,false);
 		TOOLS.put(IBISKNIMENodesPlugin.PINDEL,true);
 		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);

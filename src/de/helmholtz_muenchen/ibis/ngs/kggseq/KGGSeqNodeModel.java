@@ -21,6 +21,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -93,7 +94,6 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 	
     private final SettingsModelString m_KGGSEQ = new SettingsModelString(KGGSeqNodeModel.CFGKEY_KGGSEQ_PATH, "");
     private final SettingsModelString m_BUILDVER = new SettingsModelString(KGGSeqNodeModel.CFGKEY_BUILDVER, "hg19");
-    private final SettingsModelString m_INFILE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_INFILE, "");
     private final SettingsModelString m_PEDFILE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_PEDFILE, "");
     private final SettingsModelBoolean m_COMPOSITESUBJECTID = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_COMPOSITE_SUBJECT_ID, false);
     private final SettingsModelString m_OUTPREFIX = new SettingsModelString(KGGSeqNodeModel.CFGKEY_OUTPREFIX, "");
@@ -128,7 +128,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected KGGSeqNodeModel() {
-        super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(1));
+        super(1, 1);
         
         addSetting(m_BUILDVER);
         addSetting(m_CANDIDATE_GENES);
@@ -146,7 +146,6 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
         addSetting(m_GTY_QUAL);
         addSetting(m_GTY_SEC_PL);
         addSetting(m_IGNORE_HOMO);
-        addSetting(m_INFILE);
         addSetting(m_KGGSEQ);
         addSetting(m_OMIM_ANNO);
         addSetting(m_OUTFORMAT);
@@ -165,13 +164,14 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
-    	String BasePath 	= m_INFILE.getStringValue().substring(0,m_INFILE.getStringValue().lastIndexOf("/")+1);
+    	String infile 		= inData[0].iterator().next().getCell(0).toString();
+    	String BasePath 	= infile.substring(0,infile.lastIndexOf("/")+1);
     	String lockFile 	= BasePath+m_OUTPREFIX.getStringValue() + SuccessfulRunChecker.LOCK_ENDING;
     	String StdErrFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdErr.log";
     	String StdOutFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdOut.log";
     	
     	
-    	super.executeCommand(createCommand(BasePath), exec, new File(lockFile),StdOutFile, StdErrFile);
+    	super.executeCommand(createCommand(BasePath,infile), exec, new File(lockFile),StdOutFile, StdErrFile);
     	
     	
     	
@@ -202,7 +202,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
      * Creates the execution command of the KGGSeq Node
      * @return
      */
-    private String[] createCommand(String BasePath){
+    private String[] createCommand(String BasePath, String infile){
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
@@ -210,7 +210,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	command.add(m_KGGSEQ.getStringValue());
     	
     	command.add("--buildver "+m_BUILDVER.getStringValue());
-    	command.add("--vcf-file "+m_INFILE.getStringValue());
+    	command.add("--vcf-file "+infile);
     	command.add("--ped-file "+m_PEDFILE.getStringValue());
     	
     	if(m_COMPOSITESUBJECTID.getBooleanValue()){
@@ -273,6 +273,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	}
     	
     	command.add("--no-resource-check");
+    	command.add("--no-lib-check");
+    	
     	
     	return new String[]{StringUtils.join(command, " ")};
     }
@@ -283,111 +285,16 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	
+    	
+    	if(CompatibilityChecker.getIndexCellType(inSpecs[0], "VCFCell")!=0){
+    		throw new InvalidSettingsException("Invalid input. No VCFCell in first column of input table.");
+    	}
+    	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()})};
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//         m_BUILDVER.saveSettingsTo(settings);
-//         m_CANDIDATE_GENES.saveSettingsTo(settings);
-//         m_CANDIDATE_PATHWAYS.saveSettingsTo(settings);
-//         m_CANDIDATE_PPI.saveSettingsTo(settings);
-//         m_COMPOSITESUBJECTID.saveSettingsTo(settings);
-//         m_DISEASE_CAUSING_PRED.saveSettingsTo(settings);
-//         m_FILTER_COMMON.saveSettingsTo(settings);
-//         m_GENE_FEATURES.saveSettingsTo(settings);
-//         m_GENOTYPE_FILTER.saveSettingsTo(settings);
-//         m_GTY_AF_ALT.saveSettingsTo(settings);
-//         m_GTY_AF_HET.saveSettingsTo(settings);
-//         m_GTY_AF_REF.saveSettingsTo(settings);
-//         m_GTY_DP.saveSettingsTo(settings);
-//         m_GTY_QUAL.saveSettingsTo(settings);
-//         m_GTY_SEC_PL.saveSettingsTo(settings);
-//         m_IGNORE_HOMO.saveSettingsTo(settings);
-//         m_INFILE.saveSettingsTo(settings);
-//         m_KGGSEQ.saveSettingsTo(settings);
-//         m_OMIM_ANNO.saveSettingsTo(settings);
-//         m_OUTFORMAT.saveSettingsTo(settings);
-//         m_OUTPREFIX.saveSettingsTo(settings);
-//         m_PEDFILE.saveSettingsTo(settings);
-//         m_PUBMED.saveSettingsTo(settings);
-//         m_SEQ_MQ.saveSettingsTo(settings);
-//         m_SEQ_QUAL.saveSettingsTo(settings);
-//         m_SEQ_SB.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_BUILDVER.loadSettingsFrom(settings);
-//        m_CANDIDATE_GENES.loadSettingsFrom(settings);
-//        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
-//        m_CANDIDATE_PPI.loadSettingsFrom(settings);
-//        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
-//        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
-//        m_FILTER_COMMON.loadSettingsFrom(settings);
-//        m_GENE_FEATURES.loadSettingsFrom(settings);
-//        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
-//        m_GTY_AF_ALT.loadSettingsFrom(settings);
-//        m_GTY_AF_HET.loadSettingsFrom(settings);
-//        m_GTY_AF_REF.loadSettingsFrom(settings);
-//        m_GTY_DP.loadSettingsFrom(settings);
-//        m_GTY_QUAL.loadSettingsFrom(settings);
-//        m_GTY_SEC_PL.loadSettingsFrom(settings);
-//        m_IGNORE_HOMO.loadSettingsFrom(settings);
-//        m_INFILE.loadSettingsFrom(settings);
-//        m_KGGSEQ.loadSettingsFrom(settings);
-//        m_OMIM_ANNO.loadSettingsFrom(settings);
-//        m_OUTFORMAT.loadSettingsFrom(settings);
-//        m_OUTPREFIX.loadSettingsFrom(settings);
-//        m_PEDFILE.loadSettingsFrom(settings);
-//        m_PUBMED.loadSettingsFrom(settings);
-//        m_SEQ_MQ.loadSettingsFrom(settings);
-//        m_SEQ_QUAL.loadSettingsFrom(settings);
-//        m_SEQ_SB.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_BUILDVER.loadSettingsFrom(settings);
-//        m_CANDIDATE_GENES.loadSettingsFrom(settings);
-//        m_CANDIDATE_PATHWAYS.loadSettingsFrom(settings);
-//        m_CANDIDATE_PPI.loadSettingsFrom(settings);
-//        m_COMPOSITESUBJECTID.loadSettingsFrom(settings);
-//        m_DISEASE_CAUSING_PRED.loadSettingsFrom(settings);
-//        m_FILTER_COMMON.loadSettingsFrom(settings);
-//        m_GENE_FEATURES.loadSettingsFrom(settings);
-//        m_GENOTYPE_FILTER.loadSettingsFrom(settings);
-//        m_GTY_AF_ALT.loadSettingsFrom(settings);
-//        m_GTY_AF_HET.loadSettingsFrom(settings);
-//        m_GTY_AF_REF.loadSettingsFrom(settings);
-//        m_GTY_DP.loadSettingsFrom(settings);
-//        m_GTY_QUAL.loadSettingsFrom(settings);
-//        m_GTY_SEC_PL.loadSettingsFrom(settings);
-//        m_IGNORE_HOMO.loadSettingsFrom(settings);
-//        m_INFILE.loadSettingsFrom(settings);
-//        m_KGGSEQ.loadSettingsFrom(settings);
-//        m_OMIM_ANNO.loadSettingsFrom(settings);
-//        m_OUTFORMAT.loadSettingsFrom(settings);
-//        m_OUTPREFIX.loadSettingsFrom(settings);
-//        m_PEDFILE.loadSettingsFrom(settings);
-//        m_PUBMED.loadSettingsFrom(settings);
-//        m_SEQ_MQ.loadSettingsFrom(settings);
-//        m_SEQ_QUAL.loadSettingsFrom(settings);
-//        m_SEQ_SB.loadSettingsFrom(settings);
-//    }
     
     /**
      * {@inheritDoc}
