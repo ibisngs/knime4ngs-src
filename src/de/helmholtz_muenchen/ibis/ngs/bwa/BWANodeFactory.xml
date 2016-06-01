@@ -29,37 +29,48 @@
         	<option name="Algorithm for constructing BWT index">
         	<ul>
         		<li>
-        		BWT-SW: Algorithm implemented in BWT-SW.
-        		This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually slower than IS.
+        			BWT-SW: Algorithm implemented in BWT-SW.
+        			This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually slower than IS.
         		</li>
         		<li>
-        		IS: IS linear-time algorithm for constructing suffix array.
-        		It requires 5.37N memory where N is the size of the database.
-        		IS is moderately fast, but does not work with database larger than 2GB.
-        		IS is the default algorithm due to its simplicity.
-        		The current codes for IS algorithm are reimplemented by Yuta Mori.
+        			IS: IS linear-time algorithm for constructing suffix array.
+        			It requires 5.37N memory where N is the size of the database.
+        			IS is moderately fast, but does not work with database larger than 2GB.
+        			IS is the default algorithm due to its simplicity.
+        			The current codes for IS algorithm are reimplemented by Yuta Mori.
         		</li>
-        		</ul>
-        		 </option>
-        <option name="Algorithm for mapping">See description above.</option>
-        <option name="Build color-space index">Build a color-space index. The input fast should be in nucleotide space.</option>
-        <option name="Specify read group header">
-        	GATK requires a read group identifier (ID) and sample information (SM), e.g. specified by ’@RG\tID:foo\tSM:bar’.
-        	All reads within a read group are assumed to come from the same instrument run and to therefore share the same error model.
-        	SM defines the name of the sample sequenced in a read group.
-        	Read group header will not be added if BWA-SW is used.
-        </option>
-        <option name="Number of threads">
-        	BWA aln (sub-command of BWA-backtrack), BWA-SW and BWA-MEM can be run in multi-threading mode.
-        </option>	
+        	</ul>
+        	</option>
+        	<option name="Algorithm for mapping">
+        		Define which algorithm should be used for mapping.
+        	<ul>
+        		<li>BWA_MEM: This algorithm is designed for Illumina sequence reads up to 100bp. 
+        		It is generally recommended for high-quality queries as it is faster and more accurate than the other two algorithms. 
+        		BWA-MEM also has better performance than BWA-backtrack for 70-100bp Illumina reads. </li>
+        		<li>BWA-backtrack: This algorithm is designed for longer sequences ranged from 70bp to 1 Mbp.</li>
+        		<li>BWA-SW: Analogous to BWA-backtrack BWA-SW is also designed for longer sequences ranged from 70bp to 1 Mbp.</li>
+        	</ul>	
+    		</option>
+        	<option name="Build color-space index">Build a color-space index. The input fasta should be in nucleotide space.</option>
+        	<option name="Specify read group header">
+        		GATK requires a read group identifier (ID) and sample information (SM), e.g. specified by ’@RG\tID:foo\tSM:bar’.
+        		All reads within a read group are assumed to come from the same instrument run and to therefore share the same error model.
+        		SM defines the name of the sample sequenced in a read group.
+        		Read group header will not be added if BWA-SW is used.
+        	</option>
+        	<option name="Number of threads">
+        		Set the number of threads to be used.<br />
+        		BWA aln (sub-command of BWA-backtrack), BWA-SW and BWA-MEM can be run in multi-threading mode.<br />
+        		Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.
+        	</option>	
         </tab>
         <tab name="Preference page">
         	<option name="HTE">
  				Set threshold for repeated execution.
  				Only used if HTE is enabled in the preference page.
  			</option>
-        	<option name="Path to bwa">Set the path to BWA executable.</option>
-        	<option name="Path to reference sequence">Choose a reference sequence, such as a genome sequence, to map the reads (file type: FastA).</option>
+        	<option name="Path to bwa">Set the path to BWA executable. This will be done automatically if the path is already defined in the preference page.</option>
+        	<option name="Path to the reference sequence">Choose a reference sequence, such as a genome sequence, to map the reads (file type: FastA). This will be done automatically if the path is already defined in the preference page.</option>
 		</tab>       
 
     </fullDescription>
