@@ -162,13 +162,13 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     		throw new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue(), false)) {
     		throw new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
     	}
 
     	//check reference genome
     	String reffile = m_REF_GENOME.getStringValue();
-    	if(CompatibilityChecker.inputFileNotOk(reffile)) {
+    	if(CompatibilityChecker.inputFileNotOk(reffile, true)) {
     		throw new InvalidSettingsException("Set path to reference genome!");
     	}
     	

@@ -30,7 +30,7 @@ public class VCFSorterNodeDialog extends HTExecutorNodeDialog {
     public void addToolDialogComponents() {
     	final SettingsModelString refseq = new SettingsModelString(VCFSorterNodeModel.CFGKEY_REFSEQFILE,"");
 
-    	setDefaultTabTitle("Preference page");
+//    	setDefaultTabTitle("Preference page");
     	
     	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
     	

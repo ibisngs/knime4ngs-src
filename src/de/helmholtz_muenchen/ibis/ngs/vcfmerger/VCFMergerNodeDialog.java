@@ -248,7 +248,7 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
         //DC_FILE_REMOVE_BUTTON.getModel().setEnabled(false);
                
         // add elements
-		createNewTab("CombineVariants options");
+		setDefaultTabTitle("CombineVariants options");
         createNewGroup("add VCF files");
         addDialogComponent(dcFastaFile);
         addDialogComponent(DC_FILE_FILE_BUTTON);
