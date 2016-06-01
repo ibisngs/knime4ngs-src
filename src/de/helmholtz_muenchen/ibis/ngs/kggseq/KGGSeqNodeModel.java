@@ -26,7 +26,6 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
-import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
  * This is the model implementation of KGGSeq.
@@ -111,13 +110,13 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 
     private final SettingsModelOptionalString m_GENOTYPE_FILTER = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENOTYPE_FILTER, "4",true);
     private final SettingsModelBoolean m_IGNORE_HOMO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_IGNORE_HOMO, true);
-    private final SettingsModelOptionalString m_GENE_FEATURES = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENE_FEATURES, "0,1,2,3,4,5",true);
-    private final SettingsModelBoolean m_FILTER_COMMON = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_FILTER_COMMON, true);   
-    private final SettingsModelBoolean m_DISEASE_CAUSING_PRED = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_DISEASE_CAUSING_PRED, true);
-    private final SettingsModelBoolean m_OMIM_ANNO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_OMIM_ANNO, true);
-    private final SettingsModelBoolean m_CANDIDATE_PPI = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PPI, true);
+    private final SettingsModelOptionalString m_GENE_FEATURES = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENE_FEATURES, "0,1,2,3,4,5,6",true);
+    private final SettingsModelOptionalString m_FILTER_COMMON = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_FILTER_COMMON,"hg19_1kg201204,hg19_dbsnp138,hg19_ESP6500AA,hg19_ESP6500EA", true);   
+    private final SettingsModelBoolean m_DISEASE_CAUSING_PRED = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_DISEASE_CAUSING_PRED, false);
+    private final SettingsModelBoolean m_OMIM_ANNO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_OMIM_ANNO, false);
+    private final SettingsModelBoolean m_CANDIDATE_PPI = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PPI, false);
     private final SettingsModelString m_CANDIDATE_GENES = new SettingsModelString(KGGSeqNodeModel.CFGKEY_CANDIDATE_GENES, "");
-    private final SettingsModelBoolean m_CANDIDATE_PATHWAYS = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PATHWAYS, true);
+    private final SettingsModelBoolean m_CANDIDATE_PATHWAYS = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PATHWAYS, false);
     private final SettingsModelOptionalString m_PUBMED = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_PUBMED,"",false);
 
 	
@@ -241,8 +240,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     		command.add("--db-gene refgene --gene-feature-in "+m_GENE_FEATURES.getStringValue());
     	}
     	
-    	if(m_FILTER_COMMON.getBooleanValue()){
-    		command.add("--db-filter hg19_1kg201204,hg19_dbsnp138,hg19_ESP6500AA,hg19_ESP6500EA  --rare-allele-freq 0.05");
+    	if(m_FILTER_COMMON.isActive()){
+    		command.add("--db-filter "+m_FILTER_COMMON.getStringValue()+" --rare-allele-freq 0.05");
     	}
     	
     	if(m_DISEASE_CAUSING_PRED.getBooleanValue()){
@@ -287,7 +286,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	
-    	if(CompatibilityChecker.getIndexCellType(inSpecs[0], "VCFCell")!=0){
+    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")!=0){
     		throw new InvalidSettingsException("Invalid input. No VCFCell in first column of input table.");
     	}
     	

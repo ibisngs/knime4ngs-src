@@ -61,14 +61,14 @@ public class KGGSeqNodeDialog extends HTExecutorNodeDialog {
 	    final SettingsModelDoubleBounded m_GTY_AF_ALT = new SettingsModelDoubleBounded(KGGSeqNodeModel.CFGKEY_GTY_AF_ALT,0.75,0,Double.MAX_VALUE);
 
 	    final SettingsModelOptionalString m_GENOTYPE_FILTER = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENOTYPE_FILTER, "4",true);
-	    final SettingsModelBoolean m_IGNORE_HOMO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_IGNORE_HOMO, true);
-	    final SettingsModelOptionalString m_GENE_FEATURES = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENE_FEATURES, "0,1,2,3,4,5",true);
-	    final SettingsModelBoolean m_FILTER_COMMON = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_FILTER_COMMON, true);   
-	    final SettingsModelBoolean m_DISEASE_CAUSING_PRED = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_DISEASE_CAUSING_PRED, true);
-	    final SettingsModelBoolean m_OMIM_ANNO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_OMIM_ANNO, true);
-	    final SettingsModelBoolean m_CANDIDATE_PPI = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PPI, true);
+	    final SettingsModelBoolean m_IGNORE_HOMO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_IGNORE_HOMO, false);
+	    final SettingsModelOptionalString m_GENE_FEATURES = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_GENE_FEATURES, "0,1,2,3,4,5,6",true);
+	    final SettingsModelOptionalString m_FILTER_COMMON = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_FILTER_COMMON,"hg19_1kg201204,hg19_dbsnp138,hg19_ESP6500AA,hg19_ESP6500EA", false);   
+	    final SettingsModelBoolean m_DISEASE_CAUSING_PRED = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_DISEASE_CAUSING_PRED, false);
+	    final SettingsModelBoolean m_OMIM_ANNO = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_OMIM_ANNO, false);
+	    final SettingsModelBoolean m_CANDIDATE_PPI = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PPI, false);
 	    final SettingsModelString m_CANDIDATE_GENES = new SettingsModelString(KGGSeqNodeModel.CFGKEY_CANDIDATE_GENES, "");
-	    final SettingsModelBoolean m_CANDIDATE_PATHWAYS = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PATHWAYS, true);
+	    final SettingsModelBoolean m_CANDIDATE_PATHWAYS = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_CANDIDATE_PATHWAYS, false);
 	    final SettingsModelOptionalString m_PUBMED = new SettingsModelOptionalString(KGGSeqNodeModel.CFGKEY_PUBMED,"",false);
 		
 	    addPrefPageSetting(m_KGGSEQ, IBISKNIMENodesPlugin.KGGSeq);
@@ -107,9 +107,9 @@ public class KGGSeqNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentOptionalString(m_GENOTYPE_FILTER, "Genotype Filter"));
     	addDialogComponent(new DialogComponentBoolean(m_IGNORE_HOMO, "Ignore Homo"));
     	addDialogComponent(new DialogComponentOptionalString(m_GENE_FEATURES, "Select Gene Features"));
-    	addDialogComponent(new DialogComponentBoolean(m_FILTER_COMMON, "Filter by Common variants")); 
+    	addDialogComponent(new DialogComponentOptionalString(m_FILTER_COMMON, "Filter by Common variants (AF=0.05)")); 
     	addDialogComponent(new DialogComponentBoolean(m_DISEASE_CAUSING_PRED, "Prioritize sequence variants by disease-causing prediction")); 
-    	addDialogComponent(new DialogComponentBoolean(m_OMIM_ANNO, "Prioritize sequence variants by other genomic and OMIM annotation")); 
+    	addDialogComponent(new DialogComponentBoolean(m_OMIM_ANNO, "Prioritize sequence variants by OMIM annotation")); 
     	addDialogComponent(new DialogComponentOptionalString(m_PUBMED, "Prioritize sequence variants by PubMed"));
     	addDialogComponent(new DialogComponentBoolean(m_CANDIDATE_PPI, "Prioritize sequence variants by candidate genes with  protein interaction information")); 
     	addDialogComponent(new DialogComponentBoolean(m_CANDIDATE_PATHWAYS, "Prioritize sequence variants by candidate genes with pathway information")); 

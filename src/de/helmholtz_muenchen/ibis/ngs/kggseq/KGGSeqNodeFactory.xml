@@ -24,7 +24,7 @@
             </option>
         	<option name="General Options">
             	<b>Build Version</b>: Specify the database and reference genome version.<br />
-            	<b>Composite Subject ID</b>: By checking this option KGGSeq uses a composite subject ID in the CVF file.<br />
+            	<b>Composite Subject ID</b>: By checking this option KGGSeq uses a composite subject ID in the VCF file.<br />
             	<b>Output Prefix</b>: Define a prefix for all output files of this run.<br />
             	<b>Output Format</b>: Choose either excel or csv as output format.
             </option> 
@@ -40,8 +40,16 @@
             	<b>Gty Af Alt</b>: Exclude variants with the fraction of the reads carrying alternative allele &lt; = x% at a alternative-allele homozygous genotype. (Default value = 0.75)<br />
             </option>
         	<option name="Annotation Options">
-        		Apply different annotation options.<br />
-        		For detailed explanations, see <a href="http://grass.cgs.hku.hk/limx/kggseq/doc10/UserManual.html">online KGGSeq user manual</a>.
+				For detailed explanations, see <a href="http://grass.cgs.hku.hk/limx/kggseq/doc10/UserManual.html">online KGGSeq user manual</a>.<br />
+        		<b>Genotype Filter</b>: Filter out variants for which their genotypes are not consistent with the assumption of disease inheritance pattern (4=Exclude variants at which both affected and unaffected subjects have the same heterozygous genotypes). For complete list see <a href="http://grass.cgs.hku.hk/limx/kggseq/doc10/UserManual.html">online KGGSeq user manual</a>.<br />
+        		<b>Ignore Homo</b>: Ignore homozygous mutations <br />
+        		<b>Select Gene Features</b>: Select variants by specific features: Frameshift(1), Nonframeshift(2), Startloss(3), Stopgain(4), Splicing(5), Missense(6), ...Unknown(17). For complete list see <a href="http://grass.cgs.hku.hk/limx/kggseq/doc10/UserManual.html">online KGGSeq user manual</a>.<br />
+        		<b>Filter by Common variants</b>: Specify databases which are used for allele frequency filtration. <br />
+        		<b>Prioritize sequence variants by disease-causing prediction</b>:  Uses dbNSFP v3.0+ database to RE-predict whether a nonsynonymous single nucleotide variant (SNV) will potentially be Mendelian disease causal or not. <br />
+        		<b>Prioritize sequence variants by other genomic and OMIM annotation</b>: KGGSeq can extract all available disorder names linked to a gene in which the variants are located from the OMIM dataset morbidmap <br />
+        		<b>Prioritize sequence variants by PubMed</b>: KGGSeq can mine the titles and abstracts of published papers in PubMed via the NCBI E-utilities to find a co-mention with the searched term(s) of interest. <br />	
+	       		<b>Prioritize sequence variants by candidate genes with  protein interaction information</b>: Examine whether variants share the same PPIs with candidate genes. In this case, a file including the candidate gene names has to be specified. <br />	
+	       		<b>Prioritize sequence variants by candidate genes with pathway information</b>: Examine whether variants share the same genesets with candidate genes. In this case, a file including the candidate gene names has to be specified. <br />	
         	</option>
         </tab>
     </fullDescription>
@@ -50,4 +58,9 @@
         <inPort index="0" name="In-Port name"></inPort>
         <outPort index="0" name="Out-Port name">Currently returns inData</outPort>
     </ports>
+    
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+	</views>
+    
 </knimeNode>
