@@ -172,7 +172,11 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	
     	super.executeCommand(createCommand(BasePath,infile), exec, new File(lockFile),StdOutFile, StdErrFile);
     	
-    	
+    	//Check if outfile was created--> execution was successful. 
+    	if(!new File(BasePath+m_OUTPREFIX.getStringValue()+".flt.xlsx").exists()){
+    		setWarningMessage("No outfile was created. Execution probably failed. Please check error logs. Removing .klock file");
+    		new File(lockFile).delete();
+    	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
