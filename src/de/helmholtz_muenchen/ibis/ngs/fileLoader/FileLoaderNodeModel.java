@@ -50,7 +50,7 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
 	
 	private static final String [] ENDINGS = {"",".vcf",".gvcf",".fastq",".fq",".bam",".sam"};
 	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
-	
+		
 	private boolean secondOk = false;
 	private String sep;
 	
@@ -89,6 +89,17 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     			if(line.trim().equals("")) continue;
     			if(secondOk) {
     				String [] col = line.split(this.sep);
+    				
+    				if(CompatibilityChecker.inputFileNotOk(col[0])) {
+    					setWarningMessage("Some input files are invalid!");
+    					continue;
+    				}
+    				
+    				if(CompatibilityChecker.inputFileNotOk(col[1])) {
+    					setWarningMessage("Some input files are invalid!");
+    					continue;
+    				}
+    				
     				in1_list.add(col[0]);
     				if(col.length<2) {
     					setWarningMessage("Second column contains less entries than first! Ignoring those lines!");
@@ -176,6 +187,11 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	} else if(end==0) {
     		this.setWarningMessage("The input file is not in a supported NGS format");
     	} 
+    	
+    	//repeat check of first input file as it might be a path in a list
+    	if(CompatibilityChecker.inputFileNotOk(in1)) {
+    		throw new InvalidSettingsException("First input file in your list does not exist or is empty!");
+    	}
     	
     	//first input file is ok
     	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
