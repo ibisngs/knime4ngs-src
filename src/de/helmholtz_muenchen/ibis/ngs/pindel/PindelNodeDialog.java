@@ -35,52 +35,12 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class PindelNodeDialog extends HTExecutorNodeDialog {	
 	
-    protected PindelNodeDialog() {
-
-//        GeneralOptions();
-//        PindelParams();
-//        Pindel2VCFParams();
-    }
+    protected PindelNodeDialog() {}
 	
 	public void addToolDialogComponents() {
-	/*
-	 * executables
-	 * String path to pindel
-	 * 
-	 * interval to analyse
-	 * String interval default (ALL) (-c)
-	 * (21 -> only chromosome 21, chromosome name has to match chromsome name in reference sequence
-	 * 21:5,000,000-6,000,000 ->all bases in the interval on the chromosome)
-	 * 
-	 * pindel config file
-	 * boolean create pindel config file (only previous node Picard insert size metrics)
-	 * String path to pindel config file
-	 * 
-	 * int number of threads (-T)
-	 * int window size : does analysis for x mio bases (Mb, megabases) -> influences RAM used and runtime
-	 * 
-	 * sensitivity/ selectivity
-	 * int min num matched bases (30)
-	 * int additional mismatch (1) -> only map part of read when no other position with the specified number of mismatches
-	 * int min perfect match around BP (3) -> when mapping parts of reads
-	 * float sequencing error rate (0.05)
-	 * float maximum allowed mismatch rate for considering a reads (0.1)
-	 * 
-	 * boolean create vcf output -> pindel_SI, pindel_D 
-	 * String path to pindel2vcf
-	 *  
-	 */
-	
-	// minimum coverage reads (10)
-	// heterozygosity threshold (0.2)
-	// homozygosity threshold (0.8)
-	// minimum reads supporting the variant (1)
-	// event supported on both strands? (boolean)
-	// minimum size of variant (1)
-	// maximum size of variant (infinite)
-	// GATK compatible (boolean)
 	
 	final SettingsModelString pindel = new SettingsModelString(PindelNodeModel.CFGKEY_PINDEL, PindelNodeModel.DEF_PINDEL);;
+	final SettingsModelString refseqfile 			= new SettingsModelString(PindelNodeModel.CFGKEY_REFSEQFILE,"");
 	final SettingsModelBoolean interval = new SettingsModelBoolean(PindelNodeModel.CFGKEY_INTERVAL, PindelNodeModel.DEF_INTERVAL);;
 	final SettingsModelString chrom= new SettingsModelString(PindelNodeModel.CFGKEY_CHROM, PindelNodeModel.DEF_CHROM);
 	final SettingsModelIntegerBounded start = new SettingsModelIntegerBounded(PindelNodeModel.CFGKEY_START, PindelNodeModel.DEF_START, PindelNodeModel.MIN_START, PindelNodeModel.MAX_START);
@@ -123,8 +83,8 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
     
     	addPrefPageSetting(pindel, IBISKNIMENodesPlugin.PINDEL);
         addPrefPageSetting(pindel2vcf, IBISKNIMENodesPlugin.PINDEL2VCF);
-//      createNewGroup("Path to Pindel executable");
-//      addDialogComponent(new DialogComponentFileChooser(pindel, "pindel", JFileChooser.OPEN_DIALOG, false));
+        addPrefPageSetting(refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
+        
       
       createNewGroup("Interval for variant calling");
       addDialogComponent(new DialogComponentBoolean(interval, "Restrict variant calling to a certain genomic region"));
@@ -150,7 +110,7 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
 		});
       
       createNewGroup("Path to Pindel config file");
-      addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, true));
+      addDialogComponent(new DialogComponentFileChooser(config_file, "pindelconfig", JFileChooser.OPEN_DIALOG, false,".config"));
       create_config.setEnabled(true);
       addDialogComponent(new DialogComponentBoolean(create_config, "Create config file (requires PicardTools: CollectInsertMetrics as previous node)"));
       
@@ -165,19 +125,6 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
       
       createNewGroup("Output");
       addDialogComponent(new DialogComponentBoolean(vcf_out, "Convert Pindel output (deletions and small insertions) to VCF format"));
-//      DialogComponentFileChooser p2vcf_fc= new DialogComponentFileChooser(pindel2vcf, "p2vcf", JFileChooser.OPEN_DIALOG);
-//      p2vcf_fc.setBorderTitle("Path to Pindel2vcf converter");
-//      addDialogComponent(p2vcf_fc);
-      
-      // disable file chooser for pindel2vcf converter if output is not converted
-//      vcf_out.addChangeListener(new ChangeListener() {
-//			
-//			@Override
-//			public void stateChanged(ChangeEvent e) {
-//				pindel2vcf.setEnabled(vcf_out.getBooleanValue());
-////				setEnabled(vcf_out.getBooleanValue(), "Pindel2vcf parameters");
-//			}
-//		});
       
       createNewGroup("Runtime and memeroy usage");
       setHorizontalPlacement(true);
@@ -272,72 +219,6 @@ public class PindelNodeDialog extends HTExecutorNodeDialog {
 			}
 		});
     }
-    
-
-
-//	@Override
-//	protected void updatePrefs() {
-//		if(usePrefPage.getBooleanValue()) {
-//	    	String pindel_path = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel");
-//	    	if(pindel_path != null && !pindel_path.equals("")) {
-//	    		pindel.setStringValue(pindel_path);
-//	    		pindel.setEnabled(false);
-//			} else {
-//				pindel.setEnabled(true);
-//			}
-//
-//		    String pindel2vcfPath = IBISKNIMENodesPlugin.getDefault().getToolPathPreference("pindel2vcf");
-//		    	if(pindel2vcfPath != null && !pindel2vcfPath.equals("")) {
-//		    		pindel2vcf.setStringValue(pindel2vcfPath);
-//		    		pindel2vcf.setEnabled(false);
-//		    	} else {
-//		    		pindel2vcf.setEnabled(true);
-//		    	}
-//	    	
-//		} else {
-//			pindel.setEnabled(true);
-//			pindel2vcf.setEnabled(true);
-//		}
-//	}
-    
-    
-    /* 
-     * Program:   pindel2vcf (conversion of Pindel output to VCF format)
-Example:   pindel2vcf -p sample3chr20_D -r human_g1k_v36.fasta -R 1000GenomesPilot-NCBI36
-              -d 20101123-v sample3chr20_D.vcf
-
-Note:      -is only guaranteed to work correctly on output files produced by pindel version 0.2.3 and above.
-           -LI and BP files (long insertion and break point files) have a different type of header and
-            are not supported yet.
-
--r/--reference  The name of the file containing the reference genome: required parameter
-*-R/--reference_name  The name and version of the reference genome: required parameter
-*-d/--reference_date  The date of the version of the reference genome used: required parameter
--p/--pindel_output  The name of the pindel output file containing the SVs
--P/--pindel_output_root  The root-name of the pindel output file; this will result in one big output file containing                                                     deletions, short and long insertions, tandem duplications and inversions
--v/--vcf  The name of the output vcf-file (default: name of pindel output file +".vcf"
--c/--chromosome  The name of the chromosome (default: SVs on all chromosomes are processed)
--w/--window_size  Memory saving option: the size of the genomic region in a chromosome of which structural variants are calculated separately, in millions of bases (default 300, for memory saving 100 or 50 recommended)
-*-mc/--min_coverage  The minimum number of reads to provide a genotype (default 10)
-*-he/--het_cutoff  The propertion of reads to call het (default 0.2)
-*-ho/--hom_cutoff  The propertion of reads to call het (default 0.8)
-*-is/--min_size  The minimum size of events to be reported (default 1)
-*-as/--max_size  The maximum size of events to be reported (default infinite)
-*-b/--both_strands_supported  Only report events that are detected on both strands (default false)
--m/--min_supporting_samples  The minimum number of samples an event needs to occur in with sufficient support to be reported (default 0)
-*-e/--min_supporting_reads  The minimum number of supporting reads required for an event to be reported (default 1)
--f/--max_supporting_reads  The maximum number of supporting reads allowed for an event to be reported, allows protection against miscalls in due to segmental duplications or poorly mapped regions (default infinite)
--sr/--region_start  The start of the region of which events are to be reported (default 0)
--er/--region_end  The end of the region of which events are to be reported (default infinite)
--ir/--max_internal_repeats  Filters out all indels where the inserted/deleted sequence is a homopolymer/microsatellite of more than X repetitions (default infinite). For example: T->TCACACA has CACACA as insertion, which is a microsattelite of 3 repeats; this would be filtered out by setting -ir to 2
--co/--compact_output_limit  Puts all structural variations of which either the ref allele or the alt allele exceeds the specified size (say 10 in '-co 10') in the format 'chrom pos first_base <SVType>'
--il/--max_internal_repeatlength  Filters out all indels where the inserted/deleted sequence is a homopolymers/microsatellite with an unit size of more than Y, combine with the option -ir. Default value of -il is infinite. For example: T->TCAGCAG has CAGCAG as insertion, which has the fundamental repetitive unit CAG of length 3. This would be filtered out if -il has been set to 3 or above, but would be deemed 'sufficiently unrepetitive' if -il is 2
--pr/--max_postindel_repeats  Filters out all indels where the inserted/deleted sequence is followed by a repetition (of over X times) of the fundamental repeat unit of the inserted/deleted sequence. For example, T->TCACA would usually be a normal insertion, which is not filtered out, but if the real sequence change is TCACACA->TCACACACACA, it will be filtered out by -pr of 1 or above, as the fundamental repeat unit of the inserted sequence (CA) is repeated more than one time in the postindel sequence [indel sequence CACA, postindel sequence CACACA]. Note: when CAC is inserted next to ACACAC, the repeat sequence is recognized as CA, even though the 'postrepeat' sequence is ACACAC
--pl/--max_postindel_repeatlength  Filters out all indels where the inserted/deleted sequence is followed by a repetition of  the fundamental repeat unit of the inserted/deleted sequence; the maximum size of that 'fundamental unit' given by the value of -pl (default infinite) For example: TCAG->TCAGCAG has insertion CAG and post-insertion sequence CAG. This insertion would be filtered out if -pl has been set to 3 or above, but would be deemed 'sufficiently unrepetitive' if -pl is 2
--sb/--only_balanced_samples  Only count a sample as supporting an event if it is supported by reads on both strands, minimum reads per strand given by the -ss parameter. (default false)
--ss/--minimum_strand_support  Only count a sample as supporting an event if at least one of its strands is supported by X reads (default 1)
-*-G/--gatk_compatible  calls genotypes which could either be homozygous or heterozygous not as ./1 but as 0/1, to ensure compatibility with GATK
-     * 
-     */
+  
 }
 

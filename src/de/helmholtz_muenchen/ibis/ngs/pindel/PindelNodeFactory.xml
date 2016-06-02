@@ -17,11 +17,6 @@
 			<br />
 			Further information about Pindel and installation instructions are available at <a href="http://gmt.genome.wustl.edu/pindel/0.2.4/index.html"> http://gmt.genome.wustl.edu/pindel/0.2.4/index.html </a>
 			<br />
-			Predecessor Loss-of-Function nodes: PicardTools (it is recommended to use CollectInsertSizeMetrics before running Pindel), GATKRealignment, GATKBaseRecalibration
-			<br />
-			Predecessor NGS nodes: BAMLoader
-			<br />
-			Successor Loss-of-Function nodes: VAT
     	</intro>
         
         <tab name="Options">
@@ -111,9 +106,7 @@
         <inPort index="0" name="In-Port">
         	Cell 0: Path2BAMFile (indexed BAM file for variant calling)
 			<br />
-    		Cell 1: Path2SEQFile (reference sequence used for mapping the BAM file)
-			<br />
-			Cell 2 (optional): Path2ISMetrics (file produced by PicardTools CollectInsertSize with information about the insert size distribution)
+			Cell 1 (optional): Path2ISMetrics (file produced by PicardTools CollectInsertSize with information about the insert size distribution)
 			<br />
 			The cell position does not matter. Additional columns are ignored.
     	</inPort>
@@ -126,23 +119,15 @@
 			<br />
 			Cell 1: Path2VCFinsertionsFile (VCF file containing all small insertions)
 			<br />
-			Cell 2: Path2BAMFile (BAM file from inport)
-			<br />
-			Cell 3: Path2SEQFile (reference genome from inport)
-			<br />
 			Outport without VCF output
     		<br />
     		Cell 0: Path2PindelDFile (Pindel file containing all deletions)
 			<br />
 			Cell 1: Path2PindelSIFile (Pindel file containing all small insertions)
 			<br />
-			Cell 2: Path2BAMFile (BAM file from inport)
-			<br />
-			Cell 3: Path2SEQFile (reference genome from inport)
     	</outPort>
     </ports>
-        
-    <views>
-        <view index="0" name=""></view>
-    </views>
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+		</views>
 </knimeNode>

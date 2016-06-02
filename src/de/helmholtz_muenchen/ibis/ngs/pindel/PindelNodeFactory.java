@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "Pindel" Node.
  * 
@@ -35,7 +37,7 @@ public class PindelNodeFactory
     @Override
     public NodeView<PindelNodeModel> createNodeView(final int viewIndex,
             final PindelNodeModel nodeModel) {
-        return new PindelNodeView(nodeModel);
+        return new HTENodeView<PindelNodeModel>(nodeModel);
     }
 
     /**

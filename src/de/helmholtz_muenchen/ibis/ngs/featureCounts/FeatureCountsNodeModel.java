@@ -130,7 +130,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	super.configure(inSpecs);
     	
     	
-    	if(CompatibilityChecker.getIndexCellType(inSpecs[0], "BAMCell")!=0){
+    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell")!=0){
     		throw new InvalidSettingsException("Invalid input. No BAMCell in first column of input table. Node requires the FileLoader as predecessor.");
     	}
     	

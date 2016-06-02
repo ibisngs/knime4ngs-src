@@ -2,7 +2,6 @@ package de.helmholtz_muenchen.ibis.ngs.pindel;
 
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,30 +21,8 @@ public class RunPindel extends PindelNodeModel {
 	
 	
 	public String createOutputFilePindel(String filebase, String toolextension, String variant) throws Exception{
-		
-		//path to output file
-		String path =filebase+"."+toolextension+"_"+variant;
-		
-		//file does not exist
-		if(!Files.exists(Paths.get(path))){
-			return filebase+"."+toolextension;
-		}
-		
-		//file exists
-		else{
 			
-			//add integer to file name and increment integer until the file does not exist
-//			int n=1;
-//			while(Files.exists(Paths.get(filebase+"."+toolextension+n+"_"+variant))){
-//				n++;
-//				
-//				if(n==10000){
-//					throw new Exception("Oops, I'm so sorry, something went wrong, there are too many files");
-//				}
-//			}
-			return filebase+"."+toolextension;
-		}
-		
+		return filebase+"."+toolextension;
 	}
 	
 	public void PindelConfig(String bamfile, String ismfile, String configfile) throws Exception {
@@ -135,9 +112,7 @@ public class RunPindel extends PindelNodeModel {
     	/**Execute**/
     	String lockFile = out + SuccessfulRunChecker.LOCK_ENDING;
     	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),out+".out.log", out+".err.log");
-		
-//		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, out+".out.log", out+".err.log", null);
-		
+			
 	}
 	
 	public void Pindel2VCF (ExecutionContext exec, String p2vcf, String ref, String refn, String refd, String pfile, String vout, boolean [] fs, double [] nums) throws Exception{
@@ -173,8 +148,6 @@ public class RunPindel extends PindelNodeModel {
     	String lockFile = vout + SuccessfulRunChecker.LOCK_ENDING;
     	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),vout+".out.log", vout+".err.log");
 		
-//		Executor.executeCommand(new String[]{cmd}, exec, null, PindelNodeModel.logger, vout+".out.log", vout+".err.log", null);
-
 	}
 
 }

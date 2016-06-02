@@ -7,7 +7,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>The StarStatisticMerger can be used to merge the mapping statistics of multiple STAR runs into one file in order to post-process that data.
+        <intro>The StarStatisticMerger can be used to merge the mapping statistics (Log.final.out) of multiple STAR runs into one file in order to post-process that data.
         </intro>
 		<tab name="Options">
         	<option name="Path to folder with STAR Outputs">
