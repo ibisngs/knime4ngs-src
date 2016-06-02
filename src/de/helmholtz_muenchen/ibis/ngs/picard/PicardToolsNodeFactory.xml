@@ -8,8 +8,7 @@
     
     <fullDescription>
         <intro>
-        	This is a wrapper node for PicardTools. 
-        	It comes along with version 1.136 of PicardTools. 
+        	This is a wrapper node for PicardTools.  
         	PicardTools is a popular java tool suite for modifying files in SAM/BAM format (Format specification at <a href="http://samtools.github.io/hts-specs/SAMv1.pdf"> http://samtools.github.io/hts-specs/SAMv1.pdf </a>).
 			Currently, the PicardTools node implements four tools: 
 			<ul>
@@ -106,17 +105,17 @@
         <inPort index="0" name="In-Port">
         	Cell 0: Path2BAMFile or Path2SAMFile (BAM or SAM file to modify, if you use MarkDuplicates the file has to be sorted by mapping position)
 			<br />
-			Cell 1: Path2SEQFile or Sequence File or Path2RefFile (reference sequence used for mapping the BAM or SAM file)
-			<br />
 			The cell position does not matter. Additional columns are ignored.
     	</inPort>
         <outPort index="0" name="Out-Port">
         	Cell 0: Path2BAMFile or Path2SAMFile (BAM or SAM depending on the output format selected)
 			<br />
-			Cell 1: Path2SEQFile (reference sequence used for mapping the BAM or SAM file)
-    		<br />
-			Cell 2 (optional): Path2ISMetrics (file with information about insert size distribution produced by CollectInsertSizeMetrics)
+			Cell 1 (optional): Path2ISMetrics (file with information about insert size distribution produced by CollectInsertSizeMetrics)
     	</outPort>
     </ports>  
+  
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+		</views>
   
 </knimeNode>

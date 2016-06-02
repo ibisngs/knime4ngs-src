@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "PicardTools" Node.
  * 
@@ -35,7 +37,7 @@ public class PicardToolsNodeFactory
     @Override
     public NodeView<PicardToolsNodeModel> createNodeView(final int viewIndex,
             final PicardToolsNodeModel nodeModel) {
-        return new PicardToolsNodeView(nodeModel);
+        return new HTENodeView<PicardToolsNodeModel>(nodeModel);
     }
 
     /**

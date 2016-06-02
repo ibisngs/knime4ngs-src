@@ -14,23 +14,22 @@ import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
-//import net.sf.picard.sam.SortSam;
 
 
 /**
@@ -39,13 +38,19 @@ import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
  *
  * @author 
  */
-public class PicardToolsNodeModel extends NodeModel {
+public class PicardToolsNodeModel extends HTExecutorNodeModel {
     
     // the logger instance
     protected static final NodeLogger logger = NodeLogger.getLogger(PicardToolsNodeModel.class);
     
     
     //general options
+    static final String CFGKEY_PICARD="picard";
+    private final SettingsModelString m_picard = new SettingsModelString(CFGKEY_PICARD, "");
+    static final String CFGKEY_PICARD_MEM="picard_mem";
+    private final SettingsModelIntegerBounded m_picard_mem = new SettingsModelIntegerBounded(CFGKEY_PICARD_MEM, 8, 1, Integer.MAX_VALUE);
+    static final String CFGKEY_REFGENOME="refgenome";
+    private final SettingsModelString m_refgenome = new SettingsModelString(CFGKEY_REFGENOME, "");
     
     //selected tool
     static final String CFGKEY_PTOOL="ptool";
@@ -135,12 +140,36 @@ public class PicardToolsNodeModel extends NodeModel {
     private final SettingsModelString m_sort_order=new SettingsModelString(CFGKEY_SORT_ORDER, DEF_SORT_ORDER);
     
     private int posSamBam;
-    private int posRef;
 
     protected PicardToolsNodeModel() {
     
-        // #input ports, #output ports
         super(1, 1);
+        
+    	//general options
+        addSetting(m_picard);
+        addSetting(m_picard_mem);
+        addSetting(m_refgenome);
+        addSetting(m_ptool);
+        addSetting(m_bsformat);
+        addSetting(m_index);
+        addSetting(m_valstring);
+        //add or replace read groups
+        addSetting(m_use_file_name);
+        addSetting(m_id_name);
+        addSetting(m_library_name);
+        addSetting(m_sample_name);
+        addSetting(m_platform_unit);
+        addSetting(m_platform);
+        //insert size metrics
+        addSetting(m_acc_level);
+        addSetting(m_ass_sorted_sm);
+        addSetting(m_min_pct);
+        addSetting(m_deviation);
+        //mark duplicates
+        addSetting(m_remove_dupl);
+        addSetting(m_ass_sorted_rd);
+        //sorting
+        addSetting(m_sort_order);  
     }
 
     /**
@@ -154,7 +183,7 @@ public class PicardToolsNodeModel extends NodeModel {
         //retrieves BAM/SAM file and reference sequence file from table of previous node
         DataRow r=inData[0].iterator().next();
         String inputfile=r.getCell(posSamBam).toString();
-        String reffile=r.getCell(posRef).toString();
+        String reffile=m_refgenome.getStringValue();
         
         
         //checks if all files are still available
@@ -195,7 +224,7 @@ public class PicardToolsNodeModel extends NodeModel {
         	String output_hist=PathProcessor.createOutputFile(base, "pdf", "ismhist");
         	String output_data=PathProcessor.createOutputFile(base, "txt", "ismetrics");
         	
-        	RunPicard.runMetrics(inputfile, reffile, output_data, output_hist, m_valstring.getStringValue(), m_index.getBooleanValue(), m_deviation.getDoubleValue(), m_min_pct.getDoubleValue(), m_acc_level.getStringValue(), m_ass_sorted_sm.getBooleanValue());
+        	runMetrics(exec,inputfile, reffile, output_data, output_hist, m_valstring.getStringValue(), m_index.getBooleanValue(), m_deviation.getDoubleValue(), m_min_pct.getDoubleValue(), m_acc_level.getStringValue(), m_ass_sorted_sm.getBooleanValue());
 
 		    //create output table with output sam/bam file and reference sequence AND metrics files
 		    
@@ -239,10 +268,10 @@ public class PicardToolsNodeModel extends NodeModel {
 		    	output=PathProcessor.createOutputFile(base, m_bsformat.getStringValue(), "rg");
 		    	
 		    	if(m_use_file_name.getBooleanValue()){
-		    		RunPicard.runRG(inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), basename, basename, basename, basename, m_platform.getStringValue());
+		    		runRG(exec,inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), basename, basename, basename, basename, m_platform.getStringValue());
 		    	}
 		    	else{
-		    		RunPicard.runRG(inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), m_id_name.getStringValue(), m_library_name.getStringValue(), m_sample_name.getStringValue(), m_platform_unit.getStringValue(), m_platform.getStringValue());		    		
+		    		runRG(exec,inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), m_id_name.getStringValue(), m_library_name.getStringValue(), m_sample_name.getStringValue(), m_platform_unit.getStringValue(), m_platform.getStringValue());		    		
 		    	}
 		    }
 		    
@@ -253,14 +282,14 @@ public class PicardToolsNodeModel extends NodeModel {
 		    	output=PathProcessor.createOutputFile(base, m_bsformat.getStringValue(), "marked");
 		    	String output_metrics=PathProcessor.createOutputFile(base, "txt", "marked.metrics");
 		    	
-		    	RunPicard.runDupl(inputfile, output, output_metrics, m_valstring.getStringValue(), m_index.getBooleanValue(), m_remove_dupl.getBooleanValue(), m_ass_sorted_rd.getBooleanValue());
+		    	runDupl(exec,inputfile, output, output_metrics, m_valstring.getStringValue(), m_index.getBooleanValue(), m_remove_dupl.getBooleanValue(), m_ass_sorted_rd.getBooleanValue());
 		    }
 		    
 		    //launch sort sam
 		    else if(tool.equals(TOOLS_AVAILABLE[3])){
 		    	
 		    	output=PathProcessor.createOutputFile(base, m_bsformat.getStringValue(), "sorted");
-		    	RunPicard.runSortSam(inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), m_sort_order.getStringValue());
+		    	runSortSam(exec,inputfile, output, m_valstring.getStringValue(), m_index.getBooleanValue(), m_sort_order.getStringValue());
 		    }
 		    
 		    //create output table with output sam/bam file and reference sequence
@@ -317,11 +346,7 @@ public class PicardToolsNodeModel extends NodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	
-    	//input port: BWA (all mappers?), SAMLoader, BAMLoader
-    	//reference file: "Sequence file", "Path2SEQFile", "Path2RefFile"
-    	//input sam/bam file: "Path2SAMFile", "Path2BAMFile"
-    		
+    	    		
     		//names of the input table columns
 			String [] cols=inSpecs[0].getColumnNames();
 			
@@ -329,19 +354,11 @@ public class PicardToolsNodeModel extends NodeModel {
 			if(!CompatibilityChecker.checkInputCellType(inSpecs[0],"SAMCell") && !CompatibilityChecker.checkInputCellType(inSpecs[0],"BAMCell")){
 				throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
 			}
-//			
-//			//checking for reference sequence
-//			if(!inSpecs[0].containsName("Sequence file") && !inSpecs[0].containsName("Path2SEQFile") && !inSpecs[0].containsName("Path2RefFile")){
-//				throw new InvalidSettingsException("Previous node is incompatible! Missing path to reference sequence!");
-//			}
 			
 			//determining position of reference and sam/bam file
 			for(int i=0; i<cols.length; i++){
 				if(cols[i].equals("Path2BAMFile") || cols[i].equals("Path2SAMFile")){
 					posSamBam=i;
-				}
-				if(cols[i].equals("Sequence file") || cols[i].equals("Path2SEQFile") || cols[i].equals("Path2RefFile")){
-					posRef=i;
 				}
 			}
 			
@@ -371,117 +388,6 @@ public class PicardToolsNodeModel extends NodeModel {
         return new DataTableSpec[]{new DataTableSpec(colspec)};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //executed when dialog opened
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-        
-        //general options
-        m_ptool.saveSettingsTo(settings);
-        m_bsformat.saveSettingsTo(settings);
-        m_index.saveSettingsTo(settings);
-        m_valstring.saveSettingsTo(settings);
-        
-        //add or replace read group
-        m_use_file_name.saveSettingsTo(settings);
-        m_id_name.saveSettingsTo(settings);
-        m_library_name.saveSettingsTo(settings);
-        m_sample_name.saveSettingsTo(settings);
-        m_platform_unit.saveSettingsTo(settings);
-        m_platform.saveSettingsTo(settings);
-        
-        //insert size metrics
-        m_acc_level.saveSettingsTo(settings);
-        m_ass_sorted_sm.saveSettingsTo(settings);
-        m_min_pct.saveSettingsTo(settings);
-        m_deviation.saveSettingsTo(settings);
-        
-        //mark duplicates
-        m_remove_dupl.saveSettingsTo(settings);
-        m_ass_sorted_rd.saveSettingsTo(settings);
-        
-        //sorting
-        m_sort_order.saveSettingsTo(settings);
-        
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //executed when dialog closed
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-         
-    	
-    	//general options
-    	m_ptool.loadSettingsFrom(settings);
-    	m_bsformat.loadSettingsFrom(settings);
-    	m_index.loadSettingsFrom(settings);
-    	m_valstring.loadSettingsFrom(settings);
-    	
-    	//add or replace read group
-    	m_use_file_name.loadSettingsFrom(settings);
-    	m_id_name.loadSettingsFrom(settings);
-    	m_library_name.loadSettingsFrom(settings);
-    	m_sample_name.loadSettingsFrom(settings);
-    	m_platform_unit.loadSettingsFrom(settings);
-    	m_platform.loadSettingsFrom(settings);
-    	
-    	//insert size metrics
-    	m_acc_level.loadSettingsFrom(settings);
-    	m_ass_sorted_sm.loadSettingsFrom(settings);
-    	m_min_pct.loadSettingsFrom(settings);
-    	m_deviation.loadSettingsFrom(settings);
-    	
-    	//mark duplicates
-    	m_remove_dupl.loadSettingsFrom(settings);
-    	m_ass_sorted_rd.loadSettingsFrom(settings);
-    	
-    	//sorting
-    	m_sort_order.loadSettingsFrom(settings);
-    	
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    //executed when dialog closed
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-    	
-    	//general options
-        m_ptool.validateSettings(settings);
-        m_bsformat.validateSettings(settings);
-        m_index.validateSettings(settings);
-        m_valstring.validateSettings(settings);
-        
-        //add or replace read groups
-        m_use_file_name.validateSettings(settings);
-        m_id_name.validateSettings(settings);
-        m_library_name.validateSettings(settings);
-        m_sample_name.validateSettings(settings);
-        m_platform_unit.validateSettings(settings);
-        m_platform.validateSettings(settings);
-        
-        //insert size metrics
-        m_acc_level.validateSettings(settings);
-        m_ass_sorted_sm.validateSettings(settings);
-        m_min_pct.validateSettings(settings);
-        m_deviation.validateSettings(settings);
-        
-        //mark duplicates
-        m_remove_dupl.validateSettings(settings);
-        m_ass_sorted_rd.validateSettings(settings);
-        
-        //sorting
-        m_sort_order.validateSettings(settings);
-
-    }
     
     /**
      * {@inheritDoc}
@@ -504,5 +410,364 @@ public class PicardToolsNodeModel extends NodeModel {
 
     }
 
+    
+	//run CollectInsertSizeMetrics
+	protected void runMetrics (ExecutionContext exec,String input, String ref, String outputm, String outputh, String val, boolean index, double dev, double pct, String acc, boolean sorted ) throws Exception{
+		
+		/* command line options
+		 * INPUT
+		 * CREATE_INDEX
+		 * VALIDATION_STRINGENCY
+		 * HISTOGRAM_FILE
+		 * DEVIATIONS
+		 * MINIMUM_PCT
+		 * METRIC_ACCUMULATION_LEVEL
+		 * ASSUME_SORTED
+		 * OUTPUT
+		 * REFERENCE_SEQUENCE
+		 */
+
+		String picard = m_picard.getStringValue();
+		String method = "CollectInsertSizeMetrics";
+		String[] args = new String[11];
+		args[0]="INPUT="+input;
+		args[1]="OUTPUT="+outputm;
+		args[2]="HISTOGRAM_FILE="+outputh;
+		args[3]="REFERENCE_SEQUENCE="+ref;
+		args[4]="VALIDATION_STRINGENCY="+val;
+		args[5]="CREATE_INDEX="+index;
+		args[6]="DEVIATIONS="+dev;
+		args[7]="MINIMUM_PCT="+pct;
+		args[8]="METRIC_ACCUMULATION_LEVEL="+acc;
+		args[9]="ASSUME_SORTED="+sorted;
+		args[10]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		File lockFile = new File(outputm+SuccessfulRunChecker.LOCK_ENDING);
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
+		super.executeCommand(new String[] { command }, exec, lockFile, outputm+".stdOut",outputm+".stdErr");
+		
+		
+//		PicardToolsNodeModel.logger.info(lockCommand);
+		
+//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+		
+//		if(b) {
+//			PicardToolsNodeModel.logger.info("According to klock CollectInsertSizeMetrics has been finished successfully!");
+//			return;
+//		}
+			
+//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+		
+		//redirect error stream
+//		redirecterr(outputm);
+//		System.err.println("Output of CollectInsertSizeMetrics:");
+		
+//		Exception exception=null;
+//		
+//		int exitcode =0;
+//		
+//		try{
+			//run tool
+//			exitcode=new CollectInsertSizeMetrics().instanceMain(args);
+//		}
+//		catch(Exception e){
+//			exception =e ;
+//		}
+//		//reset error stream and variable for index writing
+//		finally{
+//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
+//			reseterr();
+//		}
+//		
+//		//checks if exception has been caught
+//		if(exception!=null){
+//			throw exception;
+//		}
+//		
+//		if(exitcode==1){
+//			throw new Exception("Something went wrong while executing CollectInsertSizeMetrics, please check out the log file");
+//		}
+//		
+//		checker.writeOK();
+//		checker.finalize();
+//		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
+	}
+	
+	//run AddOrReplaceReadGroups
+	protected void runRG(ExecutionContext exec, String input, String output, String val, boolean index, String id, String library, String sample, String unit, String platform) throws Exception{
+		
+		/* command line arguments
+		 * INPUT
+		 * OUTPUT
+		 * VALIDATION_STRINGENCY
+		 * CREATE_INDEX
+		 * RGID id
+		 * RGLB library
+		 * RGPL platform
+		 * RGPU platform unit
+		 * RGSM sample
+		 */
+		
+		if(id.equals("")) {
+			id = "id";
+			PicardToolsNodeModel.logger.warn("ID has to be specified (now set to 'id')");
+		}
+		if(library.equals("")) {
+			library = "library";
+			PicardToolsNodeModel.logger.warn("Library has to be specified (now set to 'library')");
+		}
+		if(sample.equals("")) {
+			sample="sample";
+			PicardToolsNodeModel.logger.warn("Sample has to be specified (now set to 'sample')");
+		}
+		if(unit.equals("")) {
+			unit="unit";
+			PicardToolsNodeModel.logger.warn("Platform unit has to be specified (now set to 'unit')");
+		}
+		if(platform.equals("")) {
+			platform = "platform";
+			PicardToolsNodeModel.logger.warn("Platform has to be specified (now set to 'platform')");
+		}
+		
+		String picard = m_picard.getStringValue();
+		String method = "AddOrReplaceReadGroups";
+		
+		String [] args = new String[10];
+		args[0]="INPUT="+input;
+		args[1]="OUTPUT="+output;
+		args[2]="VALIDATION_STRINGENCY="+val;
+		args[3]="CREATE_INDEX="+index;
+		args[4]="RGID="+id;
+		args[5]="RGLB="+library;
+		args[6]="RGSM="+sample;
+		args[7]="RGPU="+unit;
+		args[8]="RGPL="+platform;
+		args[9]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8];
+
+		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+
+		
+		//		PicardToolsNodeModel.logger.info(lockCommand);
+//		
+//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+//			
+//		if(b) {
+//			PicardToolsNodeModel.logger.info("According to klock AddOrReplaceReadGroups has been finished successfully!");
+//			return;
+//		}
+//			
+//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+//			
+//		//redirect error stream
+//		redirecterr(output);
+//		System.err.println("Output of AddOrReplaceReadGroups:");
+//		
+//		Exception exception=null;
+//		int exitcode=0;
+//		
+//		try{
+//			//run tool
+//			exitcode=new AddOrReplaceReadGroups().instanceMain(args);
+//		}
+//		catch(Exception e){
+//			exception =e;
+//		}
+//		//reset error stream, resert writing index variable
+//		finally{
+//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
+//			reseterr();
+//		}
+//		
+//		//checks if exception has been caught
+//		if(exception!=null){
+//			throw exception;
+//		}
+//		
+//		if(exitcode==1){
+//			throw new Exception("Something went wrong while executing MarkDuplicates, please check out the log file");
+//		}
+//		
+//		checker.writeOK();
+//		checker.finalize();
+		
+		PicardToolsNodeModel.logger.info("AddOrReplaceReadGroups finished successfully");
+	}
+
+	
+	//run MarkDuplicates
+	protected void runDupl(ExecutionContext exec, String input, String output, String metrics, String val, boolean index, boolean rmdupl, boolean ass_sort) throws Exception {
+		
+		/* command line options for MarkDuplicates
+		 * INPUT
+		 * OUTPUT
+		 * METRICS_FILE
+		 * REMOVE_DUPLICATES
+		 * ASSUME_SORTED
+		 * VALIDATION_STRINGENCY
+		 * CREATE_INDEX
+		 */
+		
+		String picard = m_picard.getStringValue();
+		String method = "MarkDuplicates";
+		
+		String [] args = new String[8];
+		args[0]="INPUT="+input;
+		args[1]="OUTPUT="+output;
+		args[2]="METRICS_FILE="+metrics;
+		args[3]="VALIDATION_STRINGENCY="+val;
+		args[4]="CREATE_INDEX="+index;
+		args[5]="REMOVE_DUPLICATES="+rmdupl;
+		args[6]="ASSUME_SORTED="+ass_sort;
+		args[7]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6];
+
+		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+
+		
+		//		PicardToolsNodeModel.logger.info(lockCommand);
+//		
+//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+//		
+//		if(b) {
+//			PicardToolsNodeModel.logger.info("According to klock MarkDuplicates has been finished successfully!");
+//			return;
+//		}
+//			
+//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+//		
+//		//redirect error stream
+//		redirecterr(output);
+//		System.err.println("Output of MarkDuplicates:");
+//		
+//		Exception exception=null;
+//		int exitcode=0;
+//
+//		try{
+//			//run tool
+//			exitcode = new MarkDuplicates().instanceMain(args);
+//		}
+//		catch(Exception e){
+//			exception = e;
+//		}
+//		//reset error stream, reset writing index variable
+//		finally{
+//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
+//			reseterr();
+//		}
+//		
+//		//checks if exception has been caught
+//		if(exception!=null){
+//			throw exception;
+//		}
+//		
+//		if(exitcode==1){
+//			throw new Exception("Something went wrong while executing MarkDuplicates, please check out the log file");
+//		}
+		
+		PicardToolsNodeModel.logger.info("MarkDupplicates finished successfully");
+		
+//		checker.writeOK();
+//		checker.finalize();
+	}
+	
+	//run SortSam
+	protected void runSortSam(ExecutionContext exec, String input, String output, String val, boolean index, String order) throws Exception {
+		
+		/* command line options for SortSam
+		 *INPUT
+		 *OUTPUT
+		 *SORT_ORDER
+		 *VALIDATION_STRINGENCY
+		 *CREATE_INDEX
+		 */
+
+		String picard = m_picard.getStringValue();
+		String method = "SortSam";
+		
+		String[] args= new String[6];
+		args[0]="INPUT="+input;
+		args[1]="OUTPUT="+output;
+		args[2]="VALIDATION_STRINGENCY="+val;
+		args[3]="CREATE_INDEX="+index;
+		args[4]="SORT_ORDER="+order;
+		args[5]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4];
+		
+		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+//		PicardToolsNodeModel.logger.info(lockCommand);
+//		
+//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
+//		
+//		if(b) {
+//			PicardToolsNodeModel.logger.info("According to klock SortSam has been finished successfully!");
+//			return;
+//		}
+//			
+//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
+//		
+//		//redirect error stream
+//		redirecterr(output);
+//		System.err.println("Output of Sortsam");
+//		
+//		Exception exception=null;
+//		int exitcode=0;
+//		
+//		try{
+//			//run tool
+//			exitcode=new SortSam().instanceMain(args);
+//		}
+//		catch(Exception e){
+//			exception = e;
+//		}
+//		//reset error stream, reset index writing variable
+//		finally{
+//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
+//			reseterr();
+//		}
+//		
+//		//checks if exception has been caught
+//		if(exception!=null){
+//			throw exception;
+//		}
+//		if(exitcode==1){
+//			throw new Exception("Something went wrong while executing SortSam, please check out the log file");
+//		}
+//		
+		PicardToolsNodeModel.logger.info("SortSam finished successfully");
+//		checker.writeOK();
+//		checker.finalize();
+	}
+	
+	
+	//create file that contains output of picard tools
+	//code from http://www.avajava.com/tutorials/lessons/how-do-i-redirect-standard-error-to-a-file.html
+	
+//	private PrintStream err=null;
+//	
+//	//method to redirect error stream
+//	private void redirecterr(String output) throws Exception{
+//		
+//		//makes sure err is never overridden
+//		if(err==null){
+//			err = System.err;
+//		}
+//		PrintStream errtofile = new PrintStream( new FileOutputStream(new File(output+".log")));
+//		System.setErr(errtofile);
+//
+//		PicardToolsNodeModel.logger.info("log file can be found in "+output+".log");
+//	}
+//
+//	//method to reset error stream
+//	private void reseterr(){
+//		System.setErr(err);
+//	}
+    
 }
 
