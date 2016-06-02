@@ -50,7 +50,6 @@
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.convert2annovar.Convert2AnnovarNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.convert2annovar.Convert2AnnovarNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.getannotationdatabase.GetAnnotationDatabaseNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.getannotationdatabase.GetAnnotationDatabaseNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.annovar.AnnovarNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.annovar.AnnovarNodeFactory"/>
-		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.snpeffgetdb.SnpEffGetDBNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.snpeffgetdb.SnpEffGetDBNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.snpeff.SnpEffNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.snpeff.SnpEffNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.snpsift.SnpSiftNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.snpsift.SnpSiftNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/anno" factory-class="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.kggseq.KGGSeqNodeFactory"/>

@@ -301,8 +301,8 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	vcf_index = CompatibilityChecker.getIndexCellType(inSpecs[0], "VCFCell");
-    	if(!(vcf_index>-1)) {
+    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	

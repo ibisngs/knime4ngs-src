@@ -18,7 +18,6 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
@@ -373,15 +372,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	String script_warning = CheckUtils.checkSourceFile(m_veppl.getStringValue());
-    	if(script_warning != null) {
-    		setWarningMessage(script_warning);
+    	if(CompatibilityChecker.inputFileNotOk(m_veppl.getStringValue(), false)) {
+    		throw new InvalidSettingsException("Invalid path to variant_effect_predictor.pl script!");
     	}
-    	
-//    	String outfolder_warning = CheckUtils.checkDestinationDirectory(m_outfolder.getStringValue());
-//    	if(outfolder_warning!=null) {
-//    		setWarningMessage(outfolder_warning);
-//    	}
     	
     	if(m_use_loftee.getBooleanValue()) {
     		try {
@@ -398,13 +391,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     		}
     	}
     	
-    	vcf_index = -1;
-    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
-    		}
-    	}
-    	
+    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}

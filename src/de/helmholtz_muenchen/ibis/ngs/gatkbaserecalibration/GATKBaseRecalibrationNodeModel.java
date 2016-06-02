@@ -338,7 +338,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
           
-    	posBam = CompatibilityChecker.getIndexCellType(inSpecs[0], "BAMCell");
+    	posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	if(!(posBam>-1)) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
     	}

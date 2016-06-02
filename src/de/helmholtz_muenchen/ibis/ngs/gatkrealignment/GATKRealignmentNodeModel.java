@@ -334,8 +334,8 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	@Override
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
-		posBam = CompatibilityChecker.getIndexCellType(inSpecs[0], "BAMCell");
-    	if(!(posBam>-1)) {
+		posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	if(posBam==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
     	}
     	

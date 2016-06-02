@@ -18,9 +18,9 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
-import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -224,19 +224,11 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	vcf_index=-1;
-    	
-    	String vep_warning = CheckUtils.checkSourceFile(m_vepscript.getStringValue());
-    	if(vep_warning != null) {
-    		setWarningMessage(vep_warning);
+    	if(CompatibilityChecker.inputFileNotOk(m_vepscript.getStringValue(), false)) {
+    		throw new InvalidSettingsException("Invalid path to filter_vep.pl script!");
     	}
     	
-    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
-    		}
-    	}
-    	
+    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the output table!");
     	}

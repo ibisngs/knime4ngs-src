@@ -4,7 +4,7 @@
     <name>SnpEff</name>
     
     <shortDescription>
-       SnpEff annotates and predicts the effects of genetic variants. 
+       SnpEff annotates and predicts the effects of genetic variants.
     </shortDescription>
     
     <fullDescription>
@@ -16,6 +16,11 @@
         	<option name="Database name">
         		In order to produce the annotation, SnpEff requires a database.<br />
        	 		For more information, see <a href="http://snpeff.sourceforge.net/SnpEff.html">http://snpeff.sourceforge.net/SnpEff.html</a>
+       	 	</option>
+       	 	<option name="Use database directory specified in config file?">
+       	 		Uncheck this option, if you want to use another database directory.
+       	 		If the chosen database is not available, it will be downloaded.
+       	 		Note, that downloading may take some time depending on the size of the database.
        	 	</option>
        	 	<option name="Path to BED file">
        	 		Only analyze changes that intersect with the intervals specified in this BED file.

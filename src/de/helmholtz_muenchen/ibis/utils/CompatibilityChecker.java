@@ -84,16 +84,19 @@ public class CompatibilityChecker {
 	}
 	
 	public static boolean inputFileNotOk(String path, boolean checkEmpty) {
-		if(checkEmpty) {
+		
+		if(path.equals("")) return false;
+		
+		if(checkEmpty && Files.exists(Paths.get(path))) {
 			boolean isEmpty = false;
 			try {
 				isEmpty = (Files.newBufferedReader(Paths.get(path),StandardCharsets.ISO_8859_1).readLine() == null);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			return path.equals("") || Files.notExists(Paths.get(path)) || isEmpty;
+			return isEmpty;
 		}
-		return path.equals("") || Files.notExists(Paths.get(path));
+		return Files.notExists(Paths.get(path));
 	}
 	
 	public static boolean checkInputCellType(DataTableSpec inSpecs, String CellType) {

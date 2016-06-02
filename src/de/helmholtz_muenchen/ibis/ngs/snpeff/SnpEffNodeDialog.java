@@ -32,37 +32,35 @@ public class SnpEffNodeDialog extends HTExecutorNodeDialog {
     
     public void addToolDialogComponents() {
     	
-
     	final SettingsModelString snpeff_binary = new SettingsModelString(SnpEffNodeModel.CFGKEY_SNPEFF_BIN, null);
     	final SettingsModelString database = new SettingsModelString(SnpEffNodeModel.CFGKEY_DATABASE, "");
+    	final SettingsModelBoolean use_config = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_USE_CONFIG, true);
+    	final SettingsModelString database_dir = new SettingsModelString(SnpEffNodeModel.CFGKEY_DATA_DIR, "");
     	final SettingsModelBoolean usebedfile = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_USEBEDFILE, false);
     	final SettingsModelString bed_file = new SettingsModelString(SnpEffNodeModel.CFGKEY_BED_FILE, null);
     	final SettingsModelIntegerBounded memory = new SettingsModelIntegerBounded(SnpEffNodeModel.CFGKEY_MEM, 4, 1, Integer.MAX_VALUE);
         final SettingsModelOptionalString opt_flags = new SettingsModelOptionalString(SnpEffNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
     	//results filter
-    	final SettingsModelBoolean no_downstream = new SettingsModelBoolean(
-    			SnpEffNodeModel.CFGKEY_NO_DOWNSTREAM, false);
-    	final SettingsModelBoolean no_intergenic = new SettingsModelBoolean(
-    			SnpEffNodeModel.CFGKEY_NO_INTERGENIC, false);
-    	final SettingsModelBoolean no_intronic = new SettingsModelBoolean(
-    			SnpEffNodeModel.CFGKEY_NO_INTRONIC, false);
-    	final SettingsModelBoolean no_upstream = new SettingsModelBoolean(
-    			SnpEffNodeModel.CFGKEY_NO_UPSTREAM, false);
-    	final SettingsModelBoolean no_utr = new SettingsModelBoolean(
-    			SnpEffNodeModel.CFGKEY_NO_UTR, false);
+    	final SettingsModelBoolean no_downstream = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_DOWNSTREAM, false);
+    	final SettingsModelBoolean no_intergenic = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_INTERGENIC, false);
+    	final SettingsModelBoolean no_intronic = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_INTRONIC, false);
+    	final SettingsModelBoolean no_upstream = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_UPSTREAM, false);
+    	final SettingsModelBoolean no_utr = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_UTR, false);
 
     	this.addPrefPageSetting(snpeff_binary, IBISKNIMENodesPlugin.SNPEFF);
     	
-    	addDialogComponent(new DialogComponentString(database, "Database name"));
-    	addDialogComponent(new DialogComponentBoolean(usebedfile, "Use BED file?"));
+    	createNewGroup("Database");
+    	addDialogComponent(new DialogComponentString(database, "Name"));
+    	addDialogComponent(new DialogComponentBoolean(use_config, "Use database directory specified in config file?"));
+    	addDialogComponent(new DialogComponentFileChooser(database_dir, "snpeff_db", 0, true));
     	
     	createNewGroup("Path to BED file");
+    	addDialogComponent(new DialogComponentBoolean(usebedfile, "Use BED file?"));
     	addDialogComponent(new DialogComponentFileChooser(bed_file, "par_3", 0, false, ".bed"));
 
-    	addDialogComponent(new DialogComponentNumber(memory, "Java Memory", 1 ));
-    	
     	createNewGroup("Further options");
+    	addDialogComponent(new DialogComponentNumber(memory, "Java Memory", 1 ));
     	addDialogComponent(new DialogComponentOptionalString(opt_flags,"Optional flags"));
     	
     	createNewTab("Results filter");
@@ -76,14 +74,15 @@ public class SnpEffNodeDialog extends HTExecutorNodeDialog {
     	/*Results filter options change listener*/
     	usebedfile.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if(usebedfile.getBooleanValue()){
-					bed_file.setEnabled(true);
-				}
-				else{
-					bed_file.setEnabled(false);
-				}
+				bed_file.setEnabled(usebedfile.getBooleanValue());
 			}
 		});
+    	
+    	use_config.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				database_dir.setEnabled(!use_config.getBooleanValue());
+			}
+    	});
     }
 }
 
