@@ -229,7 +229,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    //create output table with output sam/bam file and reference sequence AND metrics files
 		    
 		    //definition of the column labels and the column data types
-		    DataColumnSpec[] colspec= new DataColumnSpec[3];
+		    DataColumnSpec[] colspec= new DataColumnSpec[2];
 		    
 		    if(m_bsformat.getStringValue().equals("bam")){
 		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
@@ -237,19 +237,17 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    else{
 		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
 		    }
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
-		    colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
+		    colspec[1]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
 		    DataTableSpec outspec=new DataTableSpec(colspec);
 		    
 		    //container which is filled with cells and rows
 		    BufferedDataContainer c = exec.createDataContainer(outspec);
 		    		    
 		    FileCell sc1 = (FileCell)FileCellFactory.create(inputfile);
-		    FileCell sc2 = (FileCell)FileCellFactory.create(reffile);
 		    FileCell sc3 = (FileCell)FileCellFactory.create(output_data);
 		    
 		    //create row and add it to the container
-		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc2, sc3});
+		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc3});
 		    c.addRowToTable(row);
 		    
 		    //create final table
@@ -295,7 +293,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    //create output table with output sam/bam file and reference sequence
 		    
 		    //definition of the column labels and the column data types
-		    DataColumnSpec[] colspec= new DataColumnSpec[2];
+		    DataColumnSpec[] colspec= new DataColumnSpec[1];
 		    
 		    if(m_bsformat.getStringValue().equals("bam")){
 		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
@@ -305,7 +303,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    }
 		    
 		    //create column specifications for table
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
 		    DataTableSpec outspec=new DataTableSpec(colspec);
 		    
 		    //container which is filled with cells and rows
@@ -313,10 +310,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    
 		    //single cells containing paths to use for the next node
 		    FileCell sc1= (FileCell)FileCellFactory.create(output);
-		    FileCell sc2= (FileCell)FileCellFactory.create(reffile);
 		    
 		    //create row and add it to the container
-		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc2});
+		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1});
 		    c.addRowToTable(row);
 		    
 		    //create final table
@@ -367,9 +363,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 			
 			DataColumnSpec[] colspec;
 			if(add_col) {
-				colspec = new DataColumnSpec[3];
-			} else {
 				colspec = new DataColumnSpec[2];
+			} else {
+				colspec = new DataColumnSpec[1];
 			} 
 			
 		    if(m_bsformat.getStringValue().equals("bam")){
@@ -380,9 +376,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    }
 		    
 		    //create column specifications for table
-		    colspec[1]=new DataColumnSpecCreator("Path2SEQFile", FileCell.TYPE).createSpec();
 		    if(add_col) {
-		    	colspec[2]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
+		    	colspec[1]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
 		    }
 
         return new DataTableSpec[]{new DataTableSpec(colspec)};
@@ -446,51 +441,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
 		super.executeCommand(new String[] { command }, exec, lockFile, outputm+".stdOut",outputm+".stdErr");
 		
-		
-//		PicardToolsNodeModel.logger.info(lockCommand);
-		
-//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-		
-//		if(b) {
-//			PicardToolsNodeModel.logger.info("According to klock CollectInsertSizeMetrics has been finished successfully!");
-//			return;
-//		}
-			
-//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-		
-		//redirect error stream
-//		redirecterr(outputm);
-//		System.err.println("Output of CollectInsertSizeMetrics:");
-		
-//		Exception exception=null;
-//		
-//		int exitcode =0;
-//		
-//		try{
-			//run tool
-//			exitcode=new CollectInsertSizeMetrics().instanceMain(args);
-//		}
-//		catch(Exception e){
-//			exception =e ;
-//		}
-//		//reset error stream and variable for index writing
-//		finally{
-//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
-//			reseterr();
-//		}
-//		
-//		//checks if exception has been caught
-//		if(exception!=null){
-//			throw exception;
-//		}
-//		
-//		if(exitcode==1){
-//			throw new Exception("Something went wrong while executing CollectInsertSizeMetrics, please check out the log file");
-//		}
-//		
-//		checker.writeOK();
-//		checker.finalize();
-//		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
+		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
 	}
 	
 	//run AddOrReplaceReadGroups
@@ -549,50 +500,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
 
-		
-		//		PicardToolsNodeModel.logger.info(lockCommand);
-//		
-//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-//			
-//		if(b) {
-//			PicardToolsNodeModel.logger.info("According to klock AddOrReplaceReadGroups has been finished successfully!");
-//			return;
-//		}
-//			
-//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-//			
-//		//redirect error stream
-//		redirecterr(output);
-//		System.err.println("Output of AddOrReplaceReadGroups:");
-//		
-//		Exception exception=null;
-//		int exitcode=0;
-//		
-//		try{
-//			//run tool
-//			exitcode=new AddOrReplaceReadGroups().instanceMain(args);
-//		}
-//		catch(Exception e){
-//			exception =e;
-//		}
-//		//reset error stream, resert writing index variable
-//		finally{
-//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
-//			reseterr();
-//		}
-//		
-//		//checks if exception has been caught
-//		if(exception!=null){
-//			throw exception;
-//		}
-//		
-//		if(exitcode==1){
-//			throw new Exception("Something went wrong while executing MarkDuplicates, please check out the log file");
-//		}
-//		
-//		checker.writeOK();
-//		checker.finalize();
-		
 		PicardToolsNodeModel.logger.info("AddOrReplaceReadGroups finished successfully");
 	}
 
@@ -627,52 +534,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6];
 
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
-
-		
-		//		PicardToolsNodeModel.logger.info(lockCommand);
-//		
-//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-//		
-//		if(b) {
-//			PicardToolsNodeModel.logger.info("According to klock MarkDuplicates has been finished successfully!");
-//			return;
-//		}
-//			
-//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-//		
-//		//redirect error stream
-//		redirecterr(output);
-//		System.err.println("Output of MarkDuplicates:");
-//		
-//		Exception exception=null;
-//		int exitcode=0;
-//
-//		try{
-//			//run tool
-//			exitcode = new MarkDuplicates().instanceMain(args);
-//		}
-//		catch(Exception e){
-//			exception = e;
-//		}
-//		//reset error stream, reset writing index variable
-//		finally{
-//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
-//			reseterr();
-//		}
-//		
-//		//checks if exception has been caught
-//		if(exception!=null){
-//			throw exception;
-//		}
-//		
-//		if(exitcode==1){
-//			throw new Exception("Something went wrong while executing MarkDuplicates, please check out the log file");
-//		}
 		
 		PicardToolsNodeModel.logger.info("MarkDupplicates finished successfully");
-		
-//		checker.writeOK();
-//		checker.finalize();
 	}
 	
 	//run SortSam
@@ -701,73 +564,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4];
 		
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
-//		PicardToolsNodeModel.logger.info(lockCommand);
-//		
-//		boolean b = SuccessfulRunChecker.hasTerminatedSuccessfully(lockFile, lockCommand);
-//		
-//		if(b) {
-//			PicardToolsNodeModel.logger.info("According to klock SortSam has been finished successfully!");
-//			return;
-//		}
-//			
-//		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile, lockCommand);
-//		
-//		//redirect error stream
-//		redirecterr(output);
-//		System.err.println("Output of Sortsam");
-//		
-//		Exception exception=null;
-//		int exitcode=0;
-//		
-//		try{
-//			//run tool
-//			exitcode=new SortSam().instanceMain(args);
-//		}
-//		catch(Exception e){
-//			exception = e;
-//		}
-//		//reset error stream, reset index writing variable
-//		finally{
-//			SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(false);
-//			reseterr();
-//		}
-//		
-//		//checks if exception has been caught
-//		if(exception!=null){
-//			throw exception;
-//		}
-//		if(exitcode==1){
-//			throw new Exception("Something went wrong while executing SortSam, please check out the log file");
-//		}
-//		
+
 		PicardToolsNodeModel.logger.info("SortSam finished successfully");
-//		checker.writeOK();
-//		checker.finalize();
-	}
-	
-	
-	//create file that contains output of picard tools
-	//code from http://www.avajava.com/tutorials/lessons/how-do-i-redirect-standard-error-to-a-file.html
-	
-//	private PrintStream err=null;
-//	
-//	//method to redirect error stream
-//	private void redirecterr(String output) throws Exception{
-//		
-//		//makes sure err is never overridden
-//		if(err==null){
-//			err = System.err;
-//		}
-//		PrintStream errtofile = new PrintStream( new FileOutputStream(new File(output+".log")));
-//		System.setErr(errtofile);
-//
-//		PicardToolsNodeModel.logger.info("log file can be found in "+output+".log");
-//	}
-//
-//	//method to reset error stream
-//	private void reseterr(){
-//		System.setErr(err);
-//	}
-    
+	}   
 }
 
