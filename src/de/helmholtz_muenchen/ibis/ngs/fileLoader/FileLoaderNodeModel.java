@@ -170,7 +170,7 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
 			try {
 				firstLine = IO.head(Paths.get(in1), 1).get(0);
 				in1 = firstLine.trim();
-				String [] sep = {"\t", "\\s", ";", ","};
+				String [] sep = {"\t", " ", ";", ","};
 				for(String s:sep) {
 					if(firstLine.contains(s)) {
 						String [] col = firstLine.split(s);
