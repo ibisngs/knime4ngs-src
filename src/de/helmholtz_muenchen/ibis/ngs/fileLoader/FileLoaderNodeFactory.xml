@@ -13,9 +13,9 @@
         
         
         <option name="Input file">
-        	Choose an input file in BAM/SAM, fastQ, VCF or BED format.
+        	Choose an input file in BAM/SAM, fastQ, VCF or format.
         	A list of files (as .csv, .tsv or .list) with one file path per line can also be loaded.
-        	In this way several fastQ files of paired-end read experiments can be loaded. Pairs of fastQ files should be in the same row, but different columns, separated by tabs, white-spaces or commas.
+        	In this way, several fastQ files of paired-end read experiments can be loaded. Pairs of fastQ files should be in the same row, but different columns, separated by tabs, white-spaces or commas.
         </option>
         <option name="Second optional fastQ file">
         	In the case of paired end reads, a second fastQ file can be loaded.
