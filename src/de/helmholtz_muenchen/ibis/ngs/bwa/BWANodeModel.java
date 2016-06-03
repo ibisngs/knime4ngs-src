@@ -18,6 +18,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -48,23 +49,30 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_READGROUPBOOLEAN  = "readgroupboolean";
 	public static final String CFGKEY_ALNALGO 			= "alnalgo";
 	public static final String CFGKEY_THREADS 			= "alnthreads";
+	public static final String CFGKEY_OPTIONAL_Index 	= "optional_index";
+	public static final String CFGKEY_OPTIONAL_Aln 		= "optional_aln";
+	public static final String CFGKEY_OPTIONAL_Map 		= "optional_map";
 	
-	private final SettingsModelString m_refseqfile 			= new SettingsModelString(CFGKEY_REFSEQFILE,"");
-	private final SettingsModelString m_bwafile 			= new SettingsModelString(CFGKEY_BWAFILE,"");
-	private final SettingsModelBoolean m_checkIndexRefSeq 	= new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
-	private final SettingsModelBoolean m_checkColorSpaced	= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
-	private final SettingsModelString m_bwtIndex 			= new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
-	private final SettingsModelString m_alnalgo 			= new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
-	private final SettingsModelString m_readGroup 			= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar");
-	private final SettingsModelBoolean m_readGroupBoolean 	= new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
-	private final SettingsModelIntegerBounded m_ALN_THREADS = new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
+	private final SettingsModelString m_refseqfile 				= new SettingsModelString(CFGKEY_REFSEQFILE,"");
+	private final SettingsModelString m_bwafile 				= new SettingsModelString(CFGKEY_BWAFILE,"");
+	private final SettingsModelBoolean m_checkIndexRefSeq 		= new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
+	private final SettingsModelBoolean m_checkColorSpaced		= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
+	private final SettingsModelString m_bwtIndex 				= new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
+	private final SettingsModelString m_alnalgo 				= new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
+	private final SettingsModelString m_readGroup 				= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar\\t:PL:ILLUMINA");
+	private final SettingsModelBoolean m_readGroupBoolean 		= new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
+	private final SettingsModelIntegerBounded m_ALN_THREADS 	= new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
+//	private final SettingsModelOptionalString m_Optional_Index 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Index,"",false);
+	private final SettingsModelOptionalString m_Optional_Aln 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Aln,"",false);
+	private final SettingsModelOptionalString m_Optional_Map 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Map,"",false);
+	
+
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	private static String readType = "";
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
-	public static final String OUT_COL2 = "Path2RefFile";
 	
 	
     /**
@@ -82,13 +90,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	addSetting(m_readGroupBoolean);
     	addSetting(m_alnalgo);
     	addSetting(m_ALN_THREADS);
+//    	addSetting(m_Optional_Index);
+    	addSetting(m_Optional_Aln);
+    	addSetting(m_Optional_Map);
     	
     }
 
-//    static SettingsModelString createSettingsModelSelection() {
-//    	return new SettingsModelString("bwa-path","");
-//    }
-    
+   
     /**
      * {@inheritDoc}
      */
@@ -137,7 +145,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	bwa_index(exec,path2bwa, path2refFile);
 
     	//BWA aln
-    	if(!m_alnalgo.getStringValue().equals("BWA-MEM")){
+    	if(m_alnalgo.getStringValue().equals("BWA-backtrack")){
         	LOGGER.info("Find the SA coordinates of the input reads.\n");
         	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, path2readFile2, isBam,threads);
         	LOGGER.info("Finished BWA aln...");
@@ -156,13 +164,9 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    			new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(out2Name),
-    			(FileCell) FileCellFactory.create(path2refFile)};
-    	
+    	FileCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(out2Name)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
@@ -236,6 +240,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	//Multi-Threading 
     	command.add("-t " +Threads);
     	
+    	command.add(m_Optional_Aln.getStringValue());
+    	
     	//If Inputfile is in bam format
     	if(readType.equals("paired-end")){
     		outfile = out11Name;				//Set Outfile for forward reads
@@ -288,6 +294,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
         		LOGGER.info("Generate alignments in the SAM format given single-end reads.\n");
         		command.add(path2bwa+" samse");
         		
+        		command.add(m_Optional_Map.getStringValue());
+        		
         		/**Other Options**/
         		if(m_readGroupBoolean.getBooleanValue()){
         			command.add("-r "+m_readGroup.getStringValue());
@@ -302,6 +310,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
         		// bwa sampe sequence.fasta aln_sa_1.sai aln_sa_2.sai s_1_1_sequence.fq s_1_2_sequence.fq > aln.sam
         		LOGGER.info("Generate alignments in the SAM format given paired-end reads.\n");
         		command.add(path2bwa+" sampe");
+        		
+        		command.add(m_Optional_Map.getStringValue());
         		
         		/**Other Options**/
         		if(m_readGroupBoolean.getBooleanValue()){
@@ -323,6 +333,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	command.add(path2bwa+" bwasw");
         	command.add("-t "+threads);
         	
+        	command.add(m_Optional_Map.getStringValue());
+        	
     		/**In and Outfiles**/
         	command.add("-f "+out2Name);
         	command.add(path2refFile);
@@ -336,6 +348,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
 
         	command.add(path2bwa+" mem");
         	command.add("-t "+threads);
+        	command.add(m_Optional_Map.getStringValue());
+        	
     		if(m_readGroupBoolean.getBooleanValue()){
     			command.add("-R "+m_readGroup.getStringValue());
     		}
@@ -398,69 +412,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
 
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()})};
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	/** added for HTE **/
-//    	super.saveSettingsTo(settings);
-//    	
-//    	m_bwafile.saveSettingsTo(settings);
-//    	m_refseqfile.saveSettingsTo(settings);
-//    	m_bwtIndex.saveSettingsTo(settings);
-//    	m_checkColorSpaced.saveSettingsTo(settings);
-//    	m_checkIndexRefSeq.saveSettingsTo(settings);
-//    	m_readGroup.saveSettingsTo(settings);
-//    	m_readGroupBoolean.saveSettingsTo(settings);
-//    	m_alnalgo.saveSettingsTo(settings);
-//    	m_ALN_THREADS.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	/** added for HTE **/
-//    	super.loadValidatedSettingsFrom(settings);
-//    	
-//    	m_bwafile.loadSettingsFrom(settings);
-//    	m_refseqfile.loadSettingsFrom(settings);
-//    	m_bwtIndex.loadSettingsFrom(settings);
-//    	m_checkColorSpaced.loadSettingsFrom(settings);
-//    	m_checkIndexRefSeq.loadSettingsFrom(settings);
-//    	m_readGroup.loadSettingsFrom(settings);
-//    	m_readGroupBoolean.loadSettingsFrom(settings);
-//    	m_alnalgo.loadSettingsFrom(settings);
-//    	m_ALN_THREADS.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	/** added for HTE **/
-//    	super.validateSettings(settings);
-//    	
-//    	m_bwafile.validateSettings(settings);
-//    	m_refseqfile.validateSettings(settings);
-//    	m_bwtIndex.validateSettings(settings);
-//    	m_checkColorSpaced.validateSettings(settings);
-//    	m_checkIndexRefSeq.validateSettings(settings);
-//    	m_readGroup.validateSettings(settings);
-//    	m_readGroupBoolean.validateSettings(settings);
-//    	m_alnalgo.validateSettings(settings);
-//    	m_ALN_THREADS.validateSettings(settings);
-//    }
-    
     
     /**
      * {@inheritDoc}

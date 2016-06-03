@@ -30,7 +30,7 @@
         	<ul>
         		<li>
         			BWT-SW: Algorithm implemented in BWT-SW.
-        			This method works with the whole genome, but it does not work with database smaller than 10MB and it is usually slower than IS.
+        			 	Algorithm implemented in BWT-SW. This method works with the whole human genome. 
         		</li>
         		<li>
         			IS: IS linear-time algorithm for constructing suffix array.
@@ -44,7 +44,7 @@
         	<option name="Algorithm for mapping">
         		Define which algorithm should be used for mapping.
         	<ul>
-        		<li>BWA_MEM: This algorithm is designed for Illumina sequence reads up to 100bp. 
+        		<li>BWA_MEM: This algorithm is designed for 70bp - 100bp sequence reads. 
         		It is generally recommended for high-quality queries as it is faster and more accurate than the other two algorithms. 
         		BWA-MEM also has better performance than BWA-backtrack for 70-100bp Illumina reads. </li>
         		<li>BWA-backtrack: This algorithm is designed for longer sequences ranged from 70bp to 1 Mbp.</li>
@@ -58,6 +58,11 @@
         		SM defines the name of the sample sequenced in a read group.
         		Read group header will not be added if BWA-SW is used.
         	</option>
+        	
+        	<option name="Optional Parameters">
+        		For each computing step, additional parameters can be specified. For a list of all parameters, see <a href="http://bio-bwa.sourceforge.net/bwa.shtml">online BWA user manual</a>.<br />
+        	</option>        	
+        	
         	<option name="Number of threads">
         		Set the number of threads to be used.<br />
         		BWA aln (sub-command of BWA-backtrack), BWA-SW and BWA-MEM can be run in multi-threading mode.<br />
@@ -76,8 +81,8 @@
     </fullDescription>
     
     <ports>
-    	<inPort index="0" name="In-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2 (if paired end mapping is used)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path to SAM file<br></br>Cell 1: Path to RefFile</outPort>
+    	<inPort index="0" name="In-Port">Cell 0: Path to ReadFile1<br></br>Cell 1: (Optional) Path to ReadFile2</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to SAM file<br></br></outPort>
     </ports>
     
         <views>

@@ -8,10 +8,12 @@ import javax.swing.event.ChangeListener;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
@@ -39,34 +41,36 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 	
 	public void addToolDialogComponents() {
 		
-		final SettingsModelString bwa = new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");	
-//		final DialogComponentFileChooser dcfc = new DialogComponentFileChooser(bwa,"his_id_BWAPATH", 0);
-		final SettingsModelString refseq = new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
-		final SettingsModelBoolean indexrefseq = new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
-		final SettingsModelString readGroup = new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
-		final SettingsModelBoolean readGroupBoolean = new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
-		final SettingsModelIntegerBounded ALN_THREADS = new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
-
-    	
+		final SettingsModelString bwa 						= new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");	
+		final SettingsModelString refseq 					= new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
+		final SettingsModelBoolean indexrefseq 				= new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
+		final SettingsModelString readGroup 				= new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
+		final SettingsModelBoolean readGroupBoolean 		= new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
+		final SettingsModelIntegerBounded ALN_THREADS 		= new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
+//		final SettingsModelOptionalString Optional_Index 	= new SettingsModelOptionalString(BWANodeModel.CFGKEY_OPTIONAL_Index,"",false);
+		final SettingsModelOptionalString Optional_Aln 		= new SettingsModelOptionalString(BWANodeModel.CFGKEY_OPTIONAL_Aln,"",false);
+		final SettingsModelOptionalString Optional_Map 		= new SettingsModelOptionalString(BWANodeModel.CFGKEY_OPTIONAL_Map,"",false);
+		final SettingsModelString alnalgo 					= new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-MEM");
+		final SettingsModelString bwtIndex 					= new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW");
+		final SettingsModelBoolean checkColorSpaced			= new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false);
+		
     	addPrefPageSetting(bwa, IBISKNIMENodesPlugin.BWA);
     	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
     	readGroup.setEnabled(false);
     	
-//    	createNewGroup("BWA");    	
-//    	addDialogComponent(dcfc);
     	bwa.setEnabled(false);
-//    	createNewGroup("Reference sequence: FastA file (e.g. genome)");
-//    	addDialogComponent(new DialogComponentFileChooser(refseq, "his1_id_BWA", 0, ".fa|.fasta"));
-//    	createNewGroup("Options");
     	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
-    	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW"),"Algorithm for constructing BWT index:","BWT-SW","IS"));
-    	addDialogComponent(new DialogComponentStringSelection(new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-MEM"),"Algorithm for mapping:","BWA-MEM","BWA-backtrack","BWA-SW"));
-    	addDialogComponent(new DialogComponentBoolean(new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false), "Build color-space index."));
+    	addDialogComponent(new DialogComponentStringSelection(bwtIndex,"Algorithm for constructing BWT index:","BWT-SW","IS"));
+    	addDialogComponent(new DialogComponentStringSelection(alnalgo,"Algorithm for mapping:","BWA-MEM","BWA-backtrack","BWA-SW"));
+    	addDialogComponent(new DialogComponentBoolean(checkColorSpaced, "Build color-space index."));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify read group header:"));
     	addDialogComponent(new DialogComponentString(readGroup,""));
     	setHorizontalPlacement(false);
-    	
+//    	addDialogComponent(new DialogComponentOptionalString(Optional_Index, "Optional Indexing Parameters"));
+    	addDialogComponent(new DialogComponentOptionalString(Optional_Aln, "Optional 'Aln' Parameters"));
+    	Optional_Aln.setEnabled(false);
+    	addDialogComponent(new DialogComponentOptionalString(Optional_Map, "Optional Mapping Parameters"));
     	addDialogComponent(new DialogComponentNumber(ALN_THREADS, "Number of threads", 1));
     	
     	refseq.addChangeListener(new ChangeListener() {
@@ -96,6 +100,19 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 					}
 			}
 		});
+    	
+    	alnalgo.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+					if(alnalgo.getStringValue().equals("BWA-backtrack")){
+						Optional_Aln.setEnabled(true);
+					}else{
+						Optional_Aln.setEnabled(false);
+					}
+			}
+		});
+    	
+    	
+    	
     }	
 }
 
