@@ -85,7 +85,7 @@ public class CompatibilityChecker {
 	
 	public static boolean inputFileNotOk(String path, boolean checkEmpty) {
 		
-		if(path.equals("")) return false;
+		if(path.equals("") || path == null) return true;
 		
 		if(checkEmpty && Files.exists(Paths.get(path))) {
 			boolean isEmpty = false;

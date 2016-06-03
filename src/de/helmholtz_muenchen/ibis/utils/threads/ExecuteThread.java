@@ -85,7 +85,12 @@ public class ExecuteThread implements Callable<Boolean> {
 		if(this.command.length==1){
 			p = Runtime.getRuntime().exec(this.command[0], this.ENVIRONMENT);
 		}else{
+			try {
 			p = Runtime.getRuntime().exec(this.command, this.ENVIRONMENT);
+				} catch (Exception e) {
+					System.err.println(e.getMessage());
+					e.printStackTrace();
+				}
 		}
 		
 		stdErrStream = new StreamThread(p.getErrorStream(),stdErrFile,this.stdErrStr);

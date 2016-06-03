@@ -1,24 +1,29 @@
 package de.helmholtz_muenchen.ibis.ngs.snpsift;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
-import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 
 
@@ -30,24 +35,30 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class SnpSiftNodeModel extends HTExecutorNodeModel {
     
-	public static final String CFGKEY_SNPEFF_FOLDER = "snpeff_folder";
-	public static final String CFGKEY_INVCF = "invcf";
-	public static final String CFGKEY_METHOD = "method";
+	static final String CFGKEY_SNPSIFT_BIN = "snpsift_bin";
+	static final String CFGKEY_METHOD = "method";
+	static final String DEF_METHOD = "Filter";
+	
+	public enum SnpSiftTool {
+		TSTV, FILTER, ANNOTATE, INTERVALS, ANNOTATE_DBSNP
+	}
+	static final LinkedHashMap<String, SnpSiftTool> NAME2TOOL = new LinkedHashMap<>();
+	static {
+		NAME2TOOL.put("Filter", SnpSiftTool.FILTER);
+		NAME2TOOL.put("Annotate", SnpSiftTool.ANNOTATE);
+		NAME2TOOL.put("TsTv", SnpSiftTool.TSTV);
+		NAME2TOOL.put("Intervals", SnpSiftTool.INTERVALS);
+		NAME2TOOL.put("Annotate with dbsnfp", SnpSiftTool.ANNOTATE_DBSNP);
+	}
 	
 	//Filter
 	public static final String CFGKEY_FILTERSTRING = "filterstring";
-	public static final String CFGKEY_FILTERQUAL = "filterqual";
-	public static final String CFGKEY_FILTERCOVERAGE = "filtercoverage";
-	public static final String CFGKEY_FILTERQUALBOOL = "filterqualbool";
-	public static final String CFGKEY_FILTERCOVERAGEBOOL = "filtercoveragebool";
 	
 	//Annotate
 	public static final String CFGKEY_ANNID = "annid";
 	public static final String CFGKEY_ANNINFO = "anninfo";
 	public static final String CFGKEY_ANNVCFDB = "annvcfdb";
-	
-	//TSTV
-	public static final String CFGKEY_TSTVHOM = "tstvhom";	
+	public static final String CFGKEY_ANN_OPT = "ann_opt_field";
 	
 	//Intervals
 	public static final String CFGKEY_INTERX = "interx";
@@ -60,21 +71,15 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	
 	
 	/**Setting Models**/
-	private final SettingsModelString m_snpeff_folder = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_SNPEFF_FOLDER,"");
-	private final SettingsModelString m_invcf = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_INVCF,"");
+	private final SettingsModelString m_snpsift_bin = new SettingsModelString(
+			SnpSiftNodeModel.CFGKEY_SNPSIFT_BIN,"");
 	private final SettingsModelString m_method = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_METHOD,"");
+			SnpSiftNodeModel.CFGKEY_METHOD,SnpSiftNodeModel.DEF_METHOD);
 	
 	
 	/**Filter**/
 	private final SettingsModelString m_filterstring = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_FILTERSTRING,"");
-	private final SettingsModelDoubleBounded m_filterqual = new SettingsModelDoubleBounded(SnpSiftNodeModel.CFGKEY_FILTERQUAL, 20, 0, Double.MAX_VALUE);
-	private final SettingsModelIntegerBounded m_filtercoverage = new SettingsModelIntegerBounded(SnpSiftNodeModel.CFGKEY_FILTERCOVERAGE, 10, 0, Integer.MAX_VALUE);
-	private final SettingsModelBoolean m_filterqualbool = new SettingsModelBoolean(CFGKEY_FILTERCOVERAGEBOOL, false);
-	private final SettingsModelBoolean m_filtercoveragebool = new SettingsModelBoolean(CFGKEY_FILTERCOVERAGEBOOL, false);
 
 	/**Annotate**/
 	private final SettingsModelOptionalString m_anninfo = new SettingsModelOptionalString(
@@ -82,10 +87,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_annid = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_ANNID, false);
 	private final SettingsModelString m_annvcfdb = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_ANNVCFDB,"");
-	
-	/**TSTV**/
-	private final SettingsModelString m_tstvhom = new SettingsModelString(
-			SnpSiftNodeModel.CFGKEY_TSTVHOM,"");	
+	private final SettingsModelOptionalString m_ann_opt = new SettingsModelOptionalString(SnpSiftNodeModel.CFGKEY_ANN_OPT, "", false);
 	
 	/**Intervals**/
 	private final SettingsModelString m_interbed = new SettingsModelString(
@@ -99,23 +101,21 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,"",false);
 	private final SettingsModelBoolean m_dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
 
-	
+	private int vcf_index;
+	private DataType outType = FileCell.TYPE;
+
+	public static final String OUT_COL = "snpSift_result";
 	
     protected SnpSiftNodeModel() {
-        super(1, 0);
+        super(1, 1);
         
-		addSetting(m_invcf);
 		addSetting(m_method);
-		addSetting(m_snpeff_folder);
-		addSetting(m_filtercoverage);
-		addSetting(m_filterqual);
+		addSetting(m_snpsift_bin);
 		addSetting(m_filterstring);
-		addSetting(m_filtercoveragebool);
-		addSetting(m_filterqualbool);
 		addSetting(m_annid);
 		addSetting(m_anninfo);
 		addSetting(m_annvcfdb);
-		addSetting(m_tstvhom);
+		addSetting(m_ann_opt);
 		addSetting(m_interbed);
 		addSetting(m_interx);
 		addSetting(m_dbnsfp);
@@ -130,74 +130,59 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
-        String folder = m_snpeff_folder.getStringValue();
         String stdOutFile = "";
         ArrayList<String> command = new ArrayList<String>();
-        
         command.add("java");
-        command.add("-jar "+folder+"/SnpSift.jar");
-        boolean filter = false;
+    	command.add("-jar");
+    	command.add(m_snpsift_bin.getStringValue());
         
-        String basename = m_invcf.getStringValue().substring(0,m_invcf.getStringValue().lastIndexOf("."));
+        String vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
 
-        /**FILTER**/
-        if(m_method.getStringValue().equals("Filter")){
-        	command.add("filter");
-        	command.add("--file "+m_invcf.getStringValue());
-        	
-        	String filterString = "";
-        	
-        	if(m_filtercoveragebool.getBooleanValue()){
-        		filterString+="(DP >= "+m_filtercoverage.getIntValue()+")";
-        		filter = true;
-        	}
-        	if(m_filterqualbool.getBooleanValue()){
-        		filterString+=" & (QUAL >= "+m_filterqual.getDoubleValue()+")";
-        		filter = true;
-        	}
-        	if(!(m_filterstring.getStringValue().equals(""))){
-        		if(filter){
-        			filterString+=" & ";
-        		}
-        	}
-        	filterString+=m_filterstring.getStringValue();
-        	command.add(filterString);
-        	stdOutFile = basename+"_filtered.vcf";
-        }
+        SnpSiftTool tool = NAME2TOOL.get(m_method.getStringValue());
         
-       /**ANNOTATE**/
-        if(m_method.getStringValue().equals("Annotate")){
+        switch(tool) {
+        case TSTV:
+        	command.add("tstv");
+        	command.add(vcf_infile);
+        	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_tstv.txt");
+        	break;
+        case FILTER:
+        	command.add("filter");
+        	command.add("--file");
+        	command.add(vcf_infile);
+        	command.add(m_filterstring.getStringValue());
+        	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_filtered.vcf");
+        	break;
+        case ANNOTATE:
         	command.add("annotate");
         	if(m_annid.getBooleanValue()){
-        		command.add("-id");
+        		command.add("-noInfo");
         	}
-        	if(m_anninfo.isEnabled()){
+        	if(m_anninfo.isActive()){
+        		command.add("-info");
         		command.add(m_anninfo.getStringValue());
         	}
+        	if(m_ann_opt.getStringValue().length() > 1) {
+            	command.add(m_ann_opt.getStringValue());
+        	}
         	command.add(m_annvcfdb.getStringValue());
-        	command.add(m_invcf.getStringValue());
+        	command.add(vcf_infile);
+        	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_annotated.vcf");
+        	break;
+		default:
+			break;
         	
-        	stdOutFile = basename+"_annotated.vcf";
-        }
-        
-        /**TSTV**/
-        if(m_method.getStringValue().equals("TsTv")){
-        	command.add("tstv");
-        	command.add(m_tstvhom.getStringValue());
-        	command.add(m_invcf.getStringValue());
-        	
-        	stdOutFile = basename+"_tstv.txt";
         }
         
         /**Intervals**/
         if(m_method.getStringValue().equals("Intervals")){
         	command.add("intervals");
-        	command.add("-i "+m_invcf.getStringValue());
+        	command.add("-i "+vcf_infile);
         	if(m_interx.getBooleanValue()){
         		command.add("-x");
         	}
         	command.add(m_interbed.getStringValue());
-        	stdOutFile = basename+"_intervals.vcf";
+        	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_intervals.vcf");
         }
         
         /**dbnsfp**/
@@ -211,25 +196,38 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         		}	
         	}
         	command.add(m_dbnsfp.getStringValue());
-        	command.add(m_invcf.getStringValue());
-        	stdOutFile = basename+"_dbnsfp.vcf";
+        	command.add(vcf_infile);
+        	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_dbnfsp.vcf");
         }
         
     	/**Execute**/
+        String [] cmd = new String [command.size()];
+    	for(int i=0; i < cmd.length; i++) {
+    		cmd[i] = command.get(i);
+    	}
     	String lockFile = stdOutFile + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),stdOutFile);
-//    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,stdOutFile);
-
-         	
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO: generated method stub
+    	super.executeCommand(cmd, exec, new File(lockFile),stdOutFile);
+	
+    	//Create Output Table
+    	
+    	if(stdOutFile.endsWith(".vcf")) {
+    		outType = VCFCell.TYPE;
+    	}
+    	
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL, outType).createSpec()}));
+    	
+    	FileCell[] c = new FileCell[]{
+    			(FileCell) FileCellFactory.create(stdOutFile)};
+    	
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	
+    	
+        return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -238,116 +236,35 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-    	m_filtercoverage.setEnabled(false);
-    	m_filterqual.setEnabled(false);
+
+    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	if(vcf_index==-1) {
+    		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
+    	}
     	
-        // TODO: generated method stub
-        return null;
+    	outType = FileCell.TYPE;
+    	SnpSiftTool tool = 	NAME2TOOL.get(m_method.getStringValue());
+    	switch(tool) {
+    	case FILTER:
+    		if(m_filterstring.getStringValue().equals("")) {
+    			throw new InvalidSettingsException("No filter string defined!");
+    		}
+    		outType = VCFCell.TYPE;
+    		break;
+    	case ANNOTATE:
+    		if(CompatibilityChecker.inputFileNotOk(m_annvcfdb.getStringValue())) {
+    			throw new InvalidSettingsException("Given annotation database invalid!");
+    		}
+    		outType = VCFCell.TYPE;
+    		break;
+    	default:
+    		break;
+    	}
+    	//TODO check output according to method
+    	
+    	return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					new DataColumnSpecCreator(OUT_COL, outType).createSpec()})};
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	
-//    	super.saveSettingsTo(settings);
-//    	
-//    	m_invcf.saveSettingsTo(settings);
-//    	m_method.saveSettingsTo(settings);
-//    	m_snpeff_folder.saveSettingsTo(settings);
-//         m_filtercoverage.saveSettingsTo(settings);
-//         m_filterqual.saveSettingsTo(settings);
-//         m_filterstring.saveSettingsTo(settings);
-//         m_filtercoveragebool.saveSettingsTo(settings);
-//         m_filterqualbool.saveSettingsTo(settings);
-//         m_annid.saveSettingsTo(settings);
-//         m_anninfo.saveSettingsTo(settings);
-//         m_annvcfdb.saveSettingsTo(settings);
-//         m_tstvhom.saveSettingsTo(settings);
-//         m_interbed.saveSettingsTo(settings);
-//         m_interx.saveSettingsTo(settings);
-//         m_dbnsfp.saveSettingsTo(settings);
-//         m_dbnsfpfields.saveSettingsTo(settings);
-//         m_dbnsfpfieldsall.saveSettingsTo(settings);
-//
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	
-//    	super.loadValidatedSettingsFrom(settings);
-//    	
-//        m_filtercoveragebool.loadSettingsFrom(settings);
-//        m_filterqualbool.loadSettingsFrom(settings);
-//        m_filtercoverage.loadSettingsFrom(settings);
-//        m_filterqual.loadSettingsFrom(settings);
-//        m_filterstring.loadSettingsFrom(settings);
-//        m_invcf.loadSettingsFrom(settings);
-//        m_method.loadSettingsFrom(settings);
-//        m_snpeff_folder.loadSettingsFrom(settings);
-//        m_annid.loadSettingsFrom(settings);
-//        m_anninfo.loadSettingsFrom(settings);
-//        m_annvcfdb.loadSettingsFrom(settings);
-//        m_tstvhom.loadSettingsFrom(settings);
-//        m_interbed.loadSettingsFrom(settings);
-//        m_interx.loadSettingsFrom(settings);
-//        m_dbnsfp.loadSettingsFrom(settings);
-//        m_dbnsfpfields.loadSettingsFrom(settings);
-//        m_dbnsfpfieldsall.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	
-//    	super.validateSettings(settings);
-//    	
-//        m_filtercoverage.validateSettings(settings);
-//        m_filterqual.validateSettings(settings);
-//        m_filtercoveragebool.validateSettings(settings);
-//        m_filterqualbool.validateSettings(settings);
-//        m_filterstring.validateSettings(settings);
-//        m_invcf.validateSettings(settings);
-//        m_method.validateSettings(settings);
-//        m_snpeff_folder.validateSettings(settings);
-//        m_annid.validateSettings(settings);
-//        m_anninfo.validateSettings(settings);
-//        m_annvcfdb.validateSettings(settings);
-//        m_tstvhom.validateSettings(settings);
-//        m_interx.validateSettings(settings);
-//        m_interbed.validateSettings(settings);
-//        m_dbnsfp.validateSettings(settings);
-//        m_dbnsfpfields.validateSettings(settings);
-//        m_dbnsfpfieldsall.validateSettings(settings);
-//    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-
 }
 

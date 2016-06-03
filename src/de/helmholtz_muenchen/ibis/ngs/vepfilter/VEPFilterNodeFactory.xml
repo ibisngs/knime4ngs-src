@@ -24,8 +24,10 @@
         		This button allows you to easily select all SO terms that define loss-of-function (LOF) variants.
         	</option>
         	<option name="Further filtering conditions">
-        		Further filters can be specified.
-        		For more information, see <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html</a>
+        		Further filters can be specified as a comma-separated list of filter strings.
+        		Variants have to pass ALL filter strings.
+        		If variants should pass if they meet one of multiple conditions, use "or" in your filter string. 
+        		For more information, see the <a href="http://www.ensembl.org/info/docs/tools/vep/script/vep_filter.html">documentation of the filtering script</a>.
         	</option>
         	<option name="Folder for output files">
         		Set the path to the folder where the filtered VCF file will be stored.<br />
