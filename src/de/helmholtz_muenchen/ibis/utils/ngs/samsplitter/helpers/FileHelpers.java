@@ -294,5 +294,30 @@ public class FileHelpers
 				
 			}
 		
+		/**
+		 * Returns md5 sum for a given file
+		 * @param file
+		 * @return
+		 */
+		public static String getmd5Sum(String file){
+			
+			FileInputStream fis;
+			try {
+				fis = new FileInputStream(new File(file));
+				String md5 = org.apache.commons.codec.digest.DigestUtils.md5Hex(fis);
+				fis.close();
+				return md5;
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			
+			return "";
+		}
+		
 		
 	}

@@ -26,6 +26,7 @@ import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.ngs.samsplitter.helpers.FileHelpers;
 
 /**
  * This is the model implementation of KGGSeq.
@@ -168,14 +169,38 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	String lockFile 	= BasePath+m_OUTPREFIX.getStringValue() + SuccessfulRunChecker.LOCK_ENDING;
     	String StdErrFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdErr.log";
     	String StdOutFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdOut.log";
+    	String outfile 		= BasePath+m_OUTPREFIX.getStringValue()+".flt.xlsx";
+    	
+    	String[] command 		= createCommand(BasePath,infile);
+    	boolean terminationState= false;
+    	
+    	//Check md5 sums to see if file has changed
+    	String md5_oldOutFile 	= "";
+    	String md5_newOutFile	= "";
+    	
+    	if(new File(outfile).exists()){
+    		md5_oldOutFile = FileHelpers.getmd5Sum(outfile);
+    		String lockCommand = "";
+    		for (String s : command) {
+    			lockCommand += s;
+    		}
+    		terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(new File(lockFile), lockCommand);
+    	}
     	
     	
     	super.executeCommand(createCommand(BasePath,infile), exec, new File(lockFile),StdOutFile, StdErrFile);
     	
     	//Check if outfile was created--> execution was successful. 
-    	if(!new File(BasePath+m_OUTPREFIX.getStringValue()+".flt.xlsx").exists()){
-    		setWarningMessage("No outfile was created. Execution probably failed. Please check error logs. Removing .klock file");
+    	if(!new File(outfile).exists()){
+    		setWarningMessage("No outfile was created. Execution probably failed. Please check error logs. Removing .klock file.");
     		new File(lockFile).delete();
+    	}else{
+    		md5_newOutFile = FileHelpers.getmd5Sum(outfile);
+    		
+    		if(md5_oldOutFile.equals(md5_newOutFile) && !terminationState ){
+        		setWarningMessage("Outfile already existed and did not change during execution. Execution probably failed! Please check error logs. Removing .klock file.");
+        		new File(lockFile).delete();
+    		}
     	}
     	
     	BufferedDataContainer cont = exec.createDataContainer(
