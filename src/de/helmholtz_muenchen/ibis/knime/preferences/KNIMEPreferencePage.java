@@ -53,7 +53,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
         IWorkbenchPreferencePage {
 
 	
-	private static final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/Incoming/KNIME_BIN/";
+	private static final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/knime/";
 	public static final HashMap<String, Boolean> TOOLS;
 	static {
 		TOOLS = new HashMap<>();
