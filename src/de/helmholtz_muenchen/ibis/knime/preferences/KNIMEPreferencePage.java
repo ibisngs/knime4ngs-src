@@ -69,6 +69,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
+		TOOLS.put(IBISKNIMENodesPlugin.SNPSIFT, false);
 		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
 		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
 		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
@@ -643,10 +644,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 							HashSet<String> deps = DEPENDENCIES.get(tool);
 							if(deps == null) continue;
 							for(String dep: deps) {
-								f = new File(dir + File.separatorChar + dep);
-								if (!f.exists()) {
-									FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + tool), f);
-									f.setExecutable(true, false);
+								File f1 = new File(dir + File.separatorChar + dep);
+								if (!f1.exists()) {
+									FileUtils.copyURLToFile(new URL(DOWNLOAD_PATH + dep), f1);
+									f1.setExecutable(true, false);
 								}
 							}
 						}

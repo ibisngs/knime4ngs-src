@@ -24,7 +24,7 @@ public class GATKVariantFiltrationNodeDialog extends GATKNodeDialog {
 
 	@Override
 	protected void addDialogComponent() {
-		SettingsModelOptionalString QUAL= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_QUAL, "<50.0",true);
+//		SettingsModelOptionalString QUAL= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_QUAL, "<50.0",true);
 		SettingsModelOptionalString QD= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_QD, "<2.0",false);
 		SettingsModelOptionalString FS= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_FS, ">60.0",false);
 		SettingsModelOptionalString MQ= new SettingsModelOptionalString(GATKVariantFiltrationNodeModel.CFGKEY_MQ, "<40.0",false);
@@ -47,7 +47,7 @@ public class GATKVariantFiltrationNodeDialog extends GATKNodeDialog {
     	
     	addDialogComponent(new DialogComponentOptionalString(INFOFilterName, "Filter name"));
 
-    	addDialogComponent(new DialogComponentOptionalString(QUAL, "Quality cutoff (QUAL)"));
+//    	addDialogComponent(new DialogComponentOptionalString(QUAL, "Quality cutoff (QUAL)"));
     	
     	addDialogComponent(new DialogComponentOptionalString(QD, "Variant Confidence/Quality by Depth (QD)"));
     	addDialogComponent(new DialogComponentOptionalString(FS, "Strand Bias (FS)"));

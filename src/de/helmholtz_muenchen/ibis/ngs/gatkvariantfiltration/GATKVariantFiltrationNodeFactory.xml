@@ -19,6 +19,7 @@
         		Filter variants according to values of the INFO fields. 
 				Variants that match any one of the given conditions will be tagged with 'Filter Name' in the FILTER field.
 				Further conditions can be defined in the 'Additional Filter Options' field.
+				For further information on hard filtering, see howto <a href="http://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set">Apply hard filters to a call set</a>.
         	</option>
         	<option name="Filter FORMAT fields">
         		Filter genotypes according to values of the FORMAT fields. 
@@ -26,8 +27,6 @@
 				Further conditions can be defined in the 'Additional Filter Options' field.
 				If the box is checked, filtered genotypes are set to no-call.
 				Note that allele counts are not recomputed after filtering.
-        	
-        		For further information on how to apply hard filters, see <a href="http://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set"> http://gatkforums.broadinstitute.org/gatk/discussion/2806/howto-apply-hard-filters-to-a-call-set</a>
 			</option>
 		</tab>
 		<tab name= "GATK">

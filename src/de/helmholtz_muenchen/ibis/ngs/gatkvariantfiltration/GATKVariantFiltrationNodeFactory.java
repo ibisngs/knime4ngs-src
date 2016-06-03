@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "GATKVariantFiltration" Node.
  * 
@@ -35,7 +37,7 @@ public class GATKVariantFiltrationNodeFactory
     @Override
     public NodeView<GATKVariantFiltrationNodeModel> createNodeView(final int viewIndex,
             final GATKVariantFiltrationNodeModel nodeModel) {
-        return new GATKVariantFiltrationNodeView(nodeModel);
+        return new HTENodeView<GATKVariantFiltrationNodeModel>(nodeModel);
     }
 
     /**

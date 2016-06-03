@@ -11,6 +11,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -30,7 +31,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 	/**
 	 * Config Keys
 	 */
-	public static final String CFGKEY_QUAL = "Quality score";
+//	public static final String CFGKEY_QUAL = "Quality score";
 	public static final String CFGKEY_QD = "QualByDepth";
 	public static final String CFGKEY_FS = "Fisherstrand";
 	public static final String CFGKEY_MQ = "MappingQuality";
@@ -49,7 +50,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 	/**
 	 * The SettingsModels
 	 */
-	private final SettingsModelOptionalString m_QUAL= new SettingsModelOptionalString(CFGKEY_QUAL, "<50.0",true);
+//	private final SettingsModelOptionalString m_QUAL= new SettingsModelOptionalString(CFGKEY_QUAL, "<50.0",true);
 	private final SettingsModelOptionalString m_QD= new SettingsModelOptionalString(CFGKEY_QD, "<2.0",false);
 	private final SettingsModelOptionalString m_FS= new SettingsModelOptionalString(CFGKEY_FS, ">60.0",false);
 	private final SettingsModelOptionalString m_MQ= new SettingsModelOptionalString(CFGKEY_MQ, "<40.0",false);
@@ -84,7 +85,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
         addSetting(m_MQ);
         addSetting(m_MQR);
         addSetting(m_QD);
-        addSetting(m_QUAL);
+//        addSetting(m_QUAL);
         addSetting(m_RPR);
         addSetting(m_INFOFilterString);
         addSetting(m_INFOFilterName);
@@ -142,7 +143,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	/**
     	 * Create Filter String for INFO Field
     	 */
-    	filterStringINFOFIELD = addToFilterString(m_QUAL,"QUAL",filterStringINFOFIELD);
+//    	filterStringINFOFIELD = addToFilterString(m_QUAL,"QUAL",filterStringINFOFIELD);
     	filterStringINFOFIELD = addToFilterString(m_QD,"QD",filterStringINFOFIELD);
     	filterStringINFOFIELD = addToFilterString(m_FS,"FS",filterStringINFOFIELD);
     	filterStringINFOFIELD = addToFilterString(m_MQ,"MQ",filterStringINFOFIELD);
@@ -194,71 +195,6 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
     	return StringUtils.join(command, " ");
 	}
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
-//         m_DP.saveSettingsTo(settings);
-//         m_GQ.saveSettingsTo(settings);
-//         m_FS.saveSettingsTo(settings);
-//         m_HS.saveSettingsTo(settings);
-//         m_MQ.saveSettingsTo(settings);
-//         m_MQR.saveSettingsTo(settings);
-//         m_QD.saveSettingsTo(settings);
-//         m_QUAL.saveSettingsTo(settings);
-//         m_RPR.saveSettingsTo(settings);
-//         m_INFOFilterString.saveSettingsTo(settings);
-//         m_INFOFilterName.saveSettingsTo(settings);
-//         m_FORMATFilterString.saveSettingsTo(settings);
-//         m_FORMATFilterName.saveSettingsTo(settings);
-//         m_NOCALL.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_DP.loadSettingsFrom(settings);
-//        m_GQ.loadSettingsFrom(settings);
-//        m_FS.loadSettingsFrom(settings);
-//        m_HS.loadSettingsFrom(settings);
-//        m_MQ.loadSettingsFrom(settings);
-//        m_MQR.loadSettingsFrom(settings);
-//        m_QD.loadSettingsFrom(settings);
-//        m_QUAL.loadSettingsFrom(settings);
-//        m_RPR.loadSettingsFrom(settings);
-//        m_INFOFilterString.loadSettingsFrom(settings);
-//        m_INFOFilterName.loadSettingsFrom(settings);
-//        m_FORMATFilterString.loadSettingsFrom(settings);
-//        m_FORMATFilterName.loadSettingsFrom(settings);
-//        m_NOCALL.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateExtraSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_DP.validateSettings(settings);
-//        m_GQ.validateSettings(settings);
-//        m_FS.validateSettings(settings);
-//        m_HS.validateSettings(settings);
-//        m_MQ.validateSettings(settings);
-//        m_MQR.validateSettings(settings);
-//        m_QD.validateSettings(settings);
-//        m_QUAL.validateSettings(settings);
-//        m_RPR.validateSettings(settings);
-//        m_INFOFilterString.validateSettings(settings);
-//        m_INFOFilterName.validateSettings(settings);
-//        m_FORMATFilterString.validateSettings(settings);
-//        m_FORMATFilterName.validateSettings(settings);
-//        m_NOCALL.validateSettings(settings);
-//    }
-
 	@Override
 	protected String getCommandWalker() {
 		return "VariantFiltration";
@@ -272,13 +208,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
-		vcf_index = -1;
-		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
-    		}
-    	}
+		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
 		return (vcf_index>-1);
 	}
 
