@@ -36,7 +36,7 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
     	
     	/**Annotate**/
     	final SettingsModelOptionalString anninfo = new SettingsModelOptionalString(
-    			SnpSiftNodeModel.CFGKEY_ANNINFO,"",false);
+    			SnpSiftNodeModel.CFGKEY_ANNINFO,SnpSiftNodeModel.DEF_FIELDS,false);
     	final SettingsModelBoolean annid = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_ANNID, false);
     	final SettingsModelString annvcfdb = new SettingsModelString(
     			SnpSiftNodeModel.CFGKEY_ANNVCFDB,"");
@@ -48,65 +48,79 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
     			SnpSiftNodeModel.CFGKEY_INTERBED,"");
     	final SettingsModelBoolean interx = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_INTERX, false);
 
-    	/**dbnsfp**/
+    	/**dbNSFP**/
     	final SettingsModelString dbnsfp = new SettingsModelString(
     			SnpSiftNodeModel.CFGKEY_DBNSFP,"");
     	final SettingsModelOptionalString dbnsfpfields = new SettingsModelOptionalString(
-    			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,"",false);
+    			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,SnpSiftNodeModel.DEF_FIELDS,false);
     	final SettingsModelBoolean dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
+    	final SettingsModelOptionalString dbnsfp_opt = new SettingsModelOptionalString(SnpSiftNodeModel.CFGKEY_DBNSFP_OPT, "", false);
+
+    	
+    	/**Other**/
+    	final SettingsModelString other_cmd = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_CMD,"");
+    	final SettingsModelString other_out = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_OUT,"");
     	
     	this.addPrefPageSetting(snpsift_bin, IBISKNIMENodesPlugin.SNPSIFT);
    
     	addDialogComponent(new DialogComponentStringSelection(method, "Select tool",SnpSiftNodeModel.NAME2TOOL.keySet()));
+    	
+    	createNewGroup("Individual Command");
+    	addDialogComponent(new DialogComponentString(other_cmd, "Your command"));
+    	addDialogComponent(new DialogComponentFileChooser(other_out, "Output file"));
+    	
+    	createNewTab("Filter");
     	addDialogComponent(new DialogComponentString(filterstring, "Filter criteria (SnpSift Syntax)"));
-		annvcfdb.setEnabled(false);
     	
     	createNewTab("Annotate");
     	createNewGroup("VCF file providing annotations");
     	addDialogComponent(new DialogComponentFileChooser(annvcfdb, "par_3", 0, false, ".vcf"));
-//    	closeCurrentGroup();
     	addDialogComponent(new DialogComponentBoolean(annid, "Do not annotate INFO fields"));
-    	addDialogComponent(new DialogComponentOptionalString(anninfo, "Annotate using a (comma-separated) list of info fields"));
+    	addDialogComponent(new DialogComponentOptionalString(anninfo, "List of INFO fields"));
     	addDialogComponent(new DialogComponentOptionalString(ann_opt, "Futher annotate flags"));
     	
     	createNewTab("Intervals");
     	createNewGroup("Specify interval file");
     	addDialogComponent(new DialogComponentFileChooser(interbed, "par_4", 0, false, ".bed",".txt"));
-    	addDialogComponent(new DialogComponentBoolean(interx, "Exclude VCF entries in intervals"));    	
+    	addDialogComponent(new DialogComponentBoolean(interx, "Exclude entries in intervals"));    	
     	
-    	createNewTab("Annotate with dbnsfp");
-    	createNewGroup("Specify dbnsfp database");
-    	addDialogComponent(new DialogComponentFileChooser(dbnsfp, "par_5", 0, false,".txt"));
-    	addDialogComponent(new DialogComponentBoolean(dbnsfpfieldsall, "Annotate all fields, even if the database has an empty value"));   
-    	addDialogComponent(new DialogComponentOptionalString(dbnsfpfields, "Specify which fields are used for annotation by a comma separated list of field names"));
-
-    	dbnsfpfieldsall.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-					if(dbnsfpfieldsall.getBooleanValue()){
-						dbnsfpfields.setEnabled(false);
-						dbnsfpfields.setIsActive(false);
-					}else{
-						dbnsfpfields.setEnabled(true);
-					}
-			}
-		});
+    	createNewTab("dbNSFP");
+    	createNewGroup("Specify dbNSFP database");
+    	addDialogComponent(new DialogComponentFileChooser(dbnsfp, "par_5", 0, false,".txt.gz"));
+    	addDialogComponent(new DialogComponentBoolean(dbnsfpfieldsall, "Include empty values"));   
+    	addDialogComponent(new DialogComponentOptionalString(dbnsfpfields, "List of field names"));
+    	addDialogComponent(new DialogComponentOptionalString(dbnsfp_opt, "Further dbnsfp flags"));
+    	
     	
     	method.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				
-				filterstring.setEnabled(false);
+				other_cmd.setEnabled(false);
+				other_out.setEnabled(false);
+				
+				setEnabled(false, "Filter");
 				setEnabled(false, "Annotate");
-//				setEnabled(true, "Intervals");
-//				setEnabled(false, "Annotate with dbnsfp");
-//				setEnabled(true, method.getStringValue());
+				setEnabled(false, "Intervals");
+				setEnabled(false, "dbNSFP");
 				
 				SnpSiftTool tool = SnpSiftNodeModel.NAME2TOOL.get(method.getStringValue());
 				switch(tool) {
 				case FILTER:
-					filterstring.setEnabled(true);
+					setEnabled(true, "Filter");
 					break;
 				case ANNOTATE:
 					setEnabled(true, "Annotate");
+					break;
+				case INTERVALS:
+					setEnabled(true, "Intervals");
+					break;
+				case DBNSFP:
+					setEnabled(true, "dbNSFP");
+					break;
+				case OTHER:
+					other_cmd.setEnabled(true);
+					other_out.setEnabled(true);
+					break;
 				default:
 					break;
 				}		

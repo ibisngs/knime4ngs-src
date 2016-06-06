@@ -1,6 +1,8 @@
 package de.helmholtz_muenchen.ibis.ngs.snpsift;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -38,9 +40,10 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	static final String CFGKEY_SNPSIFT_BIN = "snpsift_bin";
 	static final String CFGKEY_METHOD = "method";
 	static final String DEF_METHOD = "Filter";
+	static final String DEF_FIELDS = "field1,field2";
 	
 	public enum SnpSiftTool {
-		TSTV, FILTER, ANNOTATE, INTERVALS, ANNOTATE_DBSNP
+		TSTV, FILTER, ANNOTATE, INTERVALS, DBNSFP, OTHER
 	}
 	static final LinkedHashMap<String, SnpSiftTool> NAME2TOOL = new LinkedHashMap<>();
 	static {
@@ -48,7 +51,8 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 		NAME2TOOL.put("Annotate", SnpSiftTool.ANNOTATE);
 		NAME2TOOL.put("TsTv", SnpSiftTool.TSTV);
 		NAME2TOOL.put("Intervals", SnpSiftTool.INTERVALS);
-		NAME2TOOL.put("Annotate with dbsnfp", SnpSiftTool.ANNOTATE_DBSNP);
+		NAME2TOOL.put("dbNSFP", SnpSiftTool.DBNSFP);
+		NAME2TOOL.put("Other", SnpSiftTool.OTHER);
 	}
 	
 	//Filter
@@ -64,11 +68,15 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_INTERX = "interx";
 	public static final String CFGKEY_INTERBED = "interbed";
 	
-	//dbnsfp
+	//dbNFSP
 	public static final String CFGKEY_DBNSFP = "dbnsfp";
 	public static final String CFGKEY_DBNSFPFFIELDS = "dbnsfpFields";
 	public static final String CFGKEY_DBNSFPFFIELDSALL = "dbnsfpFieldsall";
+	public static final String CFGKEY_DBNSFP_OPT = "dbnsfp_opt_field";
 	
+	//Other
+	public static final String CFGKEY_OTHER_CMD = "other_cmd";
+	public static final String CFGKEY_OTHER_OUT = "other_out";
 	
 	/**Setting Models**/
 	private final SettingsModelString m_snpsift_bin = new SettingsModelString(
@@ -76,14 +84,13 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_method = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_METHOD,SnpSiftNodeModel.DEF_METHOD);
 	
-	
 	/**Filter**/
 	private final SettingsModelString m_filterstring = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_FILTERSTRING,"");
 
 	/**Annotate**/
 	private final SettingsModelOptionalString m_anninfo = new SettingsModelOptionalString(
-			SnpSiftNodeModel.CFGKEY_ANNINFO,"",false);
+			SnpSiftNodeModel.CFGKEY_ANNINFO,DEF_FIELDS,false);
 	private final SettingsModelBoolean m_annid = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_ANNID, false);
 	private final SettingsModelString m_annvcfdb = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_ANNVCFDB,"");
@@ -94,13 +101,18 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 			SnpSiftNodeModel.CFGKEY_INTERBED,"");
 	private final SettingsModelBoolean m_interx = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_INTERX, false);
 
-	/**dbnsfp**/
+	/**dbNSFP**/
 	private final SettingsModelString m_dbnsfp = new SettingsModelString(
 			SnpSiftNodeModel.CFGKEY_DBNSFP,"");
 	private final SettingsModelOptionalString m_dbnsfpfields = new SettingsModelOptionalString(
-			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,"",false);
+			SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDS,DEF_FIELDS,false);
 	private final SettingsModelBoolean m_dbnsfpfieldsall = new SettingsModelBoolean(SnpSiftNodeModel.CFGKEY_DBNSFPFFIELDSALL, false);
+	private final SettingsModelOptionalString m_dbnsfp_opt = new SettingsModelOptionalString(SnpSiftNodeModel.CFGKEY_DBNSFP_OPT, "", false);
 
+	/*Other*/
+	private final SettingsModelString m_other_cmd = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_CMD,"");
+	private final SettingsModelString m_other_out = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_OUT,"");
+	
 	private int vcf_index;
 	private DataType outType = FileCell.TYPE;
 
@@ -121,6 +133,12 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 		addSetting(m_dbnsfp);
 		addSetting(m_dbnsfpfields);
 		addSetting(m_dbnsfpfieldsall);
+		addSetting(m_dbnsfp_opt);
+		addSetting(m_other_cmd);
+		addSetting(m_other_out);
+		
+		m_other_cmd.setEnabled(false);
+		m_other_out.setEnabled(false);
     }
 
     /**
@@ -163,42 +181,57 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         		command.add(m_anninfo.getStringValue());
         	}
         	if(m_ann_opt.getStringValue().length() > 1) {
-            	command.add(m_ann_opt.getStringValue());
+        		String [] opts = m_ann_opt.getStringValue().split(" ");
+        		for(String s:opts) {
+        			command.add(s.trim());
+        		}
         	}
         	command.add(m_annvcfdb.getStringValue());
         	command.add(vcf_infile);
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_annotated.vcf");
         	break;
-		default:
-			break;
-        	
-        }
-        
-        /**Intervals**/
-        if(m_method.getStringValue().equals("Intervals")){
+        case INTERVALS:
         	command.add("intervals");
-        	command.add("-i "+vcf_infile);
+        	command.add("-i");
+        	command.add(vcf_infile);
         	if(m_interx.getBooleanValue()){
         		command.add("-x");
         	}
         	command.add(m_interbed.getStringValue());
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_intervals.vcf");
-        }
-        
-        /**dbnsfp**/
-        if(m_method.getStringValue().equals("Annotate with dbnsfp")){
+        	break;
+        case DBNSFP:
         	command.add("dbnsfp");
         	if(m_dbnsfpfieldsall.getBooleanValue()){
         		command.add("-a");
-        	}else{
-        		if(m_dbnsfpfields.isActive() && m_dbnsfpfields.isEnabled()){
-        			command.add("-f "+m_dbnsfpfields.getStringValue());
-        		}	
         	}
+        	if(m_dbnsfpfields.isActive()){
+        		command.add("-f");
+        		command.add(m_dbnsfpfields.getStringValue());
+        	}
+        	if(m_dbnsfp_opt.getStringValue().length() > 1) {
+        		String [] opts = m_dbnsfp_opt.getStringValue().split(" ");
+        		for(String s:opts) {
+        			command.add(s.trim());
+        		}
+        	}
+        	command.add("-db");
         	command.add(m_dbnsfp.getStringValue());
         	command.add(vcf_infile);
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_dbnfsp.vcf");
+        	break;
+        case OTHER:
+        	String [] cmd = m_other_cmd.getStringValue().split(" ");
+        	for(String c:cmd) {
+        		command.add(c.trim());
+        	}
+        	command.add(vcf_infile);
+        	stdOutFile = m_other_out.getStringValue();
+        	break;
+		default:
+			break;
         }
+
         
     	/**Execute**/
         String [] cmd = new String [command.size()];
@@ -257,10 +290,35 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     		}
     		outType = VCFCell.TYPE;
     		break;
+    	case INTERVALS:
+    		if(CompatibilityChecker.inputFileNotOk(m_interbed.getStringValue())) {
+    			throw new InvalidSettingsException("Interval file invalid!");
+    		}
+    		outType = VCFCell.TYPE;
+    		break;
+    	case DBNSFP:
+    		if(CompatibilityChecker.inputFileNotOk(m_dbnsfp.getStringValue())) {
+    			throw new InvalidSettingsException("dbNSFP file invalid!");
+    		}
+    		if(CompatibilityChecker.inputFileNotOk(m_dbnsfp.getStringValue() + ".tbi")) {
+    			throw new InvalidSettingsException("dbNSFP file invalid!");
+    		}
+    		outType = VCFCell.TYPE;
+    		break;
+    	case OTHER:
+    		if(m_other_cmd.getStringValue().equals("") || m_other_out.getStringValue().equals("")) {
+    			throw new InvalidSettingsException("Both, command and output file have to be defined!");
+    		}
+    		if(Files.notExists(Paths.get(new File(m_other_out.getStringValue()).getParent()))) {
+    			throw new InvalidSettingsException("Directory for output file does not exist!");
+    		}
+    		if(m_other_out.getStringValue().endsWith(".vcf")) {
+    			outType = VCFCell.TYPE;
+    		}
+    		break;
     	default:
     		break;
     	}
-    	//TODO check output according to method
     	
     	return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{

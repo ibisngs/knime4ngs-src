@@ -4,35 +4,106 @@
     <name>SnpSift</name>
     
     <shortDescription>
-        
+        This node is a wrapper for the SnpSift toolbox.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+			This node is a wrapper for the <a href="http://snpeff.sourceforge.net/SnpSift.html">SnpSift</a> toolbox.
+			Various tools allow you to filter and manipulate VCF files (annotated by snpEff).
+		</intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <tab name="Options">
+        	<option name="Select tool">
+        		<ul>
+        			<li>
+        				<a href="http://snpeff.sourceforge.net/SnpSift.html#filter">Filter</a>:
+        				SnpSift filter is one of the most useful SnpSift commands. 
+        				Using SnpSift filter you can filter VCF files using arbitrary expressions.
+        			</li>
+        			<li>
+        				<a href="http://snpeff.sourceforge.net/SnpSift.html#annotate">Annotate</a>:
+        				Annotate using fields from another VCF file (e.g. dbSnp, 1000 Genomes projects, ClinVar, ExAC, etc.). 
+        			</li>
+        			<li>
+        				<a href="http://snpeff.sourceforge.net/SnpSift.html#TsTv">TsTv</a>:
+        				Calculate the transition to transversion ratios for each sample.
+        			</li>
+        			<li>
+        				<a href="http://snpeff.sourceforge.net/SnpSift.html#Intervals">Intervals</a>:
+        				This tool is used to extract variants that intersect any interval. 
+        			</li>
+        			<li>
+        				<a href="http://snpeff.sourceforge.net/SnpSift.html#dbNSFP">dbNSFP</a>:
+        				The dbNSFP is an integrated database of functional predictions from multiple algorithms (SIFT, Polyphen2, LRT and MutationTaster, PhyloP and GERP++, etc.). 
+        			</li>
+        			<li>
+        				Other: Use another tool by specifying an individual command.
+        			</li>
+        		</ul>
+        	</option>
+        	<option name="Individual Command">
+        		You can specify an individual command and parameters that are provided by SnpSift, e.g. hwe -q.
+        		The output of the specified tool is written into the selected file.
+        	</option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        <tab name="Filter">
+        	<option name="Filter criteria">
+        		Set your filter criteria according to the syntax of SnpSift.
+        	</option>
         </tab>
-        -->
+        <tab name="Annotate">
+        	<option name="VCF file providing annotations">
+        		Set a path to a VCF file that provides annotations to be assigned to variants in the input VCF file.
+        	</option>
+        	<option name="Do not annotate INFO fields">
+        		INFO fields are not annotated, i.e. only the ID field is annotated.
+        	</option>
+        	<option name="List of INFO fields">
+        		Annotate using a list of info fields (list is a comma separated list of fields). Default: ALL.
+        	</option>
+        	<option name="Further annotate flags">
+        		Here, you can specify further flags that are supported by the annotate tool.
+        	</option>
+        </tab>
+        <tab name="Intervals">
+        	<option name="Specify interval file">
+        		Select a BED file that defines intervals.
+        	</option>
+        	<option name="Exclude entries in intervals">
+        		If this option is checked, all variants that intersect one of the given intervals will be excluded from the output.
+        	</option>
+        </tab>
+        <tab name="dbNFSP">
+        	<option name="Specify dbNFSP database">
+        		Set the path to the gzipped and indexed dbNFSP.
+        	</option>
+        	<option name="Include empty values">
+        		Annotate fields, even if the database has an empty value (annotates using '.' for empty).
+        	</option>
+        	<option name="List of field names">
+        		A comma separated list of fields to add.
+        		Type "java -jar SnpSift.jar dbnfsp" within your terminal to see the full list of default fields.
+        	</option>
+        	<option name="Further dbnsfp flags">
+        		Here, you can specify further flags that are supported by the dbnsfp tool.
+        	</option>
+        </tab>
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
+        <inPort index="0" name="Input VCF file">
+        	Cell 0: Input VCF file. Some SnpSift tools require files annotated by snpEff.
+        </inPort>
+
+        <outPort index="0" name="Output file">
+        	Cell 0: The format of the output file depends on the chosen tool.
+        </outPort>
+
     </ports>    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>
 </knimeNode>
