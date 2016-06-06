@@ -187,7 +187,6 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
 		
     	//The Output Col Names
     	public static final String OUT_COL1 = "Path2SAMFile";
-    	public static final String OUT_COL2 = "Path2RefFile";
     	
     	private static String readType = "";
     	
@@ -375,7 +374,13 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
 	    	}
     	}
 
-    	String path2baseFileName = m_refseqfile.getStringValue().substring(0,m_refseqfile.getStringValue().lastIndexOf("."));
+    	String path2baseFileName = "";
+    	if(m_refseqfile.getStringValue().isEmpty()){
+    		throw new InvalidSettingsException("Reference Genome is missing!");
+    	}else{
+    		path2baseFileName = m_refseqfile.getStringValue().substring(0,m_refseqfile.getStringValue().lastIndexOf("."));
+    	}
+    	
     	
     	//Check for bowtie2-align
     	Boolean f1 = !new File(path2baseFileName + ".1.bt2").exists();
@@ -588,200 +593,11 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
 
     	/**Execute**/
     	String lockFile = path2outfile + "_bowtie2" + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),null,null);  
+    	String stdOut 	= path2outfile+".stdOut";
+    	String stdErr 	= path2outfile+".stdErr";
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),stdOut,stdErr);  
     }
     
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	m_alignmenttype.saveSettingsTo(settings);
-//    	m_bmax.saveSettingsTo(settings);
-//
-//    	m_d.saveSettingsTo(settings);
-//    	m_dcv.saveSettingsTo(settings);
-//    	m_dpad.saveSettingsTo(settings);
-//    	m_ff.saveSettingsTo(settings);
-//    	m_ftabchars.saveSettingsTo(settings);
-//    	m_gbar.saveSettingsTo(settings);
-//    	m_i1.saveSettingsTo(settings);
-//    	m_i2.saveSettingsTo(settings);
-//    	m_ignorequals.saveSettingsTo(settings);
-//    	m_installpath.saveSettingsTo(settings);
-//    	m_l.saveSettingsTo(settings);
-//    	m_ma.saveSettingsTo(settings);
-//    	m_maxins.saveSettingsTo(settings);
-//    	m_minins.saveSettingsTo(settings);
-//    	m_mm.saveSettingsTo(settings);
-//    	m_mp.saveSettingsTo(settings);
-//    	m_n.saveSettingsTo(settings);
-//    	m_nceil1.saveSettingsTo(settings);
-//    	m_nceil2.saveSettingsTo(settings);
-//    	m_noauto.saveSettingsTo(settings);
-//    	m_nocontain.saveSettingsTo(settings);
-//    	m_nodc.saveSettingsTo(settings);
-//    	m_nodiscordant.saveSettingsTo(settings);
-//    	m_nodovetail.saveSettingsTo(settings);
-//    	m_nofw.saveSettingsTo(settings);
-//    	m_nomixed.saveSettingsTo(settings);
-//    	m_nooverlap.saveSettingsTo(settings);
-//    	m_norc.saveSettingsTo(settings);
-//    	m_np.saveSettingsTo(settings);
-//    	m_offrate.saveSettingsTo(settings);
-//    	m_packed.saveSettingsTo(settings);
-//    	m_preset.saveSettingsTo(settings);
-//    	m_qcfilter.saveSettingsTo(settings);
-//    	m_quals.saveSettingsTo(settings);
-//    	m_r.saveSettingsTo(settings);
-//    	m_rdg1.saveSettingsTo(settings);
-//    	m_rdg2.saveSettingsTo(settings);
-//    	m_recorder.saveSettingsTo(settings);
-//    	m_refseqfile.saveSettingsTo(settings);
-//    	m_reporting1.saveSettingsTo(settings);
-//    	m_reporting2.saveSettingsTo(settings);
-//    	m_rfg1.saveSettingsTo(settings);
-//    	m_rfg2.saveSettingsTo(settings);
-//    	m_scoremin1.saveSettingsTo(settings);
-//    	m_scoremin2.saveSettingsTo(settings);
-//    	m_skip.saveSettingsTo(settings);
-//    	m_threads.saveSettingsTo(settings);
-//    	m_trim3.saveSettingsTo(settings);
-//    	m_trim5.saveSettingsTo(settings);
-//    	m_upto.saveSettingsTo(settings);
-//    	m_usecutoff.saveSettingsTo(settings);
-//    	m_usepreset.saveSettingsTo(settings);
-//    	m_useskip.saveSettingsTo(settings);
-//    	m_useupto.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	m_alignmenttype.loadSettingsFrom(settings);
-//    	m_bmax.loadSettingsFrom(settings);
-//    	m_d.loadSettingsFrom(settings);
-//    	m_dcv.loadSettingsFrom(settings);
-//    	m_dpad.loadSettingsFrom(settings);
-//    	m_ff.loadSettingsFrom(settings);
-//    	m_ftabchars.loadSettingsFrom(settings);
-//    	m_gbar.loadSettingsFrom(settings);
-//    	m_i1.loadSettingsFrom(settings);
-//    	m_i2.loadSettingsFrom(settings);
-//    	m_ignorequals.loadSettingsFrom(settings);
-//    	m_installpath.loadSettingsFrom(settings);
-//    	m_l.loadSettingsFrom(settings);
-//    	m_ma.loadSettingsFrom(settings);
-//    	m_maxins.loadSettingsFrom(settings);
-//    	m_minins.loadSettingsFrom(settings);
-//    	m_mm.loadSettingsFrom(settings);
-//    	m_mp.loadSettingsFrom(settings);
-//    	m_n.loadSettingsFrom(settings);
-//    	m_nceil1.loadSettingsFrom(settings);
-//    	m_nceil2.loadSettingsFrom(settings);
-//    	m_noauto.loadSettingsFrom(settings);
-//    	m_nocontain.loadSettingsFrom(settings);
-//    	m_nodc.loadSettingsFrom(settings);
-//    	m_nodiscordant.loadSettingsFrom(settings);
-//    	m_nodovetail.loadSettingsFrom(settings);
-//    	m_nofw.loadSettingsFrom(settings);
-//    	m_nomixed.loadSettingsFrom(settings);
-//    	m_nooverlap.loadSettingsFrom(settings);
-//    	m_norc.loadSettingsFrom(settings);
-//    	m_np.loadSettingsFrom(settings);
-//    	m_offrate.loadSettingsFrom(settings);
-//    	m_packed.loadSettingsFrom(settings);
-//    	m_preset.loadSettingsFrom(settings);
-//    	m_qcfilter.loadSettingsFrom(settings);
-//    	m_quals.loadSettingsFrom(settings);
-//    	m_r.loadSettingsFrom(settings);
-//    	m_rdg1.loadSettingsFrom(settings);
-//    	m_rdg2.loadSettingsFrom(settings);
-//    	m_recorder.loadSettingsFrom(settings);
-//    	m_refseqfile.loadSettingsFrom(settings);
-//    	m_reporting1.loadSettingsFrom(settings);
-//    	m_reporting2.loadSettingsFrom(settings);
-//    	m_rfg1.loadSettingsFrom(settings);
-//    	m_rfg2.loadSettingsFrom(settings);
-//    	m_scoremin1.loadSettingsFrom(settings);
-//    	m_scoremin2.loadSettingsFrom(settings);
-//    	m_skip.loadSettingsFrom(settings);
-//    	m_threads.loadSettingsFrom(settings);
-//    	m_trim3.loadSettingsFrom(settings);
-//    	m_trim5.loadSettingsFrom(settings);
-//    	m_upto.loadSettingsFrom(settings);
-//    	m_usecutoff.loadSettingsFrom(settings);
-//    	m_usepreset.loadSettingsFrom(settings);
-//    	m_useskip.loadSettingsFrom(settings);
-//    	m_useupto.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	m_alignmenttype.validateSettings(settings);
-//    	m_bmax.validateSettings(settings);
-//    	m_d.validateSettings(settings);
-//    	m_dcv.validateSettings(settings);
-//    	m_dpad.validateSettings(settings);
-//    	m_ff.validateSettings(settings);
-//    	m_ftabchars.validateSettings(settings);
-//    	m_gbar.validateSettings(settings);
-//    	m_i1.validateSettings(settings);
-//    	m_i2.validateSettings(settings);
-//    	m_ignorequals.validateSettings(settings);
-//    	m_installpath.validateSettings(settings);
-//    	m_l.validateSettings(settings);
-//    	m_ma.validateSettings(settings);
-//    	m_maxins.validateSettings(settings);
-//    	m_minins.validateSettings(settings);
-//    	m_mm.validateSettings(settings);
-//    	m_mp.validateSettings(settings);
-//    	m_n.validateSettings(settings);
-//    	m_nceil1.validateSettings(settings);
-//    	m_nceil2.validateSettings(settings);
-//    	m_noauto.validateSettings(settings);
-//    	m_nocontain.validateSettings(settings);
-//    	m_nodc.validateSettings(settings);
-//    	m_nodiscordant.validateSettings(settings);
-//    	m_nodovetail.validateSettings(settings);
-//    	m_nofw.validateSettings(settings);
-//    	m_nomixed.validateSettings(settings);
-//    	m_nooverlap.validateSettings(settings);
-//    	m_norc.validateSettings(settings);
-//    	m_np.validateSettings(settings);
-//    	m_offrate.validateSettings(settings);
-//    	m_packed.validateSettings(settings);
-//    	m_preset.validateSettings(settings);
-//    	m_qcfilter.validateSettings(settings);
-//    	m_quals.validateSettings(settings);
-//    	m_r.validateSettings(settings);
-//    	m_rdg1.validateSettings(settings);
-//    	m_rdg2.validateSettings(settings);
-//    	m_recorder.validateSettings(settings);
-//    	m_refseqfile.validateSettings(settings);
-//    	m_reporting1.validateSettings(settings);
-//    	m_reporting2.validateSettings(settings);
-//    	m_rfg1.validateSettings(settings);
-//    	m_rfg2.validateSettings(settings);
-//    	m_scoremin1.validateSettings(settings);
-//    	m_scoremin2.validateSettings(settings);
-//    	m_skip.validateSettings(settings);
-//    	m_threads.validateSettings(settings);
-//    	m_trim3.validateSettings(settings);
-//    	m_trim5.validateSettings(settings);
-//    	m_upto.validateSettings(settings);
-//    	m_usecutoff.validateSettings(settings);
-//    	m_usepreset.validateSettings(settings);
-//    	m_useskip.validateSettings(settings);
-//    	m_useupto.validateSettings(settings);
-//    }
     
     /**
      * {@inheritDoc}

@@ -83,6 +83,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		DEPENDENCIES = new HashMap<>();
 		HashSet<String> bowtie2_dep = new HashSet<>();
 		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_BUILD);
+		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_BUILD_L);
+		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_BUILD_S);
+		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_ALIGN_L);
+		bowtie2_dep.add(IBISKNIMENodesPlugin.BOWTIE2_ALIGN_S);
 		DEPENDENCIES.put(IBISKNIMENodesPlugin.BOWTIE2, bowtie2_dep);
 	}
 	

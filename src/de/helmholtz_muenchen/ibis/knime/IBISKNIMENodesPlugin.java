@@ -63,6 +63,10 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
 //	tool dependencies, neither in FIELDS nor in PATHS
 	public static final String BOWTIE2_BUILD = "bowtie2-build";
+	public static final String BOWTIE2_BUILD_S = "bowtie2-build-s";
+	public static final String BOWTIE2_BUILD_L = "bowtie2-build-l";
+	public static final String BOWTIE2_ALIGN_S = "bowtie2-align-s";
+	public static final String BOWTIE2_ALIGN_L = "bowtie2-align-l";
 	
 //	excluded binaries: integrate binaries by adding them to PATHS and TOOLS in the KNIMEPreferencePage
 //	public static final String BFAST = "bfast";
