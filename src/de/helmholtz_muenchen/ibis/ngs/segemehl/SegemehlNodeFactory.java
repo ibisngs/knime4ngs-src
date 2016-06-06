@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "Segemehl" Node.
  * 
@@ -35,7 +37,7 @@ public class SegemehlNodeFactory
     @Override
     public NodeView<SegemehlNodeModel> createNodeView(final int viewIndex,
             final SegemehlNodeModel nodeModel) {
-        return new SegemehlNodeView(nodeModel);
+        return new HTENodeView<SegemehlNodeModel>(nodeModel);
     }
 
     /**

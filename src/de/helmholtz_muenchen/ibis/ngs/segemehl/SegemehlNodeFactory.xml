@@ -16,23 +16,23 @@
 			memory space and allows bisulfite sequencing mapping and split read mapping.<br></br>
 			Source: <a href="http://www.bioinf.uni-leipzig.de/Software/segemehl/">http://www.bioinf.uni-leipzig.de/Software/segemehl/</a>
 		</intro>
-		
-        <option name="############### Options ###############"></option>
-        <option name="Segemehl">Set path of executable Segemehl.</option>
-        <option name="Reference sequence: FastA file">Choose a reference sequence, such as a genome seqeunce, to map the reads on (file type: FastA).</option>
-        <option name="*************** General ***************"></option>
-        <option name="Index reference sequence">Uncheck this option if the reference sequence is already indexed (using Segemehl). In this case the reference sequence 
-        		will not be indexed again.</option>
+		<tab name="Alignment Parameters">
         <option name="Number of threads/ cores to use">Parallel threads &lt;n&gt; will make matching much faster on machines with  &lt;n&gt; multiple cores. Use them!</option>
-        <option name="############### Further Options ###############"></option>
-        <option name="*************** Alignment Parameters ***************"></option>
+        
         <option name="Use (multiple) split read mapping (e.g. for cDNA reads)">Segemehl supports (multiple) split read mapping. To activate the split read mapping,
 				it is only required to give this option.</option>
         <option name="Use bisulfite mapping">Segemehl supports mapping of bisulfite-treated sequencing data where DNA fragments are treated with sodium bisulfite which 
         		results in the conversion of unmethylated cytosines into uracils while methylated cytosines remain unchanged. With bisulfite sequencing, it is possible 
         		to capture DNA methylation genomewide in an unbiased fashion with single-base resolution and is hence considered ‘gold standard’. Segemehl supports both 
         		currently used protocols for the construction of the bisulfite-treated libraries, namely methylC-seq  and BS-seq.</option>
-      	<option name="*************** Adapter and polyA clipping ***************"></option>
+      	
+      	<option name="Alignment accuracy">This option controls the minimum alignment accuracy (in percent). All reads with a best alignment below this threshold will be discarded. </option>
+      	<option name="Optional Parameters">
+        		For each computing step, additional parameters can be specified. For a list of all parameters, see <a href="http://www.bioinf.uni-leipzig.de/Software/segemehl/">online Segemehl user manual</a>.<br />
+        </option>    
+      	
+      	</tab>
+      	<tab name="Adapter and polyA clipping">
         <option name="Clip 5' adapters">Using this option, Segemehl clipps adapter sequences of the 5'-ends of the reads before aligning them. Therefore you have to define 
         a adapter sequence.</option>
         <option name="Clip 3' adapters">Using this option, Segemehl clipps adapter sequences of the 3'-ends of the reads before aligning them. Therefore you have to define 
@@ -40,16 +40,16 @@
         <option name="Automatically clip polyA tails">Additionally, for cDNA-reads it is possible to automatically clip polyAtails . All clipping options may be combined.</option>
         <option name="Clipping accuracy [%]">You can control the clipping accuracy, selecting an integer value between 0 and 100 [%]. The default is set to 70%.</option>
         <option name="Type of clipping">All adapters and polyA-Signals will be soft-clipped. If you want hard-clipping, use this option.</option>
-    
+    	</tab>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="In-Port">Cell 0: Path2ReadFile1<br></br>Cell 1 (Optional): Path2ReadFile2 (if paired end mapping is used)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br>Cell 1: Path2RefFile</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path2SAMFile<br></br></outPort>
     </ports>
     
-	<views>
-        <view index="0" name=""></view>
-    </views>
+        <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+		</views>
     
 </knimeNode>

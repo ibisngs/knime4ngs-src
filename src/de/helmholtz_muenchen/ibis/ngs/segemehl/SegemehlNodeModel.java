@@ -20,12 +20,14 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
-import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 /**
@@ -51,6 +53,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_CHECKSPLITREADMAPPING = "checkSplitReadMapping";
 	public static final String CFGKEY_CHECKSBISULFITEMAPPING = "checkBisulfiteMapping";
 	public static final String CFGKEY_BISULFITEMAPPINGTYPE = "bisulfiteMappingType";
+	public static final String CFGKEY_OPTIONAL = "optional";
 
 	private final SettingsModelString m_segemehlfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_SEGEMEHLFILE,"");
 	private final SettingsModelString m_refseqfile = new SettingsModelString(SegemehlNodeModel.CFGKEY_REFSEQFILE,"");
@@ -68,10 +71,11 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_checkBisulfiteMapping = new SettingsModelBoolean(CFGKEY_CHECKSBISULFITEMAPPING, false);
 	private final SettingsModelString m_bisulfiteMappingType = new SettingsModelString(SegemehlNodeModel.CFGKEY_BISULFITEMAPPINGTYPE,"");
 	private final SettingsModelIntegerBounded m_accuracy = new SettingsModelIntegerBounded(SegemehlNodeModel.CFGKEY_ACCURACY, 90, 0, 100);
+	private final SettingsModelOptionalString m_optional = new SettingsModelOptionalString(SegemehlNodeModel.CFGKEY_OPTIONAL, "",false);
 
+	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
-	public static final String OUT_COL2 = "Path2RefFile";
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(SegemehlNodeModel.class);
 	
@@ -99,6 +103,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	addSetting(m_checkBisulfiteMapping);
     	addSetting(m_bisulfiteMappingType);
     	addSetting(m_accuracy);
+    	addSetting(m_optional);
         
         m_autoadapter3seq.setEnabled(false);
         m_adapter3seq.setEnabled(false);
@@ -117,11 +122,14 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	ArrayList<String> command = new ArrayList<String>();
-    	
+     	String path2segemehl = m_segemehlfile.getStringValue();
+     	
     	String path2reads1 = inData[0].iterator().next().getCell(0).toString();
-    	
-    	String path2segemehl = m_segemehlfile.getStringValue();
-    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+    	String path2readFile2 	= "";
+    	 
+    	if(readType.equals("paired-end")){
+    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();	
+    	}
     	  	
     	String path2refSeq = m_refseqfile.getStringValue();
     	String path2indexedRefSeq = path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx";
@@ -136,14 +144,13 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	    	}
     	}
     	String outName = basePath+outBaseName+"_map.sam";
-    	String outNameUnmatchedReads = path2refSeq.substring(0,path2refSeq.lastIndexOf("/")+1)+"unmatchedReads.f";
+    	String outNameUnmatchedReads = basePath+outBaseName+"_unmatchedReads.f";
     	int nrOfThreads = m_threads.getIntValue();
     	int accuracy = m_accuracy.getIntValue();
 
     	
     // Indexing reference sequence: segemehl -x chr1.idx -d chr1.fa
-    	String index = path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx"; 
-    	if(Files.notExists(Paths.get(index))) {
+    	if(Files.notExists(Paths.get(path2indexedRefSeq))) {
     		LOGGER.info("Indexing reference sequence.");
     		command.add(path2segemehl);
     		command.add("-x "+path2indexedRefSeq);
@@ -151,8 +158,8 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	     	/**
 	     	 * Execute
 	     	 */
-//	     	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-			super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(path2indexedRefSeq));
+	    	File lockFile = new File(path2indexedRefSeq + ".klock");
+			super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, lockFile);
 	     	command = new ArrayList<String>();	//Clear Array
 	    	
     	} else {
@@ -170,12 +177,12 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     		command.add("-P " + m_adapter5seq.getStringValue());
     	}
     	if(m_clip3adapter.getBooleanValue()) {
-    		if(m_autoadapter3seq.getBooleanValue()) {
-    			command.add("-Y");
-    		} else {
+//    		if(m_autoadapter3seq.getBooleanValue()) {
+//    			command.add("-Y");
+//    		} else {
     			command.add("-Q " + m_adapter3seq.getStringValue());
     		}
-    	}
+//    	}
     	if(m_clippolya.getBooleanValue()) {
     		command.add("-T");
     	}
@@ -212,13 +219,16 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	command.add("-o "+outName);
     	command.add("-u "+outNameUnmatchedReads);
     	
+    	if(m_optional.isActive()){
+    		command.add(m_optional.getStringValue());
+    	}
+    	
      	/**
      	 * Execute
      	 */
     	File lockFile = new File(outName + ".klock");
 	
 		// execute the command
-//		Executor.executeCommand(new String[]{joinedCommand},exec,LOGGER);
 		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, lockFile);
 
 
@@ -230,19 +240,15 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outName),
-    			(FileCell) FileCellFactory.create(path2refSeq)};
+    			(FileCell) FileCellFactory.create(outName)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
-    	
-    	pushFlowVariableString("BAMSAMINFILE",outName);
-    	
+    	   	
         return new BufferedDataTable[]{outTable};
     }
 	
@@ -261,15 +267,13 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
  	
-    	//Warning concerning files
   	
-//		if(!m_checkIndexRefSeq.getBooleanValue()) {
-//	    	String path2refSeq = m_refseqfile.getStringValue();
-//			File file = new File(path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx");    	        
-//			if(!file.exists()){
-//				throw new InvalidSettingsException("The reference sequence has not been indexed yet. Please modify the options of Segemehl to run Segemehl.");
-//			}
-//		}
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
+    	}
+    	
 		
 		if(m_refseqfile.getStringValue().length() > 1) {
 			if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
@@ -277,126 +281,13 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	    	}
 		}
     		
-		
-    	int NumCols = inSpecs[0].getNumColumns();
-    	if(NumCols == 1){
-    		
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "single-end";
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
-    	}else if(NumCols == 2){
-    		
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "paired-end";
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
-    	}else{
-    		if(inSpecs[0].getColumnSpec(0).getType().equals(FastQCell.TYPE) && inSpecs[0].getColumnSpec(1).getType().equals(FastQCell.TYPE)){
-        		//Everything fine, input is single-end
-    			readType = "paired-end";
-    			setWarningMessage("Unexpected number of input columns!");
-    			
-        	}else{
-        		throw new InvalidSettingsException("This node is incompatible with the previous node. The outport of the previous node has to fit to the inport of this node.");
-
-        	}
-    	}
     	
         return new DataTableSpec[]{new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
+    					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()})};
     }
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	/** added for HTE **/
-//    	super.saveSettingsTo(settings);
-//    	
-//    	m_segemehlfile.saveSettingsTo(settings);
-//    	m_refseqfile.saveSettingsTo(settings);
-//    	m_adapter3seq.saveSettingsTo(settings);
-//    	m_adapter5seq.saveSettingsTo(settings);
-//    	m_autoadapter3seq.saveSettingsTo(settings);
-//    	m_clip3adapter.saveSettingsTo(settings);
-//    	m_clip5adapter.saveSettingsTo(settings);
-//    	m_clippolya.saveSettingsTo(settings);
-//    	m_softhardclipping.saveSettingsTo(settings);
-//    	m_threads.saveSettingsTo(settings);
-//    	m_clippingaccuracy.saveSettingsTo(settings);
-////    	m_checkIndexRefSeq.saveSettingsTo(settings);
-//    	m_checkSplitReadMapping.saveSettingsTo(settings);
-//    	m_checkBisulfiteMapping.saveSettingsTo(settings);
-//    	m_bisulfiteMappingType.saveSettingsTo(settings);
-//    	m_accuracy.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	/** added for HTE **/
-//    	super.loadValidatedSettingsFrom(settings);
-//    	
-//    	m_segemehlfile.loadSettingsFrom(settings);
-//    	m_refseqfile.loadSettingsFrom(settings);
-//    	m_adapter3seq.loadSettingsFrom(settings);
-//    	m_adapter5seq.loadSettingsFrom(settings);
-//    	m_autoadapter3seq.loadSettingsFrom(settings);
-//    	m_clip3adapter.loadSettingsFrom(settings);
-//    	m_clip5adapter.loadSettingsFrom(settings);
-//    	m_clippolya.loadSettingsFrom(settings);
-//    	m_softhardclipping.loadSettingsFrom(settings);
-//    	m_threads.loadSettingsFrom(settings);
-//    	m_clippingaccuracy.loadSettingsFrom(settings);
-////    	m_checkIndexRefSeq.loadSettingsFrom(settings);
-//    	m_checkSplitReadMapping.loadSettingsFrom(settings);
-//    	m_checkBisulfiteMapping.loadSettingsFrom(settings);
-//    	m_bisulfiteMappingType.loadSettingsFrom(settings);
-//    	m_accuracy.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	/** added for HTE **/
-//    	super.validateSettings(settings);
-//    	
-//    	m_segemehlfile.validateSettings(settings);
-//    	m_refseqfile.validateSettings(settings);
-//    	m_adapter3seq.validateSettings(settings);
-//    	m_adapter5seq.validateSettings(settings);
-//    	m_autoadapter3seq.validateSettings(settings);
-//    	m_clip3adapter.validateSettings(settings);
-//    	m_clip5adapter.validateSettings(settings);
-//    	m_clippolya.validateSettings(settings);
-//    	m_softhardclipping.validateSettings(settings);
-//    	m_threads.validateSettings(settings);
-//    	m_clippingaccuracy.validateSettings(settings);
-////    	m_checkIndexRefSeq.validateSettings(settings);
-//    	m_checkSplitReadMapping.validateSettings(settings);
-//    	m_checkBisulfiteMapping.validateSettings(settings);
-//    	m_bisulfiteMappingType.validateSettings(settings);
-//    	m_accuracy.validateSettings(settings);
-//    }
-    
+
     /**
      * {@inheritDoc}
      */
