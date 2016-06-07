@@ -31,21 +31,16 @@ public class FilterLowExpressedNodeDialog extends DefaultNodeSettingsPane {
     protected FilterLowExpressedNodeDialog() {
     	super();
     	// create the components
-    	DialogComponentNumber keepReads = new DialogComponentNumber(SET_KEEP_READS, "minimum read number", 1);
-    	DialogComponentNumber keepFraction = new DialogComponentNumber(SET_KEEP_FRACTION, "fraction of samples", 0.01);
-    	DialogComponentBoolean bothSep = new DialogComponentBoolean(SET_BOTH_SEP, "test for both conditions separately");
+    	DialogComponentNumber keepReads = new DialogComponentNumber(SET_KEEP_READS, "Minimum read number", 1);
+    	DialogComponentNumber keepFraction = new DialogComponentNumber(SET_KEEP_FRACTION, "Fraction of samples", 0.01);
+    	DialogComponentBoolean bothSep = new DialogComponentBoolean(SET_BOTH_SEP, "Filter both conditions separately");
 
-		@SuppressWarnings("deprecation")
-		DialogComponentButtonGroup mode = new DialogComponentButtonGroup(SET_MODE, "Filtering Mode", false, FilterLowExpressedNodeModel.DEFAULT_MODE, FilterLowExpressedNodeModel.DEFAULT_MODE, "Minimum cutoff per sample");
+		DialogComponentButtonGroup mode = new DialogComponentButtonGroup(SET_MODE, false, "Filtering Mode", FilterLowExpressedNodeModel.DEFAULT_MODE, "Per sample");
 
     	this.addDialogComponent(mode);
     	this.addDialogComponent(keepReads);
     	this.addDialogComponent(keepFraction);
     	this.addDialogComponent(bothSep);
-    	
-    	// disable for standard mode
-    	SET_KEEP_FRACTION.setEnabled(false);
-		SET_BOTH_SEP.setEnabled(false);
     	
 		// check for changes
     	this.SET_MODE.addChangeListener(new ChangeListener() {
@@ -53,11 +48,9 @@ public class FilterLowExpressedNodeDialog extends DefaultNodeSettingsPane {
 			public void stateChanged(ChangeEvent arg0) {
 				if(SET_MODE.getStringValue().equals(FilterLowExpressedNodeModel.DEFAULT_MODE)) {
 					SET_KEEP_FRACTION.setEnabled(false);
-					SET_BOTH_SEP.setEnabled(false);
 				}
 				else {
 					SET_KEEP_FRACTION.setEnabled(true);
-					SET_BOTH_SEP.setEnabled(true);
 				}
 			}
         });

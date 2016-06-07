@@ -53,7 +53,12 @@ public class ExecuteThread implements Callable<Boolean> {
 		this.stdInFile=stdInFile;
 		this.stdOutStr=stdOutStr;
 		this.stdErrStr=stdErrStr;
-		this.HTEOutStr=HTEOUT;
+
+		if(HTEOUT == null) {
+			this.HTEOutStr = new StringBuffer();
+		} else {
+			this.HTEOutStr = HTEOUT;
+		}
 
 		this.LOGGER = logger;
 		

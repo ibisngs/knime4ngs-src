@@ -32,7 +32,7 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
     protected static final int DEFAULT_KEEP_READS = 10;
     protected static final double DEFAULT_KEEP_FRATION = 0.5;
     protected static final boolean DEFAULT_BOTH_SEP = true;
-    public static final String DEFAULT_MODE = "Sum cutoff of all samples";
+    public static final String DEFAULT_MODE = "Average over all samples";
     
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelInteger SET_KEEP_READS	= new SettingsModelInteger(CFGKEY_KEEP_READS, DEFAULT_KEEP_READS);
@@ -54,7 +54,10 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
 		this.addSetting(SET_MODE);
 		this.addSetting(SET_KEEP_READS);
 		this.addSetting(SET_KEEP_FRACTION);
-		this.addSetting(SET_BOTH_SEP);;
+		this.addSetting(SET_BOTH_SEP);
+		
+    	// disable for standard mode
+		SET_KEEP_FRACTION.setEnabled(false);
 	}
 	
     /**

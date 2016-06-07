@@ -50,16 +50,17 @@
     
     <ports>
         <inPort index="0" name="In-Port">
-        	Cell 0: One or more SAM or BAM files
+        	Cell 0: One or more SAM or BAM files.
         </inPort>
         <outPort index="0" name="Out-Port">
-        	Cell 0: Path to output file<br />
-        	Cell 1: Command which was used to call the binary
+        	Cell 0: Path to output file.
         </outPort>
     </ports> 
     
-        <views>
-        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
-</views>
+	<views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>
     
 </knimeNode>

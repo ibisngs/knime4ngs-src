@@ -85,7 +85,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
     	
-    	exec.setProgress(0.01); // tell the user that we started with the work
+//    	exec.setProgress(0.01); // tell the user that we started with the work
     	
     	// get binary path
     	String getBinaryPath = getBinaryPath();   	
@@ -100,7 +100,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
     	
     	runHTExecute(command,exec,lockFile);
 		
-		exec.setProgress(1.00); // we are done
+//		exec.setProgress(1.00); // we are done
         return getOutputData(exec, ExecuteThread.getCommand(command), inData);
     }
 	

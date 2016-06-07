@@ -12,13 +12,11 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.util.CheckUtils;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
@@ -27,6 +25,8 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 
 /**
  * This is the model implementation for the wrapper of featureCounts.
@@ -40,7 +40,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
      
 	// name of the output variables
 	public static final String OUT_COL1 = "OutputFile";
-	public static final String OUT_COL2 = "CallCommand";
+//	public static final String OUT_COL2 = "CallCommand";
 
     // keys for SettingsModels
     protected static final String CFGKEY_OUTPUT_FOLDER 				= "OutputFolder";
@@ -134,10 +134,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     		throw new InvalidSettingsException("Invalid input. No BAMCell in first column of input table. Node requires the FileLoader as predecessor.");
     	}
     	
-    	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
-		if(outfolder_warning!=null) {
-			setWarningMessage(outfolder_warning);
-		}
+//    	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
+//		if(outfolder_warning!=null) {
+//			setWarningMessage(outfolder_warning);
+//		}
     	
         validateAnnotationFile(SET_ANNOTATION_FILE.getStringValue());
 
@@ -188,7 +188,14 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     		infile = it.next().getCell(0).toString();
     		inputArgument.add(infile);
     		if(first){
-				outfile = SET_OUTPUT_FOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(infile).getName();
+    			outfile = SET_OUTPUT_FOLDER.getStringValue();
+    			if(CompatibilityChecker.inputFileNotOk(SET_OUTPUT_FOLDER.getStringValue(),false)) {
+    				outfile = new File(infile).getParent();
+    			}
+    			if(!outfile.endsWith(File.separator)) {
+    				outfile += File.separator;
+    			}
+				outfile += new File(infile).getName();
 				outfile = IO.replaceFileExtension(outfile, ".featureCounts");
 				first=false;
 			}
@@ -210,8 +217,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private DataTableSpec getDataOutSpec1() {
     	return new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec()});
+    					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()});
     }
 	
 	
@@ -219,9 +225,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 		
-    	DataCell[] c = new DataCell[]{
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true)),
-    			new StringCell(command)};
+    	DataCell[] c = new DataCell[]{FileCellFactory.create(outfile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

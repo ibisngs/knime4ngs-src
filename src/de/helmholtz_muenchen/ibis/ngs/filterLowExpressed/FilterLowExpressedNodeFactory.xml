@@ -7,28 +7,45 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>The FilterLowExpressed node can be used to filter low expressed genes before differential expression analysis.<br /> 
-        It takes as input a count table and an annotation file.</intro>
-    <tab name="Options">
-    	<option name="Filtering Mode"> Specify whether to use the sum cut off of all samples or the minimum cut off per sample.</option>    
-        <option name="Minimum read number">Set the minimum number of reads per sample. (default: 10)</option>
-        <option name="Fraction of samples">Set the fraction of samples which must have the minimum read number. (default: 0.5)</option>
-        <option name="Test for both conditions separately">Choose whether the conditions should be tested and be fulfilled in both cases separately. (default: true)</option>
+        <intro>
+        	The FilterLowExpressed node can be used to filter low expressed genes before differential expression analysis.<br /> 
+        	It takes as input a count table and an annotation file.
+        </intro>
+    
+    	<tab name="Options">
+    		<option name="Filtering Mode">
+    			Specify whether to apply the read cutoff to the average over all samples or individually to each sample.
+    		</option>    
+        	<option name="Minimum read number">
+        		Set the minimum number of reads per sample. (default: 10)
+        	</option>
+        	<option name="Fraction of samples">
+        		Set the fraction of samples which must have the minimum read number. (default: 0.5)
+        	</option>
+        	<option name="Filter both conditions separately">
+        		Choose whether the filter criteria should be met in both conditions (e.g. case and control group). (default: true)
+        	</option>
         </tab>
     </fullDescription>
+    
     <ports>
-        <inPort index="0" name="count table">Row names: IDs of features.
-        <br />Cell 1...n: Count of features in the samples.
-        <br />The table must contain a header line with the names of the samples
+        <inPort index="0" name="Count table">
+        	Row names: IDs of features.
+        	<br />Column headers are the names of the samples.
+        	<br />Cell 0...n: Count of features in the samples.
         </inPort>
-        <inPort index="1" name="condition table">Row names: Names of the samples as they are named in the count table
-        <br />Cell 1: Condition (should only contain two conditions and the column should be named 'condition')
+        <inPort index="1" name="Condition table">
+        	Row names: Names of the samples as they are named in the count table.
+        	<br />The column header should be named 'condition'.
+        	<br />Cell 0: Condition (should only contain two conditions).
         </inPort>
-        <outPort index="0" name="count table">
-        The output table has the same format as the input count table, but some genes were filtered out based on the settings.
+        <outPort index="0" name="Filtered count table">
+        	The output table has the same format as the input count table, but some genes were filtered out based on the settings.
         </outPort>
     </ports>    
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">
+        	STDOUT and STDERR of the underlying R script.
+        </view>
     </views>
 </knimeNode>

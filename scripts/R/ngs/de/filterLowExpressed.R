@@ -1,7 +1,11 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
+.libPaths()
+if (!require(argparse)) {
+	install.packages("argparse", repos="http://cran.rstudio.com")
+	library("argparse")
+}
 parser <- ArgumentParser(prog="filterLowExpressed.R", description="Can be used to remove very low expressed genes based on their counts.")
 
 ## GLOBALS 
@@ -41,6 +45,7 @@ pData <- as.data.frame(pData[colnames(exprs), ])
 rownames(pData) <- colnames(exprs)
 colnames(pData) <- c("condition")
 
+
 ########################################################################################################################################
 ## PERFORM DE TEST
 ########################################################################################################################################
@@ -60,7 +65,13 @@ if(args$filterMode == 0) {
 	}
 }
 if(args$filterMode == 1) {
-		keep <- rowSums(exprs[, C1]) >= args$keepReads | rowSums(exprs[, C2]) >= args$keepReads
+	if(args$bothConditionsSeperate == 1) {
+		keep <- rowSums(exprs[, C1])>=args$keepReads*length(C1) & rowSums(exprs[, C2])>=args$keepReads*length(C2)
+	}
+	if(args$bothConditionsSeperate != 1) {
+		keep <- rowSums(exprs[, rownames(pData)])>=args$keepReads*nrow(pData)
+		#keep <- rowSums(exprs[, C1]) >= args$keepReads | rowSums(exprs[, C2]) >= args$keepReads
+	}
 }
 
 # strip results 
