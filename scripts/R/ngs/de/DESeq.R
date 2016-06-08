@@ -1,7 +1,10 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
+if (!require(argparse)) {
+	install.packages("argparse", repos="http://cran.rstudio.com")
+	library("argparse")
+}
 parser <- ArgumentParser(prog="DESeq.R", description="Differential gene expression test with DESeq")
 
 ## GLOBALS 
@@ -24,7 +27,7 @@ args <- parser$parse_args(commandArgs(trailingOnly=TRUE))
 ########################################################################################################################################
 source(args$file.glob)
 loadLib("DESeq", bioC=TRUE)
-loadLib("edgeR", bioC=TRUE)
+#loadLib("edgeR", bioC=TRUE)
 
 ########################################################################################################################################
 ## LOAD COUNTS
@@ -52,7 +55,7 @@ cds <- estimateDispersions(cds, method=args$method, sharingMode=args$sharingMode
 DE <- nbinomTest(cds, unique(condition)[1], unique(condition)[2]) 
 
 # ensure that it is sorted by adjusted p.value
-DE <- DE[order(DE$padj), ]
+DE <- DE[order(DE$pval), ]
 
 # filtering
 all <- DE

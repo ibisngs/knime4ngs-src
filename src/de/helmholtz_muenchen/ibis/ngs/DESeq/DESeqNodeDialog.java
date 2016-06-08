@@ -20,8 +20,8 @@ public class DESeqNodeDialog extends DefaultNodeSettingsPane {
     protected DESeqNodeDialog() {
     	super();
     	// create the components
-    	DialogComponentStringSelection method = new DialogComponentStringSelection(SET_METHOD, "empirical dispersion calculation", DESeqNodeModel.METHODS, false);
-    	DialogComponentStringSelection shearing = new DialogComponentStringSelection(SET_SHEARING, "sharing mode", DESeqNodeModel.SHEARING, false);
+    	DialogComponentStringSelection method = new DialogComponentStringSelection(SET_METHOD, "Empirical dispersion calculation", DESeqNodeModel.METHODS, false);
+    	DialogComponentStringSelection shearing = new DialogComponentStringSelection(SET_SHEARING, "Sharing mode", DESeqNodeModel.SHEARING, false);
     	
     	this.addDialogComponent(method);
     	this.addDialogComponent(shearing);

@@ -8,11 +8,11 @@
     
     <fullDescription>
         <intro>
-        This node uses the DESeq package of R to test for differential expression based on a model using the negative binomial distribution.<br />
-        DESeq takes as input a count table and an annotation file.
+        	This node uses the <a href="http://bioconductor.org/packages/release/bioc/html/DESeq.html">DESeq package</a> of R to test for differential expression based on a model using the negative binomial distribution.<br />
+        	DESeq takes as input a count table and an annotation file.
         </intro>
         
-        <option name="Empirical Dispersion Calculation"> This method obtains dispersion estimates for a count data set. For each condition (or collectively for all conditions) it first computes for each gene an empirical dispersion value (a.k.a. a raw SCV value), then fits by regression a dispersion-mean relationship and finally chooses for each gene a dispersion parameter that will be used in subsequent tests from the empirical and the fitted value according to the 'sharingMode' argument. 
+        <option name="Empirical dispersion calculation"> This method obtains dispersion estimates for a count data set. For each condition (or collectively for all conditions) it first computes for each gene an empirical dispersion value (a.k.a. a raw SCV value), then fits by regression a dispersion-mean relationship and finally chooses for each gene a dispersion parameter that will be used in subsequent tests from the empirical and the fitted value according to the 'sharingMode' argument. 
         <br />
         There are three ways how to empirical dispersion can be computed:
 			<ul>
@@ -31,7 +31,7 @@
 	        </ul>
         	(default: pooled)
         </option>
-        <option name="Sharing Mode">After the empirical dispersion values have been computed for each gene, a dispersion-mean relationship is fitted for sharing information across genes in oder to reduce variability of the dispersion estimates. After that, for each gene, we have two values: the empirical values (derived only from this gene's data), and the fitted value (i.e., the dispersion value typical for genes with an average expression similar to those of this gene).
+        <option name="Sharing mode">After the empirical dispersion values have been computed for each gene, a dispersion-mean relationship is fitted for sharing information across genes in oder to reduce variability of the dispersion estimates. After that, for each gene, we have two values: the empirical values (derived only from this gene's data), and the fitted value (i.e., the dispersion value typical for genes with an average expression similar to those of this gene).
         The sharingModel argument specifies which of these two values will be written to the featureData's disp_columns.
 	        <ul>
 	        <li>
@@ -48,24 +48,29 @@
         </option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Row names: IDs of features.
-        <br />Cell 1...n: Count of features in the samples.
-        <br />The table must contain a header line with the names of the samples.
+        <inPort index="0" name="Count table">
+        	Row names: IDs of features.
+        	<br />Column headers are the names of the samples.
+        	<br />Cell 0...n: Count of features in the samples.
         </inPort>
-        <inPort index="1" name="condition table">Row names: Names of the samples as they are named in the count table.
-        <br />Cell 1: Condition (should only contain two conditions)
+        <inPort index="1" name="Condition table">
+        	Row names: Names of the samples as they are named in the count table.
+        	<br />The column header should be named 'condition'.
+        	<br />Cell 0: Condition (should only contain two conditions).
         </inPort>
         <outPort index="0" name="DE expressed genes">Cell 0: ID of feature
-        <br />Cell 1: Average log2 CPM expression
+        <br />Cell 1: Average log2 CPM (counts per million) expression
         <br />Cell 2: Log2 CPM A expression
         <br />Cell 3: Log2 CPM B expression
-        <br />Cell 4: Foldchange 
-        <br />Cell 5: Log2 foldchange 
-        <br />Cell 6: P value
-        <br />Cell 7: Adjusted p value (corrected with BH)
+        <br />Cell 4: Fold change 
+        <br />Cell 5: Log2 fold change 
+        <br />Cell 6: P-value
+        <br />Cell 7: Adjusted p-value (corrected with BH)
         </outPort>
     </ports>    
     <views>
-       <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">
+        	STDOUT and STDERR of the underlying R script.
+        </view>
     </views>
 </knimeNode>

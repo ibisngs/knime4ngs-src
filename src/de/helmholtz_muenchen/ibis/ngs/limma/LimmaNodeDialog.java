@@ -21,9 +21,9 @@ public class LimmaNodeDialog extends DefaultNodeSettingsPane {
     protected LimmaNodeDialog() {
     	super();
     	// create the components
-    	DialogComponentStringSelection cor = new DialogComponentStringSelection(SET_CORRECTION, "p.value correction method", LimmaNodeModel.CORRECTION_METHODS, false);
-    	DialogComponentStringSelection normFac = new DialogComponentStringSelection(SET_NORM_FACTOR, "method for calculation of normalization factors", LimmaNodeModel.NORM_FACTORS, false);
-    	DialogComponentStringSelection normCPM = new DialogComponentStringSelection(SET_METHOD_CPM, "method for CPM normalization", LimmaNodeModel.NORM_CPM, false);
+    	DialogComponentStringSelection cor = new DialogComponentStringSelection(SET_CORRECTION, "P-value correction method", LimmaNodeModel.CORRECTION_METHODS, false);
+    	DialogComponentStringSelection normFac = new DialogComponentStringSelection(SET_NORM_FACTOR, "Method for calculation of normalization factors", LimmaNodeModel.NORM_FACTORS, false);
+    	DialogComponentStringSelection normCPM = new DialogComponentStringSelection(SET_METHOD_CPM, "Method for CPM normalization", LimmaNodeModel.NORM_CPM, false);
     	
     	this.addDialogComponent(normFac);
     	this.addDialogComponent(normCPM);

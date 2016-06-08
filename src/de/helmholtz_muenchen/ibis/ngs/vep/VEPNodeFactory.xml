@@ -63,7 +63,7 @@
             	The file is required for the flags --hgvs or --check_ref when the cache is used.	
             	Moreover, the plugin LOFTEE won't work properly if no FastA file is given!
             	The FastA can be downladed using the VEP installation script.
-            	In general, it is located in the cache directory.
+            	In general, it is located in the cache directory (which is shown as default).
             </option>
         </tab>
         

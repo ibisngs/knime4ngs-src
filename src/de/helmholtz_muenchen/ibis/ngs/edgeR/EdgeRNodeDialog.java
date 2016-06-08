@@ -20,11 +20,10 @@ public class EdgeRNodeDialog extends DefaultNodeSettingsPane {
     protected EdgeRNodeDialog() {
     	super();
     	// create the components
-    	DialogComponentStringSelection cor = new DialogComponentStringSelection(SET_CORRECTION, "p.value correction method", EdgeRNodeModel.CORRECTION_METHODS, false);
-    	DialogComponentStringSelection normFac = new DialogComponentStringSelection(SET_NORM_FACTOR, "method for calculation of normalization factors", EdgeRNodeModel.NORM_FACTORS, false);
+    	DialogComponentStringSelection cor = new DialogComponentStringSelection(SET_CORRECTION, "P-value correction method", EdgeRNodeModel.CORRECTION_METHODS, false);
+    	DialogComponentStringSelection normFac = new DialogComponentStringSelection(SET_NORM_FACTOR, "Method for calculation of normalization factors", EdgeRNodeModel.NORM_FACTORS, false);
     	
     	this.addDialogComponent(normFac);
     	this.addDialogComponent(cor);
     }
 }
-

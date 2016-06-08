@@ -11,7 +11,6 @@ import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
@@ -35,10 +34,6 @@ public class DESeqNodeModel extends RNodeModel {
 	// definition of SettingsModel (all prefixed with SET)
     private final SettingsModelString SET_METHOD	= new SettingsModelString(CFGKEY_METHOD, DEFAULT_METHOD);
     private final SettingsModelString SET_SHEARING	= new SettingsModelString(CFGKEY_SHEARING, DEFAULT_SHEARING);
-
-    // the logger instance
-	@SuppressWarnings("unused")
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(DESeqNodeModel.class);
 	
 	private static final String SCRIPT_PATH = "ngs" + File.separatorChar + "de" + File.separatorChar + "DESeq.R";
 	

@@ -1,7 +1,10 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require(argparse)
+if (!require(argparse)) {
+	install.packages("argparse", repos="http://cran.rstudio.com")
+	library("argparse")
+}
 parser <- ArgumentParser(prog="limma.R", description="Differential gene expression test with limma")
 
 ## GLOBALS 

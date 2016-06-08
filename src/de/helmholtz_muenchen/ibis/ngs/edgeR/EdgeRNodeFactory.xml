@@ -8,9 +8,8 @@
     
     <fullDescription>
         <intro>
-        This node uses the edgeR package of R for differential expression analysis of RNA-seq expression profiles with biological replication.
+        This node uses the <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html">edgeR package</a> of R for differential expression analysis of RNA-seq expression profiles with biological replication.
         EdgeR takes as input an annotation file and a count table.<br></br>
-        Source: <a href="https://bioconductor.org/packages/release/bioc/html/edgeR.html/">https://bioconductor.org/packages/release/bioc/html/edgeR.html</a> 
         </intro>
         
         <option name="Method for calculation of normalization factors">
@@ -35,7 +34,7 @@
  			</ul>       
         	(default: TMM)
         </option>
-        <option name="P value correction method"> Choose which correction method should be used for adjusting p values for multiple comparisons. 
+        <option name="P-value correction method"> Choose which correction method should be used for adjusting p values for multiple comparisons. 
 	       	<ul>
 	       		<li>
 	       			<b>bonferroni</b> - in the Bonferroni correction the p values are multiplied by the number of comparisons. This is a more conservative correction compared to the other adjustment methods.
@@ -72,21 +71,26 @@
         </option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Row names: IDs of features.
-        <br />Cell 1...n: Count of features in the samples.
-        <br />The table must contain a header line with the names of the samples.
+        <inPort index="0" name="Count table">
+        	Row names: IDs of features.
+        	<br />Column headers are the names of the samples.
+        	<br />Cell 0...n: Count of features in the samples.
         </inPort>
-        <inPort index="1" name="condition table">Row names: Names of the samples as they are named in the count table.
-        <br />Cell 1: condition (should only contain two conditions)
+        <inPort index="1" name="Condition table">
+        	Row names: Names of the samples as they are named in the count table.
+        	<br />The column header should be named 'condition'.
+        	<br />Cell 0: Condition (should only contain two conditions).
         </inPort>
         <outPort index="0" name="DE expressed genes">Cell 0: ID of feature.
-        <br />Cell 1: Log2 foldchange 
-        <br />Cell 2: Average log2 CPM expression
-        <br />Cell 3: P value
-        <br />Cell 4: Adjusted p value
+        <br />Cell 1: Log2 fold change 
+        <br />Cell 2: Average log2 CPM (counts per million) expression
+        <br />Cell 3: P-value
+        <br />Cell 4: Adjusted p-value
         </outPort>
     </ports>    
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">
+        	STDOUT and STDERR of the underlying R script.
+        </view>
     </views>
 </knimeNode>

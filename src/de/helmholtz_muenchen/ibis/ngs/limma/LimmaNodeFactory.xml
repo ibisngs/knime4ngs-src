@@ -7,30 +7,44 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>This node can find differential expressed genes using the limma package. It takes as input a count table and a annotation file.</intro>
+        <intro>
+        	This node can find differential expressed genes using the <a href="https://bioconductor.org/packages/release/bioc/html/limma.html">limma package</a> of R.
+        	It takes as input a count table and a annotation file.
+        </intro>
         
-        <option name="method for calculation of normalization factors">method which is used for calculation of the normalization factors against different library sizes (default: TMM)</option>
-        <option name="method for CPM normalization">method which is used for CPM normalization (default: quantile)</option>
-        <option name="p.value correction method">method which is used for p-value correction against multiple testing (default: BH)</option>
+        <option name="Method for calculation of normalization factors">
+        	Method which is used for calculation of the normalization factors against different library sizes (default: TMM).
+        </option>
+        <option name="Method for CPM normalization">
+        	Method which is used for CPM (counts per million) normalization (default: quantile).
+        </option>
+        <option name="P-value correction method">
+        	Method which is used for p-value correction against multiple testing (default: BH).
+        </option>
     </fullDescription>
     <ports>
-        <inPort index="0" name="count table">Row names: ID of feature
-        <br />Cell 1...n: count of feature in sample
-        <br />Must contain a header line with the names of the samples
+        <inPort index="0" name="Count table">
+        	Row names: IDs of features.
+        	<br />Column headers are the names of the samples.
+        	<br />Cell 0...n: Count of features in the samples.
         </inPort>
-        <inPort index="1" name="condition table">Row names: Name of the sample like it is named in the count table
-        <br />Cell 1: condition (should only contain two conditions)
+        <inPort index="1" name="Condition table">
+        	Row names: Names of the samples as they are named in the count table.
+        	<br />The column header should be named 'condition'.
+        	<br />Cell 0: Condition (should only contain two conditions).
         </inPort>
         <outPort index="0" name="DE expressed genes">Cell 0: ID of feature
-        <br />Cell 1: log2 foldchange 
-        <br />Cell 2: average log2 CPM expression
+        <br />Cell 1: Log2 fold change 
+        <br />Cell 2: Average log2 CPM expression
         <br />Cell 3: B-statistic
         <br />Cell 4: t-statistic
-        <br />Cell 5: P-Value
-        <br />Cell 6: adjusted P-Value
+        <br />Cell 5: P-value
+        <br />Cell 6: Adjusted p-value
         </outPort>
     </ports>    
     <views>
-        <view index="0" name="STDOUT / STDERR">STDOUT / STDERR</view>
+        <view index="0" name="STDOUT / STDERR">
+        	STDOUT and STDERR of the underlying R script.
+        </view>
     </views>
 </knimeNode>

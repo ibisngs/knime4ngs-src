@@ -1,7 +1,10 @@
 ########################################################################################################################################
 ## PARSE ARGS
 ########################################################################################################################################
-require("argparse")
+if (!require(argparse)) {
+	install.packages("argparse", repos="http://cran.rstudio.com")
+	library("argparse")
+}
 parser <- ArgumentParser(prog="edgeR.R", description="Differential gene expression test with edgeR")
 
 ## GLOBALS 
@@ -55,7 +58,7 @@ et <- exactTest(y)
 DE <- et$table
 DE$adj.PValue <- p.adjust(DE$PValue, method = args$correctPvalue)
 # ensure that it is sorted by adjusted p.value
-DE <- DE[order(DE$adj.PValue), ]
+DE <- DE[order(DE$PValue), ]
 
 # filtering
 all <- DE
