@@ -4,11 +4,13 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
+import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
@@ -46,7 +48,8 @@ public class PicardToolsNodeDialog extends HTExecutorNodeDialog {
 		//general options
 	    final SettingsModelString picard = new SettingsModelString(PicardToolsNodeModel.CFGKEY_PICARD, "");
 	    final SettingsModelIntegerBounded picard_mem = new SettingsModelIntegerBounded(PicardToolsNodeModel.CFGKEY_PICARD_MEM, 8, 1, Integer.MAX_VALUE);
-
+	    final SettingsModelOptionalString picard_tmp = new SettingsModelOptionalString(PicardToolsNodeModel.CFGKEY_PICARD_TMP, "",false);
+	    
 	    final SettingsModelString refgenome = new SettingsModelString(PicardToolsNodeModel.CFGKEY_REFGENOME, "");
 		final SettingsModelString ptool = new SettingsModelString(PicardToolsNodeModel.CFGKEY_PTOOL, "");	//tool selection
 	    final SettingsModelString bsformat = new SettingsModelString(PicardToolsNodeModel.CFGKEY_BSFORMAT, PicardToolsNodeModel.DEF_BSFORMAT);	// output format
@@ -82,6 +85,7 @@ public class PicardToolsNodeDialog extends HTExecutorNodeDialog {
         createNewGroup("PicardTool selection");
         addDialogComponent(new DialogComponentStringSelection(ptool, "Tool", PicardToolsNodeModel.TOOLS_AVAILABLE));
         addDialogComponent(new DialogComponentNumber(picard_mem, "Picard Memory (GB)", 1));
+        addDialogComponent(new DialogComponentOptionalString(picard_tmp, "Specify tmp directory"));
         //output format
         createNewGroup("Output");
         addDialogComponent(new DialogComponentButtonGroup(bsformat, "Choose output format", true, new String[]{"BAM (required for variant calling)", "SAM"}, new String[]{"bam", "sam"}));

@@ -16,7 +16,7 @@
         <option name="Select utility">Choose which of the SAMtools utilities you want to use:
         <ul><li>cat: Concatenate BAMs. The sequence dictionary of each input BAM must be identical, although this command does not check this. </li>
         <li>faidx: Index reference sequence in the FASTA format</li>
-        <li>fillmd: Generate the MD tag</li>
+        <li>calmd: Generate the MD tag</li>
         <li>fixmate: Fill in mate coordinates, ISIZE and mate related flags from a name-sorted alignment. </li>
         <li>flagstat: Print simple statistics of BAM file</li>
         <li>idxstats: Retrieve and print stats in the index file. The output is TAB delimited with each line consisting of reference sequence name, sequence length, # mapped reads and # unmapped reads.</li>
@@ -27,63 +27,22 @@
 			mapping quality. In the paired-end mode, this command ONLY works with FR orientation and requires ISIZE is correctly set. It does not work for unpaired reads</li>
         	 </ul>
          </option>
-         <option name="Input (sorted) BAM file"> Set the path to the (sorted) input BAM file (only if no inport is available)</option>
-        <tab name="cat">
-        <option name="Header SAM file"> Set the path to a SAM file whose header should be used </option>
-        <option name="Second input BAM file"> Set the path to a second BAM file to be concatenated (first file comes from inport)</option>
-        </tab>
         <tab name="Preference page">
         <option name="HTE"> Set a threshold for repeated execution.Only used if HTE is enabled in the preference page. </option>
         <option name="Path to samtools"> Set the path to the SAMtools executable (only if no inport is available)</option>
         <option name="Path to reference sequence">Set the path to the reference sequence (only if no inport is available)</option>
  		</tab>
-        
-        
-       
-       <!-- <option name="############### fillmd ###############"></option>  
-        <option name="Change identical bases to '='">Convert a read base to = if it is identical to the aligned reference base.</option>  
-        <option name="Output as BAM file">Specify as outputfile should be written as (un)compressed BAM file</option> 
-        <option name="Modify quality string">When used jointly with the following option, this option overwrites the original base quality.</option>
-        <option name="Compute the BQ tag or cap base quality by BAQ, depending on if the option above is selected. If upper option is selected,
-        this option caps the base quality by BAQ. "></option> 
-        <option name="Extended BAQ calculation">This option trades specificity for sensitivity, though the effect is minor. </option> 
- 
-        <option name="############### merge ###############"></option>  
- 		<option name="Second input BAM file"> Path to the BAM file which should be merged with the BAM file from the inport </option>
- 		<option name="Use lines of SAM file as header"> Use the lines of the SAM file as ‘@’ headers to be copied to out.bam, replacing any header lines that would otherwise be copied from in1.bam. (any alignment records it may contain are ignored.)  </option>
- 		<option name="Merge files in specified region"> Merge files in the specified region indicated by the String </option>
- 		<option name="Use zlib lvl 1 for output compression">  </option>
- 		<option name="Overwrite outputfile if present">  </option>
- 		<option name="Input alignments are sorted by read names">The input alignments are sorted by read names rather than by chromosomal coordinates</option>
-        <option name="Attach RG tag to each alignment"> Attach an RG tag to each alignment. The tag value is inferred from file names.  </option>
-        <option name="Uncompressed BAM output">  </option>
-        
-        <option name="############### phase ###############"></option>
-        <option name="Prefix of BAM output">Prefix of BAM output. When this option is in use, phase-0 reads will be saved in file prefix.0.bam and 
-        phase-1 reads in prefix.1.bam. Phase unknown reads will be randomly allocated to one of the two files.
-        Chimeric reads with switch errors will be saved in prefix.chimeric.bam</option>
-        <option name="block length"> Maximum length for local phasing. </option>
-        <option name="Min. het phred-LOD"> Minimum Phred-scaled LOD to call a heterozygote </option>
-        <option name="Min. base quality in het calling"> Minimum base quality to be used in het calling </option>
-        <option name="Do not try to fix chimeric reads"> </option>
-        <option name="Drop reads with ambiguous phase"> </option>
-        
-        <option name="############### reheader ###############"></option>
-        <option name="Header SAM file">SAM file of which to use the header</option>
-        
-        <option name="############### rmdup ###############"></option>
-        <option name="remove duplicate for single-end reads">Remove duplicate for single-end reads. By default, the command works for paired-end reads only. </option>
-        <option name="treat paired-end reads as single-end reads"></option> -->
-                
+                      
         
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">**Optional Inport**<br></br>Cell 0: Path to SAMtools executable file<br></br>Cell 1: Path to input BAM file (SAM if needed for fillmd [currently not working])<br></br></inPort>
-   		
+        <inPort index="0" name="In-Port name">Optional Inport<br></br>Cell 0: Path to SAMtools executable file<br></br>Cell 1: Path to input BAM/SAM file<br></br></inPort>
+   		<outPort index="0" name="Out-Port">Cell 0: Path to Outfile<br></br></outPort>
     </ports>
-    <views>
-    <view index="0" name=""></view>
-    </views>
+
+   <views>
+   <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+   </views>
 
 </knimeNode>

@@ -15,6 +15,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -49,6 +50,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     private final SettingsModelString m_picard = new SettingsModelString(CFGKEY_PICARD, "");
     static final String CFGKEY_PICARD_MEM="picard_mem";
     private final SettingsModelIntegerBounded m_picard_mem = new SettingsModelIntegerBounded(CFGKEY_PICARD_MEM, 8, 1, Integer.MAX_VALUE);
+    static final String CFGKEY_PICARD_TMP="picard_tmp";
+    private final SettingsModelOptionalString m_picard_tmp = new SettingsModelOptionalString(CFGKEY_PICARD_TMP, "",false);
     static final String CFGKEY_REFGENOME="refgenome";
     private final SettingsModelString m_refgenome = new SettingsModelString(CFGKEY_REFGENOME, "");
     
@@ -148,6 +151,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     	//general options
         addSetting(m_picard);
         addSetting(m_picard_mem);
+        addSetting(m_picard_tmp);
         addSetting(m_refgenome);
         addSetting(m_ptool);
         addSetting(m_bsformat);
@@ -435,10 +439,17 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		args[7]="MINIMUM_PCT="+pct;
 		args[8]="METRIC_ACCUMULATION_LEVEL="+acc;
 		args[9]="ASSUME_SORTED="+sorted;
-		args[10]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		if(m_picard_tmp.isActive()){
+			args[10]="TMP_DIR="+m_picard_tmp.getStringValue();
+		}else{
+			args[10]="";
+		}
+		
+		
 		
 		File lockFile = new File(outputm+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9]+" "+args[10];
 		super.executeCommand(new String[] { command }, exec, lockFile, outputm+".stdOut",outputm+".stdErr");
 		
 		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
@@ -493,10 +504,15 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		args[6]="RGSM="+sample;
 		args[7]="RGPU="+unit;
 		args[8]="RGPL="+platform;
-		args[9]="TMP_DIR="+Paths.get(input).getParent().toString();
+		
+		if(m_picard_tmp.isActive()){
+			args[9]="TMP_DIR="+m_picard_tmp.getStringValue();
+		}else{
+			args[9]="";
+		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
 
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
 
@@ -528,10 +544,14 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		args[4]="CREATE_INDEX="+index;
 		args[5]="REMOVE_DUPLICATES="+rmdupl;
 		args[6]="ASSUME_SORTED="+ass_sort;
-		args[7]="TMP_DIR="+Paths.get(input).getParent().toString();
+		if(m_picard_tmp.isActive()){
+			args[7]="TMP_DIR="+m_picard_tmp.getStringValue();
+		}else{
+			args[7]="";
+		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7];
 
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
 		
@@ -558,10 +578,14 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		args[2]="VALIDATION_STRINGENCY="+val;
 		args[3]="CREATE_INDEX="+index;
 		args[4]="SORT_ORDER="+order;
-		args[5]="TMP_DIR="+Paths.get(input).getParent().toString();
+		if(m_picard_tmp.isActive()){
+			args[5]="TMP_DIR="+m_picard_tmp.getStringValue();
+		}else{
+			args[5]="";
+		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5];
 		
 		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
 

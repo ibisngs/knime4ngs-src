@@ -3,9 +3,15 @@ package de.helmholtz_muenchen.ibis.ngs.samtools;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -13,11 +19,14 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.ngs.bamsamconverter.BAMSAMConverterNodeModel;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
@@ -37,36 +46,35 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	protected static boolean useFastafile = true;
 	
 	public static final String CFGKEY_UTILITY = "utility";
-	
 	public static final String CFGKEY_SAMTOOLS = "samtools";
-	public static final String CFGKEY_BAMFILE = "bamfile";
 	public static final String CFGKEY_REFSEQFILE = "refseqfile";
+	public static final String CFGKEY_OPTIONAL = "optional";
 	
 	
-	private final SettingsModelString m_utility = new SettingsModelString(SamToolsNodeModel.CFGKEY_UTILITY, "");
-	private final SettingsModelString m_samtools = new SettingsModelString(SamToolsNodeModel.CFGKEY_SAMTOOLS, "");
-	private final SettingsModelString m_bamfile = new SettingsModelString(SamToolsNodeModel.CFGKEY_BAMFILE, "");
-	private final SettingsModelString m_refseqfile = new SettingsModelString(SamToolsNodeModel.CFGKEY_REFSEQFILE, "");
-	
+	private final SettingsModelString m_utility 			= new SettingsModelString(SamToolsNodeModel.CFGKEY_UTILITY, "");
+	private final SettingsModelString m_samtools 			= new SettingsModelString(SamToolsNodeModel.CFGKEY_SAMTOOLS, "");
+	private final SettingsModelString m_refseqfile 			= new SettingsModelString(SamToolsNodeModel.CFGKEY_REFSEQFILE, "");
+	private final SettingsModelOptionalString m_Optional 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL,"",false);
+
 
 	/**Parameters for "calmd"**/
-	public static final String CFGKEY_CHANGEIDENTBASES = "changeIdentBases";
-	public static final String CFGKEY_USECOMPRESSION = "useCompression";
-	public static final String CFGKEY_COMPRESSION = "compression";
-	public static final String CFGKEY_INPUTISSAM = "inputIsSam";
-	public static final String CFGKEY_MODIFYQUAL = "modifyQual";
-	public static final String CFGKEY_BQTAG = "bqTag";
-	public static final String CFGKEY_EXTENDEDBAQ = "extendedBAQ";
-	public static final String CFGKEY_DOCAPMAPQUAL = "doCapMapQual";
-	public static final String CFGKEY_CAPMAPQUAL = "capMapQual";
+//	public static final String CFGKEY_CHANGEIDENTBASES = "changeIdentBases";
+//	public static final String CFGKEY_USECOMPRESSION = "useCompression";
+//	public static final String CFGKEY_COMPRESSION = "compression";
+//	public static final String CFGKEY_INPUTISSAM = "inputIsSam";
+//	public static final String CFGKEY_MODIFYQUAL = "modifyQual";
+//	public static final String CFGKEY_BQTAG = "bqTag";
+//	public static final String CFGKEY_EXTENDEDBAQ = "extendedBAQ";
+//	public static final String CFGKEY_DOCAPMAPQUAL = "doCapMapQual";
+//	public static final String CFGKEY_CAPMAPQUAL = "capMapQual";
 	
-	private final SettingsModelBoolean m_changeIdentBases = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_CHANGEIDENTBASES, false);
-	private final SettingsModelBoolean m_useCompression = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_USECOMPRESSION, false);	
-	private final SettingsModelString m_compression = new SettingsModelString(SamToolsNodeModel.CFGKEY_COMPRESSION, "");
-	private final SettingsModelBoolean m_inputIsSAM = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_INPUTISSAM, false);
-	private final SettingsModelBoolean m_modifyQual = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_MODIFYQUAL, false);
-	private final SettingsModelBoolean m_bqTag = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_BQTAG, false);
-	private final SettingsModelBoolean m_extendedBAQ = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_EXTENDEDBAQ, false);
+//	private final SettingsModelBoolean m_changeIdentBases = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_CHANGEIDENTBASES, false);
+//	private final SettingsModelBoolean m_useCompression = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_USECOMPRESSION, false);	
+//	private final SettingsModelString m_compression = new SettingsModelString(SamToolsNodeModel.CFGKEY_COMPRESSION, "");
+//	private final SettingsModelBoolean m_inputIsSAM = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_INPUTISSAM, false);
+//	private final SettingsModelBoolean m_modifyQual = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_MODIFYQUAL, false);
+//	private final SettingsModelBoolean m_bqTag = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_BQTAG, false);
+//	private final SettingsModelBoolean m_extendedBAQ = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_EXTENDEDBAQ, false);
 
 	/**Parameters for rmdup**/
 	public static final String CFGKEY_REMOVEDUP = "removeDup";
@@ -76,19 +84,16 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	/**Parameters for cat**/
 	public static final String CFGKEY_USEHEADERSAM = "useHeaderSAM";
 	public static final String CFGKEY_HEADERSAM = "headerSAM";
-	public static final String CFGKEY_INBAM1 = "inBAM1";
 
 	private final SettingsModelBoolean m_useHeaderSAM = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_USEHEADERSAM, false);
 	private final SettingsModelString m_headerSAM = new SettingsModelString(SamToolsNodeModel.CFGKEY_HEADERSAM, "");
-	private final SettingsModelString m_inBAM1 = new SettingsModelString(SamToolsNodeModel.CFGKEY_INBAM1, "");
 
 	/**Parameters for reheader**/
 	public static final String CFGKEY_REHINSAM = "rehInSAM";
 
 	private final SettingsModelString m_rehInSAM = new SettingsModelString(SamToolsNodeModel.CFGKEY_REHINSAM, "");
+	
 	/**Parameters for merge**/
-	public static final String CFGKEY_MINBAM1 = "minbam1";
-
 	public static final String CFGKEY_MCOMPRESSION = "mcompression"; //zlib compression
 	public static final String CFGKEY_MFORCE = "mforce";
 	public static final String CFGKEY_USEMHFILE = "usemhfile";
@@ -98,8 +103,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_USEMREGION = "usemregion";
 	public static final String CFGKEY_MRGTAG = "mrgtag";
 	public static final String CFGKEY_MUNCOMPRESSED = "muncompressed";
-	private final SettingsModelString m_minbam1 = new SettingsModelString(SamToolsNodeModel.CFGKEY_MINBAM1, "");
-
+	
 	private final SettingsModelBoolean m_mcompression = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_MCOMPRESSION, false);
 	private final SettingsModelBoolean m_mforce = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_MFORCE, false);
 	private final SettingsModelBoolean m_usemhfile = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_USEMHFILE, false);
@@ -127,30 +131,31 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_fixchimeras = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_FIXCHIMERAS, false);
 
 	
-	protected static Boolean optionalPort = false;
-	
-//	private static final NodeLogger LOGGER = NodeLogger.getLogger(SamToolsNodeModel.class);
+	protected static Boolean optionalPort 	= false;
+	public static String OUT_COL1 			= "Outfile";
+	private String OutCellType 				= "FileCell";	
 	
 	/**
      * Constructor for the node model.
      */
     protected SamToolsNodeModel() {
     
-        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0));
+        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
        
        	addSetting(m_utility);
     	addSetting(m_samtools);
-    	addSetting(m_bamfile);
+//    	addSetting(m_bamfile);
     	addSetting(m_refseqfile);
+    	addSetting(m_Optional);
     	
     	//calmd
-    	addSetting(m_changeIdentBases);
-    	addSetting(m_compression);
-    	addSetting(m_useCompression);
-    	addSetting(m_inputIsSAM);
-    	addSetting(m_modifyQual); 
-    	addSetting(m_bqTag); 
-    	addSetting(m_extendedBAQ); 
+//    	addSetting(m_changeIdentBases);
+//    	addSetting(m_compression);
+//    	addSetting(m_useCompression);
+//    	addSetting(m_inputIsSAM);
+//    	addSetting(m_modifyQual); 
+//    	addSetting(m_bqTag); 
+//    	addSetting(m_extendedBAQ); 
 
     	//remdup
     	addSetting(m_removeDup);
@@ -158,7 +163,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	//cat
     	addSetting(m_useHeaderSAM);
     	addSetting(m_headerSAM);
-    	addSetting(m_inBAM1);
+//    	addSetting(m_inBAM1);
 
     	//reheader
     	addSetting(m_rehInSAM);
@@ -173,7 +178,6 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	addSetting(m_usemregion);
     	addSetting(m_mrgtag);
     	addSetting(m_muncompressed);
-    	addSetting(m_minbam1);
 
     	//phase
     	addSetting(m_blocklength);
@@ -182,44 +186,6 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	addSetting(m_minqual);
     	addSetting(m_maxdepth);
     	addSetting(m_fixchimeras);
-
-        //calmd
-        m_changeIdentBases.setEnabled(false);
-    	m_compression.setEnabled(false);
-    	m_useCompression.setEnabled(false);
-    	m_inputIsSAM.setEnabled(false);
-    	m_modifyQual.setEnabled(false);
-    	m_bqTag.setEnabled(false);
-    	m_extendedBAQ.setEnabled(false);
-
-    	//mdup
-    	m_removeDup.setEnabled(false);
-    	m_treatPE.setEnabled(false);
-    	//cat
-    	m_headerSAM.setEnabled(false);
-
-    	//reheader
-    	m_rehInSAM.setEnabled(false);
-
-    	//merge
-    	m_mcompression.setEnabled(false);
-    	m_mforce.setEnabled(false);
-    	m_usemhfile.setEnabled(false);
-    	m_mhfile.setEnabled(false);
-    	m_msorted.setEnabled(false);
-    	m_mregion.setEnabled(false);
-    	m_usemregion.setEnabled(false);
-    	m_mrgtag.setEnabled(false);
-    	m_muncompressed.setEnabled(false);
-
-    	//phase
-    	m_blocklength.setEnabled(false);
-    	m_prefix.setEnabled(false);
-    	m_hetphred.setEnabled(false);
-    	m_minqual.setEnabled(false);
-    	m_maxdepth.setEnabled(false);
-    	m_fixchimeras.setEnabled(false);
-
     }
 
     /**
@@ -230,26 +196,19 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	    	
-    	String path2samtools = "";
-    	String path2bamfile = "";
-    	String path2seqfile = "";
-    	
-    	String lockFile = "";
-    	
+    	String path2samtools 	= m_samtools.getStringValue();
+    	String path2bamfile 	= "";
+    	String path2seqfile 	= m_refseqfile.getStringValue();
+    	String lockFile 		= "";
+    	String OutCellType 		= "FileCell";		 
     	
     	if(optionalPort){
-    		path2samtools = inData[0].iterator().next().getCell(0).toString();
-    		path2bamfile = inData[0].iterator().next().getCell(1).toString();
-    		path2seqfile = m_refseqfile.getStringValue();
-    	}
-    	else{
-    		path2samtools = m_samtools.getStringValue();
-    		path2bamfile = m_bamfile.getStringValue();
-    		path2seqfile = m_refseqfile.getStringValue();
+    		path2bamfile = inData[0].iterator().next().getCell(0).toString();
     	}
     	
+    	
     	String basePathWithFileName = "";
-    	if(path2bamfile != ""){
+    	if(!path2bamfile.isEmpty()){
     	   	basePathWithFileName = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));	
     	}
     	else{
@@ -257,10 +216,13 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	}
  
     	String utility = m_utility.getStringValue();
-    	
-
     	ArrayList<String> command = new ArrayList<String>();
     	command.add(path2samtools+" "+utility);
+    	
+    	if(m_Optional.isActive()){
+    		command.add(m_Optional.getStringValue());	
+    	}
+    	
     	String outfile = "-1";
     	boolean stdOut = false;
     	
@@ -271,40 +233,43 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		stdOut = true;
     		
-    	} else if(utility.equals("calmd")) {
-
-    		String outFileExtension = ".sam";
+//    	} else if(utility.equals("calmd")) {
+//
+//    		String outFileExtension = ".sam";
+//    		OutCellType = "SAMCell";
+//    		
+//    		if(m_changeIdentBases.getBooleanValue()){
+//    			command.add("-e");
+//    		}
+//    		if(m_useCompression.getBooleanValue()){
+//    			outFileExtension = ".bam";
+//    			OutCellType = "BAMCell";
+//    			if(m_compression.getStringValue().equals("uncompressed")){
+//    				command.add("-u");
+//    			}
+//    			else{
+//    				command.add("-b");
+//    			}
+//    		}
+//    		if(m_inputIsSAM.getBooleanValue()){
+//    			command.add("-S");
+//    		}
+//    		if(m_modifyQual.getBooleanValue()){
+//    			command.add("-A");
+//    		}
+//    		if(m_bqTag.getBooleanValue()){
+//    			command.add("-r");
+//    		}
+//    		if(m_extendedBAQ.getBooleanValue()){
+//    			command.add("-E");
+//    		}
+//    		
+//    		command.add(path2bamfile);
+//    		command.add(path2seqfile);
+//    		outfile = basePathWithFileName + "_" + utility + outFileExtension;
+//    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+//    		stdOut = true;
     		
-    		if(m_changeIdentBases.getBooleanValue()){
-    			command.add("-e");
-    		}
-    		if(m_useCompression.getBooleanValue()){
-    			outFileExtension = ".bam";
-    			if(m_compression.getStringValue().equals("uncompressed")){
-    				command.add("-u");
-    			}
-    			else{
-    				command.add("-b");
-    			}
-    		}
-    		if(m_inputIsSAM.getBooleanValue()){
-    			command.add("-S");
-    		}
-    		if(m_modifyQual.getBooleanValue()){
-    			command.add("-A");
-    		}
-    		if(m_bqTag.getBooleanValue()){
-    			command.add("-r");
-    		}
-    		if(m_extendedBAQ.getBooleanValue()){
-    			command.add("-E");
-    		}
-    		
-    		command.add(path2bamfile);
-    		command.add(path2seqfile);
-    		outfile = basePathWithFileName + "_" + utility + outFileExtension;
-    		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
-    		stdOut = true;
     		
     			
     	} else if (utility.equals("fixmate")) {
@@ -312,6 +277,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		outfile = basePathWithFileName + "_" + utility + ".bam";
     		command.add(outfile);
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    		OutCellType = "BAMCell";
     		
     	} else if (utility.equals("rmdup")) {
     		if(m_removeDup.getBooleanValue()){
@@ -324,22 +290,34 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		outfile = basePathWithFileName + "_" + utility + ".bam";
     		command.add(outfile);
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+    		OutCellType = "BAMCell";
     		
     	} else if (utility.equals("cat")) {
-    		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
     		
-    		outfile += "_" + m_inBAM1.getStringValue().substring(m_inBAM1.getStringValue().lastIndexOf("/")+1,m_inBAM1.getStringValue().lastIndexOf("."));
-    		outfile += "_" + utility + ".bam";
+    		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
+    		outfile += ".catAll.bam";
     		if(m_useHeaderSAM.getBooleanValue()){
     			command.add("-h " + m_headerSAM.getStringValue());
     		}
-     		command.add(path2bamfile);
-     		command.add(m_inBAM1.getStringValue());
-     		command.add("-o " + outfile);
+    		command.add("-o " + outfile);
+    		
+            Iterator<DataRow> it = inData[0].iterator();
+            int size = 0;
+            while(it.hasNext()){
+            	command.add(it.next().getCell(0).toString());
+            	size++;
+            } 
+     		if(size<2){
+     			throw new InvalidSettingsException("Insufficient number of input files. At least 2 bam files required for samtools cat.");
+     		}
      		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
+     		OutCellType = "BAMCell";
+     		
      		
     	} else if (utility.equals("faidx")){
     		command.add(path2seqfile);
+    		outfile = path2seqfile;
+    		lockFile = outfile+".faidx" + SuccessfulRunChecker.LOCK_ENDING;
     		
     	} else if (utility.equals("reheader")) {
     		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf(".")) + "_" + utility + ".bam";
@@ -347,11 +325,11 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		command.add(path2bamfile);
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		stdOut = true;
+    		OutCellType = "BAMCell";
     		
     	} else if (utility.equals("merge")) {
     		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
-    		outfile += "_" + m_minbam1.getStringValue().substring(m_minbam1.getStringValue().lastIndexOf("/")+1,m_minbam1.getStringValue().lastIndexOf("."));
-    		outfile += "_" + utility + ".bam";
+    		outfile += ".mergedAll.bam";
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		
     		if(m_mcompression.getBooleanValue()){
@@ -377,8 +355,18 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		}
     		
     		command.add(outfile);
-    		command.add(path2bamfile);
-    		command.add(m_minbam1.getStringValue());
+    		
+            Iterator<DataRow> it = inData[0].iterator();
+            int size = 0;
+            while(it.hasNext()){
+            	command.add(it.next().getCell(0).toString());
+            	size++;
+            } 
+     		if(size<2){
+     			throw new InvalidSettingsException("Insufficient number of input files. At least 2 bam files required for samtools cat.");
+     		}
+     		
+    		OutCellType = "BAMCell";
     		
     	} 	else if (utility.equals("phase")) {
 
@@ -395,26 +383,42 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
        		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
        		command.add(path2bamfile);
        		stdOut = true;
-       		
-       		//com = "cd "+folder+"; " + path2samtools + " " + utility + " "+ params.toString() + path2bamfile + " >"+outfile; 
-    		//redirect STDOUT, else SAM stuff is spammed in log file; it's necessary to "cd" to right directory, else files won't be written there
+       		OutCellType = "BAMCell";
     	}
    	
     	
     	if(command.size()!=0) {
     		
     		if(!stdOut){	//No extra output file required
-//    			Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER);
-    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile));
+    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),null,outfile+".stdErr");
     			
     		}else{	//StdOut to outfile
-    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),outfile);
+    			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec, null, new File(lockFile), outfile,outfile+".stdErr", null, null, null);
     		}
     	}else{
     		throw new Exception("Something went wrong...Execution command is empty!");
     	}
    	
-    	return new BufferedDataTable[]{};
+    	
+    	DataColumnSpec dcs = null;
+    	if(OutCellType.equals("BAMCell")){
+    		dcs = new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec();
+    	}else{
+    		dcs = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
+    	}
+    	
+    	BufferedDataContainer cont = exec.createDataContainer(
+    			new DataTableSpec(
+    			new DataColumnSpec[]{
+    					dcs}));
+    	
+    	FileCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(outfile)};
+    	cont.addRowToTable(new DefaultRow("Row0",c));
+    	cont.close();
+    	BufferedDataTable outTable = cont.getTable();
+    	   	
+    	
+		return new BufferedDataTable[]{outTable};
     }
 
     /**
@@ -433,305 +437,46 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	String utility = m_utility.getStringValue();
-    	//flowVariables
-        String bamfile = "";
-        String fastafile = "";
-        String basePathWithFileName = "";
-    	
+   	
     	//Check OptionalInputPort
 		try{
 			inSpecs[0].getColumnNames();
 			optionalPort=true;
-			String[] colnames = inSpecs[0].getColumnNames();
-
-			if(colnames[0].equals(BAMSAMConverterNodeModel.OUT_COL1) && colnames[1].equals("Path2BAMFile")){
-			    bamfile = getAvailableInputFlowVariables().get("BAMSAMINFILE").getStringValue();
-			    fastafile = getAvailableInputFlowVariables().get("Path2seqFile").getStringValue();
-	
-				m_samtools.setEnabled(false);
-	    		m_bamfile.setEnabled(false);
-	    		useSamtools=false;
-	    		useBamfile=false;
-	    		//useFastafile=false;
-	    		if(m_utility.getStringValue().equals("calmd") || m_utility.getStringValue().equals("faidx")){
-	    			m_refseqfile.setEnabled(true);
-	    			useFastafile=true;
-	    		}
-
-
-	    		
+			
+			if(!inSpecs[0].getColumnSpec(0).getType().toString().equals("BAMCell")){
+				throw new InvalidSettingsException("Expected BAMCell in first table cell but found a "+inSpecs[0].getColumnSpec(0).getType().toString()+".");
 			}
-			else{
-				throw new InvalidSettingsException("The in-port is invalid! Don't use an in-port or connect the right node.");
-			}
-
+			
+			
     	}catch(NullPointerException npe){
     		
+    		optionalPort=false;
     		
-		    bamfile = m_bamfile.getStringValue();
-		    fastafile = m_refseqfile.getStringValue();
-    		
-    		m_samtools.setEnabled(true);
-    		m_bamfile.setEnabled(true);
-    		useSamtools=true;
-    		useBamfile=true;
-    		useFastafile=true;
-    		if(m_utility.getStringValue().equals("calmd")){
-    				m_refseqfile.setEnabled(true);
-    				useFastafile=true;
-    		}
-			optionalPort=false;
-    	
+    		if(!utility.equals("faidx")){
+    			setWarningMessage(m_utility.getStringValue()+" requires input table.");
+    			throw new InvalidSettingsException(m_utility.getStringValue()+" requires input table.");
+    		}	
     	}
     	
-    	/*******************************************************************
-		 ************         Check if Outfile exists            ***********
-		 *******************************************************************/
-        if(bamfile.length()>0){
-        	basePathWithFileName = bamfile.substring(0,bamfile.lastIndexOf("."));
-        }
-        else if(fastafile.length()>0){
-        	basePathWithFileName = fastafile.substring(0,fastafile.lastIndexOf("."));
-        }
-	    
-    	String outfile="";
-        if(utility.equals("flagstat") || utility.equals("idxstats") || utility.equals("depth") || utility.equals("rmdup")){
-        	outfile = basePathWithFileName + "_" + utility + ".txt";
-        }
-        else if(utility.equals("faidx")){
-        	outfile = fastafile + ".fai";
-        }
-        else if(utility.equals("calmd")){
-        	String outFileExtension = ".sam";
-        	if(m_useCompression.getBooleanValue()){
-    			outFileExtension = ".bam";
-        	}
-        	outfile = basePathWithFileName + "_" + utility + outFileExtension;
-        }
-        else if(utility.equals("fixmate") || utility.equals("rmdup")){
-        	outfile = basePathWithFileName + "_" + utility + ".bam";
-        }
-        else if(utility.equals("merge")){
-        	outfile = bamfile.substring(0,bamfile.lastIndexOf("."));
-    		outfile += "_" + m_minbam1.getStringValue().substring(m_minbam1.getStringValue().lastIndexOf("/")+1,m_minbam1.getStringValue().lastIndexOf("."));
-    		outfile += "_" + utility + ".bam";
-        }
-        else if(utility.equals("phase")){
-        	outfile = bamfile.substring(0,bamfile.lastIndexOf(".")+1) + "phase";
-        	String folder = bamfile.substring(0,bamfile.lastIndexOf("/")+1);
-        	String outfile_1 = folder + m_prefix.getStringValue() + ".0.bam";
-        	String outfile_2 = folder + m_prefix.getStringValue() + ".1.bam";
-        	String outfile_3 = folder + m_prefix.getStringValue() + ".chimera.bam";
-        	String[] files = {outfile_1,outfile_2,outfile_3};
-        	for(int i=0;i<files.length;i++){
-        		File o = new File(files[i]);
-        		if(o.exists()){
-                	setWarningMessage(files[i]+" already exists! Please rename or move to other directory.");
-                }
-        	}
-        }
-        else if(utility.equals("reheader")){
-        	outfile = bamfile.substring(0,bamfile.lastIndexOf(".")) + "_" + utility + ".bam";
-        }
-
-
-		
-        File outpath = new File(outfile);
-        if(outpath.exists()){
-        	setWarningMessage(outfile+" already exists! Please rename or move to other directory.");
-        }
-        /***************************************************************************************************/
-	
-    	
-         
     	
      	if(m_refseqfile.getStringValue().length() > 1) {
 	     	if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
 	     		throw new InvalidSettingsException("Sequence file is not in fasta format!");
 	     	}
      	}
-    	
 
-    	/**if(m_utility.getStringValue().equals("faidx") && !FileValidator.checkFastaFormat(m_infasta.getStringValue())){
-    		throw new InvalidSettingsException("Error: File not in fasta format!");
-    	}**/
-
-        return new DataTableSpec[]{};
+    	DataColumnSpec dcs = null;
+    	if(OutCellType.equals("BAMCell")){
+    		dcs = new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec();
+    	}else{
+    		dcs = new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec();
+    	}
+    	    	
+        return new DataTableSpec[]{new DataTableSpec(
+    			new DataColumnSpec[]{
+    					dcs})};
     }
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//
-//    	super.saveSettingsTo(settings);
-//    	
-//    	m_utility.saveSettingsTo(settings);
-//    	m_samtools.saveSettingsTo(settings);
-//    	m_bamfile.saveSettingsTo(settings);
-//    	m_refseqfile.saveSettingsTo(settings);
-//    	//calmd
-//    	m_changeIdentBases.saveSettingsTo(settings);
-//    	m_compression.saveSettingsTo(settings);
-//    	m_useCompression.saveSettingsTo(settings);
-//    	m_inputIsSAM.saveSettingsTo(settings);
-//    	m_modifyQual.saveSettingsTo(settings); 
-//    	m_bqTag.saveSettingsTo(settings); 
-//    	m_extendedBAQ.saveSettingsTo(settings); 
-//    	//m_doCapMapQual.saveSettingsTo(settings); 
-//    	//m_capMapQual.saveSettingsTo(settings); 
-//    	//remdup
-//    	m_removeDup.saveSettingsTo(settings);
-//    	m_treatPE.saveSettingsTo(settings);
-//    	//cat
-//    	m_useHeaderSAM.saveSettingsTo(settings);
-//    	m_headerSAM.saveSettingsTo(settings);
-//    	m_inBAM1.saveSettingsTo(settings);
-//    	//m_inBAM2.saveSettingsTo(settings);
-//    	//reheader
-//    	m_rehInSAM.saveSettingsTo(settings);
-//    	//m_rehInBAM.saveSettingsTo(settings);
-//    	//merge
-//    	m_mcompression.saveSettingsTo(settings);
-//    	m_mforce.saveSettingsTo(settings);
-//    	m_usemhfile.saveSettingsTo(settings);
-//    	m_mhfile.saveSettingsTo(settings);
-//    	m_msorted.saveSettingsTo(settings);
-//    	m_mregion.saveSettingsTo(settings);
-//    	m_usemregion.saveSettingsTo(settings);
-//    	m_mrgtag.saveSettingsTo(settings);
-//    	m_muncompressed.saveSettingsTo(settings);
-//    	m_minbam1.saveSettingsTo(settings);
-//    	//m_minbam2.saveSettingsTo(settings);
-//    	//faidx
-//    	//m_infasta.saveSettingsTo(settings);
-//    	//phase
-//    	m_blocklength.saveSettingsTo(settings);
-//    	m_prefix.saveSettingsTo(settings);
-//    	m_hetphred.saveSettingsTo(settings);
-//    	m_minqual.saveSettingsTo(settings);
-//    	m_maxdepth.saveSettingsTo(settings);
-//    	m_fixchimeras.saveSettingsTo(settings);
-//    	//m_dropambig.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	
-//    	super.loadValidatedSettingsFrom(settings);
-//    	
-//    	m_utility.loadSettingsFrom(settings);
-//    	m_samtools.loadSettingsFrom(settings);
-//    	m_bamfile.loadSettingsFrom(settings);
-//    	m_refseqfile.loadSettingsFrom(settings);
-//    	//calmd
-//    	m_changeIdentBases.loadSettingsFrom(settings);
-//    	m_compression.loadSettingsFrom(settings);
-//    	m_useCompression.loadSettingsFrom(settings); 
-//    	m_inputIsSAM.loadSettingsFrom(settings);
-//    	m_modifyQual.loadSettingsFrom(settings); 
-//    	m_bqTag.loadSettingsFrom(settings); 
-//    	m_extendedBAQ.loadSettingsFrom(settings);
-//    	//m_doCapMapQual.loadSettingsFrom(settings);
-//    	//m_capMapQual.loadSettingsFrom(settings);
-//    	//remdup
-//    	m_removeDup.loadSettingsFrom(settings);
-//    	m_treatPE.loadSettingsFrom(settings);
-//    	//cat
-//    	m_useHeaderSAM.loadSettingsFrom(settings);
-//    	m_headerSAM.loadSettingsFrom(settings);
-//    	m_inBAM1.loadSettingsFrom(settings);
-//    	//m_inBAM2.loadSettingsFrom(settings);
-//    	//reheader
-//    	m_rehInSAM.loadSettingsFrom(settings);
-//    	//m_rehInBAM.loadSettingsFrom(settings);
-//    	//merge
-//    	m_mcompression.loadSettingsFrom(settings);
-//    	m_mforce.loadSettingsFrom(settings);
-//    	m_usemhfile.loadSettingsFrom(settings);
-//    	m_mhfile.loadSettingsFrom(settings);
-//    	m_msorted.loadSettingsFrom(settings);
-//    	m_mregion.loadSettingsFrom(settings);
-//    	m_usemregion.loadSettingsFrom(settings);
-//    	m_mrgtag.loadSettingsFrom(settings);
-//    	m_muncompressed.loadSettingsFrom(settings);
-//    	m_minbam1.loadSettingsFrom(settings);
-//    	//m_minbam2.loadSettingsFrom(settings);
-//    	//faidx
-//    	//m_infasta.loadSettingsFrom(settings);
-//    	//phase
-//    	m_blocklength.loadSettingsFrom(settings);
-//    	m_prefix.loadSettingsFrom(settings);
-//    	m_hetphred.loadSettingsFrom(settings);
-//    	m_minqual.loadSettingsFrom(settings);
-//    	m_maxdepth.loadSettingsFrom(settings);
-//    	m_fixchimeras.loadSettingsFrom(settings);
-//    	//m_dropambig.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	
-//    	super.validateSettings(settings);
-//    	
-//    	m_utility.validateSettings(settings);
-//    	m_samtools.validateSettings(settings);
-//    	m_bamfile.validateSettings(settings);
-//    	m_refseqfile.validateSettings(settings);
-//    	//calmd
-//    	m_changeIdentBases.validateSettings(settings);
-//    	m_compression.validateSettings(settings);
-//    	m_useCompression.validateSettings(settings); 
-//    	m_inputIsSAM.validateSettings(settings);
-//    	m_modifyQual.validateSettings(settings); 
-//    	m_bqTag.validateSettings(settings); 
-//    	m_extendedBAQ.validateSettings(settings); 
-//      	//m_doCapMapQual.validateSettings(settings); 
-//    	//m_capMapQual.validateSettings(settings);
-//    	//remdup
-//    	m_removeDup.validateSettings(settings);
-//    	m_treatPE.validateSettings(settings);
-//    	//cat
-//    	m_useHeaderSAM.validateSettings(settings);
-//    	m_headerSAM.validateSettings(settings);
-//    	m_inBAM1.validateSettings(settings);
-//    	//m_inBAM2.validateSettings(settings);
-//    	//reheader
-//    	m_rehInSAM.validateSettings(settings);
-//    	//m_rehInBAM.validateSettings(settings);
-//    	//merge
-//    	m_mcompression.validateSettings(settings);
-//    	m_mforce.validateSettings(settings);
-//    	m_usemhfile.validateSettings(settings);
-//    	m_mhfile.validateSettings(settings);
-//    	m_msorted.validateSettings(settings);
-//    	m_mregion.validateSettings(settings);
-//    	m_usemregion.validateSettings(settings);
-//    	m_mrgtag.validateSettings(settings);
-//    	m_muncompressed.validateSettings(settings);
-//    	m_minbam1.validateSettings(settings);
-//    	//m_minbam2.validateSettings(settings);
-//    	//faidx
-//    	//m_infasta.validateSettings(settings);
-//    	//phase
-//    	m_blocklength.validateSettings(settings);
-//    	m_prefix.validateSettings(settings);
-//    	m_hetphred.validateSettings(settings);
-//    	m_minqual.validateSettings(settings);
-//    	m_maxdepth.validateSettings(settings);
-//    	m_fixchimeras.validateSettings(settings);
-//    	//m_dropambig.validateSettings(settings);
-//    	
-//    }
     
     /**
      * {@inheritDoc}
