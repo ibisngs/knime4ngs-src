@@ -35,9 +35,7 @@
         </option>
         <option name="Path to BED file">
         Tick this option in order to call variants in certain genomic regions. 
-        You have to specify the intervals in a text file in BED format
-        (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>)
-        and select the file in the file browser.
+        You have to specify the intervals in a text file in <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> BED format</a> and select the file in the file browser.
         </option>
         <option name="Further options">
         Set additional command line flags for the GATKVariantFiltration.
