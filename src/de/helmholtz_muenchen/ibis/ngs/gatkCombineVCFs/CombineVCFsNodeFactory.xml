@@ -11,16 +11,16 @@
        Analogous to the CombineGVCFs the CombineVCFs can be used to merge VCF files of different samples into a single VCF.  
        The resulting VCF file can then be further processed by filtering nodes.
        It is expected that the input is a list of two or more VCF files. <br />
-       For further information, see: <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineVariants.php">GATK documentation of CombineVariants</a>
+       For further information, see <a href="https://www.broadinstitute.org/gatk/guide/tooldocs/org_broadinstitute_gatk_tools_walkers_variantutils_CombineVariants.php">GATK documentation of CombineVariants</a>
     </intro>
         
     <tab name="Options">
     <option name="GenotypeMergeType">
     Desire how the genotype records for the samples should be merged.
     <ul>
-    <li> Uniquify: Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
-   	<li> Unsorted: Take the genotypes in any order.</li>
-	<li> Require unique: Require that all samples/genotypes be unique between all inputs.</li>
+    <li> UNSORTED: Take the genotypes in any order.</li>
+    <li> UNIQUIFY: Make all sample genotypes unique by file. Each sample shared across RODs gets named sample.ROD.</li>
+	<li> REQUIRE_UNIQUE: Require that all samples/genotypes be unique between all inputs.</li>
 	</ul>
 	</option>
 	<option name="Folder for output files"> Set the path to the folder where the combined vcf file should be stored.</option> 
@@ -28,7 +28,8 @@
     <tab name="GATK">
     <option name="GATK Memory"> Set the maximum Java heap size (in GB).</option>
     <option name="Path to BED file"> You can check this option to perform the analysis in certain genomic regions. 
-        You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>) and select the file in the file browser.</option>
+        	You have to specify the intervals in a text file in <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> BED format</a> and select the file in the file browser.
+    </option>
     <option name="Further options"> Set additional command line flags for the CombineVCFs.</option>
     </tab>
     <tab name="Preference page">

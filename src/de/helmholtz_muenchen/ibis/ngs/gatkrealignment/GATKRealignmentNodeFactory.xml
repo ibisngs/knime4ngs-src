@@ -25,7 +25,7 @@
         	</option>
             <option name="Interval for realignment">
             	You can check this option to perform realignment in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>) and select the file in the file browser.
+            	You have to specify the intervals in a text file in <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> BED format </a> and select the file in the file browser.
         	</option>
             <option name="Number of threads">
             	Increasing the number of threads speeds up the node, but also increases the memory required for the calculations.

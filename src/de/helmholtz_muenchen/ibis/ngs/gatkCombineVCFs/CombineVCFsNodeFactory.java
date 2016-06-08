@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "CombineVCFs" Node.
  * 
@@ -35,7 +37,7 @@ public class CombineVCFsNodeFactory
     @Override
     public NodeView<CombineVCFsNodeModel> createNodeView(final int viewIndex,
             final CombineVCFsNodeModel nodeModel) {
-        return new CombineVCFsNodeView(nodeModel);
+        return new HTENodeView<CombineVCFsNodeModel>(nodeModel);
     }
 
     /**

@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "VCFMerger" Node.
  * 
@@ -35,7 +37,7 @@ public class VCFMergerNodeFactory
     @Override
     public NodeView<VCFMergerNodeModel> createNodeView(final int viewIndex,
             final VCFMergerNodeModel nodeModel) {
-        return new VCFMergerNodeView(nodeModel);
+        return new HTENodeView<VCFMergerNodeModel>(nodeModel);
     }
 
     /**

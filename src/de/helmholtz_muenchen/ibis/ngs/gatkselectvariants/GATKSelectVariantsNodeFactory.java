@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "GATKSelectVariants" Node.
  * 
@@ -35,7 +37,7 @@ public class GATKSelectVariantsNodeFactory
     @Override
     public NodeView<GATKSelectVariantsNodeModel> createNodeView(final int viewIndex,
             final GATKSelectVariantsNodeModel nodeModel) {
-        return new GATKSelectVariantsNodeView(nodeModel);
+        return new HTENodeView<GATKSelectVariantsNodeModel>(nodeModel);
     }
 
     /**

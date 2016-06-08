@@ -36,7 +36,7 @@
         	</option>
             <option name="Interval for recalibration">
             	You can check this option to perform recalibration in certain genomic regions. 
-            	You have to specify the intervals in a text file in BED format (Format explained at <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> http://genome.ucsc.edu/FAQ/FAQformat.html</a>) and select the file in the file browser.
+            	You have to specify the intervals in a text file in <a href="http://genome.ucsc.edu/FAQ/FAQformat.html"> BED format</a> and select the file in the file browser.
             </option>	
         	<option name="Analyze Covariates">
     		Before/after plots of the base quality score can be generated.<br />

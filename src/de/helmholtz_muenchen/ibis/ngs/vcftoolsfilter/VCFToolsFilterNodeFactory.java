@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "LOFFilter" Node.
  * 
@@ -35,7 +37,7 @@ public class VCFToolsFilterNodeFactory
     @Override
     public NodeView<VCFToolsFilterNodeModel> createNodeView(final int viewIndex,
             final VCFToolsFilterNodeModel nodeModel) {
-        return new VCFToolsFilterNodeView(nodeModel);
+        return new HTENodeView<VCFToolsFilterNodeModel>(nodeModel);
     }
 
     /**

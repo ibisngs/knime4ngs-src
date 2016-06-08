@@ -29,5 +29,8 @@
         <outPort index="0" name="Sorted VCF file">
         	Cell 0: Path to sorted VCF file.
         </outPort>
-    </ports>    
+    </ports>
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+    </views>     
 </knimeNode>
