@@ -8,7 +8,7 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>The SamTools node enables the access to  several SAMtools utilities. The node can be used alone or by connecting a BAMLoader node to the inport.<br />
+        <intro>The SamTools node enables the access to  several SAMtools utilities.<br />
         For more information, see the
 		       SAMtools help pages and <a href="http://samtools.sourceforge.net/samtools.shtml">http://samtools.sourceforge.net/samtools.shtml</a></intro>
         
