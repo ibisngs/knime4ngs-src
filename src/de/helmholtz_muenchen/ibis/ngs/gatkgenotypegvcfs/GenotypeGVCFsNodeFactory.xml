@@ -3,7 +3,7 @@
     <name>GenotypeGVCFs</name>
     
     <shortDescription>
-        Perform joint genotyping on gVCF files produced by HaplotypeCaller.
+        Performs joint genotyping on gVCF files produced by HaplotypeCaller.
     </shortDescription>
     
     <fullDescription>

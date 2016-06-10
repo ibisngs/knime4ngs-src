@@ -3,7 +3,7 @@
     <name>KGGSeq</name>
     
     <shortDescription>
-        
+        Filters and prioritizes genetic variants from whole exome sequencing data.
     </shortDescription>
     
     <fullDescription>

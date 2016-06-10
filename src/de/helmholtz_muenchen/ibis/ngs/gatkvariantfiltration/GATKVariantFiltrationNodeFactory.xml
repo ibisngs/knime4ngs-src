@@ -3,7 +3,7 @@
     <name>GATKVariantFiltration</name>
     
     <shortDescription>
-        Filter variant calls based on INFO and FORMAT annotations.
+        Filters variant calls based on INFO and FORMAT annotations.
     </shortDescription>
     
     <fullDescription>

@@ -3,7 +3,7 @@
     <name>GATKSelectVariants</name>
     
     <shortDescription>
-        Select a subset of variants from a larger callset.
+        Selects a subset of variants from a larger callset.
     </shortDescription>
     
     <fullDescription>

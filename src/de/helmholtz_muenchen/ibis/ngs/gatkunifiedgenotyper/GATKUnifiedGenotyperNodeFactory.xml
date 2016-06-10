@@ -3,7 +3,7 @@
     <name>GATKUnifiedGenotyper</name>
     
     <shortDescription>
-        SNP and Indel caller
+        Calls SNPs and indels.
     </shortDescription>
     
     <fullDescription>

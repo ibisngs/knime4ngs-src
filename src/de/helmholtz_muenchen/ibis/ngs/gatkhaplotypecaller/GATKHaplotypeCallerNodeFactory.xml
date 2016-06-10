@@ -3,7 +3,7 @@
     <name>GATKHaplotypeCaller</name>
     
     <shortDescription>
-        Call germline SNPs and indels  via local re-assembly of haplotypes.
+        Calls germline SNPs and indels  via local re-assembly of haplotypes.
     </shortDescription>
     
     <fullDescription>

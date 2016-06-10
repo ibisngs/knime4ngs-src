@@ -3,7 +3,7 @@
     <name>VQSR</name>
     
     <shortDescription>
-        Create a Gaussian mixture model by looking at the annotations values over a high quality subset of the input call set and then evaluate all input variants.
+        Creates a Gaussian mixture model by looking at the annotations values over a high quality subset of the input call set and then evaluate all input variants.
     </shortDescription>
     
     <fullDescription>

@@ -3,12 +3,12 @@
     <name>FileLoader</name>
     
     <shortDescription>
-        This node loads one or two input file(s) and serves as a starting point for any NGS workflow.
+        This node loads either one or two separate input file(s) or a list of files whereby it serves as a starting point for any NGS workflow.
     </shortDescription>
     
     <fullDescription>
         <intro>
-        	The FileLoader loads one or two input files and serves as a starting point for any NGS workflow.
+        	The FileLoader loads either one or two separate input files or a list of files whereby it serves as a starting point for any NGS workflow.
         </intro>
         
         

@@ -3,7 +3,7 @@
     <name>Pindel</name>
     
     <shortDescription>
-        Pindel - a pattern growth approach to detect breakpoints of large deletions and medium sized insertions from paired-end reads
+        Pindel - a pattern growth approach to detect breakpoints of large deletions and medium sized insertions from paired-end reads.
     </shortDescription>
     
     <fullDescription>
