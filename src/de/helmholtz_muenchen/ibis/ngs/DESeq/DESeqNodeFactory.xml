@@ -26,7 +26,7 @@
 	        <b>per-condition</b> - For each condition with replicates, compute a gene's empirical dispersion value by considering the data from samples for this condition. For samples of unreplicated conditions, the maximum of empirical dispersion values from the other conditions is used.
 	        </li>
 	        <li>
-	        <b>blind</b> - Ignore the sample lables and compute a gene's empirical dispersion value as if all samples were replicates of a single condition. This can be done even if there are no biological replicates.
+	        <b>blind</b> - Ignore the sample labels and compute a gene's empirical dispersion value as if all samples were replicates of a single condition. This can be done even if there are no biological replicates.
 	        </li>
 	        </ul>
         	(default: pooled)

@@ -50,7 +50,7 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 		command.add("--variant_index_type LINEAR");
 		command.add("--variant_index_parameter 128000");
 		
-		this.OUTFILE = IO.replaceFileExtension(INFILE, ".gvcf");
+		this.OUTFILE = IO.replaceFileExtension(INFILE, ".g.vcf");
 		return StringUtils.join(command, " ");
 	}
 

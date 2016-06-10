@@ -15,7 +15,7 @@
         
         <tab name="Annotation">
         	<option name="Coding only">
-        		If this checkbox is checked, VEP will only return consequences that affect coding regions of transcripts.
+        		If this box is checked, VEP will only return consequences that affect coding regions of transcripts.
         	</option>
         	<option name=" Choose transcript set">
             	VEP uses <b>Ensembl</b> transcripts (=GENCODE Comprehensive) by default.
