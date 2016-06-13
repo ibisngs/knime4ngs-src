@@ -59,7 +59,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_checkColorSpaced		= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
 	private final SettingsModelString m_bwtIndex 				= new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
 	private final SettingsModelString m_alnalgo 				= new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
-	private final SettingsModelString m_readGroup 				= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar\\t:PL:ILLUMINA");
+	private final SettingsModelString m_readGroup 				= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar\\tPL:ILLUMINA");
 	private final SettingsModelBoolean m_readGroupBoolean 		= new SettingsModelBoolean(CFGKEY_READGROUPBOOLEAN,false);
 	private final SettingsModelIntegerBounded m_ALN_THREADS 	= new SettingsModelIntegerBounded(CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
 //	private final SettingsModelOptionalString m_Optional_Index 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Index,"",false);

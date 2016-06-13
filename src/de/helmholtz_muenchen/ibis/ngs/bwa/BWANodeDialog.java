@@ -44,7 +44,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 		final SettingsModelString bwa 						= new SettingsModelString(BWANodeModel.CFGKEY_BWAFILE,"bwa");	
 		final SettingsModelString refseq 					= new SettingsModelString(BWANodeModel.CFGKEY_REFSEQFILE,"");
 		final SettingsModelBoolean indexrefseq 				= new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKINDEX, true);
-		final SettingsModelString readGroup 				= new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar");
+		final SettingsModelString readGroup 				= new SettingsModelString(BWANodeModel.CFGKEY_READGROUP, "@RG\\tID:foo\\tSM:bar\\tPL:ILLUMINA");
 		final SettingsModelBoolean readGroupBoolean 		= new SettingsModelBoolean(BWANodeModel.CFGKEY_READGROUPBOOLEAN, false);
 		final SettingsModelIntegerBounded ALN_THREADS 		= new SettingsModelIntegerBounded(BWANodeModel.CFGKEY_THREADS,2, 1, Integer.MAX_VALUE);
 //		final SettingsModelOptionalString Optional_Index 	= new SettingsModelOptionalString(BWANodeModel.CFGKEY_OPTIONAL_Index,"",false);
