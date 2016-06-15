@@ -11,15 +11,11 @@ import java.util.Iterator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
-import de.helmholtz_muenchen.ibis.utils.ngs.FileSearch;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 
 /**
@@ -42,20 +38,20 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
 	/**
 	 * Node Models
 	 */
-	private final SettingsModelString m_infolder = new SettingsModelString(PlotDepthOfCoverageNodeModel.CFGKEY_INFOLDER,"");
-	private final SettingsModelString m_filesuffix = new SettingsModelString(PlotDepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"");
+//	private final SettingsModelString m_infolder = new SettingsModelString(PlotDepthOfCoverageNodeModel.CFGKEY_INFOLDER,"");
+//	private final SettingsModelString m_filesuffix = new SettingsModelString(PlotDepthOfCoverageNodeModel.CFGKEY_FILESUFFIX,"");
 	
 	private static final String SCRIPT_PATH = "ngs" + File.separatorChar + "de" + File.separatorChar + "plotExomeCapture.R";
 	
-	public boolean optionalPort=false;
+//	public boolean optionalPort=false;
 	
     /**
      * Constructor for the node model.
      */
     protected PlotDepthOfCoverageNodeModel() {
-    	super(OptionalPorts.createOPOs(1,1), OptionalPorts.createOPOs(0), SCRIPT_PATH, new String[]{"--infile"}, new String[]{});
-    	addSetting(m_filesuffix);
-    	addSetting(m_infolder);
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(0), SCRIPT_PATH, new String[]{"--infile"}, new String[]{});
+//    	addSetting(m_filesuffix);
+//    	addSetting(m_infolder);
     }
 
     
@@ -69,24 +65,24 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
     	ArrayList<String> files = new ArrayList<>();
     	String outfolder;
     	
-    	if(optionalPort) {
+//    	if(optionalPort) {
     		String firstIn = inData[0].iterator().next().getCell(0).toString();
     		outfolder = firstIn.substring(0,firstIn.lastIndexOf(File.separatorChar));
     		Iterator<DataRow> iter = inData[0].iterator();
     		while(iter.hasNext()) {
     			files.add(iter.next().getCell(0).toString());
     		}
-    	} else {
-    		outfolder = m_infolder.getStringValue();
-    		FileSearch fileSearch = new FileSearch(); 
-
-        	//try different directory and filename :)
-        	fileSearch.searchDirectory(new File(m_infolder.getStringValue()), m_filesuffix.getStringValue());
-    	    for (String matched : fileSearch.getResult()){
-    	    	LOGGER.debug("Found : " + matched);
-    	    	files.add(matched);
-    	    }
-    	}
+//    	} else {
+//    		outfolder = m_infolder.getStringValue();
+//    		FileSearch fileSearch = new FileSearch(); 
+//
+//        	//try different directory and filename :)
+//        	fileSearch.searchDirectory(new File(m_infolder.getStringValue()), m_filesuffix.getStringValue());
+//    	    for (String matched : fileSearch.getResult()){
+//    	    	LOGGER.debug("Found : " + matched);
+//    	    	files.add(matched);
+//    	    }
+//    	}
 
     	this.addArgument("--in"   , writeDocSampleSummary(outfolder,files));
     	super.execute(inData, exec);
@@ -157,73 +153,10 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void reset() {
-        optionalPort = false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-    	try{
-			inSpecs[0].getColumnNames();
-			optionalPort=true;
-		}catch(NullPointerException e){}
-       
-        return null;
+    	return null;
     }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//        	m_filesuffix.saveSettingsTo(settings);
-//        	m_infolder.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_filesuffix.loadSettingsFrom(settings);
-//        m_infolder.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//        m_filesuffix.validateSettings(settings);
-//        m_infolder.validateSettings(settings);
-//    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        // TODO: generated method stub
-    }
-
 }
 
