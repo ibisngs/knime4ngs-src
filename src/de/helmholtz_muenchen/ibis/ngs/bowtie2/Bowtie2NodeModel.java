@@ -340,13 +340,18 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-    	
 
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
     	if(CC.getWarningStatus()){
     		setWarningMessage(CC.getWarningMessages());
     	}
+    	
+		if(CompatibilityChecker.inputFileNotOk(m_installpath.getStringValue(), false)) {
+			throw new InvalidSettingsException("Set path to Bowtie2 binary!");
+		}
+    	
+    	
     	if(readType.equals("paired-end")){
     		m_minins.setEnabled(true);
         	m_maxins.setEnabled(true);

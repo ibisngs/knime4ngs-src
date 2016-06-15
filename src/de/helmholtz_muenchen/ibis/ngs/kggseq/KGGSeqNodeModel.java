@@ -315,6 +315,11 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	
+		if(CompatibilityChecker.inputFileNotOk(m_KGGSEQ.getStringValue(), false)) {
+			throw new InvalidSettingsException("Set path to KGGSeq jar!");
+		}
+    	
+    	
     	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")!=0){
     		throw new InvalidSettingsException("Invalid input. No VCFCell in first column of input table.");
     	}

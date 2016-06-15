@@ -274,6 +274,10 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     		setWarningMessage(CC.getWarningMessages());
     	}
     	
+		if(CompatibilityChecker.inputFileNotOk(m_segemehlfile.getStringValue(), false)) {
+			throw new InvalidSettingsException("Set path to samtools binary!");
+		}
+    	
 		
 		if(m_refseqfile.getStringValue().length() > 1) {
 			if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){

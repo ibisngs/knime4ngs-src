@@ -22,6 +22,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
@@ -438,6 +439,11 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	
     	String utility = m_utility.getStringValue();
    	
+		if(CompatibilityChecker.inputFileNotOk(m_samtools.getStringValue(), false)) {
+			throw new InvalidSettingsException("Set path to samtools binary!");
+		}
+    	
+    	
     	//Check OptionalInputPort
 		try{
 			inSpecs[0].getColumnNames();

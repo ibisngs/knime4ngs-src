@@ -388,6 +388,11 @@ public class BWANodeModel extends HTExecutorNodeModel {
     		setWarningMessage(CC.getWarningMessages());
     	}
     	
+    	
+		if(CompatibilityChecker.inputFileNotOk(m_bwafile.getStringValue(), false)) {
+			throw new InvalidSettingsException("Set path to BWA binary!");
+		}
+    	
     	    	
         //Version control
     	try {

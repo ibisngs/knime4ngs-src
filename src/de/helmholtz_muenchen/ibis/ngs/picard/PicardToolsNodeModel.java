@@ -346,6 +346,10 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    		
+    		if(CompatibilityChecker.inputFileNotOk(m_picard.getStringValue(), false)) {
+    			throw new InvalidSettingsException("Set path to picard.jar!");
+    		}
     	    		
     		//names of the input table columns
 			String [] cols=inSpecs[0].getColumnNames();
