@@ -182,7 +182,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	}
     	
     	pars.put(outputFolderParameter, outputFolderArgument);
-    	OUTFILE = outputFolderParameter;
+    	OUTFILE = outputFolderArgument;
     	
     	// return the GUI parameter
 		return pars;
