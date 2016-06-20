@@ -407,14 +407,14 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				}
 				TableItem item = table.getSelection()[0];
 				
-				String file = getFilePath(shell, "Select directory path to "+item.getText(0),null);
+				String file = getFilePath(shell, "Select directory path to "+item.getText(0),null, "");
 				editBinary(item, file);
 			}
 		});
 		
 		browseRefGenome.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select reference genome","*.fa;*.fasta");
+				String file = getFilePath(shell, "Select reference genome","*.fa;*.fasta", refGenome.getText());
 				REF_GENOME = file;
 				refGenome.setText(REF_GENOME);
 			}
@@ -422,7 +422,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseResHapmap.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select HapMap dataset","*.vcf");
+				String file = getFilePath(shell, "Select HapMap dataset","*.vcf", res_hapmap.getText());
 				RES_HAPMAP = file;
 				res_hapmap.setText(RES_HAPMAP);
 			}
@@ -430,7 +430,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseResOmni.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select Omni dataset","*.vcf");
+				String file = getFilePath(shell, "Select Omni dataset","*.vcf", res_omni.getText());
 				RES_OMNI = file;
 				res_omni.setText(RES_OMNI);
 			}
@@ -438,7 +438,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseRes1000Gsnps.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select 1000G SNPs data set","*.vcf");
+				String file = getFilePath(shell, "Select 1000G SNPs data set","*.vcf", res_1000G_SNPS.getText());
 				RES_1000G_SNPS = file;
 				res_1000G_SNPS.setText(RES_1000G_SNPS);
 			}
@@ -446,7 +446,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseRes1000GIndels.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select 1000G Indels data set","*.vcf");
+				String file = getFilePath(shell, "Select 1000G Indels data set","*.vcf", res_1000G_Indels.getText());
 				RES_1000G_INDELS = file;
 				res_1000G_Indels.setText(RES_1000G_INDELS);
 			}
@@ -454,7 +454,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseResDbsnp.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select dbSNP dataset","*.vcf");
+				String file = getFilePath(shell, "Select dbSNP dataset","*.vcf", res_dbsnp.getText());
 				RES_DBSNP = file;
 				res_dbsnp.setText(RES_DBSNP);
 			}
@@ -462,7 +462,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseResMills.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select Mills dataset","*.vcf");
+				String file = getFilePath(shell, "Select Mills dataset","*.vcf", res_mills.getText());
 				RES_MILLS = file;
 				res_mills.setText(RES_MILLS);
 			}
@@ -470,7 +470,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		browseDBFile.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				String file = getFilePath(shell, "Select HTE database file","*.db;*.sql");
+				String file = getFilePath(shell, "Select HTE database file","*.db;*.sql", "");
 				selectDBFile(file);
 			}
 		});
@@ -700,13 +700,18 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	private String getFilePath(Shell shell, String text, String ext) {
+	private String getFilePath(Shell shell, String text, String ext, String content) {
 		FileDialog fdl = new FileDialog(shell);
 		fdl.setText(text);
 		if(ext == null) {
 			fdl.setFilterExtensions(new String[]{ext});
 		}
-		fdl.setFilterPath(System.getProperty("user.home"));
+		if(content.equals("")) {
+			fdl.setFilterPath(System.getProperty("user.home"));
+		} else {
+			fdl.setFilterPath(new File(content).getParent());
+		}
+		
 		String path = fdl.open();
 		return path;
 	}
