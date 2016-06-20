@@ -48,6 +48,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_BUILDVER			  	= "BUILDVER";
 	public static final String CFGKEY_INFILE			  	= "INFILE";
 	public static final String CFGKEY_PEDFILE 			   	= "PEDFILE";
+	public static final String CFGKEY_RESOURCE 			   	= "RESOURCE";
 	public static final String CFGKEY_COMPOSITE_SUBJECT_ID 	= "COMPOSITE_SUBJECT_ID";
 	public static final String CFGKEY_OUTPREFIX				= "OUTPREFIX";
 	public static final String CFGKEY_OUTFORMAT				= "OUTFORMAT";
@@ -95,6 +96,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     private final SettingsModelString m_KGGSEQ = new SettingsModelString(KGGSeqNodeModel.CFGKEY_KGGSEQ_PATH, "");
     private final SettingsModelString m_BUILDVER = new SettingsModelString(KGGSeqNodeModel.CFGKEY_BUILDVER, "hg19");
     private final SettingsModelString m_PEDFILE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_PEDFILE, "");
+    private final SettingsModelString m_RESOURCE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_RESOURCE, "");
     private final SettingsModelBoolean m_COMPOSITESUBJECTID = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_COMPOSITE_SUBJECT_ID, false);
     private final SettingsModelString m_OUTPREFIX = new SettingsModelString(KGGSeqNodeModel.CFGKEY_OUTPREFIX, "");
     private final SettingsModelString m_OUTFORMAT = new SettingsModelString(KGGSeqNodeModel.CFGKEY_OUTFORMAT, "excel");
@@ -155,6 +157,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
         addSetting(m_SEQ_MQ);
         addSetting(m_SEQ_QUAL);
         addSetting(m_SEQ_SB);
+        addSetting(m_RESOURCE);
     }
 
     /**
@@ -236,8 +239,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	
     	command.add("java -jar");
     	command.add(m_KGGSEQ.getStringValue());
-    	
     	command.add("--buildver "+m_BUILDVER.getStringValue());
+    	command.add("--resource "+m_RESOURCE.getStringValue());
     	command.add("--vcf-file "+infile);
     	command.add("--ped-file "+m_PEDFILE.getStringValue());
     	

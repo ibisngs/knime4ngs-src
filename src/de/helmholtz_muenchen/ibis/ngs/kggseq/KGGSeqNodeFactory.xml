@@ -22,6 +22,9 @@
             <option name="PED Input File">
             	Set the path to the PED pedigree file containing the description of the individuals relationships.
             </option>
+            <option name="Local path to the resource datasets">
+            	Set the path to resource datasets.
+            </option>
         	<option name="General Options">
             	<b>Build Version</b>: Specify the database and reference genome version.<br />
             	<b>Composite Subject ID</b>: By checking this option KGGSeq uses a composite subject ID in the VCF file.<br />

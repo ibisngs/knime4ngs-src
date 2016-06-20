@@ -46,6 +46,7 @@ public class KGGSeqNodeDialog extends HTExecutorNodeDialog {
 	    final SettingsModelString m_KGGSEQ = new SettingsModelString(KGGSeqNodeModel.CFGKEY_KGGSEQ_PATH, "");
 	    final SettingsModelString m_BUILDVER = new SettingsModelString(KGGSeqNodeModel.CFGKEY_BUILDVER, "hg19");
 	    final SettingsModelString m_PEDFILE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_PEDFILE, "");
+	    final SettingsModelString m_RESOURCE = new SettingsModelString(KGGSeqNodeModel.CFGKEY_RESOURCE, "");
 	    final SettingsModelBoolean m_COMPOSITESUBJECTID = new SettingsModelBoolean(KGGSeqNodeModel.CFGKEY_COMPOSITE_SUBJECT_ID, false);
 	    final SettingsModelString m_OUTPREFIX = new SettingsModelString(KGGSeqNodeModel.CFGKEY_OUTPREFIX, "");
 	    final SettingsModelString m_OUTFORMAT = new SettingsModelString(KGGSeqNodeModel.CFGKEY_OUTFORMAT, "excel");
@@ -75,6 +76,9 @@ public class KGGSeqNodeDialog extends HTExecutorNodeDialog {
     	
     	createNewGroup("PED Input File");
     	addDialogComponent(new DialogComponentFileChooser(m_PEDFILE, "kggseq_pedin", 0, ".ped")); 
+    	
+    	createNewGroup("Local path to the resource datasets");
+    	addDialogComponent(new DialogComponentFileChooser(m_RESOURCE, "kggseq_resource", 0,true)); 
     	
     	createNewGroup("General Options");
     	addDialogComponent(new DialogComponentStringSelection(m_BUILDVER, "Build Version", "hg19"));
