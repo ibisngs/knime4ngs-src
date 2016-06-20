@@ -404,5 +404,14 @@ public class IO {
     public static String getBasePath(String File){
     	return File.substring(0, File.lastIndexOf("/"));
     }
+
+    /**
+     * Returns the name of a file, instead of the complete path.
+     * @param Filename
+     * @return
+     */
+    public static String getFileName(String File){
+    	return File.substring(File.lastIndexOf("/")+1);
+    }
     
 }

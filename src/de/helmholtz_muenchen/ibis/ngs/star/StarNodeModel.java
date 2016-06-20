@@ -73,6 +73,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     // the logger instance
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
+	private static String readType = "";
        
     /**
      * Constructor for the node model.
@@ -92,8 +93,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
 
+    	CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	
     	if(SET_RUN_MODE.getStringValue().equals(DEFAULT_RUN_MODE)){
-        	CompatibilityChecker CC = new CompatibilityChecker();
         	CC.getReadType(inSpecs, 0);
         	if(CC.getWarningStatus()){
         		setWarningMessage(CC.getWarningMessages());
@@ -134,13 +137,16 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	// get input parameter from run aligner
     	if(isAlignRunMode()) {	
 	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
-	    	String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+	    	String path2readFile2 = "";
+	    	if(readType.equals("paired-end")) {
+	    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+		    	// add second input file, if paired mode was selected and both files are different
+		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
+		    		inputArgument.add(getAbsoluteFilename(path2readFile2, false));
+	    	}
+	    	
 	    	// add first input file
 	    	inputArgument.add(getAbsoluteFilename(path2readFile1, false));
-	    	
-	    	// add second input file, if paired mode was selected and both files are different
-	    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
-	    		inputArgument.add(getAbsoluteFilename(path2readFile2, false));
 	    	
 	    	// add genome folder to parameters
 	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, SET_GENOME_FOLDER.getStringValue());   	    	
@@ -172,6 +178,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	
     	if(isAlignRunMode()){
     		String outfile = IO.replaceFileExtension(inData[0].iterator().next().getCell(0).toString(),".");
+    		outfile = IO.getFileName(outfile);
     		outputFolderArgument+="/"+outfile;		
     	}
     	

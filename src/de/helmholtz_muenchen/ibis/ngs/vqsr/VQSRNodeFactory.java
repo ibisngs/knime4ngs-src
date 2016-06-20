@@ -4,6 +4,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "VQSR" Node.
  * 
@@ -35,7 +37,7 @@ public class VQSRNodeFactory
     @Override
     public NodeView<VQSRNodeModel> createNodeView(final int viewIndex,
             final VQSRNodeModel nodeModel) {
-        return new VQSRNodeView(nodeModel);
+        return new HTENodeView<VQSRNodeModel>(nodeModel);
     }
 
     /**
