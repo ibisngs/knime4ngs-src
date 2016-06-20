@@ -9,8 +9,8 @@
     
     <fullDescription>
         <intro>The SamTools node enables the access to  several SAMtools utilities.<br />
-        For more information, see the
-		       SAMtools help pages and <a href="http://samtools.sourceforge.net/samtools.shtml">http://samtools.sourceforge.net/samtools.shtml</a></intro>
+        For more information, see <a href="http://samtools.sourceforge.net/samtools.shtml"> the
+		       SAMtools help page</a></intro>
         
         
         <option name="Select utility">Choose which of the SAMtools utilities you want to use:
@@ -37,7 +37,7 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Optional Inport<br></br>Cell 0: Path to SAMtools executable file<br></br>Cell 1: Path to input BAM/SAM file<br></br></inPort>
+        <inPort index="0" name="In-Port name">Optional Inport<br></br>Cell 0: Path to input BAM/SAM file<br></br></inPort>
    		<outPort index="0" name="Out-Port">Cell 0: Path to Outfile<br></br></outPort>
     </ports>
 

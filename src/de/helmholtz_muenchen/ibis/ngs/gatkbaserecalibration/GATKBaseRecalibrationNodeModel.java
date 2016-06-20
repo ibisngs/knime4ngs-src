@@ -368,27 +368,27 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 			throw new InvalidSettingsException("Set 1000G Indel data set!");
 		}
 		
-		if (m_use_phase1_1000G.getBooleanValue() && !Files.exists(Paths.get(phase1 + ".idx"))) {
-			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
-		}
+//		if (m_use_phase1_1000G.getBooleanValue() && !Files.exists(Paths.get(phase1 + ".idx"))) {
+//			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
+//		}
 		
 		String mills = m_mills_1000G_file.getStringValue();
 		if(m_use_mills_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(mills)) {
 			throw new InvalidSettingsException("Set Mills data set!");
 		}
 		
-		if (m_use_mills_1000G.getBooleanValue() && !Files.exists(Paths.get(mills + ".idx"))) {
-			throw new InvalidSettingsException("Mills index file: " + mills + ".idx does not exist!");
-		}
+//		if (m_use_mills_1000G.getBooleanValue() && !Files.exists(Paths.get(mills + ".idx"))) {
+//			throw new InvalidSettingsException("Mills index file: " + mills + ".idx does not exist!");
+//		}
 		
 		String dbsnp = m_dbsnp_file.getStringValue();
 		if(m_use_dbsnp.getBooleanValue() && CompatibilityChecker.inputFileNotOk(dbsnp)) {
 			throw new InvalidSettingsException("Set dbSNP data set!");
 		}
 		
-		if (m_use_dbsnp.getBooleanValue() && !Files.exists(Paths.get(dbsnp + ".idx"))) {
-			throw new InvalidSettingsException("dbSNP index file: " + dbsnp + ".idx does not exist!");
-		}
+//		if (m_use_dbsnp.getBooleanValue() && !Files.exists(Paths.get(dbsnp + ".idx"))) {
+//			throw new InvalidSettingsException("dbSNP index file: " + dbsnp + ".idx does not exist!");
+//		}
 		
 		if(m_use_interval.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_interval_file.getStringValue())) {
 			throw new InvalidSettingsException("Interval file not specified or does not exist!");

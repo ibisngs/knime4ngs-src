@@ -23,6 +23,7 @@ import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 
@@ -125,20 +126,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		/********************* RUN MODE ***************************/
 		pars.put(NAME_OF_RUN_MODE_PARAM, SET_RUN_MODE.getStringValue());
 		
-		
-		/********************* OUTPUT ****************************/
-    	// check, which kind of output parameter must be set.
-    	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
-    	
-		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
-    	File outDir = new File(outputFolderArgument);
-    	// create folder, if not already there
-    	if(!outDir.isDirectory())
-    		outDir.mkdirs();
-    	
-    	pars.put(outputFolderParameter, outputFolderArgument);
-
-    	
+		   	
     	/********************** INPUT ****************************/
     	String inputParameter = (isAlignRunMode() ? NAME_OF_FASTAQ_PARAM : NAME_OF_FASTA_FILES_PARAM);
     	ArrayList<String> inputArgument = new ArrayList<String>();
@@ -169,6 +157,26 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	if(SET_OPTIONAL_PARA.isActive()){
     		pars.put(SET_OPTIONAL_PARA.getStringValue(), "");
     	}
+    	
+    	
+    	
+		/********************* OUTPUT ****************************/
+    	// check, which kind of output parameter must be set.
+    	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
+    	
+		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
+    	File outDir = new File(outputFolderArgument);
+    	// create folder, if not already there
+    	if(!outDir.isDirectory())
+    		outDir.mkdirs();
+    	
+    	if(isAlignRunMode()){
+    		String outfile = IO.replaceFileExtension(inData[0].iterator().next().getCell(0).toString(),".");
+    		outputFolderArgument+="/"+outfile;		
+    	}
+    	
+    	pars.put(outputFolderParameter, outputFolderArgument);
+    	
     	
     	// return the GUI parameter
 		return pars;
