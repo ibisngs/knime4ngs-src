@@ -68,7 +68,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
     private final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
     private final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(CFGKEY_OPTIONAL_PARA, "",false);
-
+    private String OUTFILE 											= "";
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -169,7 +169,6 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		/********************* OUTPUT ****************************/
     	// check, which kind of output parameter must be set.
     	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
-    	
 		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
     	File outDir = new File(outputFolderArgument);
     	// create folder, if not already there
@@ -183,7 +182,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	}
     	
     	pars.put(outputFolderParameter, outputFolderArgument);
-    	
+    	OUTFILE = outputFolderParameter;
     	
     	// return the GUI parameter
 		return pars;
@@ -207,7 +206,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	
     	DataCell[] c = new DataCell[]{
     			new StringCell(SET_RUN_MODE.getStringValue()),
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true)),
+    			new StringCell(OUTFILE),
     			new StringCell(command)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
@@ -252,17 +251,17 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToLockFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
+		return new File(OUTFILE + File.separator + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "STAR.stdErr.log");
+		return new File(OUTFILE + File.separator + "STAR.stdErr.log");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "STAR.stdOut.log");
+		return new File(OUTFILE + File.separator + "STAR.stdOut.log");
  	}
 }
 
