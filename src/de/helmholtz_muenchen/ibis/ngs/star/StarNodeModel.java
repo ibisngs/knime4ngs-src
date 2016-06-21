@@ -27,6 +27,8 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 
 /**
@@ -222,9 +224,8 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		}
 		
 		
-    	DataCell[] c = new DataCell[]{
-    			new StringCell(OUTFILE)};
-    	
+		
+    	DataCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(OUTFILE)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
 		
