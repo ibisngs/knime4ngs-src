@@ -99,6 +99,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected final static int MAX_THREADS = 16;
     
     private String outfile;
+    private int bam_sam_index = -1;
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -129,9 +130,14 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	super.configure(inSpecs);
     	
+    	bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	if(bam_sam_index == -1) {
+    		bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "SAMCell");
+    	}
     	
-    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell")!=0){
-    		throw new InvalidSettingsException("Invalid input. No BAMCell in first column of input table. Node requires the FileLoader as predecessor.");
+
+    	if(bam_sam_index!=0){
+    		throw new InvalidSettingsException("Invalid input. No BAMCell/SAMCell in first column of input table!");
     	}
     	
 //    	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
@@ -185,7 +191,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	String infile;
     	// get input parameter from BAM/SAM selector
     	for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); ) {
-    		infile = it.next().getCell(0).toString();
+    		infile = it.next().getCell(bam_sam_index).toString();
     		inputArgument.add(infile);
     		if(first){
     			outfile = SET_OUTPUT_FOLDER.getStringValue();
