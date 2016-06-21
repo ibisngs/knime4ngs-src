@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -203,7 +204,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		File f = new File(IO.getBasePath(OUTFILE)+"/_STARtmp");
 		if(f.exists()){
 			try{
-				f.delete();
+				FileUtils.deleteDirectory(f);
 			}catch(Exception e){
 				setWarningMessage("Failed to delete tmp dir.");
 			}
