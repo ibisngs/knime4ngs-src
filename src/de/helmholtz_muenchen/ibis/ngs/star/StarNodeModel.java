@@ -38,10 +38,8 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
 public class StarNodeModel extends BinaryWrapperNodeModel {
      
 	// name of the output variables
-	public static final String OUT_COL1 = "RunMode";
-	public static final String OUT_COL2 = "OutputFolder";
-	public static final String OUT_COL3 = "CallCommand";
-
+	public static final String OUT_COL = "Output";
+	
     // keys for SettingsModels
     protected static final String CFGKEY_RUN_MODE 		= "RunMode";
     protected static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
@@ -195,9 +193,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private DataTableSpec getDataOutSpec1() {
     	return new DataTableSpec(
     			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL1, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL2, StringCell.TYPE).createSpec(),
-    					new DataColumnSpecCreator(OUT_COL3, StringCell.TYPE).createSpec()});
+    					new DataColumnSpecCreator(OUT_COL, StringCell.TYPE).createSpec()});
     }
 	
 	@Override
@@ -205,9 +201,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
     	DataCell[] c = new DataCell[]{
-    			new StringCell(SET_RUN_MODE.getStringValue()),
-    			new StringCell(OUTFILE),
-    			new StringCell(command)};
+    			new StringCell(OUTFILE)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
