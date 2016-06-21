@@ -27,6 +27,7 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
 
 /**
  * This is the model implementation for the wrapper of STAR.
@@ -192,16 +193,26 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      * @return
      */
     private DataTableSpec getDataOutSpec1() {
-    	return new DataTableSpec(
-    			new DataColumnSpec[]{
-    					new DataColumnSpecCreator(OUT_COL, StringCell.TYPE).createSpec()});
+    	
+    	if(isAlignRunMode()) {
+        	return new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL, SAMCell.TYPE).createSpec()});
+    	}else{
+        	return new DataTableSpec(
+        			new DataColumnSpec[]{
+        					new DataColumnSpecCreator(OUT_COL, StringCell.TYPE).createSpec()});
+    	}
+    	
+    	
+
     }
 	
 	@Override
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
-		File f = new File(IO.getBasePath(OUTFILE)+"/_STARtmp");
+		File f = new File(OUTFILE + "_STARtmp");
 		if(f.exists()){
 			try{
 				FileUtils.deleteDirectory(f);
