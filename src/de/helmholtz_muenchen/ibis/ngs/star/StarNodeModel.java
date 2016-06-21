@@ -200,6 +200,16 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
+		File f = new File(IO.getBasePath(OUTFILE)+"/_STARtmp");
+		if(f.exists()){
+			try{
+				f.delete();
+			}catch(Exception e){
+				setWarningMessage("Failed to delete tmp dir.");
+			}
+		}
+		
+		
     	DataCell[] c = new DataCell[]{
     			new StringCell(OUTFILE)};
     	
@@ -245,17 +255,17 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToLockFile() {
-		return new File(OUTFILE + File.separator + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
+		return new File(OUTFILE + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(OUTFILE + File.separator + "STAR.stdErr.log");
+		return new File(OUTFILE + "STAR.stdErr.log");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(OUTFILE + File.separator + "STAR.stdOut.log");
+		return new File(OUTFILE + "STAR.stdOut.log");
  	}
 }
 
