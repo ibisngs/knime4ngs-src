@@ -281,12 +281,12 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(OUTFILE + "STAR.stdErr.log");
+		return new File(OUTFILE + ".stdErr");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(OUTFILE + "STAR.stdOut.log");
+		return new File(OUTFILE + ".stdOut");
  	}
 }
 
