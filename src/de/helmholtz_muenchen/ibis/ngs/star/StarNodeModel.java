@@ -71,6 +71,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
     private final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(CFGKEY_OPTIONAL_PARA, "",false);
     private String OUTFILE 											= "";
+//    private String OUTFILE_TABLE									= "";
     
     // the logger instance
     @SuppressWarnings("unused")
@@ -180,12 +181,16 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	if(isAlignRunMode()){
     		String outfile = IO.replaceFileExtension(inData[0].iterator().next().getCell(0).toString(),".");
     		outfile = IO.getFileName(outfile);
-    		outputFolderArgument+="/"+outfile;		
+    		outputFolderArgument+="/"+outfile;	
+    		
+        	pars.put(outputFolderParameter, outputFolderArgument);
+        	OUTFILE = outputFolderArgument+"Aligned.out.sam";
+    	}else{
+    		
+        	pars.put(outputFolderParameter, outputFolderArgument);
+        	OUTFILE = outputFolderArgument;
     	}
-    	
-    	pars.put(outputFolderParameter, outputFolderArgument);
-    	OUTFILE = outputFolderArgument;
-    	
+	
     	// return the GUI parameter
 		return pars;
 	}
@@ -214,7 +219,9 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
-		File f = new File(OUTFILE + "_STARtmp");
+		
+		String tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");
+		File f = new File(tmpOut);
 		if(f.exists()){
 			try{
 				FileUtils.deleteDirectory(f);
@@ -222,6 +229,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 				setWarningMessage("Failed to delete tmp dir.");
 			}
 		}
+		
 		
 		
 		
@@ -268,7 +276,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToLockFile() {
-		return new File(OUTFILE + SuccessfulRunChecker.LOCK_NAME + SuccessfulRunChecker.LOCK_ENDING);
+		return new File(OUTFILE + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 	@Override
