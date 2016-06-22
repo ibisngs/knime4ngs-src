@@ -338,6 +338,10 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		}
     		if(m_mforce.getBooleanValue()){
     			command.add("-f");
+    		}else{
+    			if(new File (outfile).exists()){
+    				throw new InvalidSettingsException("Outfile already exists. Please move/delete the file or enable outfile overwrite.");
+    			}
     		}
     		if(m_msorted.getBooleanValue()){
     			command.add("-n");
@@ -463,8 +467,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     			throw new InvalidSettingsException(m_utility.getStringValue()+" requires input table.");
     		}	
     	}
-    	
-    	
+       	
      	if(m_refseqfile.getStringValue().length() > 1) {
 	     	if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
 	     		throw new InvalidSettingsException("Sequence file is not in fasta format!");
