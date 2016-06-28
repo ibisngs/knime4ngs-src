@@ -85,7 +85,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> cmd = new ArrayList<>();
 		cmd.add("perl");
 		cmd.add(IO.getScriptPath()+"scripts/perl/vcfsorter.pl");
-		cmd.add(m_refseqfile.getStringValue());
+		cmd.add(IO.replaceFileExtension(m_refseqfile.getStringValue(), ".dict"));
 		cmd.add(vcf_infile);
 		cmd.add(outfile);
     	
