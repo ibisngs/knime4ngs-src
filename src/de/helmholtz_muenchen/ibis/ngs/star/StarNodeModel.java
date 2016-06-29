@@ -13,7 +13,6 @@ import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
@@ -22,7 +21,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 
-import de.helmholtz_muenchen.ibis.ngs.fastaSelector.FastaSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -97,27 +95,18 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	super.configure(inSpecs);
 
     	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
     	
-    	if(SET_RUN_MODE.getStringValue().equals(DEFAULT_RUN_MODE)){
-        	CC.getReadType(inSpecs, 0);
+    	if(isAlignRunMode()){
+    		readType = CC.getReadType(inSpecs, 0);
         	if(CC.getWarningStatus()){
         		setWarningMessage(CC.getWarningMessages());
         	}
-    	}
+        	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
+    	} else {
+    		if(!CompatibilityChecker.checkInputCellType(inSpecs[0], "FastACell")) {
+    			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects a FastA file as input.");
 
-    	
-    	
-    	// check input port
-    	String[] cn=inSpecs[0].getColumnNames();
-    	if(isAlignRunMode()) {
-    		
-            // validate genome dir
-            validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
-    	}
-    	else {
-    		if(!cn[0].equals(FastaSelectorNodeModel.OUTPUT_NAME_FASTA_FILES))
-    			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects the output of a 'FastaSelector' node.");
+    		}
     	}
     	
 		return new DataTableSpec[]{getDataOutSpec1()};
@@ -208,7 +197,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	}else{
         	return new DataTableSpec(
         			new DataColumnSpec[]{
-        					new DataColumnSpecCreator(OUT_COL, StringCell.TYPE).createSpec()});
+        					new DataColumnSpecCreator(OUT_COL, FileCell.TYPE).createSpec()});
     	}
     	
     	
@@ -220,13 +209,15 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
     	
 		
-		String tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");
-		File f = new File(tmpOut);
-		if(f.exists()){
-			try{
-				FileUtils.deleteDirectory(f);
-			}catch(Exception e){
-				setWarningMessage("Failed to delete tmp dir.");
+		if(isAlignRunMode()) {
+			String tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");
+			File f = new File(tmpOut);
+			if(f.exists()){
+				try{
+					FileUtils.deleteDirectory(f);
+				}catch(Exception e){
+					setWarningMessage("Failed to delete tmp dir.");
+				}
 			}
 		}
 		

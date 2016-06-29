@@ -20,10 +20,11 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="FeatureCountFiles"> Paths to FeatureCountFiles are expected to be in the first column.</inPort>
-        <outPort index="0" name="Merged count file"> Merged FeatureCountFile.</outPort>
+        <inPort index="0" name="FeatureCount Files">
+        	Paths to FeatureCountFiles are expected to be in the first column.
+        </inPort>
+        <outPort index="0" name="Merged count matrix">
+        	Merged count matrix which is written to the specified output file.
+        </outPort>
     </ports>    
-    <views>
-        <view index="0" name="no view implemented">no view implemented</view>
-    </views>
 </knimeNode>

@@ -134,6 +134,9 @@
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell$FastQCellFactory">
 			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell$FastQSerializer"/> 
 		</DataType>
+		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell$FastACellFactory">
+			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell$FastASerializer"/> 
+		</DataType>		
 		<DataType cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell" factoryClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell$GVCFCellFactory">
 			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell$GVCFSerializer"/> 
 		</DataType>

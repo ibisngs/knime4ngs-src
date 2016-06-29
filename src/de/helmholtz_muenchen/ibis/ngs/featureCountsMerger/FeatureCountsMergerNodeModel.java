@@ -95,9 +95,9 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     		if(this.SET_REMOVE_ENDING.getBooleanValue()) {
     			String tmp[] = sampleName.split(ENDING_SPLIT);
     			sampleName = tmp[0];
-    			for(int i = 1; i < tmp.length-1; i++) {
-    				sampleName = sampleName + tmp[i];
-    			}
+//    			for(int i = 1; i < tmp.length-1; i++) {
+//    				sampleName = sampleName + tmp[i];
+//    			}
     		}
 
     		sampleNames.add(sampleName);

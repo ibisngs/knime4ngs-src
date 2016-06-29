@@ -77,8 +77,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		//////////////////////////////////////////////////////////////////////////
 		// PREPARE INPUT FILES
 		//////////////////////////////////////////////////////////////////////////
-		exec.setProgress(0.00);
-		exec.setProgress("writing input data");
+//		exec.setProgress(0.00);
+//		exec.setProgress("writing input data");
 		for(int i=0; i < INPUT_FILE_ARGUMENTS.length; i++){
 			exec.checkCanceled();
 			if(inData[i] != null){
@@ -99,8 +99,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 	}
 	
 	protected String[] prepareOutputData(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
-		exec.setProgress(0.05);
-		exec.setProgress("preparing output data");
+//		exec.setProgress(0.05);
+//		exec.setProgress("preparing output data");
 		String[] outFiles = new String[OUTPUT_FILE_ARGUMENTS.length];
 		for(int i=0; i < OUTPUT_FILE_ARGUMENTS.length; i ++){
 			exec.checkCanceled();
@@ -132,8 +132,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		//////////////////////////////////////////////////////////////////////////
 		// RUN COMMAND
 		//////////////////////////////////////////////////////////////////////////
-		exec.setProgress(0.10);
-		exec.setProgress("executing script");
+//		exec.setProgress(0.10);
+//		exec.setProgress("executing script");
 		LOGGER.info("Running Rscript with arguments: " + getArgumentsAsVector());
 		try{
 			super.executeScript(exec, null);
@@ -145,10 +145,10 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		//////////////////////////////////////////////////////////////////////////
 		// READ DATA
 		//////////////////////////////////////////////////////////////////////////
-		exec.setProgress(0.90);
-		exec.setProgress("reading output");
+//		exec.setProgress(0.90);
+//		exec.setProgress("reading output");
 		BufferedDataTable[] output = IO.readCSV(exec, outFiles, RNodeModel.LOGGER, true, true);
-		exec.setProgress(1.0);
+//		exec.setProgress(1.0);
 
 		return(output);
 	}

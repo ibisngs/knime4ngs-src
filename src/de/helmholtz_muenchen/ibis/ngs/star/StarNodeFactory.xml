@@ -18,8 +18,15 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port">Input depends on the runMode:<br /><br /><b>-alignReads:</b> Input from <i>RunAligner</i> node (single- and paired-reads are supported)<br /><b>-generateGenome:</b> Input from <i>FastaSelector</i> node (list of fasta files)</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: runMode (<i>alignReads</i> or <i>generateGenome</i>)<br />Cell 1: path to output folder<br />Cell 2: command which was used to call the binary</outPort>
+        <inPort index="0" name="In-Port">
+        	Input depends on the runMode:<br />
+        	<br />
+        	<b>-alignReads:</b> FastQ file(s) loaded with FileLoader (single- and paired-reads are supported)<br />
+        	<b>-generateGenome:</b> FastA file(s) loaded with FileLoader
+        </inPort>
+        <outPort index="0" name="Out-Port">
+        	Cell 0: In case of <b>alignReads</b> path to SAM file, otherwise path to folder containing the generated genome.<br />
+        </outPort>
     </ports>    
     
     <views>

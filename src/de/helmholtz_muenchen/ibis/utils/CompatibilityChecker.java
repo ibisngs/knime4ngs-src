@@ -6,7 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.DataType;
 import org.knime.core.node.InvalidSettingsException;
+
+import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
 public class CompatibilityChecker {
 
@@ -80,10 +83,18 @@ public class CompatibilityChecker {
 	}
 	
 	public static boolean inputFileNotOk(String path) {
-		return inputFileNotOk(path, true);
+		return inputFileNotOk(path, true, null);
+	}
+	
+	public static boolean inputFileNotOk(String path, DataType type) {
+		return inputFileNotOk(path, true, type);
 	}
 	
 	public static boolean inputFileNotOk(String path, boolean checkEmpty) {
+		return inputFileNotOk(path, checkEmpty, null);
+	}
+	
+	public static boolean inputFileNotOk(String path, boolean checkEmpty, DataType type) {
 		
 		if(path.equals("") || path == null) return true;
 		
@@ -96,11 +107,26 @@ public class CompatibilityChecker {
 			}
 			return isEmpty;
 		}
-		return Files.notExists(Paths.get(path));
+		
+		if(Files.notExists(Paths.get(path))) return true;
+		
+		if(type == null) {
+			return false;
+		} else {
+			String my_type = type.toString();
+			if(my_type.equals("FastACell")) {
+				return !FileValidator.checkFastaFormat(path);
+			}
+			if(my_type.equals("FastQCell")) {
+				return !FileValidator.checkFastqFormat(path);
+			}
+		}
+		
+		return false;
 	}
 	
 	public static boolean checkInputCellType(DataTableSpec inSpecs, String CellType) {
-		return (getIndexCellType(inSpecs,CellType)>-1);
+		return (getFirstIndexCellType(inSpecs,CellType)>-1);
 	}
 	
 	/**

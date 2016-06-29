@@ -22,6 +22,7 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
@@ -48,11 +49,12 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {"",".vcf",".g.vcf",".fastq",".fq",".bam",".sam"};
-	private static final DataType [] TYPES = {FileCell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {"",".fa", ".fasta",".vcf",".g.vcf",".fastq",".fq",".bam",".sam"};
+	private static final DataType [] TYPES = {FileCell.TYPE, FastACell.TYPE, FastACell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 		
 	private boolean secondOk = false;
 	private String sep;
+	private DataType type;
 	
 	private DataColumnSpec dcs1 = null;
 	private DataColumnSpec dcs2 = null;
@@ -90,12 +92,12 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     			if(secondOk) {
     				String [] col = line.split(this.sep);
     				
-    				if(CompatibilityChecker.inputFileNotOk(col[0])) {
+    				if(CompatibilityChecker.inputFileNotOk(col[0], type)) {
     					setWarningMessage("Some input files are invalid!");
     					continue;
     				}
     				
-    				if(CompatibilityChecker.inputFileNotOk(col[1])) {
+    				if(CompatibilityChecker.inputFileNotOk(col[1], type)) {
     					setWarningMessage("Some input files are invalid!");
     					continue;
     				}
@@ -103,10 +105,16 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     				in1_list.add(col[0]);
     				if(col.length<2) {
     					setWarningMessage("Second column contains less entries than first! Ignoring those lines!");
+    					continue;
     				}
     				in2_list.add(col[1]);
     			} else {
-    				in1_list.add(line.trim());
+    				String file = line.trim();
+    				if(CompatibilityChecker.inputFileNotOk(file, type)) {
+    					setWarningMessage("Some input files are invalid!");
+    					continue;
+    				}
+    				in1_list.add(file);
     			}
     		}
     		
@@ -115,6 +123,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     		in1_list.add(in1);
     		in2_list.add(in2);
     	}
+    	
+    	
     	
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(specs));
@@ -156,7 +166,6 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	String in2 = m_infile2.getStringValue();
     	
     	secondOk = false;
-    	
     	int end = checkEnding(in1);
     	
     	//check first input file
@@ -188,8 +197,10 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     		this.setWarningMessage("The input file is not in a supported NGS format");
     	} 
     	
+    	type = TYPES[checkEnding(in1)];
+    	
     	//repeat check of first input file as it might be a path in a list
-    	if(CompatibilityChecker.inputFileNotOk(in1)) {
+    	if(CompatibilityChecker.inputFileNotOk(in1, type)) {
     		throw new InvalidSettingsException("First input file in your list does not exist or is empty!");
     	}
     	
@@ -197,8 +208,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	dcs1 = new DataColumnSpecCreator(OUT_COL1, TYPES[checkEnding(in1)]).createSpec();
     	
     	if(in2.length()>0) {
-    		if(CompatibilityChecker.inputFileNotOk(in2) || !TYPES[checkEnding(in2)].toString().equals("FastQCell")) {
-    			setWarningMessage("Second input file does not exist or has disallowed ending and will be ignored!");
+    		if(CompatibilityChecker.inputFileNotOk(in2, type) || !TYPES[checkEnding(in2)].toString().equals("FastQCell")) {
+    			setWarningMessage("Second input file does not exist, has a disallowed ending or is invalid and will be ignored!");
     		} else {
     			secondOk = true;
     			dcs2 = new DataColumnSpecCreator(OUT_COL2, TYPES[checkEnding(in2)]).createSpec();
