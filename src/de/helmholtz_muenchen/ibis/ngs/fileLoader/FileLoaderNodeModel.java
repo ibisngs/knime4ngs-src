@@ -1,6 +1,7 @@
 package de.helmholtz_muenchen.ibis.ngs.fileLoader;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -91,25 +92,28 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     			if(line.trim().equals("")) continue;
     			if(secondOk) {
     				String [] col = line.split(this.sep);
+    				String file1 = IO.getAbsolutePath(new File(in1).getParent(), col[0]);
+    				String file2 = IO.getAbsolutePath(new File(in1).getParent(), col[1]);
     				
-    				if(CompatibilityChecker.inputFileNotOk(col[0], type)) {
+    				
+    				if(CompatibilityChecker.inputFileNotOk(file1, type)) {
     					setWarningMessage("Some input files are invalid!");
     					continue;
     				}
     				
-    				if(CompatibilityChecker.inputFileNotOk(col[1], type)) {
+    				if(CompatibilityChecker.inputFileNotOk(file2, type)) {
     					setWarningMessage("Some input files are invalid!");
     					continue;
     				}
     				
-    				in1_list.add(col[0]);
+    				in1_list.add(file1);
     				if(col.length<2) {
     					setWarningMessage("Second column contains less entries than first! Ignoring those lines!");
     					continue;
     				}
-    				in2_list.add(col[1]);
+    				in2_list.add(file2);
     			} else {
-    				String file = line.trim();
+    				String file = IO.getAbsolutePath(new File(in1).getParent(), line.trim());
     				if(CompatibilityChecker.inputFileNotOk(file, type)) {
     					setWarningMessage("Some input files are invalid!");
     					continue;
@@ -178,16 +182,17 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     		String firstLine;
 			try {
 				firstLine = IO.head(Paths.get(in1), 1).get(0);
-				in1 = firstLine.trim();
 				String [] sep = {"\t", " ", ";", ","};
 				for(String s:sep) {
 					if(firstLine.contains(s)) {
 						String [] col = firstLine.split(s);
 						if(col.length > 2) setWarningMessage("Only the first or first two columns are read. Further columns are ignored.");
-						in1 = col[0];
-						in2 = col[1];
+						in2 = IO.getAbsolutePath(new File(in1).getParent(), col[1]);
+						in1 = IO.getAbsolutePath(new File(in1).getParent(), col[0]);
 						this.sep = s;
 						break;
+					} else {
+						in1 = IO.getAbsolutePath(new File(in1).getParent(), firstLine.trim());
 					}
 				}
 			} catch (IOException e) {
@@ -201,6 +206,7 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	
     	//repeat check of first input file as it might be a path in a list
     	if(CompatibilityChecker.inputFileNotOk(in1, type)) {
+    		System.out.println(in1);
     		throw new InvalidSettingsException("First input file in your list does not exist or is empty!");
     	}
     	

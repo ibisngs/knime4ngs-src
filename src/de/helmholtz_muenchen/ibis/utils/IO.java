@@ -414,4 +414,15 @@ public class IO {
     	return File.substring(File.lastIndexOf("/")+1);
     }
     
+    public static String getAbsolutePath(String currDir, String path) {
+    	if(path.startsWith(File.separator)) {
+    		return path;
+    	} else if(path.startsWith("."+File.separator)) {
+    		return currDir + path.replaceFirst("\\.", "");
+    	} else if(path.startsWith(".."+File.separator)) {
+    		return getAbsolutePath(new File(currDir).getParent(), path.replaceFirst("\\.", ""));
+    	}
+    	return currDir + File.separator + path;
+    }
+    
 }

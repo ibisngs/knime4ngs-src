@@ -49,14 +49,14 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
        	// add groups and components
        	createNewGroup("STAR Options");
         addDialogComponent(dcRunMode);
-
+        addDialogComponent(new DialogComponentOptionalString(SET_OPTIONAL_PARA,"Optional parameters"));
+        
         createNewGroup("Input");
         addDialogComponent(dcGenomeFolder);
-        addDialogComponent(new DialogComponentOptionalString(SET_OPTIONAL_PARA,"Optional parameters"));
         
         createNewGroup("Output");
         addDialogComponent(dcOutputFolder);
- 
+        
         // add change listener to runMode
         SET_RUN_MODE.addChangeListener(new ChangeListener() {
 			@Override

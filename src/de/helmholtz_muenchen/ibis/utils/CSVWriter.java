@@ -61,7 +61,6 @@ import org.knime.core.data.DataTable;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
 import org.knime.core.data.DoubleValue;
-import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
 
@@ -177,25 +176,25 @@ public class CSVWriter extends BufferedWriter {
 
         // write each row of the data
         int i = 0;
-        int rowCnt = -1;
-        if (table instanceof BufferedDataTable) {
-            rowCnt = (int)((BufferedDataTable)table).size();
-        }
+//        int rowCnt = -1;
+//        if (table instanceof BufferedDataTable) {
+//            rowCnt = (int)((BufferedDataTable)table).size();
+//        }
 
         for (DataRow row : table) {
 
-            String rowKey = row.getKey().toString();
-            String msg;
+//            String rowKey = row.getKey().toString();
+//            String msg;
 
             // set the progress
-            if (rowCnt <= 0) {
-                msg = "Writing row " + (i + 1) + " (\"" + rowKey + "\")";
-            } else {
-                msg =
-                        "Writing row " + (i + 1) + " (\"" + rowKey + "\") of "
-                                + rowCnt;
-                exec.setProgress(i / (double)rowCnt, msg);
-            }
+//            if (rowCnt <= 0) {
+//                msg = "Writing row " + (i + 1) + " (\"" + rowKey + "\")";
+//            } else {
+//                msg =
+//                        "Writing row " + (i + 1) + " (\"" + rowKey + "\") of "
+//                                + rowCnt;
+//                exec.setProgress(i / (double)rowCnt, msg);
+//            }
             // Check if execution was canceled !
             exec.checkCanceled();
 

@@ -51,8 +51,8 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
     protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    protected static final String DEFAULT_OUTPUT_FOLDER 	= "./output/";			// creates a folder "output" relative to the STAR binary
-    protected static final String DEFAULT_GENOME_FOLDER 	= "./GenomeDir/";		// searches for the genome index in "GenomeDir" relative to the STAR binary
+    protected static final String DEFAULT_OUTPUT_FOLDER 	= "";			// creates a folder "output" relative to the STAR binary
+    protected static final String DEFAULT_GENOME_FOLDER 	= "";		// searches for the genome index in "GenomeDir" relative to the STAR binary
 
     // name of parameters which are defined in the STAR binary
     private final static String NAME_OF_OUTPUT_PREFIX_PARAM 	= "--outFileNamePrefix";	// parameter in STAR which allows the user to set the output folder (relative or absolute)
@@ -160,17 +160,29 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	
 		/********************* OUTPUT ****************************/
     	// check, which kind of output parameter must be set.
+    	String infile = inData[0].iterator().next().getCell(0).toString();
     	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
-		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
+		String outputFolderArgument = SET_OUTPUT_FOLDER.getStringValue();
+		if(CompatibilityChecker.inputFileNotOk(outputFolderArgument, false)) {
+			outputFolderArgument = new File(infile).getParent();
+			if(!isAlignRunMode()) {
+				outputFolderArgument += File.separator + "STAR_genome";
+			}
+		}
+		
+		if(!outputFolderArgument.endsWith(File.separator)) {
+			outputFolderArgument += File.separator;
+		}
+		
     	File outDir = new File(outputFolderArgument);
     	// create folder, if not already there
     	if(!outDir.isDirectory())
     		outDir.mkdirs();
     	
     	if(isAlignRunMode()){
-    		String outfile = IO.replaceFileExtension(inData[0].iterator().next().getCell(0).toString(),".");
+    		String outfile = IO.replaceFileExtension(infile,".");
     		outfile = IO.getFileName(outfile);
-    		outputFolderArgument+="/"+outfile;	
+    		outputFolderArgument+=outfile;	
     		
         	pars.put(outputFolderParameter, outputFolderArgument);
         	OUTFILE = outputFolderArgument+"Aligned.out.sam";
@@ -199,16 +211,12 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
         			new DataColumnSpec[]{
         					new DataColumnSpecCreator(OUT_COL, FileCell.TYPE).createSpec()});
     	}
-    	
-    	
-
     }
 	
 	@Override
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
-    	
-		
+
 		if(isAlignRunMode()) {
 			String tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");
 			File f = new File(tmpOut);
@@ -220,10 +228,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 				}
 			}
 		}
-		
-		
-		
-		
+
     	DataCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(OUTFILE)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -267,16 +272,19 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToLockFile() {
+		if(!isAlignRunMode()) return new File(OUTFILE+"Genome"+ SuccessfulRunChecker.LOCK_ENDING);
 		return new File(OUTFILE + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 	@Override
 	protected File getPathToStderrFile() {
+		if(!isAlignRunMode()) return new File(OUTFILE+"Genome.stdErr");
 		return new File(OUTFILE + ".stdErr");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
+		if(!isAlignRunMode()) return new File(OUTFILE+"Genome.stdOut");
 		return new File(OUTFILE + ".stdOut");
  	}
 }
