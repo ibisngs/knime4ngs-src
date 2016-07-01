@@ -11,7 +11,7 @@
         The node takes as input a list of feature count files and returns a table with the merged counts.
         </intro>
         <tab name="Options">
-        <option name="Output"> Set the path to the folder where the merged file should be stored.</option>
+        <option name="Output"> Set the path to the file where the merged counts should be stored.</option>
         <option name="Header format options">
         <b>Remove the path of the file in the header</b>: Choose whether to only take the name of the file as header caption.<br />
         <b>Remove the ending of the file in the header</b>: Choose whether to remove the ending of the file in the header caption.<br />
@@ -25,6 +25,9 @@
         </inPort>
         <outPort index="0" name="Merged count matrix">
         	Merged count matrix which is written to the specified output file.
+        	<br />Row names: IDs of features.
+        	<br />Column headers are the names of the samples.
+        	<br />Cell 0...n: Count of features in the samples.
         </outPort>
     </ports>    
 </knimeNode>

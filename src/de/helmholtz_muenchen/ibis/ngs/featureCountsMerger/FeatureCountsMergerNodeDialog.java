@@ -23,17 +23,17 @@ public class FeatureCountsMergerNodeDialog extends DefaultNodeSettingsPane {
     protected FeatureCountsMergerNodeDialog() {
 		// create open file components
 		DialogComponentFileChooser dcOutputFile = new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_fcm_OUTPUT_FILE", 0, false);
-		DialogComponentBoolean removePath 		= new DialogComponentBoolean(SET_REMOVE_PATH, "remove the path of the file in the header");
-		DialogComponentBoolean removeEnding 	= new DialogComponentBoolean(SET_REMOVE_ENDING, "remove the ending of the file in the header");
+		DialogComponentBoolean removePath 		= new DialogComponentBoolean(SET_REMOVE_PATH, "Remove the path of the file in the header");
+		DialogComponentBoolean removeEnding 	= new DialogComponentBoolean(SET_REMOVE_ENDING, "Remove the ending of the file in the header");
 		
 		// set a new title to them
-		dcOutputFile.setBorderTitle("path to output file");
+		dcOutputFile.setBorderTitle("Path to output file");
 		 
 		// add groups and components        
-		createNewGroup("output");
+		createNewGroup("Output");
 		addDialogComponent(dcOutputFile);
 		
-		createNewGroup("header format options");
+		createNewGroup("Header format options");
 		addDialogComponent(removePath);
 		addDialogComponent(removeEnding);
     }

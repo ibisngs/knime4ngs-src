@@ -7,30 +7,47 @@
     </shortDescription>
     
     <fullDescription>
-        <intro>STAR, a "splice aware" RNA-seq aligner, aligns RNA-seq reads to a reference genome using uncompressed suffix arrays.<br /><br />For details, please see paper:<br />Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635<br /><a href="http://bioinformatics.oxfordjournals.org/content/29/1/15">STAR: ultrafast universal RNA-seq aligner</a></intro>
+        <intro>
+        	STAR, a "splice aware" RNA-seq aligner, aligns RNA-seq reads to a reference genome using uncompressed suffix arrays.
+        	Details are described in the publication: <a href="http://bioinformatics.oxfordjournals.org/content/29/1/15">STAR: ultrafast universal RNA-seq aligner</a>
+        	<br />Dobin et al, Bioinformatics 2012; doi: 10.1093/bioinformatics/bts635
+        </intro>
         
         <tab name="STAR Options">
-        	<option name="runMode"><i>alignReads</i> or <i>generateGenome</i>:<br /><br/><i>alignReads:</i> aligns reads to a reference genome<br /><i>generateGenome:</i> generates a genome index out of one or more fasta files</option>
-        	<option name="path to indexed genome">Path to the genome which was indexed by STAR using the "generate genome mode". This option is only needed in the "align read mode".</option>
-        	<option name="Optional parameters">Parameters can be set like you would normally use them on the command line for this binary.</option>
-        	<option name="path to output folder">Path where all the output data is stored.</option>
+        	<option name="runMode">
+        		<i>alignReads</i> or <i>generateGenome</i>:<br />
+        		<br/>
+        		<i>alignReads</i>: Aligns reads to a reference genome.<br />
+        		<i>generateGenome</i>: Generates a genome index using one or more fastA files.
+        	</option>
+        	<option name="Optional parameters">
+        		Parameters can be set like you would normally use them on the command line for this binary.
+        	</option>
+        	<option name="Path to indexed genome">
+        		Path to the genome which was indexed by STAR using the <i>generateGenome</i> mode.
+        		This option is only needed when applying the <i>alignReads</i> mode.
+        	</option>
+        	<option name="Path to output folder">
+        		Path where all the output data is stored.
+        		The folder of the input files is used if no path is specified or the given path is invalid.
+        	</option>
         </tab>
     </fullDescription>
     
     <ports>
         <inPort index="0" name="In-Port">
-        	Input depends on the runMode:<br />
+        	Input depends on the runMode:
         	<br />
-        	<b>-alignReads:</b> FastQ file(s) loaded with FileLoader (single- and paired-reads are supported)<br />
-        	<b>-generateGenome:</b> FastA file(s) loaded with FileLoader
+        	<i>alignReads</i>: FastQ file(s) loaded with FileLoader (single- and paired-reads are supported).<br />
+        	<i>generateGenome:</i> FastA file(s) loaded with FileLoader.
         </inPort>
         <outPort index="0" name="Out-Port">
-        	Cell 0: In case of <b>alignReads</b> path to SAM file, otherwise path to folder containing the generated genome.<br />
+        	Cell 0: In case of <i>alignReads</i> path to SAM file, otherwise path to the folder containing the generated genome.<br />
         </outPort>
     </ports>    
     
     <views>
         <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
-</views>
+	</views>
     
 </knimeNode>

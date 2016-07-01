@@ -5,7 +5,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -19,13 +18,12 @@ import org.knime.core.data.def.DefaultRow;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 
 /**
@@ -129,9 +127,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     						counts.get(name).put(sampleName, count);
     					}
     					headerLine = false;
-    				}
-
-    				
+    				}	
     			}
     			// close the file
     			r.close();
@@ -146,7 +142,15 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
         BufferedDataContainer cont = exec.createDataContainer(table);
         	
     	String outfile = this.SET_OUTPUT_FILE.getStringValue();
-    	new File(outfile).delete();
+    	
+    	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
+    		String in = inData[0].iterator().next().getCell(0).toString();
+    		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
+    	}
+    	
+    	System.out.println(outfile);
+    	
+//    	new File(outfile).delete();
     	BufferedWriter outfileBW = new BufferedWriter(new FileWriter(outfile));
     	
     	// write header
@@ -215,16 +219,10 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void reset() { }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
     	// test if output file is set
-    	if(this.SET_OUTPUT_FILE.getStringValue().isEmpty())
-		throw new InvalidSettingsException("Output file path may not be empty.");
+//    	if(this.SET_OUTPUT_FILE.getStringValue().isEmpty())
+//		throw new InvalidSettingsException("Output file path may not be empty.");
         return new DataTableSpec[]{ null };
     }
     
@@ -241,14 +239,6 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     	
     	DataColumnSpec[] specs = DataTableSpec.createColumnSpecs(sampleNames.toArray(new String[0]), types);
     	return(new DataTableSpec(specs));
-	}
-
-	@Override
-	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {	
-	}
-
-	@Override
-	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec) throws IOException, CanceledExecutionException {
 	}
 }
 
