@@ -50,8 +50,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
 	public static final String OUT_COL1 = "Path2File1";
 	public static final String OUT_COL2 = "Path2File2";
 	
-	private static final String [] ENDINGS = {"",".fa", ".fasta",".vcf",".g.vcf",".fastq",".fq",".bam",".sam"};
-	private static final DataType [] TYPES = {FileCell.TYPE, FastACell.TYPE, FastACell.TYPE, VCFCell.TYPE, GVCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
+	private static final String [] ENDINGS = {"",".fa", ".fasta",".g.vcf",".vcf",".fastq",".fq",".bam",".sam"};
+	private static final DataType [] TYPES = {FileCell.TYPE, FastACell.TYPE, FastACell.TYPE, GVCFCell.TYPE, VCFCell.TYPE, FastQCell.TYPE, FastQCell.TYPE, BAMCell.TYPE, SAMCell.TYPE};
 		
 	private boolean secondOk = false;
 	private String sep;

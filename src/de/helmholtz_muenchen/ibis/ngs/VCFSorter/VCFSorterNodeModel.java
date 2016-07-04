@@ -21,6 +21,7 @@ import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastACell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
@@ -115,6 +116,10 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	if(CompatibilityChecker.inputFileNotOk(m_refseqfile.getStringValue(), true, FastACell.TYPE)) {
+    		throw new InvalidSettingsException("Reference file invalid!");
+    	}
+    	
     	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")!=0){
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}	

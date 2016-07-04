@@ -187,7 +187,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
         	pars.put(outputFolderParameter, outputFolderArgument);
         	OUTFILE = outputFolderArgument+"Aligned.out.sam";
     	}else{
-    		
+    		pars.put(NAME_OF_OUTPUT_PREFIX_PARAM, outputFolderArgument);
         	pars.put(outputFolderParameter, outputFolderArgument);
         	OUTFILE = outputFolderArgument;
     	}
@@ -217,8 +217,14 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 
+		String tmpOut;
 		if(isAlignRunMode()) {
-			String tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");
+			tmpOut = OUTFILE.replaceFirst("Aligned.out.sam", "_STARtmp");	
+		} else {
+			tmpOut = OUTFILE + "_STARtmp";
+		}
+		
+		if(tmpOut.contains("_STARtmp")) {
 			File f = new File(tmpOut);
 			if(f.exists()){
 				try{
