@@ -23,8 +23,8 @@
         	<option name="Optional parameters">
         		Parameters can be set like you would normally use them on the command line for this binary.
         	</option>
-        	<option name="Path to indexed genome">
-        		Path to the genome which was indexed by STAR using the <i>generateGenome</i> mode.
+        	<option name="Path to genome indexes">
+        		Path to the genome directory where genome indeces were generated using the STAR <i>generateGenome</i> mode.
         		This option is only needed when applying the <i>alignReads</i> mode.
         	</option>
         	<option name="Path to output folder">

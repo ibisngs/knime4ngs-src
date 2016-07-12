@@ -44,7 +44,7 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
        	
        	// set a new title to them
        	dcOutputFolder.setBorderTitle("Path to output folder");
-       	dcGenomeFolder.setBorderTitle("Path to indexed genome");
+       	dcGenomeFolder.setBorderTitle("Path to genome indexes");
      
        	// add groups and components
        	createNewGroup("STAR Options");
