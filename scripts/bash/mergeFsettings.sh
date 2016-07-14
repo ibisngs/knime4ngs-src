@@ -8,10 +8,10 @@
 #
 # Filtersettings for 69095_f.fq
 # Filename: 69095_f.fq.filterSettings
-# Original save-location: /storage/cmbstore/steffen.sass/beckers_epigenetic_adipo/Folder_B_Omics_data_on_the_parental_F0_generation/B3__Epigenomics/ChIP-seq/69095/69095_f.fq_fastqc.filterSettings
+# Original save-location: 69095_f.fq_fastqc.filterSettings
 #
-#FILENAME	/storage/cmbstore/steffen.sass/beckers_epigenetic_adipo/Folder_B_Omics_data_on_the_parental_F0_generation/B3__Epigenomics/ChIP-seq/69095/69095_f.fq
-#FILTERSETTINGSFILENAME	/storage/cmbstore/steffen.sass/beckers_epigenetic_adipo/Folder_B_Omics_data_on_the_parental_F0_generation/B3__Epigenomics/ChIP-seq/69095/69095_f.fq_fastqc.filterSettings
+#FILENAME	69095_f.fq
+#FILTERSETTINGSFILENAME	69095_f.fq_fastqc.filterSettings
 #FILETYPE	Conventional base calls
 #FILEENCODING	Sanger / Illumina 1.9
 #SEQCOUNT	55423550
