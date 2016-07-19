@@ -52,7 +52,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
 		final SettingsModelOptionalString Optional_Map 		= new SettingsModelOptionalString(BWANodeModel.CFGKEY_OPTIONAL_Map,"",false);
 		final SettingsModelString alnalgo 					= new SettingsModelString(BWANodeModel.CFGKEY_ALNALGO,"BWA-MEM");
 		final SettingsModelString bwtIndex 					= new SettingsModelString(BWANodeModel.CFGKEY_BWTINDEX,"BWT-SW");
-		final SettingsModelBoolean checkColorSpaced			= new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false);
+//		final SettingsModelBoolean checkColorSpaced			= new SettingsModelBoolean(BWANodeModel.CFGKEY_CHECKCOLORSPACED, false);
 		
     	addPrefPageSetting(bwa, IBISKNIMENodesPlugin.BWA);
     	addPrefPageSetting(refseq, IBISKNIMENodesPlugin.REF_GENOME);
@@ -62,7 +62,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentBoolean(indexrefseq, "Index reference sequence (Has to be done if index does not exist yet)."));
     	addDialogComponent(new DialogComponentStringSelection(bwtIndex,"Algorithm for constructing BWT index:","BWT-SW","IS"));
     	addDialogComponent(new DialogComponentStringSelection(alnalgo,"Algorithm for mapping:","BWA-MEM","BWA-backtrack","BWA-SW"));
-    	addDialogComponent(new DialogComponentBoolean(checkColorSpaced, "Build color-space index."));
+//    	addDialogComponent(new DialogComponentBoolean(checkColorSpaced, "Build color-space index."));
     	setHorizontalPlacement(true);
     	addDialogComponent(new DialogComponentBoolean(readGroupBoolean,"Specify read group header:"));
     	addDialogComponent(new DialogComponentString(readGroup,""));

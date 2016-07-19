@@ -53,7 +53,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_refseqfile 				= new SettingsModelString(CFGKEY_REFSEQFILE,"");
 	private final SettingsModelString m_bwafile 				= new SettingsModelString(CFGKEY_BWAFILE,"");
 	private final SettingsModelBoolean m_checkIndexRefSeq 		= new SettingsModelBoolean(CFGKEY_CHECKINDEX,true);
-	private final SettingsModelBoolean m_checkColorSpaced		= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
+//	private final SettingsModelBoolean m_checkColorSpaced		= new SettingsModelBoolean(CFGKEY_CHECKCOLORSPACED, false);
 	private final SettingsModelString m_bwtIndex 				= new SettingsModelString(CFGKEY_BWTINDEX,"BWT-SW");
 	private final SettingsModelString m_alnalgo 				= new SettingsModelString(CFGKEY_ALNALGO,"BWA-MEM");
 	private final SettingsModelString m_readGroup 				= new SettingsModelString(CFGKEY_READGROUP,"@RG\\tID:foo\\tSM:bar\\tPL:ILLUMINA");
@@ -81,7 +81,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	addSetting(m_bwafile);
     	addSetting(m_refseqfile);
     	addSetting(m_bwtIndex);
-    	addSetting(m_checkColorSpaced);
+//    	addSetting(m_checkColorSpaced);
     	addSetting(m_checkIndexRefSeq);
     	addSetting(m_readGroup);
     	addSetting(m_readGroupBoolean);
@@ -206,10 +206,10 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	    	}else{
 	    		throw new InvalidSettingsException("Oh oh oh! No valid indexing algorithm!");
 	    	}
-	    	// Colorspace
-	    	if(m_checkColorSpaced.getBooleanValue()) {
-	    		command.add("-c");
-	    	}
+//	    	// Colorspace
+//	    	if(m_checkColorSpaced.getBooleanValue()) {
+//	    		command.add("-c");
+//	    	}
 	    	
 	    	//Add Reference genome
 	    	command.add(path2refFile);
