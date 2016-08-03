@@ -39,7 +39,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
 	
 	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
-	private boolean firstOpened;
+//	private boolean firstOpened;
 	
 	protected HTExecutorNodeDialog() {
 		
@@ -69,20 +69,27 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 			}
     	});
 		
-		firstOpened = false;
+		DialogComponentFileChooser dcfc;
+		for(SettingsModelString sm: model2pref.keySet()) {
+			createNewGroup("Path to "+model2pref.get(sm));
+			dcfc = new DialogComponentFileChooser(sm,model2pref.get(sm),0);
+			addDialogComponent(dcfc);
+		}
+		
+//		firstOpened = false;
 		
 	}
 	
     public void onOpen() {
-    	if(!firstOpened) {
-    		DialogComponentFileChooser dcfc;
-    		for(SettingsModelString sm: model2pref.keySet()) {
-    			createNewGroup("Path to "+model2pref.get(sm));
-    			dcfc = new DialogComponentFileChooser(sm,model2pref.get(sm),0);
-    			addDialogComponent(dcfc);
-    		}
-    		firstOpened = true;
-    	}
+//    	if(!firstOpened) {
+//    		DialogComponentFileChooser dcfc;
+//    		for(SettingsModelString sm: model2pref.keySet()) {
+//    			createNewGroup("Path to "+model2pref.get(sm));
+//    			dcfc = new DialogComponentFileChooser(sm,model2pref.get(sm),0);
+//    			addDialogComponent(dcfc);
+//    		}
+//    		firstOpened = true;
+//    	}
     	
     	if(usePrefPage.getBooleanValue()) {
 			String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
@@ -129,5 +136,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
     	Dimension d = c.getPreferredSize();
     	return (d.getWidth()== 0 && d.getHeight() == 0);
     }
+    
+    
     
 }

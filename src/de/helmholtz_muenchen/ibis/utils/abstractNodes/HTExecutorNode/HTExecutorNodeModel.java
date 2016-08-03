@@ -209,8 +209,9 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		host_name = InetAddress.getLocalHost().getHostName();
 		lockCommand = "";
 		for (String s : command) {
-			lockCommand += s;
+			lockCommand = lockCommand + " " + s;
 		}
+		lockCommand = lockCommand.trim();
 
 		writeHTELog(node_name+" is executed with: use_hte="+use_hte+" threshold="+threshold_value+" Host"+host_name,"Info");
 		
