@@ -120,7 +120,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	static final double MAX_MISMATCH = 1.0;
 	private final SettingsModelDoubleBounded m_mismatch = new SettingsModelDoubleBounded(CFGKEY_MISMATCH, DEF_MISMATCH,
 			MIN_MISMATCH, MAX_MISMATCH);
-	static final String CFGKEY_TC_OPT_FLAGS = "opt_flags";
+	static final String CFGKEY_TC_OPT_FLAGS = "tc_opt_flags";
 	public final SettingsModelOptionalString m_tc_opt_flags = new SettingsModelOptionalString(CFGKEY_TC_OPT_FLAGS, "", false);
 
 	// indel realignment
@@ -185,7 +185,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	static final boolean DEF_ALIGNMENT_TAG = false;
 	private final SettingsModelBoolean m_alignment_tag = new SettingsModelBoolean(CFGKEY_ALIGNMENT_TAG,
 			DEF_ALIGNMENT_TAG);
-	static final String CFGKEY_IR_OPT_FLAGS = "opt_flags";
+	static final String CFGKEY_IR_OPT_FLAGS = "ir_opt_flags";
 	public final SettingsModelOptionalString m_ir_opt_flags = new SettingsModelOptionalString(CFGKEY_IR_OPT_FLAGS, "", false);
 
 	// position of input files in input table
