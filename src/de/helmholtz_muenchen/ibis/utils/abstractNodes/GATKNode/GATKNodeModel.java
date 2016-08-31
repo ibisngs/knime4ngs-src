@@ -109,7 +109,9 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 			}
     	}
     	
-    	command.add(" "+m_OPT_FLAGS.getStringValue());
+    	if(m_OPT_FLAGS.isActive()) {
+    		command.add(" "+m_OPT_FLAGS.getStringValue());
+    	}
     	
     	LOGGER.info(StringUtils.join(command, " "));
      	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec, lockFile,OUTFILE+".stdOut",OUTFILE+".stdErr");
