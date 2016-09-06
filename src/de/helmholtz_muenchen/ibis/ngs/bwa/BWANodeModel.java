@@ -1,6 +1,6 @@
 /**
  *  Copyright (C) 2016 the Knime4NGS contributors.
- *  Website: http://ibisngs.github.io/knime4ngs; Email: mail@mail.de 
+ *  Website: http://ibisngs.github.io/knime4ngs
  *  
  *  This file is part of the KNIME4NGS KNIME extension.
  *  
