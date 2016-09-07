@@ -130,15 +130,16 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	if(isAlignRunMode()) {	
 	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
 	    	String path2readFile2 = "";
+	    	
+	    	// add first input file
+	    	inputArgument.add(getAbsoluteFilename(path2readFile1, false));
+
 	    	if(readType.equals("paired-end")) {
 	    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
 		    	// add second input file, if paired mode was selected and both files are different
 		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
 		    		inputArgument.add(getAbsoluteFilename(path2readFile2, false));
 	    	}
-	    	
-	    	// add first input file
-	    	inputArgument.add(getAbsoluteFilename(path2readFile1, false));
 	    	
 	    	// add genome folder to parameters
 	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, SET_GENOME_FOLDER.getStringValue());   	    	
