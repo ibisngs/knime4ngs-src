@@ -11,7 +11,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
  * <code>NodeDialog</code> for the "Mats" Node.
@@ -19,7 +20,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
  * 
  * @author Michael Kluge
  */
-public class MatsNodeDialog extends BinaryWrapperNodeDialog {
+public class MatsNodeDialog extends HTExecutorNodeDialog {
 
 	private final static String BINARY_NAME = "MATS";
 	
@@ -38,6 +39,8 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
     	final SettingsModelDouble SET_CUTOFF_DIFFERENCE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_CUTOFF_DIFFERENCE, MatsNodeModel.DEFAULT_CUTOFF_DIFFERENCE);
     	final SettingsModelBoolean SET_ANALYSIS_TYPE		= new SettingsModelBoolean(MatsNodeModel.CFGKEY_ANALYSIS_TYPE, MatsNodeModel.DEFAULT_PAIRED_ANALYSIS);
     	final SettingsModelDouble SET_EXPRESSION_CHANGE		= new SettingsModelDouble(MatsNodeModel.CFGKEY_EXPRESSION_CHANGE, MatsNodeModel.DEFAULT_EXPRESSION_CHANGE);
+        final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+
     	
     	DialogComponentFileChooser dcAnnotationFile = new DialogComponentFileChooser(SET_ANNOTATION_FILE, "his_id_INPUT_ANNOTATION_MATS", 0, ".gtf", ".GTF");
 		DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER_Mats", 0, true);
@@ -49,6 +52,8 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
 		// set a new title to them
 		dcOutputFolder.setBorderTitle("Path to output folder");
 		dcAnnotationFile.setBorderTitle("Path to gtf annotation file");
+		
+        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
 		
 		createNewTab("Mats Options");
 		// add groups and components
@@ -88,7 +93,6 @@ public class MatsNodeDialog extends BinaryWrapperNodeDialog {
         });
     }
 
-	@Override
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
 	}

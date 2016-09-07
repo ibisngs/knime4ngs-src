@@ -29,7 +29,8 @@ import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
  * <code>NodeDialog</code> for the "Star" Node.
@@ -39,12 +40,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
  *
  * @author Michael Kluge
  */
-public class StarNodeDialog extends BinaryWrapperNodeDialog {
+public class StarNodeDialog extends HTExecutorNodeDialog {
 
 	private final static String BINARY_NAME = "STAR";
 	
-	
-    
     protected StarNodeDialog() {}
     
     public void addToolDialogComponents() {
@@ -53,7 +52,9 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
         final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
         final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
         final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(StarNodeModel.CFGKEY_OPTIONAL_PARA, "",false);
-
+        final SettingsModelString SET_BINARY_PATH				= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+        
+        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
         
         // create open file/folder components
         DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);
@@ -89,7 +90,6 @@ public class StarNodeDialog extends BinaryWrapperNodeDialog {
         });
     }
 
-	@Override
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
 	}

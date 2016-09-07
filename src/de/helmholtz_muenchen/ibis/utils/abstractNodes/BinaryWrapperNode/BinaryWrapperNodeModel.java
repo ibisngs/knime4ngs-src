@@ -46,12 +46,12 @@ import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
 public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 
     // keys for SettingsModels
-	protected static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
+	public static final String CFGKEY_BINARY_PATH 			= "BinaryPath";
 //	protected static final String CFGKEY_ADDITIONAL_PARAMETER 	= "AdditionalParameter";
 //    protected static final String CFGKEY_PARAMETER_FILE 		= "ParameterFile";
 	
 	// initial default values for SettingsModels    
-    protected static final String DEFAULT_BINARY_PATH 			= "";
+    public static final String DEFAULT_BINARY_PATH 			= "";
 //    protected static final String DEFAULT_ADDITIONAL_PARAMETER	= "";
 //    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     

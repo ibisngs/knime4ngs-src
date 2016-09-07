@@ -32,7 +32,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
  * <code>NodeDialog</code> for the "FeatureCounts" Node.
@@ -42,7 +43,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWr
  *
  * @author Michael Kluge
  */
-public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
+public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
 
 	private final static String BINARY_NAME = IBISKNIMENodesPlugin.FEATURE_COUNTS;
 	
@@ -65,7 +66,9 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
         final SettingsModelBoolean SET_FEATURE_LEVEL			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_ON_FEATURE_LVL, FeatureCountsNodeModel.DEFAULT_COUNT_ON_FEATURE_LVL);
         final SettingsModelString SET_GROUP_FEATURE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_GROUP_FEATURE, FeatureCountsNodeModel.DEFAULT_GROUP_FEATURE);
-       
+        final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+
+        
         // create open file/folder components
         DialogComponentFileChooser dcOutputFile 	= new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_OUTPUT_FILE_FeatureCounts", 0, true);
        	DialogComponentFileChooser dcAnnotationFile = new DialogComponentFileChooser(SET_ANNOTATION_FILE, "his_id_GENOME_FOLDER_FeatureCounts", 0, ".gtf", ".saf");
@@ -81,6 +84,7 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
        	// create string selection component
        	DialogComponentStringSelection dcAnnotationType 	= new DialogComponentStringSelection(SET_ANNOTATION_TYPE, "file type:", FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE, FeatureCountsNodeModel.ALTERNATIVE_ANNOTATION_TYPE);
        	
+        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
 //       	createNewTab("FeatureCounts");
        	// set a new title to them
        	dcOutputFile.setBorderTitle("Path to output folder");
@@ -120,7 +124,7 @@ public class FeatureCountsNodeDialog extends BinaryWrapperNodeDialog {
         });
     }
 
-	@Override
+
 	protected String getNameOfBinary() {
 		return BINARY_NAME;
 	}
