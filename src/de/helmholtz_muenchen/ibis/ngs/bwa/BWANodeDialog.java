@@ -48,6 +48,9 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * complex dialog please derive directly from 
  * {@link org.knime.core.node.NodeDialogPane}.
  * 
+ * @author Jan Quell
+ * @author Maximilian Hastreiter
+ * 
  */
 public class BWANodeDialog extends HTExecutorNodeDialog {
 
