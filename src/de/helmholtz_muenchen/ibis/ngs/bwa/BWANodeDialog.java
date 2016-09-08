@@ -49,7 +49,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * {@link org.knime.core.node.NodeDialogPane}.
  * 
  * @author Jan Quell
- * @author Maximilian Hastreiter
+ * @author Maximilian Hastreiterr
  * 
  */
 public class BWANodeDialog extends HTExecutorNodeDialog {
