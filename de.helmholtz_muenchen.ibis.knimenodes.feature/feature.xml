@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="de.helmholtz_muenchen.ibis.knimenodes.feature"
+      label="KNIME4NGS"
+      version="1.6.5.qualifier"
+      provider-name="IBIS Helmholtz Muenchen"
+      os="linux">
+
+   <description url="http://ibisngs.github.io/knime4ngs">
+      Knime4NGS is a set of custom KNIME nodes, designed for processing
+large next generation sequencing datasets. The nodes wrap functionalities
+of popular command line tools like BWA, Samtools and GATK and
+allow an easy creation of comprehensive NGS KNIME workflows.
+   </description>
+
+   <copyright url="http://www.gnu.org/licenses">
+      Copyright (C) 2016 the Knime4NGS contributors.
+This program is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the License,
+or at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+   </copyright>
+
+   <license url="http://www.gnu.org/licenses">
+      This program is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation, either version 3 of the License,
+or at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+   </license>
+
+   <plugin
+         id="de.helmholtz_muenchen.ibis.knimenodes"
+         download-size="0"
+         install-size="0"
+         version="1.6.5"/>
+
+</feature>

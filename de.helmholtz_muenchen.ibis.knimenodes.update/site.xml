@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/de.helmholtz_muenchen.ibis.knimenodes_1.6.5.201610191136.jar" id="de.helmholtz_muenchen.ibis.knimenodes" version="1.6.5.201610191136" os="linux">
+      <category name="KNIME4NGS"/>
+   </feature>
+   <category-def name="KNIME4NGS" label="KNIME4NGS"/>
+</site>
