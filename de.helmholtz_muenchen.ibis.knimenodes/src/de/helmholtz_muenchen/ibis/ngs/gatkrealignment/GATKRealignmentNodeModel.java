@@ -339,8 +339,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outbam)};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(outbam)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

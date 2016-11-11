@@ -185,7 +185,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     			new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(out2Name)};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(out2Name)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();

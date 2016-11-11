@@ -436,7 +436,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     					dcs}));
     	
-    	FileCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(outfile)};
+    	FileCell[] c = new FileCell[]{ FileCellFactory.create(outfile)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();

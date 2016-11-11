@@ -264,7 +264,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outName)};
+    			 FileCellFactory.create(outName)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

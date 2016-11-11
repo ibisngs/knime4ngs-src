@@ -255,7 +255,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 			}
 		}
 
-    	DataCell[] c = new FileCell[]{(FileCell) FileCellFactory.create(OUTFILE)};
+    	DataCell[] c = new FileCell[]{ FileCellFactory.create(OUTFILE)};
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
 		

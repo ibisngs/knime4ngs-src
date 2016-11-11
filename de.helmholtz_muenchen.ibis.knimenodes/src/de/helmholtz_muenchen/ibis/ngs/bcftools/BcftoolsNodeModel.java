@@ -200,8 +200,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(OUTFILE)};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(OUTFILE)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -536,89 +535,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	
     }
     
-    
-    
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveSettingsTo(final NodeSettingsWO settings) {
-//    	 m_bcfmethod.saveSettingsTo(settings);
-//    	 m_path2bcftools.saveSettingsTo(settings);
-//    	 m_vcfsampleheader.saveSettingsTo(settings);
-//    	 m_furtherOptions.saveSettingsTo(settings);
-//    	 //Concat
-//    	 m_concat_outfile_type.saveSettingsTo(settings);
-//    	 m_concat_overlap.saveSettingsTo(settings);
-    	
- 	   	//Call
-//         m_bedfile.saveSettingsTo(settings);
-//         m_keepallel.saveSettingsTo(settings);
-//         m_samplelist.saveSettingsTo(settings);
-//         m_call_outfile_type.saveSettingsTo(settings);
-//         m_ifsamplelist.saveSettingsTo(settings);
-//         m_constrainedcalling.saveSettingsTo(settings);
-//         m_outvariantsonly.saveSettingsTo(settings);
-//         m_snpcalling.saveSettingsTo(settings);
-//         m_ifbedfile.saveSettingsTo(settings);
-         
         
-//    }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//    	m_bcfmethod.loadSettingsFrom(settings);
-//   	 	m_path2bcftools.loadSettingsFrom(settings);
-//   	 	m_vcfsampleheader.loadSettingsFrom(settings);
-//   	 	m_furtherOptions.loadSettingsFrom(settings);
-//	   	//Concat
-//	   	m_concat_outfile_type.loadSettingsFrom(settings);
-//	   	m_concat_overlap.loadSettingsFrom(settings);
-	   	
-	   	//Call
-//    	m_bedfile.loadSettingsFrom(settings);
-//        m_keepallel.loadSettingsFrom(settings);
-//        m_samplelist.loadSettingsFrom(settings);
-//        m_call_outfile_type.loadSettingsFrom(settings);
-//        m_ifsamplelist.loadSettingsFrom(settings);
-//        m_constrainedcalling.loadSettingsFrom(settings);
-//        m_outvariantsonly.loadSettingsFrom(settings);
-//        m_snpcalling.loadSettingsFrom(settings);
-//        m_ifbedfile.loadSettingsFrom(settings);
-
-//    }
-
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//   	 	m_bcfmethod.validateSettings(settings);
-//   	 	m_path2bcftools.validateSettings(settings);
-//   	 	m_vcfsampleheader.validateSettings(settings);
-//   	 	m_furtherOptions.validateSettings(settings);
-//	   	//Concat
-//	   	m_concat_outfile_type.validateSettings(settings);
-//	   	m_concat_overlap.validateSettings(settings);
-   	 	
-	   	//Call
-//    	m_bedfile.validateSettings(settings);
-//        m_keepallel.validateSettings(settings);
-//        m_samplelist.validateSettings(settings);
-//        m_call_outfile_type.validateSettings(settings);
-//        m_ifsamplelist.validateSettings(settings);
-//        m_constrainedcalling.validateSettings(settings);
-//        m_outvariantsonly.validateSettings(settings);
-//        m_snpcalling.validateSettings(settings);
-//        m_ifbedfile.validateSettings(settings);
-
-//    }
-    
     /**
      * {@inheritDoc}
      */

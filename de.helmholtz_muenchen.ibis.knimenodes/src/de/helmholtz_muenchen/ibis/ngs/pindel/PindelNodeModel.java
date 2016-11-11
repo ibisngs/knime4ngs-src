@@ -50,6 +50,7 @@ import org.knime.core.node.NodeLogger;
 
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
 
 
@@ -595,8 +596,8 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     	// create column specifications
     	DataColumnSpec [] colspec = new DataColumnSpec[2];
     	if(m_vcf_out.getBooleanValue()){
-	    	colspec[0]=new DataColumnSpecCreator("Path2VCFdeletionsFile", StringCell.TYPE).createSpec();
-	    	colspec[1]=new DataColumnSpecCreator("Path2VCFinsertionsFile", StringCell.TYPE).createSpec();    		
+	    	colspec[0]=new DataColumnSpecCreator("Path2VCFdeletionsFile", VCFCell.TYPE).createSpec();
+	    	colspec[1]=new DataColumnSpecCreator("Path2VCFinsertionsFile", VCFCell.TYPE).createSpec();    		
     	}
     	else{
 	    	colspec[0]=new DataColumnSpecCreator("Path2PindelDFile", StringCell.TYPE).createSpec();

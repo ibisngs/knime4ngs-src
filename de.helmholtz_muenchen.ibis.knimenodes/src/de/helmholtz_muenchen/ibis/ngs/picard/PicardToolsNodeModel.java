@@ -267,8 +267,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    //container which is filled with cells and rows
 		    BufferedDataContainer c = exec.createDataContainer(outspec);
 		    		    
-		    FileCell sc1 = (FileCell)FileCellFactory.create(inputfile);
-		    FileCell sc3 = (FileCell)FileCellFactory.create(output_data);
+		    FileCell sc1 = FileCellFactory.create(inputfile);
+		    FileCell sc3 = FileCellFactory.create(output_data);
 		    
 		    //create row and add it to the container
 		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1, sc3});
@@ -333,7 +333,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		    BufferedDataContainer c = exec.createDataContainer(outspec);
 		    
 		    //single cells containing paths to use for the next node
-		    FileCell sc1= (FileCell)FileCellFactory.create(output);
+		    FileCell sc1= FileCellFactory.create(output);
 		    
 		    //create row and add it to the container
 		    DefaultRow row = new DefaultRow("row0", new FileCell[]{sc1});

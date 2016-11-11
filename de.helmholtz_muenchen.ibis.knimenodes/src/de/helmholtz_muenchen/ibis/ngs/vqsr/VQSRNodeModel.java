@@ -217,7 +217,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outFile)};
+    			 FileCellFactory.create(outFile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

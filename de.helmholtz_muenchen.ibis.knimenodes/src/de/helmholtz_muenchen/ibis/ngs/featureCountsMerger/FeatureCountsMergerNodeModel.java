@@ -167,7 +167,7 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
     	}
     	
-    	System.out.println(outfile);
+//    	System.out.println(outfile);
     	
 //    	new File(outfile).delete();
     	BufferedWriter outfileBW = new BufferedWriter(new FileWriter(outfile));

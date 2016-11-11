@@ -100,35 +100,6 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 	}
 	
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void saveExtraSettingsTo(final NodeSettingsWO settings) {
-//		   	 m_PED_FILE.saveSettingsTo(settings);
-//		   	 m_DENOVO_PRIOR.saveSettingsTo(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void loadExtraValidatedSettingsFrom(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//		   	 m_PED_FILE.loadSettingsFrom(settings);
-//		   	 m_DENOVO_PRIOR.loadSettingsFrom(settings);
-//    }
-//
-//    /**
-//     * {@inheritDoc}
-//     */
-//    @Override
-//    protected void validateExtraSettings(final NodeSettingsRO settings)
-//            throws InvalidSettingsException {
-//		   	 m_PED_FILE.validateSettings(settings);
-//		     m_DENOVO_PRIOR.validateSettings(settings);
-//    } 
-
 	@Override
 	protected String getCommandWalker() {
 		return "PhaseByTransmission";

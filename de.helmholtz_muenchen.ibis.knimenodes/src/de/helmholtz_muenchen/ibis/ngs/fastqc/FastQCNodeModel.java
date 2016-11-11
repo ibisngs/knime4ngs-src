@@ -157,15 +157,15 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    if(readType.equals("single-end")){
 	        cont = exec.createDataContainer(createSpecs());
 	        c = new FileCell[]{
-	        		(FileCell) FileCellFactory.create(readsFile1),
-	       			(FileCell) FileCellFactory.create(outfileMerged)};
+	        		FileCellFactory.create(readsFile1),
+	       			FileCellFactory.create(outfileMerged)};
 	    		
 	    }else{
 	       	cont = exec.createDataContainer(createSpecs());
 	       	c = new FileCell[]{
-	       			(FileCell) FileCellFactory.create(readsFile1),
-	       			(FileCell) FileCellFactory.create(readsFile2),
-	       			(FileCell) FileCellFactory.create(outfileMerged)};
+	       			FileCellFactory.create(readsFile1),
+	       			FileCellFactory.create(readsFile2),
+	       			FileCellFactory.create(outfileMerged)};
 	   	}
 	  
     	cont.addRowToTable(new DefaultRow("Row0",c));

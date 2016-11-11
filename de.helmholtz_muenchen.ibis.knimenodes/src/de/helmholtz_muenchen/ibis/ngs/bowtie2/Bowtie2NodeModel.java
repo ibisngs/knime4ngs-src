@@ -335,8 +335,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, SAMCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(path2outfile)};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(path2outfile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

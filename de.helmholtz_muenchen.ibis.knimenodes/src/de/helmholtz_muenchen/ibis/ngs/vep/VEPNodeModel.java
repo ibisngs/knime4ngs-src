@@ -372,7 +372,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, outType).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(res_file)};
+    			 FileCellFactory.create(res_file)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

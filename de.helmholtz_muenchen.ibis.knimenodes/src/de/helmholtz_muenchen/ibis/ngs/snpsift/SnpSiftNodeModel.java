@@ -272,7 +272,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL, outType).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(stdOutFile)};
+    			 FileCellFactory.create(stdOutFile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

@@ -35,7 +35,7 @@ public class FileCellFactory implements FromSimpleString {
 		return create(input);
 	}
 	
-	public static DataCell create(final String s) {
+	public static FileCell create(final String s) {
         if (s == null) {
             throw new NullPointerException("File path must not be null!");
         }

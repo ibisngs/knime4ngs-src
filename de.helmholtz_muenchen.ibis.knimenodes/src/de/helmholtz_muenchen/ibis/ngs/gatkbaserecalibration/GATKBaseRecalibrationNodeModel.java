@@ -342,7 +342,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     	DataColumnSpec [] colspec = {new DataColumnSpecCreator(OUT_COL1, BAMCell.TYPE).createSpec()};
 	    DataTableSpec outspec=new DataTableSpec(colspec);
 	    BufferedDataContainer c = exec.createDataContainer(outspec);
-	    FileCell [] row = {(FileCell)FileCellFactory.create(recalbam)};
+	    FileCell [] row = {FileCellFactory.create(recalbam)};
 	    c.addRowToTable(new DefaultRow("row0", row));
 	    c.close();
 	    BufferedDataTable out=c.getTable();

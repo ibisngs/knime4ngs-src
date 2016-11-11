@@ -96,28 +96,6 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 		return "GenotypeGVCFs";
 	}
 
-
-//	@Override
-//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-//		m_NT.saveSettingsTo(settings);
-//		m_OUTFOLDER.saveSettingsTo(settings);
-//		
-//	}
-//
-//	@Override
-//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_NT.loadSettingsFrom(settings);
-//		m_OUTFOLDER.loadSettingsFrom(settings);
-//		
-//	}
-//
-//	@Override
-//	protected void validateExtraSettings(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_NT.validateSettings(settings);
-//		m_OUTFOLDER.validateSettings(settings);
-//	}
 	
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

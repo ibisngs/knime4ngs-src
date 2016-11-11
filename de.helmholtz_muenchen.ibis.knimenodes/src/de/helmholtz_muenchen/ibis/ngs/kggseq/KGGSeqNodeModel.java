@@ -230,8 +230,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1, FileCell.TYPE).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(BasePath+m_OUTPREFIX.getStringValue())};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(BasePath+m_OUTPREFIX.getStringValue())};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

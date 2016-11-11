@@ -126,25 +126,6 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 		return this.OUTFILE;
 	}
 
-//	@Override
-//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-//		m_extrafilters.saveSettingsTo(settings);
-//        m_filesuffix.saveSettingsTo(settings);
-//	}
-//
-//	@Override
-//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_extrafilters.loadSettingsFrom(settings);
-//        m_filesuffix.loadSettingsFrom(settings);
-//	}
-//
-//	@Override
-//	protected void validateExtraSettings(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_extrafilters.validateSettings(settings);
-//        m_filesuffix.validateSettings(settings);
-//	}
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {

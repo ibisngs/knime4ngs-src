@@ -118,7 +118,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(outfile)};
+    			 FileCellFactory.create(outfile)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

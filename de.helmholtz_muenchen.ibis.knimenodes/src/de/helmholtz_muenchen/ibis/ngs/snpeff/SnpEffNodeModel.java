@@ -222,7 +222,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     					new DataColumnSpecCreator(OUT_COL1, VCFCell.TYPE).createSpec()}));
     	
     	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(out_file)};
+    			 FileCellFactory.create(out_file)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

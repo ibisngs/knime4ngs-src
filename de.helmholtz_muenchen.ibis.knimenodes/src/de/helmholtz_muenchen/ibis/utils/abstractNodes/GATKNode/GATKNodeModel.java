@@ -149,8 +149,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     			new DataColumnSpec[]{
     					new DataColumnSpecCreator(OUT_COL1_TABLE1, getOutColType()).createSpec()}));
     	
-    	FileCell[] c = new FileCell[]{
-    			(FileCell) FileCellFactory.create(OUTFILE)};
+    	FileCell[] c = new FileCell[]{FileCellFactory.create(OUTFILE)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();

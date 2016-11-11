@@ -324,12 +324,12 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	if(readType.equals("single-end")){
         	cont = exec.createDataContainer(createSpecs());
         	c = new FileCell[]{
-        			(FileCell) FileCellFactory.create(outReadsFile1)};
+        			 FileCellFactory.create(outReadsFile1)};
     	}else{
         	cont = exec.createDataContainer(createSpecs());
         	c = new FileCell[]{
-        			(FileCell) FileCellFactory.create(outReadsFile1),
-        			(FileCell) FileCellFactory.create(outReadsFile2)};
+        			 FileCellFactory.create(outReadsFile1),
+        			 FileCellFactory.create(outReadsFile2)};
     	}
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));

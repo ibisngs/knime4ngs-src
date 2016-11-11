@@ -154,12 +154,12 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	
     	for(int i = 0; i < in1_list.size(); i++) {
     		FileCell [] fileCell = new FileCell[] {
-        			(FileCell) FileCellFactory.create(in1_list.get(i))};
+        			FileCellFactory.create(in1_list.get(i))};
         	
         	if(secondOk) {
         		fileCell = new FileCell[] {
-            			(FileCell) FileCellFactory.create(in1_list.get(i)),
-            			(FileCell) FileCellFactory.create(in2_list.get(i))};
+            			FileCellFactory.create(in1_list.get(i)),
+            			FileCellFactory.create(in2_list.get(i))};
         	}
         	FileCell[] c = fileCell;
     		cont.addRowToTable(new DefaultRow("Row"+i,c));
