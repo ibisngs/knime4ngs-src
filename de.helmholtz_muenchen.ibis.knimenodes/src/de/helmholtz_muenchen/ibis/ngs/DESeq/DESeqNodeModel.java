@@ -32,6 +32,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 /**
@@ -85,7 +86,10 @@ public class DESeqNodeModel extends RNodeModel {
      * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{    	
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
+    	
+    	CompatibilityChecker.InputFileNoRows(inData);
+    	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getSpec(inData[0].getDataTableSpec())); // parse cell types
 
@@ -107,6 +111,8 @@ public class DESeqNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	
+    	CompatibilityChecker.InputFileNoColumns(inSpecs);
 
     	// add values set in GUI
     	this.addArgument("--method", this.SET_METHOD.getStringValue());

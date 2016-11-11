@@ -15,7 +15,7 @@
         	As Pindel has its own output format, this node includes also the Pindel2VCF script. 
         	It converts the files produced by Pindel to VCF format (Format explained at <a href="http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42"> http://www.1000genomes.org/wiki/analysis/variant-call-format/VCF-variant-call-format-version-42 </a>).
 			<br />
-			Further information about Pindel and installation instructions are available at <a href="http://gmt.genome.wustl.edu/pindel/0.2.4/index.html"> http://gmt.genome.wustl.edu/pindel/0.2.4/index.html </a>
+			Further information about Pindel and installation instructions are available at <a href="http://gmt.genome.wustl.edu/packages/pindel/"> http://gmt.genome.wustl.edu/packages/pindel/ </a>
 			<br />
     	</intro>
         
@@ -30,7 +30,7 @@
         	</option>
             <option name="Path to Pindel config file">
             	Pindel requires a tab-separated file containing the path to the BAM file (the BAM file has to match the BAM file from the inport), the average insert size and the sample name. 
-            	More information about the Pindel config file format can be found at <a href="http://gmt.genome.wustl.edu/pindel/0.2.4/user-manual.html"> http://gmt.genome.wustl.edu/pindel/0.2.4/user-manual.html </a>
+            	More information about the Pindel config file format can be found at <a href="http://gmt.genome.wustl.edu/packages/pindel/"> http://http://gmt.genome.wustl.edu/packages/pindel/ </a>
     			<br />
 				If the previous node is PicardTools CollectInsertSizeMetrics you can tick the option  <i> Generate config file </i> to generate automatically this file. 
 				This option uses the information about the average insert size provided by the previous node.

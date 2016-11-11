@@ -33,6 +33,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 /**
@@ -105,7 +106,10 @@ public class LimmaNodeModel extends RNodeModel {
      * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{    	
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
+    	
+    	CompatibilityChecker.InputFileNoRows(inData);
+    	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getSpec(inData[0].getDataTableSpec())); // parse cell types
 
@@ -127,6 +131,8 @@ public class LimmaNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	
+    	CompatibilityChecker.InputFileNoColumns(inSpecs);
     	
     	// add values set in GUI
     	this.addArgument("--normFactors", this.SET_NORM_FACTOR.getStringValue());

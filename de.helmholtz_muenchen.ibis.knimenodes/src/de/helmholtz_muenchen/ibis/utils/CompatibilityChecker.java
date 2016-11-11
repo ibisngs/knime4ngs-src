@@ -25,8 +25,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
+import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
@@ -176,6 +178,39 @@ public class CompatibilityChecker {
     		}
     	}
 		return index;
+	}
+	
+	/**
+	 * Method checks for empty columns in data table and throws exception when no columns exist
+	 * @param inSpecs
+	 * @throws InvalidSettingsException
+	 */
+	
+	public static void InputFileNoColumns(DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	
+    	for(int i = 0; i < inSpecs.length; i++ ){
+    		
+    		if(inSpecs[i].getNumColumns()==0){
+    			throw new InvalidSettingsException ("One or more input tables have no columns");
+    		}
+    	}
+	}
+	
+	/**
+	 * Method checks for empty rows in data table and throws exception when no rows exists
+	 * @param inData
+	 * @throws InvalidSettingsException
+	 */
+	public static void InputFileNoRows(BufferedDataTable[] inData) throws InvalidSettingsException {
+		
+		for(int i = 0; i < inData.length; i++) {
+			java.util.Iterator <DataRow> it = inData[i].iterator();
+			
+			if(it.hasNext()==false) {
+					throw new InvalidSettingsException ("One or more input tables have no rows"); 
+			}
+		}
+	
 	}
 	
 }

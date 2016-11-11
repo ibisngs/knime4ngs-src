@@ -31,6 +31,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeModel;
 
 /**
@@ -84,9 +85,13 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      * @throws Exception 
      */
     @Override
-	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{    	
+	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
+    	
+    	CompatibilityChecker.InputFileNoRows(inData);
+    	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getSpec(inData[0].getDataTableSpec())); // parse cell types
+		
 
 		return(out);
 	}
@@ -105,6 +110,9 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	
+    	CompatibilityChecker.InputFileNoColumns(inSpecs);
+    	
     	// add values set in GUI
     	this.addArgument("--keepReads", this.SET_KEEP_READS.getIntValue());
     	this.addArgument("--keepFraction", this.SET_KEEP_FRACTION.getDoubleValue());
