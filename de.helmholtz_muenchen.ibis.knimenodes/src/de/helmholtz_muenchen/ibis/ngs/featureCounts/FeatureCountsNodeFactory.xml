@@ -24,20 +24,24 @@
         	<option name="Output">
         		Set the path to the folder where the output file should be stored.
         	</option>
-        	<option name= "Further options">
-        	<b>File type</b>: Choose whether to use a GTF or a SAF annotation file.<br />
-        	<b>Feature type used for counting</b>: Choose which feature type should be used for counting in the case a GTF file is used.<br />
-        		(Default: 'exon') <br />
-        	<b>Count multimapped reads</b>: Choose whether also not uniquely mapped reads should be counted. <br />
-        	<b>Thread number</b>: Set the number of threads to be used. [1-16] <br />
-        	<b>Perform read summarization at the feature level</b>: If specified, read summarization will be performed at the feature level (eg. exon level).
-        		Otherwise, it is performed at meta-feature level (eg. gene level) <br />
-        	<b>Feature type used for grouping results</b>: Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.<br />
-        		(Default: 'gene_id'; This attribute type is usually the gene identifier.)<br />
-        		This argument is useful for the meta-feature level summarization.<br />
+        	<option name="Paired-end read options">
+        		<b>Count fragments instead of reads</b>:
+        		If specified, fragments (or templates) will be counted instead of reads.<br />
+        		<b>Count chimeric fragments</b>:
+        		If specified, chimeric fragments that have their two ends aligned to different chromosomes will be counted.
         	</option>
-        	</tab>
-        	<tab name="Preference page">
+        	<option name= "Further options">
+        		<b>Feature type used for counting</b>: Choose which feature type should be used for counting in the case a GTF file is used.<br /> (Default: 'exon') <br />
+        		<b>Count multimapped reads</b>: Choose whether also not uniquely mapped reads should be counted. <br />
+        		<b>Thread number</b>: Set the number of threads to be used. [1-16] <br />
+        		<b>Perform read summarization at the feature level</b>: If specified, read summarization will be performed at the feature level (eg. exon level).
+					Otherwise, it is performed at meta-feature level (eg. gene level) <br />
+        		<b>Feature type used for grouping results</b>: Specify the attribute type used to group features (eg. exons) into meta-features (eg. genes), when GTF annotation is provided.<br />
+        			(Default: 'gene_id'; This attribute type is usually the gene identifier.)
+        			This argument is useful for the meta-feature level summarization.<br />
+        	</option>
+        </tab>
+        <tab name="Preference page">
         	<option name="HTE"> Set a threshold for repeated execution.
         	Only used if HTE is enabled in the preference page.
         	</option>

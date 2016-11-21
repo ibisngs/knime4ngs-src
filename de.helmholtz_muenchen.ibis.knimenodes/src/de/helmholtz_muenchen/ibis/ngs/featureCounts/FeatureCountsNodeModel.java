@@ -98,7 +98,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final static String NAME_OF_ASSIGN_MULTI		= "-O";		// enables counting for more than one fragment
     private final static String NAME_OF_COUNT_FRAGMENTS		= "-p";		// enables count of fragments
     private final static String NAME_OF_COUNT_CHIMERIC		= "-C";		// disables count of chimeric fragments
-    private final static String NAME_OF_COUNT_ON_FEATURE_LVL= "-f";		// enables count on feature level
+    private final static String NAME_OF_COUNT_ON_FEATURE_LVL= "-f";		// enables read summarization on feature level
     private final static String NAME_OF_GROUP_FEATURE		= "-g";		// sets the group id for output file
     				
     // definition of SettingsModel (all prefixed with SET)
@@ -153,7 +153,6 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	if(bam_sam_index == -1) {
     		bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "SAMCell");
     	}
-    	
 
     	if(bam_sam_index!=0){
     		throw new InvalidSettingsException("Invalid input. No BAMCell/SAMCell in first column of input table!");
@@ -275,10 +274,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	if(!(f.isFile() && f.exists()))
     		throw new InvalidSettingsException("Annotation file '" + path2AnnotationFile + "' does not exist.");
     	
-    	// TODO: check if GTF or SAF file is valid
-    	
-    	//	throw new InvalidSettingsException("Folder was found but it seems that it does not contain a valid genome index.");    	
-    	// all checks where ok */
+    	SET_ANNOTATION_TYPE.setStringValue(DEFAULT_ANNOTATION_TYPE);
+    	if(path2AnnotationFile.endsWith(".saf")) {
+    		SET_ANNOTATION_TYPE.setStringValue(ALTERNATIVE_ANNOTATION_TYPE);
+    	}
+
     	return true;
     }
     
