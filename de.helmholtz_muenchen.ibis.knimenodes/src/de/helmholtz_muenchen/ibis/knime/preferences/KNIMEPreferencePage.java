@@ -23,6 +23,8 @@ package de.helmholtz_muenchen.ibis.knime.preferences;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -530,6 +532,12 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		thresholdText.setText(IBISKNIMENodesPlugin.THRESHOLD_DEFAULT+"");
 		dbFile.setText("");
 		checkNotify.setSelection(IBISKNIMENodesPlugin.NOTIFY_DEFAULT);
+		res_hapmap.setText("");
+		res_omni.setText("");
+		res_1000G_SNPS.setText("");
+		res_1000G_Indels.setText("");
+		res_dbsnp.setText("");
+		res_mills.setText("");
 		email_host.setText(IBISKNIMENodesPlugin.EMAIL_HOST_DEFAULT);
 		email_sender.setText(IBISKNIMENodesPlugin.EMAIL_SENDER_DEFAULT);
 		email_receiver.setText(IBISKNIMENodesPlugin.EMAIL_RECEIVER_DEFAULT);
@@ -568,6 +576,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		RES_MILLS = res_mills.getText();
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_MILLS, RES_MILLS);
 		
+		USE_HTE = checkHTE.getSelection();
 		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.USE_HTE, USE_HTE);
 		
 		if(!USE_HTE) {
@@ -590,6 +599,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.THRESHOLD, THRESHOLD);
 		
+		DB_FILE = dbFile.getText();
 		if(DB_FILE.equals("")) {
 			JOptionPane.showMessageDialog(null,
 				    "HTE requires a SQLite database. Please create a new one or choose an existing one.",
@@ -598,7 +608,6 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return false;
 		}
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.DB_FILE, DB_FILE);		
-		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, NOTIFY);
 
 		EMAILHOST = email_host.getText();
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.EMAIL_HOST, EMAILHOST);
@@ -609,6 +618,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		EMAILRECEIVER = email_receiver.getText();
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.EMAIL_RECEIVER, EMAILRECEIVER);
 		
+		NOTIFY = checkNotify.getSelection();
+		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.NOTIFY, NOTIFY);
 		if(NOTIFY) {
 			
 			if(EMAILHOST.equals("")) {
@@ -789,6 +800,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	public void createDBFile(String dir) {
 		if(dir==null) return;
 		try {
+			if(Files.exists(Paths.get(dir+"/hte.db"))) {
+				String e = "Database hte.db exists in "+dir+". Please use another location or rename the existing database.";
+				throw new SQLException(e);
+			}
 			HTEDBHandler htedb = new HTEDBHandler(dir+"/hte.db",null);
 			htedb.createDB();
 			htedb.closeConnection();
