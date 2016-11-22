@@ -194,12 +194,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 		return new BufferedDataTable[]{outTable};
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    }
 
     /**
      * Runs bwa index

@@ -208,14 +208,6 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
    
 		return new BufferedDataTable[]{outTable};
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-
-    }
     
     /**
      * bcftools call

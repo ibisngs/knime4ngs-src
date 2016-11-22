@@ -513,14 +513,6 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         return new BufferedDataTable [] {out};
 
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    }
-
     /**
      * {@inheritDoc}
      */

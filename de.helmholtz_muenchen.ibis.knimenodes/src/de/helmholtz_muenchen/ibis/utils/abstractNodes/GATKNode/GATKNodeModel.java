@@ -160,17 +160,6 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
  
     }
 
-    
-    
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO: generated method stub
-    }
-
     /**
      * {@inheritDoc}
      */

@@ -110,6 +110,7 @@ public class VCFMergerNodeModel extends GATKNodeModel {
      */
     @Override
     protected void reset() {
+    	resetView();
     	this.FILES.clear();
     }
 

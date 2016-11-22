@@ -445,13 +445,6 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 		return new BufferedDataTable[]{outTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-
-    }
 
     /**
      * {@inheritDoc}

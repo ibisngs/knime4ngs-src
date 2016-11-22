@@ -341,13 +341,6 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
         return new BufferedDataTable[]{outTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    	
-    }
 
     /**
      * {@inheritDoc}

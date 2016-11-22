@@ -345,13 +345,6 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
         return new BufferedDataTable[]{outTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    	
-    }
 
     /**
      * {@inheritDoc}

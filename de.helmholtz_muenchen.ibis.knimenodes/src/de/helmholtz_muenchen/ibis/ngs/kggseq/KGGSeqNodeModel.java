@@ -239,13 +239,6 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 		return new BufferedDataTable[]{outTable};
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-    }
-
     
     /**
      * Creates the execution command of the KGGSeq Node

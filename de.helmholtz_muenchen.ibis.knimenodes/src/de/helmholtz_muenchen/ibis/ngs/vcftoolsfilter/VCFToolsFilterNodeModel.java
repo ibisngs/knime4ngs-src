@@ -349,14 +349,6 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	
     	return outfile;
     }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-
-    }
 
     /**
      * {@inheritDoc}

@@ -352,14 +352,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     /**
      * {@inheritDoc}
      */
-    @Override
-    protected void reset() {
-
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     //executed when in port is connected to executed node or when previous node (already connected) is executed
     @Override
     //executed when in port is connected

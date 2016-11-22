@@ -352,12 +352,5 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 			throws IOException, CanceledExecutionException {
 		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	protected void reset() {
-		// TODO Auto-generated method stub
-		
-	}
-	
+	}	
 }

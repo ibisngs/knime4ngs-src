@@ -53,7 +53,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	
 	private static final NodeLogger LOGGER  = NodeLogger.getLogger(HTExecutorNodeModel.class);
-	private final StringBuffer HTEOUT 		= new StringBuffer("");
+	private StringBuffer HTEOUT 			= new StringBuffer("");
 	private StringBuffer HTEERR 			= new StringBuffer("");
 	
 	
@@ -98,6 +98,19 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	public void init() {
 		addSetting(m_use_pref);
 		addSetting(threshold);
+	}
+	
+	@Override
+	protected void reset(){
+		resetView();
+	}
+	
+	/**
+	 * Resets Stdout/Stderr node views
+	 */
+	protected void resetView(){
+		HTEOUT.setLength(0);
+		HTEERR.setLength(0);
 	}
 	
 	private void recExecuteCommand(String[] command, ExecutionContext exec,
