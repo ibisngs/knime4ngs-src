@@ -23,11 +23,9 @@ package de.helmholtz_muenchen.ibis.knime;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import javax.swing.JOptionPane;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.knime.core.node.NodeLogger;
+import org.knime.workbench.ui.startup.StartupMessage;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -57,8 +55,10 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final boolean HTE_DEFAULT = false;
 	public static final int THRESHOLD_DEFAULT = 1;
 	public static final boolean NOTIFY_DEFAULT = false;
-	public static final String EMAIL_HOST_DEFAULT = "outmail.helmholtz-muenchen.de";
-	public static final String EMAIL_SENDER_DEFAULT = "ibis.knime@helmholtz-muenchen.de";
+//	public static final String EMAIL_HOST_DEFAULT = "outmail.helmholtz-muenchen.de";
+//	public static final String EMAIL_SENDER_DEFAULT = "ibis.knime@helmholtz-muenchen.de";
+	public static final String EMAIL_HOST_DEFAULT = "";
+	public static final String EMAIL_SENDER_DEFAULT = "";
 	public static final String EMAIL_RECEIVER_DEFAULT = "";
 	
 //	tool binaries
@@ -108,57 +108,6 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
     private static IBISKNIMENodesPlugin IKN_PLUGIN;
 
     /**
-     * The central static logger.
-     */
-    private static final NodeLogger LOGGER = NodeLogger
-            .getLogger(IBISKNIMENodesPlugin.class);
-
-    /**
-     * Debuggin state of the plugin.
-     */
-    private static boolean DEBUG = false;
-
-    /**
-     * Logging method for debugging purpose.
-     * 
-     * @param message
-     *            The message to log.
-     */
-    public static void log(final String message) {
-        if (IBISKNIMENodesPlugin.DEBUG) {
-            LOGGER.info(message);
-        }
-    }
-
-    /**
-     * Check if the plugin is in DEBUG mode.
-     * 
-     * @return True if debugging is enabled, false otherwise.
-     */
-    public static boolean isDebug() {
-        return IBISKNIMENodesPlugin.DEBUG;
-    }
-
-    /**
-     * Change debug setting.
-     */
-    public static void toggleDebug() {
-        IBISKNIMENodesPlugin.DEBUG = !IBISKNIMENodesPlugin.DEBUG;
-        log("toggling Debug Mode");
-    }
-
-    /**
-     * Sets the debug status of the plugin.
-     * 
-     * @param debugEnabled
-     *            The new debug status.
-     */
-    public static void setDebug(final boolean debugEnabled) {
-        IBISKNIMENodesPlugin.DEBUG = debugEnabled;
-        log("setting Debug Mode :" + debugEnabled);
-    }
-
-    /**
      * The constructor.
      */
     public IBISKNIMENodesPlugin() {
@@ -177,9 +126,9 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
     public void start(final BundleContext context) throws Exception {
         super.start(context);
         IKN_PLUGIN = this;
-
-        log("starting IKN_PLUGIN: IBISKNIMENodesPlugin");
-
+       
+        IBISKNIMENodesPluginStartupMessageProvider iknpsmp = new IBISKNIMENodesPluginStartupMessageProvider();
+        
         String warn_message = "";
         
         //check tool paths
@@ -201,33 +150,14 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         	warn_message += "Please edit the paths in the KNIME4NGS preference page!"+System.getProperty("line.separator");
         }
         
-        //check path to reference genome
-//        String ref_genome = getStringPreference(REF_GENOME);
-//        if(Files.notExists(Paths.get(ref_genome)) && !ref_genome.equals("")) {
-//			getDefault().getPreferenceStore().setToDefault(REF_GENOME);
-//			warn_message += "Path to the reference genome has been changed!"+ 
-//					System.getProperty("line.separator") + 
-//					"You can reset it in the KNIME4NGS preference page!" +
-//					System.getProperty("line.separator"); 
-//		}
-        
-        //check path to database
-//        String database = getStringPreference(DB_FILE);
-//        if(Files.notExists(Paths.get(database)) && !database.equals("")) {
-//			getDefault().getPreferenceStore().setToDefault(DB_FILE);
-//			
-//			warn_message += "Path to the HTE database has been changed!"+ 
-//					System.getProperty("line.separator") + 
-//					"You can reset it or create a new one in the KNIME4NGS preference page!" +
-//					System.getProperty("line.separator"); 
-//		}
-        
+        StartupMessage sm;
         if(warn_message.length()>0) {
-        JOptionPane.showMessageDialog(null,
-			    warn_message,
-			    "Warning",
-			    JOptionPane.WARNING_MESSAGE);
+            sm = new StartupMessage(warn_message, "Paths changed!",StartupMessage.WARNING, context.getBundle());
+        } else {
+        	sm = new StartupMessage("KNIME4NGS nodes started correctly.", StartupMessage.INFO, context.getBundle());
         }
+        iknpsmp.addMessage(sm);
+        
     }
 
     /**

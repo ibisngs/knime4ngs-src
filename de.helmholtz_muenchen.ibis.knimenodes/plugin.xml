@@ -117,6 +117,11 @@
 		<category icon="/libs/icons/icon_r_green2.png" level-id="cca" name="Case Control Analysis" path="/ibis/ngs/ngs_post/"/>
 	</extension>
    	
+   	<extension point="org.knime.workbench.ui.startupMessages">
+   		<startupMessageProvider class="de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPluginStartupMessageProvider"/>
+   	</extension>
+   
+   	
    	<extension point="org.eclipse.ui.preferencePages">
    		<page category="org.knime.workbench.ui.preferences" class="de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage" id="de.helmholtz_muenchen.ibis.knime.preferences.KNIMEPreferencePage" name="KNIME4NGS"/>
 	</extension>
