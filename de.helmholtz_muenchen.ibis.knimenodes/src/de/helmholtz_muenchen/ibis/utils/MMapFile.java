@@ -19,9 +19,14 @@
  */
 package de.helmholtz_muenchen.ibis.utils;
 
-import java.io.*;
-import java.nio.channels.FileChannel;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 

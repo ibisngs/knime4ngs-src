@@ -53,9 +53,9 @@ import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;
-import de.helmholtz_muenchen.ibis.utils.ngs.VEPAnnotationParser;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 import de.helmholtz_muenchen.ibis.utils.ngs.VCFFile;
+import de.helmholtz_muenchen.ibis.utils.ngs.VEPAnnotationParser;
 
 /**
 * This is the model implementation of LOFSummarizer.
