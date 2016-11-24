@@ -21,7 +21,10 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode;
 
 
 import java.awt.Dimension;
+
 import org.knime.core.node.NodeView;
+
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
 
 
 /**

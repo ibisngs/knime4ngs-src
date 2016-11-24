@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.ngs.vcfmerger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;

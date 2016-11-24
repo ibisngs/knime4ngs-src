@@ -20,7 +20,6 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -28,9 +27,7 @@ import java.util.LinkedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -333,24 +330,5 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 		//HTE Execution
 		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, getPathToStdoutFile().getAbsolutePath(), getPathToStderrFile().getAbsolutePath(), STDOUT, STDERR, null);	
 	}
-	
-	
-	
-	/**************************************** KNIME METHODS ****************************************/
-	/***********************************************************************************************/
-    
-	
-	@Override
-	protected void loadInternals(File nodeInternDir, ExecutionMonitor exec)
-			throws IOException, CanceledExecutionException {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	protected void saveInternals(File nodeInternDir, ExecutionMonitor exec)
-			throws IOException, CanceledExecutionException {
-		// TODO Auto-generated method stub
-		
-	}	
 }

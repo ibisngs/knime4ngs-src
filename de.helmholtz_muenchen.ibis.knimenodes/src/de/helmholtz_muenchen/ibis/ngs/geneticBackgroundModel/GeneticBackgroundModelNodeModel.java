@@ -47,8 +47,8 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.EntityIdentifier;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.MatrixSummary;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.*;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 import de.helmholtz_muenchen.ibis.utils.ngs.AnnotationParser;

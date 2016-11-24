@@ -23,7 +23,6 @@ package de.helmholtz_muenchen.ibis.ngs.gatkselectvariants;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 
-
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SelectVariants.SelectVariantsNodeDialog;
 /**
  * <code>NodeDialog</code> for the "GATKSelectVariants" Node.

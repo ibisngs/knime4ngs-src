@@ -45,11 +45,13 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.CaseControlAnalyzerNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.EntityIdentifier;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.GeneSetIdentifier;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.MatrixSummary;
 import de.helmholtz_muenchen.ibis.utils.ngs.BioEntity;
 import de.helmholtz_muenchen.ibis.utils.ngs.ContingencyTable;
-import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.*;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.caseControlAnalyzer.Identifier.*;
 import de.helmholtz_muenchen.ibis.utils.ngs.Statistics;
 
 /**

@@ -20,8 +20,8 @@
 package de.helmholtz_muenchen.ibis.utils.datatypes.file;
 
 import org.knime.core.data.DataCell;
-import org.knime.core.data.DataType;
 import org.knime.core.data.DataCellFactory.FromSimpleString;
+import org.knime.core.data.DataType;
 
 public class FileCellFactory implements FromSimpleString {
 

@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 import java.awt.Dimension;
 
 import org.knime.core.node.NodeView;
+
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.LogPanel;
 
 public class HTENodeView<T extends HTExecutorNodeModel> extends NodeView<T>{

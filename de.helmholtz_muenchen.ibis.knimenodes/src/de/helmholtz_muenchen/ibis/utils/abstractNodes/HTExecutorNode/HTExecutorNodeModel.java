@@ -20,6 +20,9 @@
 package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -32,7 +35,13 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.node.*;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.ModelContent;
+import org.knime.core.node.ModelContentRO;
+import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.port.PortType;
@@ -56,6 +65,9 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	private StringBuffer HTEOUT 			= new StringBuffer("");
 	private StringBuffer HTEERR 			= new StringBuffer("");
 	
+	//Internals
+	private static final String INTERNAL_MODEL = "internalModel";
+	private static final String INTERNALS_FILE = "hte_internals.xml";
 	
 	//variables characterizing the HTExecution
 	private int exec_id = -1;
@@ -332,6 +344,39 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		
 		HTEOUT.append(Log+"\n");
 	}
+	
+	
+    @Override
+    protected void loadInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+    	 File file = new File(internDir, INTERNALS_FILE);
+         FileInputStream fis = new FileInputStream(file);
+         ModelContentRO modelContent = ModelContent.loadFromXML(fis);
+         try {
+			HTEOUT.append(modelContent.getString("ViewSTDOUT"));
+			HTEERR.append(modelContent.getString("ViewSTDERR"));
+			System.out.println("AHA!");
+			System.out.println(modelContent.getString("ViewSTDOUT"));
+		} catch (InvalidSettingsException e) {
+			e.printStackTrace();
+		}
+    }
+    
+
+    @Override
+    protected void saveInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+    	ModelContent modelContent = new ModelContent(INTERNAL_MODEL);
+    	modelContent.addString("ViewSTDOUT", getHTEOUT());
+    	modelContent.addString("ViewSTDERR", getHTEERR());
+    	File file = new File(internDir, INTERNALS_FILE);
+    	System.out.println(file.getAbsolutePath());
+    	FileOutputStream fos = new FileOutputStream(file);
+        modelContent.saveToXML(fos);
+    }
+	
 	
 	
 //	/**
