@@ -22,11 +22,18 @@ package de.helmholtz_muenchen.ibis.knime;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+
+
+import javax.swing.JOptionPane;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.workbench.ui.startup.StartupMessage;
 import org.osgi.framework.BundleContext;
+
+import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 
 /**
  * This is the OSGI bundle activator.
@@ -102,16 +109,41 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 			SAMTOOLS, SEGEMEHL, SNPEFF, SNPSIFT, STAR,
 			VCFTOOLS, VEP, VEP_FILTER};
 	
+	public static final HashMap<String, Boolean> TOOLS;
+	static {
+		TOOLS = new HashMap<>();
+		TOOLS.put(IBISKNIMENodesPlugin.BCFTOOLS, true);
+		TOOLS.put(IBISKNIMENodesPlugin.BOWTIE2,true);
+		TOOLS.put(IBISKNIMENodesPlugin.BWA,true);
+		TOOLS.put(IBISKNIMENodesPlugin.FEATURE_COUNTS,true);
+		TOOLS.put(IBISKNIMENodesPlugin.GATK,false);
+		TOOLS.put(IBISKNIMENodesPlugin.KGGSeq,false);
+		TOOLS.put(IBISKNIMENodesPlugin.PICARD,false);
+		TOOLS.put(IBISKNIMENodesPlugin.PINDEL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
+		TOOLS.put(IBISKNIMENodesPlugin.SNPSIFT, false);
+		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
+		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
+		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
+		TOOLS.put(IBISKNIMENodesPlugin.VEP_FILTER, false);
+	}
+	
 	/**
      * The shared instance.
      */
     private static IBISKNIMENodesPlugin IKN_PLUGIN;
 
+    private Thread t;
+    
     /**
      * The constructor.
      */
     public IBISKNIMENodesPlugin() {
         super();
+        IKN_PLUGIN = this;
     }
 
     /**
@@ -225,5 +257,77 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		for(String s: PATHS) {
 			IBISKNIMENodesPlugin.getDefault().getPreferenceStore().setToDefault(s);
 		}
+	}
+	
+	public void startSearchThread(String dir, Table table) {
+		t = new Thread(new Runnable() {
+		      public void run() {
+		    	  
+		    	  HashMap<String, String> tool2path = selectSearchDir(dir);
+		    	  if(!Thread.currentThread().isInterrupted()) {
+		    		  StringBuilder sb = new StringBuilder();
+		    		  if(tool2path.size()==0) {
+		    			  sb.append("No tools have been found!");
+		    		  } else {
+		    			  sb.append("The following tools have been found:"+System.getProperty("line.separator"));
+		    		  }
+		    		  for(String tool: tool2path.keySet()) {
+		    			  String path = tool2path.get(tool);
+		    			  if(path!=null) {
+		    				  sb.append(path+System.getProperty("line.separator"));
+		    			  }
+		    		  }
+		    		  int n = JOptionPane.showConfirmDialog(null,
+		    				  sb.toString(),
+		    				  "Searching directory "+dir+" finished",
+		    				  JOptionPane.YES_NO_OPTION);
+		    		  if(n == 0) {
+		    			  for(String tool: tool2path.keySet()) {
+		    				  String path = tool2path.get(tool);
+			    			  if(path!=null) {
+			    				  IBISKNIMENodesPlugin.setStringPreference(tool, tool2path.get(tool));
+			    			  }
+		    			  }
+		    			  if(!table.isDisposed()) {
+//		    				  TODO change table items
+//		    		    	  for(TableItem i: table.getItems()) {
+//		    		    		  i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
+//		    		    	  }
+		    			  }
+		    		  }
+		    	  }
+		      }
+		    });
+		t.start();
+	}
+	
+	public void cancelSearchThread() {
+		if(t.isAlive()) {
+			System.out.println("interrupt t");
+			t.interrupt();
+		}
+		System.out.println("thread not alive");
+	}
+	
+	private HashMap<String, String> selectSearchDir(String dir){
+		if(dir==null) return null;
+
+		HashMap<String, String> tool2path = new HashMap<>();
+		
+		for(String s: TOOLS.keySet()) {
+			if(IBISKNIMENodesPlugin.getStringPreference(s).equals("")) {
+				String path = BinaryHandler.checkToolAvailability(s, dir);
+				tool2path.put(s, path);
+//				if(path != null) {
+//					try {
+//						CheckUtils.checkSourceFile(path);
+//						IBISKNIMENodesPlugin.setStringPreference(s, path);
+//					} catch (InvalidSettingsException e) {
+//						IBISKNIMENodesPlugin.setStringPreference(s, "");
+//					}
+//				}
+			}
+		}
+		return tool2path;
 	}
 }

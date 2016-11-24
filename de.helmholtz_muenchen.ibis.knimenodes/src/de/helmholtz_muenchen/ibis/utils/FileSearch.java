@@ -58,29 +58,30 @@ public class FileSearch {
  
   }
  
-  private void search(File file) {
- 
-	if (file.isDirectory()) {
-	  System.out.println("Searching directory ... " + file.getAbsoluteFile());
- 
-            //do you have permission to read this directory?	
-	    if (file.canRead()) {
-		for (File temp : file.listFiles()) {
-		    if (temp.isDirectory()) {
-			search(temp);
-		    } else {
-			if (getFileNameToSearch().equals(temp.getName().toLowerCase())) {			
-			    result.add(temp.getAbsoluteFile().toString());
-		    }
- 
+	private void search(File file) {
+
+		if (file.isDirectory()) {
+			System.out.println("Searching directory ... " + file.getAbsoluteFile());
+
+			// do you have permission to read this directory?
+			if (file.canRead()) {
+				for (File temp : file.listFiles()) {
+					if(Thread.currentThread().isInterrupted()) return;
+					if (temp.isDirectory()) {
+						search(temp);
+					} else {
+						if (getFileNameToSearch().equals(temp.getName().toLowerCase())) {
+							result.add(temp.getAbsoluteFile().toString());
+						}
+
+					}
+				}
+
+			} else {
+				System.out.println(file.getAbsoluteFile() + "Permission Denied");
+			}
 		}
-	    }
- 
-	 } else {
-		System.out.println(file.getAbsoluteFile() + "Permission Denied");
-	 }
-      }
- 
-  }
+
+	}
  
 }

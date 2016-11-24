@@ -62,7 +62,6 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
@@ -75,28 +74,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 
 	
 	private static final String DOWNLOAD_PATH = "ftp://ftpmips.helmholtz-muenchen.de/knime/";
-	public static final HashMap<String, Boolean> TOOLS;
-	static {
-		TOOLS = new HashMap<>();
-		TOOLS.put(IBISKNIMENodesPlugin.BCFTOOLS, true);
-		TOOLS.put(IBISKNIMENodesPlugin.BOWTIE2,true);
-		TOOLS.put(IBISKNIMENodesPlugin.BWA,true);
-		TOOLS.put(IBISKNIMENodesPlugin.FEATURE_COUNTS,true);
-		TOOLS.put(IBISKNIMENodesPlugin.GATK,false);
-		TOOLS.put(IBISKNIMENodesPlugin.KGGSeq,false);
-		TOOLS.put(IBISKNIMENodesPlugin.PICARD,false);
-		TOOLS.put(IBISKNIMENodesPlugin.PINDEL,true);
-		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
-		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
-		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
-		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
-		TOOLS.put(IBISKNIMENodesPlugin.SNPSIFT, false);
-		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
-		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
-		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
-		TOOLS.put(IBISKNIMENodesPlugin.VEP_FILTER, false);
-//		TOOLS.put(IBISKNIMENodesPlugin.BFAST,true);
-	}
+
 	
 	//define all dependencies for each tool (recursive dependencies are not checked!)
 	public static final HashMap<String, HashSet<String>> DEPENDENCIES;
@@ -126,10 +104,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	private Button checkHTE;
 	private Button checkNotify;
 	
-	private Table table;
-
+	public Table table;
+	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(KNIMEPreferencePage.class);
-
+	
 	public KNIMEPreferencePage() {
 		super();
 
@@ -170,7 +148,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			col.setText(titles[i]);
 		}
 		
-		for(String key: TOOLS.keySet()) {
+		for(String key: IBISKNIMENodesPlugin.TOOLS.keySet()) {
 			TableItem item = new TableItem(table, SWT.NULL);
 			item.setText(0,key);
 			item.setText(1,IBISKNIMENodesPlugin.getStringPreference(key));
@@ -194,6 +172,9 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Button browseSearchDir = new Button(searchDownloadEdit, SWT.NONE);
 		browseSearchDir.setText("Search in directory");
+		
+		Button cancelSearch = new Button(searchDownloadEdit, SWT.NONE);
+		cancelSearch.setText("Cancel search");
 		
 		Button downloader = new Button(searchDownloadEdit, SWT.NONE);
 		downloader.setText("Download missing binaries");
@@ -409,7 +390,13 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		browseSearchDir.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				String path = getDirPath(shell, "Select search directory");
-				selectSearchDir(path);
+				IBISKNIMENodesPlugin.getDefault().startSearchThread(path, table);
+			}
+		});
+		
+		cancelSearch.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				IBISKNIMENodesPlugin.getDefault().cancelSearchThread();
 			}
 		});
 		
@@ -432,6 +419,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 				editBinary(item, file);
 			}
 		});
+	
 		
 		browseRefGenome.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -665,8 +653,8 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			return;
 		}
 			
-		for (String tool : TOOLS.keySet()) {
-			if (TOOLS.get(tool)) {
+		for (String tool : IBISKNIMENodesPlugin.TOOLS.keySet()) {
+			if (IBISKNIMENodesPlugin.TOOLS.get(tool)) {
 				if (IBISKNIMENodesPlugin.getStringPreference(tool).equals("")) {
 					try {
 						File f = new File(dir + File.separatorChar + tool);
@@ -697,38 +685,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 	}
 	
-	private void selectSearchDir(String dir){
-		if(dir==null) return;
 
-	    Thread t = new Thread(new Runnable() {
-	      public void run() {
-	    	  JOptionPane.showMessageDialog(null,
-	  			    "Please wait while directories are searched. The file dialog will be closed automatically.",
-	  			    "Information",
-	  			    JOptionPane.INFORMATION_MESSAGE);
-	      }
-	    });
-	    t.start();
-		
-		for(String s: TOOLS.keySet()) {
-			if(IBISKNIMENodesPlugin.getStringPreference(s).equals("")) {
-				String path = BinaryHandler.checkToolAvailability(s, dir);
-				if(path != null) {
-					try {
-						CheckUtils.checkSourceFile(path);
-						IBISKNIMENodesPlugin.setStringPreference(s, path);
-					} catch (InvalidSettingsException e) {
-						IBISKNIMENodesPlugin.setStringPreference(s, "");
-					}
-					
-				}
-			}
-		}
-		
-		for(TableItem i: table.getItems()) {
-			i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
-		}
-	}
 	
 	private String getFilePath(Shell shell, String text, String ext, String content) {
 		FileDialog fdl = new FileDialog(shell);
