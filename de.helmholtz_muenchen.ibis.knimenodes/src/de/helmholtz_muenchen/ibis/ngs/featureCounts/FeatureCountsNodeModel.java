@@ -64,7 +64,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     // keys for SettingsModels
     protected static final String CFGKEY_OUTPUT_FOLDER 				= "OutputFolder";
     protected static final String CFGKEY_ANNOTATION_FILE			= "AnnotationFile";
-    protected static final String CFGKEY_ANNOTATION_TYPE			= "AnnotationType";
+//    protected static final String CFGKEY_ANNOTATION_TYPE			= "AnnotationType";
     protected static final String CFGKEY_ANNOTATION_FEATURE			= "AnnotationFeature";
     protected static final String CFGKEY_THREAD_NUMBER				= "ThreadNumber";
     protected static final String CFGKEY_COUNT_MULTIMAPPED			= "MultimappedFlag";
@@ -75,8 +75,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected static final String CFGKEY_GROUP_FEATURE				= "GroupFeature";
     
     // initial default values for SettingsModels
-    protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
-    protected static final String ALTERNATIVE_ANNOTATION_TYPE 		= "SAF";			// alternative annotation type
+//    protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
+//    protected static final String ALTERNATIVE_ANNOTATION_TYPE 		= "SAF";			// alternative annotation type
     protected static final String DEFAULT_ANNOTATION_FILE			= "";
     protected static final String DEFAULT_ANNOTATION_FEATURE		= "exon";			// default feature which is used for counting
     protected static final int DEFAULT_THREAD_NUMBER				= 1;				// default threads to use
@@ -105,7 +105,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelString SET_FEATURE_TYPE				= new SettingsModelString(CFGKEY_ANNOTATION_FEATURE, DEFAULT_ANNOTATION_FEATURE);
     private final SettingsModelString SET_OUTPUT_FOLDER 			= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, "");
     private final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(CFGKEY_ANNOTATION_FILE, DEFAULT_ANNOTATION_FILE);
-    private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(CFGKEY_ANNOTATION_TYPE, DEFAULT_ANNOTATION_TYPE);
+//    private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(CFGKEY_ANNOTATION_TYPE, DEFAULT_ANNOTATION_TYPE);
     private final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(CFGKEY_THREAD_NUMBER, DEFAULT_THREAD_NUMBER);
     private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED, DEAFULT_COUNT_MULTIMAPPED);
     private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI, DEAFULT_COUNT_MULTI_OVERLAPING);
@@ -132,7 +132,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
         addSetting(SET_FEATURE_TYPE);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
-    	addSetting(SET_ANNOTATION_TYPE);
+//    	addSetting(SET_ANNOTATION_TYPE);
     	addSetting(SET_THREAD_NUMBER);
     	addSetting(SET_COUNT_MULTIMAPPED);
     	addSetting(SET_COUNT_OVERLAPPING_MULTI);
@@ -188,7 +188,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		if(SET_THREAD_NUMBER.getIntValue() > 1)
 			pars.put(NAME_OF_THREAD_NUMBER, Integer.toString(SET_THREAD_NUMBER.getIntValue()));
 		
-		pars.put(NAME_OF_ANNOTATION_TYPE, SET_ANNOTATION_TYPE.getStringValue());
+		pars.put(NAME_OF_ANNOTATION_TYPE, "GTF");
+		if(SET_ANNOTATION_FILE.getStringValue().endsWith(".saf")) {
+			pars.put(NAME_OF_ANNOTATION_TYPE, "SAF");
+		}
+		
 		pars.put(NAME_OF_FEATURE_TYPE, SET_FEATURE_TYPE.getStringValue());
 		pars.put(NAME_OF_ANNOTATION_FILE, SET_ANNOTATION_FILE.getStringValue());
 		pars.put(NAME_OF_GROUP_FEATURE, SET_GROUP_FEATURE.getStringValue());
@@ -274,10 +278,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	if(!(f.isFile() && f.exists()))
     		throw new InvalidSettingsException("Annotation file '" + path2AnnotationFile + "' does not exist.");
     	
-    	SET_ANNOTATION_TYPE.setStringValue(DEFAULT_ANNOTATION_TYPE);
-    	if(path2AnnotationFile.endsWith(".saf")) {
-    		SET_ANNOTATION_TYPE.setStringValue(ALTERNATIVE_ANNOTATION_TYPE);
-    	}
+//    	SET_ANNOTATION_TYPE.setStringValue(DEFAULT_ANNOTATION_TYPE);
+//    	if(path2AnnotationFile.endsWith(".saf")) {
+//    		SET_ANNOTATION_TYPE.setStringValue(ALTERNATIVE_ANNOTATION_TYPE);
+//    	}
 
     	return true;
     }
