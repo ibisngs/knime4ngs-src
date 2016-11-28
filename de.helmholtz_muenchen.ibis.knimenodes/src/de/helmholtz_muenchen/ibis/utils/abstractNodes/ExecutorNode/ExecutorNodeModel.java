@@ -169,13 +169,13 @@ public abstract class ExecutorNodeModel extends SettingsStorageNodeModel {
     protected void reset() {
 //    	if(!isRunning){ // only delete Logs if node was not interrupted during run
 //			if(STDOUT!=null){
-//				STDOUT.setLength(0);
-//				STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
+				STDOUT.setLength(0);
+				STDOUT.append(LOGMESSAGE_BEFORE_EXECUTION);
 //			}
-//			
+			
 //			if(STDERR != null){
-//				STDERR.setLength(0);
-//				STDERR.append(LOGMESSAGE_BEFORE_EXECUTION);
+				STDERR.setLength(0);
+				STDERR.append(LOGMESSAGE_BEFORE_EXECUTION);
 //			}
 //    	}
 //    	isRunning = false;
