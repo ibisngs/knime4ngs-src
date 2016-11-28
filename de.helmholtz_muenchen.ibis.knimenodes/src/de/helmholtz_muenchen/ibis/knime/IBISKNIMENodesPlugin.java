@@ -24,11 +24,13 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 
-
 import javax.swing.JOptionPane;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.knime.workbench.ui.startup.StartupMessage;
 import org.osgi.framework.BundleContext;
@@ -136,8 +138,6 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
      */
     private static IBISKNIMENodesPlugin IKN_PLUGIN;
 
-    private Thread t;
-    
     /**
      * The constructor.
      */
@@ -145,6 +145,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         super();
         IKN_PLUGIN = this;
     }
+    
+    private Thread t;
 
     /**
      * This method is called upon plug-in activation.
@@ -191,6 +193,84 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         iknpsmp.addMessage(sm);
         
     }
+    
+	public void startSearchThread(String dir, Table table, Button search, Button cancel) {
+		
+		t = new Thread(new Runnable() {
+		      public void run() {
+		    	  
+		    	  HashMap<String, String> tool2path = selectSearchDir(dir);
+		    	  if(!Thread.currentThread().isInterrupted()) {
+		    		  StringBuilder sb = new StringBuilder();
+		    		  if(tool2path.size()==0) {
+		    			  sb.append("No tools have been found!");
+		    		  } else {
+		    			  sb.append("The following tools have been found:"+System.getProperty("line.separator"));
+		    		  }
+		    		  for(String tool: tool2path.keySet()) {
+		    			  String path = tool2path.get(tool);
+		    			  if(path!=null) {
+		    				  sb.append(path+System.getProperty("line.separator"));
+		    			  }
+		    		  }
+		    		  int n = JOptionPane.showConfirmDialog(null,
+		    				  sb.toString(),
+		    				  "Searching directory "+dir+" finished",
+		    				  JOptionPane.OK_CANCEL_OPTION);
+		    		  if(n == 0) {
+		    			  for(String tool: tool2path.keySet()) {
+		    				  String path = tool2path.get(tool);
+			    			  if(path!=null) {
+			    				  IBISKNIMENodesPlugin.setStringPreference(tool, tool2path.get(tool));
+			    			  }
+		    			  }
+		    		  }
+		    		  if(!table.isDisposed()) {
+	    				  Display.getDefault().asyncExec(new Runnable () {
+							@Override
+							public void run() {
+								for(TableItem i: table.getItems()) {
+									i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
+								}	
+								cancel.setEnabled(false);
+								search.setEnabled(true);
+							}
+	    				  });		    				  
+	    			  }
+		    	  }
+		      }
+		    });
+		t.start();
+	}
+	
+	public HashMap<String, String> selectSearchDir(String dir){
+		if(dir==null) return null;
+
+		HashMap<String, String> tool2path = new HashMap<>();
+		
+		for(String s: IBISKNIMENodesPlugin.TOOLS.keySet()) {
+			if(IBISKNIMENodesPlugin.getStringPreference(s).equals("")) {
+				String path = BinaryHandler.checkToolAvailability(s, dir);
+				if(path!=null) {
+					tool2path.put(s, path);
+				}
+			}
+		}
+		return tool2path;
+	}
+	
+	public void cancelSearchThread() {
+		if(t.isAlive()) {
+			System.out.println("interrupt t");
+			t.interrupt();
+		}
+		System.out.println("thread not alive");
+	}
+	
+	public boolean isSearching() {
+		if(t==null) return false;
+		return t.isAlive();
+	}
 
     /**
      * This method is called when the plug-in is stopped.
@@ -257,77 +337,5 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		for(String s: PATHS) {
 			IBISKNIMENodesPlugin.getDefault().getPreferenceStore().setToDefault(s);
 		}
-	}
-	
-	public void startSearchThread(String dir, Table table) {
-		t = new Thread(new Runnable() {
-		      public void run() {
-		    	  
-		    	  HashMap<String, String> tool2path = selectSearchDir(dir);
-		    	  if(!Thread.currentThread().isInterrupted()) {
-		    		  StringBuilder sb = new StringBuilder();
-		    		  if(tool2path.size()==0) {
-		    			  sb.append("No tools have been found!");
-		    		  } else {
-		    			  sb.append("The following tools have been found:"+System.getProperty("line.separator"));
-		    		  }
-		    		  for(String tool: tool2path.keySet()) {
-		    			  String path = tool2path.get(tool);
-		    			  if(path!=null) {
-		    				  sb.append(path+System.getProperty("line.separator"));
-		    			  }
-		    		  }
-		    		  int n = JOptionPane.showConfirmDialog(null,
-		    				  sb.toString(),
-		    				  "Searching directory "+dir+" finished",
-		    				  JOptionPane.YES_NO_OPTION);
-		    		  if(n == 0) {
-		    			  for(String tool: tool2path.keySet()) {
-		    				  String path = tool2path.get(tool);
-			    			  if(path!=null) {
-			    				  IBISKNIMENodesPlugin.setStringPreference(tool, tool2path.get(tool));
-			    			  }
-		    			  }
-		    			  if(!table.isDisposed()) {
-//		    				  TODO change table items
-//		    		    	  for(TableItem i: table.getItems()) {
-//		    		    		  i.setText(1,IBISKNIMENodesPlugin.getStringPreference(i.getText(0)));
-//		    		    	  }
-		    			  }
-		    		  }
-		    	  }
-		      }
-		    });
-		t.start();
-	}
-	
-	public void cancelSearchThread() {
-		if(t.isAlive()) {
-			System.out.println("interrupt t");
-			t.interrupt();
-		}
-		System.out.println("thread not alive");
-	}
-	
-	private HashMap<String, String> selectSearchDir(String dir){
-		if(dir==null) return null;
-
-		HashMap<String, String> tool2path = new HashMap<>();
-		
-		for(String s: TOOLS.keySet()) {
-			if(IBISKNIMENodesPlugin.getStringPreference(s).equals("")) {
-				String path = BinaryHandler.checkToolAvailability(s, dir);
-				tool2path.put(s, path);
-//				if(path != null) {
-//					try {
-//						CheckUtils.checkSourceFile(path);
-//						IBISKNIMENodesPlugin.setStringPreference(s, path);
-//					} catch (InvalidSettingsException e) {
-//						IBISKNIMENodesPlugin.setStringPreference(s, "");
-//					}
-//				}
-			}
-		}
-		return tool2path;
 	}
 }

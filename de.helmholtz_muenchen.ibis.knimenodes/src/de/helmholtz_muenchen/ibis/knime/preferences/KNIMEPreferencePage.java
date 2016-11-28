@@ -17,7 +17,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package de.helmholtz_muenchen.ibis.knime.preferences;
 
 import java.io.File;
@@ -64,6 +63,7 @@ import org.knime.core.node.util.CheckUtils;
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
+
 
 /**
  * @author Maximilian Hastreiter
@@ -167,14 +167,16 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		
 		Composite searchDownloadEdit = new Composite(binPrefs, SWT.NONE);
 		GridLayout downloadLayout = new GridLayout();
-		downloadLayout.numColumns = 3;
+		downloadLayout.numColumns = 4;
 		searchDownloadEdit.setLayout(downloadLayout);
 		
 		Button browseSearchDir = new Button(searchDownloadEdit, SWT.NONE);
 		browseSearchDir.setText("Search in directory");
+		browseSearchDir.setEnabled(!IBISKNIMENodesPlugin.getDefault().isSearching());
 		
 		Button cancelSearch = new Button(searchDownloadEdit, SWT.NONE);
 		cancelSearch.setText("Cancel search");
+		cancelSearch.setEnabled(IBISKNIMENodesPlugin.getDefault().isSearching());
 		
 		Button downloader = new Button(searchDownloadEdit, SWT.NONE);
 		downloader.setText("Download missing binaries");
@@ -389,14 +391,18 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		/* event handles */
 		browseSearchDir.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				browseSearchDir.setEnabled(false);
+				cancelSearch.setEnabled(true);
 				String path = getDirPath(shell, "Select search directory");
-				IBISKNIMENodesPlugin.getDefault().startSearchThread(path, table);
+				IBISKNIMENodesPlugin.getDefault().startSearchThread(path, table, browseSearchDir, cancelSearch);
 			}
 		});
 		
 		cancelSearch.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				IBISKNIMENodesPlugin.getDefault().cancelSearchThread();
+				cancelSearch.setEnabled(false);
+				browseSearchDir.setEnabled(true);
 			}
 		});
 		
@@ -775,18 +781,4 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		dbFile.setText(DB_FILE);	
 	}
-	
-//	private Button addBrowsePathComp(Group parent, Text text, String content, String label) {
-//		Label lab = new Label(parent,SWT.LEFT);
-//		lab.setText(label);
-//		
-//		text = new Text(parent,SWT.BORDER);
-//		text.setText(content);
-//		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//		
-//		Button browse = new Button(parent, SWT.RIGHT);
-//		browse.setText("Browse");
-//		
-//		return browse;
-//	}
 }
