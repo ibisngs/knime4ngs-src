@@ -19,6 +19,5 @@
 	<classpathentry kind="lib" path="libs/jbzip2-0.9.jar"/>
 	<classpathentry kind="lib" path="libs/RCaller-2.5.jar"/>
 	<classpathentry kind="lib" path="libs/picard.jar"/>
-	<classpathentry kind="lib" path="/home/ibis/tim.jeske/eclipse_knime_3.0.0/plugins/org.knime.workbench.ui_3.1.2.v201603040957/workbench-ui.jar" sourcepath="/home/ibis/tim.jeske/eclipse_knime_3.0.0/plugins/org.knime.workbench.ui.source_3.2.0.v201606131354.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
