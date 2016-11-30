@@ -356,8 +356,6 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
          try {
 			HTEOUT.append(modelContent.getString("ViewSTDOUT"));
 			HTEERR.append(modelContent.getString("ViewSTDERR"));
-			System.out.println("AHA!");
-			System.out.println(modelContent.getString("ViewSTDOUT"));
 		} catch (InvalidSettingsException e) {
 			e.printStackTrace();
 		}
@@ -372,7 +370,6 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
     	modelContent.addString("ViewSTDOUT", getHTEOUT());
     	modelContent.addString("ViewSTDERR", getHTEERR());
     	File file = new File(internDir, INTERNALS_FILE);
-    	System.out.println(file.getAbsolutePath());
     	FileOutputStream fos = new FileOutputStream(file);
         modelContent.saveToXML(fos);
     }
