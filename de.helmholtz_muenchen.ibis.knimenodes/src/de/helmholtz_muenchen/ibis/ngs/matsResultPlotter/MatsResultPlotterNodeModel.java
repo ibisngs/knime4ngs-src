@@ -41,7 +41,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.ngs.matsResultIndexer.MatsResultIndexerNodeModel;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.Executor;
 
 /**
@@ -50,7 +50,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.Executor;
  *
  * @author Michael Kluge
  */
-public class MatsResultPlotterNodeModel extends ExecutorNodeModel {
+public class MatsResultPlotterNodeModel extends HTExecutorNodeModel {
 	
 	public static final String OUT_COL1 = "OutputFolder";
 	public static final String PYTHON_BIN = "python";
@@ -88,7 +88,7 @@ public class MatsResultPlotterNodeModel extends ExecutorNodeModel {
 	 * Constructor
 	 */
 	protected MatsResultPlotterNodeModel() {
-		super(1, 1, true, true);
+		super(1, 1);
 		this.addSetting(SET_INPUT_FILE);
     	this.addSetting(SET_BINARY_PATH);
     	this.addSetting(SET_OUTPUT_FILE);

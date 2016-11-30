@@ -21,7 +21,6 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -29,21 +28,20 @@ import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode.ExecutorNodeModel;
-import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 
-public abstract class ScriptNodeModel extends ExecutorNodeModel {
+public abstract class ScriptNodeModel extends HTExecutorNodeModel {
 	protected final String SCRIPT;
 	public static final String SCRIPTS_SUBFOLDER = "scripts";
 	
 	
 	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script) {
-		super(nrInDataPorts, nrOutDataPorts, true, true);		
+		super(nrInDataPorts, nrOutDataPorts);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	
 	protected ScriptNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script) {
-		super(inPortTypes, outPortTypes, true, true);		
+		super(inPortTypes, outPortTypes);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	
@@ -51,8 +49,8 @@ public abstract class ScriptNodeModel extends ExecutorNodeModel {
 		return(IO.getScriptPath() + SCRIPTS_SUBFOLDER + File.separatorChar);
 	}
 	
-	protected void executeScript(final ExecutionContext exec, String[] environment) throws CanceledExecutionException, IOException, InterruptedException, ExecutionException, UnsuccessfulExecutionException {
-		executeCommand(exec, this.getCommand(), environment, null, null);
+	protected void executeScript(final ExecutionContext exec, String[] environment) throws Exception {
+		executeCommand(this.getCommand(), exec, environment, null, null, null, null, null, null);
 	}
 	
 	protected abstract String[] getCommand();

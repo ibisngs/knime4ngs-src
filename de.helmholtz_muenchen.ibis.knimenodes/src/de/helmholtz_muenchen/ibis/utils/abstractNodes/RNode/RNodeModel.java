@@ -157,7 +157,7 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		try{
 			super.executeScript(exec, null);
 		} catch(UnsuccessfulExecutionException e){
-			throw new UnsuccessfulExecutionException("R command failed\nSTDOUT:"+IO.tail(this.getSTDOUT(), 5)+"\nSTDERR:"+IO.tail(this.getSTDERR(), 5));	
+			throw new UnsuccessfulExecutionException("R command failed\nSTDOUT:"+IO.tail(this.getHTEOUT(), 5)+"\nSTDERR:"+IO.tail(this.getHTEERR(), 5));	
 		}
 
 

@@ -203,7 +203,7 @@ public class Executor {
 	 * @throws UnsuccessfulExecutionException 
 	 * @throws Exception
 	 */
-	public static void executeCommand(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile,StringBuffer HTEOUT) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException  {
+	public static void executeCommand(String[] command, ExecutionContext exec, String[] environment, NodeLogger logger, String stdOutFile, String stdErrFile, StringBuffer stdOut, StringBuffer stdErr, String StdInFile, StringBuffer HTEOUT) throws CanceledExecutionException, InterruptedException, ExecutionException, UnsuccessfulExecutionException  {
 		exec.checkCanceled();
 		//Create Threadpool + the execution and monitoring threads 
 		ExecutorService pool = Executors.newSingleThreadExecutor();

@@ -154,8 +154,5 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
     	} 
     	Dimension d = c.getPreferredSize();
     	return (d.getWidth()== 0 && d.getHeight() == 0);
-    }
-    
-    
-    
+    } 
 }

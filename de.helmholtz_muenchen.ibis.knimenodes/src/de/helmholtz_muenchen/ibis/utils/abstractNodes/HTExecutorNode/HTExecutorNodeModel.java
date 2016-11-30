@@ -61,6 +61,7 @@ import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
  */
 public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	
+	public static final String LOGMESSAGE_LOG_DISABLED     = "";
 	private static final NodeLogger LOGGER  = NodeLogger.getLogger(HTExecutorNodeModel.class);
 	private StringBuffer HTEOUT 			= new StringBuffer("");
 	private StringBuffer HTEERR 			= new StringBuffer("");
@@ -373,35 +374,5 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
     	FileOutputStream fos = new FileOutputStream(file);
         modelContent.saveToXML(fos);
     }
-	
-	
-	
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	protected void saveSettingsTo(final NodeSettingsWO settings) {
-//		threshold.saveSettingsTo(settings);
-//		m_use_pref.saveSettingsTo(settings);
-//	}
-//
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		threshold.loadSettingsFrom(settings);
-//		m_use_pref.loadSettingsFrom(settings);
-//	}
-//
-//	/**
-//	 * {@inheritDoc}
-//	 */
-//	@Override
-//	protected void validateSettings(final NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		threshold.validateSettings(settings);
-//		m_use_pref.validateSettings(settings);
-//	}
+    
 }

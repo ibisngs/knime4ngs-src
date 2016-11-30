@@ -17,7 +17,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package de.helmholtz_muenchen.ibis.utils.abstractNodes.ExecutorNode;
+package de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -85,12 +85,12 @@ public class LogPanel extends JTabbedPane {
 	
 	private void setText(){
 		if(STDOUT == null){
-			textarea_stdout.setText(ExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
+			textarea_stdout.setText(HTExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
 		}else{
 			textarea_stdout.setText(STDOUT);	
 		}
 		if(STDERR == null){
-			textarea_stderr.setText(ExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
+			textarea_stderr.setText(HTExecutorNodeModel.LOGMESSAGE_LOG_DISABLED);	
 		}else{
 			textarea_stderr.setText(STDERR);	
 		}
