@@ -101,8 +101,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	ArrayList<String> in1_list = new ArrayList<>();
     	ArrayList<String> in2_list = new ArrayList<>();
     	
-    	String in1 = m_infile1.getStringValue();
-    	String in2 = m_infile2.getStringValue();
+    	String in1 = IO.processFilePath(m_infile1.getStringValue());
+    	String in2 = IO.processFilePath(m_infile2.getStringValue());
     	
     	if(m_isList.getBooleanValue()) {
     		BufferedReader bw = Files.newBufferedReader(Paths.get(in1));
@@ -185,8 +185,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	String in1 = m_infile1.getStringValue();
-    	String in2 = m_infile2.getStringValue();
+    	String in1 = IO.processFilePath(m_infile1.getStringValue());
+    	String in2 = IO.processFilePath(m_infile2.getStringValue());
     	
     	secondOk = false;
     	int end = checkEnding(in1);
@@ -225,8 +225,7 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     	
     	//repeat check of first input file as it might be a path in a list
     	if(CompatibilityChecker.inputFileNotOk(in1, type)) {
-    		System.out.println(in1);
-    		throw new InvalidSettingsException("First input file in your list does not exist or is empty!");
+    		throw new InvalidSettingsException("First input file "+in1+" in your list does not exist or is empty!");
     	}
     	
     	//first input file is ok

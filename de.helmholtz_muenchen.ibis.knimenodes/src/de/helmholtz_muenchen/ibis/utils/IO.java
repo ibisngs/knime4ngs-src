@@ -28,6 +28,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -42,6 +44,7 @@ import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
+import org.knime.core.util.pathresolve.ResolverUtil;
 import org.knime.core.util.tokenizer.SettingsStatus;
 
 public class IO {
@@ -433,15 +436,52 @@ public class IO {
     	return File.substring(File.lastIndexOf("/")+1);
     }
     
-    public static String getAbsolutePath(String currDir, String path) {
+    public static String getAbsolutePath(String currDir, String path) throws InvalidSettingsException {
     	if(path.startsWith(File.separator)) {
     		return path;
     	} else if(path.startsWith("."+File.separator)) {
     		return currDir + path.replaceFirst("\\.", "");
     	} else if(path.startsWith(".."+File.separator)) {
     		return getAbsolutePath(new File(currDir).getParent(), path.replaceFirst("\\.", ""));
+    	}else if(path.startsWith("knime:")){
+    		return(processFilePath(path));
     	}
     	return currDir + File.separator + path;
     }
+    
+    /**
+     * Prepares a given file path for execution
+     * @param filepath
+     * @return Execution-ready filepath
+     * @throws InvalidSettingsException 
+     */
+    public static String processFilePath(String filepath) throws InvalidSettingsException{
+    	 	
+    	if(filepath.startsWith("knime:")){
+    		filepath = getAbsolutFromKNIMERelative(filepath);
+    	}
+    	return filepath;
+    }
+    
+    /**
+     * Converts a given relative KNIME file path to an absolute path 
+     * @param filepath
+     * @return Resolved file path
+     * @throws InvalidSettingsException
+     */
+    private static String getAbsolutFromKNIMERelative(String filepath) throws InvalidSettingsException{
+    	try {
+    		URI u  = new URI(filepath);
+    		filepath = ResolverUtil.resolveURItoLocalFile(u).getAbsolutePath();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new InvalidSettingsException("Failed to convert "+filepath+" to absolute file path!");
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+			throw new InvalidSettingsException("Failed to create URI from "+filepath);
+		}
+    	return filepath;
+    }
+    
     
 }
