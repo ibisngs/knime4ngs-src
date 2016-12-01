@@ -59,7 +59,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     
 	static final String CFGKEY_SNPSIFT_BIN = "snpsift_bin";
 	static final String CFGKEY_METHOD = "method";
-	static final String DEF_METHOD = "Filter";
+	static final String DEF_METHOD = "";
 	static final String DEF_FIELDS = "field1,field2";
 	
 	public enum SnpSiftTool {
