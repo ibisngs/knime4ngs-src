@@ -118,6 +118,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
 	private int vcf_index;
+	private String vep_script;
 	
     protected VEPFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
@@ -134,6 +135,8 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     	addSetting(m_outfolder);
     	addSetting(m_vepscript);
     	addSetting(m_chosen_terms);
+    	
+    	addPrefPageSetting(m_vepscript, IBISKNIMENodesPlugin.VEP_FILTER);
     }
 
     /**
@@ -186,7 +189,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 		LOGGER.info("Prepare command for filter_vep.pl");
 		ArrayList<String> cmd = new ArrayList<>();
 		cmd.add("perl");
-		cmd.add(m_vepscript.getStringValue());
+		cmd.add(vep_script);
 		cmd.add("-i");
 		cmd.add(infile);
 		cmd.add("-o");
@@ -231,7 +234,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 		
 		String perl5lib_variable = "PERL5LIB="+System.getenv("PERL5LIB");
 		
-		super.executeCommand(cmd_array, exec, new String[]{perl5lib_variable}, lockFile, null, null, null ,null, null);
+		super.executeCommand(cmd_array, outfile, exec, new String[]{perl5lib_variable}, lockFile, null, null, null ,null, null);
 		
 		return outfile;
     }
@@ -243,7 +246,10 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_vepscript.getStringValue(), false)) {
+    	super.updatePrefs();
+    	vep_script = m_vepscript.getStringValue();
+    	
+    	if(CompatibilityChecker.inputFileNotOk(vep_script, false)) {
     		throw new InvalidSettingsException("Invalid path to filter_vep.pl script!");
     	}
     	

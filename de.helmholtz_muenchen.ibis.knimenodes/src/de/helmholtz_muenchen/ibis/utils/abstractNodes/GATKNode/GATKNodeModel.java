@@ -41,6 +41,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -80,6 +81,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
 	public static final String OUT_COL1_TABLE1 = "OUTFILE";
 	
 	private boolean outtable = true;
+	
+	private String ref_genome, gatk_jar;
     
     /**
      * Constructor for the node model.
@@ -96,6 +99,9 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
    	 	addSetting(m_path2bed);
    	 	addSetting(m_bed_file_checkbox);
    	 	addSetting(m_OPT_FLAGS);
+   	 	
+    	addPrefPageSetting(m_REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
+    	addPrefPageSetting(m_GATK, IBISKNIMENodesPlugin.GATK);
         
    	 	m_path2bed.setEnabled(false);
     }
@@ -110,9 +116,9 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	
     	command.add("java");
     	command.add("-Xmx"+m_GATK_MEM.getIntValue()+"G");
-    	command.add("-jar "+m_GATK.getStringValue());
+    	command.add("-jar "+gatk_jar);
     	command.add("-T "+getCommandWalker());
-    	command.add("-R "+m_REF_GENOME.getStringValue());    	
+    	command.add("-R "+ref_genome);    	
     	command.add(getCommandParameters(inData)); //must be called before getOutfile() !!
    
     	String OUTFILE = getOutfile(); 	
@@ -133,7 +139,7 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	}
     	
     	LOGGER.info(StringUtils.join(command, " "));
-     	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec, lockFile,OUTFILE+".stdOut",OUTFILE+".stdErr");
+     	super.executeCommand(new String[]{StringUtils.join(command, " ")},OUTFILE,exec, lockFile,OUTFILE+".stdOut",OUTFILE+".stdErr");
      	
      	
     	/**
@@ -167,25 +173,28 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	super.updatePrefs();
+    	gatk_jar = m_GATK.getStringValue();
+    	ref_genome = m_REF_GENOME.getStringValue();
+    	
     	if(!checkInputCellType(inSpecs)) {
     		throw new InvalidSettingsException("This node seems to be incompatible with the precedent node!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue(), false)) {
+    	if(CompatibilityChecker.inputFileNotOk(gatk_jar, false)) {
     		throw new InvalidSettingsException("Set path to GenomeAnalysisTK.jar!");
     	}
 
     	//check reference genome
-    	String reffile = m_REF_GENOME.getStringValue();
-    	if(CompatibilityChecker.inputFileNotOk(reffile, true)) {
+    	if(CompatibilityChecker.inputFileNotOk(ref_genome, true)) {
     		throw new InvalidSettingsException("Set path to reference genome!");
     	}
     	
-    	if (!Files.exists(Paths.get(reffile + ".fai"))) {
-			throw new InvalidSettingsException("Reference sequence index: " + reffile + ".fai does not exist!");
+    	if (!Files.exists(Paths.get(ref_genome + ".fai"))) {
+			throw new InvalidSettingsException("Reference sequence index: " + ref_genome + ".fai does not exist!");
 		}
 
-		String refbase = PathProcessor.getBase(reffile);
+		String refbase = PathProcessor.getBase(ref_genome);
 		if (!Files.exists(Paths.get(refbase + ".dict"))) {
 			throw new InvalidSettingsException("Reference sequence dictionary: " + refbase + ".dict does not exist!");
 		}

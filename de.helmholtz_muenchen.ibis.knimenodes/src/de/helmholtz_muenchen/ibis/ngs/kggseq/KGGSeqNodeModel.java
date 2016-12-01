@@ -37,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -141,6 +142,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2OutFile";
+	private String kggseq_bin;
     
     /**
      * Constructor for the node model.
@@ -174,6 +176,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
         addSetting(m_SEQ_QUAL);
         addSetting(m_SEQ_SB);
         addSetting(m_RESOURCE);
+        
+        addPrefPageSetting(m_KGGSEQ, IBISKNIMENodesPlugin.KGGSeq);
     }
 
     /**
@@ -206,8 +210,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     		terminationState = SuccessfulRunChecker.hasTerminatedSuccessfully(new File(lockFile), lockCommand);
     	}
     	
-    	
-    	super.executeCommand(createCommand(BasePath,infile), exec, new File(lockFile),StdOutFile, StdErrFile);
+    	super.executeCommand(createCommand(BasePath,infile), outfile, exec, new File(lockFile),StdOutFile, StdErrFile);
     	
     	//Check if outfile was created--> execution was successful. 
     	if(!new File(outfile).exists()){
@@ -246,7 +249,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	
     	command.add("java -jar");
-    	command.add(m_KGGSEQ.getStringValue());
+    	command.add(kggseq_bin);
     	command.add("--buildver "+m_BUILDVER.getStringValue());
     	command.add("--resource "+m_RESOURCE.getStringValue());
     	command.add("--vcf-file "+infile);
@@ -324,9 +327,10 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	super.updatePrefs();
+    	kggseq_bin = m_KGGSEQ.getStringValue();
     	
-    	
-		if(CompatibilityChecker.inputFileNotOk(m_KGGSEQ.getStringValue(), false)) {
+		if(CompatibilityChecker.inputFileNotOk(kggseq_bin, false)) {
 			throw new InvalidSettingsException("Set path to KGGSeq jar!");
 		}
     	

@@ -42,6 +42,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -102,6 +103,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "outputVCF";
 	
 	private int vcf_index;
+	private String snpeff_bin;
 	
 	/**
      * Constructor for the node model.
@@ -125,6 +127,8 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	addSetting(m_no_intronic);
     	addSetting(m_no_upstream);
     	addSetting(m_no_utr);
+    
+    	addPrefPageSetting(m_snpeff_bin, IBISKNIMENodesPlugin.SNPEFF);
         
         m_bed_file.setEnabled(false);
         m_database_dir.setEnabled(false);
@@ -143,8 +147,6 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	if(CompatibilityChecker.inputFileNotOk(vcf_infile)) {
     		throw new InvalidSettingsException("Input VCF file does not exist!");
     	}
-    	
-    	String snpEffBin = m_snpeff_bin.getStringValue();
     	
     	//get database dir 
     	String db_dir;
@@ -166,12 +168,12 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	if(!Files.exists(Paths.get(database))) {
     		ArrayList<String> command = new ArrayList<String>();
     		command.add("java");
-    		command.add("-jar " + snpEffBin + " download");
+    		command.add("-jar " + snpeff_bin + " download");
     		command.add(m_database.getStringValue());
         	
         	LOGGER.debug("Download database "+m_database.getStringValue());
         	String lockFile = new File(vcf_infile).getParent() + File.separator + "snpEff_download" + SuccessfulRunChecker.LOCK_ENDING;
-        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")},lockFile, exec, new File(lockFile));
         	LOGGER.debug("Database download finished!");
     	}
     	
@@ -181,7 +183,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	
     	command.add("java");
-    	command.add("-Xmx"+m_memory.getIntValue()+"G -jar "+snpEffBin);
+    	command.add("-Xmx"+m_memory.getIntValue()+"G -jar "+snpeff_bin);
         command.add("-s "+stats_file);
     	
     	//Result filter options
@@ -211,7 +213,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	
     	/**Execute**/
     	String lockFile = out_file + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile),out_file);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, out_file, exec, new File(lockFile),out_file);
     	
     	/**
     	 * Output
@@ -238,12 +240,15 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	super.updatePrefs();
+    	snpeff_bin = m_snpeff_bin.getStringValue();
+    	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_snpeff_bin.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(snpeff_bin)) {
     		throw new InvalidSettingsException("Set a valid path to the snpEff directory!");
     	}
     	
@@ -266,7 +271,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     }
     
     private String getConfigFile() {
-    	return new File(m_snpeff_bin.getStringValue()).getParent() + File.separator + "snpEff.config";
+    	return new File(snpeff_bin).getParent() + File.separator + "snpEff.config";
     }
     
     private String getDataDirFromConfig(String configPath) throws InvalidSettingsException {

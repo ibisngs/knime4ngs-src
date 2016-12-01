@@ -128,7 +128,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
 		String stdOutFile = outfiles + File.separatorChar + "bcl2fastq.stdout";
 
 		/** Execute **/
-		super.executeCommand(new String[] { StringUtils.join(cmd, " ") }, exec, new File(lockFile), stdErrFile,
+		super.executeCommand(new String[] { StringUtils.join(cmd, " ") }, outfiles, exec, new File(lockFile), stdErrFile,
 				stdOutFile);
 
 		File folder = new File(outfiles);

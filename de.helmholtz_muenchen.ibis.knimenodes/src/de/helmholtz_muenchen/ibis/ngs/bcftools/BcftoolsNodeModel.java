@@ -37,6 +37,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -75,6 +77,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_concat_outfile_type = new SettingsModelString(
 			BcftoolsNodeModel.CFGKEY_CONCAT_OUTFILE_TYPE, "");
 	
+	private String bcf_bin;
 	
 	/**
 	 * Call
@@ -142,6 +145,8 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 	   	//Concat
 	   	addSetting(m_concat_outfile_type);
 	    addSetting(m_concat_overlap);
+	    
+	    addPrefPageSetting(m_path2bcftools, IBISKNIMENodesPlugin.BCFTOOLS);
         
 //        m_bedfile.setEnabled(false);
 //        m_samplelist.setEnabled(false);
@@ -153,16 +158,11 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
-    	String path2bcftools=m_path2bcftools.getStringValue();
-    	
+
     	ArrayList<String> command = new ArrayList<String>();
     	String method = m_bcfmethod.getStringValue();
-    	command.add(path2bcftools+" "+method);
+    	command.add(bcf_bin+" "+method);
 
-
-
-    	 
 //    	if(m_bcfmethod.getStringValue().equals("call")){
 //    		command.addAll(call(inData));
 //    	}
@@ -188,7 +188,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     	 */
     	
     	String lockFile = OUTFILE +"_"+m_bcfmethod.getStringValue()+SuccessfulRunChecker.LOCK_ENDING;
-		super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),OUTFILE,OUTFILE+".stdErr");
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, OUTFILE ,exec,new File(lockFile),OUTFILE,OUTFILE+".stdErr");
     	/**
     	 * Output
     	 */
@@ -501,27 +501,22 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     
     
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-    	
-    		m_path2bcftools.setEnabled(true);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
-//    	    String fileformat = m_infile.getStringValue().substring(m_infile.getStringValue().lastIndexOf(".")+1);
-//    		if(fileformat.equals("vcf")&&m_outbcf.getBooleanValue()&&m_bcfmethod.getStringValue().equals("call")&&!(m_ifseqdic.getBooleanValue())){
-//    			throw new InvalidSettingsException("Input is VCF. Output is BCF. Please specify the sequence dictionary.");
-//    		}
-//    		if(!m_ifsamplelist.getBooleanValue()&&(m_constrainedcalling.getStringValue().equals("trioauto")||m_constrainedcalling.getStringValue().equals("trioxd")||m_constrainedcalling.getStringValue().equals("trioxs"))){
-//    			setWarningMessage("WARNING: You are using trio calling without a specified samplelist file. This may cause errors !");
-//    		}
-    		  	
-    		      return new DataTableSpec[]{new DataTableSpec(
-    		  			new DataColumnSpec[]{
-    		   					new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec()})};
-        	
-    }
+		super.updatePrefs();
+		bcf_bin = m_path2bcftools.getStringValue();
+		
+		if (CompatibilityChecker.inputFileNotOk(bcf_bin, false)) {
+			throw new InvalidSettingsException("Invalid path to bcftools!");
+		}
+
+		return new DataTableSpec[] { new DataTableSpec(
+				new DataColumnSpec[] { new DataColumnSpecCreator(OUT_COL2, FileCell.TYPE).createSpec() }) };
+
+	}
 }
 

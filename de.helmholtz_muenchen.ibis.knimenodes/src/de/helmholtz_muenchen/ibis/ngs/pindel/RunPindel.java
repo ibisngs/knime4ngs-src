@@ -136,7 +136,7 @@ public class RunPindel extends PindelNodeModel {
 		
     	/**Execute**/
     	String lockFile = out + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),out+".out.log", out+".err.log");
+    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, out, exec, new File(lockFile),out+".out.log", out+".err.log");
 			
 	}
 	
@@ -171,7 +171,7 @@ public class RunPindel extends PindelNodeModel {
 		
     	/**Execute**/
     	String lockFile = vout + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, exec, new File(lockFile),vout+".out.log", vout+".err.log");
+    	super.executeCommand(new String[]{StringUtils.join(cmd, " ")}, vout, exec, new File(lockFile),vout+".out.log", vout+".err.log");
 		
 	}
 

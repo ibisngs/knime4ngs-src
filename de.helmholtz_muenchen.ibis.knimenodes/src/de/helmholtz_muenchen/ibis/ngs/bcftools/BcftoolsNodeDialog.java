@@ -47,11 +47,6 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
 
-    /**
-     * New pane for configuring the Bcftools node.
-     */
-    protected BcftoolsNodeDialog() {
-    }
     
     public void addToolDialogComponents() {
     	

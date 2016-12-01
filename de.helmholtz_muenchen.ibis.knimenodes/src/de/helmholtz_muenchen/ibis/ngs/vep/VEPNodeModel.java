@@ -141,6 +141,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2VEP_AnnotationVCF";
 	
 	private int vcf_index;
+	private String vep_bin, samtools_bin;
 	private DataType outType = FileCell.TYPE;
 	
     /**
@@ -179,6 +180,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
         addSetting(m_polyphen);
         addSetting(m_symbol);
         addSetting(m_biotype);
+        
+    	addPrefPageSetting(m_veppl, IBISKNIMENodesPlugin.VEP);
+    	addPrefPageSetting(m_samtools_path, IBISKNIMENodesPlugin.SAMTOOLS);
     }
 
     /**
@@ -206,7 +210,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	
     	
     	/**create command**/
-    	String cmd = "perl "+m_veppl.getStringValue();
+    	String cmd = "perl "+vep_bin;
     	cmd += " -i " + vcf_infile;
     	
     	//output file
@@ -317,13 +321,12 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}
     	
     	String path_variable = "PATH="+System.getenv("PATH") ;
-    	String samtools_path = m_samtools_path.getStringValue();
-    	if(samtools_path.equals("")|| Files.notExists(Paths.get(samtools_path))) {
+    	if(samtools_bin.equals("")|| Files.notExists(Paths.get(samtools_bin))) {
     		setWarningMessage("Samtools PATH was not specified!");
     	} else {
     		//remove samtools
-    		int pos = samtools_path.lastIndexOf(System.getProperty("file.separator"));
-    		path_variable +=":"+samtools_path.substring(0,pos);
+    		int pos = samtools_bin.lastIndexOf(System.getProperty("file.separator"));
+    		path_variable +=":"+samtools_bin.substring(0,pos);
     	}
     	
     	//LOFTEE parameters
@@ -362,7 +365,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	logger.info("COMMAND: "+cmd);
     	logger.info("ENVIRONMENT: "+path_variable);
     	logger.info("PERL5LIB: "+perl5lib_variable);
-    	super.executeCommand(new String[]{cmd}, exec, new String[]{path_variable, perl5lib_variable}, lockFile, stdOutFile, stdErrFile, null, null, null);
+    	super.executeCommand(new String[]{cmd}, res_file, exec, new String[]{path_variable, perl5lib_variable}, lockFile, stdOutFile, stdErrFile, null, null, null);
     	
     	
     	//Create Output Table
@@ -391,18 +394,22 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_veppl.getStringValue(), false)) {
+    	super.updatePrefs();
+    	vep_bin = m_veppl.getStringValue();
+    	samtools_bin = m_samtools_path.getStringValue();
+    	
+    	if(CompatibilityChecker.inputFileNotOk(vep_bin, false)) {
     		throw new InvalidSettingsException("Invalid path to variant_effect_predictor.pl script!");
     	}
     	
     	if(m_use_loftee.getBooleanValue()) {
     		try {
 	    		 //Version control
-	            if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==1){
+	            if(FileValidator.versionControl(samtools_bin,"SAMTOOLS")==1){
 	            	setWarningMessage("WARNING: You are using a newer SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
-	            }else if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==2){
+	            }else if(FileValidator.versionControl(samtools_bin,"SAMTOOLS")==2){
 	            	setWarningMessage("WARNING: You are using an older SAMTOOLS version than "+FileValidator.SAMTOOLS_VERSION +"! This may cause problems!");
-	            }else if(FileValidator.versionControl(m_samtools_path.getStringValue(),"SAMTOOLS")==-1){
+	            }else if(FileValidator.versionControl(samtools_bin,"SAMTOOLS")==-1){
 	            	setWarningMessage("Your samtools version could not be determined! Correct behaviour can only be ensured for samtools version "+FileValidator.SAMTOOLS_VERSION+".");
 	            }
     		} catch (Exception e) {

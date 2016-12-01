@@ -40,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -109,6 +110,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2FilteredVCF";
 	
 	private int vcf_index;
+	private String vcftools_bin;
 	
     protected VCFToolsFilterNodeModel() {
     	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
@@ -125,7 +127,9 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	addSetting(m_filter_by_GQ_MEAN);
     	addSetting(m_GQ_mean_threshold);
     	addSetting(m_vcf_tools);
-        addSetting(m_fill_an_ac); 
+        addSetting(m_fill_an_ac);
+        
+        addPrefPageSetting(m_vcf_tools, IBISKNIMENodesPlugin.VCFTOOLS);
     }
 
     /**
@@ -183,8 +187,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	
     	if(m_filter_by_GQ.getBooleanValue() || m_filter_by_DP.getBooleanValue()) {
     		ArrayList<String> cmd = new ArrayList<>();
-    		String vcftools = m_vcf_tools.getStringValue();
-    		cmd.add(vcftools);
+    		cmd.add(vcftools_bin);
     		if(is_gz) {
     			cmd.add("--gzvcf");
     		} else {
@@ -207,7 +210,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     		
     		outfile = outfile+".recode.vcf";
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
-    		super.executeCommand(cmd_array, exec, lockFile);
+    		super.executeCommand(cmd_array, outfile, exec, lockFile);
     	}
     	
     	if(m_filter_by_AD.getBooleanValue()) {
@@ -233,7 +236,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 
 			File lockFile = new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
 
-			super.executeCommand(cmd_array, exec, lockFile);
+			super.executeCommand(cmd_array, outfile, exec, lockFile);
     		
     	}
     	
@@ -252,8 +255,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
         	}
     		
     		ArrayList<String> cmd = new ArrayList<>();
-    		String vcftools = m_vcf_tools.getStringValue();
-    		cmd.add(vcftools);
+    		cmd.add(vcftools_bin);
     		if(is_gz) {
     			cmd.add("--gzvcf");
     		} else {
@@ -281,7 +283,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     		outfile = outfile+".recode.vcf";
     		File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);
     		
-    		super.executeCommand(cmd_array, exec, lockFile);
+    		super.executeCommand(cmd_array, outfile, exec, lockFile);
     		infile = outfile;
     	}
     	
@@ -308,7 +310,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 
 			File lockFile = new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
 
-			super.executeCommand(cmd_array, exec, lockFile);
+			super.executeCommand(cmd_array, outfile, exec, lockFile);
     	}
     	return outfile;
     }
@@ -333,7 +335,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 		
     	if(m_fill_an_ac.getBooleanValue()) {
     		
-    		String vcftools = m_vcf_tools.getStringValue();
+    		String vcftools = vcftools_bin;
     		int pos = vcftools.lastIndexOf(System.getProperty("file.separator"));
     		vcftools = vcftools.substring(0,pos)+ System.getProperty("file.separator")+"fill-an-ac";
 
@@ -342,7 +344,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 
     	File lockFile = new File(outfile+SuccessfulRunChecker.LOCK_ENDING);	
     	cmd += " > " + outfile;
-    	super.executeCommand(new String[]{"/usr/bin/bash","-c",cmd},exec,lockFile);
+    	super.executeCommand(new String[]{"/usr/bin/bash","-c",cmd}, outfile ,exec,lockFile);
     	
     	return outfile;
     }
@@ -354,6 +356,9 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	super.updatePrefs();
+    	vcftools_bin = m_vcf_tools.getStringValue();
+    	
     	boolean a = m_filter_by_DP.getBooleanValue();
     	boolean b = m_filter_by_GQ.getBooleanValue();
     	boolean c = m_filter_by_callRate.getBooleanValue();
@@ -362,7 +367,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     	vcf_index = -1;
     	
     	if(a || b || c || d || f) {
-    		String vcftools_warning = CheckUtils.checkSourceFile(m_vcf_tools.getStringValue());
+    		String vcftools_warning = CheckUtils.checkSourceFile(vcftools_bin);
         	if(vcftools_warning != null) {
         		setWarningMessage(vcftools_warning);
         	}

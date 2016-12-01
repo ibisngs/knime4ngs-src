@@ -292,4 +292,14 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
 	protected File getPathToLockFile() {
 		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "LOCK" + SuccessfulRunChecker.LOCK_ENDING);
 	}
+
+	@Override
+	protected String getBinaryPath() {
+		return SET_BINARY_PATH.getStringValue();
+	}
+
+	@Override
+	protected String getOutfile() {
+		return SET_OUTPUT_FOLDER.getStringValue();
+	}
 }

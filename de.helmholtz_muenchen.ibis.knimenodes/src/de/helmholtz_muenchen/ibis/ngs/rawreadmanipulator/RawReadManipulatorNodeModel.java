@@ -279,7 +279,7 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
 		String stdErrFile = inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".filtered.stdErr.log";
 			
 	    /**Execute**/
-	    super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, stdOutFile, stdErrFile, null, null, null);
+	    super.executeCommand(new String[]{StringUtils.join(com, " ")}, inFile1nozip.substring(0,inFile1nozip.lastIndexOf(".")) + ".filtered.fastq", exec, null, lockFile, stdOutFile, stdErrFile, null, null, null);
 
 		
     	

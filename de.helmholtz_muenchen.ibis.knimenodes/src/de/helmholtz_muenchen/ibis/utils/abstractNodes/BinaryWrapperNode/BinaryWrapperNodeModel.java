@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
@@ -53,7 +52,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 //    protected static final String DEFAULT_PARAMETER_FILE 			= "-"; // must be set by user but is optional
     
     // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
+    protected final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(CFGKEY_BINARY_PATH, DEFAULT_BINARY_PATH);
 //    private final SettingsModelString SET_ADDITIONAL_PARAMETER 	= new SettingsModelString(CFGKEY_ADDITIONAL_PARAMETER, DEFAULT_ADDITIONAL_PARAMETER);
 //    private final SettingsModelString SET_PARAMETER_FILE		= new SettingsModelString(CFGKEY_PARAMETER_FILE, DEFAULT_PARAMETER_FILE);
     
@@ -88,14 +87,6 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 		this.catchStderr = catchStderr;
 		this.catchStdout = catchStdout;
 		addSetting(SET_BINARY_PATH);
-	}
-	
-	@Override
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-		// validate binary
-		isBinaryValid(SET_BINARY_PATH.getStringValue());
-		
-		return new DataTableSpec[]{null};
 	}
 	
     @Override
@@ -324,11 +315,11 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 		}else if(catchStdout){
 			STDOUT = new StringBuffer("Not yet executed!");		
 		}
-		
-		
-		
+
 		//HTE Execution
-		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, null, lockFile, getPathToStdoutFile().getAbsolutePath(), getPathToStderrFile().getAbsolutePath(), STDOUT, STDERR, null);	
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, this.getOutfile(), exec, null, lockFile, getPathToStdoutFile().getAbsolutePath(), getPathToStderrFile().getAbsolutePath(), STDOUT, STDERR, null);	
 	}
+	
+	protected abstract String getOutfile();
 
 }

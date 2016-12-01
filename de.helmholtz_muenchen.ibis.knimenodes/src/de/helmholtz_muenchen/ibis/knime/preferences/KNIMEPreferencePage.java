@@ -90,7 +90,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	}
 	
 	public static String REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS, RES_DBSNP, RES_MILLS;
-	public static boolean USE_HTE;
+	public static boolean OVERWRITE, USE_HTE;
 	public static String THRESHOLD;
 	public static String DB_FILE;
 	public static boolean NOTIFY;
@@ -101,6 +101,7 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	private Text dbFile;
 	private Text email_sender, email_host, email_receiver;
 	
+	private Button checkOverwrite;
 	private Button checkHTE;
 	private Button checkNotify;
 	
@@ -128,6 +129,23 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		Composite top = new Composite(parent, SWT.LEFT);
 		top.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		top.setLayout(new GridLayout());
+		
+		//overwrite preferences
+		Group outPrefs = new Group(top,SWT.NONE);
+		outPrefs.setText("Output preferences");
+		outPrefs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		outPrefs.setLayout(new GridLayout());
+		
+		Composite overwrite = new Composite(outPrefs,SWT.LEFT);
+		overwrite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridLayout overwriteLayout = new GridLayout();
+		overwriteLayout.numColumns = 1;
+		overwrite.setLayout(overwriteLayout);
+		
+		OVERWRITE = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE);
+		checkOverwrite = new Button(overwrite,SWT.CHECK);
+		checkOverwrite.setText("Overwrite existing files?");
+		checkOverwrite.setSelection(OVERWRITE);
 		
 		//bin preferences
 		Group binPrefs = new Group(top, SWT.NONE);
@@ -521,11 +539,12 @@ public class KNIMEPreferencePage extends PreferencePage implements
 			i.setText(1,"");
 		}
 		
-		refGenome.setText("");
+		checkOverwrite.setSelection(IBISKNIMENodesPlugin.OVERWRITE_DEFAULT);
 		checkHTE.setSelection(IBISKNIMENodesPlugin.HTE_DEFAULT);
 		thresholdText.setText(IBISKNIMENodesPlugin.THRESHOLD_DEFAULT+"");
 		dbFile.setText("");
 		checkNotify.setSelection(IBISKNIMENodesPlugin.NOTIFY_DEFAULT);
+		refGenome.setText("");
 		res_hapmap.setText("");
 		res_omni.setText("");
 		res_1000G_SNPS.setText("");
@@ -542,6 +561,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 	 * this page's values appropriately.
 	 */	
 	public boolean performOk() {
+		
+		OVERWRITE = checkOverwrite.getSelection();
+		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE, OVERWRITE);
+		
 		REF_GENOME = refGenome.getText();
 		if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
 			JOptionPane.showMessageDialog(null,

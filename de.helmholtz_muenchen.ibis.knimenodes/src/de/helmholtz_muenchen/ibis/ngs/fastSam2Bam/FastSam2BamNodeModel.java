@@ -111,7 +111,6 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
     private final SettingsModelString SET_PATH_SAMTOOLS		= new SettingsModelString(CFGKEY_PATH_SAMTOOLS, DEFAULT_PATH_SAMTOOLS);
 //    private final SettingsModelString SET_PATH_PICTOOLS    	= new SettingsModelString(CFGKEY_PATH_PICTOOLS, DEFAULT_PATH_PICTOOLS);
     private final SettingsModelBoolean SET_DELETE_SAM		= new SettingsModelBoolean(CFGKEY_DELETE_SAM, DEFAULT_DELETE_SAM);
-
     
     /**
      * Constructor for the node model.
@@ -338,6 +337,7 @@ public class FastSam2BamNodeModel extends SettingsStorageNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
+    	
     	// validate binaries
 //    	IO.isBinaryValid(this.SET_PATH_SAMTOOLS.getStringValue() + File.separator + SAMTOOLS_BINARY_NAME, true);
     	IO.isBinaryValid(this.SET_PATH_SAMTOOLS.getStringValue(), true);

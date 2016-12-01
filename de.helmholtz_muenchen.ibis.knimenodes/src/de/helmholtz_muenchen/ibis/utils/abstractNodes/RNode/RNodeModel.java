@@ -268,6 +268,10 @@ public abstract class RNodeModel extends ScriptNodeModel {
 
 		return(command.toArray(new String[command.size()]));
 	}
+	
+	public String getOutfile() {
+		return null;
+	}
 
 
 	public String getArgumentsAsVector(){

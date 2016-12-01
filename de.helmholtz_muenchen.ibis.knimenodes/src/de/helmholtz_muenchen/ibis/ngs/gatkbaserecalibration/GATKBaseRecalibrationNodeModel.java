@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -215,6 +216,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
  
 	public static String OUT_COL1 = "Path2RecalibratedBAM";
 	private int posBam;
+	private String gatk_jar, ref_genome, phase1, mills, dbsnp;
 	
     /**
      * Constructor for the node model.
@@ -262,6 +264,12 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 //    	m_useproxyauth.setEnabled(false);
 //    	m_proxyuser.setEnabled(false);
 //    	m_proxypassword.setEnabled(false);
+        
+		addPrefPageSetting(m_gatk, IBISKNIMENodesPlugin.GATK);
+		addPrefPageSetting(m_ref_genome, IBISKNIMENodesPlugin.REF_GENOME);
+		addPrefPageSetting(m_phase1_1000G_file, IBISKNIMENodesPlugin.RES_1000G_INDELS);
+		addPrefPageSetting(m_mills_1000G_file, IBISKNIMENodesPlugin.RES_MILLS);
+		addPrefPageSetting(m_dbsnp_file, IBISKNIMENodesPlugin.RES_DBSNP);
     }
 
     /**
@@ -356,33 +364,37 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-          
+    	super.updatePrefs();
+    	gatk_jar = m_gatk.getStringValue();
+    	ref_genome = m_ref_genome.getStringValue();
+    	phase1 = m_phase1_1000G_file.getStringValue();
+    	mills = m_mills_1000G_file.getStringValue();
+    	dbsnp = m_dbsnp_file.getStringValue();
+    	
     	posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	if(!(posBam>-1)) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_gatk.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(gatk_jar)) {
     		throw new InvalidSettingsException("Set path to the GenomeAnalysisTK.jar!");
     	}
     	
     	//check reference file
-    	String reffile =  m_ref_genome.getStringValue();
-    	if(CompatibilityChecker.inputFileNotOk(m_ref_genome.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(ref_genome)) {
     		throw new InvalidSettingsException("Set reference genome!");
     	}
 
-		if (!Files.exists(Paths.get(reffile + ".fai"))) {
-			throw new InvalidSettingsException("Reference sequence index: " + reffile + ".fai does not exist!");
+		if (!Files.exists(Paths.get(ref_genome + ".fai"))) {
+			throw new InvalidSettingsException("Reference sequence index: " + ref_genome + ".fai does not exist!");
 		}
 
-		String refbase = PathProcessor.getBase(reffile);
+		String refbase = PathProcessor.getBase(ref_genome);
 		if (!Files.exists(Paths.get(refbase + ".dict"))) {
 			throw new InvalidSettingsException("Reference sequence dictionary: " + refbase + ".dict does not exist!");
 		}
 		
 		//check data sets
-		String phase1 = m_phase1_1000G_file.getStringValue();
 		if(m_use_phase1_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(phase1)) {
 			throw new InvalidSettingsException("Set 1000G Indel data set!");
 		}
@@ -391,7 +403,6 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 //			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
 //		}
 		
-		String mills = m_mills_1000G_file.getStringValue();
 		if(m_use_mills_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(mills)) {
 			throw new InvalidSettingsException("Set Mills data set!");
 		}
@@ -400,7 +411,6 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 //			throw new InvalidSettingsException("Mills index file: " + mills + ".idx does not exist!");
 //		}
 		
-		String dbsnp = m_dbsnp_file.getStringValue();
 		if(m_use_dbsnp.getBooleanValue() && CompatibilityChecker.inputFileNotOk(dbsnp)) {
 			throw new InvalidSettingsException("Set dbSNP data set!");
 		}
@@ -426,9 +436,9 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		String lockFile = outtable + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
-		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G "+ m_gatk.getStringValue();
+		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G "+ gatk_jar;
 		cmd+=" -T BaseRecalibrator";
-		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -R "+ref_genome;
 		cmd+=" -I "+inputbam;
 		if(inputtable!=null) {
 			cmd+=" -BQSR "+inputtable;
@@ -436,15 +446,15 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		cmd+=" -o "+outtable;
 		
 		if(m_use_phase1_1000G.getBooleanValue()){
-			cmd+=" -knownSites "+m_phase1_1000G_file.getStringValue();
+			cmd+=" -knownSites "+phase1;
 		}
 		
 		if(m_use_mills_1000G.getBooleanValue()){
-			cmd+=" -knownSites "+m_mills_1000G_file.getStringValue();
+			cmd+=" -knownSites "+mills;
 		}
 		
 		if(m_use_dbsnp.getBooleanValue()){
-			cmd+=" -knownSites "+m_dbsnp_file.getStringValue();
+			cmd+=" -knownSites "+dbsnp;
 		}
 		
 		if(m_use_interval.getBooleanValue()){
@@ -490,7 +500,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		// run command
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK BaseRecalibrator...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outtable+".stdOut and "+outtable+".stdErr");
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outtable+".stdOut", outtable+".stdErr");
+		super.executeCommand(new String[]{cmd},outtable, exec, new File(lockFile),outtable+".stdOut", outtable+".stdErr");
 	}
 	
 	protected void runPrintReads(ExecutionContext exec, String inputbam, String inputtable, String outbam) throws Exception {
@@ -498,9 +508,9 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		String lockFile = outbam + SuccessfulRunChecker.LOCK_ENDING;
 		
 		//create command string
-		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G " + m_gatk.getStringValue();
+		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G " + gatk_jar;
 		cmd+=" -T PrintReads";
-		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -R "+ref_genome;
 		cmd+=" -I "+inputbam;
 		cmd+=" -BQSR "+inputtable;
 		cmd+=" -o "+outbam;
@@ -517,16 +527,16 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		
 		GATKBaseRecalibrationNodeModel.logger.info("Running GATK PrintReads...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+outbam+".stdOut and "+outbam+".stdErr");
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outbam+".stdOut", outbam+".stdErr");
+		super.executeCommand(new String[]{cmd}, outbam, exec, new File(lockFile),outbam+".stdOut", outbam+".stdErr");
 	}
 	
 	protected void runAnalyzeCovariates(ExecutionContext exec, String beforetable, String aftertable, String pplots, String recalintermediate) throws Exception {
 		
 		String lockFile = pplots + SuccessfulRunChecker.LOCK_ENDING;
 		
-		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G " + m_gatk.getStringValue();
+		String cmd="java -jar -Xmx"+m_GATK_JAVA_MEMORY.getIntValue()+"G " + gatk_jar;
 		cmd+=" -T AnalyzeCovariates";
-		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -R "+ref_genome;
 		cmd+=" -before "+beforetable;
 		cmd+=" -after "+aftertable;
 		cmd+=" -plots "+pplots;
@@ -546,6 +556,6 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		
 				GATKBaseRecalibrationNodeModel.logger.info("Running GATK AnalyzeCovariates...");
 		GATKBaseRecalibrationNodeModel.logger.info("Log files can be found in "+pplots+".stdOut and "+pplots+".stdErr");
-		super.executeCommand(new String[]{cmd}, exec, env, new File(lockFile), pplots+".stdOut", pplots+".stdErr", null, null, null);
+		super.executeCommand(new String[]{cmd},  pplots, exec, env, new File(lockFile), pplots+".stdOut", pplots+".stdErr", null, null, null);
 	}
 }

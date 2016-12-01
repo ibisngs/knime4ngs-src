@@ -40,6 +40,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -104,6 +105,8 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_GENOME_FOLDER);
     	addSetting(SET_OPTIONAL_PARA);
+    	
+    	addPrefPageSetting(SET_BINARY_PATH,IBISKNIMENodesPlugin.STAR);
     }
     
     /**
@@ -111,8 +114,12 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	super.configure(inSpecs);
-
+    	super.updatePrefs();
+    	
+    	if(CompatibilityChecker.inputFileNotOk(getBinaryPath(), false)) {
+			throw new InvalidSettingsException("Set path to featureCounts binary!");
+		}
+    	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	
     	if(isAlignRunMode()){
@@ -313,5 +320,10 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		if(!isAlignRunMode()) return new File(OUTFILE+"Genome.stdOut");
 		return new File(OUTFILE + ".stdOut");
  	}
+
+	@Override
+	protected String getOutfile() {
+		return OUTFILE;
+	}
 }
 

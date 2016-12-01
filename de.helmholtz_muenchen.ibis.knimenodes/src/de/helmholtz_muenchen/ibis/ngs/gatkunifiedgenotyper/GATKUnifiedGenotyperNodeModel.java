@@ -36,6 +36,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
@@ -160,6 +161,7 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
 	
 	private int bam_index;
 	private String outfile;
+	private String dbsnp;
 
 	//Network/Proxy options
 //	public static final String CFGKEY_USEPROXY="useproxy";
@@ -207,6 +209,8 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
         addSetting(m_gap_open_pen);
         addSetting(m_gap_cont_pen);
         addSetting(m_mbq);
+        
+        addPrefPageSetting(m_dbsnp_file, IBISKNIMENodesPlugin.RES_DBSNP);
         
         //Proxy options
 //    	m_proxyhost.setEnabled(false);
@@ -288,7 +292,7 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
 		cmd+=" -glm "+m_variant_type.getStringValue();
 		
 		if(m_use_dbsnp.getBooleanValue()){
-        	cmd+= " -D " + m_dbsnp_file.getStringValue();
+        	cmd+= " -D " + dbsnp;
         }
 		
 		cmd+=" -stand_call_conf "+m_call_min_confidence.getDoubleValue();
@@ -340,13 +344,15 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
 
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
+		super.updatePrefs();
+		dbsnp = m_dbsnp_file.getStringValue();
+		
         if(m_use_dbsnp.getBooleanValue()) { 
-        	String dbsnpfile = m_dbsnp_file.getStringValue();
-        	if(CompatibilityChecker.inputFileNotOk(dbsnpfile)){
+        	if(CompatibilityChecker.inputFileNotOk(dbsnp)){
         		throw new InvalidSettingsException("Path to dbSNP file not given or incorrect!");
         	}
-        	if(!Files.exists(Paths.get(dbsnpfile+".idx"))){
-            	throw new InvalidSettingsException("dbSNP index file: "+dbsnpfile+".idx does not exist");
+        	if(!Files.exists(Paths.get(dbsnp+".idx"))){
+            	throw new InvalidSettingsException("dbSNP index file: "+dbsnp+".idx does not exist");
             }
         }
 	}

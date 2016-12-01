@@ -53,7 +53,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	/**
 	 * New pane for configuring the HTExecutorNode node.
 	*/
-	
+	private final SettingsModelBoolean overwrite = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_OVERWRITE,true);
 	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
 	
@@ -71,7 +71,7 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 		}
 		
 		addDialogComponent(new DialogComponentBoolean(usePrefPage,"Use values from KNIME4NGS preference page?"));
-		
+		addDialogComponent(new DialogComponentBoolean(overwrite, "Overwrite existing files?"));
 		DialogComponentNumber dcn = new DialogComponentNumber(threshold, "HTE threshold", HTExecutorNodeModel.DEFAULT_THRESHOLD);
 		addDialogComponent(dcn);
 		threshold.setEnabled(false);
@@ -80,9 +80,11 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
 				threshold.setEnabled(!usePrefPage.getBooleanValue());
+				overwrite.setEnabled(!usePrefPage.getBooleanValue());
 				if(usePrefPage.getBooleanValue()) {
 					String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 			    	threshold.setIntValue(Integer.parseInt(n));
+			    	overwrite.setBooleanValue(IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE));
 				}
 				updatePrefs();
 			}
@@ -114,6 +116,8 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 			String n = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD);
 	    	threshold.setIntValue(Integer.parseInt(n));
 	    	threshold.setEnabled(false);
+	    	overwrite.setBooleanValue(IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE));
+	    	overwrite.setEnabled(false);
 		}
     	updatePrefs();
     }

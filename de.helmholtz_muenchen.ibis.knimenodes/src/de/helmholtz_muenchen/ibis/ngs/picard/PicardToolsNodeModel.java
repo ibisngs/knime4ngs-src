@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -161,6 +162,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     private final SettingsModelString m_sort_order=new SettingsModelString(CFGKEY_SORT_ORDER, DEF_SORT_ORDER);
     
     private int posSamBam;
+    private String picard_bin, ref_genome;
 
     protected PicardToolsNodeModel() {
     
@@ -191,7 +193,10 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
         addSetting(m_remove_dupl);
         addSetting(m_ass_sorted_rd);
         //sorting
-        addSetting(m_sort_order);  
+        addSetting(m_sort_order);
+        
+    	addPrefPageSetting(m_picard, IBISKNIMENodesPlugin.PICARD);
+    	addPrefPageSetting(m_refgenome, IBISKNIMENodesPlugin.REF_GENOME);
     }
 
     /**
@@ -205,19 +210,14 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
         //retrieves BAM/SAM file and reference sequence file from table of previous node
         DataRow r=inData[0].iterator().next();
         String inputfile=r.getCell(posSamBam).toString();
-        String reffile=m_refgenome.getStringValue();
-        
         
         //checks if all files are still available
         if(!Files.exists(Paths.get(inputfile))){ 
         	throw new Exception("file: "+ inputfile+" does not exist");
         }
         
-        if(!Files.exists(Paths.get(reffile))){
-        	throw new Exception("file: "+ reffile+" does not exist");
-        }
         
-        logger.info("Using file "+inputfile+" with reference "+reffile);
+        logger.info("Using file "+inputfile+" with reference "+ref_genome);
         
         
         //process path to input file -> location and base name of output file        
@@ -246,7 +246,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
         	String output_hist=PathProcessor.createOutputFile(base, "pdf", "ismhist");
         	String output_data=PathProcessor.createOutputFile(base, "txt", "ismetrics");
         	
-        	runMetrics(exec,inputfile, reffile, output_data, output_hist, m_valstring.getStringValue(), m_index.getBooleanValue(), m_deviation.getDoubleValue(), m_min_pct.getDoubleValue(), m_acc_level.getStringValue(), m_ass_sorted_sm.getBooleanValue());
+        	runMetrics(exec,inputfile, ref_genome, output_data, output_hist, m_valstring.getStringValue(), m_index.getBooleanValue(), m_deviation.getDoubleValue(), m_min_pct.getDoubleValue(), m_acc_level.getStringValue(), m_ass_sorted_sm.getBooleanValue());
 
 		    //create output table with output sam/bam file and reference sequence AND metrics files
 		    
@@ -347,59 +347,65 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    //executed when in port is connected to executed node or when previous node (already connected) is executed
-    @Override
-    //executed when in port is connected
-    protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
-            throws InvalidSettingsException {
-    	
-    		
-    		if(CompatibilityChecker.inputFileNotOk(m_picard.getStringValue(), false)) {
-    			throw new InvalidSettingsException("Set path to picard.jar!");
-    		}
-    	    		
-    		//names of the input table columns
-			String [] cols=inSpecs[0].getColumnNames();
-			
-			// checking for input bam/sam file
-			if(!CompatibilityChecker.checkInputCellType(inSpecs[0],"SAMCell") && !CompatibilityChecker.checkInputCellType(inSpecs[0],"BAMCell")){
-				throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
-			}
-			
-			//determining position of reference and sam/bam file
-			for(int i=0; i<cols.length; i++){
-				if(cols[i].equals("Path2BAMFile") || cols[i].equals("Path2SAMFile")){
-					posSamBam=i;
-				}
-			}
-			
-			boolean add_col = m_ptool.getStringValue().equals(TOOLS_AVAILABLE[1]);
-			
-			
-			DataColumnSpec[] colspec;
-			if(add_col) {
-				colspec = new DataColumnSpec[2];
-			} else {
-				colspec = new DataColumnSpec[1];
-			} 
-			
-		    if(m_bsformat.getStringValue().equals("bam")){
-		    	colspec[0]=new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
-		    }
-		    else{
-		    	colspec[0]=new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
-		    }
-		    
-		    //create column specifications for table
-		    if(add_col) {
-		    	colspec[1]=new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
-		    }
+	/**
+	 * {@inheritDoc}
+	 */
+	// executed when in port is connected to executed node or when previous node
+	// (already connected) is executed
+	@Override
+	// executed when in port is connected
+	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
-        return new DataTableSpec[]{new DataTableSpec(colspec)};
-    }
+		super.updatePrefs();
+		picard_bin = m_picard.getStringValue();
+		ref_genome = m_refgenome.getStringValue();
+		
+		if (CompatibilityChecker.inputFileNotOk(picard_bin, false)) {
+			throw new InvalidSettingsException("Set path to picard.jar!");
+		}
+		
+        if(!Files.exists(Paths.get(ref_genome))){
+        	throw new InvalidSettingsException("file: "+ ref_genome+" does not exist");
+        }
+
+		// names of the input table columns
+		String[] cols = inSpecs[0].getColumnNames();
+
+		// checking for input bam/sam file
+		if (!CompatibilityChecker.checkInputCellType(inSpecs[0], "SAMCell")
+				&& !CompatibilityChecker.checkInputCellType(inSpecs[0], "BAMCell")) {
+			throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
+		}
+
+		// determining position of reference and sam/bam file
+		for (int i = 0; i < cols.length; i++) {
+			if (cols[i].equals("Path2BAMFile") || cols[i].equals("Path2SAMFile")) {
+				posSamBam = i;
+			}
+		}
+
+		boolean add_col = m_ptool.getStringValue().equals(TOOLS_AVAILABLE[1]);
+
+		DataColumnSpec[] colspec;
+		if (add_col) {
+			colspec = new DataColumnSpec[2];
+		} else {
+			colspec = new DataColumnSpec[1];
+		}
+
+		if (m_bsformat.getStringValue().equals("bam")) {
+			colspec[0] = new DataColumnSpecCreator("Path2BAMFile", BAMCell.TYPE).createSpec();
+		} else {
+			colspec[0] = new DataColumnSpecCreator("Path2SAMFile", SAMCell.TYPE).createSpec();
+		}
+
+		// create column specifications for table
+		if (add_col) {
+			colspec[1] = new DataColumnSpecCreator("Path2ISMetrics", FileCell.TYPE).createSpec();
+		}
+
+		return new DataTableSpec[] { new DataTableSpec(colspec) };
+	}
 
         
 	//run CollectInsertSizeMetrics
@@ -418,7 +424,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		 * REFERENCE_SEQUENCE
 		 */
 
-		String picard = m_picard.getStringValue();
 		String method = "CollectInsertSizeMetrics";
 		String[] args = new String[11];
 		args[0]="INPUT="+input;
@@ -441,8 +446,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		
 		
 		File lockFile = new File(outputm+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9]+" "+args[10];
-		super.executeCommand(new String[] { command }, exec, lockFile, outputm+".stdOut",outputm+".stdErr");
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard_bin+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9]+" "+args[10];
+		super.executeCommand(new String[] { command }, outputm, exec, lockFile, outputm+".stdOut",outputm+".stdErr");
 		
 		PicardToolsNodeModel.logger.info("CollectInsertSizeMetrics finished successfully");
 	}
@@ -483,7 +488,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 			PicardToolsNodeModel.logger.warn("Platform has to be specified (now set to 'platform')");
 		}
 		
-		String picard = m_picard.getStringValue();
 		String method = "AddOrReplaceReadGroups";
 		
 		String [] args = new String[10];
@@ -504,9 +508,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard_bin+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7]+" "+args[8]+" "+args[9];
 
-		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+		super.executeCommand(new String[] { command }, output, exec, lockFile, output+".stdOut",output+".stdErr");
 
 		PicardToolsNodeModel.logger.info("AddOrReplaceReadGroups finished successfully");
 	}
@@ -524,10 +528,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		 * VALIDATION_STRINGENCY
 		 * CREATE_INDEX
 		 */
-		
-		String picard = m_picard.getStringValue();
 		String method = "MarkDuplicates";
-		
 		String [] args = new String[8];
 		args[0]="INPUT="+input;
 		args[1]="OUTPUT="+output;
@@ -543,9 +544,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard_bin+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5]+" "+args[6]+" "+args[7];
 
-		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+		super.executeCommand(new String[] { command }, output, exec, lockFile, output+".stdOut",output+".stdErr");
 		
 		PicardToolsNodeModel.logger.info("MarkDupplicates finished successfully");
 	}
@@ -560,8 +561,6 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		 *VALIDATION_STRINGENCY
 		 *CREATE_INDEX
 		 */
-
-		String picard = m_picard.getStringValue();
 		String method = "SortSam";
 		
 		String[] args= new String[6];
@@ -577,9 +576,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 		}
 		
 		File lockFile = new File(output+SuccessfulRunChecker.LOCK_ENDING);
-		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5];
+		String command = "java -Xmx"+m_picard_mem.getIntValue()+"G -jar "+picard_bin+" "+method+" "+args[0]+" "+args[1]+" "+args[2]+" "+args[3]+" "+args[4]+" "+args[5];
 		
-		super.executeCommand(new String[] { command }, exec, lockFile, output+".stdOut",output+".stdErr");
+		super.executeCommand(new String[] { command }, output, exec, lockFile, output+".stdOut",output+".stdErr");
 
 		PicardToolsNodeModel.logger.info("SortSam finished successfully");
 	}   

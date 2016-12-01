@@ -37,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -143,6 +144,7 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     
 	public static final String OUT_COL1 = "VQSR VARIANTS";
 	private int vcf_index;
+	private String gatk_bin, ref_genome, hapmap, omni, snps, dbsnp, mills;
     
     /**
      * Constructor for the node model.
@@ -179,6 +181,14 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
         
         addSetting(m_OPT_VAR_RECAL);
         addSetting(m_OPT_APPLY_RECAL);
+        
+    	addPrefPageSetting(m_GATK, IBISKNIMENodesPlugin.GATK);
+    	addPrefPageSetting(m_REF_GENOME, IBISKNIMENodesPlugin.REF_GENOME);
+    	addPrefPageSetting(m_RESOURCES_FILE_HAPMAP, IBISKNIMENodesPlugin.RES_HAPMAP);
+    	addPrefPageSetting(m_RESOURCES_FILE_OMNI, IBISKNIMENodesPlugin.RES_OMNI);
+    	addPrefPageSetting(m_RESOURCES_FILE_1000G, IBISKNIMENodesPlugin.RES_1000G_SNPS);
+    	addPrefPageSetting(m_RESOURCES_FILE_DBSNP, IBISKNIMENodesPlugin.RES_DBSNP);
+    	addPrefPageSetting(m_RESOURCES_FILE_MILLS, IBISKNIMENodesPlugin.RES_MILLS);
     }
 
     /**
@@ -187,9 +197,6 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	
-    	String PATH2GATK = m_GATK.getStringValue();
-    	String PATH2REFSEQ = m_REF_GENOME.getStringValue();
     	
     	String INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
     	if(CompatibilityChecker.inputFileNotOk(INFILE)) {
@@ -205,8 +212,8 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	String stdOut2 = IO.replaceFileExtension(outFile,"apply_recal.stdOut");
     	String stdErr2 = IO.replaceFileExtension(outFile,"apply_recal.stdErr");
     	
-    	super.executeCommand(createRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,lockFile1,stdOut1,stdErr1);
-    	super.executeCommand(applyRecalibrationCommand(PATH2GATK,PATH2REFSEQ,INFILE),exec,lockFile2,stdOut2,stdErr2);
+    	super.executeCommand(createRecalibrationCommand(gatk_bin,ref_genome,INFILE),outFile,exec,lockFile1,stdOut1,stdErr1);
+    	super.executeCommand(applyRecalibrationCommand(gatk_bin,ref_genome,INFILE),outFile,exec,lockFile2,stdOut2,stdErr2);
 
     	/**
     	 * OUTPUT
@@ -248,20 +255,20 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     	
     	//Add resources
     	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_HAPMAP.getStringValue()+" "+m_RESOURCES_FILE_HAPMAP.getStringValue());
+    		command.add("-resource:"+m_RESOURCES_STRING_HAPMAP.getStringValue()+" "+hapmap);
     	}
     	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_OMNI.getStringValue()+" "+m_RESOURCES_FILE_OMNI.getStringValue());
+    		command.add("-resource:"+m_RESOURCES_STRING_OMNI.getStringValue()+" "+omni);
     	}
     	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_1000G.getStringValue()+" "+m_RESOURCES_FILE_1000G.getStringValue());
+    		command.add("-resource:"+m_RESOURCES_STRING_1000G.getStringValue()+" "+snps);
     	}
     	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_DBSNP.getStringValue()+" "+m_RESOURCES_FILE_DBSNP.getStringValue());
+    		command.add("-resource:"+m_RESOURCES_STRING_DBSNP.getStringValue()+" "+dbsnp);
     	}
     	
     	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue()){
-    		command.add("-resource:"+m_RESOURCES_STRING_MILLS.getStringValue()+" "+m_RESOURCES_FILE_MILLS.getStringValue());
+    		command.add("-resource:"+m_RESOURCES_STRING_MILLS.getStringValue()+" "+mills);
     	}
     	
     	command.add(m_AN.getStringValue());
@@ -322,32 +329,40 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	super.updatePrefs();
+    	gatk_bin = m_GATK.getStringValue();
+    	ref_genome = m_REF_GENOME.getStringValue();
+    	hapmap = m_RESOURCES_FILE_HAPMAP.getStringValue();
+    	omni = m_RESOURCES_FILE_OMNI.getStringValue();
+    	dbsnp = m_RESOURCES_FILE_DBSNP.getStringValue();
+    	mills = m_RESOURCES_FILE_MILLS.getStringValue();
+    	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_GATK.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(gatk_bin)) {
     		throw new InvalidSettingsException("Set path to the GenomeAnalysisTK.jar!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_REF_GENOME.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(ref_genome)) {
     		throw new InvalidSettingsException("Set reference genome!");
     	}
     	
-    	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_HAPMAP.getStringValue())){
+    	if(m_RESOURCES_BOOLEAN_HAPMAP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(hapmap)){
     		throw new InvalidSettingsException("Set HapMap reference data set!");
     	}
-    	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_OMNI.getStringValue())){
+    	if(m_RESOURCES_BOOLEAN_OMNI.getBooleanValue() && CompatibilityChecker.inputFileNotOk(omni)){
     		throw new InvalidSettingsException("Set Omni reference data set!");
     	}
-    	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_1000G.getStringValue())){
+    	if(m_RESOURCES_BOOLEAN_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(snps)){
     		throw new InvalidSettingsException("Set 1000G reference data set!");
     	}
-    	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_DBSNP.getStringValue())){
+    	if(m_RESOURCES_BOOLEAN_DBSNP.getBooleanValue() && CompatibilityChecker.inputFileNotOk(dbsnp)){
     		throw new InvalidSettingsException("Set dbSNP reference data set!");
     	}
-    	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_RESOURCES_FILE_MILLS.getStringValue())){
+    	if(m_RESOURCES_BOOLEAN_MILLS.getBooleanValue() && CompatibilityChecker.inputFileNotOk(mills)){
     		throw new InvalidSettingsException("Set Mills reference data set!");
     	}
 

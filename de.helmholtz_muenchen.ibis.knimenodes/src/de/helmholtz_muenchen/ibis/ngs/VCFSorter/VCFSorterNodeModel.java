@@ -35,6 +35,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -61,6 +62,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL1 = "Path2SortedVCF";
 		
 	private int vcf_index;
+	private String ref_genome;
 	
     /**
      * Constructor for the node model.
@@ -69,6 +71,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     
         super(1, 1);
         addSetting(m_refseqfile);
+        addPrefPageSetting(m_refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
     }
 
     /**
@@ -99,7 +102,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> cmd = new ArrayList<>();
 		cmd.add("perl");
 		cmd.add(IO.getScriptPath()+"scripts/perl/vcfsorter.pl");
-		cmd.add(IO.replaceFileExtension(m_refseqfile.getStringValue(), ".dict"));
+		cmd.add(IO.replaceFileExtension(ref_genome, ".dict"));
 		cmd.add(vcf_infile);
 		cmd.add(outfile);
     	
@@ -109,7 +112,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
 		}
     	
 		
-		super.executeCommand(cmd_array, exec, new File(lockfile));
+		super.executeCommand(cmd_array, outfile, exec, new File(lockfile));
 		
     	BufferedDataContainer cont = exec.createDataContainer(
     			new DataTableSpec(
@@ -133,8 +136,11 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	
+    	super.updatePrefs();
+    	ref_genome = m_refseqfile.getStringValue();
 
-    	if(CompatibilityChecker.inputFileNotOk(m_refseqfile.getStringValue(), true, FastACell.TYPE)) {
+    	if(CompatibilityChecker.inputFileNotOk(ref_genome, true, FastACell.TYPE)) {
     		throw new InvalidSettingsException("Reference file invalid!");
     	}
     	

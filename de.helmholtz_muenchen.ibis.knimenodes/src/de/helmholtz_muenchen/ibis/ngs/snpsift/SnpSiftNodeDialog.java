@@ -80,7 +80,7 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
     	final SettingsModelString other_cmd = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_CMD,"");
     	final SettingsModelString other_out = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_OUT,"");
     	
-    	this.addPrefPageSetting(snpsift_bin, IBISKNIMENodesPlugin.SNPSIFT);
+    	addPrefPageSetting(snpsift_bin, IBISKNIMENodesPlugin.SNPSIFT);
    
     	addDialogComponent(new DialogComponentStringSelection(method, "Select tool",SnpSiftNodeModel.NAME2TOOL.keySet()));
     	
@@ -109,7 +109,6 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentBoolean(dbnsfpfieldsall, "Include empty values"));   
     	addDialogComponent(new DialogComponentOptionalString(dbnsfpfields, "List of field names"));
     	addDialogComponent(new DialogComponentOptionalString(dbnsfp_opt, "Further dbnsfp flags"));
-    	
     	
     	method.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {

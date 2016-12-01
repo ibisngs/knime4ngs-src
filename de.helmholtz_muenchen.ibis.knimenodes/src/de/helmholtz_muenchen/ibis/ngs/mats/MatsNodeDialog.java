@@ -74,10 +74,14 @@ public class MatsNodeDialog extends HTExecutorNodeDialog {
 		dcOutputFolder.setBorderTitle("Path to output folder");
 		dcAnnotationFile.setBorderTitle("Path to gtf annotation file");
 		
-        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
 		
 		createNewTab("Mats Options");
+		
 		// add groups and components
+		
+		createNewGroup("Binary");
+		addDialogComponent(new DialogComponentFileChooser(SET_BINARY_PATH, "his_id_BIN", 0, false));
+		
 		createNewGroup("Input");
 		addDialogComponent(dcAnnotationFile);
 		

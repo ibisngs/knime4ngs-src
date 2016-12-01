@@ -44,6 +44,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
@@ -241,12 +242,12 @@ public class PindelNodeModel extends HTExecutorNodeModel {
 	
 	
 	private int posBam;
-//	private int posRef;
 	
 	// if previous node is CollectInsertSizeMetrics and position of ism file
 	private boolean ISM=false;
 	private int posISM;
 	
+	private String pindel_bin, pindel2vcf_bin, ref_genome;
 	
     /**
      * Constructor for the node model.
@@ -288,6 +289,10 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         addSetting(m_min_size);
         addSetting(m_limit_size);
         addSetting(m_max_size);
+        
+		addPrefPageSetting(m_pindel, IBISKNIMENodesPlugin.PINDEL);
+		addPrefPageSetting(m_pindel2vcf, IBISKNIMENodesPlugin.PINDEL2VCF);
+		addPrefPageSetting(m_refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
     	
         // disable dialog components from beginning on
     	m_chrom.setEnabled(false);
@@ -347,20 +352,6 @@ public class PindelNodeModel extends HTExecutorNodeModel {
 	        }
         }
         
-        // reference file
-        
-        String reffile=m_refseqfile.getStringValue();
-        
-        // path to reffile should not be null
-        if(reffile.equals("")){
-        	throw new Exception("No reference file available!");
-        }
-        
-        // check path to reference path
-        if(!Files.exists(Paths.get(reffile))){
-        	throw new Exception("Reference sequence file: "+reffile+" does not exist!");
-        }
-        
         // ism metrics data
         String ismfile="";
         if(ISM && m_create_config.getBooleanValue()){
@@ -378,16 +369,13 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         // check node options
         
         // check path to pindel file 
-        if(m_pindel.getStringValue().equals("")){
+        if(pindel_bin.equals("")){
         	throw new Exception("Missing path to pindel executable: You have to configure the node before executing it!");
         }
         
-        String pindelfile = m_pindel.getStringValue();
-        
-        if(!Files.exists(Paths.get(pindelfile))){
-        	throw new Exception("Path to pindel executable: "+pindelfile+" does not exist");
+        if(!Files.exists(Paths.get(pindel_bin))){
+        	throw new Exception("Path to pindel executable: "+pindel_bin+" does not exist");
         }
-        
        
         //check interval
         String interval="";
@@ -398,11 +386,11 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         
         //check pindel2vcf
         if(m_vcf_out.getBooleanValue()){
-        	if(m_pindel2vcf.equals("")){
+        	if(pindel2vcf_bin.equals("")){
         		throw new Exception("Missing path to pindel2vcf converter: You have to configure the node before executing it!");
         	}
-        	if(!Files.exists(Paths.get(m_pindel2vcf.getStringValue()))){
-        		throw new Exception("Path to pindel2vcf converter: "+m_pindel2vcf.getStringValue()+" does not exist");
+        	if(!Files.exists(Paths.get(pindel2vcf_bin))){
+        		throw new Exception("Path to pindel2vcf converter: "+pindel2vcf_bin+" does not exist");
         	}
         }
         
@@ -425,7 +413,7 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         double [] sen_spec = new double[] {m_min_match_bases.getIntValue(), m_additional_mismatch.getIntValue(), m_min_match_breakpoint.getIntValue(), m_seq_err.getDoubleValue(), m_max_mismatch_rate.getDoubleValue()};
 
         
-        rPindel.Pindel(exec, pindelfile, configfile, reffile, pout, interval, resources, sen_spec);
+        rPindel.Pindel(exec, pindel_bin, configfile, ref_genome, pout, interval, resources, sen_spec);
         
         //check output files: pindel_D deletions, pindel_SI small insertions
         String pindeldeletions=pout+"_D";
@@ -447,7 +435,7 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         	
         	String refname="";
         	if(m_use_ref_filename.getBooleanValue()){
-        		refname=Paths.get(PathProcessor.getBase(reffile)).getFileName().toString();
+        		refname=Paths.get(PathProcessor.getBase(ref_genome)).getFileName().toString();
         	}
         	else{
         		refname=m_refname.getStringValue();
@@ -467,8 +455,8 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         	boolean [] flags = new boolean []{m_gatk_comp.getBooleanValue(), m_both_strands.getBooleanValue(), m_limit_size.getBooleanValue()};
         	double [] numbers = new double []{m_min_reads.getIntValue(), m_hetero_frac.getDoubleValue(), m_homo_frac.getDoubleValue(), m_min_supp_reads.getIntValue(), m_min_size.getIntValue(), m_max_size.getIntValue()};
  
-        	rPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindeldeletions, delout, flags, numbers);
-        	rPindel.Pindel2VCF(exec, m_pindel2vcf.getStringValue(), reffile, refname, refdate, pindelinsertions, inout, flags, numbers);
+        	rPindel.Pindel2VCF(exec, pindel2vcf_bin, ref_genome, refname, refdate, pindeldeletions, delout, flags, numbers);
+        	rPindel.Pindel2VCF(exec, pindel2vcf_bin, ref_genome, refname, refdate, pindelinsertions, inout, flags, numbers);
     	}
         
         //create output table
@@ -515,6 +503,22 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
+    	
+    	super.updatePrefs();
+    	pindel_bin = m_pindel.getStringValue();
+    	pindel2vcf_bin = m_pindel2vcf.getStringValue();
+    	ref_genome = m_refseqfile.getStringValue();
+    	
+        // path to reffile should not be null
+        if(ref_genome.equals("")){
+        	throw new InvalidSettingsException("No reference file available!");
+        }
+        
+        // check path to reference path
+        if(!Files.exists(Paths.get(ref_genome))){
+        	throw new InvalidSettingsException("Reference sequence file: "+ref_genome+" does not exist!");
+        }
+    	
     	//check interval
     	if (m_interval.getBooleanValue()){
     		//check chromosome name

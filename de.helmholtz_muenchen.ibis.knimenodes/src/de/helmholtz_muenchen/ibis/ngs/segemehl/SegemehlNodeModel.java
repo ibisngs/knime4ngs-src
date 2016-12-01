@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -98,6 +99,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(SegemehlNodeModel.class);
 	
 	private static String readType = "";
+	private String segemehl_bin, ref_genome;
 	
     /**
      * Constructor for the node model.
@@ -123,6 +125,9 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	addSetting(m_accuracy);
     	addSetting(m_optional);
         
+    	addPrefPageSetting(m_segemehlfile, IBISKNIMENodesPlugin.SEGEMEHL);
+    	addPrefPageSetting(m_refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
+    	
         m_autoadapter3seq.setEnabled(false);
         m_adapter3seq.setEnabled(false);
         m_adapter5seq.setEnabled(false);
@@ -140,7 +145,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
             final ExecutionContext exec) throws Exception {
     	
     	ArrayList<String> command = new ArrayList<String>();
-     	String path2segemehl = m_segemehlfile.getStringValue();
      	
     	String path2reads1 = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 	= "";
@@ -149,8 +153,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     		path2readFile2 = inData[0].iterator().next().getCell(1).toString();	
     	}
     	  	
-    	String path2refSeq = m_refseqfile.getStringValue();
-    	String path2indexedRefSeq = path2refSeq.substring(0,path2refSeq.lastIndexOf(".")+1)+"idx";
+    	String path2indexedRefSeq = ref_genome.substring(0,ref_genome.lastIndexOf(".")+1)+"idx";
     	String basePath = path2reads1.substring(0,path2reads1.lastIndexOf('/')+1);
     	String outBaseName1 = path2reads1.substring(path2reads1.lastIndexOf("/")+1,path2reads1.lastIndexOf("."));
     	String outBaseName = outBaseName1;
@@ -170,14 +173,14 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     // Indexing reference sequence: segemehl -x chr1.idx -d chr1.fa
     	if(Files.notExists(Paths.get(path2indexedRefSeq))) {
     		LOGGER.info("Indexing reference sequence.");
-    		command.add(path2segemehl);
+    		command.add(segemehl_bin);
     		command.add("-x "+path2indexedRefSeq);
-	    	command.add("-d "+path2refSeq);
+	    	command.add("-d "+ref_genome);
 	     	/**
 	     	 * Execute
 	     	 */
 	    	File lockFile = new File(path2indexedRefSeq + ".klock");
-			super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, lockFile);
+			super.executeCommand(new String[]{StringUtils.join(command, " ")}, path2indexedRefSeq, exec, lockFile);
 	     	command = new ArrayList<String>();	//Clear Array
 	    	
     	} else {
@@ -188,7 +191,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     // Match/ align reads: segemehl.x -i chr1.idx -d chr1.fa -q myreads.fa > mymap.sam
     	LOGGER.info("Match/ align reads to indexed reference sequence.");
     	
-    	command.add(path2segemehl);
+    	command.add(segemehl_bin);
     	command.add("-s");
     	
     	if(m_clip5adapter.getBooleanValue()) {
@@ -232,7 +235,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	command.add("-A "+accuracy);
     	command.add("-t "+nrOfThreads);
     	command.add("-i "+path2indexedRefSeq);
-    	command.add("-d "+path2refSeq);
+    	command.add("-d "+ref_genome);
     	command.add("-q "+path2reads1);
     	command.add("-o "+outName);
     	command.add("-u "+outNameUnmatchedReads);
@@ -247,7 +250,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	File lockFile = new File(outName + ".klock");
 	
 		// execute the command
-		super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, lockFile);
+		super.executeCommand(new String[]{StringUtils.join(command, " ")}, outName, exec, lockFile);
 
 
      	command = new ArrayList<String>();	//Clear Array
@@ -278,7 +281,9 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
- 	
+    	super.updatePrefs();
+    	segemehl_bin = m_segemehlfile.getStringValue();
+    	ref_genome = m_refseqfile.getStringValue();
   	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
@@ -286,13 +291,13 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     		setWarningMessage(CC.getWarningMessages());
     	}
     	
-		if(CompatibilityChecker.inputFileNotOk(m_segemehlfile.getStringValue(), false)) {
+		if(CompatibilityChecker.inputFileNotOk(segemehl_bin, false)) {
 			throw new InvalidSettingsException("Set path to samtools binary!");
 		}
     	
 		
-		if(m_refseqfile.getStringValue().length() > 1) {
-			if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
+		if(ref_genome.length() > 1) {
+			if(!FileValidator.checkFastaFormat(ref_genome)){
 	            throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
 	    	}
 		}

@@ -38,6 +38,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -133,6 +134,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_other_out = new SettingsModelString(SnpSiftNodeModel.CFGKEY_OTHER_OUT,"");
 	
 	private int vcf_index;
+	private String snpsift_bin;
 	private DataType outType = FileCell.TYPE;
 
 	public static final String OUT_COL = "snpSift_result";
@@ -156,6 +158,8 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 		addSetting(m_other_cmd);
 		addSetting(m_other_out);
 		
+		addPrefPageSetting(m_snpsift_bin, IBISKNIMENodesPlugin.SNPSIFT);
+		
 		m_other_cmd.setEnabled(false);
 		m_other_out.setEnabled(false);
     }
@@ -171,7 +175,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         ArrayList<String> command = new ArrayList<String>();
         command.add("java");
     	command.add("-jar");
-    	command.add(m_snpsift_bin.getStringValue());
+    	command.add(snpsift_bin);
         
         String vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
 
@@ -258,7 +262,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     		cmd[i] = command.get(i);
     	}
     	String lockFile = stdOutFile + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(cmd, exec, new File(lockFile),stdOutFile);
+    	super.executeCommand(cmd, stdOutFile, exec, new File(lockFile),stdOutFile);
 	
     	//Create Output Table
     	
@@ -289,6 +293,9 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
+    	super.updatePrefs();
+    	snpsift_bin = m_snpsift_bin.getStringValue();
+    	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");

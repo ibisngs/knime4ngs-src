@@ -40,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -85,14 +86,13 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelOptionalString m_Optional_Aln 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Aln,"",false);
 	private final SettingsModelOptionalString m_Optional_Map 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Map,"",false);
 	
-
-	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
 	private static String readType = "";
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
 	
+	private String bwa_bin, ref_genome;
 	
     /**
      * Constructor for the node model.
@@ -113,6 +113,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	addSetting(m_Optional_Aln);
     	addSetting(m_Optional_Map);
     	
+    	addPrefPageSetting(m_bwafile, IBISKNIMENodesPlugin.BWA);
+    	addPrefPageSetting(m_refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
     }
 
    
@@ -127,7 +129,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	/**
 		 * Get the Parameters
 		 */
-    	String path2refFile 	= m_refseqfile.getStringValue();
     	String path2readFile 	= inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 	= "";
  
@@ -140,7 +141,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	String outBaseName 		= outBaseName1;
     	String outBaseName2 	= outBaseName1;
     	String memOut 			= basePath+outBaseName1+"_mem.sam";
-    	String path2bwa 		= m_bwafile.getStringValue();
     	int threads 			= m_ALN_THREADS.getIntValue();
     	
     	if(readType.equals("paired-end")){
@@ -161,16 +161,16 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	}	
 
     	//Prepare Index
-    	bwa_index(exec,path2bwa, path2refFile);
+    	bwa_index(exec,bwa_bin, ref_genome);
 
     	//BWA aln
     	if(m_alnalgo.getStringValue().equals("BWA-backtrack")){
         	LOGGER.info("Find the SA coordinates of the input reads.\n");
-        	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, path2refFile, path2bwa, path2readFile, path2readFile2, isBam,threads);
+        	bwa_aln(exec,readType, basePath, outBaseName, outBaseName1, outBaseName2, ref_genome, bwa_bin, path2readFile, path2readFile2, isBam,threads);
         	LOGGER.info("Finished BWA aln...");
     	}
     	//BWA Mapping
-    	bwa_map(exec, readType,path2bwa,path2refFile,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut,threads);
+    	bwa_map(exec, readType,bwa_bin,ref_genome,path2readFile,out1Name,out2Name,out11Name,out12Name,path2readFile2,memOut,threads);
     	
      	
     	/**
@@ -232,7 +232,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
 
 	    	/**Execute**/
 	    	String lockFile = path2refFile + SuccessfulRunChecker.LOCK_ENDING;
-	    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
+	    	super.executeCommand(new String[]{StringUtils.join(command, " ")},path2refFile+".fai", exec, new File(lockFile));
 			
     	} else {
     		LOGGER.info("Indexing reference sequence SKIPPED.\n");
@@ -274,7 +274,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	
     	String lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     	/**Execute**/
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, outfile, exec, new File(lockFile));
    
 		//If paired end, repeat previous step
     	if(readType.equals("paired-end")) {
@@ -289,7 +289,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
         	}
         	/**Execute**/
         	lockFile = out12Name + SuccessfulRunChecker.LOCK_ENDING;
-        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, exec, new File(lockFile));
+        	super.executeCommand(new String[]{StringUtils.join(command, " ")}, out12Name, exec, new File(lockFile));
 		}
     }
     
@@ -380,9 +380,9 @@ public class BWANodeModel extends HTExecutorNodeModel {
 		if (alnalgo.equals("BWA-MEM")) {
 			String stdErr = IO.replaceFileExtension(memOut,"stdErr");
 			
-			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec, null, new File(lockFile), memOut,stdErr, null, null, null);
+			super.executeCommand(new String[] { StringUtils.join(command, " ") }, out2Name, exec, null, new File(lockFile), memOut,stdErr, null, null, null);
 		} else {
-			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec,new File(lockFile));
+			super.executeCommand(new String[] { StringUtils.join(command, " ") }, out2Name, exec,new File(lockFile));
 		}
 	}
 
@@ -394,6 +394,9 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	super.updatePrefs();
+    	bwa_bin = m_bwafile.getStringValue();
+    	ref_genome = m_refseqfile.getStringValue();
    	   	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
@@ -402,18 +405,18 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	}
     	
     	
-		if(CompatibilityChecker.inputFileNotOk(m_bwafile.getStringValue(), false)) {
+		if(CompatibilityChecker.inputFileNotOk(bwa_bin, false)) {
 			throw new InvalidSettingsException("Set path to BWA binary!");
 		}
     	
     	    	
         //Version control
     	try {
-	        if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==1){
+	        if(FileValidator.versionControl(bwa_bin,"BWA")==1){
 	        	setWarningMessage("WARNING: You are using a newer BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
-	        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==2){
+	        }else if(FileValidator.versionControl(bwa_bin,"BWA")==2){
 	        	setWarningMessage("WARNING: You are using an older BWA version than "+FileValidator.BWA_VERSION +"! This may cause problems!");
-	        }else if(FileValidator.versionControl(m_bwafile.getStringValue(),"BWA")==-1){
+	        }else if(FileValidator.versionControl(bwa_bin,"BWA")==-1){
 	        	setWarningMessage("Your BWA version could not be determined! Correct behaviour can only be ensured for BWA version "+FileValidator.BWA_VERSION+".");
 	        }
     	} catch (Exception e) {
@@ -421,8 +424,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	}
    
     	
-    	if(m_refseqfile.getStringValue().length() > 1) {
-	    	if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
+    	if(ref_genome.length() > 1) {
+	    	if(!FileValidator.checkFastaFormat(ref_genome)){
 	            throw new InvalidSettingsException("Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!");
 	    	}
     	}

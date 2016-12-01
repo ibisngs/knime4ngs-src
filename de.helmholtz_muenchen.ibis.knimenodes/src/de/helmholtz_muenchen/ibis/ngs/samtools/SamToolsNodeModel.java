@@ -38,6 +38,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -147,17 +148,16 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelIntegerBounded m_maxdepth = new SettingsModelIntegerBounded(SamToolsNodeModel.CFGKEY_MAXDEPTH, 256, 1, Integer.MAX_VALUE);
 	private final SettingsModelBoolean m_fixchimeras = new SettingsModelBoolean(SamToolsNodeModel.CFGKEY_FIXCHIMERAS, false);
 
-	
-	protected static Boolean optionalPort 	= false;
 	public static String OUT_COL1 			= "Outfile";
 	private String OutCellType 				= "FileCell";	
+	private String samtools_bin, ref_genome;
 	
 	/**
      * Constructor for the node model.
      */
     protected SamToolsNodeModel() {
     
-        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
        
        	addSetting(m_utility);
     	addSetting(m_samtools);
@@ -203,6 +203,10 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	addSetting(m_minqual);
     	addSetting(m_maxdepth);
     	addSetting(m_fixchimeras);
+    	
+		addPrefPageSetting(m_samtools, IBISKNIMENodesPlugin.SAMTOOLS);
+		addPrefPageSetting(m_refseqfile, IBISKNIMENodesPlugin.REF_GENOME);
+
     }
 
     /**
@@ -213,28 +217,22 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	    	
-    	String path2samtools 	= m_samtools.getStringValue();
-    	String path2bamfile 	= "";
-    	String path2seqfile 	= m_refseqfile.getStringValue();
     	String lockFile 		= "";
     	String OutCellType 		= "FileCell";		 
-    	
-    	if(optionalPort){
-    		path2bamfile = inData[0].iterator().next().getCell(0).toString();
-    	}
-    	
+    
+    	String path2bamfile = inData[0].iterator().next().getCell(0).toString();
     	
     	String basePathWithFileName = "";
     	if(!path2bamfile.isEmpty()){
     	   	basePathWithFileName = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));	
     	}
     	else{
-    		basePathWithFileName = path2seqfile.substring(0,path2seqfile.lastIndexOf("."));	
+    		basePathWithFileName = ref_genome.substring(0,ref_genome.lastIndexOf("."));	
     	}
  
     	String utility = m_utility.getStringValue();
     	ArrayList<String> command = new ArrayList<String>();
-    	command.add(path2samtools+" "+utility);
+    	command.add(samtools_bin+" "+utility);
     	
     	if(m_Optional.isActive()){
     		command.add(m_Optional.getStringValue());	
@@ -332,8 +330,8 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
      		
      		
     	} else if (utility.equals("faidx")){
-    		command.add(path2seqfile);
-    		outfile = path2seqfile;
+    		command.add(ref_genome);
+    		outfile = ref_genome;
     		lockFile = outfile+".faidx" + SuccessfulRunChecker.LOCK_ENDING;
     		
     	} else if (utility.equals("reheader")) {
@@ -411,10 +409,10 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	if(command.size()!=0) {
     		
     		if(!stdOut){	//No extra output file required
-    			super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new File(lockFile),null,outfile+".stdErr");
+    			super.executeCommand(new String[]{StringUtils.join(command, " ")}, outfile, exec,new File(lockFile),null,outfile+".stdErr");
     			
     		}else{	//StdOut to outfile
-    			super.executeCommand(new String[] { StringUtils.join(command, " ") }, exec, null, new File(lockFile), outfile,outfile+".stdErr", null, null, null);
+    			super.executeCommand(new String[]{StringUtils.join(command, " ")}, outfile, exec, null, new File(lockFile), outfile,outfile+".stdErr", null, null, null);
     		}
     	}else{
     		throw new Exception("Something went wrong...Execution command is empty!");
@@ -450,35 +448,16 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	String utility = m_utility.getStringValue();
+    	super.updatePrefs();
+    	samtools_bin = m_samtools.getStringValue();
+    	ref_genome = m_refseqfile.getStringValue();
    	
-		if(CompatibilityChecker.inputFileNotOk(m_samtools.getStringValue(), false)) {
+		if(CompatibilityChecker.inputFileNotOk(samtools_bin, false)) {
 			throw new InvalidSettingsException("Set path to samtools binary!");
 		}
-    	
-    	
-    	//Check OptionalInputPort
-		try{
-			inSpecs[0].getColumnNames();
-			optionalPort=true;
-			
-			if(!inSpecs[0].getColumnSpec(0).getType().toString().equals("BAMCell")){
-				throw new InvalidSettingsException("Expected BAMCell in first table cell but found a "+inSpecs[0].getColumnSpec(0).getType().toString()+".");
-			}
-			
-			
-    	}catch(NullPointerException npe){
-    		
-    		optionalPort=false;
-    		
-    		if(!utility.equals("faidx")){
-    			setWarningMessage(m_utility.getStringValue()+" requires input table.");
-    			throw new InvalidSettingsException(m_utility.getStringValue()+" requires input table.");
-    		}	
-    	}
        	
-     	if(m_refseqfile.getStringValue().length() > 1) {
-	     	if(!FileValidator.checkFastaFormat(m_refseqfile.getStringValue())){
+     	if(ref_genome.length() > 1) {
+	     	if(!FileValidator.checkFastaFormat(ref_genome)){
 	     		throw new InvalidSettingsException("Sequence file is not in fasta format!");
 	     	}
      	}

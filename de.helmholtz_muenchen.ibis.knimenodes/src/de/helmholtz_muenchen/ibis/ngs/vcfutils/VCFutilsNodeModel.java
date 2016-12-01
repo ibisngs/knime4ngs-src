@@ -281,7 +281,7 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
     	 * Execute
     	 */
     	String lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
-    	super.executeCommand(new String[]{command.toString()}, exec, new File(lockFile),outfile);
+    	super.executeCommand(new String[]{command.toString()}, outfile, exec, new File(lockFile),outfile);
 //    	Executor.executeCommand(new String[]{StringUtils.join(command, " ")},exec,LOGGER,outfile);
   	
         return new BufferedDataTable[]{};

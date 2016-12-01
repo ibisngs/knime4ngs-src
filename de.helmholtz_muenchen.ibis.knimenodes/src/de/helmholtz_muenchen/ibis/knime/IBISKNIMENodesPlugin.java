@@ -45,6 +45,7 @@ import de.helmholtz_muenchen.ibis.utils.BinaryHandler;
 public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	
 //	fields of preference page
+	public static final String OVERWRITE = "overwrite";
 	public static final String USE_HTE = "hte";
 	public static final String DB_FILE = "db_file";
 	public static final String THRESHOLD = "threshold";
@@ -61,6 +62,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String RES_MILLS = "Mills";
 	
 //	default values
+	public static final boolean OVERWRITE_DEFAULT = true;
 	public static final boolean HTE_DEFAULT = false;
 	public static final int THRESHOLD_DEFAULT = 1;
 	public static final boolean NOTIFY_DEFAULT = false;
@@ -99,7 +101,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 //	excluded binaries: integrate binaries by adding them to PATHS and TOOLS in the KNIMEPreferencePage
 //	public static final String BFAST = "bfast";
 	
-	public static String [] FIELDS = {USE_HTE, THRESHOLD, DB_FILE, NOTIFY, EMAIL_HOST, EMAIL_SENDER, EMAIL_RECEIVER};
+	public static String [] FIELDS = {OVERWRITE, USE_HTE, THRESHOLD, DB_FILE, NOTIFY, EMAIL_HOST, EMAIL_SENDER, EMAIL_RECEIVER};
 	public static String [] PATHS = {
 			REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS , RES_DBSNP, RES_MILLS, 
 			DB_FILE,
@@ -302,6 +304,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	 * @param store the preference store to fill
 	 */
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
+		store.setDefault(OVERWRITE, OVERWRITE_DEFAULT);
 		store.setDefault(USE_HTE, HTE_DEFAULT);
 		store.setDefault(THRESHOLD, THRESHOLD_DEFAULT);
 		store.setDefault(NOTIFY, NOTIFY_DEFAULT);

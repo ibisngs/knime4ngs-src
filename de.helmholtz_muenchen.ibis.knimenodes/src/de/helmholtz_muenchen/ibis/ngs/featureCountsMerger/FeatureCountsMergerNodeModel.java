@@ -239,9 +239,6 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	// test if output file is set
-//    	if(this.SET_OUTPUT_FILE.getStringValue().isEmpty())
-//		throw new InvalidSettingsException("Output file path may not be empty.");
         return new DataTableSpec[]{ null };
     }
     

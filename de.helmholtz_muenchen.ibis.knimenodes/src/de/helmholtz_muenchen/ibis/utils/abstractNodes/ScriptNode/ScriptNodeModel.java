@@ -50,11 +50,11 @@ public abstract class ScriptNodeModel extends HTExecutorNodeModel {
 	}
 	
 	protected void executeScript(final ExecutionContext exec, String[] environment) throws Exception {
-		executeCommand(this.getCommand(), exec, environment, null, null, null, null, null, null);
+		executeCommand(this.getCommand(), this.getOutfile(), exec, environment, null, null, null, null, null, null);
 	}
 	
 	protected abstract String[] getCommand();
-	
+	protected abstract String getOutfile();
 
 	public String getSCRIPT() {
 		return SCRIPT;

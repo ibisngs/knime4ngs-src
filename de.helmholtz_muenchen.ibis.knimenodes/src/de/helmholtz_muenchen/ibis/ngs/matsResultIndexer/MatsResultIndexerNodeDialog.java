@@ -59,10 +59,12 @@ public class MatsResultIndexerNodeDialog extends HTExecutorNodeDialog {
 		dcOutputFile.setBorderTitle("Path to output folder");
 		dcInputFile.setBorderTitle("Path to input folder");
 		
-        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
+        
 		
 		createNewTab("MatsResultIndexer");
 		    // add groups and components
+		createNewGroup("Binary");
+		addDialogComponent(new DialogComponentFileChooser(SET_BINARY_PATH, "his_id_BIN", 0, false));
 		createNewGroup("Input");
 		addDialogComponent(dcInputFile);
 		 

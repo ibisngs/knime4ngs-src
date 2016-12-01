@@ -38,6 +38,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -212,6 +213,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	// position of input files in input table
 	private int posBam;
 	public static final String OUT_COL1 = "Path2RealignedBAM";
+	private String gatk_jar, ref_genome, phase1, mills;
 
 	// Network/Proxy options
 	// public static final String CFGKEY_USEPROXY="useproxy";
@@ -271,6 +273,11 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	addSetting(m_max_reads_realign);
     	addSetting(m_alignment_tag);
     	addSetting(m_ir_opt_flags);
+    	
+		addPrefPageSetting(m_gatk, IBISKNIMENodesPlugin.GATK);
+		addPrefPageSetting(m_ref_genome, IBISKNIMENodesPlugin.REF_GENOME);
+		addPrefPageSetting(m_phase1_1000G_file, IBISKNIMENodesPlugin.RES_1000G_INDELS);
+		addPrefPageSetting(m_mills_1000G_file, IBISKNIMENodesPlugin.RES_MILLS);
     	
         // file chooser for interval file is disabled from the beginning
         m_interval_file.setEnabled(false);
@@ -353,33 +360,36 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	 */
 	@Override
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-
+		super.updatePrefs();
+    	gatk_jar = m_gatk.getStringValue();
+    	ref_genome = m_ref_genome.getStringValue();
+    	phase1 = m_phase1_1000G_file.getStringValue();
+    	mills = m_mills_1000G_file.getStringValue();
+    	
 		posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	if(posBam==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
     	}
     	
-    	if(CompatibilityChecker.inputFileNotOk(m_gatk.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(gatk_jar)) {
     		throw new InvalidSettingsException("Set path to the GenomeAnalysisTK.jar!");
     	}
     	
     	//check reference file
-    	String reffile =  m_ref_genome.getStringValue();
-    	if(CompatibilityChecker.inputFileNotOk(m_ref_genome.getStringValue())) {
+    	if(CompatibilityChecker.inputFileNotOk(ref_genome)) {
     		throw new InvalidSettingsException("Set reference genome!");
     	}
 
-		if (!Files.exists(Paths.get(reffile + ".fai"))) {
-			throw new InvalidSettingsException("Reference sequence index: " + reffile + ".fai does not exist!");
+		if (!Files.exists(Paths.get(ref_genome + ".fai"))) {
+			throw new InvalidSettingsException("Reference sequence index: " + ref_genome + ".fai does not exist!");
 		}
 
-		String refbase = PathProcessor.getBase(reffile);
+		String refbase = PathProcessor.getBase(ref_genome);
 		if (!Files.exists(Paths.get(refbase + ".dict"))) {
 			throw new InvalidSettingsException("Reference sequence dictionary: " + refbase + ".dict does not exist!");
 		}
 		
 		//check data sets
-		String phase1 = m_phase1_1000G_file.getStringValue();
 		if(m_use_phase1_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(phase1)) {
 			throw new InvalidSettingsException("Set 1000G Indel data set!");
 		}
@@ -388,7 +398,6 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 //			throw new InvalidSettingsException("1000G Indel index file: " + phase1 + ".idx does not exist!");
 //		}
 		
-		String mills = m_mills_1000G_file.getStringValue();
 		if(m_use_mills_1000G.getBooleanValue() && CompatibilityChecker.inputFileNotOk(mills)) {
 			throw new InvalidSettingsException("Set Mills data set!");
 		}
@@ -415,19 +424,19 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 		int threads = m_num_threads.getIntValue();
 		int memory = m_gatk_java_memory.getIntValue()*threads;
 
-		String cmd="java -jar -Xmx"+memory+"G " + m_gatk.getStringValue();
+		String cmd="java -jar -Xmx"+memory+"G " + gatk_jar;
 		cmd+=" -T RealignerTargetCreator";
 		cmd+=" -nt "+threads;
-		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -R "+ref_genome;
 		cmd+=" -I "+inputbam;
 		cmd+=" -o "+outputint;
 		
 		if(m_use_phase1_1000G.getBooleanValue()){
-			cmd+=" -known "+m_phase1_1000G_file.getStringValue();
+			cmd+=" -known "+phase1;
 		}
 		
 		if(m_use_mills_1000G.getBooleanValue()){
-			cmd+=" -known "+m_mills_1000G_file.getStringValue();
+			cmd+=" -known "+mills;
 		}
 		
 		if(m_use_interval.getBooleanValue()){
@@ -446,26 +455,26 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 		GATKRealignmentNodeModel.logger.info("Running GATK TargetCreator...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputint+".stdOut and "+outputint+".stdErr");
 		
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputint+".stdOut", outputint+".stdErr");
+		super.executeCommand(new String[]{cmd}, outputint, exec, new File(lockFile),outputint+".stdOut", outputint+".stdErr");
 	}
 	
 	private void realign (ExecutionContext exec, String outputint, String outputbam, String inputbam) throws Exception{
     	
 		String lockFile = outputbam + SuccessfulRunChecker.LOCK_ENDING;
 
-		String cmd="java -jar -Xmx"+m_gatk_java_memory.getIntValue()+"G " + m_gatk.getStringValue();
+		String cmd="java -jar -Xmx"+m_gatk_java_memory.getIntValue()+"G " + gatk_jar;
 		cmd+=" -T IndelRealigner";
-		cmd+=" -R "+m_ref_genome.getStringValue();
+		cmd+=" -R "+ref_genome;
 		cmd+=" -I "+inputbam;
 		cmd+=" -o "+outputbam;
 		cmd+=" -targetIntervals "+outputint;
 		
 		if(m_use_phase1_1000G.getBooleanValue()){
-			cmd+=" -known "+m_phase1_1000G_file.getStringValue();
+			cmd+=" -known "+phase1;
 		}
 		
 		if(m_use_mills_1000G.getBooleanValue()){
-			cmd+=" -known "+m_mills_1000G_file.getStringValue();
+			cmd+=" -known "+mills;
 		}
 		
 		if(m_use_interval.getBooleanValue()){
@@ -492,6 +501,6 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 		GATKRealignmentNodeModel.logger.info("Running GATK IndelRealigner...");
 		GATKRealignmentNodeModel.logger.info("Log files can be found in "+outputbam+".stdOut and "+outputbam+".stdErr");
 		
-		super.executeCommand(new String[]{cmd}, exec, new File(lockFile),outputbam+".stdOut", outputbam+".stdErr");
+		super.executeCommand(new String[]{cmd}, outputbam, exec, new File(lockFile),outputbam+".stdOut", outputbam+".stdErr");
 	}
 }

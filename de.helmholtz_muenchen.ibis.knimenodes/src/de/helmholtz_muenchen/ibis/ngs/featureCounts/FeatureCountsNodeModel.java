@@ -40,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -140,6 +141,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	addSetting(SET_CHIMERIC_FRAGMENTS);
     	addSetting(SET_FEATURE_LEVEL);
     	addSetting(SET_GROUP_FEATURE);
+    	
+    	addPrefPageSetting(SET_BINARY_PATH,IBISKNIMENodesPlugin.FEATURE_COUNTS);
     }
     
     /**
@@ -147,7 +150,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
      */
     @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
-    	super.configure(inSpecs);
+    	super.updatePrefs();
+    	
+    	if(CompatibilityChecker.inputFileNotOk(getBinaryPath(), false)) {
+			throw new InvalidSettingsException("Set path to featureCounts binary!");
+		}
     	
     	bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	if(bam_sam_index == -1) {
@@ -299,6 +306,11 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	@Override
 	protected File getPathToLockFile() {
 		return new File(outfile + SuccessfulRunChecker.LOCK_ENDING);
+	}
+
+	@Override
+	protected String getOutfile() {
+		return outfile;
 	}
 
 }

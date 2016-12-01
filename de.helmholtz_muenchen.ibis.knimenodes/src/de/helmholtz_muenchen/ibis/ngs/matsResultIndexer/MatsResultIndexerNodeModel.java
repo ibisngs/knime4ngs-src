@@ -157,5 +157,15 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 	protected File getPathToLockFile() {
 		return null;
 	}
+
+	@Override
+	protected String getBinaryPath() {
+		return SET_BINARY_PATH.getStringValue();
+	}
+
+	@Override
+	protected String getOutfile() {
+		return getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true);
+	}
 }
 

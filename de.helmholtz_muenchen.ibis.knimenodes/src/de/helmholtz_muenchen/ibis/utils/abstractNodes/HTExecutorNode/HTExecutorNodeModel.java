@@ -24,7 +24,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import javax.mail.Message;
@@ -44,6 +47,7 @@ import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
@@ -85,18 +89,19 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	
 	private final String HEADER = "IBIS KNIME Nodes Notification";
 	
-	//internal flags
-	private boolean use_hte = false;
-	
-	static final String CFGKEY_DEFAULT_THRESHOLD = "threshold";
-	static final int DEFAULT_THRESHOLD = 1;
+	static final String CFGKEY_OVERWRITE = "overwrite";
+	private final SettingsModelBoolean m_overwrite = new SettingsModelBoolean(CFGKEY_OVERWRITE, true); 
 	
 	static final String CFGKEY_USE_PREF = "use_pref";
 	private final SettingsModelBoolean m_use_pref = new SettingsModelBoolean(CFGKEY_USE_PREF, true);
 	
+	static final String CFGKEY_DEFAULT_THRESHOLD = "threshold";
+	static final int DEFAULT_THRESHOLD = 1;
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, DEFAULT_THRESHOLD,1,Integer.MAX_VALUE);
 
+	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
+	
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
 			PortType[] outPortTypes) {
 		super(inPortTypes, outPortTypes);
@@ -111,6 +116,7 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	public void init() {
 		addSetting(m_use_pref);
 		addSetting(threshold);
+		addSetting(m_overwrite);
 	}
 	
 	@Override
@@ -125,6 +131,22 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		HTEOUT.setLength(0);
 		HTEERR.setLength(0);
 	}
+	
+	public void addPrefPageSetting(SettingsModelString sms, String v) {
+    	this.model2pref.put(sms, v);
+    }
+	
+    public void updatePrefs() {
+    	String prefValue;
+    	if(m_use_pref.getBooleanValue()) {
+    		for(SettingsModelString sm: model2pref.keySet()) {
+    			prefValue = IBISKNIMENodesPlugin.getStringPreference(model2pref.get(sm));
+    			if(prefValue != null && !prefValue.equals("")) {
+    	    		sm.setStringValue(prefValue);
+    	    	}
+    		}
+		}
+    }
 	
 	private void recExecuteCommand(String[] command, ExecutionContext exec,
 			String[] environment, String stdOutFile,
@@ -212,19 +234,19 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 //		return result;
 //	}
 
-	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile) throws Exception {
-		this.executeCommand(command, exec, null, lockFile, null, null, null, null, null);
+	protected void executeCommand(String [] command, String outfile, ExecutionContext exec, File lockFile) throws Exception {
+		this.executeCommand(command, outfile, exec, null, lockFile, null, null, null, null, null);
 	}
 	
-	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile, String stdOutFile) throws Exception {
-		this.executeCommand(command, exec, null, lockFile, stdOutFile, null, null, null, null);
+	protected void executeCommand(String [] command, String outfile, ExecutionContext exec, File lockFile, String stdOutFile) throws Exception {
+		this.executeCommand(command, outfile, exec, null, lockFile, stdOutFile, null, null, null, null);
 	}
 	
-	protected void executeCommand(String [] command, ExecutionContext exec, File lockFile, String stdOutFile, String stdErrFile) throws Exception {
-		this.executeCommand(command, exec, null, lockFile, stdOutFile, stdErrFile, null, null, null);
+	protected void executeCommand(String [] command, String outfile, ExecutionContext exec, File lockFile, String stdOutFile, String stdErrFile) throws Exception {
+		this.executeCommand(command, outfile, exec, null, lockFile, stdOutFile, stdErrFile, null, null, null);
 	}
 	
-	protected void executeCommand(String[] command, ExecutionContext exec,
+	protected void executeCommand(String[] command, String outfile, ExecutionContext exec,
 			String[] environment, File lockFile, String stdOutFile,
 			String stdErrFile, StringBuffer stdOut, StringBuffer stdErr,
 			String StdInFile) throws Exception {
@@ -236,8 +258,18 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			this.HTEERR=stdErr;
 		}
 		
-		use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
-		threshold_value = threshold.getIntValue();
+		boolean do_overwrite;
+		if(m_use_pref.getBooleanValue()) {
+			do_overwrite = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE);
+			threshold_value = Integer.parseInt(IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.THRESHOLD));
+		} else {
+			do_overwrite = m_overwrite.getBooleanValue();
+			threshold_value = threshold.getIntValue();
+		}
+		
+		
+		
+		boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
 		db_file = IBISKNIMENodesPlugin.getStringPreference(IBISKNIMENodesPlugin.DB_FILE);
 		boolean notify = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.NOTIFY);
 		if(notify) {
@@ -272,6 +304,13 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		//abort execution if node has been executed successfully
 		if (terminationState) {
 			return;
+		}
+		
+		//abort execution if node shall not overwrite existing outfiles
+		if(!do_overwrite && outfile!=null) {
+			if(Files.exists(Paths.get(outfile))) {
+				throw new UnsuccessfulExecutionException("Execution aborted as outfile "+outfile+" exists yet! Rename/move/delete existing outfile or allow overwriting of existing outfiles.");
+			}
 		}
 			
 		SuccessfulRunChecker checker = new SuccessfulRunChecker(lockFile,

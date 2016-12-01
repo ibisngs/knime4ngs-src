@@ -94,7 +94,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	String[] com = command.toArray(new String[command.size()]);
     	StringBuffer sysErr = new StringBuffer(50);
     	
-    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
+    	super.executeCommand(new String[]{StringUtils.join(com, " ")},outfile1, exec, null, lockFile, null, null, null, sysErr, null);
     	
     	//Show FastQC Output
     	LOGGER.info(sysErr);
@@ -119,7 +119,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    		//Clear StringBuffer
 	    		sysErr.setLength(0);
 	    		sysErr.append("\n");
-		    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, exec, null, lockFile, null, null, null, sysErr, null);
+		    	super.executeCommand(new String[]{StringUtils.join(com, " ")}, outfile2,  exec, null, lockFile, null, null, null, sysErr, null);
 //	    		//Show FastQC Output
 	        	LOGGER.info(sysErr);
 	        	//Clear StringBuffer
@@ -139,7 +139,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	        	
 	        	//Set new lock file for merging
 	        	lockFile = new File(outfileMerged+SuccessfulRunChecker.LOCK_ENDING);
-	        	super.executeCommand(new String[]{StringUtils.join(commandMerge, " ")},exec,
+	        	super.executeCommand(new String[]{StringUtils.join(commandMerge, " ")}, outfileMerged, exec,
 	        			null, lockFile, null, null , null, sysErr, null);
 
 	        	

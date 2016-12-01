@@ -67,7 +67,7 @@ public class SnpEffNodeDialog extends HTExecutorNodeDialog {
     	final SettingsModelBoolean no_upstream = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_UPSTREAM, false);
     	final SettingsModelBoolean no_utr = new SettingsModelBoolean(SnpEffNodeModel.CFGKEY_NO_UTR, false);
 
-    	this.addPrefPageSetting(snpeff_binary, IBISKNIMENodesPlugin.SNPEFF);
+    	addPrefPageSetting(snpeff_binary, IBISKNIMENodesPlugin.SNPEFF);
     	
     	createNewGroup("Database");
     	addDialogComponent(new DialogComponentString(database, "Name"));

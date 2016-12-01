@@ -118,7 +118,7 @@ public class CompatibilityChecker {
 	
 	public static boolean inputFileNotOk(String path, boolean checkEmpty, DataType type) {
 		
-		if(path.equals("") || path == null) return true;
+		if( path == null || path.equals("")) return true;
 		
 		if(checkEmpty && Files.exists(Paths.get(path))) {
 			boolean isEmpty = false;
@@ -143,7 +143,6 @@ public class CompatibilityChecker {
 				return !FileValidator.checkFastqFormat(path);
 			}
 		}
-		
 		return false;
 	}
 	

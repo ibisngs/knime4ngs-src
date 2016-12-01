@@ -126,7 +126,7 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
     	
     	File lockFile = new File(REORDERED + SuccessfulRunChecker.LOCK_ENDING);
     	
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,new String[]{"PERL5LIB=PERL5LIB:"+VCFTOOLS},lockFile,REORDERED,REORDERED+".stdErr",null,null,null);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")},  REORDERED, exec,new String[]{"PERL5LIB=PERL5LIB:"+VCFTOOLS},lockFile,REORDERED,REORDERED+".stdErr",null,null,null);
     	
 
     	/**
@@ -161,7 +161,7 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
     	
     	File lockFile = new File(GZFILE + SuccessfulRunChecker.LOCK_ENDING);
     	
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,lockFile,GZFILE);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, GZFILE, exec,lockFile,GZFILE);
     	
     	return GZFILE;
     }
@@ -176,7 +176,7 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	command.add("/home/software/bin/tabix -p vcf "+INFILE);
     	File lockFile = new File(INFILE+".tbi" + SuccessfulRunChecker.LOCK_ENDING);
-    	super.executeCommand(new String[]{StringUtils.join(command, " ")},exec,lockFile);
+    	super.executeCommand(new String[]{StringUtils.join(command, " ")}, INFILE+".tbi", exec,lockFile);
     }
     
     
