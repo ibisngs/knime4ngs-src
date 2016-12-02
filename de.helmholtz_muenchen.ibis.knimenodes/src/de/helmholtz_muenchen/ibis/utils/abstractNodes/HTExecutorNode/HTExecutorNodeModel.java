@@ -90,10 +90,10 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	private final String HEADER = "IBIS KNIME Nodes Notification";
 	
 	static final String CFGKEY_OVERWRITE = "overwrite";
-	private final SettingsModelBoolean m_overwrite = new SettingsModelBoolean(CFGKEY_OVERWRITE, true); 
+	protected final SettingsModelBoolean m_overwrite = new SettingsModelBoolean(CFGKEY_OVERWRITE, true); 
 	
 	static final String CFGKEY_USE_PREF = "use_pref";
-	private final SettingsModelBoolean m_use_pref = new SettingsModelBoolean(CFGKEY_USE_PREF, true);
+	protected final SettingsModelBoolean m_use_pref = new SettingsModelBoolean(CFGKEY_USE_PREF, true);
 	
 	static final String CFGKEY_DEFAULT_THRESHOLD = "threshold";
 	static final int DEFAULT_THRESHOLD = 1;

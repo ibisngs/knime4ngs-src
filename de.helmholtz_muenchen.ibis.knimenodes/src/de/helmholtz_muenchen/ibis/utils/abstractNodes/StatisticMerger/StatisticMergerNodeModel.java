@@ -23,6 +23,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -41,14 +43,16 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
 /**
  * Default implementation of a "Statistic Merger Node"
  * @author Michael Kluge
  *
  */
-public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel {
+public abstract class StatisticMergerNodeModel extends HTExecutorNodeModel {
 	
 	// Available module names
 	private static final String MODULE_ALL = "Merge ALL Modules";
@@ -119,7 +123,21 @@ public abstract class StatisticMergerNodeModel extends SettingsStorageNodeModel 
 			    	String moduleFileName = moduleName.replace(" ", "_") + FILE_ENDING;
 			    	boolean writeHeader = true;
 			    	String outfile = new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + moduleFileName).getAbsolutePath();
-			    	new File(outfile).delete();
+			    	
+			    	boolean do_overwrite;
+					if(m_use_pref.getBooleanValue()) {
+						do_overwrite = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE);
+					} else {
+						do_overwrite = m_overwrite.getBooleanValue();
+					}
+					
+					//abort execution if node shall not overwrite existing outfiles
+					if(!do_overwrite && Files.exists(Paths.get(outfile))) {
+						throw new UnsuccessfulExecutionException("Execution aborted as outfile "+outfile+" exists yet! Rename/move/delete existing outfile or allow overwriting of existing outfiles.");
+					} else {
+						new File(outfile).delete();
+					}
+			    	
 			    	BufferedWriter outfileBW = new BufferedWriter(new FileWriter(outfile));
 			    	
 			    	// run though all files

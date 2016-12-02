@@ -24,6 +24,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -42,8 +44,10 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
+import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
 /**
  * This is the model implementation of FeatureCountsMerger.
@@ -51,7 +55,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
  *
  * @author Michael Kluge
  */
-public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
+public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     
 	public static final String ID = "ID";
 	public static final String TAB = "\t";
@@ -86,7 +90,26 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
      * {@inheritDoc}
      */
     @Override
+    //overrides HTE execution method as no external tool is used
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+    	String outfile = this.SET_OUTPUT_FILE.getStringValue();
+    	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
+    		String in = inData[0].iterator().next().getCell(0).toString();
+    		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
+    	}
+    	
+		boolean do_overwrite;
+		if(m_use_pref.getBooleanValue()) {
+			do_overwrite = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE);
+		} else {
+			do_overwrite = m_overwrite.getBooleanValue();
+		}
+		
+		//abort execution if node shall not overwrite existing outfiles
+		if(!do_overwrite && Files.exists(Paths.get(outfile))) {
+			throw new UnsuccessfulExecutionException("Execution aborted as outfile "+outfile+" exists yet! Rename/move/delete existing outfile or allow overwriting of existing outfiles.");
+		}
+    	
     	// get featureCount files
     	ArrayList<String> dataFiles = new ArrayList<String>();
     	for(CloseableRowIterator it = inData[0].iterator(); it.hasNext(); ) {
@@ -159,13 +182,6 @@ public class FeatureCountsMergerNodeModel extends SettingsStorageNodeModel {
     	// prepare output file and BufferedDataTable
     	DataTableSpec table = getDataOutSpec(sampleNames);
         BufferedDataContainer cont = exec.createDataContainer(table);
-        	
-    	String outfile = this.SET_OUTPUT_FILE.getStringValue();
-    	
-    	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
-    		String in = inData[0].iterator().next().getCell(0).toString();
-    		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
-    	}
     	
 //    	System.out.println(outfile);
     	
