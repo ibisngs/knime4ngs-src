@@ -134,8 +134,8 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 		
     	DataCell[] c = new DataCell[]{
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true)),
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true) + File.separator + GFF_FILE_NAME)};
+    			new StringCell(SET_OUTPUT_FILE.getStringValue()),
+    			new StringCell(SET_OUTPUT_FILE.getStringValue() + File.separator + GFF_FILE_NAME)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
     	cont.close();
@@ -145,12 +145,12 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true) + "MatsResultIndexer.out");
+		return new File(SET_OUTPUT_FILE.getStringValue() + "MatsResultIndexer.out");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true) + "MatsResultIndexer.err");
+		return new File(SET_OUTPUT_FILE.getStringValue() + "MatsResultIndexer.err");
 	}
 
 	@Override
@@ -165,7 +165,7 @@ public class MatsResultIndexerNodeModel extends BinaryWrapperNodeModel {
 
 	@Override
 	protected String getOutfile() {
-		return getAbsoluteFilename(SET_OUTPUT_FILE.getStringValue(), true);
+		return SET_OUTPUT_FILE.getStringValue();
 	}
 }
 

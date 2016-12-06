@@ -71,7 +71,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     // initial default values for SettingsModels    
     protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
     protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    protected static final String DEFAULT_OUTPUT_FOLDER 	= "";			// creates a folder "output" relative to the STAR binary
+    protected static final String DEFAULT_OUTPUT_FOLDER 	= "";				// contains genome for genomeGenerate or SAM/BAM files for alignReads
     protected static final String DEFAULT_GENOME_FOLDER 	= "";		// searches for the genome index in "GenomeDir" relative to the STAR binary
 
     // name of parameters which are defined in the STAR binary
@@ -95,6 +95,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     @SuppressWarnings("unused")
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
 	private static String readType = "";
+	private String genome_folder, out_folder;
        
     /**
      * Constructor for the node model.
@@ -120,14 +121,16 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 			throw new InvalidSettingsException("Set path to featureCounts binary!");
 		}
     	
-    	CompatibilityChecker CC = new CompatibilityChecker();
+    	genome_folder = IO.processFilePath(SET_GENOME_FOLDER.getStringValue());
+    	out_folder = IO.processFilePath(SET_OUTPUT_FOLDER.getStringValue());
     	
+    	CompatibilityChecker CC = new CompatibilityChecker();
     	if(isAlignRunMode()){
     		readType = CC.getReadType(inSpecs, 0);
         	if(CC.getWarningStatus()){
         		setWarningMessage(CC.getWarningMessages());
         	}
-        	validateGenomeIndex(SET_GENOME_FOLDER.getStringValue());
+        	validateGenomeIndex(genome_folder);
     	} else {
     		if(!CompatibilityChecker.checkInputCellType(inSpecs[0], "FastACell")) {
     			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects a FastA file as input.");
@@ -158,17 +161,17 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	    	String path2readFile2 = "";
 	    	
 	    	// add first input file
-	    	inputArgument.add(getAbsoluteFilename(path2readFile1, false));
+	    	inputArgument.add(path2readFile1);
 
 	    	if(readType.equals("paired-end")) {
 	    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
 		    	// add second input file, if paired mode was selected and both files are different
 		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
-		    		inputArgument.add(getAbsoluteFilename(path2readFile2, false));
+		    		inputArgument.add(path2readFile2);
 	    	}
 	    	
 	    	// add genome folder to parameters
-	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, SET_GENOME_FOLDER.getStringValue());   	    	
+	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, genome_folder);   	    	
     	}
     	// get input parameter from FastaSelector (which are already absolute)
     	else {
@@ -189,37 +192,30 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	// check, which kind of output parameter must be set.
     	String infile = inData[0].iterator().next().getCell(0).toString();
     	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
-		String outputFolderArgument = SET_OUTPUT_FOLDER.getStringValue();
-		if(CompatibilityChecker.inputFileNotOk(outputFolderArgument, false)) {
-			outputFolderArgument = new File(infile).getParent();
+		if(CompatibilityChecker.inputFileNotOk(out_folder, false)) {
+			out_folder = new File(infile).getParent();
 			if(!isAlignRunMode()) {
-				outputFolderArgument += File.separator + "STAR_genome";
+				out_folder += File.separator + "STAR_genome";
 			}
 		}
 		
-		if(!outputFolderArgument.endsWith(File.separator)) {
-			outputFolderArgument += File.separator;
+		if(!out_folder.endsWith(File.separator)) {
+			out_folder += File.separator;
 		}
 		
-    	File outDir = new File(outputFolderArgument);
+    	File outDir = new File(out_folder);
     	// create folder, if not already there
     	if(!outDir.isDirectory())
     		outDir.mkdirs();
     	
+    	OUTFILE = out_folder;
     	if(isAlignRunMode()){
     		String outfile = IO.replaceFileExtension(infile,".");
     		outfile = IO.getFileName(outfile);
-    		outputFolderArgument+=outfile;	
-    		
-        	pars.put(outputFolderParameter, outputFolderArgument);
-        	OUTFILE = outputFolderArgument+"Aligned.out.sam";
-    	}else{
-    		pars.put(NAME_OF_OUTPUT_PREFIX_PARAM, outputFolderArgument);
-        	pars.put(outputFolderParameter, outputFolderArgument);
-        	OUTFILE = outputFolderArgument;
+    		out_folder+=outfile;	
+        	OUTFILE = out_folder+"Aligned.out.sam";
     	}
-	
-    	// return the GUI parameter
+    	pars.put(outputFolderParameter, out_folder);
 		return pars;
 	}
 	
@@ -285,10 +281,6 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      * @throws InvalidSettingsException
      */
     protected boolean validateGenomeIndex(String genomePath) throws InvalidSettingsException {
-    	// check for relative path if binary file is valid
-    	if(isBinaryValid(getBinaryPath()))
-    		genomePath = getAbsoluteFilename(genomePath, true);
-    	
     	// check if genomePath exists
     	File f = new File(genomePath);
     	if(!(f.isDirectory() && f.exists()))

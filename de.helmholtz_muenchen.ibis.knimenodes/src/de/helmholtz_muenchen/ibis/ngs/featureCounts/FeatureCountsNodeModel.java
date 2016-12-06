@@ -118,7 +118,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected final static int MIN_THREADS = 1;
     protected final static int MAX_THREADS = 16;
     
-    private String outfile;
+    private String outfile, annotation_file;
     private int bam_sam_index = -1;
     
     // the logger instance
@@ -165,12 +165,10 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     		throw new InvalidSettingsException("Invalid input. No BAMCell/SAMCell in first column of input table!");
     	}
     	
-//    	String outfolder_warning = CheckUtils.checkDestinationDirectory(SET_OUTPUT_FOLDER.getStringValue());
-//		if(outfolder_warning!=null) {
-//			setWarningMessage(outfolder_warning);
-//		}
-    	
-        validateAnnotationFile(SET_ANNOTATION_FILE.getStringValue());
+    	annotation_file = IO.processFilePath(SET_ANNOTATION_FILE.getStringValue());
+    	if(CompatibilityChecker.inputFileNotOk(annotation_file, true) || !annotation_file.endsWith(".saf") || !annotation_file.endsWith(".gtf")) {
+    		throw new InvalidSettingsException("Path to annotation file invalid!");
+    	}
 
 		return new DataTableSpec[]{getDataOutSpec1()};
     }
@@ -267,31 +265,6 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 		
         return new BufferedDataTable[]{cont.getTable()};
 	}
-        
-    
-    /**
-     * Checks, if the file is a annotation file in the GTF / SAF file
-     * @param path2AnnotationFile
-     * @return
-     * @throws InvalidSettingsException
-     */
-    protected boolean validateAnnotationFile(String path2AnnotationFile) throws InvalidSettingsException {
-    	// check for relative path if binary file is valid
-    	if(isBinaryValid(getBinaryPath()))
-    		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, false);
-    	
-    	// check if path2AnnotationFile exists
-    	File f = new File(path2AnnotationFile);
-    	if(!(f.isFile() && f.exists()))
-    		throw new InvalidSettingsException("Annotation file '" + path2AnnotationFile + "' does not exist.");
-    	
-//    	SET_ANNOTATION_TYPE.setStringValue(DEFAULT_ANNOTATION_TYPE);
-//    	if(path2AnnotationFile.endsWith(".saf")) {
-//    		SET_ANNOTATION_TYPE.setStringValue(ALTERNATIVE_ANNOTATION_TYPE);
-//    	}
-
-    	return true;
-    }
     
 	@Override
 	protected File getPathToStderrFile() {

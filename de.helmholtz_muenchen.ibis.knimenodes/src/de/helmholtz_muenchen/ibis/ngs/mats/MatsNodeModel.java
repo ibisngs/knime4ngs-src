@@ -152,7 +152,7 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
 		
 		
 		/********************* OUTPUT ****************************/
-		String outputFolderArgument = getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true);
+		String outputFolderArgument = SET_OUTPUT_FOLDER.getStringValue();
     	File outDir = new File(outputFolderArgument).getParentFile();
     	// create folder, if not already there
     	if(!outDir.isDirectory())
@@ -247,7 +247,7 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 		
     	DataCell[] c = new DataCell[]{
-    			new StringCell(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true)),
+    			new StringCell(SET_OUTPUT_FOLDER.getStringValue()),
     			new StringCell(command)};
     	
     	cont.addRowToTable(new DefaultRow("Row0",c));
@@ -264,10 +264,6 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
      * @throws InvalidSettingsException
      */
     protected boolean validateAnnotationFile(String path2AnnotationFile) throws InvalidSettingsException {
-    	// check for relative path if binary file is valid
-    	if(isBinaryValid(getBinaryPath()))
-    		path2AnnotationFile = getAbsoluteFilename(path2AnnotationFile, false);
-    	
     	// check if path2AnnotationFile exists
     	File f = new File(path2AnnotationFile);
     	if(!(f.isFile() && f.exists()))
@@ -280,17 +276,17 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
     
 	@Override
 	protected File getPathToStderrFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "log.out");
+		return new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + "log.out");
 	}
 
 	@Override
 	protected File getPathToStdoutFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "log.err");
+		return new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + "log.err");
 	}
 		
 	@Override
 	protected File getPathToLockFile() {
-		return new File(getAbsoluteFilename(SET_OUTPUT_FOLDER.getStringValue(), true) + File.separator + "LOCK" + SuccessfulRunChecker.LOCK_ENDING);
+		return new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + "LOCK" + SuccessfulRunChecker.LOCK_ENDING);
 	}
 
 	@Override

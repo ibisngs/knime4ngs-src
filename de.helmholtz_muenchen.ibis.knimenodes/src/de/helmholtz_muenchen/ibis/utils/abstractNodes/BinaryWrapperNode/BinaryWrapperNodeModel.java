@@ -114,9 +114,10 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	/**
 	 * Returns the binary path which is currently was saved correctly
 	 * @return
+	 * @throws InvalidSettingsException 
 	 */
-	protected String getBinaryPath() {
-		return SET_BINARY_PATH.getStringValue();
+	protected String getBinaryPath() throws InvalidSettingsException {
+		return IO.processFilePath(SET_BINARY_PATH.getStringValue());
 	}
 	
 	/**
@@ -287,22 +288,22 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
      * @param isPath true, if its a path and not a filename
      * @return
      */
-    protected String getAbsoluteFilename(String filenPath, boolean isPath) {
-    	File binaryPath = new File(getBinaryPath());
-     	
-    	// relative path to the binary folder
-    	if(filenPath.startsWith("."))
-    		filenPath = binaryPath.getParentFile().getAbsolutePath() + File.separator + filenPath;
-    	
-    	// check, if path ends with seperator
-    	if(isPath && !filenPath.endsWith(File.separator))
-    		filenPath += File.separator;
-    	
-    	// remove useless "/./"
-    	filenPath = filenPath.replaceAll(File.separator + "\\." + File.separator, File.separator);
-
-    	return filenPath;
-    }
+//    protected String getAbsoluteFilename(String filenPath, boolean isPath) {
+//    	File binaryPath = new File(getBinaryPath());
+//     	
+//    	// relative path to the binary folder
+//    	if(filenPath.startsWith("."))
+//    		filenPath = binaryPath.getParentFile().getAbsolutePath() + File.separator + filenPath;
+//    	
+//    	// check, if path ends with seperator
+//    	if(isPath && !filenPath.endsWith(File.separator))
+//    		filenPath += File.separator;
+//    	
+//    	// remove useless "/./"
+//    	filenPath = filenPath.replaceAll(File.separator + "\\." + File.separator, File.separator);
+//
+//    	return filenPath;
+//    }
 	
 	private void runHTExecute(String[] command, ExecutionContext exec, File lockFile) throws Exception{
 	
