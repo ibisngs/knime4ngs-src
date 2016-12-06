@@ -33,6 +33,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelColumnName;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.utils.IO;
+import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.ScriptNode.ScriptNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
@@ -155,7 +156,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 //		exec.setProgress("executing script");
 		LOGGER.info("Running Rscript with arguments: " + getArgumentsAsVector());
 		try{
-			super.executeScript(exec, null);
+			File tmpFile = File.createTempFile("knime_R_connector_" + this.SCRIPT.replaceAll(File.separatorChar+"", "_"), SuccessfulRunChecker.LOCK_ENDING);
+			super.executeScript(exec, null, tmpFile);
 		} catch(UnsuccessfulExecutionException e){
 			throw new UnsuccessfulExecutionException("R command failed\nSTDOUT:"+IO.tail(this.getHTEOUT(), 5)+"\nSTDERR:"+IO.tail(this.getHTEERR(), 5));	
 		}

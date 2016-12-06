@@ -49,8 +49,8 @@ public abstract class ScriptNodeModel extends HTExecutorNodeModel {
 		return(IO.getScriptPath() + SCRIPTS_SUBFOLDER + File.separatorChar);
 	}
 	
-	protected void executeScript(final ExecutionContext exec, String[] environment) throws Exception {
-		executeCommand(this.getCommand(), this.getOutfile(), exec, environment, null, null, null, null, null, null);
+	protected void executeScript(final ExecutionContext exec, String[] environment, File lockFile) throws Exception {
+		executeCommand(this.getCommand(), this.getOutfile(), exec, environment, lockFile, null, null, null, null, null);
 	}
 	
 	protected abstract String[] getCommand();

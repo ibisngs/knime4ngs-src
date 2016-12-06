@@ -23,9 +23,13 @@ package de.helmholtz_muenchen.ibis.ngs.star;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -47,45 +51,56 @@ public class StarNodeDialog extends HTExecutorNodeDialog {
     protected StarNodeDialog() {}
     
     public void addToolDialogComponents() {
-    	// definition of SettingsModel (all prefixed with SET)
-        final SettingsModelString SET_RUN_MODE					= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
-        final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, StarNodeModel.DEFAULT_OUTPUT_FOLDER);
-        final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, StarNodeModel.DEFAULT_GENOME_FOLDER);
-        final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(StarNodeModel.CFGKEY_OPTIONAL_PARA, "",false);
-        final SettingsModelString SET_BINARY_PATH				= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+        final SettingsModelString run_mode				= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);
+        final SettingsModelBoolean twopass_mode			= new SettingsModelBoolean(StarNodeModel.CFGKEY_TWOPASS, true);
+        final SettingsModelString out_folder			= new SettingsModelString(StarNodeModel.CFGKEY_OUTPUT_FOLDER, "");
+        final SettingsModelString genome_folder			= new SettingsModelString(StarNodeModel.CFGKEY_GENOME_FOLDER, "");
+        final SettingsModelString gtf_file				= new SettingsModelString(StarNodeModel.CFGKEY_GTF_FILE, "");
+        final SettingsModelIntegerBounded overhang		= new SettingsModelIntegerBounded(StarNodeModel.CFGKEY_OVERHANG, 100, 1, Integer.MAX_VALUE);
+        final SettingsModelIntegerBounded threads 		= new SettingsModelIntegerBounded(StarNodeModel.CFGKEY_THREADS, 4, 1, Integer.MAX_VALUE);
+        final SettingsModelOptionalString opt_parameter	= new SettingsModelOptionalString(StarNodeModel.CFGKEY_OPTIONAL_PARA, "",false);
+        final SettingsModelString bin_path				= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
         
-        addPrefPageSetting(SET_BINARY_PATH,getNameOfBinary());
+        addPrefPageSetting(bin_path,getNameOfBinary());
         
-        // create open file/folder components
-        DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(SET_OUTPUT_FOLDER, "his_id_OUTPUT_FOLDER", 0, true);
-       	DialogComponentFileChooser dcGenomeFolder 	= new DialogComponentFileChooser(SET_GENOME_FOLDER, "his_id_GENOME_FOLDER", 0, true);
+        DialogComponentFileChooser dcOutputFolder 	= new DialogComponentFileChooser(out_folder, "his_id_OUTPUT_FOLDER", 0, true);
+        dcOutputFolder.setBorderTitle("Path to output folder");
+        
+        DialogComponentFileChooser dcGenomeFolder 	= new DialogComponentFileChooser(genome_folder, "his_id_GENOME_FOLDER", 0, true);
+    	dcGenomeFolder.setBorderTitle("Path to genome index");
+        
+    	DialogComponentFileChooser dcGTFfile 		= new DialogComponentFileChooser(gtf_file, "his_id_gtf_file", 0 , false, ".gtf");
+    	dcGTFfile.setBorderTitle("Path to GTF file");
+    			
+       	DialogComponentStringSelection dcRunMode 	= new DialogComponentStringSelection(run_mode, "runMode:", StarNodeModel.DEFAULT_RUN_MODE, StarNodeModel.ALTERNATIVE_RUN_MODE);
 
-       	// create string selection component
-       	DialogComponentStringSelection dcRunMode 	= new DialogComponentStringSelection(SET_RUN_MODE, "runMode:", StarNodeModel.DEFAULT_RUN_MODE, StarNodeModel.ALTERNATIVE_RUN_MODE);
-       	
-       	// set a new title to them
-       	dcOutputFolder.setBorderTitle("Path to output folder");
-       	dcGenomeFolder.setBorderTitle("Path to genome indexes");
-     
        	// add groups and components
        	createNewGroup("STAR Options");
         addDialogComponent(dcRunMode);
-        addDialogComponent(new DialogComponentOptionalString(SET_OPTIONAL_PARA,"Optional parameters"));
+        addDialogComponent(new DialogComponentBoolean(twopass_mode, "Use 2pass mapping?"));
+        addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 1));
+        addDialogComponent(new DialogComponentOptionalString(opt_parameter,"Optional parameters"));
         
         createNewGroup("Input");
         addDialogComponent(dcGenomeFolder);
-        
+        addDialogComponent(dcGTFfile);
+        addDialogComponent(new DialogComponentNumber(overhang, "Overhang", 5));
+
         createNewGroup("Output");
         addDialogComponent(dcOutputFolder);
         
+        
         // add change listener to runMode
-        SET_RUN_MODE.addChangeListener(new ChangeListener() {
+        run_mode.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent arg0) {
-				if(StarNodeModel.DEFAULT_RUN_MODE.equals(SET_RUN_MODE.getStringValue()))
-					SET_GENOME_FOLDER.setEnabled(true);
-				else
-					SET_GENOME_FOLDER.setEnabled(false);
+				if(StarNodeModel.DEFAULT_RUN_MODE.equals(run_mode.getStringValue())) {
+					genome_folder.setEnabled(true);
+					twopass_mode.setEnabled(true);
+				} else {
+					genome_folder.setEnabled(false);
+					twopass_mode.setEnabled(false);
+				}
 			}
         });
     }

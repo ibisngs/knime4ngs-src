@@ -166,7 +166,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	}
     	
     	annotation_file = IO.processFilePath(SET_ANNOTATION_FILE.getStringValue());
-    	if(CompatibilityChecker.inputFileNotOk(annotation_file, true) || !annotation_file.endsWith(".saf") || !annotation_file.endsWith(".gtf")) {
+    	if(CompatibilityChecker.inputFileNotOk(annotation_file, true) || (!annotation_file.endsWith(".saf") && !annotation_file.endsWith(".gtf"))) {
     		throw new InvalidSettingsException("Path to annotation file invalid!");
     	}
 

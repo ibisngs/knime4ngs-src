@@ -21,7 +21,6 @@ package de.helmholtz_muenchen.ibis.ngs.star;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 
 import org.apache.commons.io.FileUtils;
@@ -36,7 +35,8 @@ import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeLogger;
+import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -59,53 +59,43 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell;
  */
 public class StarNodeModel extends BinaryWrapperNodeModel {
      
-	// name of the output variables
+    public static final String CFGKEY_RUN_MODE 			= "RunMode";
+    public static final String CFGKEY_TWOPASS			= "two_pass_mode";
+    public static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
+    public static final String CFGKEY_GENOME_FOLDER 	= "GenomeFolder";
+    public static final String CFGKEY_GTF_FILE			= "gtf_file";
+    public static final String CFGKEY_OVERHANG			= "overhang";
+    public static final String CFGKEY_THREADS			= "threads";
+    public static final String CFGKEY_OPTIONAL_PARA 	= "opt_parameter";
+   
+    public static final String DEFAULT_RUN_MODE 		= "alignReads";
+    public static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";
+
+    private final SettingsModelString m_runMode					= new SettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
+    private final SettingsModelBoolean m_two_pass				= new SettingsModelBoolean(CFGKEY_TWOPASS, true);
+    private final SettingsModelString m_outfolder				= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, "");
+    private final SettingsModelString m_genome_folder			= new SettingsModelString(CFGKEY_GENOME_FOLDER, "");
+    private final SettingsModelString m_gtf_file				= new SettingsModelString(CFGKEY_GTF_FILE, "");
+    private final SettingsModelIntegerBounded m_overhang		= new SettingsModelIntegerBounded(CFGKEY_OVERHANG, 100, 1, Integer.MAX_VALUE);
+    private final SettingsModelIntegerBounded m_threads			= new SettingsModelIntegerBounded(CFGKEY_THREADS, 4, 1, Integer.MAX_VALUE);
+    private final SettingsModelOptionalString m_opt_parameter	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_PARA, "",false);
+    
+	private String readType, genome_folder, out_folder, gtf_file, OUTFILE;
+	
 	public static final String OUT_COL = "Output";
-	
-    // keys for SettingsModels
-    protected static final String CFGKEY_RUN_MODE 		= "RunMode";
-    protected static final String CFGKEY_OUTPUT_FOLDER 	= "OutputFolder";
-    protected static final String CFGKEY_GENOME_FOLDER 	= "GenomeFolder";
-    protected static final String CFGKEY_OPTIONAL_PARA 	= "OPTIONAL_PARA";
-
-    // initial default values for SettingsModels    
-    protected static final String DEFAULT_RUN_MODE 		= "alignReads";			// align read mode is default
-    protected static final String ALTERNATIVE_RUN_MODE 	= "genomeGenerate";		// alternative run mode
-    protected static final String DEFAULT_OUTPUT_FOLDER 	= "";				// contains genome for genomeGenerate or SAM/BAM files for alignReads
-    protected static final String DEFAULT_GENOME_FOLDER 	= "";		// searches for the genome index in "GenomeDir" relative to the STAR binary
-
-    // name of parameters which are defined in the STAR binary
-    private final static String NAME_OF_OUTPUT_PREFIX_PARAM 	= "--outFileNamePrefix";	// parameter in STAR which allows the user to set the output folder (relative or absolute)
-    private final static String NAME_OF_OUTPUT_GENOMEDIR_PARAM 	= "--genomeDir";			// output parameter in case of generateGenome run or input in other case
-    private final static String NAME_OF_RUN_MODE_PARAM 			= "--runMode";				// parameter in STAR which sets the runMode
-    private final static String NAME_OF_FASTAQ_PARAM 			= "--readFilesIn";			// string(s): paths to files that contain input read1 (and, if needed,  read2)
-    private final static String NAME_OF_FASTA_FILES_PARAM		= "--genomeFastaFiles";		// fasta files with genomic sequence for genome files generation
-    
-    private final static String NAME_OF_GENOME_PARAMETER_FILE	= "genomeParameters.txt"; 	// name of settings file from a indexed genome 
-	
-    // definition of SettingsModel (all prefixed with SET)
-    private final SettingsModelString SET_RUN_MODE					= new SettingsModelString(CFGKEY_RUN_MODE, DEFAULT_RUN_MODE);
-    private final SettingsModelString SET_OUTPUT_FOLDER				= new SettingsModelString(CFGKEY_OUTPUT_FOLDER, DEFAULT_OUTPUT_FOLDER);
-    private final SettingsModelString SET_GENOME_FOLDER				= new SettingsModelString(CFGKEY_GENOME_FOLDER, DEFAULT_GENOME_FOLDER);
-    private final SettingsModelOptionalString SET_OPTIONAL_PARA		= new SettingsModelOptionalString(CFGKEY_OPTIONAL_PARA, "",false);
-    private String OUTFILE 											= "";
-//    private String OUTFILE_TABLE									= "";
-    
-    // the logger instance
-    @SuppressWarnings("unused")
-	private static final NodeLogger LOGGER = NodeLogger.getLogger(StarNodeModel.class);
-	private static String readType = "";
-	private String genome_folder, out_folder;
        
     /**
      * Constructor for the node model.
      */
     protected StarNodeModel() {
         super(1, 1, true, true);
-        addSetting(SET_RUN_MODE);
-    	addSetting(SET_OUTPUT_FOLDER);
-    	addSetting(SET_GENOME_FOLDER);
-    	addSetting(SET_OPTIONAL_PARA);
+        addSetting(m_runMode);
+        addSetting(m_two_pass);
+    	addSetting(m_outfolder);
+    	addSetting(m_genome_folder);
+    	addSetting(m_threads);
+    	addSetting(m_gtf_file);
+    	addSetting(m_opt_parameter);
     	
     	addPrefPageSetting(SET_BINARY_PATH,IBISKNIMENodesPlugin.STAR);
     }
@@ -121,8 +111,9 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 			throw new InvalidSettingsException("Set path to featureCounts binary!");
 		}
     	
-    	genome_folder = IO.processFilePath(SET_GENOME_FOLDER.getStringValue());
-    	out_folder = IO.processFilePath(SET_OUTPUT_FOLDER.getStringValue());
+    	genome_folder = IO.processFilePath(m_genome_folder.getStringValue());
+    	out_folder = IO.processFilePath(m_outfolder.getStringValue());
+    	gtf_file = IO.processFilePath(m_gtf_file.getStringValue());
     	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	if(isAlignRunMode()){
@@ -134,64 +125,55 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	} else {
     		if(!CompatibilityChecker.checkInputCellType(inSpecs[0], "FastACell")) {
     			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects a FastA file as input.");
-
+    		}
+    		if(CompatibilityChecker.inputFileNotOk(gtf_file,true)) {
+    			setWarningMessage("Using a GTF file is strongly recommended for genomeGenerate!");
     		}
     	}
-    	
 		return new DataTableSpec[]{getDataOutSpec1()};
     }
-    
-    
 
 	@Override
 	protected LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData) {
-		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
-
-		/********************* RUN MODE ***************************/
-		pars.put(NAME_OF_RUN_MODE_PARAM, SET_RUN_MODE.getStringValue());
 		
-		   	
-    	/********************** INPUT ****************************/
-    	String inputParameter = (isAlignRunMode() ? NAME_OF_FASTAQ_PARAM : NAME_OF_FASTA_FILES_PARAM);
+		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
+		pars.put("--runMode", m_runMode.getStringValue());
+		  	
+		//input files
+    	String inputParameter = (isAlignRunMode() ? "--readFilesIn" : "--genomeFastaFiles");
     	ArrayList<String> inputArgument = new ArrayList<String>();
     	
-    	// get input parameter from run aligner
+    	boolean is_zipped = false;
+    	
     	if(isAlignRunMode()) {	
 	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
-	    	String path2readFile2 = "";
-	    	
-	    	// add first input file
+	    	is_zipped = path2readFile1.endsWith(".gz");
 	    	inputArgument.add(path2readFile1);
 
 	    	if(readType.equals("paired-end")) {
-	    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
-		    	// add second input file, if paired mode was selected and both files are different
-		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0)
+	    		String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0 && path2readFile2.endsWith(".gz") == is_zipped) {
 		    		inputArgument.add(path2readFile2);
+		    	}
 	    	}
 	    	
-	    	// add genome folder to parameters
-	    	pars.put(NAME_OF_OUTPUT_GENOMEDIR_PARAM, genome_folder);   	    	
+	    	if(is_zipped) {
+	    		pars.put("--readFilesCommand", "zcat");
+	    	}
+	    	pars.put("--genomeDir", genome_folder);
+	    	
+	    	if(m_two_pass.getBooleanValue()) {
+	    		pars.put("--twopassMode", "Basic");
+	    	}
+    	} else {
+    		for(DataRow dr : inData[0]) {
+    			inputArgument.add(dr.getCell(0).toString());
+    		}
     	}
-    	// get input parameter from FastaSelector (which are already absolute)
-    	else {
-    		for(Iterator<DataRow> it = inData[0].iterator(); it.hasNext(); )
-    			inputArgument.add(it.next().getCell(0).toString());
-    	}
-    	// add the input parameter
     	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
     	
-    	//add optional parameters
-    	if(SET_OPTIONAL_PARA.isActive()){
-    		pars.put(SET_OPTIONAL_PARA.getStringValue(), "");
-    	}
-    	
-    	
-    	
-		/********************* OUTPUT ****************************/
-    	// check, which kind of output parameter must be set.
+    	//output parameters
     	String infile = inData[0].iterator().next().getCell(0).toString();
-    	String outputFolderParameter = (isAlignRunMode() ? NAME_OF_OUTPUT_PREFIX_PARAM : NAME_OF_OUTPUT_GENOMEDIR_PARAM);
 		if(CompatibilityChecker.inputFileNotOk(out_folder, false)) {
 			out_folder = new File(infile).getParent();
 			if(!isAlignRunMode()) {
@@ -204,9 +186,9 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 		}
 		
     	File outDir = new File(out_folder);
-    	// create folder, if not already there
-    	if(!outDir.isDirectory())
+    	if(!outDir.isDirectory()) {
     		outDir.mkdirs();
+    	}
     	
     	OUTFILE = out_folder;
     	if(isAlignRunMode()){
@@ -215,7 +197,27 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     		out_folder+=outfile;	
         	OUTFILE = out_folder+"Aligned.out.sam";
     	}
-    	pars.put(outputFolderParameter, out_folder);
+    	
+    	if(!isAlignRunMode()) {
+    		pars.put("--genomeDir", out_folder);
+    	}
+    	
+    	//required for log files
+    	pars.put("--outFileNamePrefix", out_folder);
+    	
+    	//add further parameters
+    	
+    	pars.put("--runThreadN", m_threads.getIntValue()+"");
+    	
+    	if(!CompatibilityChecker.inputFileNotOk(gtf_file,true)) {
+    		pars.put("--sjdbGTFfile", gtf_file);
+    		pars.put("--sjdbOverhang", m_overhang.getIntValue()+"");
+    	}
+    	
+    	if(m_opt_parameter.isActive()){
+    		pars.put(m_opt_parameter.getStringValue(), "");
+    	}
+    	
 		return pars;
 	}
 	
@@ -270,7 +272,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      * @return
      */
     private boolean isAlignRunMode() {
-    	return DEFAULT_RUN_MODE.equals(SET_RUN_MODE.getStringValue());
+    	return DEFAULT_RUN_MODE.equals(m_runMode.getStringValue());
     }
     
     
@@ -287,7 +289,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     		throw new InvalidSettingsException("Genome path '" + genomePath + "' does not exist.");
     	
     	// check if parameter file is there
-    	f = new File(genomePath + File.separator + NAME_OF_GENOME_PARAMETER_FILE);
+    	f = new File(genomePath + File.separator + "genomeParameters.txt");
     	if(!(f.isFile() && f.canRead()))
     		throw new InvalidSettingsException("Folder was found but it seems that it does not contain a valid genome index.");    	
     	// all checks where ok

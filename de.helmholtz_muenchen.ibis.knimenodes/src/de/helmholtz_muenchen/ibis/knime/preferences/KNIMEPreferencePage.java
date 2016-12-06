@@ -410,9 +410,10 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		/* event handles */
 		browseSearchDir.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
+				String path = getDirPath(shell, "Select search directory");
+				if(path==null) return;
 				browseSearchDir.setEnabled(false);
 				cancelSearch.setEnabled(true);
-				String path = getDirPath(shell, "Select search directory");
 				IBISKNIMENodesPlugin.getDefault().startSearchThread(path, table, browseSearchDir, cancelSearch);
 			}
 		});

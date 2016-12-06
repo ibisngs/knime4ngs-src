@@ -20,12 +20,31 @@
         		<i>alignReads</i>: Aligns reads to a reference genome.<br />
         		<i>generateGenome</i>: Generates a genome index using one or more fastA files.
         	</option>
+        	<option name="Use 2pass mapping?">
+        		For the most sensitive novel junction discovery, it is recommended to run STAR in the 2-pass mode.
+        		It does not increase the number of detected novel junctions, but allows to detect more spliced reads mapping to novel junctions.
+        	</option>
+        	<option name="Number of threads">
+        		Number of threads to run STAR <i>genomeGenerate</i> or <i>alignReads</i>.
+        	</option>
         	<option name="Optional parameters">
         		Parameters can be set like you would normally use them on the command line for this binary.
         	</option>
         	<option name="Path to genome indexes">
         		Path to the genome directory where genome indeces were generated using the STAR <i>generateGenome</i> mode.
         		This option is only needed when applying the <i>alignReads</i> mode.
+        	</option>
+        	<option name="Path to GTF file">
+        		Path to the file with annotated transcripts in the standard GTF format.
+        		STAR will extract splice junctions from this file and use them to greatly improve accuracy of the mapping.
+        		While this is optional, and STAR can be run without annotations, using annotations is <b>highly recommended</b> whenever they are available.
+        	</option>
+        	<option name="Overhang">
+        		The overhang specifies the length of the genomic sequence around the annotated junction to be used in constructing the splice junctions database.
+        		Ideally, this length should be equal to the ReadLength-1, where ReadLength is the length of the reads.
+        		For instance, for Illumina 2x100b paired-end reads, the ideal value is 100-1=99.
+        		In case of reads of varying length, the ideal value is max(ReadLength)-1.
+        		<b>In most cases, the default value of 100 will work as well as the ideal value.</b>
         	</option>
         	<option name="Path to output folder">
         		Path where all the output data is stored.
