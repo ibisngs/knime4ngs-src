@@ -24,7 +24,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
 
 /**
  * <code>NodeFactory</code> for the "PlotDepthOfCoverage" Node.
@@ -57,7 +57,7 @@ public class PlotDepthOfCoverageNodeFactory
     @Override
     public NodeView<PlotDepthOfCoverageNodeModel> createNodeView(final int viewIndex,
             final PlotDepthOfCoverageNodeModel nodeModel) {
-        return new RNodeView<PlotDepthOfCoverageNodeModel>(nodeModel);
+        return new HTENodeView<PlotDepthOfCoverageNodeModel>(nodeModel);
     }
 
     /**

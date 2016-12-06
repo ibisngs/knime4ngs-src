@@ -22,7 +22,7 @@ package de.helmholtz_muenchen.ibis.ngs.filterLowExpressed;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
 
 /**
  * <code>NodeFactory</code> for the "FilterLowExpressed" Node.
@@ -53,8 +53,8 @@ public class FilterLowExpressedNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public RNodeView<FilterLowExpressedNodeModel> createNodeView(final int viewIndex, final FilterLowExpressedNodeModel nodeModel) {
-        return new RNodeView<FilterLowExpressedNodeModel>(nodeModel);
+    public HTENodeView<FilterLowExpressedNodeModel> createNodeView(final int viewIndex, final FilterLowExpressedNodeModel nodeModel) {
+        return new HTENodeView<FilterLowExpressedNodeModel>(nodeModel);
     }
     
     /**

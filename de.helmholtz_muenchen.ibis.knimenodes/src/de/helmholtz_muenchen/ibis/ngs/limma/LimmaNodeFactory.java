@@ -23,7 +23,7 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.RNode.RNodeView;
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
 
 /**
  * <code>NodeFactory</code> for the "Limma" Node.
@@ -56,7 +56,7 @@ public class LimmaNodeFactory
     @Override
     public NodeView<LimmaNodeModel> createNodeView(final int viewIndex,
             final LimmaNodeModel nodeModel) {
-        return new RNodeView<LimmaNodeModel>(nodeModel);
+        return new HTENodeView<LimmaNodeModel>(nodeModel);
     }
 
     /**
