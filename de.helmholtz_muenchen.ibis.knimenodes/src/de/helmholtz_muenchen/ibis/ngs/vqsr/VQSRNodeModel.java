@@ -330,12 +330,13 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	gatk_bin = m_GATK.getStringValue();
-    	ref_genome = m_REF_GENOME.getStringValue();
-    	hapmap = m_RESOURCES_FILE_HAPMAP.getStringValue();
-    	omni = m_RESOURCES_FILE_OMNI.getStringValue();
-    	dbsnp = m_RESOURCES_FILE_DBSNP.getStringValue();
-    	mills = m_RESOURCES_FILE_MILLS.getStringValue();
+    	gatk_bin = IO.processFilePath(m_GATK.getStringValue());
+    	ref_genome = IO.processFilePath(m_REF_GENOME.getStringValue());
+    	hapmap = IO.processFilePath(m_RESOURCES_FILE_HAPMAP.getStringValue());
+    	omni = IO.processFilePath(m_RESOURCES_FILE_OMNI.getStringValue());
+    	dbsnp = IO.processFilePath(m_RESOURCES_FILE_DBSNP.getStringValue());
+    	mills = IO.processFilePath(m_RESOURCES_FILE_MILLS.getStringValue());
+    	snps = IO.processFilePath(m_RESOURCES_FILE_1000G.getStringValue());
     	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {

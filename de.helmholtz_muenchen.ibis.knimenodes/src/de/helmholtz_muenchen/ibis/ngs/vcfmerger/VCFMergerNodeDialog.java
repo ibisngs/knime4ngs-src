@@ -97,7 +97,11 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
     private void addFiles(String dirname) {
     	// get files from folder
     	ArrayList<String> files = new ArrayList<String>();
-    	files = IO.getFilesOfFolder(dirname, getFilenameFilter());
+    	try {
+			files = IO.getFilesOfFolder(IO.processFilePath(dirname), getFilenameFilter());
+		} catch (InvalidSettingsException e1) {
+			e1.printStackTrace();
+		}
     	
     	// try to compile the REGEX
     	String regex = m_SET_NAME_REGEX.getStringValue();
@@ -129,7 +133,12 @@ public class VCFMergerNodeDialog extends GATKNodeDialog {
      * @param file
      */
 	private void addFile(String filename) {
-    	// check, if file is there
+    	try {
+			filename = IO.processFilePath(filename);
+		} catch (InvalidSettingsException e) {
+			e.printStackTrace();
+		}
+		// check, if file is there
     	File f = new File(filename);
     	if(!f.isFile() || !f.exists())
     		return;

@@ -357,7 +357,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	vcftools_bin = m_vcf_tools.getStringValue();
+    	vcftools_bin = IO.processFilePath(m_vcf_tools.getStringValue());
     	
     	boolean a = m_filter_by_DP.getBooleanValue();
     	boolean b = m_filter_by_GQ.getBooleanValue();

@@ -40,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
@@ -312,7 +313,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf("."));
     		outfile += ".catAll.bam";
     		if(m_useHeaderSAM.getBooleanValue()){
-    			command.add("-h " + m_headerSAM.getStringValue());
+    			command.add("-h " + IO.processFilePath(m_headerSAM.getStringValue()));
     		}
     		command.add("-o " + outfile);
     		
@@ -336,7 +337,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     		
     	} else if (utility.equals("reheader")) {
     		outfile = path2bamfile.substring(0,path2bamfile.lastIndexOf(".")) + "_" + utility + ".bam";
-    		command.add(m_rehInSAM.getStringValue());
+    		command.add(IO.processFilePath(m_rehInSAM.getStringValue()));
     		command.add(path2bamfile);
     		lockFile = outfile + SuccessfulRunChecker.LOCK_ENDING;
     		stdOut = true;
@@ -367,7 +368,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     			command.add("-u");
     		}
     		if(m_usemhfile.getBooleanValue()){
-    			command.add("-h "+m_mhfile.getStringValue());
+    			command.add("-h "+IO.processFilePath(m_mhfile.getStringValue()));
     		}
     		if(m_usemregion.getBooleanValue()){
     			command.add("-R "+m_mregion.getStringValue());
@@ -449,8 +450,8 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	samtools_bin = m_samtools.getStringValue();
-    	ref_genome = m_refseqfile.getStringValue();
+    	samtools_bin = IO.processFilePath(m_samtools.getStringValue());
+    	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
    	
 		if(CompatibilityChecker.inputFileNotOk(samtools_bin, false)) {
 			throw new InvalidSettingsException("Set path to samtools binary!");

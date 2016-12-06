@@ -41,6 +41,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
@@ -357,8 +358,8 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
 		super.updatePrefs();
-		picard_bin = m_picard.getStringValue();
-		ref_genome = m_refgenome.getStringValue();
+		picard_bin = IO.processFilePath(m_picard.getStringValue());
+		ref_genome = IO.processFilePath(m_refgenome.getStringValue());
 		
 		if (CompatibilityChecker.inputFileNotOk(picard_bin, false)) {
 			throw new InvalidSettingsException("Set path to picard.jar!");

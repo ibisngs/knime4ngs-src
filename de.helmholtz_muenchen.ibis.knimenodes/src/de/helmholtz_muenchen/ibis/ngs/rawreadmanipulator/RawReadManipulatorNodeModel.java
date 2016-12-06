@@ -200,7 +200,7 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	
     	
     	String outputFolder = m_outputfolder.getStringValue().isEmpty() ? "" : new File(m_outputfolder.getStringValue() + File.separator).getAbsolutePath();
-  	
+    	outputFolder = IO.processFilePath(outputFolder);
     	
     	/**Prepare Command**/
     	ArrayList<String> command = new ArrayList<String>();
@@ -230,10 +230,10 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	}
     	
 		if(m_useotherfilterfile.getBooleanValue()) {
-			command.add("--filtersettings="+m_otherfiltersettingsfile.getStringValue());
+			command.add("--filtersettings="+IO.processFilePath(m_otherfiltersettingsfile.getStringValue()));
     	}
     	if(m_ifbarcodefile.getBooleanValue()){
-    		command.add("--splitByAndTrimBarcodes="+m_barcodefile.getStringValue());
+    		command.add("--splitByAndTrimBarcodes="+IO.processFilePath(m_barcodefile.getStringValue()));
     	}
     	if(m_removeadapters.getBooleanValue()){
     		command.add("--removeAdapters="+m_adapters.getStringValue());

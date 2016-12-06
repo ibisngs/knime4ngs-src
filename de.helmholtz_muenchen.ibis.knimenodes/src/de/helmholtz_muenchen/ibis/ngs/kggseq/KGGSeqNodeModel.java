@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -243,17 +244,18 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     /**
      * Creates the execution command of the KGGSeq Node
      * @return
+     * @throws InvalidSettingsException 
      */
-    private String[] createCommand(String BasePath, String infile){
+    private String[] createCommand(String BasePath, String infile) throws InvalidSettingsException{
     	
     	ArrayList<String> command = new ArrayList<String>();
     	
     	command.add("java -jar");
     	command.add(kggseq_bin);
     	command.add("--buildver "+m_BUILDVER.getStringValue());
-    	command.add("--resource "+m_RESOURCE.getStringValue());
+    	command.add("--resource "+IO.processFilePath(m_RESOURCE.getStringValue()));
     	command.add("--vcf-file "+infile);
-    	command.add("--ped-file "+m_PEDFILE.getStringValue());
+    	command.add("--ped-file "+IO.processFilePath(m_PEDFILE.getStringValue()));
     	
     	if(m_COMPOSITESUBJECTID.getBooleanValue()){
     		command.add("--composite-subject-id");
@@ -296,8 +298,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	}
     	
     	if(m_CANDIDATE_GENES.isEnabled()){
-    		if(!m_CANDIDATE_GENES.getStringValue().equals("")){
-    			command.add("--candi-file "+m_CANDIDATE_GENES.getStringValue());
+    		if(!IO.processFilePath(m_CANDIDATE_GENES.getStringValue()).equals("")){
+    			command.add("--candi-file "+IO.processFilePath(m_CANDIDATE_GENES.getStringValue()));
     		}
     		
     	}
@@ -328,7 +330,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	super.updatePrefs();
-    	kggseq_bin = m_KGGSEQ.getStringValue();
+    	kggseq_bin = IO.processFilePath(m_KGGSEQ.getStringValue());
     	
 		if(CompatibilityChecker.inputFileNotOk(kggseq_bin, false)) {
 			throw new InvalidSettingsException("Set path to KGGSeq jar!");

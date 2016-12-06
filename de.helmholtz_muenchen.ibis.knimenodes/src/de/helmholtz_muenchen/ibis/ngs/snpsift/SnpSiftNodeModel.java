@@ -209,7 +209,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         			command.add(s.trim());
         		}
         	}
-        	command.add(m_annvcfdb.getStringValue());
+        	command.add(IO.processFilePath(m_annvcfdb.getStringValue()));
         	command.add(vcf_infile);
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_annotated.vcf");
         	break;
@@ -220,7 +220,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         	if(m_interx.getBooleanValue()){
         		command.add("-x");
         	}
-        	command.add(m_interbed.getStringValue());
+        	command.add(IO.processFilePath(m_interbed.getStringValue()));
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_intervals.vcf");
         	break;
         case DBNSFP:
@@ -239,7 +239,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         		}
         	}
         	command.add("-db");
-        	command.add(m_dbnsfp.getStringValue());
+        	command.add(IO.processFilePath(m_dbnsfp.getStringValue()));
         	command.add(vcf_infile);
         	stdOutFile = IO.replaceFileExtension(vcf_infile, ".snpSift_dbnfsp.vcf");
         	break;
@@ -249,7 +249,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
         		command.add(c.trim());
         	}
         	command.add(vcf_infile);
-        	stdOutFile = m_other_out.getStringValue();
+        	stdOutFile = IO.processFilePath(m_other_out.getStringValue());
         	break;
 		default:
 			break;
@@ -294,7 +294,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
 
     	super.updatePrefs();
-    	snpsift_bin = m_snpsift_bin.getStringValue();
+    	snpsift_bin = IO.processFilePath(m_snpsift_bin.getStringValue());
     	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {
@@ -311,22 +311,22 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     		outType = VCFCell.TYPE;
     		break;
     	case ANNOTATE:
-    		if(CompatibilityChecker.inputFileNotOk(m_annvcfdb.getStringValue())) {
+    		if(CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_annvcfdb.getStringValue()))) {
     			throw new InvalidSettingsException("Given annotation database invalid!");
     		}
     		outType = VCFCell.TYPE;
     		break;
     	case INTERVALS:
-    		if(CompatibilityChecker.inputFileNotOk(m_interbed.getStringValue())) {
+    		if(CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_interbed.getStringValue()))) {
     			throw new InvalidSettingsException("Interval file invalid!");
     		}
     		outType = VCFCell.TYPE;
     		break;
     	case DBNSFP:
-    		if(CompatibilityChecker.inputFileNotOk(m_dbnsfp.getStringValue())) {
+    		if(CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_dbnsfp.getStringValue()))) {
     			throw new InvalidSettingsException("dbNSFP file invalid!");
     		}
-    		if(CompatibilityChecker.inputFileNotOk(m_dbnsfp.getStringValue() + ".tbi")) {
+    		if(CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_dbnsfp.getStringValue() + ".tbi"))) {
     			throw new InvalidSettingsException("dbNSFP file invalid!");
     		}
     		outType = VCFCell.TYPE;
@@ -335,10 +335,10 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     		if(m_other_cmd.getStringValue().equals("") || m_other_out.getStringValue().equals("")) {
     			throw new InvalidSettingsException("Both, command and output file have to be defined!");
     		}
-    		if(Files.notExists(Paths.get(new File(m_other_out.getStringValue()).getParent()))) {
+    		if(Files.notExists(Paths.get(new File(IO.processFilePath(m_other_out.getStringValue())).getParent()))) {
     			throw new InvalidSettingsException("Directory for output file does not exist!");
     		}
-    		if(m_other_out.getStringValue().endsWith(".vcf")) {
+    		if(IO.processFilePath(m_other_out.getStringValue()).endsWith(".vcf")) {
     			outType = VCFCell.TYPE;
     		}
     		break;

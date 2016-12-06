@@ -46,6 +46,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
@@ -92,7 +93,7 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     @Override
     //overrides HTE execution method as no external tool is used
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
-    	String outfile = this.SET_OUTPUT_FILE.getStringValue();
+    	String outfile = IO.processFilePath(this.SET_OUTPUT_FILE.getStringValue());
     	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
     		String in = inData[0].iterator().next().getCell(0).toString();
     		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";

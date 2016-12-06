@@ -178,8 +178,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	gatk_jar = m_GATK.getStringValue();
-    	ref_genome = m_REF_GENOME.getStringValue();
+    	gatk_jar = IO.processFilePath(m_GATK.getStringValue());
+    	ref_genome = IO.processFilePath(m_REF_GENOME.getStringValue());
     	
     	if(!checkInputCellType(inSpecs)) {
     		throw new InvalidSettingsException("This node seems to be incompatible with the precedent node!");

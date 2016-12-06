@@ -178,7 +178,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 			outfile = IO.replaceFileExtension(infile,".VEPfiltered.vcf");
 		}
 		
-		String outfolder = m_outfolder.getStringValue();
+		String outfolder = IO.processFilePath(m_outfolder.getStringValue());
     	if(outfolder!=null && !outfolder.equals("")) {
     		outfile = outfolder + System.getProperty("file.separator") + new File(outfile).getName();
     	}
@@ -247,7 +247,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	vep_script = m_vepscript.getStringValue();
+    	vep_script = IO.processFilePath(m_vepscript.getStringValue());
     	
     	if(CompatibilityChecker.inputFileNotOk(vep_script, false)) {
     		throw new InvalidSettingsException("Invalid path to filter_vep.pl script!");

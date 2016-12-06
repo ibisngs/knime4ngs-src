@@ -138,7 +138,7 @@ public class VCFSorterNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	ref_genome = m_refseqfile.getStringValue();
+    	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
 
     	if(CompatibilityChecker.inputFileNotOk(ref_genome, true, FastACell.TYPE)) {
     		throw new InvalidSettingsException("Reference file invalid!");

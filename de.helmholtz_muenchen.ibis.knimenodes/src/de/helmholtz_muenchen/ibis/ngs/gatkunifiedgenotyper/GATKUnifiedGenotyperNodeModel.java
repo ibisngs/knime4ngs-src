@@ -261,8 +261,8 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
         }
         
         outfile = IO.replaceFileExtension(inputfiles.get(0), type + ".vcf");
-        if(!CompatibilityChecker.inputFileNotOk(m_outfolder.getStringValue())) {
-        	outfile = m_outfolder.getStringValue() + System.getProperty("file.separator")+ new File(inputfiles.get(0)).getName();
+        if(!CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_outfolder.getStringValue()))) {
+        	outfile = IO.processFilePath(m_outfolder.getStringValue()) + System.getProperty("file.separator")+ new File(inputfiles.get(0)).getName();
         	outfile = IO.replaceFileExtension(outfile, type + ".vcf");
         }
         
@@ -345,7 +345,7 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
 	@Override
 	protected void extraConfig() throws InvalidSettingsException {
 		super.updatePrefs();
-		dbsnp = m_dbsnp_file.getStringValue();
+		dbsnp = IO.processFilePath(m_dbsnp_file.getStringValue());
 		
         if(m_use_dbsnp.getBooleanValue()) { 
         	if(CompatibilityChecker.inputFileNotOk(dbsnp)){

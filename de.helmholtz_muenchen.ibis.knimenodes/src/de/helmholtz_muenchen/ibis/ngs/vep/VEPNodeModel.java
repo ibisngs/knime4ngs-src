@@ -40,6 +40,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -200,7 +201,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}
     	
     	String outfileBase = "";
-    	String outfolder = m_outfolder.getStringValue();
+    	String outfolder = IO.processFilePath(m_outfolder.getStringValue());
     	if(outfolder.equals("") || Files.notExists(Paths.get(outfolder))) {
     		outfileBase = vcf_infile;
     	} else {
@@ -255,7 +256,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}
     	
     	//cache usage
-    	String cache_dir = m_cache_dir.getStringValue();
+    	String cache_dir = IO.processFilePath(m_cache_dir.getStringValue());
     	if(m_use_cache.getBooleanValue()) {
     		if(cache_dir.equals("") || Files.notExists(Paths.get(cache_dir))) {
     			setWarningMessage("Cache directory was not specified!");
@@ -293,7 +294,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     	}    	
     	
     	//fasta file
-    	String fasta_file = m_fasta.getStringValue();
+    	String fasta_file = IO.processFilePath(m_fasta.getStringValue());
     	String [] flagsRequiringFastAFile = {"--hgvs", "--check_ref"};
     	boolean requireFastA = false;
     	for(String s: flagsRequiringFastAFile) {
@@ -313,7 +314,7 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 		}
     	
     	//plugin parameters
-    	String plugin_dir = m_plugin_dir.getStringValue();
+    	String plugin_dir = IO.processFilePath(m_plugin_dir.getStringValue());
     	if(plugin_dir.equals("")|| Files.notExists(Paths.get(plugin_dir))) {
     		setWarningMessage("Plugin directory was not specified!");
     	} else {
@@ -333,14 +334,14 @@ public class VEPNodeModel extends HTExecutorNodeModel {
 
     	if(m_use_loftee.getBooleanValue()) {
     		cmd += " --plugin LoF";
-    		String human_ancestor = m_human_ancestor.getStringValue();
+    		String human_ancestor = IO.processFilePath(m_human_ancestor.getStringValue());
     		if(human_ancestor.equals("")|| Files.notExists(Paths.get(human_ancestor))) {
     			setWarningMessage("Human ancestor file was not specified!");
     		} else {
     			cmd += ",human_ancestor_fa:"+human_ancestor;
     		}
     		if(m_forks.getIntValue()<=1) {
-    			String conservation_file = m_conservation_file.getStringValue();
+    			String conservation_file = IO.processFilePath(m_conservation_file.getStringValue());
     			if(conservation_file.equals("")|| Files.notExists(Paths.get(conservation_file))) {
     				setWarningMessage("Phylocsf.sql was not specified!");
     			} else {
@@ -395,8 +396,8 @@ public class VEPNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	vep_bin = m_veppl.getStringValue();
-    	samtools_bin = m_samtools_path.getStringValue();
+    	vep_bin = IO.processFilePath(m_veppl.getStringValue());
+    	samtools_bin = IO.processFilePath(m_samtools_path.getStringValue());
     	
     	if(CompatibilityChecker.inputFileNotOk(vep_bin, false)) {
     		throw new InvalidSettingsException("Invalid path to variant_effect_predictor.pl script!");

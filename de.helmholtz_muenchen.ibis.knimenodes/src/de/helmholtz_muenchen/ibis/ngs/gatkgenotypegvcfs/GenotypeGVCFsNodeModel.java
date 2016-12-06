@@ -71,7 +71,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
-				String outfolder = m_OUTFOLDER.getStringValue();
+				String outfolder = IO.processFilePath(m_OUTFOLDER.getStringValue());
 				if(outfolder.equals("") || outfolder == null) {
 					outfolder = new File(INFILE).getParent();
 				}

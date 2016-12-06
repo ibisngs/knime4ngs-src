@@ -46,6 +46,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.lofs.PathProcessor;
@@ -402,7 +403,7 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         	rPindel.PindelConfig(inputfile, ismfile, configfile);
 
         }else if(!m_create_config.getBooleanValue()){
-        	configfile= m_config_file.getStringValue();
+        	configfile= IO.processFilePath(m_config_file.getStringValue());
         }
 
         
@@ -505,9 +506,9 @@ public class PindelNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	pindel_bin = m_pindel.getStringValue();
-    	pindel2vcf_bin = m_pindel2vcf.getStringValue();
-    	ref_genome = m_refseqfile.getStringValue();
+    	pindel_bin = IO.processFilePath(m_pindel.getStringValue());
+    	pindel2vcf_bin = IO.processFilePath(m_pindel2vcf.getStringValue());
+    	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
     	
         // path to reffile should not be null
         if(ref_genome.equals("")){
@@ -568,11 +569,11 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         	throw new InvalidSettingsException("Previous node is not Picard Tools: CollectInsertSizeMetrics! You have to run in order to create a config file.");
         }
         else if (!ISM || !m_create_config.getBooleanValue()){
-	        if(m_config_file.getStringValue().equals("")){
+	        if(IO.processFilePath(m_config_file.getStringValue()).equals("")){
 	        	throw new InvalidSettingsException("Missing path to pindel config file: You have to configure the node before executing it!");
 	        }
 
-	        configfile= m_config_file.getStringValue();
+	        configfile= IO.processFilePath(m_config_file.getStringValue());
 	        
 	        if(!Files.exists(Paths.get(configfile))){
 	        	throw new InvalidSettingsException("Path to pindel config: "+configfile+" does not exist");

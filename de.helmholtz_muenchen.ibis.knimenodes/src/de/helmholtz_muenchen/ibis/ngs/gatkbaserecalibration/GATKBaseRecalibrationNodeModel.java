@@ -365,11 +365,11 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	super.updatePrefs();
-    	gatk_jar = m_gatk.getStringValue();
-    	ref_genome = m_ref_genome.getStringValue();
-    	phase1 = m_phase1_1000G_file.getStringValue();
-    	mills = m_mills_1000G_file.getStringValue();
-    	dbsnp = m_dbsnp_file.getStringValue();
+    	gatk_jar = IO.processFilePath(m_gatk.getStringValue());
+    	ref_genome = IO.processFilePath(m_ref_genome.getStringValue());
+    	phase1 = IO.processFilePath(m_phase1_1000G_file.getStringValue());
+    	mills = IO.processFilePath(m_mills_1000G_file.getStringValue());
+    	dbsnp = IO.processFilePath(m_dbsnp_file.getStringValue());
     	
     	posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	if(!(posBam>-1)) {
@@ -419,7 +419,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 //			throw new InvalidSettingsException("dbSNP index file: " + dbsnp + ".idx does not exist!");
 //		}
 		
-		if(m_use_interval.getBooleanValue() && CompatibilityChecker.inputFileNotOk(m_interval_file.getStringValue())) {
+		if(m_use_interval.getBooleanValue() && CompatibilityChecker.inputFileNotOk(IO.processFilePath(m_interval_file.getStringValue()))) {
 			throw new InvalidSettingsException("Interval file not specified or does not exist!");
 		}
 
@@ -458,7 +458,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		}
 		
 		if(m_use_interval.getBooleanValue()){
-			cmd+=" -L "+m_interval_file.getStringValue();
+			cmd+=" -L "+IO.processFilePath(m_interval_file.getStringValue());
 		}
 		
 //		cmd+=" -noStandard";
@@ -543,7 +543,7 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
 		cmd+=" -csv "+recalintermediate;
 		
 		if(m_use_interval.getBooleanValue()){
-			cmd+=" -L "+m_interval_file.getStringValue();
+			cmd+=" -L "+IO.processFilePath(m_interval_file.getStringValue());
 		}
 		
 		if(m_ac_opt_flags.isActive()) {

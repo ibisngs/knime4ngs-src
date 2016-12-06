@@ -153,7 +153,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	if(m_use_config.getBooleanValue()) {
     		db_dir = getDataDirFromConfig(getConfigFile());
     	} else {
-    		db_dir = m_database_dir.getStringValue();
+    		db_dir = IO.processFilePath(m_database_dir.getStringValue());
     	}
     	LOGGER.debug("Database dir: " +db_dir);
     	
@@ -188,7 +188,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	
     	//Result filter options
     	if(m_usebedfile.getBooleanValue()){
-    		command.add("-fi " + m_bed_file.getStringValue());
+    		command.add("-fi " + IO.processFilePath(m_bed_file.getStringValue()));
     	}
     	if(m_no_downstream.getBooleanValue()){
     		command.add("-no-downstream");
@@ -241,7 +241,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
 
     	super.updatePrefs();
-    	snpeff_bin = m_snpeff_bin.getStringValue();
+    	snpeff_bin = IO.processFilePath(m_snpeff_bin.getStringValue());
     	
     	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	if(vcf_index==-1) {

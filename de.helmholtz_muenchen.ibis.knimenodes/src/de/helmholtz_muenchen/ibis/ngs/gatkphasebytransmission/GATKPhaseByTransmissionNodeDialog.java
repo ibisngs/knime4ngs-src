@@ -45,7 +45,7 @@ public class GATKPhaseByTransmissionNodeDialog extends GATKNodeDialog {
 		SettingsModelString PED_FILE = new SettingsModelString(GATKPhaseByTransmissionNodeModel.CFGKEY_PED_FILE, "");
 	    SettingsModelString DENOVO_PRIOR = new SettingsModelString(GATKPhaseByTransmissionNodeModel.CFGKEY_DENOVOPRIOR, "1.0E-8");
 		
-	    setDefaultTabTitle("PhaseByTransmission2");
+	    setDefaultTabTitle("PhaseByTransmission");
 //createNewTab("PhaseByTransmission");
 	    createNewGroup("PED File");
     	DialogComponentFileChooser ped_file= new DialogComponentFileChooser(PED_FILE, "ped_file", 0, ".ped");

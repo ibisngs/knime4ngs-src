@@ -78,7 +78,7 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 			String INFILE = row.getCell(gvcf_index).toString();
 			
 			if(first){
-				OUTFILE = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName(); 
+				OUTFILE = IO.processFilePath(m_OUTFOLDER.getStringValue())+ System.getProperty("file.separator")+ new File(INFILE).getName(); 
 				OUTFILE = IO.replaceFileExtension(OUTFILE, ".ALLVARIANTS.gvcf");
 				first=false;
 			}

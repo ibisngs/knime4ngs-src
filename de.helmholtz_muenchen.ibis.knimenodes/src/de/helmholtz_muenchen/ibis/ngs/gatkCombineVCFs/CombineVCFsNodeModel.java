@@ -83,7 +83,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 			
 			
 			if(first){
-				outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(INFILE).getName();
+				outfile = IO.processFilePath(m_OUTFOLDER.getStringValue())+ System.getProperty("file.separator")+ new File(INFILE).getName();
 				outfile = IO.replaceFileExtension(outfile, ".ALLVARIANTS.vcf");
 				first=false;
 			}

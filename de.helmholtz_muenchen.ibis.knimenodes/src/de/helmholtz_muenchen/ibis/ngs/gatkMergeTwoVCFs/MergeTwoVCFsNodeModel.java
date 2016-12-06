@@ -97,7 +97,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 		String  vcf2 = inData[1].iterator().next().getCell(vcf_ind2).toString();
 		ArrayList<String> command 	= new ArrayList<String>();
 		
-		outfile = m_OUTFOLDER.getStringValue()+ System.getProperty("file.separator")+ new File(vcf1).getName();
+		outfile = IO.processFilePath(m_OUTFOLDER.getStringValue())+ System.getProperty("file.separator")+ new File(vcf1).getName();
 		outfile = IO.replaceFileExtension(outfile, "MERGED.vcf"); 
 		
 		
@@ -161,41 +161,6 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 			setWarningMessage(outfolder_warning);
 		}
 	}
-
-
-
-//	@Override
-//	protected void saveExtraSettingsTo(NodeSettingsWO settings) {
-//		m_GENOTYPEMERGEOPTION.saveSettingsTo(settings);
-//		m_INPUT1_TAG.saveSettingsTo(settings);
-//		m_INPUT2_TAG.saveSettingsTo(settings);
-//		m_PRIORITIZE.saveSettingsTo(settings);
-//		m_OUTFOLDER.saveSettingsTo(settings);
-//		
-//	}
-//
-//
-//	@Override
-//	protected void loadExtraValidatedSettingsFrom(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_GENOTYPEMERGEOPTION.loadSettingsFrom(settings);
-//		m_INPUT1_TAG.loadSettingsFrom(settings);
-//		m_INPUT2_TAG.loadSettingsFrom(settings);
-//		m_PRIORITIZE.loadSettingsFrom(settings);
-//		m_OUTFOLDER.loadSettingsFrom(settings);
-//	}
-//
-//
-//	@Override
-//	protected void validateExtraSettings(NodeSettingsRO settings)
-//			throws InvalidSettingsException {
-//		m_GENOTYPEMERGEOPTION.validateSettings(settings);
-//		m_INPUT1_TAG.validateSettings(settings);
-//		m_INPUT2_TAG.validateSettings(settings);
-//		m_PRIORITIZE.validateSettings(settings);
-//		m_OUTFOLDER.validateSettings(settings);
-//	}
-
 
 
 	@Override

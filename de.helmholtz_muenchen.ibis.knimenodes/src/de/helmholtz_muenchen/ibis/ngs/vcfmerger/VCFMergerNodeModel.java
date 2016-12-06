@@ -33,6 +33,7 @@ import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
@@ -98,7 +99,7 @@ public class VCFMergerNodeModel extends GATKNodeModel {
 		
     	for(String filename : FILES)
     	{
-    		command.add("--variant "+filename);
+    		command.add("--variant "+IO.processFilePath(filename));
     	}
 		
     	command.add("--genotypemergeoption "+m_GENOTYPEMERGEOPTION.getStringValue());
@@ -185,10 +186,17 @@ public class VCFMergerNodeModel extends GATKNodeModel {
 
 	@Override
 	protected String getOutfile() {
-    	String Outfolder 	= m_OUTFOLDER.getStringValue();
-    	String OUTFILETAG	= m_OUTFILETAG.getStringValue();
-		String OUTFILE 		= Outfolder+"/"+OUTFILETAG+".vcf";
-		return OUTFILE;
+    	String Outfolder;
+		try {
+			Outfolder = IO.processFilePath(m_OUTFOLDER.getStringValue());
+	    	String OUTFILETAG	= m_OUTFILETAG.getStringValue();
+			String OUTFILE 		= Outfolder+"/"+OUTFILETAG+".vcf";
+			return OUTFILE;
+		} catch (InvalidSettingsException e) {
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 
 	@Override
