@@ -61,6 +61,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTEDBHandler;
 import de.helmholtz_muenchen.ibis.utils.ngs.FileValidator;
 
@@ -565,33 +566,39 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		OVERWRITE = checkOverwrite.getSelection();
 		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.OVERWRITE, OVERWRITE);
 		
-		REF_GENOME = refGenome.getText();
-		if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
-			JOptionPane.showMessageDialog(null,
-					"Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!",
-				    "Error",
-				    JOptionPane.ERROR_MESSAGE);
-			return false;
+		try {
+				REF_GENOME = IO.processFilePath(refGenome.getText());
+	
+			if(!REF_GENOME.equals("") && !FileValidator.checkFastaFormat(REF_GENOME)) {
+				JOptionPane.showMessageDialog(null,
+						"Reference (genome) sequence file is not in FastA format or does not contain nucleotide sequences!",
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+				return false;
+			}
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.REF_GENOME, REF_GENOME);
+			
+			RES_HAPMAP = IO.processFilePath(res_hapmap.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_HAPMAP, RES_HAPMAP);
+			
+			RES_OMNI = IO.processFilePath(res_omni.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_OMNI, RES_OMNI);
+			
+			RES_1000G_SNPS = IO.processFilePath(res_1000G_SNPS.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_SNPS, RES_1000G_SNPS);
+			
+			RES_1000G_INDELS = IO.processFilePath(res_1000G_Indels.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_INDELS, RES_1000G_INDELS);
+			
+			RES_DBSNP = IO.processFilePath(res_dbsnp.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_DBSNP, RES_DBSNP);
+			
+			RES_MILLS = IO.processFilePath(res_mills.getText());
+			IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_MILLS, RES_MILLS);
+		
+		} catch (InvalidSettingsException e1) {
 		}
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.REF_GENOME, REF_GENOME);
 		
-		RES_HAPMAP = res_hapmap.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_HAPMAP, RES_HAPMAP);
-		
-		RES_OMNI = res_omni.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_OMNI, RES_OMNI);
-		
-		RES_1000G_SNPS = res_1000G_SNPS.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_SNPS, RES_1000G_SNPS);
-		
-		RES_1000G_INDELS = res_1000G_Indels.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_1000G_INDELS, RES_1000G_INDELS);
-		
-		RES_DBSNP = res_dbsnp.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_DBSNP, RES_DBSNP);
-		
-		RES_MILLS = res_mills.getText();
-		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.RES_MILLS, RES_MILLS);
 		
 		USE_HTE = checkHTE.getSelection();
 		IBISKNIMENodesPlugin.setBooleanPreference(IBISKNIMENodesPlugin.USE_HTE, USE_HTE);
@@ -616,7 +623,11 @@ public class KNIMEPreferencePage extends PreferencePage implements
 		}
 		IBISKNIMENodesPlugin.setStringPreference(IBISKNIMENodesPlugin.THRESHOLD, THRESHOLD);
 		
-		DB_FILE = dbFile.getText();
+		try {
+			DB_FILE = IO.processFilePath(dbFile.getText());
+		} catch (InvalidSettingsException e1) {
+		}
+		
 		if(DB_FILE.equals("")) {
 			JOptionPane.showMessageDialog(null,
 				    "HTE requires a SQLite database. Please create a new one or choose an existing one.",

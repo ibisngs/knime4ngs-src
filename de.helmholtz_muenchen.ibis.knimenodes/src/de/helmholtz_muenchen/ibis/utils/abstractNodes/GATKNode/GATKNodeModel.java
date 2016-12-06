@@ -43,6 +43,7 @@ import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -127,10 +128,13 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     	File lockFile = new File(OUTFILE+SuccessfulRunChecker.LOCK_ENDING); 
     	
     	if(m_bed_file_checkbox.getBooleanValue()){
-			if(m_path2bed.getStringValue().equals("") || Files.notExists(Paths.get(m_path2bed.getStringValue()))) {
+    		
+    		String bedfile = IO.processFilePath(m_path2bed.getStringValue());
+    		
+			if(bedfile.equals("") || Files.notExists(Paths.get(bedfile))) {
 				setWarningMessage("Specify valid bed file!");
 			} else {
-				command.add("-L "+m_path2bed.getStringValue());
+				command.add("-L "+bedfile);
 			}
     	}
     	

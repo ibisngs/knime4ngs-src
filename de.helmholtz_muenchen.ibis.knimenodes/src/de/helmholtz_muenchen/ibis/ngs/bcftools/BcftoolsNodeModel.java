@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -305,7 +306,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = curr_Row.getCell(0).toString();
+        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz") || curr_File.endsWith("bcf.gz") || curr_File.endsWith("vcf") || curr_File.endsWith("bcf")){
         		
@@ -321,7 +322,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     	
         ArrayList<String> command = new ArrayList<String>();
         
-        command.add("--samples "+m_vcfsampleheader.getStringValue());
+        command.add("--samples "+IO.processFilePath(m_vcfsampleheader.getStringValue()));
         
         String outfile = inputfiles.get(0);  
         
@@ -360,7 +361,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = curr_Row.getCell(0).toString();
+        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz")){
         		
@@ -408,7 +409,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = curr_Row.getCell(0).toString();
+        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz") || curr_File.endsWith("bcf.gz")){
         		
@@ -450,7 +451,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = curr_Row.getCell(0).toString();
+        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz")){
         		
@@ -508,7 +509,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
 	protected DataTableSpec[] configure(final DataTableSpec[] inSpecs) throws InvalidSettingsException {
 
 		super.updatePrefs();
-		bcf_bin = m_path2bcftools.getStringValue();
+		bcf_bin = IO.processFilePath(m_path2bcftools.getStringValue());
 		
 		if (CompatibilityChecker.inputFileNotOk(bcf_bin, false)) {
 			throw new InvalidSettingsException("Invalid path to bcftools!");

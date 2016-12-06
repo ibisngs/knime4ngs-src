@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -360,8 +361,8 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	}
     	
     	super.updatePrefs();
-    	bowtie_bin = m_installpath.getStringValue();
-    	ref_genome = m_refseqfile.getStringValue();
+    	bowtie_bin = IO.processFilePath(m_installpath.getStringValue());
+    	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
     	
 		if(CompatibilityChecker.inputFileNotOk(bowtie_bin, false)) {
 			throw new InvalidSettingsException("Set path to Bowtie2 binary!");

@@ -44,6 +44,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
 
@@ -103,7 +104,7 @@ public abstract class StatisticMergerNodeModel extends HTExecutorNodeModel {
     			outputFolder.mkdirs();
     	
     	// test if input folder is there
-    	String inputPath = SET_INPUT_FOLDER.getStringValue();
+    	String inputPath = IO.processFilePath(SET_INPUT_FOLDER.getStringValue());
     	if(!new File(inputPath).isDirectory()) {
     		throw new IllegalArgumentException("Input path '" + inputPath + "' was not found.");
     	}
@@ -122,7 +123,7 @@ public abstract class StatisticMergerNodeModel extends HTExecutorNodeModel {
 	    		if(option.getBooleanValue()) {
 			    	String moduleFileName = moduleName.replace(" ", "_") + FILE_ENDING;
 			    	boolean writeHeader = true;
-			    	String outfile = new File(SET_OUTPUT_FOLDER.getStringValue() + File.separator + moduleFileName).getAbsolutePath();
+			    	String outfile = new File(IO.processFilePath(SET_OUTPUT_FOLDER.getStringValue()) + File.separator + moduleFileName).getAbsolutePath();
 			    	
 			    	boolean do_overwrite;
 					if(m_use_pref.getBooleanValue()) {

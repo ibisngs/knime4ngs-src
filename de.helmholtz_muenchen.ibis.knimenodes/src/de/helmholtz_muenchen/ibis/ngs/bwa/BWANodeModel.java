@@ -395,8 +395,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	super.updatePrefs();
-    	bwa_bin = m_bwafile.getStringValue();
-    	ref_genome = m_refseqfile.getStringValue();
+    	bwa_bin = IO.processFilePath(m_bwafile.getStringValue());
+    	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
    	   	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
