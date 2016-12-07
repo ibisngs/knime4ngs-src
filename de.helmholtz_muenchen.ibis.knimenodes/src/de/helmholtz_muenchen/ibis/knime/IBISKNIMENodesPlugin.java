@@ -163,7 +163,6 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         super.start(context);
         IKN_PLUGIN = this;
        
-        IBISKNIMENodesPluginStartupMessageProvider iknpsmp = new IBISKNIMENodesPluginStartupMessageProvider();
         
         String warn_message = "";
         
@@ -186,14 +185,16 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
         	warn_message += "Please edit the paths in the KNIME4NGS preference page!"+System.getProperty("line.separator");
         }
         
-        StartupMessage sm;
-        if(warn_message.length()>0) {
-            sm = new StartupMessage(warn_message, "Paths changed!",StartupMessage.WARNING, context.getBundle());
-        } else {
-        	sm = new StartupMessage("KNIME4NGS nodes started correctly.", StartupMessage.INFO, context.getBundle());
-        }
-        iknpsmp.addMessage(sm);
         
+        if(warn_message.length()>0) {
+            IBISKNIMENodesPluginStartupMessageProvider iknpsmp = new IBISKNIMENodesPluginStartupMessageProvider();
+        	StartupMessage sm;
+            sm = new StartupMessage(warn_message, "Paths changed!",StartupMessage.WARNING, context.getBundle());
+            iknpsmp.addMessage(sm);
+        }
+//        } else {
+//        	sm = new StartupMessage("KNIME4NGS nodes started correctly.", StartupMessage.INFO, context.getBundle());
+//        }   
     }
     
 	public void startSearchThread(String dir, Table table, Button search, Button cancel) {
