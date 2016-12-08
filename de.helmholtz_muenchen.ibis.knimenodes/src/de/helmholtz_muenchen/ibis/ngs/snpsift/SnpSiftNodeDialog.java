@@ -112,7 +112,6 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
     	
     	method.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				System.out.println("called");
 				other_cmd.setEnabled(false);
 				other_out.setEnabled(false);
 				
@@ -122,7 +121,6 @@ public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
 				setEnabled(false, "dbNSFP");
 				
 				SnpSiftTool tool = SnpSiftNodeModel.NAME2TOOL.get(method.getStringValue());
-				System.out.println(tool);
 				switch(tool) {
 				case FILTER:
 					setEnabled(true, "Filter");

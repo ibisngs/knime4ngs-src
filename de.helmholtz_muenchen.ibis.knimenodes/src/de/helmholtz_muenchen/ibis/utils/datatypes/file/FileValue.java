@@ -18,8 +18,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package de.helmholtz_muenchen.ibis.utils.datatypes.file;
+import javax.swing.Icon;
 
 import org.knime.core.data.DataValue;
+
 
 public interface FileValue extends DataValue {
 
@@ -28,4 +30,23 @@ public interface FileValue extends DataValue {
      */
     String getFilePath();
 
+    public static final UtilityFactory UTILITY = new FileCellUtilityFactory();
+    
+    
+    /** Implementations of the meta information of this value class. */
+    public static class FileCellUtilityFactory extends UtilityFactory {
+        /** Singleton icon to be used to display this cell type. */
+        private static final Icon ICON =
+            loadIcon(FileValue.class, "/file.png");
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public Icon getIcon() {
+            return ICON;
+        }
+
+    }
+
+    
 }
