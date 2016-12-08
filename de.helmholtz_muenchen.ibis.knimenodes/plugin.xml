@@ -149,4 +149,13 @@
 			<serializer cellClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell" serializerClass="de.helmholtz_muenchen.ibis.utils.datatypes.file.SAMCell$SAMSerializer"/> 
 		</DataType>
 	</extension>
+ <extension
+       point="org.knime.product.splashExtension">
+    <splashExtension
+          icon="KNIME4NGS.png"
+          icon32="KNIME4NGS_32.png"
+          id="KNIME4NGS"
+          tooltip="KNIME4NGS">
+    </splashExtension>
+ </extension>
 </plugin>
