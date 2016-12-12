@@ -108,7 +108,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	super.updatePrefs();
     	
     	if(CompatibilityChecker.inputFileNotOk(getBinaryPath(), false)) {
-			throw new InvalidSettingsException("Set path to featureCounts binary!");
+			throw new InvalidSettingsException("Set path to STAR binary!");
 		}
     	
     	genome_folder = IO.processFilePath(m_genome_folder.getStringValue());
@@ -126,10 +126,11 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     		if(!CompatibilityChecker.checkInputCellType(inSpecs[0], "FastACell")) {
     			throw new InvalidSettingsException("Incompatible input: In 'genomeGenerate' mode the node expects a FastA file as input.");
     		}
-    		if(CompatibilityChecker.inputFileNotOk(gtf_file,true)) {
-    			setWarningMessage("Using a GTF file is strongly recommended for genomeGenerate!");
+    		if(CompatibilityChecker.inputFileNotOk(gtf_file,true) || !gtf_file.endsWith(".gtf")) {
+    			setWarningMessage("Using a GTF file is strongly recommended for genomeGenerate! Files not in GTF will be ignored!");
     		}
     	}
+    	
 		return new DataTableSpec[]{getDataOutSpec1()};
     }
 
@@ -209,7 +210,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	
     	pars.put("--runThreadN", m_threads.getIntValue()+"");
     	
-    	if(!CompatibilityChecker.inputFileNotOk(gtf_file,true)) {
+    	if(!CompatibilityChecker.inputFileNotOk(gtf_file,true) && gtf_file.endsWith(".gtf")) {
     		pars.put("--sjdbGTFfile", gtf_file);
     		pars.put("--sjdbOverhang", m_overhang.getIntValue()+"");
     	}

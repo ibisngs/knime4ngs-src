@@ -87,10 +87,10 @@ public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
 //       	dcAnnotationFile.setBorderTitle("Path to annotation file");
      
        	// add groups and components
-        createNewGroup("Input");
+        createNewGroup("Path to annotation file");
         addDialogComponent(dcAnnotationFile);
         
-        createNewGroup("Output");
+        createNewGroup("Path to output folder");
         addDialogComponent(dcOutputFile);
         
         createNewGroup("Paired read options");

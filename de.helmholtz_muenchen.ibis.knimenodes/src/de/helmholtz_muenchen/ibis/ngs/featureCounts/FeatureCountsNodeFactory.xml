@@ -18,11 +18,11 @@
        <a href="http://bioinformatics.oxfordjournals.org/content/early/2013/11/30/bioinformatics.btt656.full.pdf">featureCounts: an efficient general purpose program for assigning sequence reads to genomic features</a></intro>
         
         <tab name="Options">
-        	<option name="Input">
+        	<option name="Path to annotation file">
         		Set the path to the GTF or SAF annotation file.
         	</option>
-        	<option name="Output">
-        		Set the path to the folder where the output file should be stored.
+        	<option name="Path to output folder">
+        		Set the path to the folder where the output files will be generated.
         	</option>
         	<option name="Paired-end read options">
         		<b>Count fragments instead of reads</b>:
