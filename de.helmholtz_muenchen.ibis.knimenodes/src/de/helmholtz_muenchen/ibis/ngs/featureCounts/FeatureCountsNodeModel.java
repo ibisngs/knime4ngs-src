@@ -194,12 +194,12 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 			pars.put(NAME_OF_THREAD_NUMBER, Integer.toString(SET_THREAD_NUMBER.getIntValue()));
 		
 		pars.put(NAME_OF_ANNOTATION_TYPE, "GTF");
-		if(SET_ANNOTATION_FILE.getStringValue().endsWith(".saf")) {
+		if(annotation_file.endsWith(".saf")) {
 			pars.put(NAME_OF_ANNOTATION_TYPE, "SAF");
 		}
 		
 		pars.put(NAME_OF_FEATURE_TYPE, SET_FEATURE_TYPE.getStringValue());
-		pars.put(NAME_OF_ANNOTATION_FILE, SET_ANNOTATION_FILE.getStringValue());
+		pars.put(NAME_OF_ANNOTATION_FILE, annotation_file);
 		pars.put(NAME_OF_GROUP_FEATURE, SET_GROUP_FEATURE.getStringValue());
 		
 		/********************* OUTPUT ****************************/
