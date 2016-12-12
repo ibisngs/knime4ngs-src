@@ -98,7 +98,8 @@ public class EdgeRNodeModel extends RNodeModel {
     @Override
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception{
     	
-    	CompatibilityChecker.InputFileNoRows(inData);
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
     	
 		BufferedDataTable[] out = super.execute(inData, exec);
 		out[0] = exec.createSpecReplacerTable(out[0], this.getSpec(inData[0].getDataTableSpec())); // parse cell types
