@@ -190,7 +190,10 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
-    	    	
+    	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = "";
     	

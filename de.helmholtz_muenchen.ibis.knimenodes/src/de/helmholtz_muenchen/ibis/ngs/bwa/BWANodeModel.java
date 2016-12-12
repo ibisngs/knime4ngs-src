@@ -125,6 +125,8 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
     	
     	/**
 		 * Get the Parameters

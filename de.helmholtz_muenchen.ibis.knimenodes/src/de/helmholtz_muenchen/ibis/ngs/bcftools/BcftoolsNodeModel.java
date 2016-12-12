@@ -160,6 +160,9 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	ArrayList<String> command = new ArrayList<String>();
     	String method = m_bcfmethod.getStringValue();
     	command.add(bcf_bin+" "+method);

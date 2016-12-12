@@ -308,6 +308,9 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	//Prepare File
     	String path2readFile 	 = inData[0].iterator().next().getCell(0).toString();
     	String path2readFile2 	 = "NA";
@@ -437,7 +440,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	
     	ArrayList<String> command = new ArrayList<String>();
     	String path2baseFileName = ref_genome.substring(0,ref_genome.lastIndexOf("."));
-    	String bowtieBuild = bowtie_bin.replace("bowtie2", "bowtie2-build");
+    	String bowtieBuild = bowtie_bin.replaceAll("bowtie2$", "bowtie2-build");
 
     	command.add(bowtieBuild);
    

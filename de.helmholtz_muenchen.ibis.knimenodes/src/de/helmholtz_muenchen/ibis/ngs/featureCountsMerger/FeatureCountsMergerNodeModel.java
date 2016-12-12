@@ -93,6 +93,11 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     @Override
     //overrides HTE execution method as no external tool is used
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+    	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
+    	
     	String outfile = IO.processFilePath(this.SET_OUTPUT_FILE.getStringValue());
     	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
     		String in = inData[0].iterator().next().getCell(0).toString();

@@ -30,6 +30,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
@@ -91,6 +92,9 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+    	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
     	
 //    	exec.setProgress(0.01); // tell the user that we started with the work
     	

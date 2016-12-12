@@ -44,6 +44,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.UnsuccessfulExecutionException;
@@ -98,6 +99,10 @@ public abstract class StatisticMergerNodeModel extends HTExecutorNodeModel {
      */
     @Override
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec) throws Exception {
+    
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	// create output folder
     	File outputFolder = new File(SET_OUTPUT_FOLDER.getStringValue());
     	if(!outputFolder.isDirectory())

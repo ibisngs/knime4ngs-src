@@ -279,6 +279,9 @@ public class GATKBaseRecalibrationNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
         // check bam input file
         String inputfile=inData[0].iterator().next().getCell(posBam).toString();
         

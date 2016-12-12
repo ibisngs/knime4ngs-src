@@ -297,6 +297,9 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
 	protected BufferedDataTable[] execute(final BufferedDataTable[] inData, final ExecutionContext exec)
 			throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+		
 		String inputfile = inData[0].iterator().next().getCell(posBam).toString();
 		if(CompatibilityChecker.inputFileNotOk(inputfile)) {
 			throw new InvalidSettingsException("No BAM file in input table or BAM file does not exist!");

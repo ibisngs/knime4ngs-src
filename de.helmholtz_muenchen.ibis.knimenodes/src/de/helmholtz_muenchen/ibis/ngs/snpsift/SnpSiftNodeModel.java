@@ -171,6 +171,9 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
         String stdOutFile = "";
         ArrayList<String> command = new ArrayList<String>();
         command.add("java");

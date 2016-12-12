@@ -198,6 +198,9 @@ public class VQSRNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	String INFILE = inData[0].iterator().next().getCell(vcf_index).toString();
     	if(CompatibilityChecker.inputFileNotOk(INFILE)) {
     		throw new InvalidSettingsException("No VCF file in the input table or VCF file does not exist!");

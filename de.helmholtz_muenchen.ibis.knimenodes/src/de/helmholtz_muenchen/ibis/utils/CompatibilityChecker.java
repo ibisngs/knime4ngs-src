@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.knime.core.data.DataCell;
 import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.DataType;
@@ -45,7 +46,6 @@ public class CompatibilityChecker {
 		Warning 		= false;
 		
 	}
-	
 	/**
 	 * Based on the inSpecs, the method checks for paired-end or single-end mapping 
 	 * @param inSpecs
@@ -211,5 +211,47 @@ public class CompatibilityChecker {
 		}
 	
 	}
+	
+	/**
+	 * Method checks for missing values in input table and throws exception if empty string values exist
+	 * @param inData
+	 * @throws InvalidSettingsException
+	 */
+	private static void InputContainsEmptyCells(BufferedDataTable[] inData) throws InvalidSettingsException{
+		for(int i = 0; i < inData.length; i++) {
+			java.util.Iterator <DataRow> it = inData[i].iterator();
+			
+	        while(it.hasNext()){
+	        	
+	        	java.util.Iterator <DataCell> cellIT = it.next().iterator();
+	        	
+	        	while(cellIT.hasNext()){
+	        		
+	        		DataCell c = cellIT.next();
+	        		if(c.toString().equals("") || c.isMissing()){
+	        			throw new InvalidSettingsException ("One or more rows contain missing values!"); 
+	        		}
+	        	}
+	        } 
+			
+			
+			
+		}
+	}
+	
+	
+	
+	/**
+	 * Method checks if inData is ok and ready for execution
+	 * @param inData
+	 * @throws InvalidSettingsException
+	 */
+	public static void inDataCheck(BufferedDataTable[] inData) throws InvalidSettingsException{
+		//Check for empty table
+		InputFileNoRows(inData);
+		//Check missing values
+		InputContainsEmptyCells(inData);
+	}
+	
 	
 }

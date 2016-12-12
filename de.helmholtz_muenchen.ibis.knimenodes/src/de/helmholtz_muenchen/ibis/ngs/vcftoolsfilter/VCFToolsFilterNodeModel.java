@@ -41,6 +41,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
@@ -139,6 +140,9 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	//check input file
     	String infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	

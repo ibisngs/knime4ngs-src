@@ -314,6 +314,9 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	
     	RunPindel rPindel = new RunPindel();
         //retrieve information from table

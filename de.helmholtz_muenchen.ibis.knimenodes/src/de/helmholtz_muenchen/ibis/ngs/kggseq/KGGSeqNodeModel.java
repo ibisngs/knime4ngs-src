@@ -188,6 +188,9 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	String infile 		= inData[0].iterator().next().getCell(0).toString();
     	String BasePath 	= infile.substring(0,infile.lastIndexOf("/")+1);
     	String lockFile 	= BasePath+m_OUTPREFIX.getStringValue() + SuccessfulRunChecker.LOCK_ENDING;

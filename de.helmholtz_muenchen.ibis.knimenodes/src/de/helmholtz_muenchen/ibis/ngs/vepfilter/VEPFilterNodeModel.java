@@ -146,6 +146,9 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	String infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
     	if(Files.notExists(Paths.get(infile))) {

@@ -76,6 +76,9 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	   	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	/** Get the input columns **/
     	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
     	String outfile1 = this.getSettingsFileName(readsFile1);

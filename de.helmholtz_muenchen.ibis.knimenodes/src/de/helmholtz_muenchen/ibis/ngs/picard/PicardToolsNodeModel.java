@@ -207,6 +207,9 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
 
+    	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
         
         //retrieves BAM/SAM file and reference sequence file from table of previous node
         DataRow r=inData[0].iterator().next();

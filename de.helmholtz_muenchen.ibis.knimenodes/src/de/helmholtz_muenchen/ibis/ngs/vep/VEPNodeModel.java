@@ -193,6 +193,9 @@ public class VEPNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	//Check input table integrity
+    	CompatibilityChecker.inDataCheck(inData);
+    	
     	//check input file
     	String vcf_infile = inData[0].iterator().next().getCell(vcf_index).toString();
     	
