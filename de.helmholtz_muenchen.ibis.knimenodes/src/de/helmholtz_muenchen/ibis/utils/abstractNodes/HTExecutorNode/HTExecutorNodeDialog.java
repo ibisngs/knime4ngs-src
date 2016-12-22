@@ -28,6 +28,7 @@ import javax.swing.event.ChangeListener;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnNameSelection;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.SettingsModel;
@@ -36,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileValue;
 
 /**
  * <code>NodeDialog</code> for the "HTExecutorNode" Node.
@@ -56,11 +58,16 @@ public abstract class HTExecutorNodeDialog extends DefaultNodeSettingsPane {
 	private final SettingsModelBoolean overwrite = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_OVERWRITE,true);
 	private final SettingsModelBoolean usePrefPage = new SettingsModelBoolean(HTExecutorNodeModel.CFGKEY_USE_PREF,true);
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, HTExecutorNodeModel.DEFAULT_THRESHOLD, 1, Integer.MAX_VALUE);
+//	private final SettingsModelString mainInputCol = new SettingsModelString(HTExecutorNodeModel.CFGKEY_DEFAULT_MAININPUTCOL,"");
+
 	
 	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
 //	private boolean firstOpened;
 	
 	protected HTExecutorNodeDialog() {
+			
+//		addDialogComponent(new DialogComponentColumnNameSelection(mainInputCol, "Main Input Column", 0,FileValue.class));
+		
 		
 		addToolDialogComponents();
 		

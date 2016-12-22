@@ -100,6 +100,9 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, DEFAULT_THRESHOLD,1,Integer.MAX_VALUE);
 
+//	static final String CFGKEY_DEFAULT_MAININPUTCOL = "maininputcol";
+//	private final SettingsModelString m_mainInputCol = new SettingsModelString(HTExecutorNodeModel.CFGKEY_DEFAULT_MAININPUTCOL,"");
+//	
 	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
 	
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
@@ -117,6 +120,7 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 		addSetting(m_use_pref);
 		addSetting(threshold);
 		addSetting(m_overwrite);
+//		addSetting(m_mainInputCol);
 	}
 	
 	@Override
