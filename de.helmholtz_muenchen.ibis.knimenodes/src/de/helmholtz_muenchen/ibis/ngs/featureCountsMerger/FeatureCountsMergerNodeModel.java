@@ -99,7 +99,7 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     	
     	
     	String outfile = IO.processFilePath(this.SET_OUTPUT_FILE.getStringValue());
-    	if(CompatibilityChecker.inputFileNotOk(outfile, false)) {
+    	if(Files.notExists(Paths.get(outfile)) && !(new File(outfile).createNewFile())) {
     		String in = inData[0].iterator().next().getCell(0).toString();
     		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
     	}

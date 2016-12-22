@@ -23,6 +23,8 @@ import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
+import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTENodeView;
+
 /**
  * <code>NodeFactory</code> for the "FeatureCountsMerger" Node.
  * 
@@ -54,7 +56,7 @@ public class FeatureCountsMergerNodeFactory
     @Override
     public NodeView<FeatureCountsMergerNodeModel> createNodeView(final int viewIndex,
             final FeatureCountsMergerNodeModel nodeModel) {
-        return new FeatureCountsMergerNodeView(nodeModel);
+        return new HTENodeView<FeatureCountsMergerNodeModel>(nodeModel);
     }
 
     /**

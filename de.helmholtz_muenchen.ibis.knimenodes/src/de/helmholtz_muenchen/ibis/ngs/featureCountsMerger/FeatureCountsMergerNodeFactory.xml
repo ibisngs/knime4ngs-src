@@ -29,5 +29,11 @@
         	<br />Column headers are the names of the samples.
         	<br />Cell 0...n: Count of features in the samples.
         </outPort>
-    </ports>    
+    </ports> 
+    
+    <views>
+        <view index="0" name="STDOUT / STDERR">
+        	The node offers a direct view of its standard out and the standard error of the tool.
+        </view>
+	</views>   
 </knimeNode>
