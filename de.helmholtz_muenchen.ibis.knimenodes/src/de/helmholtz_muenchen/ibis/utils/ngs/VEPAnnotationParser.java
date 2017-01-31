@@ -92,6 +92,10 @@ public class VEPAnnotationParser implements AnnotationParser {
 					break;
 			}
 			
+			if(ent.equals("") || ent == null) {
+				continue;
+			}
+			
 			allele_num = Integer.parseInt(a.split("\\|")[allele_id_index]);
 			if(entity2allele_num.containsKey(ent)) {
 				entity2allele_num.get(ent).add(allele_num);
@@ -123,6 +127,9 @@ public class VEPAnnotationParser implements AnnotationParser {
 			allele_num = Integer.parseInt(fields[allele_id_index]);
 			if(allele_num == allele_id) {
 				gene_id = fields[gene_id_index];
+				if(gene_id.equals("") || gene_id == null) {
+					continue;
+				}
 				transcript_id = fields[transcript_id_index];
 				if(res.containsKey(gene_id)) {
 					res.get(gene_id).add(transcript_id);
