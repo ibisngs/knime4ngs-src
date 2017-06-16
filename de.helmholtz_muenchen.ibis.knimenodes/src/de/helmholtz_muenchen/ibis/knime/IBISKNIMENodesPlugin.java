@@ -76,6 +76,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String BCFTOOLS = "bcftools";
 	public static final String BOWTIE2 = "bowtie2";
 	public static final String BWA = "bwa";
+	public static final String CUTADAPT = "cutadapt";
+	public static final String FASTQC = "fastqc";
 	public static final String FEATURE_COUNTS = "featureCounts";
 	public static final String GATK = "GenomeAnalysisTK.jar";
 	public static final String KGGSeq = "kggseq.jar";
@@ -87,6 +89,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String SNPEFF = "snpEff.jar";
 	public static final String SNPSIFT = "SnpSift.jar";
 	public static final String STAR = "STAR";
+	public static final String TRIMG = "TrimGalore";
 	public static final String VCFTOOLS = "vcftools";
 	public static final String VEP = "variant_effect_predictor.pl";
 	public static final String VEP_FILTER = "filter_vep.pl";
@@ -106,11 +109,13 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 			REF_GENOME, RES_HAPMAP, RES_OMNI, RES_1000G_SNPS, RES_1000G_INDELS , RES_DBSNP, RES_MILLS, 
 			DB_FILE,
 			BCFTOOLS, BOWTIE2, BWA,
-			FEATURE_COUNTS,
+			CUTADAPT,
+			FASTQC, FEATURE_COUNTS,
 			GATK,
 			KGGSeq,
 			PICARD, PINDEL, PINDEL2VCF,
 			SAMTOOLS, SEGEMEHL, SNPEFF, SNPSIFT, STAR,
+			TRIMG,
 			VCFTOOLS, VEP, VEP_FILTER};
 	
 	public static final HashMap<String, Boolean> TOOLS;
@@ -119,6 +124,8 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		TOOLS.put(IBISKNIMENodesPlugin.BCFTOOLS, true);
 		TOOLS.put(IBISKNIMENodesPlugin.BOWTIE2,true);
 		TOOLS.put(IBISKNIMENodesPlugin.BWA,true);
+		TOOLS.put(IBISKNIMENodesPlugin.CUTADAPT, true);
+		TOOLS.put(IBISKNIMENodesPlugin.FASTQC,true);
 		TOOLS.put(IBISKNIMENodesPlugin.FEATURE_COUNTS,true);
 		TOOLS.put(IBISKNIMENodesPlugin.GATK,false);
 		TOOLS.put(IBISKNIMENodesPlugin.KGGSeq,false);
@@ -130,6 +137,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
 		TOOLS.put(IBISKNIMENodesPlugin.SNPSIFT, false);
 		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);
+		TOOLS.put(IBISKNIMENodesPlugin.TRIMG,true);
 		TOOLS.put(IBISKNIMENodesPlugin.VCFTOOLS,false);
 		TOOLS.put(IBISKNIMENodesPlugin.VEP,false);
 		TOOLS.put(IBISKNIMENodesPlugin.VEP_FILTER, false);

@@ -418,6 +418,14 @@ public class IO {
     	return file;
     }
     
+    public static Boolean hasGZipExtension(String file) {
+    	if(file.endsWith(".gz")) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+    }
+    
     /**
      * Returns the folder in which a file is located
      * @param File
