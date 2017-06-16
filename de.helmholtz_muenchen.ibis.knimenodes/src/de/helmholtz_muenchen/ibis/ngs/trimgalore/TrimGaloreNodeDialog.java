@@ -64,13 +64,13 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 		final SettingsModelString adapter2 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_ADAPTER2,"");
 		final SettingsModelString preset_adapter 			= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_PRESET_ADAPTER,"");
 		
-		final SettingsModelIntegerBounded quality 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_QUALITY, 20, 1, Integer.MAX_VALUE);
+		final SettingsModelIntegerBounded quality 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_QUALITY, 20, 0, Integer.MAX_VALUE);
 		final SettingsModelIntegerBounded stringency 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_STRINGENCY, 1, 1, Integer.MAX_VALUE);
 		final SettingsModelDoubleBounded error_rate 		= new SettingsModelDoubleBounded(TrimGaloreNodeModel.CFGKEY_ERROR_RATE, 0.1, 0, 1);
 		
 		final SettingsModelBoolean gzip 					= new SettingsModelBoolean(TrimGaloreNodeModel.CFGKEY_GZIP, true);
 		
-		final SettingsModelIntegerBounded max_length 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
+		//final SettingsModelIntegerBounded max_length 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
 		final SettingsModelIntegerBounded length 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_LENGTH, 20, 0, Integer.MAX_VALUE);
 		
 		final SettingsModelString additional_options 		= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_ADDITIONAL_OPTIONS, "");
@@ -103,7 +103,7 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
     	setHorizontalPlacement(false);
     	
     	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentNumberEdit(max_length, "Max length"));
+    	//addDialogComponent(new DialogComponentNumberEdit(max_length, "Max length"));
     	addDialogComponent(new DialogComponentNumberEdit(length, "Length"));
     	setHorizontalPlacement(false);
     	

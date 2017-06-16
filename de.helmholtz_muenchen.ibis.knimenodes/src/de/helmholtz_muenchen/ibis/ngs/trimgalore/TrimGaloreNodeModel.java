@@ -98,7 +98,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 			new SettingsModelIntegerBounded(CFGKEY_THREADS_FASTQC, 4, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_quality = 
-			new SettingsModelIntegerBounded(CFGKEY_QUALITY, 20, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_QUALITY, 20, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_adapter = 
 			new SettingsModelString(CFGKEY_ADAPTER, null);
@@ -109,8 +109,8 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelString m_preset_adapter = 
 			new SettingsModelString(CFGKEY_PRESET_ADAPTER,"");
 	
-	private final SettingsModelIntegerBounded m_max_length = 
-			new SettingsModelIntegerBounded(CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
+	//private final SettingsModelIntegerBounded m_max_length = 
+	//		new SettingsModelIntegerBounded(CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_stringency = 
 			new SettingsModelIntegerBounded(CFGKEY_STRINGENCY, 1, 1, Integer.MAX_VALUE);
@@ -133,6 +133,8 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	//The Output Col Names
 	public static final String OUT_TRIMREAD1 = "Path2TrimmedReadsFile1";
 	public static final String OUT_TRIMREAD2 = "Path2TrimmedReadsFile2";
+	
+	private int count = 2;
 	
 	//ReadType: paired-end or single-end
 	private static String readType = "";
@@ -157,7 +159,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	addSetting(m_adapter);
     	addSetting(m_adapter2);
     	addSetting(m_preset_adapter);
-    	addSetting(m_max_length);
+    	//addSetting(m_max_length);
     	addSetting(m_stringency);
     	addSetting(m_error_rate);
     	addSetting(m_gzip);
@@ -182,14 +184,12 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = "";
-    	String outFile2 = "";
     	
     	String path_variable = "PATH=";
     	
-    	// Create outfile
-    	String outFile1 = this.createOutputName(inFile1);
+    	String outFile = this.createOutputName(inFile1);
+    	String outFile2 = "";
     	
-    	File lockFile = new File(inFile1.substring(0,inFile1.lastIndexOf(".")) + ".TrimG" + SuccessfulRunChecker.LOCK_ENDING);
     	
     	if(CompatibilityChecker.inputFileNotOk(inFile1)) {
     		throw new InvalidSettingsException("Input FastQ file does not exist or is invalid!");
@@ -218,6 +218,8 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		cmd.add("-o="+IO.processFilePath(m_outfolder_trimg.getStringValue()));
     	}
     	
+    	File lockFile = new File(outFile.substring(0,outFile.lastIndexOf(".")) + ".TrimG" + SuccessfulRunChecker.LOCK_ENDING);
+    	
     	if(m_quality.getIntValue() != 20){
     		cmd.add("-q="+m_quality.getIntValue());
     	}
@@ -234,9 +236,11 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		cmd.add("--"+m_preset_adapter);
     	}
     	
+    	/*
     	if(m_max_length.getIntValue() != 0){
     		cmd.add("--max_length="+m_max_length.getIntValue());
     	}
+    	*/
     	
     	if(m_stringency.getIntValue() != 1){
     		cmd.add("--stringency="+m_stringency.getIntValue());
@@ -296,7 +300,8 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
         		throw new InvalidSettingsException("Input FastQ file does not exist or is invalid!");
         	}
     		
-    		outFile2 = this.createOutputName(inFile2);
+    		outFile2 = createOutputName(inFile2);
+    		
     		cmd.add(inFile2);
     	}
     	
@@ -311,9 +316,9 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	LOGGER.info("CMD: "+command.toString());
     	
     	LOGGER.info("Running Trim Galore...");
-		LOGGER.info("Log files can be found in "+outFile1+".stdOut and "+outFile1+".stdErr");
+		LOGGER.info("Log files can be found in "+outFile+".stdOut and "+outFile+".stdErr");
 		//super.executeCommand(new String[]{"/storageNGS/ngs1/software/trim_galore_v0.4.3/trim_galore --path_to_cutadapt /home/ibis/paul.hager/.local/bin/cutadapt -o /home/ibis/paul.hager/KNIME4NGS/trimG_TEST -q 30 --stringency 10 -e 0.4 --gzip --length 10 --fastqc_args=\"-o /home/ibis/paul.hager/KNIME4NGS/fastqcAFTER_TEST\" --max_n 80 --no_report_file  --paired /home/ibis/paul.hager/knime-workspace/KNIME4NGS_Test_VarCalling/knime4ngs-resource/VarCalling/NA12877_R2.fastq.gz /home/ibis/paul.hager/knime-workspace/KNIME4NGS_Test_VarCalling/knime4ngs-resource/VarCalling/NA12877_R1.fastq.gz"},outFile1, exec, new String[] {path_variable}, lockFile, outFile1+".stdOut", outFile1+".stdErr", null, null, null);
-		super.executeCommand(command, outFile1, exec, new String[] {path_variable}, lockFile, outFile1+".stdOut", outFile1+".stdErr", null, null, null);
+		super.executeCommand(command, outFile, exec, new String[] {path_variable}, lockFile, outFile+".stdOut", outFile+".stdErr", null, null, null);
     	
 		
 		BufferedDataContainer cont;
@@ -325,10 +330,10 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	    
 	    if(readType.equals("single-end")){
 	       	c = new FileCell[]{
-	       			FileCellFactory.create(outFile1)};
+	       			FileCellFactory.create(outFile)};
 	    } else {
 	    	c = new FileCell[]{
-	       			FileCellFactory.create(outFile1),
+	       			FileCellFactory.create(outFile),
 	       			FileCellFactory.create(outFile2)};
 	    }
 	    cont.addRowToTable(new DefaultRow("Row0", c));
@@ -347,14 +352,27 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
      *  
      */
     private String createOutputName(String file){
-    	if(IO.hasGZipExtension(file)){
-    		file = file.replace("\\.fq.gz$", "_trimmed.fq.gz");
-    	} else {
-    		file = file.replace("\\.fq$", "_trimmed.fq");
+    	if(!m_outfolder_trimg.getStringValue().equals("")){
+    		file = m_outfolder_trimg.getStringValue()+System.getProperty("file.separator")+file.substring(file.lastIndexOf(System.getProperty("file.separator"))+1, file.length());
     	}
     	
-    	String fileName = file.substring(file.lastIndexOf(File.separator), file.length());
-    	file = m_outfolder_trimg.getStringValue()+fileName;
+    	System.out.println();
+    	
+    	if(readType.equals("single-end")){
+    		if(file.endsWith(".fastq.gz")){
+        		file = file.replace(".fastq.gz", "_trimmed.fq.gz");
+        	} else {
+        		file = file.replace(".fastq", "_trimmed.fq");
+        	}
+    	} else {
+    		if(file.endsWith(".fastq.gz")){
+    			file = file.replace(".fastq.gz", "_val_"+count+".fq.gz");
+        	} else {
+        		file = file.replace(".fastq", "_val_"+count+".fq");
+        	}
+    	}
+    	
+    	count--;
     	
     	return file;
     }
@@ -390,17 +408,22 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		setWarningMessage(CC.getWarningMessages());
     	}
     	
-    	if(!m_adapter.toString().toLowerCase().matches("[ACGT]+") && !m_adapter.getStringValue().equals("")){
+    	
+    	/*
+    	if(!m_adapter.toString().matches("[ACGT]+") && !m_adapter.getStringValue().equals("")){
     		throw new InvalidSettingsException("Invalid adapter! Adapter string may only contain A, C, G, or T");
     	}
     	
-    	if(!m_adapter2.toString().toLowerCase().matches("[ACGT]+") && !m_adapter2.getStringValue().equals("")){
+    	if(!m_adapter2.toString().matches("[ACGT]+") && !m_adapter2.getStringValue().equals("")){
     		throw new InvalidSettingsException("Invalid adapter2! Adapter2 string may only contain A, C, G, or T");
     	}
+    	*/
     	
+    	/*
     	if(readType.equals("paired-end") && m_max_length.getIntValue() != 0){
     		throw new InvalidSettingsException("Maximum length filtering works currently only in single-end mode (which is more sensible for smallRNA-sequencing anyway...)");
     	}
+    	*/
     	
     	super.updatePrefs();
 
@@ -449,7 +472,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
   	 	m_adapter.saveSettingsTo(settings);
   		m_adapter2.saveSettingsTo(settings);
   		m_preset_adapter.saveSettingsTo(settings);
-  		m_max_length.saveSettingsTo(settings);
+  		//m_max_length.saveSettingsTo(settings);
   		m_stringency.saveSettingsTo(settings);
   		m_error_rate.saveSettingsTo(settings);
   		m_gzip.saveSettingsTo(settings);
@@ -481,7 +504,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	 	m_adapter.loadSettingsFrom(settings);
 		m_adapter2.loadSettingsFrom(settings);
 		m_preset_adapter.loadSettingsFrom(settings);
-		m_max_length.loadSettingsFrom(settings);
+		//m_max_length.loadSettingsFrom(settings);
 		m_stringency.loadSettingsFrom(settings);
 		m_error_rate.loadSettingsFrom(settings);
 		m_gzip.loadSettingsFrom(settings);
@@ -513,7 +536,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	 	m_adapter.validateSettings(settings);
 		m_adapter2.validateSettings(settings);
 		m_preset_adapter.validateSettings(settings);
-		m_max_length.validateSettings(settings);
+		//m_max_length.validateSettings(settings);
 		m_stringency.validateSettings(settings);
 		m_error_rate.validateSettings(settings);
 		m_gzip.validateSettings(settings);

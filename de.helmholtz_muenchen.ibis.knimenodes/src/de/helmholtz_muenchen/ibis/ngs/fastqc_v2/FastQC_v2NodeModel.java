@@ -98,17 +98,19 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = "";
     	
-    	// Create outfile
-    	String outFile1 = this.createOutputName(inFile1);
-    	
-    	File lockFile = new File(inFile1.substring(0,inFile1.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
+    	String outFile = createOutputName(inFile1);
+    	String outFile2 = "";
     	
     	ArrayList<String> cmd = new ArrayList<String>();
     	cmd.add(IO.processFilePath(m_fastqc.getStringValue()));
     	
+    	// Create outfile in outfolder if outfolder specified, otherwise at same location as infile
     	if(!m_outfolder.getStringValue().equals("")){
     		cmd.add("-o="+IO.processFilePath(m_outfolder.getStringValue()));
-    	}
+    	} 
+    	
+    	
+    	File lockFile = new File(outFile.substring(0,outFile.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
     	
     	if(m_threads.getIntValue() != 1){
     		cmd.add("-t="+m_threads.getIntValue());
@@ -125,20 +127,27 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	LOGGER.info("CMD: "+command.toString());
     	
     	LOGGER.info("Running FastQC...");
-		LOGGER.info("Log files can be found in "+inFile1+".stdOut and "+inFile1+".stdErr");
-		super.executeCommand(command, outFile1, exec, lockFile, inFile1+".stdOut", inFile1+".stdErr");
+		LOGGER.info("Log files can be found in "+outFile+".stdOut and "+outFile+".stdErr");
+		super.executeCommand(command, outFile, exec, lockFile, outFile+".stdOut", outFile+".stdErr");
 
 		if(readType.equals("paired-end")){
 			inFile2 = inData[0].iterator().next().getCell(1).toString();
 			
-			lockFile = new File(inFile2.substring(0,inFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
+			
+			if(!m_outfolder.getStringValue().equals("")){
+				outFile2 = m_outfolder.getStringValue()+System.getProperty("file.separator")+inFile2.substring(inFile2.lastIndexOf(System.getProperty("file.separator"))+1, inFile1.lastIndexOf(".fastq"));
+			} else {
+	    		outFile2 = this.createOutputName(inFile2);
+	    	}
+			
+			lockFile = new File(outFile2.substring(0,outFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
 			command[command.length-1] = inFile2;
 			
 			LOGGER.info("CMD: "+command.toString());
 	    	
 	    	LOGGER.info("Running FastQC...");
-			LOGGER.info("Log files can be found in "+inFile2+".stdOut and "+inFile2+".stdErr");
-			super.executeCommand(command, outFile1, exec, lockFile, inFile2+".stdOut", inFile2+".stdErr");
+			LOGGER.info("Log files can be found in "+outFile2+".stdOut and "+outFile2+".stdErr");
+			super.executeCommand(command, outFile2, exec, lockFile, outFile2+".stdOut", outFile2+".stdErr");
 		}
 		
 		BufferedDataContainer cont;
@@ -149,11 +158,11 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	    
 	    if(readType.equals("single-end")){
 	    	c = new FileCell[]{
-		    		FileCellFactory.create(inFile1)};
+		    		FileCellFactory.create(outFile)};
 	    } else {
 	    	c = new FileCell[]{
-	    			FileCellFactory.create(inFile1),
-	       			FileCellFactory.create(inFile2)};
+	    			FileCellFactory.create(outFile),
+	       			FileCellFactory.create(outFile2)};
 	    }
 	    
 	    cont.addRowToTable(new DefaultRow("Row0", c));
@@ -173,14 +182,20 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
      *  
      */
     private String createOutputName(String file){
-    	if(IO.hasGZipExtension(file)){
-    		file = file.replace("\\.fq.gz$", "_trimmed.fq.gz");
-    	} else {
-    		file = file.replace("\\.fq$", "_trimmed.fq");
+    	if(!m_outfolder.getStringValue().equals("")){
+    		file = m_outfolder.getStringValue()+System.getProperty("file.separator")+file.substring(file.lastIndexOf(System.getProperty("file.separator"))+1, file.length());
     	}
     	
-    	String fileName = file.substring(file.lastIndexOf(File.separator), file.length());
-    	file = m_outfolder.getStringValue()+fileName;
+    	if(file.endsWith(".fastq.gz")){
+    		file = file.replace(".fastq.gz", "_fastq.zip");
+    	} else if (file.endsWith(".fq.gz")){
+    		file = file.replace(".fq.gz", "_fastq.zip");
+    	} else if (file.endsWith(".fastq")){
+    		file = file.replace(".fastq", "_fastq.zip");
+    	} else if (file.endsWith(".fq")){
+    		file = file.replace(".fq", "_fastq.zip");
+    	}
+    	
     	
     	return file;
     }

@@ -13,6 +13,8 @@
 		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.rawreadmanipulatorStatisticMerger.RawReadManipulatorStatisticMergerNodeFactory"/>
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.runfastqc.RunFastQCNodeFactory"/>
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqSplitter.FastqSplitterNodeFactory"/>
+   		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.trimgalore.TrimGaloreNodeFactory"/>
+   		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqc_v2.FastQC_v2NodeFactory"/>
    		
    		<!--Mapping-->
    		<node category-path="/ibis/ngs/ngs_asm" factory-class="de.helmholtz_muenchen.ibis.ngs.bwa.BWANodeFactory"/>
@@ -94,9 +96,8 @@
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneSetAnalysis.GeneSetAnalysisNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
 		
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.fastqc_v2.FastQC_v2NodeFactory" id="de.helmholtz_muenchen.ibis.ngs.fastqc_v2.FastQC_v2NodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.smartphase.SmartPhaseNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SmartPhaseNodeFactory"/>
-<node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.trimgalore.TrimGaloreNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.TrimGaloreNodeFactory"/>
+<!-- <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.smartphase.SmartPhaseNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SmartPhaseNodeFactory"/> -->
+
 </extension>
 	
 	<extension point="org.knime.workbench.repository.categories">
