@@ -90,7 +90,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	command.add("java");
     	String jarCall 			= "-jar "+IO.getScriptPath()+"libs/FastQC.jar ";
-    	String path2mergeScript = "sh "+IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
+    	String path2mergeScript = IO.getScriptPath() + "scripts/bash/mergeFsettings.sh";
     	command.add(jarCall + readsFile1);
     	
     	/**Execute for first file**/
@@ -132,6 +132,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	    		/** merge the two filter settings files */
 	        	ArrayList<String> commandMerge = new ArrayList<String>();
 //	        	commandMerge.add("sh");
+	        	commandMerge.add("bash");
 	        	commandMerge.add(path2mergeScript);
 	        	commandMerge.add(outfile1);
 	        	commandMerge.add(outfile2);
@@ -142,6 +143,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	        	
 	        	//Set new lock file for merging
 	        	lockFile = new File(outfileMerged+SuccessfulRunChecker.LOCK_ENDING);
+
 	        	super.executeCommand(new String[]{StringUtils.join(commandMerge, " ")}, outfileMerged, exec,
 	        			null, lockFile, null, null , null, sysErr, null);
 
