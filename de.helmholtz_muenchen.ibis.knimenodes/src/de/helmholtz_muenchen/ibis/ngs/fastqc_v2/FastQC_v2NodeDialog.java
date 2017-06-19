@@ -5,6 +5,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
+import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
@@ -40,12 +41,16 @@ public class FastQC_v2NodeDialog extends HTExecutorNodeDialog {
 		final SettingsModelString outfolder = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_OUTFOLDER,"");
 		final SettingsModelString fastqc = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_FASTQC,"");
 		final SettingsModelIntegerBounded threads = new SettingsModelIntegerBounded(FastQC_v2NodeModel.CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
+		final SettingsModelString additionalOptions = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_ADDITIONAL_OPTIONS,"");
 		
 		createNewGroup("Folder for output files");
 		addDialogComponent(new DialogComponentFileChooser(outfolder, "his_id_FastQC_v2_OUT", 0, true));
 		
 		createNewGroup("Number of threads");
 		addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 1));
+		
+		createNewGroup("Additional options");
+		addDialogComponent(new DialogComponentString(additionalOptions, "Additional FastQC options"));
 		
 		addPrefPageSetting(fastqc, IBISKNIMENodesPlugin.FASTQC);
 	}

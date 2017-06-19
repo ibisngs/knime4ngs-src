@@ -1,37 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./icon_d_red.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_red.png" type="Source">
     <name>FastQC_v2</name>
     
     <shortDescription>
-        
+        FastQC - A quality control tool for high throughput sequence data.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+    
+        <intro>
+         FastQC aims to provide a simple way to do some quality control checks on raw sequence data coming from high throughput sequencing pipelines. It provides a modular set of analyses which you can use to give a quick impression of whether your data has any problems of which you should be aware before doing any further analysis.
+		<br></br>
+		The main functions of FastQC are:
+		<br></br>
+		<br></br>
+    	&#8226;Import of data from BAM, SAM or FastQ files (any variant)
+    	
+    	<br></br>
+    	&#8226;Providing a quick overview to tell you in which areas there may be problems
+    	
+    	<br></br>
+    	&#8226;Summary graphs and tables to quickly assess your data
+    	
+    	<br></br>
+    	&#8226;Export of results to an HTML based permanent report
+    	
+    	<br></br>
+    	&#8226;Offline operation to allow automated generation of reports without running the interactive application
+    	
+    	<br></br>
+		<br></br>
+        Source: <a href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">http://www.bioinformatics.babraham.ac.uk/projects/fastqc/</a> 
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        </intro>
+        
+        <option name="Folder for output files">Create all output files in the specified output directory.
+                    Please note that this directory must exist as the program
+                    will not create it.  If this option is not set then the 
+                    output file for each sequence file is created in the same
+                    directory as the sequence file which was processed.
+		</option>	
+		
+        <option name="Number of threads">Specifies the number of files which can be processed
+                    simultaneously.  Each thread will be allocated 250MB of
+                    memory so you shouldn't run more threads than your
+                    available memory will cope with, and not more than
+                    6 threads on a 32 bit machine
+        </option>
+        
+        <option name="Additional FastQC options.">For all additional FastQC options not offered above. 
+        			Please consult the official FastQC documentation for assistance in configuring these options."
+        </option>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 <br></br>Cell 1 (Optional): Path to ReadFile2.</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2.<br></br>Cell 2: Path to FilterFile</outPort>
+    </ports>  
+       
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+	</views>
 </knimeNode>

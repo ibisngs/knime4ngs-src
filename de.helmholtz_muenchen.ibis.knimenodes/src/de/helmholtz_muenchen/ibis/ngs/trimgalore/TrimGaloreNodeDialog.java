@@ -97,14 +97,14 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
     	addDialogComponent(new DialogComponentStringSelection(preset_adapter, "Preset adapter", "AUTOMATIC", "illumina", "nextera", "small_rna"));
     	
     	setHorizontalPlacement(true);
-    	addDialogComponent(new DialogComponentNumberEdit(quality, "Quality"));
-    	addDialogComponent(new DialogComponentNumberEdit(stringency, "Stringency"));
-    	addDialogComponent(new DialogComponentNumberEdit(error_rate, "Error rate"));
+    	addDialogComponent(new DialogComponentNumber(quality, "Quality", 1));
+    	addDialogComponent(new DialogComponentNumber(stringency, "Stringency", 1));
+    	addDialogComponent(new DialogComponentNumber(error_rate, "Error rate", 0.1));
     	setHorizontalPlacement(false);
     	
     	setHorizontalPlacement(true);
     	//addDialogComponent(new DialogComponentNumberEdit(max_length, "Max length"));
-    	addDialogComponent(new DialogComponentNumberEdit(length, "Length"));
+    	addDialogComponent(new DialogComponentNumber(length, "Length", 1));
     	setHorizontalPlacement(false);
     	
     	addDialogComponent(new DialogComponentString(additional_options, "Additional Trim Galore options"));

@@ -86,7 +86,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 			new SettingsModelString(CFGKEY_CUTADAPT, "");
 	
 	private final SettingsModelString m_outfolder_fastqc = 
-			new SettingsModelString(CFGKEY_OUTFOLDER_FASTQC, null);
+			new SettingsModelString(CFGKEY_OUTFOLDER_FASTQC, "");
 	
 	private final SettingsModelString m_outfolder_trimg = 
 			new SettingsModelString(CFGKEY_OUTFOLDER_TRIMG, "");
@@ -101,7 +101,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 			new SettingsModelIntegerBounded(CFGKEY_QUALITY, 20, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_adapter = 
-			new SettingsModelString(CFGKEY_ADAPTER, null);
+			new SettingsModelString(CFGKEY_ADAPTER, "");
 	
 	private final SettingsModelString m_adapter2 = 
 			new SettingsModelString(CFGKEY_ADAPTER2,"");
@@ -185,15 +185,17 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = "";
     	
+    	if(CompatibilityChecker.inputFileNotOk(inFile1)) {
+    		throw new InvalidSettingsException("Input FastQ file does not exist or is invalid!");
+    	}
+    	
     	String path_variable = "PATH=";
     	
     	String outFile = this.createOutputName(inFile1);
     	String outFile2 = "";
     	
     	
-    	if(CompatibilityChecker.inputFileNotOk(inFile1)) {
-    		throw new InvalidSettingsException("Input FastQ file does not exist or is invalid!");
-    	}
+    	
     	
     	ArrayList<String> cmd = new ArrayList<String>();
     	cmd.add(IO.processFilePath(m_trimg.getStringValue()));
@@ -216,6 +218,9 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	
     	if(!m_outfolder_trimg.getStringValue().equals("")){
     		cmd.add("-o="+IO.processFilePath(m_outfolder_trimg.getStringValue()));
+    	} else {
+    		String inFolder = inFile1.substring(0, inFile1.lastIndexOf(System.getProperty("file.separator"))+1);
+    		cmd.add("-o="+inFolder);
     	}
     	
     	File lockFile = new File(outFile.substring(0,outFile.lastIndexOf(".")) + ".TrimG" + SuccessfulRunChecker.LOCK_ENDING);
@@ -232,8 +237,14 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		cmd.add("-a2="+m_adapter2.getStringValue());
     	}
     	
-    	if(!m_preset_adapter.getStringValue().equals("") && !m_adapter.getStringValue().equals("")){
-    		cmd.add("--"+m_preset_adapter);
+    	if(!m_preset_adapter.getStringValue().equals("") && m_adapter.getStringValue().equals("")){
+    		if(m_preset_adapter.getStringValue().equals("illumina")){
+    			cmd.add("--illumina");
+    		} else if(m_preset_adapter.getStringValue().equals("nextera")){
+    			cmd.add("--nextera");
+    		} else if (m_preset_adapter.getStringValue().equals("small_rna")){
+    			cmd.add("--small_rna");
+    		}
     	}
     	
     	/*
@@ -409,15 +420,18 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	}
     	
     	
-    	/*
-    	if(!m_adapter.toString().matches("[ACGT]+") && !m_adapter.getStringValue().equals("")){
+    	
+    	if(!m_adapter.getStringValue().matches("[ACGT]+") && !m_adapter.getStringValue().equals("")){
     		throw new InvalidSettingsException("Invalid adapter! Adapter string may only contain A, C, G, or T");
     	}
     	
-    	if(!m_adapter2.toString().matches("[ACGT]+") && !m_adapter2.getStringValue().equals("")){
+    	if(!m_adapter2.getStringValue().matches("[ACGT]+") && !m_adapter2.getStringValue().equals("")){
     		throw new InvalidSettingsException("Invalid adapter2! Adapter2 string may only contain A, C, G, or T");
     	}
-    	*/
+    	
+    	if(CompatibilityChecker.inputFileNotOk(m_trimg.getStringValue(), false)){
+    		throw new InvalidSettingsException("Path to TrimGalore does not exist or is invalid!");
+    	}
     	
     	/*
     	if(readType.equals("paired-end") && m_max_length.getIntValue() != 0){

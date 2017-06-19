@@ -50,6 +50,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     public static final String CFGKEY_FASTQC = "Path2FastQC";
     public static final String CFGKEY_OUTFOLDER = "Path2OutFolder";
 	public static final String CFGKEY_THREADS = "NumberThreads";
+	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	
 	
 	private final SettingsModelString m_fastqc = 
@@ -60,6 +61,9 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	
 	private final SettingsModelIntegerBounded m_threads = 
 			new SettingsModelIntegerBounded(CFGKEY_THREADS, 4, 1, Integer.MAX_VALUE);
+	
+	private final SettingsModelString m_additional_options = 
+			new SettingsModelString(CFGKEY_ADDITIONAL_OPTIONS,"");
 	
 	//The Output Col Names
 	public static final String OUT_READFILE1 = "Path2ReadFile1";
@@ -81,6 +85,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
         addSetting(m_fastqc);
     	addSetting(m_outfolder);
     	addSetting(m_threads);
+    	addSetting(m_additional_options);
     	
     	addPrefPageSetting(m_fastqc, IBISKNIMENodesPlugin.FASTQC);
     }
@@ -98,7 +103,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	String inFile1 = inData[0].iterator().next().getCell(0).toString();
     	String inFile2 = "";
     	
-    	String outFile = createOutputName(inFile1);
+    	String outFile = inFile1;
     	String outFile2 = "";
     	
     	ArrayList<String> cmd = new ArrayList<String>();
@@ -115,6 +120,15 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	if(m_threads.getIntValue() != 1){
     		cmd.add("-t="+m_threads.getIntValue());
     	}
+    	
+    	if(!m_additional_options.getStringValue().equals("")){
+			setWarningMessage("NOTE! All additional FastQC options MUST use equals operator to bind arguments to options. i.e. --k=5");
+			
+			String[] addOpts = m_additional_options.getStringValue().split(" ");
+    		for(String opt : addOpts){
+    			cmd.add(opt);
+    		}
+		}
     	
     	cmd.add(inFile1);
     	
@@ -133,12 +147,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 		if(readType.equals("paired-end")){
 			inFile2 = inData[0].iterator().next().getCell(1).toString();
 			
-			
-			if(!m_outfolder.getStringValue().equals("")){
-				outFile2 = m_outfolder.getStringValue()+System.getProperty("file.separator")+inFile2.substring(inFile2.lastIndexOf(System.getProperty("file.separator"))+1, inFile1.lastIndexOf(".fastq"));
-			} else {
-	    		outFile2 = this.createOutputName(inFile2);
-	    	}
+			outFile2 = inFile2;
 			
 			lockFile = new File(outFile2.substring(0,outFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
 			command[command.length-1] = inFile2;
@@ -173,31 +182,6 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	//deleteZipFiles(inFile1, inFile2);
 
 		return new BufferedDataTable[]{outTable};
-    }
-
-
-    /**
-     * Creates correct trimmed fastq output file name
-     * @param file
-     *  
-     */
-    private String createOutputName(String file){
-    	if(!m_outfolder.getStringValue().equals("")){
-    		file = m_outfolder.getStringValue()+System.getProperty("file.separator")+file.substring(file.lastIndexOf(System.getProperty("file.separator"))+1, file.length());
-    	}
-    	
-    	if(file.endsWith(".fastq.gz")){
-    		file = file.replace(".fastq.gz", "_fastq.zip");
-    	} else if (file.endsWith(".fq.gz")){
-    		file = file.replace(".fq.gz", "_fastq.zip");
-    	} else if (file.endsWith(".fastq")){
-    		file = file.replace(".fastq", "_fastq.zip");
-    	} else if (file.endsWith(".fq")){
-    		file = file.replace(".fq", "_fastq.zip");
-    	}
-    	
-    	
-    	return file;
     }
 
 	/**
@@ -254,6 +238,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	 m_fastqc.validateSettings(settings);
     	 m_outfolder.validateSettings(settings);
     	 m_threads.validateSettings(settings);
+    	 m_additional_options.validateSettings(settings);
     }
      
      /**
@@ -272,6 +257,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	  m_fastqc.loadSettingsFrom(settings);
     	  m_outfolder.loadSettingsFrom(settings);
     	  m_threads.loadSettingsFrom(settings);
+    	  m_additional_options.loadSettingsFrom(settings);
 
      }
       
@@ -287,6 +273,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	   m_fastqc.saveSettingsTo(settings);
     	   m_outfolder.saveSettingsTo(settings);
     	   m_threads.saveSettingsTo(settings);
+    	   m_additional_options.saveSettingsTo(settings);
       }
  
 }

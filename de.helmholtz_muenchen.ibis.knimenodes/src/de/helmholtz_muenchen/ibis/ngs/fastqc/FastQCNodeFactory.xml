@@ -35,5 +35,5 @@
 
     <views>
         <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
-</views>
+	</views>
 </knimeNode>

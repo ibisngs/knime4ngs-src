@@ -1,37 +1,150 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<knimeNode icon="./icon_d_red.png" type="Source" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_red.png" type="Source">
     <name>TrimGalore</name>
     
     <shortDescription>
-        Trim Galore! is a wrapper script to automate quality and adapter trimming as well as quality control, with some added functionality to remove biased methylation positions for RRBS sequence files (for directional, non-directional (or paired-end) sequencing).
+        A wrapper tool around <a href="https://cutadapt.readthedocs.io/en/stable/">Cutadapt</a> and <a href="http://www.bioinformatics.babraham.ac.uk/projects/fastqc/">FastQC</a> to consistently apply quality and adapter trimming to FastQ files, with some extra functionality for MspI-digested RRBS-type (Reduced Representation Bisufite-Seq) libraries.
     </shortDescription>
     
     <fullDescription>
-        <intro>Insert long description here...</intro>
+        <intro>
+		Trim Galore! is a wrapper script to automate quality and adapter trimming as well as quality control, with some added functionality to remove biased methylation positions for RRBS sequence files (for directional, non-directional (or paired-end) sequencing). It's main features are:
+		<br></br>
+		Trim Galore is now also available from <a href="https://github.com/FelixKrueger/TrimGalore">GitHub</a>. You are invited to leave comments, feature request or bug reports over there! 
+		<br></br>
+		<br></br>
+		
+		
+    	&#8226;For adapter trimming, Trim Galore! uses the first 13 bp of Illumina standard adapters ('AGATCGGAAGAGC') by default (suitable for both ends of paired-end libraries), but accepts other adapter sequence, too
+    	
+    	<br></br>
+    	&#8226;For MspI-digested RRBS libraries, Trim Galore! performs quality and adapter trimming in two subsequent steps. This allows it to remove 2 additional bases that contain a cytosine which was artificially introduced in the end-repair step during the library preparation
+   		
+    	<br></br>
+    	&#8226;For any kind of FastQ file other than MspI-digested RRBS, Trim Galore! can perform single-pass adapter- and quality trimming
+    	
+    	<br></br>
+    	&#8226;The Phred quality of basecalls and the stringency for adapter removal can be specified individually
+    	    	
+    	<br></br>
+    	&#8226;Trim Galore! can remove sequences if they become too short during the trimming process. For paired-end files Trim Galore! removes entire sequence pairs if one (or both) of the two reads became shorter than the set length cutoff. Reads of a read-pair that are longer than a given threshold but for which the partner read has become too short can optionally be written out to single-end files. This ensures that the information of a read pair is not lost entirely if only one read is of good quality
+    	    	
+    	<br></br>
+    	&#8226;Trim Galore! can trim paired-end files by 1 additional bp from the 3' end of all reads to avoid problems with invalid alignments with Bowtie 1
+    	    	
+    	<br></br>
+    	&#8226;Trim Galore! accepts and produces standard or gzip compressed FastQ files
+    	   	
+    	<br></br>
+    	&#8226;FastQC can be run on the resulting output files once trimming has completed (optional)
+    	    	
+    	<br></br>
+    	<br></br>
+
+		Source: <a href="https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/">https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/</a>
+		</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
+        <option name="Gzip output">Compress the output file with GZIP. If the input files are GZIP-compressed
+                        the output files will automatically be GZIP compressed as well. As of v0.2.8 the
+                        compression will take place on the fly.
+                        </option>
+                        
+        <option name="Adapter sequence">Adapter sequence to be trimmed. If not specified explicitly, Trim Galore will
+                        try to auto-detect whether the Illumina universal, Nextera transposase or Illumina
+                        small RNA adapter sequence was used. Also see '--illumina', '--nextera' and
+                        '--small_rna'. If no adapter can be detected within the first 1 million sequences
+                        of the first file specified Trim Galore defaults to '--illumina'.
+                        </option>
+                        
+        <option name="Adapter sequence for read file 2">Optional adapter sequence to be trimmed off read 2 of paired-end files. This
+                        option requires '--paired' to be specified as well. If the libraries to be trimmed
+                        are smallRNA then a2 will be set to the Illumina small RNA 5' adapter automatically
+                        (GATCGTCGGACT).
+                        </option>
+                       
+        <option name="Preset adapter">Choose from one of 4 preset adapters:<br></br>AUTOMATIC:  Trim Galore will
+                        try to auto-detect whether the Illumina universal, Nextera transposase or Illumina
+                        small RNA adapter sequence was used. If no adapter can be detected within the first 1 million sequences
+                        of the first file specified Trim Galore defaults to '--illumina'.
+                        <br></br><br></br>illumina: Adapter sequence to be trimmed is the first 13bp of the Illumina universal adapter
+                        'AGATCGGAAGAGC' instead of the default auto-detection of adapter sequence.
+                        <br></br><br></br>nextera: Adapter sequence to be trimmed is the first 12bp of the Nextera adapter
+                        'CTGTCTCTTATA' instead of the default auto-detection of adapter sequence.
+                        <br></br><br></br>small_rna: Adapter sequence to be trimmed is the first 12bp of the Illumina Small RNA 3' Adapter
+                        'TGGAATTCTCGG' instead of the default auto-detection of adapter sequence. Selecting
+                        to trim smallRNA adapters will also lower the --length value to 18bp. If the smallRNA
+                        libraries are paired-end then a2 will be set to the Illumina small RNA 5' adapter
+                        automatically (GATCGTCGGACT) unless -a 2 had been defined explicitly. 
+                        </option>
+                        
+        <option name="Quality">Trim low-quality ends from reads in addition to adapter removal. For
+                        RRBS samples, quality trimming will be performed first, and adapter
+                        trimming is carried in a second round. Other files are quality and adapter
+                        trimmed in a single pass. The algorithm is the same as the one used by BWA
+                        (Subtract INT from all qualities; compute partial sums from all indices
+                        to the end of the sequence; cut sequence at the index at which the sum is
+                        minimal). Default Phred score: 20.
+                        </option>
+                        
+        <option name="Stringency">Overlap with adapter sequence required to trim a sequence. Defaults to a
+                        very stringent setting of 1, i.e. even a single bp of overlapping sequence
+                        will be trimmed off from the 3' end of any read.
+                        </option>   
+                        
+        <option name="Error rate">Maximum allowed error rate (no. of errors divided by the length of the matching
+                        region) (default: 0.1)
+                        </option>
+                        
+        <option name="Length">Discard reads that became shorter than length INT because of either
+                        quality or adapter trimming. A value of '0' effectively disables
+                        this behaviour. Default: 20 bp.
+						<br></br><br></br>
+                        For paired-end files, both reads of a read-pair need to be longer than
+                        &lt;INT&gt; bp to be printed out to validated paired-end files (see option --paired).
+                        If only one read became too short there is the possibility of keeping such
+                        unpaired single-end reads (see --retain_unpaired). Default pair-cutoff: 20 bp.
+                        </option>        
+                        
+         <option name="Additional TrimGalore options">Additional TrimGalore options not contained above. 
+         				Please consult the official TrimGalore documentation for assistance in setting these options.
+         </option>                                                                  
+       
+        <tab name="FastQC Options">
+            <option name="Folder for output files">Create all output files in the specified output directory.
+                    Please note that this directory must exist as the program
+                    will not create it.  If this option is not set then the 
+                    output file for each sequence file is created in the same
+                    directory as the sequence file which was processed.
+		</option>	
+		
+        <option name="Number of threads">Specifies the number of files which can be processed
+                    simultaneously.  Each thread will be allocated 250MB of
+                    memory so you shouldn't run more threads than your
+                    available memory will cope with, and not more than
+                    6 threads on a 32 bit machine
+        </option>
+        
+        <option name="Additional FastQC options.">For all additional FastQC options not offered above. 
+        			Please consult the official FastQC documentation for assistance in configuring these options."
+        </option>
         </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
         </tab>
-        -->
+   
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
-        <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
-        <!-- possibly more output ports here-->
-    </ports>    
+        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 <br></br>Cell 1 (Optional): Path to ReadFile2.</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2.<br></br>Cell 2: Path to FilterFile</outPort>
+    </ports>   
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+	</views>
 </knimeNode>
