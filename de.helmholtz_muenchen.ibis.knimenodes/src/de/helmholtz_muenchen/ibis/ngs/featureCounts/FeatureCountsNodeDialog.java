@@ -27,6 +27,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -56,14 +57,15 @@ public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
         final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_FILE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_FILE);
 //        final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_ANNOTATION_TYPE, FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE);
         final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(FeatureCountsNodeModel.CFGKEY_THREAD_NUMBER, FeatureCountsNodeModel.DEFAULT_THREAD_NUMBER);
-        final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, FeatureCountsNodeModel.DEAFULT_COUNT_MULTIMAPPED);
-        final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, FeatureCountsNodeModel.DEAFULT_COUNT_MULTI_OVERLAPING);
-        final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_FRAGMENTS);
-        final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, FeatureCountsNodeModel.DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
+        final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_MULTIMAPPED, FeatureCountsNodeModel.DEFAULT_COUNT_MULTIMAPPED);
+        final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_OVERLAPPING_MULTI, FeatureCountsNodeModel.DEFAULT_COUNT_MULTI_OVERLAPPING);
+        final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_FRAGMENTS, FeatureCountsNodeModel.DEFAULT_COUNT_FRAGMENTS);
+        final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_CHIMERIC_FRAGMENTS, FeatureCountsNodeModel.DEFAULT_COUNT_CHIMERIC_FRAGMENTS);
         final SettingsModelBoolean SET_FEATURE_LEVEL			= new SettingsModelBoolean(FeatureCountsNodeModel.CFGKEY_COUNT_ON_FEATURE_LVL, FeatureCountsNodeModel.DEFAULT_COUNT_ON_FEATURE_LVL);
         final SettingsModelString SET_GROUP_FEATURE				= new SettingsModelString(FeatureCountsNodeModel.CFGKEY_GROUP_FEATURE, FeatureCountsNodeModel.DEFAULT_GROUP_FEATURE);
-        final SettingsModelString SET_BINARY_PATH			= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
-
+        final SettingsModelString SET_BINARY_PATH				= new SettingsModelString(BinaryWrapperNodeModel.CFGKEY_BINARY_PATH, BinaryWrapperNodeModel.DEFAULT_BINARY_PATH);
+        final SettingsModelDouble SET_MINIMUM_ASSIGNED_PERCENT	= new SettingsModelDouble(FeatureCountsNodeModel.CFGKEY_MINIMUM_ASSIGNED_PERCENT, FeatureCountsNodeModel.DEFAULT_MINIMUM_ASSIGNED_PERCENT);
+        
         
         // create open file/folder components
         DialogComponentFileChooser dcOutputFile 	= new DialogComponentFileChooser(SET_OUTPUT_FILE, "his_id_OUTPUT_FILE_FeatureCounts", 0, true);
@@ -76,7 +78,8 @@ public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
      	DialogComponentBoolean dcCountChimeric	 	= new DialogComponentBoolean(SET_CHIMERIC_FRAGMENTS, "Count chimeric (paired reads)");
      	DialogComponentBoolean dcCountOnFeatureLvl	= new DialogComponentBoolean(SET_FEATURE_LEVEL, "Perform read summarization at the feature level (eg. exon level) ");
        	DialogComponentString dcGroupFeature		= new DialogComponentString(SET_GROUP_FEATURE, "Feature type used for grouping results:"); 
-     	
+     	DialogComponentNumber dcMinimumAssignedPerc	= new DialogComponentNumber(SET_MINIMUM_ASSIGNED_PERCENT, "Minimum percent of reads that must be assigned.", 1);
+       	
        	// create string selection component
 //       	DialogComponentStringSelection dcAnnotationType 	= new DialogComponentStringSelection(SET_ANNOTATION_TYPE, "file type:", FeatureCountsNodeModel.DEFAULT_ANNOTATION_TYPE, FeatureCountsNodeModel.ALTERNATIVE_ANNOTATION_TYPE);
        	
@@ -105,6 +108,7 @@ public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
         addDialogComponent(dcThreadNumber);
         addDialogComponent(dcCountOnFeatureLvl);
         addDialogComponent(dcGroupFeature);
+        addDialogComponent(dcMinimumAssignedPerc);
         
         SET_THREAD_NUMBER.addChangeListener(new ChangeListener() {
 			@Override

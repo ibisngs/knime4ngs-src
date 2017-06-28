@@ -19,10 +19,17 @@
  */
 package de.helmholtz_muenchen.ibis.ngs.featureCounts;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataCell;
@@ -37,6 +44,7 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelDouble;
 import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -74,6 +82,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected static final String CFGKEY_COUNT_CHIMERIC_FRAGMENTS	= "ChimericFragments";
     protected static final String CFGKEY_COUNT_ON_FEATURE_LVL		= "CountOnFeatureLvl";
     protected static final String CFGKEY_GROUP_FEATURE				= "GroupFeature";
+    protected static final String CFGKEY_MINIMUM_ASSIGNED_PERCENT	= "MinimumAssignedPercent";
     
     // initial default values for SettingsModels
 //    protected static final String DEFAULT_ANNOTATION_TYPE			= "GTF";			// input of GTF file as annotation is default value
@@ -81,12 +90,13 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     protected static final String DEFAULT_ANNOTATION_FILE			= "";
     protected static final String DEFAULT_ANNOTATION_FEATURE		= "exon";			// default feature which is used for counting
     protected static final int DEFAULT_THREAD_NUMBER				= 1;				// default threads to use
-    protected static final boolean DEAFULT_COUNT_MULTIMAPPED		= false;			// do not count multimapped reads by default
-    protected static final boolean DEAFULT_COUNT_MULTI_OVERLAPING	= false;			// do not count multi overlapping reads by default
-    protected static final boolean DEAFULT_COUNT_FRAGMENTS			= false;			// only for paired reads
-    protected static final boolean DEAFULT_COUNT_CHIMERIC_FRAGMENTS = false;			// do not count chimeric fragments
+    protected static final boolean DEFAULT_COUNT_MULTIMAPPED		= false;			// do not count multimapped reads by default
+    protected static final boolean DEFAULT_COUNT_MULTI_OVERLAPPING	= false;			// do not count multi overlapping reads by default
+    protected static final boolean DEFAULT_COUNT_FRAGMENTS			= false;			// only for paired reads
+    protected static final boolean DEFAULT_COUNT_CHIMERIC_FRAGMENTS = false;			// do not count chimeric fragments
     protected static final boolean DEFAULT_COUNT_ON_FEATURE_LVL		= false;			// read summarization will be performed at the feature level (eg. exon level)
     protected static final String DEFAULT_GROUP_FEATURE				= "gene_id";		// group results using id
+    protected static final double DEFAULT_MINIMUM_ASSIGNED_PERCENT		= 1;
 
     
     // name of parameters which are defined in the featureCounts binary
@@ -108,12 +118,13 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     private final SettingsModelString SET_ANNOTATION_FILE			= new SettingsModelString(CFGKEY_ANNOTATION_FILE, DEFAULT_ANNOTATION_FILE);
 //    private final SettingsModelString SET_ANNOTATION_TYPE			= new SettingsModelString(CFGKEY_ANNOTATION_TYPE, DEFAULT_ANNOTATION_TYPE);
     private final SettingsModelInteger SET_THREAD_NUMBER			= new SettingsModelInteger(CFGKEY_THREAD_NUMBER, DEFAULT_THREAD_NUMBER);
-    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED, DEAFULT_COUNT_MULTIMAPPED);
-    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI, DEAFULT_COUNT_MULTI_OVERLAPING);
-    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(CFGKEY_COUNT_FRAGMENTS, DEAFULT_COUNT_FRAGMENTS);
-    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(CFGKEY_COUNT_CHIMERIC_FRAGMENTS, DEAFULT_COUNT_CHIMERIC_FRAGMENTS);
+    private final SettingsModelBoolean SET_COUNT_MULTIMAPPED		= new SettingsModelBoolean(CFGKEY_COUNT_MULTIMAPPED, DEFAULT_COUNT_MULTIMAPPED);
+    private final SettingsModelBoolean SET_COUNT_OVERLAPPING_MULTI	= new SettingsModelBoolean(CFGKEY_COUNT_OVERLAPPING_MULTI, DEFAULT_COUNT_MULTI_OVERLAPPING);
+    private final SettingsModelBoolean SET_COUNT_FRAGMENTS			= new SettingsModelBoolean(CFGKEY_COUNT_FRAGMENTS, DEFAULT_COUNT_FRAGMENTS);
+    private final SettingsModelBoolean SET_CHIMERIC_FRAGMENTS		= new SettingsModelBoolean(CFGKEY_COUNT_CHIMERIC_FRAGMENTS, DEFAULT_COUNT_CHIMERIC_FRAGMENTS);
     private final SettingsModelBoolean SET_FEATURE_LEVEL			= new SettingsModelBoolean(CFGKEY_COUNT_ON_FEATURE_LVL, DEFAULT_COUNT_ON_FEATURE_LVL);
     private final SettingsModelString SET_GROUP_FEATURE				= new SettingsModelString(CFGKEY_GROUP_FEATURE, DEFAULT_GROUP_FEATURE);
+    private final SettingsModelDouble SET_MINIMUM_ASSIGNED_PERCENT	= new SettingsModelDouble(CFGKEY_MINIMUM_ASSIGNED_PERCENT, DEFAULT_MINIMUM_ASSIGNED_PERCENT);
     
     protected final static int MIN_THREADS = 1;
     protected final static int MAX_THREADS = 16;
@@ -141,6 +152,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	addSetting(SET_CHIMERIC_FRAGMENTS);
     	addSetting(SET_FEATURE_LEVEL);
     	addSetting(SET_GROUP_FEATURE);
+    	addSetting(SET_MINIMUM_ASSIGNED_PERCENT);
     	
     	addPrefPageSetting(SET_BINARY_PATH,IBISKNIMENodesPlugin.FEATURE_COUNTS);
     }
@@ -176,7 +188,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     
 
 	@Override
-	protected LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData) {
+	protected LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData){
 		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();
 
 		/********************* SIMPLE PARAMETER ***************************/
@@ -233,7 +245,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 				first=false;
 			}
     	}
-
+    	
+    	
     	// add the input parameter
     	pars.put(" ", StringUtils.join(inputArgument, " "));
     	
@@ -241,6 +254,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	pars.put(NAME_OF_OUTPUT_FILE, outfile);
     	// return the GUI parameter
 		return pars;
+
 	}
 	
     /**
@@ -256,6 +270,8 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 	
 	@Override
 	protected BufferedDataTable[] getOutputData(final ExecutionContext exec, String command, final BufferedDataTable[] inData) {
+		checkOutput(outfile+".out");
+		
 		BufferedDataContainer cont = exec.createDataContainer(getDataOutSpec1());
 		
     	DataCell[] c = new DataCell[]{FileCellFactory.create(outfile)};
@@ -264,6 +280,34 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
     	cont.close();
 		
         return new BufferedDataTable[]{cont.getTable()};
+	}
+	
+	private void checkOutput(String fileName){
+		double minAssignedPercent = SET_MINIMUM_ASSIGNED_PERCENT.getDoubleValue();
+		
+		BufferedReader reader = null;
+		try {
+			reader = new BufferedReader(new FileReader(new File(fileName)));
+			String line;
+			
+			while((line = reader.readLine()) != null){
+				Matcher m = Pattern.compile("\\((\\d+\\.\\d+)%\\)").matcher(line);
+				if(m.find()){
+					double assignedReads = Double.valueOf(m.group(1));
+					if(assignedReads < minAssignedPercent){
+						this.notifyWarningListeners("FeatureCounts output assigned only "+assignedReads+"% of all reads which is less than the desired threshold of "+minAssignedPercent+"%");
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+		    try {
+		        reader.close();
+		    } catch (IOException e) {
+		        e.printStackTrace();
+		    }
+		}
 	}
     
 	@Override

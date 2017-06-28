@@ -138,6 +138,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * These will override all the other settings.
 	 * @param inData Input data tables
 	 * @return
+	 * @throws Exception 
 	 */
 	protected abstract LinkedHashMap<String, String> getGUIParameters(final BufferedDataTable[] inData);
 	
@@ -173,7 +174,7 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * and by the GUI. 
 	 * Override levels: GUI parameter -> additional parameter -> default parameter file
 	 * @param inData Input data tables
-	 * @return
+	 * @return 
 	 */
 	protected ArrayList<String> getSetParameters(final BufferedDataTable[] inData) {
 		LinkedHashMap<String, String> pars = new LinkedHashMap<String, String>();			// merged parameter set

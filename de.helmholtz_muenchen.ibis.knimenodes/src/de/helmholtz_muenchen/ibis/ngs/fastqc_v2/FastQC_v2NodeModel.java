@@ -47,7 +47,6 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 /**
  * This is the model implementation of FastQC_v2.
  * 
- *
  * @author Paul Hager
  */
 public class FastQC_v2NodeModel extends HTExecutorNodeModel {
@@ -61,7 +60,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_THREADS = "NumberThreads";
 	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	
-	protected final static int defaultThreads = 4;
+	protected final static int DEFAULT_THREADS = 4;
 	
 	
 	private final SettingsModelString m_fastqc = 
@@ -71,7 +70,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 			new SettingsModelString(CFGKEY_OUTFOLDER,"");
 	
 	private final SettingsModelIntegerBounded m_threads = 
-			new SettingsModelIntegerBounded(CFGKEY_THREADS, defaultThreads, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_THREADS, DEFAULT_THREADS, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_additional_options = 
 			new SettingsModelString(CFGKEY_ADDITIONAL_OPTIONS,"");

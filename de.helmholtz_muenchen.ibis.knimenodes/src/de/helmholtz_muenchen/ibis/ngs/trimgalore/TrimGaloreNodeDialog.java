@@ -65,11 +65,11 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 	@Override
 	public void addToolDialogComponents() {
 		
-		final int defaultFastQCThreads = TrimGaloreNodeModel.defaultFastQCThreads;
-		final int defaultQuality = TrimGaloreNodeModel.defaultQuality;
-		final int defaultStringency = TrimGaloreNodeModel.defaultStringency;
-		final double defaultErrorRate = TrimGaloreNodeModel.defaultErrorRate;
-		final int defaultLength = TrimGaloreNodeModel.defaultLength;
+		final int defaultFastQCThreads = TrimGaloreNodeModel.DEFAULT_FASTQC_THREADS;
+		final int defaultQuality = TrimGaloreNodeModel.DEFAULT_QUALITY;
+		final int defaultStringency = TrimGaloreNodeModel.DEFAULT_STRINGENCY;
+		final double defaultErrorRate = TrimGaloreNodeModel.DEFAULT_ERROR_RATE;
+		final int defaultLength = TrimGaloreNodeModel.DEFAULT_LENGTH;
 		
 		final SettingsModelString cutadapt 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_CUTADAPT, "");
 		final SettingsModelString fastqc 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_FASTQC,"");

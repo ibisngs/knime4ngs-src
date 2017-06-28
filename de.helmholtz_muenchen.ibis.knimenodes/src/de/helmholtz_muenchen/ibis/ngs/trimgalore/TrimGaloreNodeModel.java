@@ -81,11 +81,11 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	public static final String CFGKEY_FASTQC_ADDITIONAL_OPTIONS = "FastqcAdditionalOptions";
 	
-	protected final static int defaultFastQCThreads = 4;
-	protected final static int defaultQuality = 20;
-	protected final static int defaultStringency = 1;
-	protected final static double defaultErrorRate = 0.1;
-	protected final static int defaultLength = 20;
+	protected final static int DEFAULT_FASTQC_THREADS = 4;
+	protected final static int DEFAULT_QUALITY = 20;
+	protected final static int DEFAULT_STRINGENCY = 1;
+	protected final static double DEFAULT_ERROR_RATE = 0.1;
+	protected final static int DEFAULT_LENGTH = 20;
 	
 	
 	private final SettingsModelString m_fastqc = 
@@ -107,10 +107,10 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 			new SettingsModelBoolean(CFGKEY_FASTQC_ENABLE, false);
 	
 	private final SettingsModelIntegerBounded m_threads = 
-			new SettingsModelIntegerBounded(CFGKEY_THREADS_FASTQC, defaultFastQCThreads, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_THREADS_FASTQC, DEFAULT_FASTQC_THREADS, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_quality = 
-			new SettingsModelIntegerBounded(CFGKEY_QUALITY, defaultQuality, 0, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_QUALITY, DEFAULT_QUALITY, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_adapter = 
 			new SettingsModelString(CFGKEY_ADAPTER, "");
@@ -125,16 +125,16 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	//		new SettingsModelIntegerBounded(CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_stringency = 
-			new SettingsModelIntegerBounded(CFGKEY_STRINGENCY, defaultStringency, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_STRINGENCY, DEFAULT_STRINGENCY, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelDoubleBounded m_error_rate = 
-			new SettingsModelDoubleBounded(CFGKEY_ERROR_RATE, defaultErrorRate, 0, 1);
+			new SettingsModelDoubleBounded(CFGKEY_ERROR_RATE, DEFAULT_ERROR_RATE, 0, 1);
 	
 	private final SettingsModelBoolean m_gzip = 
 			new SettingsModelBoolean(CFGKEY_GZIP, true);
 	
 	private final SettingsModelIntegerBounded m_length = 
-			new SettingsModelIntegerBounded(CFGKEY_LENGTH, defaultLength, 0, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_LENGTH, DEFAULT_LENGTH, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_additional_options =
 			new SettingsModelString(CFGKEY_ADDITIONAL_OPTIONS, "");
@@ -409,18 +409,26 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	if(readType.equals("single-end")){
     		if(file.endsWith(".fastq.gz")){
         		file = file.replace(".fastq.gz", "_trimmed.fq.gz");
-        	} else {
+        	} else if (file.endsWith(".fastq")){
         		file = file.replace(".fastq", "_trimmed.fq");
+        	} else if (file.endsWith("fq.gz")){
+        		file = file.replace(".fq.gz", "_trimmed.fq.gz");
+        	} else if (file.endsWith(".fq")){
+        		file = file.replace(".fq", "_trimmed.fq");
         	}
     	} else {
     		if(file.endsWith(".fastq.gz")){
     			file = file.replace(".fastq.gz", "_val_"+count+".fq.gz");
-        	} else {
-        		file = file.replace(".fastq", "_val_"+count+".fq");
+        	} else if (file.endsWith(".fastq")){
+        		file = file.replace(".fastq", "_val_"+count+".fq.gz");
+        	} else if (file.endsWith("fq.gz")){
+        		file = file.replace(".fq.gz", "_val_"+count+".fq.gz");
+        	} else if (file.endsWith(".fq")){
+        		file = file.replace(".fq", "_val_"+count+".fq.gz");
         	}
+    		count--;
     	}
     	
-    	count--;
     	
     	return file;
     }

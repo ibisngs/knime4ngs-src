@@ -49,7 +49,7 @@ public class FastQC_v2NodeDialog extends HTExecutorNodeDialog {
 
     }
     
-    final int defaultThreads = FastQC_v2NodeModel.defaultThreads;
+    final int defaultThreads = FastQC_v2NodeModel.DEFAULT_THREADS;
 
 	@Override
 	public void addToolDialogComponents() {
