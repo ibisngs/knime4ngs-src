@@ -20,31 +20,21 @@
 package de.helmholtz_muenchen.ibis.ngs.fastqc_v2;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.StringUtils;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
 import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
-import org.knime.core.node.defaultnodesettings.SettingsModelInteger;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.ngs.gatkbaserecalibration.GATKBaseRecalibrationNodeModel;
-import de.helmholtz_muenchen.ibis.ngs.vep.VEPNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -71,6 +61,8 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_THREADS = "NumberThreads";
 	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	
+	private static final int defaultThreads = 4;
+	
 	
 	private final SettingsModelString m_fastqc = 
 			new SettingsModelString(CFGKEY_FASTQC,"");
@@ -79,7 +71,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 			new SettingsModelString(CFGKEY_OUTFOLDER,"");
 	
 	private final SettingsModelIntegerBounded m_threads = 
-			new SettingsModelIntegerBounded(CFGKEY_THREADS, 4, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_THREADS, defaultThreads, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_additional_options = 
 			new SettingsModelString(CFGKEY_ADDITIONAL_OPTIONS,"");
@@ -125,25 +117,38 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	String outFile = inFile1;
     	String outFile2 = "";
     	
+    	// Beautify outfolderPath string
+    	String outFolderPath = m_outfolder.getStringValue();
+    	outFolderPath = outFolderPath.trim();
+    	if(!outFolderPath.equals("") && !outFolderPath.endsWith(System.getProperty("file.separator"))){
+    		outFolderPath += System.getProperty("file.separator");
+    	}
+    	
+    	int numThreads = m_threads.getIntValue();
+    	
+    	String additionalOpts = m_additional_options.getStringValue();
+    	additionalOpts.trim();
+    	
     	ArrayList<String> cmd = new ArrayList<String>();
     	cmd.add(IO.processFilePath(m_fastqc.getStringValue()));
     	
     	// Create outfile in outfolder if outfolder specified, otherwise at same location as infile
-    	if(!m_outfolder.getStringValue().equals("")){
-    		cmd.add("-o="+IO.processFilePath(m_outfolder.getStringValue()));
+    	if(!outFolderPath.equals("")){
+    		outFile = outFolderPath+inFile1.substring(inFile1.lastIndexOf(System.getProperty("file.separator")), inFile1.length());
+    		cmd.add("-o="+IO.processFilePath(outFolderPath));
     	} 
     	
     	
     	File lockFile = new File(outFile.substring(0,outFile.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
     	
-    	if(m_threads.getIntValue() != 1){
-    		cmd.add("-t="+m_threads.getIntValue());
+    	if(numThreads != 1){
+    		cmd.add("-t="+numThreads);
     	}
     	
-    	if(!m_additional_options.getStringValue().equals("")){
+    	if(!additionalOpts.equals("")){
 			setWarningMessage("NOTE! All additional FastQC options MUST use equals operator to bind arguments to options. i.e. --k=5");
 			
-			String[] addOpts = m_additional_options.getStringValue().split(" ");
+			String[] addOpts = additionalOpts.split(" ");
     		for(String opt : addOpts){
     			cmd.add(opt);
     		}
@@ -168,6 +173,11 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 			
 			outFile2 = inFile2;
 			
+			// Create outfile in outfolder if outfolder specified, otherwise at same location as infile
+	    	if(!outFolderPath.equals("")){
+	    		outFile2 = outFolderPath+inFile2.substring(inFile2.lastIndexOf(System.getProperty("file.separator")), inFile2.length());
+	    	} 
+			
 			lockFile = new File(outFile2.substring(0,outFile2.lastIndexOf(".")) + ".FastQC" + SuccessfulRunChecker.LOCK_ENDING);
 			command[command.length-1] = inFile2;
 			
@@ -186,11 +196,11 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	    
 	    if(readType.equals("single-end")){
 	    	c = new FileCell[]{
-		    		FileCellFactory.create(outFile)};
+		    		FileCellFactory.create(inFile1)};
 	    } else {
 	    	c = new FileCell[]{
-	    			FileCellFactory.create(outFile),
-	       			FileCellFactory.create(outFile2)};
+	    			FileCellFactory.create(inFile1),
+	       			FileCellFactory.create(inFile2)};
 	    }
 	    
 	    cont.addRowToTable(new DefaultRow("Row0", c));
@@ -198,8 +208,6 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	cont.close();
     	BufferedDataTable outTable = cont.getTable();
     	
-    	//deleteZipFiles(inFile1, inFile2);
-
 		return new BufferedDataTable[]{outTable};
     }
 
@@ -217,8 +225,6 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	}
     	
     	super.updatePrefs();
-
-        // TODO: generated method stub
         return new DataTableSpec[]{createSpecs()};
     }
     
@@ -243,57 +249,6 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	
     	return out;
     }
-    
-    /**
-     * @see org.knime.core.node.NodeModel
-     *      #validateSettings(org.knime.core.node.NodeSettingsRO)
-     */
-     @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-    	// delegate this to the settings models
-    	
-    	 m_fastqc.validateSettings(settings);
-    	 m_outfolder.validateSettings(settings);
-    	 m_threads.validateSettings(settings);
-    	 m_additional_options.validateSettings(settings);
-    }
-     
-     /**
-      * @see org.knime.core.node.NodeModel
-      *      #loadValidatedSettingsFrom(org.knime.core.node.NodeSettingsRO)
-      */
-      @Override
-     protected void loadValidatedSettingsFrom(
-             final NodeSettingsRO settings)
-             throws InvalidSettingsException {
-             
-     	// loads the values from the settings into the models.
-         // It can be safely assumed that the settings are validated by the 
-         // method below.
-         
-    	  m_fastqc.loadSettingsFrom(settings);
-    	  m_outfolder.loadSettingsFrom(settings);
-    	  m_threads.loadSettingsFrom(settings);
-    	  m_additional_options.loadSettingsFrom(settings);
-
-     }
-      
-      /**
-       * @see org.knime.core.node.NodeModel
-       *      #saveSettingsTo(org.knime.core.node.NodeSettings)
-       */
-       @Override
-      protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-          // save settings to the config object.
-      	
-    	   m_fastqc.saveSettingsTo(settings);
-    	   m_outfolder.saveSettingsTo(settings);
-    	   m_threads.saveSettingsTo(settings);
-    	   m_additional_options.saveSettingsTo(settings);
-      }
  
 }
 

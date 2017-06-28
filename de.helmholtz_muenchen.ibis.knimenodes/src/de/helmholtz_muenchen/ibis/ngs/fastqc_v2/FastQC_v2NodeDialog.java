@@ -20,18 +20,13 @@
 package de.helmholtz_muenchen.ibis.ngs.fastqc_v2;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
-import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
-import org.knime.core.node.defaultnodesettings.DialogComponentOptionalString;
 import org.knime.core.node.defaultnodesettings.DialogComponentString;
-import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
-import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
 
 /**
@@ -53,13 +48,15 @@ public class FastQC_v2NodeDialog extends HTExecutorNodeDialog {
     protected FastQC_v2NodeDialog() {
 
     }
+    
+    final int defaultThreads = 4;
 
 	@Override
 	public void addToolDialogComponents() {
 		//options tab
 		final SettingsModelString outfolder = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_OUTFOLDER,"");
 		final SettingsModelString fastqc = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_FASTQC,"");
-		final SettingsModelIntegerBounded threads = new SettingsModelIntegerBounded(FastQC_v2NodeModel.CFGKEY_THREADS,4, 1, Integer.MAX_VALUE);
+		final SettingsModelIntegerBounded threads = new SettingsModelIntegerBounded(FastQC_v2NodeModel.CFGKEY_THREADS, defaultThreads, 1, Integer.MAX_VALUE);
 		final SettingsModelString additionalOptions = new SettingsModelString(FastQC_v2NodeModel.CFGKEY_ADDITIONAL_OPTIONS,"");
 		
 		createNewGroup("Folder for output files");
