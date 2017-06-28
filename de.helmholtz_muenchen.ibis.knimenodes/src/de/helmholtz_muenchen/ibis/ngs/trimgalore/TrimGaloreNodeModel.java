@@ -25,17 +25,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.apache.commons.lang3.StringUtils;
-import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
-import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
 import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
@@ -57,7 +50,6 @@ import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 
@@ -219,7 +211,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> cmd = new ArrayList<String>();
     	cmd.add(IO.processFilePath(m_trimg.getStringValue()));
     	
-    	if(m_cutadapt.equals("")|| Files.notExists(Paths.get(m_cutadapt.getStringValue()))) {
+    	if(m_cutadapt.equals("") || Files.notExists(Paths.get(m_cutadapt.getStringValue()))) {
     		setWarningMessage("Cutadapt PATH was not specified!");
     	} else {
     		cmd.add("--path_to_cutadapt="+IO.processFilePath(m_cutadapt.getStringValue()));
@@ -485,133 +477,6 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	
     	
     	return out;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveSettingsTo(final NodeSettingsWO settings) {
-
-        // TODO save user settings to the config object.
-    	m_fastqc.saveSettingsTo(settings);
-    	m_trimg.saveSettingsTo(settings);
-    	m_cutadapt.saveSettingsTo(settings);
-    	m_outfolder_fastqc.saveSettingsTo(settings);
-    	m_outfolder_trimg.saveSettingsTo(settings);
-    	m_fastqc_enabled.saveSettingsTo(settings);
-  	  	m_threads.saveSettingsTo(settings);
-  	 	m_quality.saveSettingsTo(settings);
-  	 	m_adapter.saveSettingsTo(settings);
-  		m_adapter2.saveSettingsTo(settings);
-  		m_preset_adapter.saveSettingsTo(settings);
-  		//m_max_length.saveSettingsTo(settings);
-  		m_stringency.saveSettingsTo(settings);
-  		m_error_rate.saveSettingsTo(settings);
-  		m_gzip.saveSettingsTo(settings);
-  		m_length.saveSettingsTo(settings);
-  		m_additional_options.saveSettingsTo(settings);
-  		m_fastqc_additional_options.saveSettingsTo(settings);
-        
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-        // TODO load (valid) settings from the config object.
-        // It can be safely assumed that the settings are valided by the 
-        // method below.
-        
-    	m_fastqc.loadSettingsFrom(settings);
-    	m_trimg.loadSettingsFrom(settings);
-    	m_cutadapt.loadSettingsFrom(settings);
-    	m_outfolder_fastqc.loadSettingsFrom(settings);
-    	m_outfolder_trimg.loadSettingsFrom(settings);
-    	m_fastqc_enabled.loadSettingsFrom(settings);
-  	  	m_threads.loadSettingsFrom(settings);
-  	  	m_quality.loadSettingsFrom(settings);
-	 	m_adapter.loadSettingsFrom(settings);
-		m_adapter2.loadSettingsFrom(settings);
-		m_preset_adapter.loadSettingsFrom(settings);
-		//m_max_length.loadSettingsFrom(settings);
-		m_stringency.loadSettingsFrom(settings);
-		m_error_rate.loadSettingsFrom(settings);
-		m_gzip.loadSettingsFrom(settings);
-		m_length.loadSettingsFrom(settings);
-		m_additional_options.loadSettingsFrom(settings);
-  		m_fastqc_additional_options.loadSettingsFrom(settings);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void validateSettings(final NodeSettingsRO settings)
-            throws InvalidSettingsException {
-            
-        // TODO check if the settings could be applied to our model
-        // e.g. if the count is in a certain range (which is ensured by the
-        // SettingsModel).
-        // Do not actually set any values of any member variables.
-    	
-    	m_fastqc.validateSettings(settings);
-    	m_trimg.validateSettings(settings);
-    	m_cutadapt.validateSettings(settings);
-    	m_outfolder_fastqc.validateSettings(settings);
-    	m_outfolder_trimg.validateSettings(settings);
-    	m_fastqc_enabled.validateSettings(settings);
-  	  	m_threads.validateSettings(settings);
-  	  	m_quality.validateSettings(settings);
-	 	m_adapter.validateSettings(settings);
-		m_adapter2.validateSettings(settings);
-		m_preset_adapter.validateSettings(settings);
-		//m_max_length.validateSettings(settings);
-		m_stringency.validateSettings(settings);
-		m_error_rate.validateSettings(settings);
-		m_gzip.validateSettings(settings);
-		m_length.validateSettings(settings);
-		m_additional_options.validateSettings(settings);
-  		m_fastqc_additional_options.validateSettings(settings);
-
-
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void loadInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-        
-        // TODO load internal data. 
-        // Everything handed to output ports is loaded automatically (data
-        // returned by the execute method, models loaded in loadModelContent,
-        // and user settings set through loadSettingsFrom - is all taken care 
-        // of). Load here only the other internals that need to be restored
-        // (e.g. data used by the views).
-
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void saveInternals(final File internDir,
-            final ExecutionMonitor exec) throws IOException,
-            CanceledExecutionException {
-       
-        // TODO save internal models. 
-        // Everything written to output ports is saved automatically (data
-        // returned by the execute method, models saved in the saveModelContent,
-        // and user settings saved through saveSettingsTo - is all taken care 
-        // of). Save here only the other internals that need to be preserved
-        // (e.g. data used by the views).
-
     }
 
 }
