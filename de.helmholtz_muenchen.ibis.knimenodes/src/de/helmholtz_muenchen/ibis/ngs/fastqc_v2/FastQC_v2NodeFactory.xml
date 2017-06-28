@@ -65,7 +65,7 @@
     
     <ports>
         <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 <br></br>Cell 1 (Optional): Path to ReadFile2.</inPort>
-        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2.<br></br>Cell 2: Path to FilterFile</outPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to ReadFile1<br></br>Cell 1 (Optional): Path to ReadFile2.</outPort>
     </ports>  
        
     <views>

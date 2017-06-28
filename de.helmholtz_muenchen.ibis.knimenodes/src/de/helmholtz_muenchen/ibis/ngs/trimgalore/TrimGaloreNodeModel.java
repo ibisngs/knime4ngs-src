@@ -20,7 +20,6 @@
 package de.helmholtz_muenchen.ibis.ngs.trimgalore;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,7 +30,6 @@ import org.knime.core.data.DataTableSpec;
 import org.knime.core.data.def.DefaultRow;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
-import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
@@ -47,11 +45,8 @@ import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCellFactory;
 
 import org.knime.core.node.ExecutionContext;
-import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeLogger;
-import org.knime.core.node.NodeSettingsRO;
-import org.knime.core.node.NodeSettingsWO;
 
 
 /**
@@ -86,6 +81,12 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	public static final String CFGKEY_FASTQC_ADDITIONAL_OPTIONS = "FastqcAdditionalOptions";
 	
+	protected final static int defaultFastQCThreads = 4;
+	protected final static int defaultQuality = 20;
+	protected final static int defaultStringency = 1;
+	protected final static double defaultErrorRate = 0.1;
+	protected final static int defaultLength = 20;
+	
 	
 	private final SettingsModelString m_fastqc = 
 			new SettingsModelString(CFGKEY_FASTQC,"");
@@ -106,10 +107,10 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 			new SettingsModelBoolean(CFGKEY_FASTQC_ENABLE, false);
 	
 	private final SettingsModelIntegerBounded m_threads = 
-			new SettingsModelIntegerBounded(CFGKEY_THREADS_FASTQC, 4, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_THREADS_FASTQC, defaultFastQCThreads, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_quality = 
-			new SettingsModelIntegerBounded(CFGKEY_QUALITY, 20, 0, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_QUALITY, defaultQuality, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_adapter = 
 			new SettingsModelString(CFGKEY_ADAPTER, "");
@@ -124,16 +125,16 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	//		new SettingsModelIntegerBounded(CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelIntegerBounded m_stringency = 
-			new SettingsModelIntegerBounded(CFGKEY_STRINGENCY, 1, 1, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_STRINGENCY, defaultStringency, 1, Integer.MAX_VALUE);
 	
 	private final SettingsModelDoubleBounded m_error_rate = 
-			new SettingsModelDoubleBounded(CFGKEY_ERROR_RATE, 0.1, 0, 1);
+			new SettingsModelDoubleBounded(CFGKEY_ERROR_RATE, defaultErrorRate, 0, 1);
 	
 	private final SettingsModelBoolean m_gzip = 
 			new SettingsModelBoolean(CFGKEY_GZIP, true);
 	
 	private final SettingsModelIntegerBounded m_length = 
-			new SettingsModelIntegerBounded(CFGKEY_LENGTH, 20, 0, Integer.MAX_VALUE);
+			new SettingsModelIntegerBounded(CFGKEY_LENGTH, defaultLength, 0, Integer.MAX_VALUE);
 	
 	private final SettingsModelString m_additional_options =
 			new SettingsModelString(CFGKEY_ADDITIONAL_OPTIONS, "");
@@ -155,9 +156,9 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected TrimGaloreNodeModel() {
-    
-        // TODO one incoming port and one outgoing port is assumed
-        super(1, 1);
+    	
+    	
+    	super(1, 1);
         
         addSetting(m_fastqc);
         addSetting(m_trimg);
@@ -190,6 +191,32 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     protected BufferedDataTable[] execute(final BufferedDataTable[] inData,
             final ExecutionContext exec) throws Exception {
     	
+    	String cutadaptPath = m_cutadapt.getStringValue();
+    	String fastqcPath = m_fastqc.getStringValue();
+    	String outFolderTrimG = m_outfolder_trimg.getStringValue();
+    	int quality = m_quality.getIntValue();
+    	String adapter = m_adapter.getStringValue();
+    	String adapter2 = m_adapter2.getStringValue();
+    	String presetAdapter = m_preset_adapter.getStringValue();
+    	int stringency = m_stringency.getIntValue(); 
+    	double errorRate = m_error_rate.getDoubleValue();
+    	int length = m_length.getIntValue();
+    	String outfolderFastQC = m_outfolder_fastqc.getStringValue();
+    	int fastqcThreads = m_threads.getIntValue();
+    	String fastqcAddOpts = m_fastqc_additional_options.getStringValue();
+    	String trimgAddOpts = m_additional_options.getStringValue();
+    	
+    	// Beautify outfolder paths
+    	outFolderTrimG = outFolderTrimG.trim();
+    	if(!outFolderTrimG.equals("") && !outFolderTrimG.endsWith(System.getProperty("file.separator"))){
+    		outFolderTrimG += System.getProperty("file.separator");
+    	}
+    	
+    	outfolderFastQC = outfolderFastQC.trim();
+    	if(!outfolderFastQC.equals("") && !outfolderFastQC.endsWith(System.getProperty("file.separator"))){
+    		outfolderFastQC += System.getProperty("file.separator");
+    	}
+    	
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
@@ -206,29 +233,27 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	String outFile2 = "";
     	
     	
-    	
-    	
     	ArrayList<String> cmd = new ArrayList<String>();
     	cmd.add(IO.processFilePath(m_trimg.getStringValue()));
     	
-    	if(m_cutadapt.equals("") || Files.notExists(Paths.get(m_cutadapt.getStringValue()))) {
+    	if(cutadaptPath.equals("") || Files.notExists(Paths.get(cutadaptPath))) {
     		setWarningMessage("Cutadapt PATH was not specified!");
     	} else {
-    		cmd.add("--path_to_cutadapt="+IO.processFilePath(m_cutadapt.getStringValue()));
+    		cmd.add("--path_to_cutadapt="+IO.processFilePath(cutadaptPath));
     	}
     	
-    	if(m_fastqc.equals("")|| Files.notExists(Paths.get(m_fastqc.getStringValue()))) {
+    	if(fastqcPath.equals("")|| Files.notExists(Paths.get(fastqcPath))) {
     		setWarningMessage("FastQC PATH was not specified!");
     	} else {
     		//remove 'fastqc' at end of path
-    		int pos = m_fastqc.getStringValue().lastIndexOf(System.getProperty("file.separator"));
-    		path_variable +=m_fastqc.getStringValue().substring(0,pos)+":";
+    		int pos = fastqcPath.lastIndexOf(System.getProperty("file.separator"));
+    		path_variable += fastqcPath.substring(0,pos)+":";
     	}
     	
     	path_variable += System.getenv("PATH");
     	
-    	if(!m_outfolder_trimg.getStringValue().equals("")){
-    		cmd.add("-o="+IO.processFilePath(m_outfolder_trimg.getStringValue()));
+    	if(!outFolderTrimG.equals("")){
+    		cmd.add("-o="+IO.processFilePath(outFolderTrimG));
     	} else {
     		String inFolder = inFile1.substring(0, inFile1.lastIndexOf(System.getProperty("file.separator"))+1);
     		cmd.add("-o="+inFolder);
@@ -236,24 +261,24 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	
     	File lockFile = new File(outFile.substring(0,outFile.lastIndexOf(".")) + ".TrimG" + SuccessfulRunChecker.LOCK_ENDING);
     	
-    	if(m_quality.getIntValue() != 20){
-    		cmd.add("-q="+m_quality.getIntValue());
+    	if(quality != 20){
+    		cmd.add("-q="+quality);
     	}
     	
-    	if(!m_adapter.getStringValue().equals("")){
-    		cmd.add("-a="+m_adapter.getStringValue());
+    	if(!adapter.equals("")){
+    		cmd.add("-a="+adapter);
     	}
     	
-    	if(!m_adapter2.getStringValue().equals("")){
-    		cmd.add("-a2="+m_adapter2.getStringValue());
+    	if(!adapter2.equals("")){
+    		cmd.add("-a2="+adapter2);
     	}
     	
-    	if(!m_preset_adapter.getStringValue().equals("") && m_adapter.getStringValue().equals("")){
-    		if(m_preset_adapter.getStringValue().equals("illumina")){
+    	if(!presetAdapter.equals("") && adapter.equals("")){
+    		if(presetAdapter.equals("illumina")){
     			cmd.add("--illumina");
-    		} else if(m_preset_adapter.getStringValue().equals("nextera")){
+    		} else if(presetAdapter.equals("nextera")){
     			cmd.add("--nextera");
-    		} else if (m_preset_adapter.getStringValue().equals("small_rna")){
+    		} else if (presetAdapter.equals("small_rna")){
     			cmd.add("--small_rna");
     		}
     	}
@@ -264,12 +289,12 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	}
     	*/
     	
-    	if(m_stringency.getIntValue() != 1){
-    		cmd.add("--stringency="+m_stringency.getIntValue());
+    	if(stringency != 1){
+    		cmd.add("--stringency="+stringency);
     	}
     	
-    	if(m_error_rate.getDoubleValue() != 0.1){
-    		cmd.add("-e="+m_error_rate.getDoubleValue());
+    	if(errorRate != 0.1){
+    		cmd.add("-e="+errorRate);
     	}
     	
     	if(m_gzip.getBooleanValue()){
@@ -278,23 +303,23 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		cmd.add("--dont_gzip");
     	}
     	
-    	if(m_length.getIntValue() != 20){
-    		cmd.add("--length="+m_length.getIntValue());
+    	if(length != 20){
+    		cmd.add("--length="+length);
     	}
     	
     	if(m_fastqc_enabled.getBooleanValue()){
     		String fastqcString = "";
-    		if(m_threads.getIntValue() != 1 || !m_outfolder_fastqc.getStringValue().equals("")){
+    		if(fastqcThreads != 1 || !outfolderFastQC.equals("")){
     			fastqcString += "--fastqc_args=";
-    			if(m_threads.getIntValue() != 1){
-    				fastqcString += "-t="+m_threads.getIntValue()+" ";
+    			if(fastqcThreads != 1){
+    				fastqcString += "-t="+fastqcThreads+" ";
     			}
-    			if(!m_outfolder_fastqc.getStringValue().equals("")){
-    				fastqcString += "-o="+IO.processFilePath(m_outfolder_fastqc.getStringValue())+" ";
+    			if(!outfolderFastQC.equals("")){
+    				fastqcString += "-o="+IO.processFilePath(outfolderFastQC)+" ";
     			}
-    			if(!m_fastqc_additional_options.getStringValue().equals("")){
+    			if(!fastqcAddOpts.equals("")){
     				setWarningMessage("NOTE! All additional FastQC options MUST use equals operator to bind arguments to options. i.e. --k=5");
-    				fastqcString += m_fastqc_additional_options.getStringValue();	
+    				fastqcString += fastqcAddOpts;	
     			}
     			fastqcString = fastqcString.trim();
     			fastqcString += "";
@@ -304,9 +329,9 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     		cmd.add(fastqcString);
     	}
     	
-    	if(!m_additional_options.getStringValue().equals("")){
+    	if(!trimgAddOpts.equals("")){
     		setWarningMessage("NOTE! All additional TrimGalore options MUST use equals operator to bind arguments to options. i.e. --length_1=30");
-    		String[] addOpts = m_additional_options.getStringValue().split(" ");
+    		String[] addOpts = trimgAddOpts.split(" ");
     		for(String opt : addOpts){
     			cmd.add(opt);
     		}
@@ -374,12 +399,13 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
      *  
      */
     private String createOutputName(String file){
-    	if(!m_outfolder_trimg.getStringValue().equals("")){
-    		file = m_outfolder_trimg.getStringValue()+System.getProperty("file.separator")+file.substring(file.lastIndexOf(System.getProperty("file.separator"))+1, file.length());
+    	
+    	String outFolderTrimG = m_outfolder_trimg.getStringValue();
+    	
+    	if(!outFolderTrimG.equals("")){
+    		file = outFolderTrimG+System.getProperty("file.separator")+file.substring(file.lastIndexOf(System.getProperty("file.separator"))+1, file.length());
     	}
-    	
-    	System.out.println();
-    	
+    	    	
     	if(readType.equals("single-end")){
     		if(file.endsWith(".fastq.gz")){
         		file = file.replace(".fastq.gz", "_trimmed.fq.gz");
@@ -405,25 +431,9 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected void reset() {
-        // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
-        
-        // TODO: check if user settings are available, fit to the incoming
-        // table structure, and the incoming types are feasible for the node
-        // to execute. If the node can execute in its current state return
-        // the spec of its output data table(s) (if you can, otherwise an array
-        // with null elements), or throw an exception with a useful user message
-    	
+           	
     	CompatibilityChecker CC = new CompatibilityChecker();
     	readType = CC.getReadType(inSpecs, 0);
     	if(CC.getWarningStatus()){
@@ -452,7 +462,6 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	
     	super.updatePrefs();
 
-        // TODO: generated method stub
         return new DataTableSpec[]{createSpecs()};
 
     }

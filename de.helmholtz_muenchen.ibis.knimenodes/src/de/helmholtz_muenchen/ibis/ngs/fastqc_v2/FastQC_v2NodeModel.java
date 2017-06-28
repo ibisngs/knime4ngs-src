@@ -61,7 +61,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	public static final String CFGKEY_THREADS = "NumberThreads";
 	public static final String CFGKEY_ADDITIONAL_OPTIONS = "AdditionalOptions";
 	
-	private static final int defaultThreads = 4;
+	protected final static int defaultThreads = 4;
 	
 	
 	private final SettingsModelString m_fastqc = 
@@ -134,7 +134,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	
     	// Create outfile in outfolder if outfolder specified, otherwise at same location as infile
     	if(!outFolderPath.equals("")){
-    		outFile = outFolderPath+inFile1.substring(inFile1.lastIndexOf(System.getProperty("file.separator")), inFile1.length());
+    		outFile = outFolderPath+inFile1.substring(inFile1.lastIndexOf(System.getProperty("file.separator"))+1, inFile1.length());
     		cmd.add("-o="+IO.processFilePath(outFolderPath));
     	} 
     	

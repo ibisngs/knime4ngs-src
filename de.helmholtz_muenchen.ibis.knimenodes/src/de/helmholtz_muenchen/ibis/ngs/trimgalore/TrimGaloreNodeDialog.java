@@ -56,6 +56,8 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 	private SettingsModelIntegerBounded threads;
 	private SettingsModelString outfolder_fastqc;
 	
+	
+	
 
     protected TrimGaloreNodeDialog() {}
 
@@ -63,12 +65,18 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 	@Override
 	public void addToolDialogComponents() {
 		
+		final int defaultFastQCThreads = TrimGaloreNodeModel.defaultFastQCThreads;
+		final int defaultQuality = TrimGaloreNodeModel.defaultQuality;
+		final int defaultStringency = TrimGaloreNodeModel.defaultStringency;
+		final double defaultErrorRate = TrimGaloreNodeModel.defaultErrorRate;
+		final int defaultLength = TrimGaloreNodeModel.defaultLength;
+		
 		final SettingsModelString cutadapt 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_CUTADAPT, "");
 		final SettingsModelString fastqc 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_FASTQC,"");
 		final SettingsModelString trimg						= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_TRIMG, "");
 		
 		fastqc_enabled										= new SettingsModelBoolean(TrimGaloreNodeModel.CFGKEY_FASTQC_ENABLE, false);
-		threads 											= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_THREADS_FASTQC, 4, 1, Integer.MAX_VALUE);	
+		threads 											= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_THREADS_FASTQC, defaultFastQCThreads, 1, Integer.MAX_VALUE);	
 		outfolder_fastqc 									= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_OUTFOLDER_FASTQC,"");    	
 		
 		final SettingsModelString outfolder_trimg 			= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_OUTFOLDER_TRIMG,"");
@@ -77,19 +85,21 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 		final SettingsModelString adapter2 					= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_ADAPTER2,"");
 		final SettingsModelString preset_adapter 			= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_PRESET_ADAPTER,"");
 		
-		final SettingsModelIntegerBounded quality 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_QUALITY, 20, 0, Integer.MAX_VALUE);
-		final SettingsModelIntegerBounded stringency 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_STRINGENCY, 1, 1, Integer.MAX_VALUE);
-		final SettingsModelDoubleBounded error_rate 		= new SettingsModelDoubleBounded(TrimGaloreNodeModel.CFGKEY_ERROR_RATE, 0.1, 0, 1);
+		final SettingsModelIntegerBounded quality 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_QUALITY, defaultQuality, 0, Integer.MAX_VALUE);
+		final SettingsModelIntegerBounded stringency 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_STRINGENCY, defaultStringency, 1, Integer.MAX_VALUE);
+		final SettingsModelDoubleBounded error_rate 		= new SettingsModelDoubleBounded(TrimGaloreNodeModel.CFGKEY_ERROR_RATE, defaultErrorRate, 0, 1);
 		
 		final SettingsModelBoolean gzip 					= new SettingsModelBoolean(TrimGaloreNodeModel.CFGKEY_GZIP, true);
 		
 		//final SettingsModelIntegerBounded max_length 		= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_MAX_LENGTH, 0, 0, Integer.MAX_VALUE);
-		final SettingsModelIntegerBounded length 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_LENGTH, 20, 0, Integer.MAX_VALUE);
+		final SettingsModelIntegerBounded length 			= new SettingsModelIntegerBounded(TrimGaloreNodeModel.CFGKEY_LENGTH, defaultLength, 0, Integer.MAX_VALUE);
 		
 		final SettingsModelString additional_options 		= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_ADDITIONAL_OPTIONS, "");
 		fastqc_additional_options							= new SettingsModelString(TrimGaloreNodeModel.CFGKEY_FASTQC_ADDITIONAL_OPTIONS, "");
 
-				
+		
+		boolean enableFastQC = fastqc_enabled.getBooleanValue();
+		
 		// Preferences page settings
 		addPrefPageSetting(fastqc, IBISKNIMENodesPlugin.FASTQC);
     	addPrefPageSetting(trimg, IBISKNIMENodesPlugin.TRIMG);
@@ -140,24 +150,27 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
     	createNewTab("FastQC Options");
     	addDialogComponent(new DialogComponentBoolean(fastqc_enabled, "Execute FastQC after Trim Galore"));
     	
-    	outfolder_fastqc.setEnabled(fastqc_enabled.getBooleanValue());
-    	threads.setEnabled(fastqc_enabled.getBooleanValue());
-    	fastqc_additional_options.setEnabled(fastqc_enabled.getBooleanValue());
+    	outfolder_fastqc.setEnabled(enableFastQC);
+    	threads.setEnabled(enableFastQC);
+    	fastqc_additional_options.setEnabled(enableFastQC);
     	
     	createNewGroup("Folder for fastqc output files");
     	addDialogComponent(new DialogComponentFileChooser(outfolder_fastqc, "his_id_TrimGalore_OUT_FASTQC", JFileChooser.OPEN_DIALOG, true));
 
     	createNewGroup("Options");
-    	addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 4));
+    	addDialogComponent(new DialogComponentNumber(threads, "Number of threads", 1));
     	addDialogComponent(new DialogComponentString(fastqc_additional_options, "Additional FastQC options"));
     	
     	// Makes the fastqc options tab dependant on the fastqc checkbox
 		fastqc_enabled.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(final ChangeEvent e) {
-				outfolder_fastqc.setEnabled(fastqc_enabled.getBooleanValue());
-				threads.setEnabled(fastqc_enabled.getBooleanValue());
-				fastqc_additional_options.setEnabled(fastqc_enabled.getBooleanValue());
+				
+				boolean enableFastQC = fastqc_enabled.getBooleanValue();
+				
+				outfolder_fastqc.setEnabled(enableFastQC);
+				threads.setEnabled(enableFastQC);
+				fastqc_additional_options.setEnabled(enableFastQC);
 			}
 		});
 	}
@@ -165,9 +178,11 @@ public class TrimGaloreNodeDialog extends HTExecutorNodeDialog {
 	public void onOpen() {
 		super.onOpen();
 		
-		outfolder_fastqc.setEnabled(fastqc_enabled.getBooleanValue());
-    	threads.setEnabled(fastqc_enabled.getBooleanValue());
-    	fastqc_additional_options.setEnabled(fastqc_enabled.getBooleanValue());
+		boolean enableFastQC = fastqc_enabled.getBooleanValue();
+		
+		outfolder_fastqc.setEnabled(enableFastQC);
+    	threads.setEnabled(enableFastQC);
+    	fastqc_additional_options.setEnabled(enableFastQC);
 	}
 }
 
