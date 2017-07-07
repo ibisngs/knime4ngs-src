@@ -2,7 +2,7 @@
 <feature
       id="de.helmholtz_muenchen.ibis.knimenodes.feature"
       label="KNIME4NGS"
-      version="1.7.0.qualifier"
+      version="1.8.0.qualifier"
       provider-name="IBIS Helmholtz Muenchen"
       os="linux">
 
