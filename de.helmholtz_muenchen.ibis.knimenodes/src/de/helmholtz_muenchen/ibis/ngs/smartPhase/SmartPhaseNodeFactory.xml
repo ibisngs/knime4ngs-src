@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE knimeNode PUBLIC "-//UNIKN//DTD KNIME Node 2.0//EN" "http://www.knime.org/Node.dtd">
+<knimeNode icon="./icon_d_green.png" type="Source">
+    <name>SmartPhase</name>
+    
+    <shortDescription>
+        Resolves haplotype phase of filtered rare variants in desired genomic regions to determine possible compound heterozygosity.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>
+		SmartPhase resolves haplotype phase in targeted genomic regions with the ultimate goal of informing on compound heterozygosity for clinical analysis.
+		Through a combination of trio information and phase informative reads, high quality filtered variants of importance have their phase deduced and noted
+		along with a confidence score. 
+		<br></br>
+    	<br></br>
+
+		</intro>
+        
+        
+        <option name="Gene Regions File">BED file specifying genomic regions of interest that are to be searched for filtered variants. 
+        				No variants outside of these regions will be analysed. A valid BED file must be supplied. Optionally, if a column
+        				with the header "name" is provided, the name of the genomic region will be displayed in the final output. Default 
+        				column for this option is 4 (1-based).
+                        </option>
+                        
+        <option name="Filtered Variants File">File containing all potentially harmful variants to be analysed for compound heterozygosity to 
+        				assist in clinical analysis. Accepts either VCF or output from a gemini db query. If not in VCF, must contain column
+        				headers "chrom", "start", "ref", and "alt". NOTE: As gemini output is assumed in this case, "start" values must be 0-based! 
+        				NOTE: Must be sorted by chrom and then start!
+                        </option>
+                        
+        <option name="All Variants File">VCF file containing all variants of the patient. If trio information is available and should be used,
+        				variants of all parents must also be contained within this file. Must be indexed.
+                        </option>
+                       
+        <!--
+        
+         <option name="Reads">Comma separated list of BAM files to be used for phase informative reads during haplotype resolution. Must be sorted
+        				by chromosome and then start. All BAM files must be indexed.
+                        </option> 
+        
+        <option name="Minimum Mapping Quality">Comma separated list of mapping quality cutoff values to be used when examining reads. Each value
+        				corresponds to the minMapQ for an input BAM file and thus there must be an equal number of arguments for both options.
+                        </option> 
+                        
+     	-->
+                        
+        <option name="Patient ID">Official ID of patient to be analyzed. Must be equal to patient ID used in AllVariants.vcf.
+                        </option>
+                        
+        <option name="Folder for smartPhase output files">Output directory where all predictions and statistics should be written to.
+                        </option>   
+                        
+        <option name="Trio Information Available">Boolean flag indicating if trio information is available and should be used while phasing.
+                        </option>
+                        
+        <option name="Family Pedigree File">Pedigree file containing familial information indicating which IDs correspond to the father and mother
+        				of the patient. Used when analyzing vcf file to know which columns to examine for variant infos. ID used for "Patient ID" must
+        				also be used here.
+                        </option>        
+        
+        <tab name="Preference page">
+        	<option name="HTE">
+        		Set a threshold for repeated execution.
+        		Only used if HTE is enabled in the preference page.
+        	</option>
+        </tab>
+   
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="In-Port name">Cell 0: Path to ReadFile1 <br></br>Cell 1: Path to ReadFile2.</inPort>
+        <outPort index="0" name="Out-Port">Cell 0: Path to compound heterozygote prediction output file.<br></br>Cell 1: Path to statistics output file.</outPort>
+    </ports>   
+    <views>
+        <view index="0" name="STDOUT / STDERR">The node offers a direct view of its standard out and the standard error of the tool. </view>
+	</views>
+</knimeNode>

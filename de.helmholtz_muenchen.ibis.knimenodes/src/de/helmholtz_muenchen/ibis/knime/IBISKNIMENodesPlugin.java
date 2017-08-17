@@ -86,6 +86,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 	public static final String PINDEL2VCF = "pindel2vcf";
 	public static final String SAMTOOLS = "samtools";
 	public static final String SEGEMEHL = "segemehl.x";
+	public static final String SMARTPHASE = "smartPhase.jar";
 	public static final String SNPEFF = "snpEff.jar";
 	public static final String SNPSIFT = "SnpSift.jar";
 	public static final String STAR = "STAR";
@@ -114,7 +115,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 			GATK,
 			KGGSeq,
 			PICARD, PINDEL, PINDEL2VCF,
-			SAMTOOLS, SEGEMEHL, SNPEFF, SNPSIFT, STAR,
+			SAMTOOLS, SEGEMEHL, SMARTPHASE, SNPEFF, SNPSIFT, STAR,
 			TRIMG,
 			VCFTOOLS, VEP, VEP_FILTER};
 	
@@ -134,6 +135,7 @@ public class IBISKNIMENodesPlugin extends AbstractUIPlugin {
 		TOOLS.put(IBISKNIMENodesPlugin.PINDEL2VCF,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SAMTOOLS,true);
 		TOOLS.put(IBISKNIMENodesPlugin.SEGEMEHL,true);
+		TOOLS.put(IBISKNIMENodesPlugin.SMARTPHASE, true);
 		TOOLS.put(IBISKNIMENodesPlugin.SNPEFF, false);
 		TOOLS.put(IBISKNIMENodesPlugin.SNPSIFT, false);
 		TOOLS.put(IBISKNIMENodesPlugin.STAR,true);

@@ -64,7 +64,7 @@ public class ReorderVCFNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected ReorderVCFNodeModel() {
-        super(1, 1);
+        super(1, 1, 0);
         addSetting(m_REFERENCE_VCF);
         addSetting(m_VCFTOOLS);
     }

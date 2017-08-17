@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "Star" Node.
@@ -48,7 +49,9 @@ public class StarNodeDialog extends HTExecutorNodeDialog {
 
 	private final static String BINARY_NAME = "STAR";
 	
-    protected StarNodeDialog() {}
+    protected StarNodeDialog() {
+    	super(FileCell.TYPE.getPreferredValueClass(), FileCell.TYPE.getPreferredValueClass());
+    }
     
     public void addToolDialogComponents() {
         final SettingsModelString run_mode				= new SettingsModelString(StarNodeModel.CFGKEY_RUN_MODE, StarNodeModel.DEFAULT_RUN_MODE);

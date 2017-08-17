@@ -26,6 +26,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.ngs.vcfmerger.VCFMergerNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "CombineVCFs" Node.
@@ -39,6 +40,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Kaarin Ahomaa
  */
 public class CombineVCFsNodeDialog extends GATKNodeDialog {
+	
+	public CombineVCFsNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass());
+	}
 	
 	 private SettingsModelString GENOTYPEMERGEOPTION;
 	 private SettingsModelString OUTFOLDER;

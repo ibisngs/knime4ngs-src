@@ -81,7 +81,7 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected FeatureCountsMergerNodeModel() {
-        super(1, 1);
+        super(1, 1, 1);
         addSetting(SET_OUTPUT_FILE);
     	addSetting(SET_REMOVE_ENDING);
     	addSetting(SET_REMOVE_PATH);
@@ -97,10 +97,15 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
+    	int colIndex = 0;
+    	if(FeatureCountsMergerNodeDialog.getUseMainInputColBool()){
+    		colIndex = inData[0].getDataTableSpec().findColumnIndex(FeatureCountsMergerNodeDialog.getMainInputCol1());
+    	}
+    	
     	
     	String outfile = IO.processFilePath(this.SET_OUTPUT_FILE.getStringValue());
     	if(Files.notExists(Paths.get(outfile)) && !(new File(outfile).createNewFile())) {
-    		String in = inData[0].iterator().next().getCell(0).toString();
+    		String in = inData[0].iterator().next().getCell(colIndex).toString();
     		outfile = new File(in).getParent() + File.separator + "merged.featureCounts";
     	}
     	
@@ -119,7 +124,7 @@ public class FeatureCountsMergerNodeModel extends HTExecutorNodeModel {
     	// get featureCount files
     	ArrayList<String> dataFiles = new ArrayList<String>();
     	for(CloseableRowIterator it = inData[0].iterator(); it.hasNext(); ) {
-    		dataFiles.add(it.next().getCell(0).toString());
+    		dataFiles.add(it.next().getCell(colIndex).toString());
     	}
     	
     	// data gets stored here

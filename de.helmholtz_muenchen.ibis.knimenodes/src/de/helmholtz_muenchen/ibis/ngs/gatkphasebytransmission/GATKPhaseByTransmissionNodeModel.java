@@ -66,7 +66,7 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
      * Constructor for the node model.
      */
     protected GATKPhaseByTransmissionNodeModel() {
-    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
     	addSetting(m_PED_FILE);
 	   	addSetting(m_DENOVO_PRIOR);
     }
@@ -114,9 +114,16 @@ public class GATKPhaseByTransmissionNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		vcf_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
+		if(GATKPhaseByTransmissionNodeDialog.getUseMainInputColBool()){
+			vcf_index = inSpecs[0].findColumnIndex(GATKPhaseByTransmissionNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	} else {
+    		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    				vcf_index = i;
+    			}
     		}
     	}
 		return (vcf_index>-1);

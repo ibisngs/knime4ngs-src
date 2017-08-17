@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 
 /**
  * <code>NodeDialog</code> for the "Segemehl" Node.
@@ -56,7 +57,9 @@ public class SegemehlNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the Segemehl node.
      */
-    protected SegemehlNodeDialog() {}
+    protected SegemehlNodeDialog() {
+    	super(FastQCell.TYPE.getPreferredValueClass(), FastQCell.TYPE.getPreferredValueClass());
+    }
     
     public void addToolDialogComponents() {
     	

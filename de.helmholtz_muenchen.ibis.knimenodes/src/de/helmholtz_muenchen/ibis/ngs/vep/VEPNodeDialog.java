@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 
 /**
@@ -49,6 +50,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Tim Jeske
  */
 public class VEPNodeDialog extends HTExecutorNodeDialog {
+	
+	public VEPNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass(), 0);
+	}
 
 	private SettingsModelBoolean my_overwrite;
     

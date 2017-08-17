@@ -87,7 +87,6 @@ public class BWANodeModel extends HTExecutorNodeModel {
 	private final SettingsModelOptionalString m_Optional_Map 	= new SettingsModelOptionalString(CFGKEY_OPTIONAL_Map,"",false);
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(BWANodeModel.class);
-	private static String readType = "";
 	
 	//The Output Col Names
 	public static final String OUT_COL1 = "Path2SAMFile";
@@ -99,7 +98,7 @@ public class BWANodeModel extends HTExecutorNodeModel {
      */
     protected BWANodeModel() {
     	
-    	super(1, 1);
+    	super(1, 1, 2);
     	addSetting(m_bwafile);
     	addSetting(m_refseqfile);
     	addSetting(m_bwtIndex);
@@ -131,11 +130,20 @@ public class BWANodeModel extends HTExecutorNodeModel {
     	/**
 		 * Get the Parameters
 		 */
-    	String path2readFile 	= inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(BWANodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(BWANodeDialog.getMainInputCol1());
+    	}
+    	String path2readFile 	= inData[0].iterator().next().getCell(colIndex1).toString();
+    	
     	String path2readFile2 	= "";
  
     	if(readType.equals("paired-end")){
-    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();	
+    		int colIndex2 = 1;
+        	if(BWANodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(BWANodeDialog.getMainInputCol2());
+        	}
+    		path2readFile2 = inData[0].iterator().next().getCell(colIndex2).toString();	
     	}
  
     	String basePath 		= path2readFile.substring(0,path2readFile.lastIndexOf('/')+1);
@@ -396,15 +404,11 @@ public class BWANodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	super.updatePrefs();
+    	super.conf(inSpecs);
+    	
     	bwa_bin = IO.processFilePath(m_bwafile.getStringValue());
     	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
    	   	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
     	
     	
 		if(CompatibilityChecker.inputFileNotOk(bwa_bin, false)) {

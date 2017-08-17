@@ -99,7 +99,6 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
 	
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(SegemehlNodeModel.class);
 	
-	private static String readType = "";
 	private String segemehl_bin, ref_genome;
 	
     /**
@@ -107,7 +106,7 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
      */
     protected SegemehlNodeModel() {
     
-        super(1, 1);
+        super(1, 1, 2);
         
     	addSetting(m_segemehlfile);
     	addSetting(m_refseqfile);
@@ -149,12 +148,21 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     	CompatibilityChecker.inDataCheck(inData);
     	
     	ArrayList<String> command = new ArrayList<String>();
+    	
+    	int colIndex1 = 0;
+    	if(SegemehlNodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(SegemehlNodeDialog.getMainInputCol1());
+    	}
      	
-    	String path2reads1 = inData[0].iterator().next().getCell(0).toString();
+    	String path2reads1 = inData[0].iterator().next().getCell(colIndex1).toString();
     	String path2readFile2 	= "";
     	 
     	if(readType.equals("paired-end")){
-    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();	
+    		int colIndex2 = 1;
+        	if(SegemehlNodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(SegemehlNodeDialog.getMainInputCol2());
+        	}
+    		path2readFile2 = inData[0].iterator().next().getCell(colIndex2).toString();	
     	}
     	  	
     	String path2indexedRefSeq = ref_genome.substring(0,ref_genome.lastIndexOf(".")+1)+"idx";
@@ -285,15 +293,10 @@ public class SegemehlNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	super.updatePrefs();
     	segemehl_bin = IO.processFilePath(m_segemehlfile.getStringValue());
     	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
   	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
+    	super.conf(inSpecs);
     	
 		if(CompatibilityChecker.inputFileNotOk(segemehl_bin, false)) {
 			throw new InvalidSettingsException("Set path to samtools binary!");

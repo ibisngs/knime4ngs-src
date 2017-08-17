@@ -21,10 +21,8 @@ package de.helmholtz_muenchen.ibis.ngs.featureCounts;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -140,7 +138,7 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
      * Constructor for the node model.
      */
     protected FeatureCountsNodeModel() {
-        super(1, 1, true, true);
+        super(1, 1, true, true, 1);
         addSetting(SET_FEATURE_TYPE);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
@@ -168,13 +166,20 @@ public class FeatureCountsNodeModel extends BinaryWrapperNodeModel {
 			throw new InvalidSettingsException("Set path to featureCounts binary!");
 		}
     	
-    	bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	if(FeatureCountsNodeDialog.getUseMainInputColBool()){
+    		bam_sam_index = inSpecs[0].findColumnIndex(FeatureCountsNodeDialog.getMainInputCol1());
+    	}
+    	
+    	if(bam_sam_index == -1) {
+    		bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	}
+    	
     	if(bam_sam_index == -1) {
     		bam_sam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "SAMCell");
     	}
 
-    	if(bam_sam_index!=0){
-    		throw new InvalidSettingsException("Invalid input. No BAMCell/SAMCell in first column of input table!");
+    	if(bam_sam_index == -1){
+    		throw new InvalidSettingsException("Invalid input. No BAMCell/SAMCell found in input table!");
     	}
     	
     	annotation_file = IO.processFilePath(SET_ANNOTATION_FILE.getStringValue());

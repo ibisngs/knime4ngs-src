@@ -24,6 +24,7 @@ import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "GATKSelectVariants" Node.
@@ -37,6 +38,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author 
  */
 public abstract class SelectVariantsNodeDialog extends GATKNodeDialog {
+	
+	public SelectVariantsNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass());
+	}
 
 
     

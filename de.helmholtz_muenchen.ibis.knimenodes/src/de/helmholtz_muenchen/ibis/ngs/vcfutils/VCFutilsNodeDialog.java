@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "VCFutils" Node.
@@ -52,7 +53,9 @@ public class VCFutilsNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the VCFutils node.
      */
-    protected VCFutilsNodeDialog() {}
+    protected VCFutilsNodeDialog() {
+    	super(FileCell.TYPE.getPreferredValueClass(), FileCell.TYPE.getPreferredValueClass());
+    }
     
     public void addToolDialogComponents() {
     	

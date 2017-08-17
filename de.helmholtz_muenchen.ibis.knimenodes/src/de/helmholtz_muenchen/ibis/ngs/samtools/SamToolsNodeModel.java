@@ -158,7 +158,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
      */
     protected SamToolsNodeModel() {
     
-        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
        
        	addSetting(m_utility);
     	addSetting(m_samtools);
@@ -222,9 +222,14 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
     	CompatibilityChecker.inDataCheck(inData);
     	
     	String lockFile 		= "";
-    	String OutCellType 		= "FileCell";		 
+    	String OutCellType 		= "FileCell";	
+    	
+    	int colIndex = 0;
+    	if(SamToolsNodeDialog.getUseMainInputColBool()){
+    		colIndex = inData[0].getDataTableSpec().findColumnIndex(SamToolsNodeDialog.getMainInputCol1());
+    	}
     
-    	String path2bamfile = inData[0].iterator().next().getCell(0).toString();
+    	String path2bamfile = inData[0].iterator().next().getCell(colIndex).toString();
     	
     	String basePathWithFileName = "";
     	if(!path2bamfile.isEmpty()){
@@ -323,7 +328,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
             Iterator<DataRow> it = inData[0].iterator();
             int size = 0;
             while(it.hasNext()){
-            	command.add(it.next().getCell(0).toString());
+            	command.add(it.next().getCell(colIndex).toString());
             	size++;
             } 
      		if(size<2){
@@ -382,7 +387,7 @@ public class SamToolsNodeModel extends HTExecutorNodeModel {
             Iterator<DataRow> it = inData[0].iterator();
             int size = 0;
             while(it.hasNext()){
-            	command.add(it.next().getCell(0).toString());
+            	command.add(it.next().getCell(colIndex).toString());
             	size++;
             } 
      		if(size<2){

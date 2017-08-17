@@ -88,7 +88,7 @@ public class MatsResultPlotterNodeModel extends HTExecutorNodeModel {
 	 * Constructor
 	 */
 	protected MatsResultPlotterNodeModel() {
-		super(1, 1);
+		super(1, 1, 0);
 		this.addSetting(SET_INPUT_FILE);
     	this.addSetting(SET_BINARY_PATH);
     	this.addSetting(SET_OUTPUT_FILE);

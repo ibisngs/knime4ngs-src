@@ -40,13 +40,13 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Tim Jeske
  */
 public class GATKRawNodeDialog extends GATKNodeDialog {
+	
 
     /**
      * New pane for configuring the GATKRaw node.
      */
     protected GATKRawNodeDialog() {
-
-    	
+    	super(null);
     }
 
 	@Override

@@ -41,6 +41,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.util.CheckUtils;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.ngs.fastqc_v2.FastQC_v2NodeDialog;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -114,7 +115,7 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
 	private String vcftools_bin;
 	
     protected VCFToolsFilterNodeModel() {
-    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
     	
     	//addSetting(m_outfolder);
     	addSetting(m_filter_by_DP);
@@ -377,13 +378,14 @@ public class VCFToolsFilterNodeModel extends HTExecutorNodeModel {
         	}
     	}
     	
-    	for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-    			vcf_index = i;
+    	if(VCFToolsFilterNodeDialog.getUseMainInputColBool()){
+    		vcf_index = inSpecs[0].findColumnIndex(VCFToolsFilterNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
     		}
+    	} else {
+    		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
     	}
-    
-    	
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}

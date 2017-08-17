@@ -79,7 +79,7 @@ public abstract class StatisticMergerNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected StatisticMergerNodeModel() {
-        super(0, 2);
+        super(0, 2, 0);
         addSetting(SET_INPUT_FOLDER);
     	addSetting(SET_OUTPUT_FOLDER);
     	

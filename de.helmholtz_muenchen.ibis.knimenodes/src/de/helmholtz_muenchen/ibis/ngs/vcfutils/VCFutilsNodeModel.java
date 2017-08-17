@@ -112,7 +112,9 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
      */
     protected VCFutilsNodeModel() {
     	
-        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0));
+        super(OptionalPorts.createOPOs(1, 1), OptionalPorts.createOPOs(0), 2);
+        
+        readType = "paired-end";
         
     	addSetting(m_adjacentgaps);
     	addSetting(m_baseqpval);
@@ -164,7 +166,11 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
     	
     	String fle = "";
     	if(optionalPort){
-    		fle = inData[0].iterator().next().getCell(1).toString();
+    		int colIndex2 = 1;
+        	if(VCFutilsNodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(VCFutilsNodeDialog.getMainInputCol2());
+        	}
+    		fle = inData[0].iterator().next().getCell(colIndex2).toString();
     	}
     	else{
     		if(m_vcffile.isEnabled()) {
@@ -177,7 +183,11 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
     	
     	String path2vcf = "";
     	if(optionalPort){
-    		String path2bcftools = inData[0].iterator().next().getCell(0).toString();
+        	int colIndex1 = 0;
+        	if(VCFutilsNodeDialog.getUseMainInputColBool()){
+        		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(VCFutilsNodeDialog.getMainInputCol1());
+        	}
+    		String path2bcftools = inData[0].iterator().next().getCell(colIndex1).toString();
     		path2vcf = path2bcftools+"vcfutils.pl";
     	}
     	else{
@@ -320,7 +330,17 @@ public class VCFutilsNodeModel extends HTExecutorNodeModel {
 				//Format OK
 		
 			String[] colnames = inSpecs[0].getColumnNames();
-			if(colnames[0].equals("Path2Bcftools") && colnames[1].equals("Path2BcftoolsOutput")){
+			if(VCFutilsNodeDialog.getUseMainInputColBool()){
+        		if(VCFutilsNodeDialog.getMainInputCol1().equals("Path2Bcftools") && VCFutilsNodeDialog.getMainInputCol1().equals("Path2BcftoolsOutput")){
+        			m_vcffile.setEnabled(false);
+    				m_vcf.setEnabled(false);
+    				m_snpfile.setEnabled(false);
+    				m_hapmapfile.setEnabled(false);
+        		} else {
+        			throw new InvalidSettingsException("Expected first selected column's name to be 'Path2Bcftools' and second 'Path2BcftoolsOutput'.");
+        		}
+        	}
+			else if(colnames[0].equals("Path2Bcftools") && colnames[1].equals("Path2BcftoolsOutput")){
 				m_vcffile.setEnabled(false);
 				m_vcf.setEnabled(false);
 				m_snpfile.setEnabled(false);

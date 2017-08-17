@@ -28,6 +28,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 
 /**
  * <code>NodeDialog</code> for the "FastQC_v2" Node.
@@ -46,7 +47,7 @@ public class FastQC_v2NodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the FastQC_v2 node.
      */
     protected FastQC_v2NodeDialog() {
-
+    	super(FastQCell.TYPE.getPreferredValueClass(), FastQCell.TYPE.getPreferredValueClass());
     }
     
     final int defaultThreads = FastQC_v2NodeModel.DEFAULT_THREADS;
@@ -70,5 +71,7 @@ public class FastQC_v2NodeDialog extends HTExecutorNodeDialog {
 		
 		addPrefPageSetting(fastqc, IBISKNIMENodesPlugin.FASTQC);
 	}
+
+
 }
 

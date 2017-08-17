@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 
 /**
  * This is the model implementation of GATKBaseRecalibration.
@@ -44,6 +45,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  */
 
 public class GATKBaseRecalibrationNodeDialog extends HTExecutorNodeDialog {
+	
+	public GATKBaseRecalibrationNodeDialog(){
+		super(BAMCell.TYPE.getPreferredValueClass(), 0);
+	}
 
 	public void addToolDialogComponents() {
 

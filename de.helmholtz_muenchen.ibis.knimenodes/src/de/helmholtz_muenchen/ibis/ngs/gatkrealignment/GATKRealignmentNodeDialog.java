@@ -37,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 
 /**
  * <code>NodeDialog</code> for the "GATKRealignment" Node.
@@ -54,6 +55,7 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
 public class GATKRealignmentNodeDialog extends HTExecutorNodeDialog {
 
 	protected GATKRealignmentNodeDialog() {
+		super(BAMCell.TYPE.getPreferredValueClass(), 0);
 	};
 
 	public void addToolDialogComponents() {

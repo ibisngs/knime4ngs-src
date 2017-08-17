@@ -37,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 
 
@@ -57,7 +58,9 @@ public class KGGSeqNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the KGGSeq node.
      */
-    protected KGGSeqNodeDialog() {}
+    protected KGGSeqNodeDialog() {
+    	super(VCFCell.TYPE.getPreferredValueClass(), 0);
+    }
 
 	@Override
 	public void addToolDialogComponents() {

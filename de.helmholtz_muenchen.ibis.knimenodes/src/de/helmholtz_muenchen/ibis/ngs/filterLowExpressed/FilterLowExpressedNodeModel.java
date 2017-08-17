@@ -70,7 +70,7 @@ public class FilterLowExpressedNodeModel extends RNodeModel {
      * Constructor for the node model.
      */
 	protected FilterLowExpressedNodeModel() {
-		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"});
+		super(2, 1, SCRIPT_PATH, new String[]{"--countTable", "--annotationFile"}, new String[]{"--output"}, 1);
 		this.addSetting(SET_MODE);
 		this.addSetting(SET_KEEP_READS);
 		this.addSetting(SET_KEEP_FRACTION);

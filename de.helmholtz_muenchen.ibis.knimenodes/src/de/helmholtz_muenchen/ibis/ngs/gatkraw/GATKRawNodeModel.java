@@ -51,7 +51,7 @@ public class GATKRawNodeModel extends GATKNodeModel {
      */
     protected GATKRawNodeModel(int in, int out) {
     
-        super(OptionalPorts.createOPOs(in), OptionalPorts.createOPOs(out));
+        super(OptionalPorts.createOPOs(in), OptionalPorts.createOPOs(out), 0);
         addSetting(m_walker);
 		addSetting(m_out);
     }

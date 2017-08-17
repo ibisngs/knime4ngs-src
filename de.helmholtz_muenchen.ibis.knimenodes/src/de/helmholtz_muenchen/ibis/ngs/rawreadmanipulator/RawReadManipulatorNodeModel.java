@@ -135,16 +135,13 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
 	private final SettingsModelBoolean m_trimbothends = new SettingsModelBoolean(CFGKEY_TRIMBOTHENDS, false);
 	public final SettingsModelOptionalString m_outputfolder = new SettingsModelOptionalString(CFGKEY_OUTPUTFOLDER, "", false);
 	
-	//ReadType: paired-end or single-end
-	private static String readType = "";
-	
-	
+
 	/**
      * Constructor for the node model.
      */
     protected RawReadManipulatorNodeModel() {
     
-        super(1, 1);
+        super(1, 1, 3);
         
     	addSetting(m_removeadapters);
     	addSetting(m_adapters);
@@ -194,11 +191,19 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
-    	String inFile1 = inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(RawReadManipulatorNodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(RawReadManipulatorNodeDialog.getMainInputCol1());
+    	}
+    	String inFile1 = inData[0].iterator().next().getCell(colIndex1).toString();
     	String inFile2 = "";
     	
     	if(readType.equals("paired-end")){
-    		inFile2 = inData[0].iterator().next().getCell(1).toString();
+    		int colIndex2 = 1;
+        	if(RawReadManipulatorNodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(RawReadManipulatorNodeDialog.getMainInputCol2());
+        	}
+    		inFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
     	}
     	
     	
@@ -226,9 +231,17 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     	
     	if(m_filterfileexists.getBooleanValue()){
     		if(readType.equals("paired-end")) {
-    			command.add("--filtersettings="+inData[0].iterator().next().getCell(2).toString());
+    			int colIndex3 = 2;
+            	if(RawReadManipulatorNodeDialog.getUseMainInputColBool()){
+            		colIndex3 = inData[0].getDataTableSpec().findColumnIndex(RawReadManipulatorNodeDialog.getMainInputCol3());
+            	}
+    			command.add("--filtersettings="+inData[0].iterator().next().getCell(colIndex3).toString());
     		} else {
-        		command.add("--filtersettings="+inData[0].iterator().next().getCell(1).toString());
+    			int colIndex3 = 1;
+            	if(RawReadManipulatorNodeDialog.getUseMainInputColBool()){
+            		colIndex3 = inData[0].getDataTableSpec().findColumnIndex(RawReadManipulatorNodeDialog.getMainInputCol3());
+            	}
+        		command.add("--filtersettings="+inData[0].iterator().next().getCell(colIndex3).toString());
     		}
     	}
     	
@@ -350,11 +363,7 @@ public class RawReadManipulatorNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
+    	super.conf(inSpecs);
     	
     	//If no filtersettings are available --> FileLoader is previous node
     	if((inSpecs[0].getNumColumns()<3 & readType.equals("paired-end"))|| (inSpecs[0].getNumColumns()<2 & readType.equals("single-end")) ){

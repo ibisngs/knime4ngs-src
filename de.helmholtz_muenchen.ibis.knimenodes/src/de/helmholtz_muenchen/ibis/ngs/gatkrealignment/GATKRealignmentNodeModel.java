@@ -242,7 +242,7 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected GATKRealignmentNodeModel() {
-        super(1, 1);
+        super(1, 1, 1);
         
     	addSetting(m_gatk);
         addSetting(m_ref_genome);
@@ -369,7 +369,14 @@ public class GATKRealignmentNodeModel extends HTExecutorNodeModel {
     	phase1 = IO.processFilePath(m_phase1_1000G_file.getStringValue());
     	mills = IO.processFilePath(m_mills_1000G_file.getStringValue());
     	
-		posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	if(GATKRealignmentNodeDialog.getUseMainInputColBool()){
+    		posBam = inSpecs[0].findColumnIndex(GATKRealignmentNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(posBam).getType().toString().equals("BAMCell")){
+    			posBam = -1;
+    		}
+    	} else {
+    		posBam = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	}
     	if(posBam==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no BAM file in the input table!");
     	}

@@ -26,6 +26,7 @@ import org.knime.core.node.defaultnodesettings.DialogComponentString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "GATKPhaseByTransmission" Node.
@@ -39,6 +40,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class GATKPhaseByTransmissionNodeDialog extends GATKNodeDialog {
+	
+	public GATKPhaseByTransmissionNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass());
+	}
 
 	@Override
 	protected void addDialogComponent() {

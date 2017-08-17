@@ -31,6 +31,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 
 
 /**
@@ -47,6 +48,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Tim Jeske
  */
 public class GATKUnifiedGenotyperNodeDialog extends GATKNodeDialog {
+	
+	public GATKUnifiedGenotyperNodeDialog() {
+		super(BAMCell.TYPE.getPreferredValueClass());
+	}
 	
 	public void addDialogComponent() {
 		

@@ -37,6 +37,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "PicardTools" Node.
@@ -60,7 +61,9 @@ public class PicardToolsNodeDialog extends HTExecutorNodeDialog {
 	
 	
     
-    protected PicardToolsNodeDialog() {}
+    protected PicardToolsNodeDialog() {
+    	super(FileCell.TYPE.getPreferredValueClass(), 0);
+    }
 
 	@Override
 	public void addToolDialogComponents() {

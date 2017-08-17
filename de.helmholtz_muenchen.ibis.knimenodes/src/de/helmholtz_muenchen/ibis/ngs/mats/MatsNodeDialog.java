@@ -50,7 +50,7 @@ public class MatsNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the Mats node.
      */
-    protected MatsNodeDialog() {}
+    protected MatsNodeDialog() {super(null, 0);}
     
     public void addToolDialogComponents() {
     	

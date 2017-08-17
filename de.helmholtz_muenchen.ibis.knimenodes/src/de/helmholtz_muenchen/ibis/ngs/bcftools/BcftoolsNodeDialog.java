@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.ngs.bcftools;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.core.data.DataCell;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
@@ -46,6 +47,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Maximilian Hastreiter
  */
 public class BcftoolsNodeDialog extends HTExecutorNodeDialog {
+	
+	public BcftoolsNodeDialog(){
+		super(DataCell.class, 0);
+	}
 
     
     public void addToolDialogComponents() {

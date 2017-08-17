@@ -19,6 +19,7 @@
  */
 package de.helmholtz_muenchen.ibis.ngs.DESeq;
 
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -30,6 +31,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Michael Kluge
  */
 public class DESeqNodeDialog extends HTExecutorNodeDialog {
+	
+	public DESeqNodeDialog() {
+		super(StringCell.TYPE.getPreferredValueClass(), 1);
+	}
 	
 	@Override
 	public void addToolDialogComponents() {

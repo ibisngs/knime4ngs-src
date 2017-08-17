@@ -148,8 +148,6 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
 	
 	private int count = 2;
 	
-	//ReadType: paired-end or single-end
-	private static String readType = "";
     
 
     /**
@@ -158,7 +156,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     protected TrimGaloreNodeModel() {
     	
     	
-    	super(1, 1);
+    	super(1, 1, 2);
         
         addSetting(m_fastqc);
         addSetting(m_trimg);
@@ -220,7 +218,11 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
-    	String inFile1 = inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(TrimGaloreNodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(TrimGaloreNodeDialog.getMainInputCol1());
+    	}
+    	String inFile1 = inData[0].iterator().next().getCell(colIndex1).toString();
     	String inFile2 = "";
     	
     	if(CompatibilityChecker.inputFileNotOk(inFile1)) {
@@ -341,7 +343,11 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	// Add paired-end options if necessary
     	if(readType.equals("paired-end")){
     		cmd.add("--paired");
-    		inFile2 = inData[0].iterator().next().getCell(1).toString();
+    		int colIndex2 = 1;
+        	if(TrimGaloreNodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(TrimGaloreNodeDialog.getMainInputCol2());
+        	}
+    		inFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
     		
     		if(CompatibilityChecker.inputFileNotOk(inFile2)) {
         		throw new InvalidSettingsException("Input FastQ file does not exist or is invalid!");
@@ -442,11 +448,7 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
            	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
+    	super.conf(inSpecs);
     	
     	
     	
@@ -468,8 +470,6 @@ public class TrimGaloreNodeModel extends HTExecutorNodeModel {
     	}
     	*/
     	
-    	super.updatePrefs();
-
         return new DataTableSpec[]{createSpecs()};
 
     }

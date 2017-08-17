@@ -49,8 +49,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 
 	private static final NodeLogger LOGGER = NodeLogger.getLogger(RNodeModel.class);
 	
-	protected RNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, String[] input_file_arguments, String[] output_file_arguments) {
-		super(nrInDataPorts, nrOutDataPorts, script);
+	protected RNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, String[] input_file_arguments, String[] output_file_arguments, int numIn) {
+		super(nrInDataPorts, nrOutDataPorts, script, numIn);
 
 		// check number of file names
 		if(input_file_arguments.length != this.getNrInPorts()){
@@ -63,8 +63,8 @@ public abstract class RNodeModel extends ScriptNodeModel {
 		this.OUTPUT_FILE_ARGUMENTS= output_file_arguments;
 	}
 	
-	protected RNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script, String[] input_file_arguments, String[] output_file_arguments) {
-		super(inPortTypes, outPortTypes, script);
+	protected RNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script, String[] input_file_arguments, String[] output_file_arguments, int numIn) {
+		super(inPortTypes, outPortTypes, script, numIn);
 		// TODO what if PortTypes are not tables to write???
 		 
 		// check number of file names

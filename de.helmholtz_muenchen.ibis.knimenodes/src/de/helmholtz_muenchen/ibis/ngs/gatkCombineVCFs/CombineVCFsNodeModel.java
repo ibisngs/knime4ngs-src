@@ -61,7 +61,7 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
      */
     protected CombineVCFsNodeModel() {
     
-    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
     	addSetting(m_GENOTYPEMERGEOPTION);
 		addSetting(m_OUTFOLDER);
     }
@@ -106,6 +106,13 @@ public class CombineVCFsNodeModel extends GATKNodeModel {
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		vcf_index = -1;
+		
+		if(CombineVCFsNodeDialog.getUseMainInputColBool()){
+			vcf_index = inSpecs[0].findColumnIndex(CombineVCFsNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	}
 		
 		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
 			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {

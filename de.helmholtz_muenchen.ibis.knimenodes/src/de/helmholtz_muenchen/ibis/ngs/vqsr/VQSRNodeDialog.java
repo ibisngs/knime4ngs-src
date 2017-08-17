@@ -36,6 +36,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "VQSR" Node.
@@ -55,7 +56,9 @@ public class VQSRNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the VQSR node.
      */
-    protected VQSRNodeDialog() {}
+    protected VQSRNodeDialog() {
+    	super(VCFCell.TYPE.getPreferredValueClass(), 0);
+    }
     
     public void addToolDialogComponents() {
     	

@@ -19,6 +19,7 @@
  */
 package de.helmholtz_muenchen.ibis.ngs.edgeR;
 
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
@@ -30,6 +31,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Michael Kluge
  */
 public class EdgeRNodeDialog extends HTExecutorNodeDialog {
+	
+	public EdgeRNodeDialog() {
+		super(StringCell.TYPE.getPreferredValueClass(), 1);
+	}
 	
 
 	@Override

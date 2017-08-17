@@ -149,7 +149,7 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected KGGSeqNodeModel() {
-        super(1, 1);
+        super(1, 1, 1);
         
         addSetting(m_BUILDVER);
         addSetting(m_CANDIDATE_GENES);
@@ -191,7 +191,12 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
-    	String infile 		= inData[0].iterator().next().getCell(0).toString();
+    	int colIndex = 0;
+    	if(KGGSeqNodeDialog.getUseMainInputColBool()){
+    		colIndex = inData[0].getDataTableSpec().findColumnIndex(KGGSeqNodeDialog.getMainInputCol1());
+    	}
+    	
+    	String infile 		= inData[0].iterator().next().getCell(colIndex).toString();
     	String BasePath 	= infile.substring(0,infile.lastIndexOf("/")+1);
     	String lockFile 	= BasePath+m_OUTPREFIX.getStringValue() + SuccessfulRunChecker.LOCK_ENDING;
     	String StdErrFile 	= BasePath+m_OUTPREFIX.getStringValue()+".stdErr.log";
@@ -340,8 +345,8 @@ public class KGGSeqNodeModel extends HTExecutorNodeModel {
 		}
     	
     	
-    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")!=0){
-    		throw new InvalidSettingsException("Invalid input. No VCFCell in first column of input table.");
+    	if(CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell")==-1){
+    		throw new InvalidSettingsException("Invalid input. No VCFCell found.");
     	}
     	
         return new DataTableSpec[]{new DataTableSpec(

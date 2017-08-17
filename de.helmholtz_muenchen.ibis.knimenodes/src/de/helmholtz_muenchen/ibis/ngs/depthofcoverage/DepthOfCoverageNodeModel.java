@@ -31,6 +31,7 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -69,7 +70,7 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
      * Constructor for the node model.
      */
     protected DepthOfCoverageNodeModel() {
-        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
         addSetting(m_extrafilters);
         addSetting(m_filesuffix);
     }
@@ -130,11 +131,15 @@ public class DepthOfCoverageNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		bam_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
-    			bam_index = i;
+		if(DepthOfCoverageNodeDialog.getUseMainInputColBool()){
+			bam_index = inSpecs[0].findColumnIndex(DepthOfCoverageNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(bam_index).getType().toString().equals("BAMCell")){
+    			bam_index = -1;
     		}
+    	} else {
+    		bam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	}
+
 		return (bam_index>-1);
 	}
 

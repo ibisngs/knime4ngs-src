@@ -39,6 +39,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.ngs.fastqc_v2.FastQC_v2NodeDialog;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
@@ -121,7 +122,7 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
 	private String vep_script;
 	
     protected VEPFilterNodeModel() {
-    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
     	
     	boolean use_hte = IBISKNIMENodesPlugin.getBooleanPreference(IBISKNIMENodesPlugin.USE_HTE);
     	
@@ -256,7 +257,14 @@ public class VEPFilterNodeModel extends HTExecutorNodeModel {
     		throw new InvalidSettingsException("Invalid path to filter_vep.pl script!");
     	}
     	
-    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	if(VEPFilterNodeDialog.getUseMainInputColBool()){
+    		vcf_index = inSpecs[0].findColumnIndex(VEPFilterNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	} else {
+    		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	}
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the output table!");
     	}

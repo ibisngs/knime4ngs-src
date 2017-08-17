@@ -45,7 +45,7 @@ import de.helmholtz_muenchen.ibis.utils.ngs.OptionalPorts;
 public class MergeTwoVCFsNodeModel extends GATKNodeModel {
     
 	protected MergeTwoVCFsNodeModel(PortType[] INPORTS, PortType[] OUTPORTS) {
-		super(INPORTS, OUTPORTS);
+		super(INPORTS, OUTPORTS, 0);
 		
 	}
 	
@@ -78,7 +78,7 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
     protected MergeTwoVCFsNodeModel() {
 
     	 //Specify the amount of input and output ports needed.
-    	super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1));
+    	super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1), 2);
     	addSetting(m_GENOTYPEMERGEOPTION);
 		addSetting(m_INPUT1_TAG);
 		addSetting(m_INPUT2_TAG);
@@ -129,19 +129,33 @@ public class MergeTwoVCFsNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		vcf_ind1 = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-				vcf_ind1 = i;
+		if(MergeTwoVCFsNodeDialog.getUseMainInputColBool()){
+			vcf_ind1 = inSpecs[0].findColumnIndex(MergeTwoVCFsNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_ind1).getType().toString().equals("VCFCell")){
+    			vcf_ind1 = -1;
+    		}
+    	} else {
+    		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+				if(inSpecs[0].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+					vcf_ind1 = i;
+				}
 			}
-		}
+    	}
 		
 		vcf_ind2 = -1;
 		
-		for(int i = 0; i < inSpecs[1].getNumColumns(); i++) {
-			if(inSpecs[1].getColumnSpec(i).getType().toString().equals("VCFCell")) {
-				vcf_ind2 = i;
-			}
-		} 
+		if(MergeTwoVCFsNodeDialog.getUseMainInputColBool()){
+			vcf_ind2 = inSpecs[0].findColumnIndex(MergeTwoVCFsNodeDialog.getMainInputCol2());
+    		if(!inSpecs[0].getColumnSpec(vcf_ind2).getType().toString().equals("VCFCell")){
+    			vcf_ind2 = -1;
+    		}
+    	} else {
+    		for(int i = 0; i < inSpecs[1].getNumColumns(); i++) {
+    			if(inSpecs[1].getColumnSpec(i).getType().toString().equals("VCFCell")) {
+    				vcf_ind2 = i;
+    			}
+    		} 
+    	}
 		
 		
 		return (vcf_ind1>-1 && vcf_ind2>-1);

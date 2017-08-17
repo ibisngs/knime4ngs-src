@@ -29,7 +29,7 @@ public class Bcl2FastQNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the Bcl2FastQ node.
      */
     protected Bcl2FastQNodeDialog() {
-
+    	super(null, 0);
     }
 
 	@Override

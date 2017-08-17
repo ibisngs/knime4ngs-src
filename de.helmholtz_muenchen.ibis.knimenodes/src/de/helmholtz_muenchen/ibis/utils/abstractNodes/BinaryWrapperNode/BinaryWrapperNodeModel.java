@@ -81,8 +81,8 @@ public abstract class BinaryWrapperNodeModel extends HTExecutorNodeModel {
 	 * @param catchStdout catches stdout if true
 	 * @param catchStderr catches stderr if true
 	 */
-	protected BinaryWrapperNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr) {
-		super(nrInDataPorts,nrOutDataPorts);
+	protected BinaryWrapperNodeModel(int nrInDataPorts, int nrOutDataPorts, boolean catchStdout, boolean catchStderr, int nrMainInputCols) {
+		super(nrInDataPorts,nrOutDataPorts, nrMainInputCols);
 		// init is called by child classes
 		
 		this.catchStderr = catchStderr;

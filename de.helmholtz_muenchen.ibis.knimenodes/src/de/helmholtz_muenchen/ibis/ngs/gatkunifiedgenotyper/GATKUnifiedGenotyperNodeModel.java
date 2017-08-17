@@ -188,7 +188,7 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
     protected GATKUnifiedGenotyperNodeModel() {
     
         // #in ports, #out ports
-        super(OptionalPorts.createOPOs(1),OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1),OptionalPorts.createOPOs(1), 1);
 
         addSetting(m_outfolder);
         addSetting(m_use_dbsnp);
@@ -319,12 +319,19 @@ public class GATKUnifiedGenotyperNodeModel extends GATKNodeModel {
     protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
     	bam_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
-    			bam_index = i;
+    	if(GATKUnifiedGenotyperNodeDialog.getUseMainInputColBool()){
+			bam_index = inSpecs[0].findColumnIndex(GATKUnifiedGenotyperNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(bam_index).getType().toString().equals("BAMCell")){
+    			bam_index = -1;
+    		}
+    	} else {
+    		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
+    				bam_index = i;
+    			}
     		}
     	}
-		return (bam_index>-1);	
+    	return (bam_index>-1);	
     }
 
 	@Override

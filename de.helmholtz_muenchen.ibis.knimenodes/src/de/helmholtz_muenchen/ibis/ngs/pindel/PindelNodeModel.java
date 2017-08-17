@@ -256,7 +256,9 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     protected PindelNodeModel() {
     
         // one incoming port and one outgoing port
-    	super(1, 1);
+    	super(1, 1, 2);
+    	
+    	readType = "paired-end";
         
         addSetting(m_pindel);
         addSetting(m_refseqfile);
@@ -544,9 +546,18 @@ public class PindelNodeModel extends HTExecutorNodeModel {
     	}
     	    	
     	String [] cols = inSpecs[0].getColumnNames();
-    	    	
+    	
+    	if(PindelNodeDialog.getUseMainInputColBool()){
+    		if(!PindelNodeDialog.getMainInputCol2().equals("Path2ISMetrics")){
+    			throw new InvalidSettingsException("The second column selected must be 'Path2ISMetrics'");
+    		}
+    		logger.info("Previous Node is PicardTools: CollectInsertSizeMetrics");
+    		ISM=true;
+    		m_create_config.setEnabled(true);
+    		posISM = inSpecs[0].findColumnIndex(PindelNodeDialog.getMainInputCol2());
+    	}
     	//check if previous node is CollectInsertSizeMetrics
-    	if(inSpecs[0].containsName("Path2ISMetrics")){
+    	else if(inSpecs[0].containsName("Path2ISMetrics")){
     		logger.info("Previous Node is PicardTools: CollectInsertSizeMetrics");
     		ISM=true;
     		m_create_config.setEnabled(true);
@@ -584,9 +595,16 @@ public class PindelNodeModel extends HTExecutorNodeModel {
         }
     	
     	//Check if bam file is available
-    	posBam=CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+        if(PindelNodeDialog.getUseMainInputColBool()){
+    		posBam = inSpecs[0].findColumnIndex(PindelNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(posBam).getType().toString().equals("BAMCell")){
+    			posBam = -1;
+    		}
+    	} else {
+    		posBam=CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
+    	}
     	if(posBam==-1){
-    		throw new InvalidSettingsException("No BAM found in input table. Wrong node/input connected?");
+    		throw new InvalidSettingsException("No BAM found in input table. Wrong node/input connected or wrong input selected?");
     	}
     	    	
     	// create column specifications

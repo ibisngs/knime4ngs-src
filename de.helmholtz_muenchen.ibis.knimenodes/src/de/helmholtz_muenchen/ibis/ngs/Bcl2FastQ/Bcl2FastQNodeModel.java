@@ -70,7 +70,7 @@ public class Bcl2FastQNodeModel extends HTExecutorNodeModel {
      * Constructor for the node model.
      */
     protected Bcl2FastQNodeModel() {
-        super(0, 1);
+        super(0, 1, 0);
         addSetting(m_ToolPath);
         addSetting(m_InputPath);
     	addSetting(m_outfolder);

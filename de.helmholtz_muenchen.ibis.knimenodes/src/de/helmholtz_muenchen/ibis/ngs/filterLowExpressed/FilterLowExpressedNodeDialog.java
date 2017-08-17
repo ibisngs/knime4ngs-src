@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.ngs.filterLowExpressed;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.core.data.def.StringCell;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentButtonGroup;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -39,6 +40,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Michael Kluge
  */
 public class FilterLowExpressedNodeDialog extends HTExecutorNodeDialog {
+	
+	public FilterLowExpressedNodeDialog() {
+		super(StringCell.TYPE.getPreferredValueClass(), 1);
+	}
 	
 	@Override
 	public void addToolDialogComponents() {

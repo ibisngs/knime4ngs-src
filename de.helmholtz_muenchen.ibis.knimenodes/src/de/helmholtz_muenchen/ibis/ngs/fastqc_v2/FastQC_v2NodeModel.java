@@ -81,7 +81,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 	public static final String OUT_FILTERFILE = "Path2filterfile";
 	
 	//ReadType: paired-end or single-end
-	private static String readType = "";
+	//private static String readType = "";
 	
 	//IBISKNIMENodesPlugin.FASTQC
 
@@ -90,7 +90,7 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
      */
     protected FastQC_v2NodeModel() {
     
-        super(1, 1);
+        super(1, 1, 2);
         
         addSetting(m_fastqc);
     	addSetting(m_outfolder);
@@ -110,7 +110,12 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     	//Check input table integrity
     	CompatibilityChecker.inDataCheck(inData);
     	
-    	String inFile1 = inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(FastQC_v2NodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(FastQC_v2NodeDialog.getMainInputCol1());
+    	}
+    	String inFile1 = inData[0].iterator().next().getCell(colIndex1).toString();
+
     	String inFile2 = "";
     	
     	String outFile = inFile1;
@@ -168,7 +173,11 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
 		super.executeCommand(command, outFile, exec, lockFile, outFile+".stdOut", outFile+".stdErr");
 
 		if(readType.equals("paired-end")){
-			inFile2 = inData[0].iterator().next().getCell(1).toString();
+			int colIndex2 = 0;
+	    	if(FastQC_v2NodeDialog.getUseMainInputColBool()){
+	    		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(FastQC_v2NodeDialog.getMainInputCol2());
+	    	}
+			inFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
 			
 			outFile2 = inFile2;
 			
@@ -217,13 +226,8 @@ public class FastQC_v2NodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
     	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
+    	super.conf(inSpecs);
     	
-    	super.updatePrefs();
         return new DataTableSpec[]{createSpecs()};
     }
     

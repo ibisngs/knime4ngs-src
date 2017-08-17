@@ -26,6 +26,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "GATKVariantFiltration" Node.
@@ -39,6 +40,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class GATKVariantFiltrationNodeDialog extends GATKNodeDialog {
+	
+	public GATKVariantFiltrationNodeDialog() {
+		super(VCFCell.TYPE.getPreferredValueClass());
+	}
 
 	@Override
 	protected void addDialogComponent() {

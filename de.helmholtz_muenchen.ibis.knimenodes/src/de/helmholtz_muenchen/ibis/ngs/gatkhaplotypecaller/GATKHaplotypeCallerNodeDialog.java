@@ -23,6 +23,7 @@ package de.helmholtz_muenchen.ibis.ngs.gatkhaplotypecaller;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 
 /**
  * <code>NodeDialog</code> for the "GATKHaplotypeCaller" Node.
@@ -36,6 +37,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class GATKHaplotypeCallerNodeDialog extends GATKNodeDialog {
+	
+	public GATKHaplotypeCallerNodeDialog(){
+		super(BAMCell.TYPE.getPreferredValueClass());
+	}
 
 	@Override
 	protected void addDialogComponent() {

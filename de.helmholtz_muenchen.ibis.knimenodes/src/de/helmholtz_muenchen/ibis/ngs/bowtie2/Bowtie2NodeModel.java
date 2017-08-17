@@ -207,7 +207,6 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	//The Output Col Names
     	public static final String OUT_COL1 = "Path2SAMFile";
     	
-    	private static String readType = "";
     	private String bowtie_bin;
     	private String ref_genome;
     	
@@ -216,7 +215,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
      */
     protected Bowtie2NodeModel() {
     	
-        super(1, 1);
+        super(1, 1, 2);
         
         m_packed.setEnabled(false);
         m_bmax.setEnabled(false);
@@ -312,11 +311,23 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	CompatibilityChecker.inDataCheck(inData);
     	
     	//Prepare File
-    	String path2readFile 	 = inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(Bowtie2NodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(Bowtie2NodeDialog.getMainInputCol1());
+    	}
+    	
+    	String path2readFile 	 = inData[0].iterator().next().getCell(colIndex1).toString();
+    	
     	String path2readFile2 	 = "NA";
     	if(readType.equals("paired-end")){
-    		path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+    		int colIndex2 = 1;
+        	if(Bowtie2NodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(Bowtie2NodeDialog.getMainInputCol2());
+        	}
+    		path2readFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
     	}
+    	
+    	
 
     	//Prepare Outfile Name
     	String basePath 	= path2readFile.substring(0,path2readFile.lastIndexOf("."));
@@ -357,13 +368,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     protected DataTableSpec[] configure(final DataTableSpec[] inSpecs)
             throws InvalidSettingsException {
 
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
-    	
-    	super.updatePrefs();
+    	super.conf(inSpecs);
     	bowtie_bin = IO.processFilePath(m_installpath.getStringValue());
     	ref_genome = IO.processFilePath(m_refseqfile.getStringValue());
     	

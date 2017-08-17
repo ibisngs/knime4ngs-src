@@ -38,6 +38,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import org.apache.commons.lang3.StringUtils;
+import org.knime.core.data.DataTableSpec;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -51,6 +52,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortType;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.SettingsStorageNodeModel;
 import de.helmholtz_muenchen.ibis.utils.threads.ExecuteThread;
@@ -86,6 +88,7 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	private String email = "";
 	private String emailsender = "";
 	private String emailhost = "";
+	static protected String readType = "";
 	
 	private final String HEADER = "IBIS KNIME Nodes Notification";
 	
@@ -100,32 +103,57 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	private final SettingsModelIntegerBounded threshold = new SettingsModelIntegerBounded(
 			HTExecutorNodeModel.CFGKEY_DEFAULT_THRESHOLD, DEFAULT_THRESHOLD,1,Integer.MAX_VALUE);
 
-//	static final String CFGKEY_DEFAULT_MAININPUTCOL = "maininputcol";
-//	private final SettingsModelString m_mainInputCol = new SettingsModelString(HTExecutorNodeModel.CFGKEY_DEFAULT_MAININPUTCOL,"");
-//	
+	static final String CFGKEY_USE_MAIN_INPUT_COL = "useMainInputCol";
+	protected final SettingsModelBoolean m_use_main_input_col = new SettingsModelBoolean(CFGKEY_USE_MAIN_INPUT_COL, false);
+	
+	static final String CFGKEY_MAININPUTCOL = "maininputcol";
+	static final String CFGKEY_MAININPUTCOL2 = "maininputcol2";
+	static final String CFGKEY_MAININPUTCOL3 = "maininputcol3";
+	
+	private final SettingsModelString m_mainInputCol = new SettingsModelString(HTExecutorNodeModel.CFGKEY_MAININPUTCOL,"");
+	private final SettingsModelString m_mainInputCol2 = new SettingsModelString(HTExecutorNodeModel.CFGKEY_MAININPUTCOL2,"");
+	private final SettingsModelString m_mainInputCol3 = new SettingsModelString(HTExecutorNodeModel.CFGKEY_MAININPUTCOL3,"");
+
 	protected final LinkedHashMap<SettingsModelString, String> model2pref = new LinkedHashMap<>();
 	
 	protected HTExecutorNodeModel(PortType[] inPortTypes,
-			PortType[] outPortTypes) {
+			PortType[] outPortTypes, int nrMainInputCols) {
 		super(inPortTypes, outPortTypes);
-		init();
+		init(nrMainInputCols);
 	}
 
-	protected HTExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts) {
+	protected HTExecutorNodeModel(int nrInDataPorts, int nrOutDataPorts, int nrMainInputCols) {
 		super(nrInDataPorts, nrOutDataPorts);
-		init();
+		init(nrMainInputCols);
 	}
 	
-	public void init() {
+	public void init(int nrMainInputCols) {
 		addSetting(m_use_pref);
 		addSetting(threshold);
 		addSetting(m_overwrite);
-//		addSetting(m_mainInputCol);
+		if(nrMainInputCols > 0){
+			addSetting(m_mainInputCol);
+			addSetting(m_use_main_input_col);
+		}
+		if(nrMainInputCols > 1){
+			addSetting(m_mainInputCol2);
+		}
+		if(nrMainInputCols > 2){
+			addSetting(m_mainInputCol3);
+		}
 	}
 	
 	@Override
 	protected void reset(){
 		resetView();
+	}
+	
+	/**
+	 * @return readType
+	 */
+	@SuppressWarnings({ "static-access", "static-access" })
+	public String getReadType(){
+		return this.readType;
 	}
 	
 	/**
@@ -350,6 +378,18 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 			checker.finalize();
 		}
 	}
+
+    protected void conf(final DataTableSpec[] inSpecs)
+            throws InvalidSettingsException {
+    	
+   		CompatibilityChecker CC = new CompatibilityChecker();
+    	readType = CC.getReadType(inSpecs, 0);
+    	if(CC.getWarningStatus()){
+    		setWarningMessage(CC.getWarningMessages());
+    	}
+    	
+    	this.updatePrefs();
+    }
 	
 	private void sendMail(String content) {
 

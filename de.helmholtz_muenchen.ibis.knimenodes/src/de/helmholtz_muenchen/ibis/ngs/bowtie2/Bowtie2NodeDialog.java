@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 
 /**
  * <code>NodeDialog</code> for the "Bowtie2" Node.
@@ -53,7 +54,7 @@ public class Bowtie2NodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the Bowtie2 node.
      */
     protected Bowtie2NodeDialog() {
-    
+    	super(FastQCell.TYPE.getPreferredValueClass(),FastQCell.TYPE.getPreferredValueClass());
     }
     	
     public void addToolDialogComponents() {

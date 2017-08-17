@@ -26,6 +26,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
 
 /**
  * <code>NodeDialog</code> for the "DepthOfCoverage" Node.
@@ -40,6 +41,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Tim Jeske
  */
 public class DepthOfCoverageNodeDialog extends GATKNodeDialog {
+	
+	public DepthOfCoverageNodeDialog(){
+		super(BAMCell.TYPE.getPreferredValueClass());
+	}
 
     /**
      * New pane for configuring the DepthOfCoverage node.

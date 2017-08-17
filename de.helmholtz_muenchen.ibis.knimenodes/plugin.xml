@@ -4,6 +4,7 @@
    		<!--FileLoader-->
    		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.fileLoader.FileLoaderNodeFactory"/>
    		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.vcfSampler.VCFSamplerNodeFactory"/>
+   		<node category-path="/ibis/ngs" factory-class="de.helmholtz_muenchen.ibis.ngs.bamSelector.BAMSelectorNodeFactory"/>
    	
    		<!--Preprocessing-->
    		<node category-path="/ibis/ngs/ngs_pre" factory-class="de.helmholtz_muenchen.ibis.ngs.Bcl2FastQ.Bcl2FastQNodeFactory"/>
@@ -41,6 +42,7 @@
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.picard.PicardToolsNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.vcftoolsfilter.VCFToolsFilterNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.VCFSorter.VCFSorterNodeFactory"/>
+		<node category-path="/ibis/ngs/ngs_post" factory-class="de.helmholtz_muenchen.ibis.ngs.smartPhase.SmartPhaseNodeFactory"/>
 		<!--Samtools-->
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.SNPcall.SNPcallNodeFactory"/>
 		<node category-path="/ibis/ngs/ngs_post/sam" factory-class="de.helmholtz_muenchen.ibis.ngs.samtools.SamToolsNodeFactory"/>
@@ -97,6 +99,7 @@
 		<node category-path="/ibis/ngs/ngs_post/cca" factory-class="de.helmholtz_muenchen.ibis.ngs.geneBasedAnalysis.GeneBasedAnalysisNodeFactory"/>
 		
 <!-- <node category-path="/" factory-class="de.helmholtz_muenchen.ibis.ngs.smartphase.SmartPhaseNodeFactory" id="de.helmholtz_muenchen.ibis.ngs.SmartPhaseNodeFactory"/> -->
+
 
 </extension>
 	

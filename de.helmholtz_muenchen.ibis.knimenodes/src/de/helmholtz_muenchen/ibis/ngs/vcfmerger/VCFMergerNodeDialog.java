@@ -63,6 +63,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  * @author Maximilian Hastreiter
  */
 public class VCFMergerNodeDialog extends GATKNodeDialog {
+	
+	public VCFMergerNodeDialog() {
+		super(null);
+	}
 
 	  private SettingsModelString OUTFOLDER 	;//		= new SettingsModelString(VCFMergerNodeModel.CFGKEY_OUTFOLDER, "");
 	  private SettingsModelString GENOTYPEMERGEOPTION	;//= new SettingsModelString(VCFMergerNodeModel.CFGKEY_GENOTYPEMERGEOPTION, "");

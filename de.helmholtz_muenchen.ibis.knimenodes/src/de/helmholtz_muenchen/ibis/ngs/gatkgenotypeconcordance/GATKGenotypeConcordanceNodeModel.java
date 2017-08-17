@@ -43,7 +43,7 @@ public class GATKGenotypeConcordanceNodeModel extends GATKNodeModel {
     private int eval_index, comp_index;
     
 	protected GATKGenotypeConcordanceNodeModel() {
-		super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1));
+		super(OptionalPorts.createOPOs(2), OptionalPorts.createOPOs(1), 2);
 	}
 
 	@Override

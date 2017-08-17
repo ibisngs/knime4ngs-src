@@ -69,7 +69,7 @@ public class PlotDepthOfCoverageNodeModel extends RNodeModel {
      * Constructor for the node model.
      */
     protected PlotDepthOfCoverageNodeModel() {
-    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(0), SCRIPT_PATH, new String[]{"--infile"}, new String[]{});
+    	super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(0), SCRIPT_PATH, new String[]{"--infile"}, new String[]{}, 0);
 //    	addSetting(m_filesuffix);
 //    	addSetting(m_infolder);
     }

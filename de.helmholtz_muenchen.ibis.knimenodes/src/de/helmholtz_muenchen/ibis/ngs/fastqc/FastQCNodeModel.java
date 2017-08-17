@@ -58,15 +58,13 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL2 = "Path2ReadFile2";
 	public static final String OUT_COL3 = "Path2filterfile";
 	
-	//ReadType: paired-end or single-end
-	private static String readType = "";
-	
+
     /**
      * Constructor for the node model.
      */
     protected FastQCNodeModel() {
     
-        super(1, 1);
+        super(1, 1, 2);
         
     }
 
@@ -80,7 +78,12 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	CompatibilityChecker.inDataCheck(inData);
     	
     	/** Get the input columns **/
-    	String readsFile1 = inData[0].iterator().next().getCell(0).toString();
+    	int colIndex1 = 0;
+    	if(FastQCNodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(FastQCNodeDialog.getMainInputCol1());
+    	}
+    	String readsFile1 = inData[0].iterator().next().getCell(colIndex1).toString();
+    	
     	String outfile1 = this.getSettingsFileName(readsFile1);
     	String outfileMerged = outfile1;  	
     	
@@ -105,7 +108,11 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
     	/**If Paired-End data**/
     	String readsFile2 = "";
     	if(readType.equals("paired-end")) {
-    		readsFile2 = inData[0].iterator().next().getCell(1).toString();
+    		int colIndex2 = 0;
+        	if(FastQCNodeDialog.getUseMainInputColBool()){
+        		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(FastQCNodeDialog.getMainInputCol2());
+        	}
+    		readsFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
     		if (!readsFile2.equals("") && !readsFile2.equals(readsFile1)) {
     		
     			String outfile2 = this.getSettingsFileName(readsFile2); // override this path
@@ -198,11 +205,7 @@ public class FastQCNodeModel extends HTExecutorNodeModel {
             throws InvalidSettingsException {
     	
     	
-    	CompatibilityChecker CC = new CompatibilityChecker();
-    	readType = CC.getReadType(inSpecs, 0);
-    	if(CC.getWarningStatus()){
-    		setWarningMessage(CC.getWarningMessages());
-    	}
+    	super.conf(inSpecs);
     	
     	return new DataTableSpec[]{createSpecs()};
     }

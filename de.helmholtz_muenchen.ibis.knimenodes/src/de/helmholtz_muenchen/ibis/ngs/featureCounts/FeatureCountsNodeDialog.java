@@ -34,6 +34,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.BinaryWrapperNode.BinaryWrapperNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "FeatureCounts" Node.
@@ -47,7 +48,9 @@ public class FeatureCountsNodeDialog extends HTExecutorNodeDialog {
 
 	private final static String BINARY_NAME = IBISKNIMENodesPlugin.FEATURE_COUNTS;
     
-    protected FeatureCountsNodeDialog() {}
+    protected FeatureCountsNodeDialog() {
+    	super(FileCell.TYPE.getPreferredValueClass(), 0);
+    }
     
     public void addToolDialogComponents() {
         

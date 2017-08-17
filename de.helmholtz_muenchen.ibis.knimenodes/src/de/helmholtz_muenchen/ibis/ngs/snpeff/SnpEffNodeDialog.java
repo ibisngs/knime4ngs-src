@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "SnpEff" Node.
@@ -48,6 +49,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Sebastian Kopetzky
  */
 public class SnpEffNodeDialog extends HTExecutorNodeDialog {
+	
+	public SnpEffNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass(), 0);
+	}
     
     public void addToolDialogComponents() {
     	

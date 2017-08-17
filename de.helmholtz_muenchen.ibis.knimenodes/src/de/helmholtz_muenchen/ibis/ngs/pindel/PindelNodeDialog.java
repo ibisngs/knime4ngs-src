@@ -40,6 +40,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.BAMCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "Pindel" Node.
@@ -54,6 +56,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Maximilian Hastreiter
  */
 public class PindelNodeDialog extends HTExecutorNodeDialog {
+	
+	public PindelNodeDialog(){
+		super(BAMCell.TYPE.getPreferredValueClass(), FileCell.TYPE.getPreferredValueClass());
+	}
 
 	public void addToolDialogComponents() {
 

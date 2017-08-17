@@ -38,6 +38,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeDialog;
  */
 public class GATKGenotypeConcordanceNodeDialog extends GATKNodeDialog {
 	
+	public GATKGenotypeConcordanceNodeDialog() {
+		super(null);
+	}
+	
     @Override
 	protected void addDialogComponent() {
 		

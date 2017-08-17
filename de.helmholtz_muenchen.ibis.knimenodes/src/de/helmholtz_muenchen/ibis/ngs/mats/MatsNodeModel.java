@@ -113,7 +113,7 @@ public class MatsNodeModel extends BinaryWrapperNodeModel {
      * Constructor for the node model.
      */
     protected MatsNodeModel() {
-    	super(2, 1, true, true);
+    	super(2, 1, true, true, 0);
     	addSetting(SET_OUTPUT_FOLDER);
     	addSetting(SET_ANNOTATION_FILE);
     	addSetting(SET_READ_LENGTH);

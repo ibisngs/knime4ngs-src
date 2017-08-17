@@ -137,7 +137,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
      */
     protected BcftoolsNodeModel() {
     
-        super(1,1);
+        super(1,1,1);
         
         addSetting(m_bcfmethod);
    	 	addSetting(m_path2bcftools);
@@ -166,24 +166,29 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
     	ArrayList<String> command = new ArrayList<String>();
     	String method = m_bcfmethod.getStringValue();
     	command.add(bcf_bin+" "+method);
+    	
+    	int colIndex = 0;
+    	if(BcftoolsNodeDialog.getUseMainInputColBool()){
+    		colIndex = inData[0].getDataTableSpec().findColumnIndex(BcftoolsNodeDialog.getMainInputCol1());
+    	}
 
 //    	if(m_bcfmethod.getStringValue().equals("call")){
 //    		command.addAll(call(inData));
 //    	}
     	if(m_bcfmethod.getStringValue().equals("concat")){
-    		command.addAll(concat(inData));
+    		command.addAll(concat(inData, colIndex));
     	}
     	
     	else if(m_bcfmethod.getStringValue().equals("index")){
-            command.addAll(index(inData));
+            command.addAll(index(inData, colIndex));
     	}
     	
     	else if(m_bcfmethod.getStringValue().equals("reheader")){
-    		 command.addAll(reheader(inData));
+    		 command.addAll(reheader(inData, colIndex));
     	}
     	
     	else if(m_bcfmethod.getStringValue().equals("stats")){
-    		command.addAll(stats(inData));
+    		command.addAll(stats(inData, colIndex));
     	}
    	
     	
@@ -299,7 +304,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
      * @return Command options for bcftools reheader
      * @throws InvalidSettingsException
      */
-    protected ArrayList<String> reheader(BufferedDataTable[] inData) throws InvalidSettingsException{
+    protected ArrayList<String> reheader(BufferedDataTable[] inData, int colIndex) throws InvalidSettingsException{
     	//Row Iterator
     	Iterator<DataRow> it = inData[0].iterator();
 
@@ -309,7 +314,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
+        	String curr_File = IO.processFilePath(curr_Row.getCell(colIndex).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz") || curr_File.endsWith("bcf.gz") || curr_File.endsWith("vcf") || curr_File.endsWith("bcf")){
         		
@@ -354,7 +359,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
      * @return Command options for bcftools index
      * @throws InvalidSettingsException
      */
-    protected ArrayList<String> stats(BufferedDataTable[] inData) throws InvalidSettingsException{
+    protected ArrayList<String> stats(BufferedDataTable[] inData, int colIndex) throws InvalidSettingsException{
     	//Row Iterator
     	Iterator<DataRow> it = inData[0].iterator();
 
@@ -364,7 +369,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
+        	String curr_File = IO.processFilePath(curr_Row.getCell(colIndex).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz")){
         		
@@ -402,7 +407,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
      * @return Command options for bcftools index
      * @throws InvalidSettingsException
      */
-    protected ArrayList<String> index(BufferedDataTable[] inData) throws InvalidSettingsException{
+    protected ArrayList<String> index(BufferedDataTable[] inData, int colIndex) throws InvalidSettingsException{
     	//Row Iterator
     	Iterator<DataRow> it = inData[0].iterator();
 
@@ -412,7 +417,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
+        	String curr_File = IO.processFilePath(curr_Row.getCell(colIndex).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz") || curr_File.endsWith("bcf.gz")){
         		
@@ -443,7 +448,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
      * @return Command options for bcftools concat
      * @throws InvalidSettingsException
      */
-    protected ArrayList<String> concat(BufferedDataTable[] inData) throws InvalidSettingsException{
+    protected ArrayList<String> concat(BufferedDataTable[] inData, int colIndex) throws InvalidSettingsException{
     
     	//Row Iterator
     	Iterator<DataRow> it = inData[0].iterator();
@@ -454,7 +459,7 @@ public class BcftoolsNodeModel extends HTExecutorNodeModel {
         	DataRow curr_Row = it.next();
         	
         	//File from current row
-        	String curr_File = IO.processFilePath(curr_Row.getCell(0).toString());
+        	String curr_File = IO.processFilePath(curr_Row.getCell(colIndex).toString());
         	//Check format and append if correct
         	if(curr_File.endsWith("vcf.gz")){
         		

@@ -42,7 +42,7 @@ public class MatsResultIndexerNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the MatsResultIndexer node.
      */
-    protected MatsResultIndexerNodeDialog() {}
+    protected MatsResultIndexerNodeDialog() {super(null, 0);}
     
     public void addToolDialogComponents() {
     	

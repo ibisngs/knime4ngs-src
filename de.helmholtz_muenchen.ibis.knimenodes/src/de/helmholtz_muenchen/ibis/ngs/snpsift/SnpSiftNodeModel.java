@@ -140,7 +140,7 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
 	public static final String OUT_COL = "snpSift_result";
 	
     protected SnpSiftNodeModel() {
-        super(1, 1);
+        super(1, 1, 1);
         
 		addSetting(m_method);
 		addSetting(m_snpsift_bin);
@@ -299,7 +299,14 @@ public class SnpSiftNodeModel extends HTExecutorNodeModel {
     	super.updatePrefs();
     	snpsift_bin = IO.processFilePath(m_snpsift_bin.getStringValue());
     	
-    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	if(SnpSiftNodeDialog.getUseMainInputColBool()){
+    		vcf_index = inSpecs[0].findColumnIndex(SnpSiftNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	} else {
+    		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	}
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}

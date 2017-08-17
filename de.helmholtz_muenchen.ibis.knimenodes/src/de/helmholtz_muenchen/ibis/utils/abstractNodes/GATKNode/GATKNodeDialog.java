@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.knime.core.data.DataValue;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -46,7 +47,12 @@ public abstract class GATKNodeDialog extends HTExecutorNodeDialog{
 //	  private final SettingsModelBoolean m_bed_file_check = new SettingsModelBoolean(DepthOfCoverageNodeModel.CFGKEY_BED_FILE_CHECKBOX,false);
 //    private final SettingsModelOptionalString m_OPT_FLAGS = new SettingsModelOptionalString(GATKNodeModel.CFGKEY_OPT_FLAGS,"",false);
 
-    protected GATKNodeDialog() {
+    protected GATKNodeDialog(Class<? extends DataValue> classFilter) {
+    	super(classFilter, 0);
+    }
+    
+    protected GATKNodeDialog(Class<? extends DataValue> classFilter1, Class<? extends DataValue> classFilter2) {
+    	super(classFilter1, classFilter2);
     }
     
     public void addToolDialogComponents() {

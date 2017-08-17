@@ -25,6 +25,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 /**
  * <code>NodeDialog</code> for the "FeatureCountsMerger" Node.
@@ -32,6 +33,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Michael Kluge
  */
 public class FeatureCountsMergerNodeDialog extends HTExecutorNodeDialog {
+	
+	public FeatureCountsMergerNodeDialog() {
+		super(FileCell.TYPE.getPreferredValueClass(), 0);
+	}
 
 	@Override
 	public void addToolDialogComponents() {

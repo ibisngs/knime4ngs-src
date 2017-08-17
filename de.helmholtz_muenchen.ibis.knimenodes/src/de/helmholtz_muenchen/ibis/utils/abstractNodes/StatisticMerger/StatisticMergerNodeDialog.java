@@ -37,6 +37,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  *
  */
 public abstract class StatisticMergerNodeDialog extends HTExecutorNodeDialog {
+	
+	public StatisticMergerNodeDialog(){
+		super(null, 0);
+	}
 
 	@Override
 	public void addToolDialogComponents() {

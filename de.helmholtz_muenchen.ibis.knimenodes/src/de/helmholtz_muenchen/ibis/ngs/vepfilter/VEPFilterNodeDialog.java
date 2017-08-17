@@ -35,6 +35,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 
 /**
@@ -49,6 +50,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Tim Jeske
  */
 public class VEPFilterNodeDialog extends HTExecutorNodeDialog {
+	
+	public VEPFilterNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass(), 0);
+	}
 	
 	private DialogComponentStringListSelection DC_TERM_DISPLAY;
 	private SettingsModelBoolean my_overwrite;

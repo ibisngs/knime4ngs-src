@@ -30,6 +30,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 
 /**
@@ -51,7 +52,9 @@ public class VCFToolsFilterNodeDialog extends HTExecutorNodeDialog {
 
 	
 		
-    protected VCFToolsFilterNodeDialog() {}
+    protected VCFToolsFilterNodeDialog() {
+    	super(VCFCell.TYPE.getPreferredValueClass(), 0);
+    }
     
     public void addToolDialogComponents() {
     	

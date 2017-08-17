@@ -35,13 +35,13 @@ public abstract class ScriptNodeModel extends HTExecutorNodeModel {
 	public static final String SCRIPTS_SUBFOLDER = "scripts";
 	
 	
-	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script) {
-		super(nrInDataPorts, nrOutDataPorts);		
+	protected ScriptNodeModel(int nrInDataPorts, int nrOutDataPorts, String script, int numIn) {
+		super(nrInDataPorts, nrOutDataPorts, numIn);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	
-	protected ScriptNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script) {
-		super(inPortTypes, outPortTypes);		
+	protected ScriptNodeModel(final PortType[] inPortTypes, final PortType[] outPortTypes, String script, int numIn) {
+		super(inPortTypes, outPortTypes, numIn);		
 		this.SCRIPT = getScriptPath() + script;
 	}
 	

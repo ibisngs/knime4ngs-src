@@ -167,7 +167,7 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
 
     protected PicardToolsNodeModel() {
     
-        super(1, 1);
+        super(1, 1, 1);
         
     	//general options
         addSetting(m_picard);
@@ -372,21 +372,30 @@ public class PicardToolsNodeModel extends HTExecutorNodeModel {
         	throw new InvalidSettingsException("file: "+ ref_genome+" does not exist");
         }
 
-		// names of the input table columns
-		String[] cols = inSpecs[0].getColumnNames();
+        if(PicardToolsNodeDialog.getUseMainInputColBool()){
+    		posSamBam = inSpecs[0].findColumnIndex(PicardToolsNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(posSamBam).getType().toString().equals("BAMCell") && !inSpecs[0].getColumnSpec(posSamBam).getType().toString().equals("SAMCell")){
+    			throw new InvalidSettingsException("Selected column is incompatable! Missing path to sam/bam file!");
+    		}
+    	} else {
+    		// names of the input table columns
+    		String[] cols = inSpecs[0].getColumnNames();
 
-		// checking for input bam/sam file
-		if (!CompatibilityChecker.checkInputCellType(inSpecs[0], "SAMCell")
-				&& !CompatibilityChecker.checkInputCellType(inSpecs[0], "BAMCell")) {
-			throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
-		}
+    		// checking for input bam/sam file
+    		if (!CompatibilityChecker.checkInputCellType(inSpecs[0], "SAMCell")
+    				&& !CompatibilityChecker.checkInputCellType(inSpecs[0], "BAMCell")) {
+    			throw new InvalidSettingsException("Previous node is incompatible! Missing path to sam/bam file!");
+    		}
 
-		// determining position of reference and sam/bam file
-		for (int i = 0; i < cols.length; i++) {
-			if (cols[i].equals("Path2BAMFile") || cols[i].equals("Path2SAMFile")) {
-				posSamBam = i;
-			}
-		}
+    		// determining position of reference and sam/bam file
+    		for (int i = 0; i < cols.length; i++) {
+    			if (cols[i].equals("Path2BAMFile") || cols[i].equals("Path2SAMFile")) {
+    				posSamBam = i;
+    			}
+    		}
+    	}
+        
+		
 
 		boolean add_col = m_ptool.getStringValue().equals(TOOLS_AVAILABLE[1]);
 

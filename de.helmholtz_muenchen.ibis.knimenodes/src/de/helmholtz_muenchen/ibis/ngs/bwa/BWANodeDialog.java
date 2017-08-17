@@ -38,6 +38,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 
 /**
  * <code>NodeDialog</code> for the "BWA" Node.
@@ -60,6 +61,7 @@ public class BWANodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the BWA node.
      */
 	protected BWANodeDialog() {
+		super(FastQCell.TYPE.getPreferredValueClass(), FastQCell.TYPE.getPreferredValueClass());
 	}
 	
 	public void addToolDialogComponents() {

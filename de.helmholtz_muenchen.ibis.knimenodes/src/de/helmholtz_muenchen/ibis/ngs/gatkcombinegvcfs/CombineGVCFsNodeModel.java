@@ -58,7 +58,7 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
      */
     protected CombineGVCFsNodeModel() {
     
-        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
         addSetting(m_OUTFOLDER);
     }
 
@@ -99,9 +99,16 @@ public class CombineGVCFsNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		gvcf_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("GVCFCell")) {
-    			gvcf_index = i;
+		if(CombineGVCFsNodeDialog.getUseMainInputColBool()){
+			gvcf_index = inSpecs[0].findColumnIndex(CombineGVCFsNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(gvcf_index).getType().toString().equals("GVCFCell")){
+    			gvcf_index = -1;
+    		}
+    	} else {
+    		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
+    			if(inSpecs[0].getColumnSpec(i).getType().toString().equals("GVCFCell")) {
+    				gvcf_index = i;
+    			}
     		}
     	}
 		return (gvcf_index>-1);

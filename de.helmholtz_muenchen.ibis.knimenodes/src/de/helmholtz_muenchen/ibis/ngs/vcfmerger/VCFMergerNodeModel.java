@@ -89,7 +89,7 @@ public class VCFMergerNodeModel extends GATKNodeModel {
      * Constructor for the node model.
      */
     protected VCFMergerNodeModel(int INPORTS, int OUTPORTS) {
-		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS), 0);
    	}
 
 	@Override

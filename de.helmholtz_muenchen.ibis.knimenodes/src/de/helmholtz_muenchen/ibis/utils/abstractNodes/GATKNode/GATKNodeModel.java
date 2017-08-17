@@ -88,8 +88,8 @@ public abstract class GATKNodeModel extends HTExecutorNodeModel{
     /**
      * Constructor for the node model.
      */
-    protected GATKNodeModel(PortType[] INPORTS, PortType[] OUTPORTS) {
-        super(INPORTS, OUTPORTS);
+    protected GATKNodeModel(PortType[] INPORTS, PortType[] OUTPORTS, int numIn) {
+        super(INPORTS, OUTPORTS, numIn);
         if(OUTPORTS.length==0) {
         	outtable = false;
         }

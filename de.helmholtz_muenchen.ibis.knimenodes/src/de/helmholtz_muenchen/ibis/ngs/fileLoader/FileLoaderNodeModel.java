@@ -246,6 +246,8 @@ public class FileLoaderNodeModel extends SettingsStorageNodeModel {
     		specs = new DataColumnSpec[]{dcs1};
     	}
     	
+    	System.out.println(dcs1.getType().toString());
+    	
     	return new DataTableSpec[]{new DataTableSpec(specs)};
     }
     

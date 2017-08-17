@@ -88,7 +88,7 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
      * Constructor for the node model.
      */
     protected StarNodeModel() {
-        super(1, 1, true, true);
+        super(1, 1, true, true, 2);
         addSetting(m_runMode);
         addSetting(m_two_pass);
     	addSetting(m_outfolder);
@@ -146,13 +146,24 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
     	
     	boolean is_zipped = false;
     	
+    	int colIndex1 = 0;
+		if(StarNodeDialog.getUseMainInputColBool()){
+    		colIndex1 = inData[0].getDataTableSpec().findColumnIndex(StarNodeDialog.getMainInputCol1());
+    	}
+    	
     	if(isAlignRunMode()) {	
-	    	String path2readFile1 = inData[0].iterator().next().getCell(0).toString();
+    		
+	    	String path2readFile1 = inData[0].iterator().next().getCell(colIndex1).toString();
 	    	is_zipped = path2readFile1.endsWith(".gz");
 	    	inputArgument.add(path2readFile1);
 
 	    	if(readType.equals("paired-end")) {
-	    		String path2readFile2 = inData[0].iterator().next().getCell(1).toString();
+	    		int colIndex2 = 0;
+		    	if(StarNodeDialog.getUseMainInputColBool()){
+		    		colIndex2 = inData[0].getDataTableSpec().findColumnIndex(StarNodeDialog.getMainInputCol2());
+		    	}
+		    	
+	    		String path2readFile2 = inData[0].iterator().next().getCell(colIndex2).toString();
 		    	if(!path2readFile1.equals(path2readFile2) && path2readFile2.length() > 0 && path2readFile2.endsWith(".gz") == is_zipped) {
 		    		inputArgument.add(path2readFile2);
 		    	}
@@ -168,13 +179,13 @@ public class StarNodeModel extends BinaryWrapperNodeModel {
 	    	}
     	} else {
     		for(DataRow dr : inData[0]) {
-    			inputArgument.add(dr.getCell(0).toString());
+    			inputArgument.add(dr.getCell(colIndex1).toString());
     		}
     	}
     	pars.put(inputParameter, StringUtils.join(inputArgument, " "));
     	
     	//output parameters
-    	String infile = inData[0].iterator().next().getCell(0).toString();
+    	String infile = inData[0].iterator().next().getCell(colIndex1).toString();
 		if(CompatibilityChecker.inputFileNotOk(out_folder, false)) {
 			out_folder = new File(infile).getParent();
 			if(!isAlignRunMode()) {

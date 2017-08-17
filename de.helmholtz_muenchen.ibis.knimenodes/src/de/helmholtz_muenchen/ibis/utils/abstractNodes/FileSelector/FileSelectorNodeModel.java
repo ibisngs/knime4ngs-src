@@ -127,7 +127,7 @@ public abstract class FileSelectorNodeModel extends SettingsStorageNodeModel {
 	    	DefaultRow r = new DefaultRow("Row"+i, c);
 	    	cont.addRowToTable(r);
 	    	i++;
-    	}
+    	} 
     	
     	cont.close();
     	BufferedDataTable out = cont.getTable();

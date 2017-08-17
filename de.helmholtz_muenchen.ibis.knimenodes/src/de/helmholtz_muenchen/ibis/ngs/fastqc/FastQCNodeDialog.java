@@ -22,6 +22,7 @@ package de.helmholtz_muenchen.ibis.ngs.fastqc;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 
 
 /**
@@ -41,7 +42,7 @@ public class FastQCNodeDialog extends HTExecutorNodeDialog {
      * New pane for configuring the FastQC node.
      */
     protected FastQCNodeDialog() {
-
+    	super(FastQCell.TYPE.getPreferredValueClass(), FastQCell.TYPE.getPreferredValueClass());
     }
 
 	@Override

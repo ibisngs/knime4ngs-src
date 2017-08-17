@@ -27,6 +27,7 @@ import org.knime.core.data.DataType;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.InvalidSettingsException;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.GVCFCell;
@@ -44,7 +45,7 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
     private int bam_index;
 	
 	protected GATKHaplotypeCallerNodeModel(int INPORTS, int OUTPORTS) {
-		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS), 1);
 	}
 
 	@Override
@@ -87,10 +88,13 @@ public class GATKHaplotypeCallerNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		bam_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("BAMCell")) {
-    			bam_index = i;
+		if(GATKHaplotypeCallerNodeDialog.getUseMainInputColBool()){
+			bam_index = inSpecs[0].findColumnIndex(GATKHaplotypeCallerNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(bam_index).getType().toString().equals("BAMCell")){
+    			bam_index = -1;
     		}
+    	} else {
+    		bam_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "BAMCell");
     	}
 		return (bam_index>-1);
 	}

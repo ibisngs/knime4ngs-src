@@ -35,6 +35,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelOptionalString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
 
 
 /**
@@ -54,7 +56,9 @@ public class RawReadManipulatorNodeDialog extends HTExecutorNodeDialog {
     /**
      * New pane for configuring the RawReadManipulator node.
      */
- protected RawReadManipulatorNodeDialog() {}
+ protected RawReadManipulatorNodeDialog() {
+	 super(FastQCell.TYPE.getPreferredValueClass(), FastQCell.TYPE.getPreferredValueClass(), FileCell.TYPE.getPreferredValueClass());
+ }
  
  public void addToolDialogComponents() {
 	

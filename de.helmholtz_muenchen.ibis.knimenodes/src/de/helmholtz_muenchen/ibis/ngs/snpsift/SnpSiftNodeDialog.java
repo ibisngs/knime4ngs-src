@@ -34,6 +34,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
 import de.helmholtz_muenchen.ibis.ngs.snpsift.SnpSiftNodeModel.SnpSiftTool;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeDialog;
+import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
 
 /**
  * <code>NodeDialog</code> for the "SnpSift" Node.
@@ -41,6 +42,10 @@ import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorN
  * @author Maximilian Hastreiter
  */
 public class SnpSiftNodeDialog extends HTExecutorNodeDialog {
+	
+	SnpSiftNodeDialog(){
+		super(VCFCell.TYPE.getPreferredValueClass(), 0);
+	}
     
     public void addToolDialogComponents() {
 

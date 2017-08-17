@@ -32,6 +32,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
+import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.GATKNode.GATKNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.VCFCell;
@@ -55,7 +56,7 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	private int gvcf_index;
 
     protected GenotypeGVCFsNodeModel(int INPORTS, int OUTPORTS) {
-		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS));
+		super(OptionalPorts.createOPOs(INPORTS), OptionalPorts.createOPOs(OUTPORTS), 1);
 		addSetting(m_NT);
 		addSetting(m_OUTFOLDER);
    	}
@@ -101,11 +102,15 @@ public class GenotypeGVCFsNodeModel extends GATKNodeModel {
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
 		gvcf_index = -1;
 		
-		for(int i = 0; i < inSpecs[0].getNumColumns(); i++) {
-    		if(inSpecs[0].getColumnSpec(i).getType().toString().equals("GVCFCell")) {
-    			gvcf_index = i;
+		if(GenotypeGVCFsNodeDialog.getUseMainInputColBool()){
+			gvcf_index = inSpecs[0].findColumnIndex(GenotypeGVCFsNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(gvcf_index).getType().toString().equals("GVCFCell")){
+    			gvcf_index = -1;
     		}
+    	} else {
+    		gvcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "GVCFCell");
     	}
+		
 		return (gvcf_index>-1);
 	}
 	@Override

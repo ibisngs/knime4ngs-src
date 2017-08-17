@@ -94,7 +94,7 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
      * Constructor for the node model.
      */
     protected GATKVariantFiltrationNodeModel() {
-        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1), OptionalPorts.createOPOs(1), 1);
         
         addSetting(m_DP);
         addSetting(m_GQ);
@@ -226,7 +226,14 @@ public class GATKVariantFiltrationNodeModel extends GATKNodeModel {
 
 	@Override
 	protected boolean checkInputCellType(DataTableSpec[] inSpecs) {
-		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+		if(GATKVariantFiltrationNodeDialog.getUseMainInputColBool()){
+			vcf_index = inSpecs[0].findColumnIndex(GATKVariantFiltrationNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	} else {
+    		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	}
 		return (vcf_index>-1);
 	}
 

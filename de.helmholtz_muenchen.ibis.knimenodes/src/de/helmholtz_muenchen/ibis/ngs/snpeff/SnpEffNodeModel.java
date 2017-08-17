@@ -110,7 +110,7 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
      */
     protected SnpEffNodeModel() {
     
-        super(OptionalPorts.createOPOs(1),OptionalPorts.createOPOs(1));
+        super(OptionalPorts.createOPOs(1),OptionalPorts.createOPOs(1), 1);
         
     	addSetting(m_snpeff_bin);
     	addSetting(m_use_config);
@@ -246,7 +246,14 @@ public class SnpEffNodeModel extends HTExecutorNodeModel {
     	super.updatePrefs();
     	snpeff_bin = IO.processFilePath(m_snpeff_bin.getStringValue());
     	
-    	vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	if(SnpEffNodeDialog.getUseMainInputColBool()){
+    		vcf_index = inSpecs[0].findColumnIndex(SnpEffNodeDialog.getMainInputCol1());
+    		if(!inSpecs[0].getColumnSpec(vcf_index).getType().toString().equals("VCFCell")){
+    			vcf_index = -1;
+    		}
+    	} else {
+    		vcf_index = CompatibilityChecker.getFirstIndexCellType(inSpecs[0], "VCFCell");
+    	}
     	if(vcf_index==-1) {
     		throw new InvalidSettingsException("This node is not compatible with the precedent node as there is no VCF file in the input table!");
     	}
