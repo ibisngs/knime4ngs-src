@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/de.helmholtz_muenchen.ibis.knimenodes.feature_1.7.0.qualifier.jar" id="de.helmholtz_muenchen.ibis.knimenodes.feature" version="1.7.0.qualifier" os="linux">
+   <feature url="features/de.helmholtz_muenchen.ibis.knimenodes.feature_1.8.0.201707071119.jar" id="de.helmholtz_muenchen.ibis.knimenodes.feature" version="1.8.0.201707071119" os="linux">
       <category name="KNIME4NGS"/>
    </feature>
    <category-def name="KNIME4NGS" label="KNIME4NGS">
