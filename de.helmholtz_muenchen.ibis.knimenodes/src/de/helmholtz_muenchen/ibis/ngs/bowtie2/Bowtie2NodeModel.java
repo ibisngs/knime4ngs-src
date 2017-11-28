@@ -513,7 +513,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     			preset = " --very-sensitive";
     		}
     		if(m_alignmenttype.getStringValue().equals("local alignment (ends might be soft clipped)")) {
-    			preset += "--local";
+    			preset += " --local";
     		}
     		command.add(preset);
     		
