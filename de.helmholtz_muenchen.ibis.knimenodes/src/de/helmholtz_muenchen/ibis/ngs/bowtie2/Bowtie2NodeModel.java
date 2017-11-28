@@ -241,7 +241,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	m_nocontain.setEnabled(false);
     	m_nooverlap.setEnabled(false);
     	
-    	
+    	addSetting(m_alignmenttype);
     	addSetting(m_d);
     	addSetting(m_dcv);
     	addSetting(m_dpad);
@@ -518,7 +518,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     			preset = " --very-sensitive";
     		}
     		if(m_alignmenttype.getStringValue().equals("local alignment (ends might be soft clipped)")) {
-    			preset += "-local";
+    			preset += " --local";
     		}
     		command.add(preset);
     		
