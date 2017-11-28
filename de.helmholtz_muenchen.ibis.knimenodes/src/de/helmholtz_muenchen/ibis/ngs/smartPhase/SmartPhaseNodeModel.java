@@ -19,17 +19,13 @@ import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 
 import de.helmholtz_muenchen.ibis.knime.IBISKNIMENodesPlugin;
-import de.helmholtz_muenchen.ibis.ngs.trimgalore.TrimGaloreNodeDialog;
 import de.helmholtz_muenchen.ibis.ngs.trimgalore.TrimGaloreNodeModel;
 import de.helmholtz_muenchen.ibis.utils.CompatibilityChecker;
 import de.helmholtz_muenchen.ibis.utils.IO;
 import de.helmholtz_muenchen.ibis.utils.SuccessfulRunChecker;
-import de.helmholtz_muenchen.ibis.utils.abstractNodes.FileSelector.FileSelectorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.abstractNodes.HTExecutorNode.HTExecutorNodeModel;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FastQCell;
 import de.helmholtz_muenchen.ibis.utils.datatypes.file.FileCell;
@@ -63,7 +59,7 @@ public class SmartPhaseNodeModel extends HTExecutorNodeModel {
     
     // storage 
     private final HashSet<String> FILES		= new HashSet<String>();
-    private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
+//    private boolean hasConfigureOpendOnce 	= false; // true, if configure was opend once
 	
 	// the logger instance
     private static final NodeLogger LOGGER = NodeLogger

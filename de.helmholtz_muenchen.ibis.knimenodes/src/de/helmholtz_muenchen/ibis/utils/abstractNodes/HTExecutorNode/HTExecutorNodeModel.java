@@ -151,9 +151,8 @@ public abstract class HTExecutorNodeModel extends SettingsStorageNodeModel {
 	/**
 	 * @return readType
 	 */
-	@SuppressWarnings({ "static-access", "static-access" })
 	public String getReadType(){
-		return this.readType;
+		return readType;
 	}
 	
 	/**
