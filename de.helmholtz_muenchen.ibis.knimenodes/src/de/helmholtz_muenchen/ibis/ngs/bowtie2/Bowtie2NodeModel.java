@@ -242,7 +242,7 @@ public class Bowtie2NodeModel extends HTExecutorNodeModel {
     	m_nocontain.setEnabled(false);
     	m_nooverlap.setEnabled(false);
     	
-    	
+    	addSetting(m_alignmenttype);
     	addSetting(m_d);
     	addSetting(m_dcv);
     	addSetting(m_dpad);
